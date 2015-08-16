@@ -12,6 +12,7 @@ import org.apache.http.util.EntityUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.handshake.ServerHandshake;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -105,11 +106,18 @@ public abstract class DiscordClient extends WebSocketClient {
                 String id = (String) author.get("id");
                 String channelID = (String) d.get("channel_id");
                 String content = (String) d.get("content");
+                JSONArray array = (JSONArray) d.get("mentions");
+
+                String[] mentionedIDs = new String[array.size()];
+                for (int i = 0; i < array.size(); i++) {
+                    JSONObject userInfo = (JSONObject) array.get(i);
+                    mentionedIDs[i] = (String) userInfo.get("id");
+                }
 
                 if (!id.equalsIgnoreCase(ourUser.getId())
                         && this.ready) {
                     Discord4J.debug("Message from: " + username + " (" + id + ") " + " in channel ID " + channelID + ": " + content);
-                    this.onMessageReceive(new Message(content, id, channelID));
+                    this.onMessageReceive(new Message(content, id, username, channelID, mentionedIDs));
                 }
             } else if (s.equalsIgnoreCase("READY")) {
                 JSONObject info = (JSONObject) object.get("d");
@@ -183,21 +191,29 @@ public abstract class DiscordClient extends WebSocketClient {
 
     }
 
-    //TODO Mention support.
-    public void sendMessage(String content, String channelID) throws IOException, ParseException {
+    public void sendMessage(String content, String channelID, String... mentions) throws IOException, ParseException {
         if (this.ready) {
             HttpClient client = HttpClients.createDefault();
             HttpPost post = new HttpPost("https://discordapp.com/api/channels/" + channelID + "/messages");
             post.addHeader("Authorization", token);
             post.addHeader("content-type", "application/json");
-            post.setEntity(new StringEntity("{\"content\":\"" + content + "\",\"mentions\":[]}"));
+            String mention = "";
+            for (String s : mentions) {
+                mention += (s + ",");
+            }
+            mention = mention.substring(0, mention.length() - 1);
+            post.setEntity(new StringEntity("{\"content\":\"" + content + "\",\"mentions\":[" + mention + "]}"));
             client.execute(post);
 
-            this.onMessageSend(new Message(content, this.ourUser.getId(), channelID));
+            this.onMessageSend(new Message(content, this.ourUser.getId(), this.ourUser.getName(), channelID, mentions));
         } else System.err.println("Hold your horses! The bot hasn't signed in yet!");
     }
 
     public boolean isReady() {
         return ready;
+    }
+
+    public User getOurUser() {
+        return ourUser;
     }
 }

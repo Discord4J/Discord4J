@@ -24,10 +24,23 @@ public class Message {
      */
     private final String channel_id;
 
-    public Message(String content, String author_id, String channel_id) {
+    /**
+     * The author's username
+     */
+    private final String authorUsername;
+
+    /**
+     * All users @mentioned in the
+     * message.
+     */
+    private final String[] mentionedIDs;
+
+    public Message(String content, String author_id, String authorUsername, String channel_id, String[] mentionedIDs) {
         this.content = content;
         this.author_id = author_id;
+        this.authorUsername = authorUsername;
         this.channel_id = channel_id;
+        this.mentionedIDs = mentionedIDs;
     }
 
     // Getters. Boring.
@@ -36,11 +49,19 @@ public class Message {
         return content;
     }
 
-    public String getAuthor_id() {
+    public String getAuthorID() {
         return author_id;
     }
 
-    public String getChannel_id() {
+    public String getChannelID() {
         return channel_id;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
+    }
+
+    public String[] getMentionedIDs() {
+        return mentionedIDs;
     }
 }

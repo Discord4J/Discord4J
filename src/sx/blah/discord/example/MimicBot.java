@@ -13,9 +13,7 @@ import java.net.URISyntaxException;
  * @since 8:00 PM 16 Aug, 2015
  * Project: DiscordAPI
  * <p>
- * This example bot will mimic everything anyone says if
- * the message starts with the letter 'a'.
- * Use sparingly.
+ * Responds to users that @mention you.
  */
 public class MimicBot extends DiscordClient {
     /**
@@ -34,17 +32,20 @@ public class MimicBot extends DiscordClient {
 
     /**
      * Handles message reception.
-     * Will immediately send the same content back to the channel
-     * upon reception of message that starts with "a".
+     * Will respond with "@[user], you called?"
+     * when someone mentions the bot.
      *
      * @param message Message received.
      */
     @Override
     public void onMessageReceive(Message message) {
         try {
-            if (message.getContent().charAt(0) == 'a'
-                    || message.getContent().charAt(0) == 'A')
-                this.sendMessage(message.getContent(), message.getChannel_id());
+            boolean mentioned = false;
+            for (String s : message.getMentionedIDs()) {
+                if (s.equalsIgnoreCase(this.getOurUser().getId())) {
+                    this.sendMessage("@" + message.getAuthorUsername() + ", you called?", message.getChannelID(), message.getAuthorID());
+                }
+            }
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
@@ -70,6 +71,6 @@ public class MimicBot extends DiscordClient {
      */
     public static void main(String... args) throws ParseException, IOException, URISyntaxException {
         Discord4J.debug = true;
-        new MimicBot("e-mail", "password");
+        new MimicBot(args[0] /* email */, args[1] /* password */);
     }
 }
