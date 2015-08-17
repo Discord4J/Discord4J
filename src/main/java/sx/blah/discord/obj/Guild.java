@@ -20,9 +20,21 @@ public class Guild {
      */
     private final List<User> users;
 
-    public Guild(List<Channel> channels, List<User> users) {
+    /**
+     * The name of the guild.
+     */
+    private final String name;
+
+    /**
+     * The ID of this guild.
+     */
+    private final String id;
+
+    public Guild(String name, String id, List<Channel> channels, List<User> users) {
+        this.name = name;
         this.channels = channels;
         this.users = users;
+        this.id = id;
     }
 
     /**
@@ -38,7 +50,7 @@ public class Guild {
      */
     public Channel getChannelByID(String id) {
         for (Channel c : channels) {
-            if (c.getId().equalsIgnoreCase(id))
+            if (c.getChannelID().equalsIgnoreCase(id))
                 return c;
         }
 
@@ -63,5 +75,23 @@ public class Guild {
         }
 
         return null; // Not found, return null.
+    }
+
+    /**
+     * @return The name of the guild
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return The ID of this guild.
+     */
+    public String getID() {
+        return id;
+    }
+
+    public void addUser(User user) {
+
     }
 }

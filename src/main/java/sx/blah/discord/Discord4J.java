@@ -1,5 +1,8 @@
 package sx.blah.discord;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author qt
  * @since 7:56 PM 16 Aug, 2015
@@ -13,16 +16,8 @@ public class Discord4J {
     public static final double PROJECT_VERSION = 1.0;
 
     /**
-     * Set this to true to see debug output
+     * SLF4J Instance
      */
-    public static boolean debug = false;
+    public static final Logger logger = LoggerFactory.getLogger(Discord4J.class);
 
-    /**
-     * Outputs a message to debug
-     *
-     * @param s Message
-     */
-    public static void debug(String s) {
-        if (debug) System.out.println(s);
-    }
 }

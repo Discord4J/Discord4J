@@ -3,13 +3,12 @@ package sx.blah.discord.example;
 import org.json.simple.parser.ParseException;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.DiscordClient;
+import sx.blah.discord.obj.Invite;
 import sx.blah.discord.obj.Message;
 import sx.blah.discord.obj.User;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author qt
@@ -19,11 +18,6 @@ import java.util.List;
  * Responds to users that @mention you.
  */
 public class ReplyBot extends DiscordClient {
-    /**
-     * Private cache of messages our bot has sent.
-     */
-    private List<Message> ourMessages = new ArrayList<>();
-
     /**
      * Sets up the bot.
      *
@@ -40,6 +34,7 @@ public class ReplyBot extends DiscordClient {
 
     /**
      * Handles message reception.
+     *
      * @param m Message received.
      */
     @Override
@@ -52,12 +47,14 @@ public class ReplyBot extends DiscordClient {
                 e.printStackTrace();
             }
         } else if (m.getContent().startsWith(".clear")) {
-            for (Message message : ourMessages) {
-                try {
-                    Discord4J.debug("Attempting deletion of message " + message.getMessageID());
-                    this.deleteMessage(message.getMessageID(), message.getChannelID());
-                } catch (IOException e) {
-                    System.err.println("Couldn't delete message " + message.getMessageID() + " (" + e.getMessage() + ").");
+            for (Message message : this.getChannelByID(m.getChannelID()).getMessages()) {
+                if (message.getAuthorID().equalsIgnoreCase(this.getOurUser().getId())) {
+                    try {
+                        Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthorUsername(), message.getContent());
+                        this.deleteMessage(message.getMessageID(), message.getChannelID());
+                    } catch (IOException e) {
+                        Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
+                    }
                 }
             }
         }
@@ -65,11 +62,11 @@ public class ReplyBot extends DiscordClient {
 
     /**
      * Handles us sending messages.
+     *
      * @param m The message we sent
      */
     @Override
     public void onMessageSend(Message m) {
-        this.ourMessages.add(m);
     }
 
     /**
@@ -80,7 +77,18 @@ public class ReplyBot extends DiscordClient {
     @Override
     public void onMentioned(Message message) {
         try {
-            this.sendMessage("@" + message.getAuthorUsername() + ", you called?", message.getChannelID(), message.getAuthorID());
+            if (message.getContent().contains("https://discord.gg/")
+                    || message.getContent().contains("http://discord.gg/")) {
+                String invite = message.getContent().split(".gg/")[1].split(" ")[0];
+                Discord4J.logger.debug("Received invite code \"{}\"", invite);
+                Invite invite1 = this.acceptInvite(invite);
+                if (null != invite1) {
+                    this.sendMessage(String.format("Hello, %s! I was invited to the %s channel by @%s.",
+                            invite1.getGuildName(), invite1.getChannelName(), invite1.getInviterUsername()), invite1.getChannelID(), invite1.getInviterID());
+                }
+            } else {
+                this.sendMessage("@" + message.getAuthorUsername() + ", you called?", message.getChannelID(), message.getAuthorID());
+            }
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
@@ -127,8 +135,8 @@ public class ReplyBot extends DiscordClient {
      * If you'd like to see content that was deleted,
      * I recommend you to cache all messages.
      *
-     * @param messageID
-     * @param channelID
+     * @param messageID The message that was deleted
+     * @param channelID The channel that the message was deleted from
      */
     @Override
     public void onMessageDelete(String messageID, String channelID) {
@@ -138,13 +146,13 @@ public class ReplyBot extends DiscordClient {
     /**
      * Starts the bot. This can be done any place you want.
      * The main method is for demonstration.
+     *
      * @param args Command line arguments passed to the program.
      * @throws ParseException
      * @throws IOException
      * @throws URISyntaxException
      */
     public static void main(String... args) throws ParseException, IOException, URISyntaxException {
-        Discord4J.debug = true;
         new ReplyBot(args[0] /* email */, args[1] /* password */);
     }
 }
