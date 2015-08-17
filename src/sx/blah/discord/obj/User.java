@@ -32,6 +32,12 @@ public class User {
     private int discriminator;
 
     /**
+     * This user's presence.
+     * One of [online/idle/offline].
+     */
+    private String presence;
+
+    /**
      * Creates User objects (orly?)
      */
     public User(String name, String id) {
@@ -64,5 +70,13 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getPresence() {
+        return presence;
+    }
+
+    public void setPresence(String presence) {
+        this.presence = presence;
     }
 }

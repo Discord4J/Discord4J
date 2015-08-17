@@ -9,6 +9,11 @@ package sx.blah.discord.obj;
  */
 public class Message {
     /**
+     * The ID of the message. Used for message updating.
+     */
+    private final String messageID;
+
+    /**
      * The actual message (what you see
      * on your screen, the content).
      */
@@ -35,7 +40,8 @@ public class Message {
      */
     private final String[] mentionedIDs;
 
-    public Message(String content, String author_id, String authorUsername, String channel_id, String[] mentionedIDs) {
+    public Message(String messageID, String content, String author_id, String authorUsername, String channel_id, String[] mentionedIDs) {
+        this.messageID = messageID;
         this.content = content;
         this.author_id = author_id;
         this.authorUsername = authorUsername;
@@ -59,6 +65,10 @@ public class Message {
 
     public String getAuthorUsername() {
         return authorUsername;
+    }
+
+    public String getMessageID() {
+        return messageID;
     }
 
     public String[] getMentionedIDs() {

@@ -19,8 +19,8 @@ public final class DiscordEndpoints {
     public static final String APIBASE = BASE + "api";
 
     /**
-     * Websocket thing. IDK, I stole all of these
-     * urls from Hydrabolt :P
+     * Websocket hub. All communication (except login and logout)
+     * goes through this.
      */
     public static final String WEBSOCKET_HUB = "ws://discordapp.com/hub";
 
