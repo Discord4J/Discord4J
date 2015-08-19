@@ -1,5 +1,10 @@
 package sx.blah.discord.obj;
 
+import org.json.simple.parser.ParseException;
+import sx.blah.discord.DiscordClient;
+
+import java.io.IOException;
+
 /**
  * @author qt
  * @since 7:53 PM 16 Aug, 2015
@@ -73,5 +78,16 @@ public class Message {
 
     public String[] getMentionedIDs() {
         return mentionedIDs;
+    }
+
+    /**
+     * Adds an @mention to the author of the referenced Message
+     * object before your content
+     *
+     * @param content Message to send.
+     */
+    public void reply(String content, DiscordClient client) throws IOException, ParseException {
+        client.sendMessage("@" + this.getAuthorUsername() + ", "
+                + content, this.getChannelID(), this.getAuthorID());
     }
 }

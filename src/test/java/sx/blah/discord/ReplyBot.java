@@ -1,8 +1,6 @@
-package sx.blah.discord.example;
+package sx.blah.discord;
 
 import org.json.simple.parser.ParseException;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.DiscordClient;
 import sx.blah.discord.obj.Invite;
 import sx.blah.discord.obj.Message;
 import sx.blah.discord.obj.User;
@@ -42,20 +40,26 @@ public class ReplyBot extends DiscordClient {
         if (m.getContent().startsWith(".meme")
                 || m.getContent().startsWith(".nicememe")) {
             try {
-                sendMessage("http://niceme.me/", m.getChannelID());
+                m.reply("http://niceme.me/", this);
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
             }
         } else if (m.getContent().startsWith(".clear")) {
-            for (Message message : this.getChannelByID(m.getChannelID()).getMessages()) {
-                if (message.getAuthorID().equalsIgnoreCase(this.getOurUser().getId())) {
-                    try {
-                        Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthorUsername(), message.getContent());
-                        this.deleteMessage(message.getMessageID(), message.getChannelID());
-                    } catch (IOException e) {
-                        Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
-                    }
+            this.getChannelByID(m.getChannelID()).getMessages().stream().filter(message -> message.getAuthorID().equalsIgnoreCase(this.getOurUser().getId())).forEach(message -> {
+                try {
+                    Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthorUsername(), message.getContent());
+                    this.deleteMessage(message.getMessageID(), message.getChannelID());
+                } catch (IOException e) {
+                    Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
                 }
+            });
+        } else if (m.getContent().startsWith(".name ")) {
+            String s = m.getContent().split(" ", 2)[1];
+            try {
+                this.changeAccountInfo(s, "", "");
+                m.reply("is this better?", this);
+            } catch (ParseException | IOException e) {
+                e.printStackTrace();
             }
         }
     }

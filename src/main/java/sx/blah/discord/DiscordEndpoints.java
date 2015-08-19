@@ -24,7 +24,7 @@ public final class DiscordEndpoints {
      */
     public static final String WEBSOCKET_HUB = "ws://discordapp.com/hub";
 
-    public static final String USERS = APIBASE + "/users";
+    public static final String USERS = APIBASE + "/users/";
 
     /**
      * Used for logging in.
@@ -38,7 +38,12 @@ public final class DiscordEndpoints {
     /**
      * Servers URL
      */
-    public static final String SERVERS = APIBASE + "/guilds";
+    public static final String SERVERS = APIBASE + "/guilds/";
 
-    public static final String CHANNELS = APIBASE + "/channels";
+    public static final String CHANNELS = APIBASE + "/channels/";
+
+    /**
+     * Used for accapting invites
+     */
+    public static final String INVITE = APIBASE + "/invite/";
 }
