@@ -22,7 +22,7 @@ public final class DiscordEndpoints {
      * Websocket hub. All communication (except login and logout)
      * goes through this.
      */
-    public static final String WEBSOCKET_HUB = "ws://discordapp.com/hub";
+    public static final String WEBSOCKET_HUB = "ws://gateway-cerberus.discord.gg/";
 
     public static final String USERS = APIBASE + "/users/";
 
