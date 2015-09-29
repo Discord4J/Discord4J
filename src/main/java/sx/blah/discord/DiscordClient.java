@@ -139,10 +139,12 @@ public abstract class DiscordClient extends WebSocketClient {
                         mentionedIDs[i] = userID;
                     }
 
+	                Message message1 = new Message(messageID, content, id, username, channelID, mentionedIDs);
+	                this.getChannelByID(channelID).addMessage(message1);
+
                     if (!id.equalsIgnoreCase(ourUser.getId())
                             && this.ready) {
                         Discord4J.logger.debug("Message from: {} ({}) in channel ID {}: {}", username, id, channelID, content);
-                        Message message1 = new Message(messageID, content, id, username, channelID, mentionedIDs);
                         this.onMessageReceive(message1);
                         if (mentioned) {
                             this.onMentioned(message1);
