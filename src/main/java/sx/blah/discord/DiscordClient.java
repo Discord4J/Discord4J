@@ -407,7 +407,7 @@ public abstract class DiscordClient extends WebSocketClient {
     public void deleteMessage(String messageID, String channelID) throws IOException {
         if (this.ready) {
             Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages/" + messageID,
-                    new BasicNameValuePair("authorizarion", token));
+                    new BasicNameValuePair("authorization", token));
         } else {
             System.err.println("Hold your horses! The bot hasn't signed in yet!");
         }
