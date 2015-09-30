@@ -7,6 +7,15 @@ import sx.blah.discord.obj.User;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * @author qt
@@ -91,7 +100,9 @@ public class ReplyBot extends DiscordClient {
                             invite1.getGuildName(), invite1.getChannelName(), invite1.getInviterUsername()), invite1.getChannelID(), invite1.getInviterID());
                 }
             } else {
-                this.sendMessage("@" + message.getAuthorUsername() + ", you called?", message.getChannelID(), message.getAuthorID());
+                this.sendMessage("That message was sent " +
+		                message.getTimestamp().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")) +
+		                " " + ZoneId.systemDefault().getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH) + "!", message.getChannelID());
             }
         } catch (IOException | ParseException e) {
             e.printStackTrace();

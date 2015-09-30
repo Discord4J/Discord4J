@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,6 +129,7 @@ public abstract class DiscordClient extends WebSocketClient {
                     String content = (String) d.get("content");
                     String messageID = (String) d.get("id");
                     JSONArray array = (JSONArray) d.get("mentions");
+                    String time = (String) d.get("timestamp");
 
                     String[] mentionedIDs = new String[array.size()];
                     boolean mentioned = false;
@@ -139,7 +142,7 @@ public abstract class DiscordClient extends WebSocketClient {
                         mentionedIDs[i] = userID;
                     }
 
-	                Message message1 = new Message(messageID, content, id, username, channelID, mentionedIDs);
+	                Message message1 = new Message(messageID, content, id, username, channelID, mentionedIDs, this.convertFromTimestamp(time));
 	                this.getChannelByID(channelID).addMessage(message1);
 
                     if (!id.equalsIgnoreCase(ourUser.getId())
@@ -388,9 +391,10 @@ public abstract class DiscordClient extends WebSocketClient {
                     new BasicNameValuePair("content-type", "application/json"));
 
             JSONObject object1 = (JSONObject) JSON_PARSER.parse(response);
+	        String time = (String) object1.get("timestamp");
             String messageID = (String) object1.get("id");
 
-            Message message = new Message(messageID, content, this.ourUser.getId(), this.ourUser.getName(), channelID, mentions);
+            Message message = new Message(messageID, content, this.ourUser.getId(), this.ourUser.getName(), channelID, mentions, this.convertFromTimestamp(time));
             this.onMessageSend(message);
             return message;
         } else {
@@ -472,7 +476,7 @@ public abstract class DiscordClient extends WebSocketClient {
                     (String) author.get("id"),
                     (String) author.get("username"),
                     (String) object1.get("channel_id"),
-                    mentionsArray));
+                    mentionsArray, this.convertFromTimestamp((String) object1.get("timestamp"))));
         }
         return messages;
     }
@@ -509,6 +513,10 @@ public abstract class DiscordClient extends WebSocketClient {
             return null;
         }
     }
+
+	private LocalDateTime convertFromTimestamp(String time) {
+		return LocalDateTime.parse(time.split("\\+")[0]).atZone(ZoneId.of("UTC+00:00")).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+	}
 
     /**
      * @return Whether or not the bot is ready to be used (is it logged in?)

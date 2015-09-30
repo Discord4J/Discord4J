@@ -4,6 +4,7 @@ import org.json.simple.parser.ParseException;
 import sx.blah.discord.DiscordClient;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 /**
  * @author qt
@@ -45,13 +46,19 @@ public class Message {
      */
     private final String[] mentionedIDs;
 
-    public Message(String messageID, String content, String author_id, String authorUsername, String channel_id, String[] mentionedIDs) {
+	/**
+     * The time the message was received.
+     */
+    private final LocalDateTime timestamp;
+
+    public Message(String messageID, String content, String author_id, String authorUsername, String channel_id, String[] mentionedIDs, LocalDateTime timestamp) {
         this.messageID = messageID;
         this.content = content;
         this.author_id = author_id;
         this.authorUsername = authorUsername;
         this.channel_id = channel_id;
         this.mentionedIDs = mentionedIDs;
+	    this.timestamp = timestamp;
     }
 
     // Getters. Boring.
@@ -79,6 +86,10 @@ public class Message {
     public String[] getMentionedIDs() {
         return mentionedIDs;
     }
+
+	public LocalDateTime getTimestamp() {
+		return timestamp;
+	}
 
     /**
      * Adds an @mention to the author of the referenced Message
