@@ -35,7 +35,7 @@ import java.util.List;
  * sends messages, as well
  * as holds our user data.
  */
-public abstract class DiscordClient extends WebSocketClient {
+public class DiscordClient extends WebSocketClient {
     /**
      * Used for keep alive. Keeps last time (in ms)
      * that we sent the keep alive so we can accurately
@@ -136,16 +136,16 @@ public abstract class DiscordClient extends WebSocketClient {
                     for (int i = 0; i < array.size(); i++) {
                         JSONObject userInfo = (JSONObject) array.get(i);
                         String userID = (String) userInfo.get("id");
-                        if (userID.equalsIgnoreCase(this.ourUser.getId())) {
+                        if (userID.equalsIgnoreCase(this.ourUser.getID())) {
                             mentioned = true;
                         }
                         mentionedIDs[i] = userID;
                     }
 
-	                Message message1 = new Message(messageID, content, id, username, channelID, mentionedIDs, this.convertFromTimestamp(time));
+	                Message message1 = new Message(messageID, content, this.getUserByID(id), channelID, mentionedIDs, this.convertFromTimestamp(time));
 	                this.getChannelByID(channelID).addMessage(message1);
 
-                    if (!id.equalsIgnoreCase(ourUser.getId())
+                    if (!id.equalsIgnoreCase(ourUser.getID())
                             && this.ready) {
                         Discord4J.logger.debug("Message from: {} ({}) in channel ID {}: {}", username, id, channelID, content);
                         this.onMessageReceive(message1);
@@ -163,7 +163,9 @@ public abstract class DiscordClient extends WebSocketClient {
                     username = (String) user.get("username");
                     String avatar = (String) user.get("avatar");
 
-                    this.keepaliveDelay = (long) d.get("heartbeat_interval");
+	                this.ourUser = new User(username, id, avatar);
+
+	                this.keepaliveDelay = (long) d.get("heartbeat_interval");
                     Discord4J.logger.debug("Received heartbeat interval of {}.", this.keepaliveDelay);
 
                     JSONArray guilds = (JSONArray) d.get("guilds");
@@ -176,13 +178,18 @@ public abstract class DiscordClient extends WebSocketClient {
                         String name = (String) guild.get("name");
                         String guildID = (String) guild.get("id");
 
+	                    List<Channel> channelList = new ArrayList<>();
                         List<User> memberList = new ArrayList<>();
+	                    Guild g;
+	                    guildList.add(g = new Guild(name, guildID, new ArrayList<>(), new ArrayList<>()));
+
                         for (Object o1 : members) {
-                            JSONObject member = (JSONObject) o1;
-                            memberList.add(new User((String) member.get("username"), (String) member.get("id"), (String) member.get("avatar")));
+                            JSONObject member = (JSONObject) ((JSONObject) o1).get("user");
+                            g.addUser(new User((String) member.get("username"), (String) member.get("id"), (String) member.get("avatar")));
                         }
 
-                        List<Channel> channelList = new ArrayList<>();
+
+
                         for (Object o1 : channels) {
                             JSONObject channel = (JSONObject) o1;
                             String type = (String) channel.get("type");
@@ -193,16 +200,13 @@ public abstract class DiscordClient extends WebSocketClient {
                                 try {
                                     messages = this.getChannelMessages(channelID);
                                 } catch (Exception e) {
-                                    Discord4J.logger.error("Unable to fetch messages for channel {} ({}). Cause: {}.", channelID, chName, e.getMessage());
+                                    Discord4J.logger.error("Unable to fetch messages for channel {} ({}). Cause: {}.", channelID, chName, e.getClass().getSimpleName());
                                 }
-                                channelList.add(new Channel(chName, channelID, messages));
+	                            g.addChannel(new Channel(chName, channelID, messages));
                             }
                         }
-
-                        guildList.add(new Guild(name, guildID, channelList, memberList));
                     }
 
-                    this.ourUser = new User(username, id, avatar);
                     Discord4J.logger.debug("Connected as {} ({}).", username, id);
                     this.ready = true;
                     new Thread(() -> {
@@ -210,9 +214,8 @@ public abstract class DiscordClient extends WebSocketClient {
                         while (this.ready) {
                             long l;
                             if ((l = (System.currentTimeMillis() - timer)) >= keepaliveDelay) {
-                                String s1 = "{\"op\":1,\"d\":" + System.currentTimeMillis() + "}";
-                                Discord4J.logger.debug("Sending keep alive... ({}). Took {} ms.", s1, l);
-                                send(s1);
+                                Discord4J.logger.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+                                send("{\"op\":1,\"d\":" + System.currentTimeMillis() + "}");
                                 timer = System.currentTimeMillis();
                             }
                         }
@@ -227,8 +230,6 @@ public abstract class DiscordClient extends WebSocketClient {
                     this.onStartTyping(id, channelID);
                     break;
 
-
-
                 case "GUILD_CREATE":
                     d = (JSONObject) object.get("d");
                     String name = (String) d.get("name");
@@ -239,7 +240,8 @@ public abstract class DiscordClient extends WebSocketClient {
                     List<User> memberList = new ArrayList<>();
                     for (Object o : members) {
                         JSONObject object1 = (JSONObject) o;
-                        memberList.add(new User((String) object1.get("username"), (String) object1.get("id")));
+                        memberList.add(new User((String) object1.get("username"),
+		                        (String) object1.get("id"), (String) object1.get("avatar")));
                     }
 
                     List<Channel> channelList = new ArrayList<>();
@@ -299,28 +301,28 @@ public abstract class DiscordClient extends WebSocketClient {
      *
      * @param message Message received
      */
-    public abstract void onMessageReceive(Message message);
+    public void onMessageReceive(Message message) {}
 
     /**
      * Called when our bot sends a message.
      *
      * @param message The message we sent.
      */
-    public abstract void onMessageSend(Message message);
+    public void onMessageSend(Message message) {}
 
     /**
      * Called when our bot gets mentioned in a message.
      *
      * @param message Message sent
      */
-    public abstract void onMentioned(Message message);
+    public void onMentioned(Message message) {}
 
     /**
      * Called when a user starts typing.
      *
      * @param userID The user's ID.
      */
-    public abstract void onStartTyping(String userID, String channelID);
+    public void onStartTyping(String userID, String channelID) {}
 
     /**
      * TODO
@@ -329,7 +331,7 @@ public abstract class DiscordClient extends WebSocketClient {
      * @param user     The user whose presence changed.
      * @param presence The presence they have changed to (online/idle/offline. Not sure if there are more)
      */
-    public abstract void onPresenceChange(User user, String presence);
+    public void onPresenceChange(User user, String presence) {}
 
     /**
      * Called when a message is edited.
@@ -339,7 +341,7 @@ public abstract class DiscordClient extends WebSocketClient {
      *
      * @param message Edited message
      */
-    public abstract void onMessageUpdate(Message message);
+    public void onMessageUpdate(Message message) {}
 
     /**
      * Called when a message is deleted.
@@ -350,7 +352,7 @@ public abstract class DiscordClient extends WebSocketClient {
      * @param messageID The ID of the message that was deleted.
      * @param channelID The channel the message was deleted from.
      */
-    public abstract void onMessageDelete(String messageID, String channelID);
+    public void onMessageDelete(String messageID, String channelID) {}
 
     /**
      * Logs you into Discord using given
@@ -394,7 +396,7 @@ public abstract class DiscordClient extends WebSocketClient {
 	        String time = (String) object1.get("timestamp");
             String messageID = (String) object1.get("id");
 
-            Message message = new Message(messageID, content, this.ourUser.getId(), this.ourUser.getName(), channelID, mentions, this.convertFromTimestamp(time));
+            Message message = new Message(messageID, content, this.ourUser, channelID, mentions, this.convertFromTimestamp(time));
             this.onMessageSend(message);
             return message;
         } else {
@@ -473,8 +475,7 @@ public abstract class DiscordClient extends WebSocketClient {
 
             messages.add(new Message((String) object1.get("id"),
                     (String) object1.get("content"),
-                    (String) author.get("id"),
-                    (String) author.get("username"),
+                    this.getUserByID((String) author.get("id")),
                     (String) object1.get("channel_id"),
                     mentionsArray, this.convertFromTimestamp((String) object1.get("timestamp"))));
         }
@@ -548,6 +549,26 @@ public abstract class DiscordClient extends WebSocketClient {
 
         return null;
     }
+
+	public Guild getGuildByID(String guildID) {
+		for(Guild guild : guildList) {
+			if(guild.getID().equalsIgnoreCase(guildID))
+				return guild;
+		}
+
+		return null;
+	}
+
+	public User getUserByID(String userID) {
+		User u = null;
+		for(Guild guild : guildList) {
+			if(null == u) {
+				u = guild.getUserByID(userID);
+			}
+		}
+
+		return u;
+	}
 
     /**
      * New Request system. Reflection is cool, right guys?

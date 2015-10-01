@@ -25,20 +25,15 @@ public class Message {
      */
     private final String content;
 
-    /**
-     * The ID of the author.
-     */
-    private final String author_id;
+	/**
+	 * The User who sent the message.
+	 */
+	private final User author;
 
     /**
      * The ID of the channel the message was sent in.
      */
     private final String channel_id;
-
-    /**
-     * The author's username
-     */
-    private final String authorUsername;
 
     /**
      * All users @mentioned in the
@@ -51,11 +46,10 @@ public class Message {
      */
     private final LocalDateTime timestamp;
 
-    public Message(String messageID, String content, String author_id, String authorUsername, String channel_id, String[] mentionedIDs, LocalDateTime timestamp) {
+    public Message(String messageID, String content, User user, String channel_id, String[] mentionedIDs, LocalDateTime timestamp) {
         this.messageID = messageID;
         this.content = content;
-        this.author_id = author_id;
-        this.authorUsername = authorUsername;
+	    this.author = user;
         this.channel_id = channel_id;
         this.mentionedIDs = mentionedIDs;
 	    this.timestamp = timestamp;
@@ -67,17 +61,13 @@ public class Message {
         return content;
     }
 
-    public String getAuthorID() {
-        return author_id;
-    }
-
     public String getChannelID() {
         return channel_id;
     }
 
-    public String getAuthorUsername() {
-        return authorUsername;
-    }
+	public User getAuthor() {
+		return author;
+	}
 
     public String getMessageID() {
         return messageID;
@@ -98,7 +88,7 @@ public class Message {
      * @param content Message to send.
      */
     public void reply(String content, DiscordClient client) throws IOException, ParseException {
-        client.sendMessage("@" + this.getAuthorUsername() + ", "
-                + content, this.getChannelID(), this.getAuthorID());
+        client.sendMessage("@" + this.getAuthor().getName() + ", "
+                + content, this.getChannelID(), this.getAuthor().getID());
     }
 }

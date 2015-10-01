@@ -1,5 +1,7 @@
 package sx.blah.discord.obj;
 
+import sx.blah.discord.DiscordEndpoints;
+
 /**
  * @author qt
  * @since 5:40 PM 15 Aug, 2015
@@ -37,22 +39,21 @@ public class User {
      */
     private String presence;
 
-    /**
-     * Creates User objects (orly?)
-     */
-    public User(String name, String id) {
-        this.id = id;
-        this.name = name;
-    }
+	/**
+	 * The user's avatar in URL form.
+	 */
+	private String avatarURL;
 
     public User(String name, String id, String avatar) {
-        this(name, id);
-        this.avatar = avatar;
+	    this.id = id;
+	    this.name = name;
+	    this.avatar = avatar;
+	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
 
     // -- Getters and setters. Pretty boring.
 
-    public String getId() {
+    public String getID() {
         return id;
     }
 
@@ -68,8 +69,13 @@ public class User {
         return avatar;
     }
 
+    public String getAvatarURL() {
+		return avatarURL;
+    }
+
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
 
     public String getPresence() {

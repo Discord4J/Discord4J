@@ -46,4 +46,6 @@ public final class DiscordEndpoints {
      * Used for accapting invites
      */
     public static final String INVITE = APIBASE + "/invite/";
+
+    public static final String AVATARS = "https://cdn.discordapp.com/avatars/%s/%s.jpg";
 }

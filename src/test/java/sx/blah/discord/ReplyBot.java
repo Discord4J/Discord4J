@@ -7,15 +7,6 @@ import sx.blah.discord.obj.User;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * @author qt
@@ -54,9 +45,9 @@ public class ReplyBot extends DiscordClient {
                 e.printStackTrace();
             }
         } else if (m.getContent().startsWith(".clear")) {
-            this.getChannelByID(m.getChannelID()).getMessages().stream().filter(message -> message.getAuthorID().equalsIgnoreCase(this.getOurUser().getId())).forEach(message -> {
+            this.getChannelByID(m.getChannelID()).getMessages().stream().filter(message -> message.getAuthor().getID().equalsIgnoreCase(this.getOurUser().getID())).forEach(message -> {
                 try {
-                    Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthorUsername(), message.getContent());
+                    Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthor().getName(), message.getContent());
                     this.deleteMessage(message.getMessageID(), message.getChannelID());
                 } catch (IOException e) {
                     Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
@@ -100,9 +91,7 @@ public class ReplyBot extends DiscordClient {
                             invite1.getGuildName(), invite1.getChannelName(), invite1.getInviterUsername()), invite1.getChannelID(), invite1.getInviterID());
                 }
             } else {
-                this.sendMessage("That message was sent " +
-		                message.getTimestamp().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")) +
-		                " " + ZoneId.systemDefault().getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH) + "!", message.getChannelID());
+                this.sendMessage(message.getAuthor().getAvatarURL(), message.getChannelID());
             }
         } catch (IOException | ParseException e) {
             e.printStackTrace();

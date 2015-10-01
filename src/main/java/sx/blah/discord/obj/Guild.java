@@ -69,8 +69,12 @@ public class Guild {
      * @return The user with given ID.
      */
     public User getUserByID(String id) {
+	    if(null == users)
+		    return null;
         for (User user : users) {
-            if (user.getId().equalsIgnoreCase(id))
+            if (null != user
+		            && null != user.getID()
+                    && user.getID().equalsIgnoreCase(id))
                 return user;
         }
 
@@ -92,6 +96,10 @@ public class Guild {
     }
 
     public void addUser(User user) {
-
+		this.users.add(user);
     }
+
+	public void addChannel(Channel channel) {
+		this.channels.add(channel);
+	}
 }
