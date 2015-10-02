@@ -46,12 +46,12 @@ public class ReplyBot extends DiscordClient {
             }
         } else if (m.getContent().startsWith(".clear")) {
             this.getChannelByID(m.getChannelID()).getMessages().stream().filter(message -> message.getAuthor().getID().equalsIgnoreCase(this.getOurUser().getID())).forEach(message -> {
-                try {
-                    Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthor().getName(), message.getContent());
-                    this.deleteMessage(message.getMessageID(), message.getChannelID());
-                } catch (IOException e) {
-                    Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
-                }
+	            try {
+		            Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthor().getName(), message.getContent());
+		            this.deleteMessage(message.getMessageID(), message.getChannelID());
+	            } catch (IOException e) {
+		            Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
+	            }
             });
         } else if (m.getContent().startsWith(".name ")) {
             String s = m.getContent().split(" ", 2)[1];
@@ -156,7 +156,11 @@ public class ReplyBot extends DiscordClient {
      * @throws IOException
      * @throws URISyntaxException
      */
-    public static void main(String... args) throws ParseException, IOException, URISyntaxException {
-        new ReplyBot(args[0] /* email */, args[1] /* password */);
+    public static void main(String... args) {
+	    try {
+		    new ReplyBot(args[0] /* email */, args[1] /* password */);
+	    } catch (Exception e) {
+		    e.printStackTrace();
+	    }
     }
 }

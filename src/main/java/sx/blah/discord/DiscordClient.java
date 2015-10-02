@@ -51,7 +51,7 @@ public class DiscordClient extends WebSocketClient {
     /**
      * Our token, so we can send messages
      */
-    private String token;
+    private static String token;
 
     /**
      * Whether our account is ready to be used yet.
@@ -85,7 +85,7 @@ public class DiscordClient extends WebSocketClient {
     private final String password;
 
     public DiscordClient(String email, String password) throws URISyntaxException, IOException, ParseException {
-        super(new URI(DiscordEndpoints.WEBSOCKET_HUB), new Draft_10());
+        super(new URI(obtainGateway(token = login(email, password))), new Draft_10());
         this.email = email;
         this.password = password;
         token = login(email, password);
@@ -95,7 +95,11 @@ public class DiscordClient extends WebSocketClient {
         this.connect();
     }
 
-    @Override
+	@Override public void connect() {
+		super.connect();
+	}
+
+	@Override
     public void onOpen(ServerHandshake serverHandshake) {
         if (!token.isEmpty()) {
             send("{\"op\":2,\"d\":{\"token\":\"" + token + "\",\"properties\":{\"$os\":\"Linux\",\"$browser\":\"DesuBot\",\"$device\":\"DesuBot\",\"$referrer\":\"\",\"$referring_domain\":\"\"},\"v\":2}}");
@@ -360,12 +364,26 @@ public class DiscordClient extends WebSocketClient {
      *
      * @return The User object of who you log in as.
      */
-    public String login(String email, String password)
+    private static String login(String email, String password)
             throws IOException, ParseException {
         return (String) ((JSONObject) JSON_PARSER.parse(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
                 new StringEntity("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"),
                 new BasicNameValuePair("content-type", "application/json")))).get("token");
     }
+
+	/**
+	 * Gets the WebSocket gateway
+	 * @param token Our login token
+	 * @return the WebSocket URL of which to connect
+	 * @throws ParseException
+	 */
+	private static String obtainGateway(String token) throws ParseException {
+		String s = ((String) ((JSONObject)JSON_PARSER.parse(
+				Requests.GET.makeRequest("https://discordapp.com/api/gateway",
+						new BasicNameValuePair("authorization", token)))).get("url")).replaceAll("wss", "ws");
+		Discord4J.logger.debug("Obtained gateway {}.", s);
+		return s;
+	}
 
     /**
      * Sends a message to the specified channel.
