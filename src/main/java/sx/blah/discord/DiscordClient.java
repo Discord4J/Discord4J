@@ -329,6 +329,15 @@ public final class DiscordClient {
 		return null;
 	}
 
+    /**
+     * Gets all the guilds this client is connected to.
+     *
+     * @return The guilds.
+     */
+    public List<Guild> getGuildList() {
+        return guildList;
+    }
+
 	public User getUserByID(String userID) {
 		User u = null;
 		for(Guild guild : guildList) {
