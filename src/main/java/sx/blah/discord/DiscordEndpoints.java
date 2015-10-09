@@ -1,3 +1,20 @@
+// Discord4J - Unofficial wrapper for Discord API
+// Copyright (c) 2015
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 package sx.blah.discord;
 
 /**
@@ -17,12 +34,6 @@ public final class DiscordEndpoints {
      * The base API location on Discord's servers.
      */
     public static final String APIBASE = BASE + "api";
-
-    /**
-     * Websocket hub. All communication (except login and logout)
-     * goes through this.
-     */
-    public static final String WEBSOCKET_HUB = "ws://gateway-cerberus.discord.gg/";
 
     public static final String USERS = APIBASE + "/users/";
 
@@ -47,5 +58,8 @@ public final class DiscordEndpoints {
      */
     public static final String INVITE = APIBASE + "/invite/";
 
-    public static final String AVATARS = "https://cdn.discordapp.com/avatars/%s/%s.jpg";
+	/**
+	 * Formatted string for getting avatar URLs.
+	 */
+	public static final String AVATARS = "https://cdn.discordapp.com/avatars/%s/%s.jpg";
 }

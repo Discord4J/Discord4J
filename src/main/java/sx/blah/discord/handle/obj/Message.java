@@ -1,4 +1,21 @@
-package sx.blah.discord.obj;
+// Discord4J - Unofficial wrapper for Discord API
+// Copyright (c) 2015
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+package sx.blah.discord.handle.obj;
 
 import org.json.simple.parser.ParseException;
 import sx.blah.discord.DiscordClient;
@@ -33,7 +50,7 @@ public class Message {
     /**
      * The ID of the channel the message was sent in.
      */
-    private final String channel_id;
+    private final String channelID;
 
     /**
      * All users @mentioned in the
@@ -46,11 +63,11 @@ public class Message {
      */
     private final LocalDateTime timestamp;
 
-    public Message(String messageID, String content, User user, String channel_id, String[] mentionedIDs, LocalDateTime timestamp) {
+    public Message(String messageID, String content, User user, String channelID, String[] mentionedIDs, LocalDateTime timestamp) {
         this.messageID = messageID;
         this.content = content;
 	    this.author = user;
-        this.channel_id = channel_id;
+        this.channelID = channelID;
         this.mentionedIDs = mentionedIDs;
 	    this.timestamp = timestamp;
     }
@@ -62,7 +79,7 @@ public class Message {
     }
 
     public String getChannelID() {
-        return channel_id;
+        return channelID;
     }
 
 	public User getAuthor() {
@@ -87,8 +104,8 @@ public class Message {
      *
      * @param content Message to send.
      */
-    public void reply(String content, DiscordClient client) throws IOException, ParseException {
-        client.sendMessage("@" + this.getAuthor().getName() + ", "
+    public void reply(String content) throws IOException, ParseException {
+        DiscordClient.get().sendMessage("@" + this.getAuthor().getName() + ", "
                 + content, this.getChannelID(), this.getAuthor().getID());
     }
 }

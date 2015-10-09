@@ -1,20 +1,35 @@
+// Discord4J - Unofficial wrapper for Discord API
+// Copyright (c) 2015
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 package sx.blah.discord;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import sx.blah.discord.obj.*;
+import sx.blah.discord.handle.IDispatcher;
+import sx.blah.discord.handle.impl.EventDispatcher;
+import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -35,7 +50,7 @@ import java.util.List;
  * sends messages, as well
  * as holds our user data.
  */
-public class DiscordClient extends WebSocketClient {
+public final class DiscordClient {
     /**
      * Used for keep alive. Keeps last time (in ms)
      * that we sent the keep alive so we can accurately
@@ -48,15 +63,10 @@ public class DiscordClient extends WebSocketClient {
      */
     private User ourUser;
 
-    /**
-     * Our token, so we can send messages
-     */
-    private static String token;
-
-    /**
-     * Whether our account is ready to be used yet.
-     */
-    private boolean ready = false;
+	/**
+	 * Our token, so we can send messages
+	 */
+	private String token;
 
     /**
      * How long there should be between keep alive
@@ -77,298 +87,73 @@ public class DiscordClient extends WebSocketClient {
     /**
      * Private copy of the email you logged in with.
      */
-    private final String email;
+    private String email;
 
     /**
      * Private copy of the password you used to log in.
      */
-    private final String password;
+    private String password;
 
-    public DiscordClient(String email, String password) throws URISyntaxException, IOException, ParseException {
-        super(new URI(obtainGateway(token = login(email, password))), new Draft_10());
-        this.email = email;
-        this.password = password;
-        token = login(email, password);
-        Discord4J.logger.debug("Logged in with token {}.", token);
-        Discord4J.logger.debug("Connecting to Discord WebSocket...");
+	/**
+	 * Local instance of DiscordClient.
+	 */
+	private static final DiscordClient __INSTANCE = new DiscordClient();
 
-        this.connect();
-    }
+	/**
+	 * WebSocket over which to communicate with Discord.
+	 */
+	private WebSocketClient ws;
 
-	@Override public void connect() {
-		super.connect();
+	/**
+	 * Event dispatcher.
+	 */
+	private final IDispatcher dispatcher;
+
+	public DiscordClient() {
+		dispatcher = new EventDispatcher();
 	}
 
-	@Override
-    public void onOpen(ServerHandshake serverHandshake) {
-        if (!token.isEmpty()) {
-            send("{\"op\":2,\"d\":{\"token\":\"" + token + "\",\"properties\":{\"$os\":\"Linux\",\"$browser\":\"DesuBot\",\"$device\":\"DesuBot\",\"$referrer\":\"\",\"$referring_domain\":\"\"},\"v\":2}}");
-            Discord4J.logger.debug("Connected.");
-        } else System.err.println("Use the login() method to set your token first!");
-    }
+	/**
+	 * @return Singleton instance
+	 */
+	public static DiscordClient get() {
+		return __INSTANCE;
+	}
 
-    /**
-     * Called when the websocket receives a message.
-     * This method is basically the whole library.
-     *
-     * @param message
-     */
-    @Override
-    public void onMessage(String message) {
-        try {
-            JSONObject object = ((JSONObject) JSON_PARSER.parse(message));
-            String s = (String) object.get("t");
+	/**
+	 * Gets the event dispatcher. This will send events to all listeners
+	 *
+	 * @return
+	 */
+	public IDispatcher getDispatcher() {
+		return dispatcher;
+	}
 
-            switch (s) {
-                /*
-                 * This is called when someone sends a message.
-                 */
-                case "MESSAGE_CREATE":
-                    JSONObject d = (JSONObject) object.get("d");
-                    JSONObject author = (JSONObject) d.get("author");
-
-                    String username = (String) author.get("username");
-                    String id = (String) author.get("id");
-                    String channelID = (String) d.get("channel_id");
-                    String content = (String) d.get("content");
-                    String messageID = (String) d.get("id");
-                    JSONArray array = (JSONArray) d.get("mentions");
-                    String time = (String) d.get("timestamp");
-
-                    String[] mentionedIDs = new String[array.size()];
-                    boolean mentioned = false;
-                    for (int i = 0; i < array.size(); i++) {
-                        JSONObject userInfo = (JSONObject) array.get(i);
-                        String userID = (String) userInfo.get("id");
-                        if (userID.equalsIgnoreCase(this.ourUser.getID())) {
-                            mentioned = true;
-                        }
-                        mentionedIDs[i] = userID;
-                    }
-
-	                Message message1 = new Message(messageID, content, this.getUserByID(id), channelID, mentionedIDs, this.convertFromTimestamp(time));
-	                this.getChannelByID(channelID).addMessage(message1);
-
-                    if (!id.equalsIgnoreCase(ourUser.getID())
-                            && this.ready) {
-                        Discord4J.logger.debug("Message from: {} ({}) in channel ID {}: {}", username, id, channelID, content);
-                        this.onMessageReceive(message1);
-                        if (mentioned) {
-                            this.onMentioned(message1);
-                        }
-                    }
-                    break;
-
-                case "READY":
-                    d = (JSONObject) object.get("d");
-
-                    JSONObject user = (JSONObject) d.get("user");
-                    id = (String) user.get("id");
-                    username = (String) user.get("username");
-                    String avatar = (String) user.get("avatar");
-
-	                this.ourUser = new User(username, id, avatar);
-
-	                this.keepaliveDelay = (long) d.get("heartbeat_interval");
-                    Discord4J.logger.debug("Received heartbeat interval of {}.", this.keepaliveDelay);
-
-                    JSONArray guilds = (JSONArray) d.get("guilds");
-
-                    // I hope you like loops.
-                    for (Object o : guilds) {
-                        JSONObject guild = (JSONObject) o;
-                        JSONArray members = (JSONArray) guild.get("members");
-                        JSONArray channels = (JSONArray) guild.get("channels");
-                        String name = (String) guild.get("name");
-                        String guildID = (String) guild.get("id");
-
-	                    List<Channel> channelList = new ArrayList<>();
-                        List<User> memberList = new ArrayList<>();
-	                    Guild g;
-	                    guildList.add(g = new Guild(name, guildID, new ArrayList<>(), new ArrayList<>()));
-
-                        for (Object o1 : members) {
-                            JSONObject member = (JSONObject) ((JSONObject) o1).get("user");
-                            g.addUser(new User((String) member.get("username"), (String) member.get("id"), (String) member.get("avatar")));
-                        }
-
-
-
-                        for (Object o1 : channels) {
-                            JSONObject channel = (JSONObject) o1;
-                            String type = (String) channel.get("type");
-                            if ("text".equalsIgnoreCase(type)) {
-                                channelID = (String) channel.get("id");
-                                String chName = (String) channel.get("name");
-                                List<Message> messages = new ArrayList<>();
-                                try {
-                                    messages = this.getChannelMessages(channelID);
-                                } catch (Exception e) {
-                                    Discord4J.logger.error("Unable to fetch messages for channel {} ({}). Cause: {}.", channelID, chName, e.getClass().getSimpleName());
-                                }
-	                            g.addChannel(new Channel(chName, channelID, messages));
-                            }
-                        }
-                    }
-
-                    Discord4J.logger.debug("Connected as {} ({}).", username, id);
-                    this.ready = true;
-                    new Thread(() -> {
-                        // Keep alive
-                        while (this.ready) {
-                            long l;
-                            if ((l = (System.currentTimeMillis() - timer)) >= keepaliveDelay) {
-                                Discord4J.logger.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-                                send("{\"op\":1,\"d\":" + System.currentTimeMillis() + "}");
-                                timer = System.currentTimeMillis();
-                            }
-                        }
-                    }).start();
-                    break;
-
-                case "TYPING_START":
-                    d = (JSONObject) object.get("d");
-                    id = (String) d.get("id");
-                    channelID = (String) d.get("channel_id");
-
-                    this.onStartTyping(id, channelID);
-                    break;
-
-                case "GUILD_CREATE":
-                    d = (JSONObject) object.get("d");
-                    String name = (String) d.get("name");
-                    id = (String) d.get("id");
-                    JSONArray members = (JSONArray) d.get("members");
-                    JSONArray channels = (JSONArray) d.get("channels");
-
-                    List<User> memberList = new ArrayList<>();
-                    for (Object o : members) {
-                        JSONObject object1 = (JSONObject) o;
-                        memberList.add(new User((String) object1.get("username"),
-		                        (String) object1.get("id"), (String) object1.get("avatar")));
-                    }
-
-                    List<Channel> channelList = new ArrayList<>();
-                    for (Object o : channels) {
-                        JSONObject channel = (JSONObject) o;
-                        if (((String) channel.get("type")).equalsIgnoreCase("text")) {
-                            channelList.add(new Channel((String) channel.get("name"), (String) channel.get("id")));
-                        }
-                    }
-
-                    this.guildList.add(new Guild(name, id, channelList, memberList));
-                    break;
-
-                case "GUILD_MEMBER_ADD":
-                    //TODO
-                    break;
-
-                case "MESSAGE_UPDATE":
-                    //todo
-                    // this one is sort of complicated,
-                    // because it doesn't always have an ID
-                    // or username attached.
-                    break;
-
-                case "MESSAGE_DELETE":
-                    d = (JSONObject) object.get("d");
-                    id = (String) d.get("id");
-                    channelID = (String) d.get("channel_id");
-
-                    this.onMessageDelete(id, channelID);
-                    break;
-
-                case "PRESENCE_UPDATE":
-                    d = (JSONObject) object.get("d");
-                    // todo lol
-                    break;
-
-                default:
-                    Discord4J.logger.warn("Unknown message received (ignoring): {}", message);
-            }
-        } catch (ParseException e) {
-            System.err.println(e.toString());
-        }
-    }
-
-    @Override
-    public void onClose(int i, String s, boolean b) {
-    }
-
-    @Override
-    public void onError(Exception e) {
-        e.printStackTrace();
-    }
-
-    /**
-     * Called when we receive a message
-     *
-     * @param message Message received
-     */
-    public void onMessageReceive(Message message) {}
-
-    /**
-     * Called when our bot sends a message.
-     *
-     * @param message The message we sent.
-     */
-    public void onMessageSend(Message message) {}
-
-    /**
-     * Called when our bot gets mentioned in a message.
-     *
-     * @param message Message sent
-     */
-    public void onMentioned(Message message) {}
-
-    /**
-     * Called when a user starts typing.
-     *
-     * @param userID The user's ID.
-     */
-    public void onStartTyping(String userID, String channelID) {}
-
-    /**
-     * TODO
-     * Called when a user changes presence
-     *
-     * @param user     The user whose presence changed.
-     * @param presence The presence they have changed to (online/idle/offline. Not sure if there are more)
-     */
-    public void onPresenceChange(User user, String presence) {}
-
-    /**
-     * Called when a message is edited.
-     * <p>
-     * It does not give us any info about the original message,
-     * so you should cache all messages.
-     *
-     * @param message Edited message
-     */
-    public void onMessageUpdate(Message message) {}
-
-    /**
-     * Called when a message is deleted.
-     * Unfortunately not much info is given to us.
-     * If you'd like to see content that was deleted,
-     * I recommend you to cache all messages.
-     *
-     * @param messageID The ID of the message that was deleted.
-     * @param channelID The channel the message was deleted from.
-     */
-    public void onMessageDelete(String messageID, String channelID) {}
+	/**
+	 * @return Token, used for all XHR requests.
+	 */
+	public String getToken() {
+		return token;
+	}
 
     /**
      * Logs you into Discord using given
      * email and password.
-     *
-     * @return The User object of who you log in as.
      */
-    private static String login(String email, String password)
-            throws IOException, ParseException {
-        return (String) ((JSONObject) JSON_PARSER.parse(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
+    public void login(String email, String password)
+		    throws IOException, ParseException, URISyntaxException {
+	    if (null != ws) {
+		    ws.close();
+	    }
+
+	    this.email = email;
+	    this.password = password;
+
+	    this.token = (String) ((JSONObject) JSON_PARSER.parse(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
                 new StringEntity("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"),
                 new BasicNameValuePair("content-type", "application/json")))).get("token");
+
+	    this.ws = new DiscordWS(new URI(obtainGateway(this.token)));
     }
 
 	/**
@@ -377,7 +162,7 @@ public class DiscordClient extends WebSocketClient {
 	 * @return the WebSocket URL of which to connect
 	 * @throws ParseException
 	 */
-	private static String obtainGateway(String token) throws ParseException {
+	private String obtainGateway(String token) throws ParseException {
 		String s = ((String) ((JSONObject)JSON_PARSER.parse(
 				Requests.GET.makeRequest("https://discordapp.com/api/gateway",
 						new BasicNameValuePair("authorization", token)))).get("url")).replaceAll("wss", "ws");
@@ -396,7 +181,7 @@ public class DiscordClient extends WebSocketClient {
      * @throws ParseException
      */
     public Message sendMessage(String content, String channelID, String... mentions) throws IOException, ParseException {
-        if (this.ready) {
+        if (null != ws) {
 
             String mention = "";
             for (String s : mentions) {
@@ -415,11 +200,11 @@ public class DiscordClient extends WebSocketClient {
             String messageID = (String) object1.get("id");
 
             Message message = new Message(messageID, content, this.ourUser, channelID, mentions, this.convertFromTimestamp(time));
-            this.onMessageSend(message);
-            return message;
+	        DiscordClient.this.dispatcher.dispatch(new MessageSendEvent(message));
+	        return message;
         } else {
-            System.err.println("Hold your horses! The bot hasn't signed in yet!");
-            return null;
+	        Discord4J.logger.error("Bot has not signed in yet!");
+	        return null;
         }
     }
 
@@ -431,11 +216,11 @@ public class DiscordClient extends WebSocketClient {
      * @throws IOException
      */
     public void deleteMessage(String messageID, String channelID) throws IOException {
-        if (this.ready) {
+        if (this.isReady()) {
             Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages/" + messageID,
                     new BasicNameValuePair("authorization", token));
         } else {
-            System.err.println("Hold your horses! The bot hasn't signed in yet!");
+	        Discord4J.logger.error("Bot has not signed in yet!");
         }
     }
 
@@ -497,43 +282,10 @@ public class DiscordClient extends WebSocketClient {
                     (String) object1.get("channel_id"),
                     mentionsArray, this.convertFromTimestamp((String) object1.get("timestamp"))));
         }
-        return messages;
+	    return messages;
     }
 
-    /**
-     * Joins a channel based on an invite code.
-     *
-     * @param inviteCode The code given. Note that you will need to parse this from
-     *                   https://discord.gg/invite-code-here/
-     *                   to
-     *                   invite-code-here
-     * @return An Invite object, containing most relevant information.
-     * @throws IOException
-     * @throws ParseException
-     */
-    public Invite acceptInvite(String inviteCode) throws IOException, ParseException {
-        if (this.ready) {
-            String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE + inviteCode,
-                    new BasicNameValuePair("Authorization", token));
-
-            JSONObject object1 = (JSONObject) JSON_PARSER.parse(response);
-            JSONObject guild = (JSONObject) object1.get("guild");
-            JSONObject inviter = (JSONObject) object1.get("inviter");
-            JSONObject channel = (JSONObject) object1.get("channel");
-
-            return new Invite((String) inviter.get("id"),
-                    (String) inviter.get("username"),
-                    (String) guild.get("id"),
-                    (String) guild.get("name"),
-                    (String) channel.get("id"),
-                    (String) channel.get("name"));
-        } else {
-            System.err.println("Hold your horses! The bot hasn't signed in yet!");
-            return null;
-        }
-    }
-
-	private LocalDateTime convertFromTimestamp(String time) {
+	public LocalDateTime convertFromTimestamp(String time) {
 		return LocalDateTime.parse(time.split("\\+")[0]).atZone(ZoneId.of("UTC+00:00")).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
@@ -541,7 +293,7 @@ public class DiscordClient extends WebSocketClient {
      * @return Whether or not the bot is ready to be used (is it logged in?)
      */
     public boolean isReady() {
-        return ready;
+        return null != ws;
     }
 
     /**
@@ -588,59 +340,213 @@ public class DiscordClient extends WebSocketClient {
 		return u;
 	}
 
-    /**
-     * New Request system. Reflection is cool, right guys?
-     * R-right...?
-     */
-    private enum Requests {
-        POST(HttpPost.class),
-        GET(HttpGet.class),
-        DELETE(HttpDelete.class),
-        PATCH(HttpPatch.class);
+	class DiscordWS extends WebSocketClient {
+		public DiscordWS(URI serverURI) {
+			super(serverURI);
+			this.connect();
+		}
 
-        static final HttpClient CLIENT = HttpClients.createDefault();
+		@Override
+		public void onOpen(ServerHandshake serverHandshake) {
+			if (!token.isEmpty()) {
+				send("{\"op\":2,\"d\":{\"token\":\"" + token + "\",\"properties\":{\"$os\":\"Linux\",\"$browser\":\"DesuBot\",\"$device\":\"DesuBot\",\"$referrer\":\"\",\"$referring_domain\":\"\"},\"v\":2}}");
+				Discord4J.logger.debug("Connected.");
+			} else System.err.println("Use the login() method to set your token first!");
+		}
 
-        final Class<? extends HttpUriRequest> requestClass;
+		/**
+		 * Called when the websocket receives a message.
+		 * This method is parses from raw JSON to objects,
+		 * then dispatches them in the form of events.
+		 *
+		 * @param frame raw JSON data from Discord servers
+		 */
+		@Override public final void onMessage(String frame) {
+			try {
+				JSONObject object = ((JSONObject) JSON_PARSER.parse(frame));
+				String s = (String) object.get("t");
+				JSONObject d = (JSONObject) object.get("d");
 
-        Requests(Class<? extends HttpUriRequest> clazz) {
-            this.requestClass = clazz;
-        }
+				switch (s) {
+					case "READY":
+						JSONObject user = (JSONObject) d.get("user");
+						String id = (String) user.get("id");
+						String username = (String) user.get("username");
+						String avatar = (String) user.get("avatar");
 
-        public Class<? extends HttpUriRequest> getRequestClass() {
-            return requestClass;
-        }
+						DiscordClient.this.ourUser = new User(username, id, avatar);
 
-        public String makeRequest(String url, BasicNameValuePair... headers) {
-            try {
-                HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
-                for (BasicNameValuePair header : headers) {
-                    request.addHeader(header.getName(), header.getValue());
-                }
-                return EntityUtils.toString(CLIENT.execute(request).getEntity());
-            } catch (Exception e) {
-                Discord4J.logger.error("Unable to make request to {}. ({})", url, e.getMessage());
-                return null;
-            }
-        }
+						DiscordClient.this.keepaliveDelay = (long) d.get("heartbeat_interval");
+						Discord4J.logger.debug("Received heartbeat interval of {}.", DiscordClient.this.keepaliveDelay);
 
-        public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) {
-            try {
-                if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
-                    HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
-                            this.requestClass.getConstructor(String.class).newInstance(url);
-                    for (BasicNameValuePair header : headers) {
-                        request.addHeader(header.getName(), header.getValue());
-                    }
-                    request.setEntity(entity);
-                    return EntityUtils.toString(CLIENT.execute(request).getEntity());
-                } else {
-                    Discord4J.logger.error("Tried to attach HTTP entity to invalid type! ({})",
-                            this.requestClass.getSimpleName());
-                }
-            } catch (Exception e) {
-                Discord4J.logger.error("Unable to make request to {}. ({})", url, e.getMessage());
-            }
-            return null;
-        }
+						JSONArray guilds = (JSONArray) d.get("guilds");
+
+						// I hope you like loops.
+						for (Object o : guilds) {
+							JSONObject guild = (JSONObject) o;
+							JSONArray members = (JSONArray) guild.get("members");
+							JSONArray channels = (JSONArray) guild.get("channels");
+							String name = (String) guild.get("name");
+							String guildID = (String) guild.get("id");
+
+							Guild g;
+							guildList.add(g = new Guild(name, guildID));
+
+							for (Object o1 : members) {
+								JSONObject member = (JSONObject) ((JSONObject) o1).get("user");
+								g.addUser(new User((String) member.get("username"), (String) member.get("id"), (String) member.get("avatar")));
+							}
+
+							for (Object o1 : channels) {
+								JSONObject channel = (JSONObject) o1;
+								String type = (String) channel.get("type");
+								if ("text".equalsIgnoreCase(type)) {
+									String channelID = (String) channel.get("id");
+									String chName = (String) channel.get("name");
+									List<Message> messages = new ArrayList<>();
+									try {
+										messages = DiscordClient.this.getChannelMessages(channelID);
+									} catch (Exception e) {
+										Discord4J.logger.error("Unable to fetch messages for channel {} ({}). Cause: {}.", channelID, chName, e.getClass().getSimpleName());
+									}
+									g.addChannel(new Channel(chName, channelID, messages));
+								}
+							}
+						}
+
+						Discord4J.logger.debug("Connected as {} ({}).", username, id);
+						new Thread(() -> {
+							// Keep alive
+							while (null != ws) {
+								long l;
+								if ((l = (System.currentTimeMillis() - timer)) >= keepaliveDelay) {
+									Discord4J.logger.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+									send("{\"op\":1,\"d\":" + System.currentTimeMillis() + "}");
+									timer = System.currentTimeMillis();
+								}
+							}
+						}).start();
+
+						DiscordClient.this.dispatcher.dispatch(new ReadyEvent());
+						break;
+
+					case "MESSAGE_CREATE":
+						JSONObject author = (JSONObject) d.get("author");
+
+						username = (String) author.get("username");
+						id = (String) author.get("id");
+						String channelID = (String) d.get("channel_id");
+						String content = (String) d.get("content");
+						String messageID = (String) d.get("id");
+						JSONArray array = (JSONArray) d.get("mentions");
+						String time = (String) d.get("timestamp");
+
+						String[] mentionedIDs = new String[array.size()];
+						boolean mentioned = false;
+						for (int i = 0; i < array.size(); i++) {
+							JSONObject userInfo = (JSONObject) array.get(i);
+							String userID = (String) userInfo.get("id");
+							if (userID.equalsIgnoreCase(DiscordClient.get().getOurUser().getID())) {
+								mentioned = true;
+							}
+							mentionedIDs[i] = userID;
+						}
+
+						Message message1 = new Message(messageID, content, DiscordClient.get().getUserByID(id),
+								channelID, mentionedIDs, DiscordClient.get().convertFromTimestamp(time));
+						Channel c = DiscordClient.get().getChannelByID(channelID);
+						if (null != c)
+							c.addMessage(message1);
+						if (!id.equalsIgnoreCase(DiscordClient.get().getOurUser().getID())) {
+							Discord4J.logger.debug("Message from: {} ({}) in channel ID {}: {}", username, id, channelID, content);
+							if (content.contains("discord.gg/")) {
+								String inviteCode = content.split("discord\\.gg/")[1].split(" ")[0];
+								Discord4J.logger.debug("Received invite code \"{}\"", inviteCode);
+								DiscordClient.get().dispatcher.dispatch(new InviteReceivedEvent(new Invite(inviteCode), message1));
+							}
+							if (mentioned) {
+								DiscordClient.this.dispatcher.dispatch(new MentionEvent(message1));
+							}
+							DiscordClient.this.dispatcher.dispatch(new MessageReceivedEvent(message1));
+						}
+						break;
+
+
+					case "TYPING_START":
+						// id = (String) d.get("id");
+						// channelID = (String) d.get("channel_id");
+
+						//todo call event
+						break;
+
+					case "GUILD_CREATE":
+						String name = (String) d.get("name");
+						id = (String) d.get("id");
+						JSONArray members = (JSONArray) d.get("members");
+						JSONArray channels = (JSONArray) d.get("channels");
+
+						List<User> memberList = new ArrayList<>();
+						for (Object o : members) {
+							JSONObject object1 = (JSONObject) o;
+							memberList.add(new User((String) object1.get("username"),
+									(String) object1.get("id"), (String) object1.get("avatar")));
+						}
+
+						List<Channel> channelList = new ArrayList<>();
+						for (Object o : channels) {
+							JSONObject channel = (JSONObject) o;
+							if (((String) channel.get("type")).equalsIgnoreCase("text")) {
+								channelList.add(new Channel((String) channel.get("name"), (String) channel.get("id")));
+							}
+						}
+						Guild guild = new Guild(name, id, channelList, memberList);
+						DiscordClient.this.guildList.add(guild);
+						DiscordClient.get().dispatcher.dispatch(new GuildCreateEvent(guild));
+						break;
+
+					case "GUILD_MEMBER_ADD":
+						//TODO
+						break;
+
+					case "MESSAGE_UPDATE":
+						//todo
+						// this one is sort of complicated,
+						// because it doesn't always have an ID
+						// or username attached.
+						break;
+
+					case "MESSAGE_DELETE":
+						id = (String) d.get("id");
+						channelID = (String) d.get("channel_id");
+						c = DiscordClient.this.getChannelByID(channelID);
+						if (null != c) {
+							message1 = c.getMessageByID(id);
+							if (null != message1) {
+								DiscordClient.get().dispatcher.dispatch(new MessageDeleteEvent(message1));
+							}
+						}
+						break;
+
+					case "PRESENCE_UPDATE":
+						// todo lol
+						break;
+
+					default:
+						Discord4J.logger.warn("Unknown message received (ignoring): {}", frame);
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override public void onClose(int i, String s, boolean b) {
+
+		}
+
+		@Override
+		public void onError(Exception e) {
+			e.printStackTrace();
+		}
+
     }
 }
