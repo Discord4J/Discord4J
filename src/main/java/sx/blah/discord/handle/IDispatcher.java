@@ -22,9 +22,22 @@ package sx.blah.discord.handle;
  * @since 10/6/2015
  */
 public interface IDispatcher {
+	/**
+	 * Unregisters a listener, so the listener will no longer receive events.
+	 *
+	 * @param listener Listener to unregister
+	 */
 	void unregisterListener(IListener listener);
 
+	/**
+	 * Registers an IListener to receive events.
+	 * @param listener Listener to register
+	 */
 	void registerListener(IListener listener);
 
+	/**
+	 * Sends an IEvent to all listeners that listen for that specific event.
+	 * @param IEvent Event to dispatch.
+	 */
 	void dispatch(IEvent IEvent);
 }

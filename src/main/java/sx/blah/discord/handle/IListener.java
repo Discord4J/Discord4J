@@ -22,5 +22,10 @@ package sx.blah.discord.handle;
  * @since 10/2/2015
  */
 public interface IListener<I extends IEvent> {
+	/**
+	 * Receives an event when it is dispatched
+	 *
+	 * @param event The event that was received
+	 */
 	void receive(I event);
 }

@@ -33,7 +33,7 @@ import java.io.IOException;
  * @since 8:00 PM 16 Aug, 2015
  * Project: DiscordAPI
  * <p>
- * Responds to users that @mention you.
+ * General testing bot. Also a demonstration of how to use the bot.
  */
 public class TestBot {
 

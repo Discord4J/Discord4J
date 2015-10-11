@@ -121,9 +121,7 @@ public final class DiscordClient {
 	}
 
 	/**
-	 * Gets the event dispatcher. This will send events to all listeners
-	 *
-	 * @return
+	 * @return the event dispatcher. This will send events to all listeners
 	 */
 	public IDispatcher getDispatcher() {
 		return dispatcher;
@@ -138,7 +136,9 @@ public final class DiscordClient {
 
     /**
      * Logs you into Discord using given
-     * email and password.
+     * email and password. Also starts the bot.
+     *
+     * Very important to use this method.
      */
     public void login(String email, String password)
 		    throws IOException, ParseException, URISyntaxException {
@@ -349,6 +349,10 @@ public final class DiscordClient {
 		return u;
 	}
 
+	private void constructUserFromJSON(JSONObject object) {
+
+	}
+
 	class DiscordWS extends WebSocketClient {
 		public DiscordWS(URI serverURI) {
 			super(serverURI);
@@ -517,7 +521,13 @@ public final class DiscordClient {
 						//TODO
 						break;
 
+					case "GUILD_MEMBER_REMOVE":
+						user = (JSONObject) d.get("user");
+						//TODO
+						break;
+
 					case "MESSAGE_UPDATE":
+
 						//todo
 						// this one is sort of complicated,
 						// because it doesn't always have an ID
@@ -530,7 +540,8 @@ public final class DiscordClient {
 						c = DiscordClient.this.getChannelByID(channelID);
 						if (null != c) {
 							message1 = c.getMessageByID(id);
-							if (null != message1) {
+							if (null != message1
+									&& !message1.getAuthor().getID().equalsIgnoreCase(DiscordClient.this.ourUser.getID())) {
 								DiscordClient.get().dispatcher.dispatch(new MessageDeleteEvent(message1));
 							}
 						}
@@ -540,8 +551,9 @@ public final class DiscordClient {
 						// todo lol
 						break;
 
+
 					default:
-						Discord4J.logger.warn("Unknown message received (ignoring): {}", frame);
+						Discord4J.logger.warn("Unknown message received: {} (ignoring): {}", s, frame);
 				}
 			} catch (ParseException e) {
 				e.printStackTrace();

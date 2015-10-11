@@ -33,12 +33,21 @@ public class EventDispatcher implements IDispatcher {
 	// holy generics, batman!
 	private Map<Class<? extends IEvent>, List<IListener>> listenerMap = new HashMap<>();
 
+	/**
+	 * Unregisters a listener, so the listener will no longer receive events.
+	 *
+	 * @param listener Listener to unregister
+	 */
 	@Override public void unregisterListener(IListener listener) {
 		for (Map.Entry<Class<? extends IEvent>, List<IListener>> entry : listenerMap.entrySet()) {
 			entry.getValue().stream().filter(listener1 -> listener1.equals(listener)).forEach(listener1 -> entry.getValue().remove(listener1));
 		}
 	}
 
+	/**
+	 * Registers an IListener to receive events.
+	 * @param listener Listener to register
+	 */
 	@Override public void registerListener(IListener listener) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (IEvent.class.isAssignableFrom(rawType)) {
@@ -52,6 +61,10 @@ public class EventDispatcher implements IDispatcher {
 		}
 	}
 
+	/**
+	 * Sends an IEvent to all listeners that listen for that specific event.
+	 * @param event The event to dispatch.
+	 */
 	@Override public void dispatch(IEvent event) {
 		Class<? extends IEvent> eventType = event.getClass();
 		Discord4J.logger.debug("Dispatching event of type {}", eventType.getSimpleName());

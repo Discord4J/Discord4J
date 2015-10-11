@@ -31,16 +31,28 @@ import sx.blah.discord.util.Requests;
  * Project: DiscordAPI
  */
 public class Invite {
+	/**
+	 * An invite code, AKA an invite URL minus the https://discord.gg/
+	 */
 	private final String inviteCode;
 
 	public Invite(String inviteCode) {
 		this.inviteCode = inviteCode;
 	}
 
+	/**
+	 * @return The invite code
+	 */
 	public String getInviteCode() {
 		return inviteCode;
 	}
 
+	/**
+	 * @return Accepts the invite and returns relevant information,
+	 *         such as the Guild ID and name, and the channel the invite
+	 *         was created from.
+	 * @throws Exception
+	 */
 	public InviteResponse accept() throws Exception {
 		if (DiscordClient.get().isReady()) {
 			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE + inviteCode,
@@ -64,7 +76,7 @@ public class Invite {
 	 * Gains the same information as accepting,
 	 * but doesn't actually accept the invite.
 	 *
-	 * @return
+	 * @return an InviteResponse containing the invite's details.
 	 * @throws Exception
 	 */
 	public InviteResponse details() throws Exception {
@@ -107,7 +119,7 @@ public class Invite {
 		 */
 		private final String channelName;
 
-		//TODO replace with objects; need to add GUILD_CREATE event first...
+		//TODO replace with objects. Need to figure out logistics, as the GUILD_CREATE is sent after MESSAGE_CREATE and after we accept the invite
 		public InviteResponse(String guildID, String guildName, String channelID, String channelName) {
 			this.guildID = guildID;
 			this.guildName = guildName;
