@@ -105,4 +105,13 @@ public class User {
     public void setPresence(Presences presence) {
         this.presence = presence;
     }
+
+    // STOLEN: idea from hydrabolt :P
+    public String mention() {
+        return "<@" + id + ">";
+    }
+
+    @Override public String toString() {
+        return mention();
+    }
 }

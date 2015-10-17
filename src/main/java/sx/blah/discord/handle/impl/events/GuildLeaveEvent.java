@@ -17,34 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.obj;
+package sx.blah.discord.handle.impl.events;
 
-import java.util.ArrayList;
-import java.util.List;
+import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.obj.Guild;
 
 /**
  * @author qt
- * @since 11:58 PM, 10/16/15
+ * @since 1:56 PM, 10/17/15
  * Project: Discord4J
  */
-public class PrivateChannel extends Channel {
-    private final User recipient;
+public class GuildLeaveEvent implements IEvent {
+    private final Guild guild;
 
-    public PrivateChannel(User recipient, String id) {
-        this(recipient, id, new ArrayList<>());
+    public GuildLeaveEvent(Guild guild) {
+        this.guild = guild;
     }
 
-    public PrivateChannel(User recipient, String id, List<Message> messages) {
-        super(recipient.getName(), id, null, messages);
-        this.recipient = recipient;
-        this.isPrivate = true;
-    }
-
-    /**
-     * Indicates the user with whom you are communicating.
-     * @return
-     */
-    public User getRecipient() {
-        return recipient;
+    public Guild getGuild() {
+        return guild;
     }
 }

@@ -33,72 +33,76 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.NoSuchElementException;
+
 /**
  * New Request system. Reflection is cool, right guys?
  * R-right...?
  */
 public enum Requests {
-	POST(HttpPost.class),
-	GET(HttpGet.class),
-	DELETE(HttpDelete.class),
-	PATCH(HttpPatch.class);
+    POST(HttpPost.class),
+    GET(HttpGet.class),
+    DELETE(HttpDelete.class),
+    PATCH(HttpPatch.class);
 
-	static final HttpClient CLIENT = HttpClients.createDefault();
+    static final HttpClient CLIENT = HttpClients.createDefault();
 
-	final Class<? extends HttpUriRequest> requestClass;
+    final Class<? extends HttpUriRequest> requestClass;
 
-	Requests(Class<? extends HttpUriRequest> clazz) {
-		this.requestClass = clazz;
-	}
+    Requests(Class<? extends HttpUriRequest> clazz) {
+        this.requestClass = clazz;
+    }
 
-	public Class<? extends HttpUriRequest> getRequestClass() {
-		return requestClass;
-	}
+    public Class<? extends HttpUriRequest> getRequestClass() {
+        return requestClass;
+    }
 
-	public String makeRequest(String url, BasicNameValuePair... headers) {
-		try {
-			HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
-			for (BasicNameValuePair header : headers) {
-				request.addHeader(header.getName(), header.getValue());
-			}
+    public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP403Exception {
+        try {
+            HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
+            for (BasicNameValuePair header : headers) {
+                request.addHeader(header.getName(), header.getValue());
+            }
             HttpResponse response = CLIENT.execute(request);
             int responseCode = response.getStatusLine().getStatusCode();
-            if(responseCode == 404) {
+            if (responseCode == 404) {
                 Discord4J.logger.error("Received 404 error, please notify the developer and include the URL ({})", url);
-            } else if(responseCode == 403) {
-                Discord4J.logger.error("Received 403 error, please log in again!");
+            } else if (responseCode == 403) {
+                throw new HTTP403Exception("Unable to make request to " + url);
             }
-			return EntityUtils.toString(response.getEntity());
-		} catch (Exception e) {
-			Discord4J.logger.error("Unable to make request to {}. ({})", url, e.getMessage());
-			return null;
-		}
-	}
+            return EntityUtils.toString(response.getEntity());
+        } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) {
-		try {
-			if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
-				HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
-						this.requestClass.getConstructor(String.class).newInstance(url);
-				for (BasicNameValuePair header : headers) {
-					request.addHeader(header.getName(), header.getValue());
-				}
-				request.setEntity(entity);
+    public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP403Exception {
+        try {
+            if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
+                HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
+                        this.requestClass.getConstructor(String.class).newInstance(url);
+                for (BasicNameValuePair header : headers) {
+                    request.addHeader(header.getName(), header.getValue());
+                }
+                request.setEntity(entity);
                 HttpResponse response = CLIENT.execute(request);
                 int responseCode = response.getStatusLine().getStatusCode();
-                if(responseCode == 404) {
+                if (responseCode == 404) {
                     Discord4J.logger.error("Received 404 error, please notify the developer and include the URL ({})", url);
-                } else if(responseCode == 403) {
-                    Discord4J.logger.error("Received 403 error, please log in again!");
+                } else if (responseCode == 403) {
+                    throw new HTTP403Exception("Unable to make request to " + url);
                 }
-				return EntityUtils.toString(response.getEntity());
-			} else {
-				Discord4J.logger.error("Tried to attach HTTP entity to invalid type! ({})",
-						this.requestClass.getSimpleName());
-			}
-		} catch (Exception e) {
-			Discord4J.logger.error("Unable to make request to {}. ({})", url, e.getMessage());
-		}
-		return null;
-	}
+                return EntityUtils.toString(response.getEntity());
+            } else {
+                Discord4J.logger.error("Tried to attach HTTP entity to invalid type! ({})",
+                        this.requestClass.getSimpleName());
+            }
+        } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

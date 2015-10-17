@@ -17,34 +17,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.obj;
-
-import java.util.ArrayList;
-import java.util.List;
+package sx.blah.discord.util;
 
 /**
  * @author qt
- * @since 11:58 PM, 10/16/15
+ * @since 1:17 PM, 10/17/15
  * Project: Discord4J
  */
-public class PrivateChannel extends Channel {
-    private final User recipient;
-
-    public PrivateChannel(User recipient, String id) {
-        this(recipient, id, new ArrayList<>());
-    }
-
-    public PrivateChannel(User recipient, String id, List<Message> messages) {
-        super(recipient.getName(), id, null, messages);
-        this.recipient = recipient;
-        this.isPrivate = true;
-    }
-
-    /**
-     * Indicates the user with whom you are communicating.
-     * @return
-     */
-    public User getRecipient() {
-        return recipient;
+public class HTTP403Exception extends Exception {
+    public HTTP403Exception(String cause) {
+        super(cause);
     }
 }

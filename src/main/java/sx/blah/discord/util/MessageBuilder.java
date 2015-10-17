@@ -19,9 +19,9 @@
 
 package sx.blah.discord.util;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.DiscordClient;
 import sx.blah.discord.handle.obj.Channel;
-import sx.blah.discord.handle.obj.User;
 
 /**
  * @author x
@@ -30,37 +30,68 @@ import sx.blah.discord.handle.obj.User;
  * Utility class designed to make message sending easier.
  */
 public class MessageBuilder {
-	private String content;
-	private String[] mentionedIDs = new String[]{};
+	private String content = "";
 	private String channelID;
 
+    /**
+     * Sets the content of the message.
+     * @param content
+     * @return
+     */
 	public MessageBuilder withContent(String content) {
 		this.content = content;
 		return this;
 	}
 
-	public MessageBuilder withMentions(String... mentionedIDs) {
-		this.mentionedIDs = mentionedIDs;
+    /**
+     * Sets the content of the message with a given style.
+     * @param content
+     * @param styles
+     * @return
+     */
+    public MessageBuilder withContent(String content, Styles styles) {
+		this.content = styles.getMarkdown() + content + styles.getReverseMarkdown();
 		return this;
 	}
 
-	public MessageBuilder withMentions(User... mentions) {
-		String[] mentionedIDs = new String[mentions.length];
-		for (int i = 0; i < mentions.length; i++) {
-			mentionedIDs[i] = mentions[i].getID();
-		}
-		this.mentionedIDs = mentionedIDs;
+    /**
+     * Appends extra text to the current content.
+     * @param content
+     * @return
+     */
+    public MessageBuilder appendContent(String content) {
+        this.content += content;
+        return this;
+    }
 
-		return this;
-	}
+    /**
+     * Appends extra text to the current content with given style.
+     * @param content
+     * @param styles
+     * @return
+     */
+    public MessageBuilder appendContent(String content, Styles styles) {
+        this.content += (styles.getMarkdown() + content + styles.getReverseMarkdown());
+        return this;
+    }
 
+    /**
+     * Sets the channel that the message should go to.
+     * @param channelID
+     * @return
+     */
 	public MessageBuilder withChannel(String channelID) {
 		this.channelID = channelID;
 		return this;
 	}
 
+    /**
+     * Sets the channel that the message should go to.
+     * @param channel
+     * @return
+     */
 	public MessageBuilder withChannel(Channel channel) {
-		this.channelID = channel.getChannelID();
+		this.channelID = channel.getID();
 		return this;
 	}
 
@@ -73,7 +104,7 @@ public class MessageBuilder {
 			throw new RuntimeException("You need content and a channel ID to send a message!");
 		} else {
 			try {
-				DiscordClient.get().sendMessage(content, channelID, mentionedIDs);
+				DiscordClient.get().sendMessage(content, channelID);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -86,4 +117,33 @@ public class MessageBuilder {
 	public void send() {
 		build();
 	}
+
+    /**
+     * Enum describing Markdown formatting that can be used in chat.
+     */
+    public enum Styles {
+        ITALICS("*"),
+        BOLD("**"),
+        BOLD_ITALICS("***"),
+        STRIKEOUT("~~"),
+        CODE("```"),
+        UNDERLINE("__"),
+        UNDERLINE_ITALICS("__*"),
+        UNDERLINE_BOLD("__**"),
+        UNDERLINE_BOLD_ITALICS("__***");
+
+        final String markdown, reverseMarkdown;
+        Styles(String markdown) {
+            this.markdown = markdown;
+            this.reverseMarkdown = new StringBuilder(markdown).reverse().toString();
+        }
+
+        public String getMarkdown() {
+            return markdown;
+        }
+
+        public String getReverseMarkdown() {
+            return reverseMarkdown;
+        }
+    }
 }

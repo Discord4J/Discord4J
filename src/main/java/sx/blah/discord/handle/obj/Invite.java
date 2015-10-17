@@ -25,6 +25,7 @@ import org.json.simple.parser.JSONParser;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.DiscordClient;
 import sx.blah.discord.DiscordEndpoints;
+import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Requests;
 
 /**
@@ -55,22 +56,12 @@ public class Invite {
 	 *         was created from.
 	 * @throws Exception
 	 */
-	public InviteResponse accept() throws Exception {
+	public void accept() throws HTTP403Exception {
 		if (DiscordClient.get().isReady()) {
 			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE + inviteCode,
 					new BasicNameValuePair("authorization", DiscordClient.get().getToken()));
-
-			JSONObject object1 = (JSONObject) new JSONParser().parse(response);
-			JSONObject guild = (JSONObject) object1.get("guild");
-			JSONObject channel = (JSONObject) object1.get("channel");
-
-			return new InviteResponse((String) guild.get("id"),
-					(String) guild.get("name"),
-					(String) channel.get("id"),
-					(String) channel.get("name"));
 		} else {
 			Discord4J.logger.error("Bot has not signed in yet!");
-			return null;
 		}
 	}
 

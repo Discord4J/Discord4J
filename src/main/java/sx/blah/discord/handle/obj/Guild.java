@@ -77,7 +77,7 @@ public class Guild {
      */
     public Channel getChannelByID(String id) {
         for (Channel c : channels) {
-            if (c.getChannelID().equalsIgnoreCase(id))
+            if (c.getID().equalsIgnoreCase(id))
                 return c;
         }
 

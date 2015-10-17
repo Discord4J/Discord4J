@@ -27,6 +27,8 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.Channel;
 import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
+import sx.blah.discord.handle.obj.PrivateChannel;
+import sx.blah.discord.util.MessageBuilder;
 
 import java.io.IOException;
 
@@ -47,28 +49,26 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
-			DiscordClient.get().login(args[0], args[1]);
+			DiscordClient.get().login(args[0] /* username */, args[1] /* password */);
 
 			DiscordClient.get().getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 				@Override public void receive(MessageReceivedEvent messageReceivedEvent) {
 					Message m = messageReceivedEvent.getMessage();
 					if (m.getContent().startsWith(".meme")
 							|| m.getContent().startsWith(".nicememe")) {
-						try {
-							m.reply("http://niceme.me/");
-						} catch (IOException | ParseException e) {
-							e.printStackTrace();
-						}
+							new MessageBuilder().appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
+                                    .appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
+                                    .build();
 					} else if (m.getContent().startsWith(".clear")) {
-						Channel c = DiscordClient.get().getChannelByID(m.getChannelID());
+						Channel c = DiscordClient.get().getChannelByID(m.getChannel().getID());
 						if (null != c) {
 							c.getMessages().stream().filter(message -> message.getAuthor().getID()
 									.equalsIgnoreCase(DiscordClient.get().getOurUser().getID())).forEach(message -> {
 								try {
-									Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthor().getName(), message.getContent());
-									DiscordClient.get().deleteMessage(message.getMessageID(), message.getChannelID());
+									Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
+									DiscordClient.get().deleteMessage(message.getID(), message.getChannel().getID());
 								} catch (IOException e) {
-									Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
+									Discord4J.logger.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
 								}
 							});
 						}
@@ -80,7 +80,14 @@ public class TestBot {
 						} catch (ParseException | IOException e) {
 							e.printStackTrace();
 						}
-					}
+					} else if(m.getContent().startsWith(".pm")) {
+                        try {
+                            PrivateChannel channel = DiscordClient.get().getOrCreatePMChannel(m.getAuthor());
+                            new MessageBuilder().withChannel(channel).withContent("SUP DUDE").build();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
 				}
 			});
 
@@ -88,9 +95,11 @@ public class TestBot {
 				@Override public void receive(InviteReceivedEvent event) {
 					Invite invite = event.getInvite();
 					try {
-						Invite.InviteResponse response = invite.accept();
-						event.getMessage().reply(String.format("I was invited to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
-						DiscordClient.get().sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild!", response.getChannelName(), response.getGuildName()),
+						Invite.InviteResponse response = invite.details();
+						event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
+                        invite.accept();
+                        DiscordClient.get().sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild! I was invited by %s!",
+                                        response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()),
 								response.getChannelID());
 					} catch (Exception e) {
 						e.printStackTrace();

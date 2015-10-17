@@ -50,14 +50,20 @@ public class Channel {
      */
     protected boolean isPrivate;
 
-    public Channel(String name, String id) {
-        this(name, id, new ArrayList<>());
+    /**
+     * The guild this channel belongs to.
+     */
+    private final Guild parent;
+
+    public Channel(String name, String id, Guild parent) {
+        this(name, id, parent, new ArrayList<>());
     }
 
-    public Channel(String name, String id, List<Message> messages) {
+    public Channel(String name, String id, Guild parent, List<Message> messages) {
         this.name = name;
         this.id = id;
         this.messages = messages;
+        this.parent = parent;
         this.isPrivate = false;
     }
 
@@ -67,7 +73,7 @@ public class Channel {
         return name;
     }
 
-    public String getChannelID() {
+    public String getID() {
         return id;
     }
 
@@ -77,7 +83,7 @@ public class Channel {
 
 	public Message getMessageByID(String messageID) {
 		for (Message message : messages) {
-			if (message.getMessageID().equalsIgnoreCase(messageID))
+			if (message.getID().equalsIgnoreCase(messageID))
 				return message;
 		}
 
@@ -85,12 +91,25 @@ public class Channel {
 	}
 
     public void addMessage(Message message) {
-        if (message.getChannelID().equalsIgnoreCase(this.getChannelID())) {
+        if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
             messages.add(message);
         }
     }
 
+    public Guild getParent() {
+        return parent;
+    }
+
     public boolean isPrivate() {
         return isPrivate;
+    }
+
+    // still STOLEN from hydrabolt :P
+    public String mention() {
+        return "<#" + this.getID() + ">";
+    }
+
+    @Override public String toString() {
+        return mention();
     }
 }

@@ -52,25 +52,18 @@ public class Message {
     /**
      * The ID of the channel the message was sent in.
      */
-    private final String channelID;
-
-    /**
-     * All users @mentioned in the
-     * message.
-     */
-    private final String[] mentionedIDs;
+    private final Channel channel;
 
 	/**
      * The time the message was received.
      */
     private final LocalDateTime timestamp;
 
-    public Message(String messageID, String content, User user, String channelID, String[] mentionedIDs, LocalDateTime timestamp) {
+    public Message(String messageID, String content, User user, Channel channel, LocalDateTime timestamp) {
         this.messageID = messageID;
         this.content = content;
 	    this.author = user;
-        this.channelID = channelID;
-        this.mentionedIDs = mentionedIDs;
+        this.channel = channel;
 	    this.timestamp = timestamp;
     }
 
@@ -80,20 +73,16 @@ public class Message {
         return content;
     }
 
-    public String getChannelID() {
-        return channelID;
+    public Channel getChannel() {
+        return channel;
     }
 
 	public User getAuthor() {
 		return author;
 	}
 
-    public String getMessageID() {
+    public String getID() {
         return messageID;
-    }
-
-    public String[] getMentionedIDs() {
-        return mentionedIDs;
     }
 
 	public LocalDateTime getTimestamp() {
@@ -107,7 +96,6 @@ public class Message {
      * @param content Message to send.
      */
     public void reply(String content) throws IOException, ParseException {
-        DiscordClient.get().sendMessage("@" + this.getAuthor().getName() + ", "
-                + content, this.getChannelID(), this.getAuthor().getID());
+        DiscordClient.get().sendMessage(String.format("%s, %s", this.getAuthor(), content), this.getChannel().getID());
     }
 }
