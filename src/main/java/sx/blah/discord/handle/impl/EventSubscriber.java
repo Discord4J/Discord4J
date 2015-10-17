@@ -17,23 +17,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.impl.events;
+package sx.blah.discord.handle.impl;
 
-import sx.blah.discord.handle.IEvent;
-import sx.blah.discord.handle.obj.Message;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author x
- * @since 10/9/2015
+ * @author qt
+ * @since 9:12 PM, 10/15/15
+ * Project: Discord4J
  */
-public class MessageDeleteEvent implements IEvent {
-	private final Message message;
-
-	public MessageDeleteEvent(Message message) {
-		this.message = message;
-	}
-
-	public Message getMessage() {
-		return message;
-	}
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EventSubscriber {
 }
