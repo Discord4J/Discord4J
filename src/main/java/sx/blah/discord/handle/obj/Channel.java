@@ -33,28 +33,32 @@ public class Channel {
     /**
      * User-friendly channel name (e.g. "general")
      */
-    private String name;
+    protected String name;
 
     /**
      * Channel ID.
      */
-    private final String id;
+    protected final String id;
 
     /**
      * Messages that have been sent into this channel
      */
-    private final List<Message> messages;
+    protected final List<Message> messages;
+
+    /**
+     * Indicates whether or not this channel is a PM channel.
+     */
+    protected boolean isPrivate;
 
     public Channel(String name, String id) {
-        this.name = name;
-        this.id = id;
-        this.messages = new ArrayList<>();
+        this(name, id, new ArrayList<>());
     }
 
     public Channel(String name, String id, List<Message> messages) {
         this.name = name;
         this.id = id;
         this.messages = messages;
+        this.isPrivate = false;
     }
 
     // Getters.
@@ -84,5 +88,9 @@ public class Channel {
         if (message.getChannelID().equalsIgnoreCase(this.getChannelID())) {
             messages.add(message);
         }
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
     }
 }

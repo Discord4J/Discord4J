@@ -72,7 +72,7 @@ public class EventDispatcher implements IDispatcher {
 	 */
 	@Override public void dispatch(IEvent event) {
 		Class<? extends IEvent> eventType = event.getClass();
-		Discord4J.logger.debug("Dispatching event of type {}", eventType.getSimpleName());
+		Discord4J.logger.debug("Dispatching event of type {}.", eventType.getSimpleName());
 		if (listenerMap.containsKey(eventType)) {
 			for (IListener listener : listenerMap.get(eventType)) {
 				listener.receive(event);

@@ -25,6 +25,7 @@ package sx.blah.discord.util;
  */
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.HttpClients;
@@ -60,7 +61,14 @@ public enum Requests {
 			for (BasicNameValuePair header : headers) {
 				request.addHeader(header.getName(), header.getValue());
 			}
-			return EntityUtils.toString(CLIENT.execute(request).getEntity());
+            HttpResponse response = CLIENT.execute(request);
+            int responseCode = response.getStatusLine().getStatusCode();
+            if(responseCode == 404) {
+                Discord4J.logger.error("Received 404 error, please notify the developer and include the URL ({})", url);
+            } else if(responseCode == 403) {
+                Discord4J.logger.error("Received 403 error, please log in again!");
+            }
+			return EntityUtils.toString(response.getEntity());
 		} catch (Exception e) {
 			Discord4J.logger.error("Unable to make request to {}. ({})", url, e.getMessage());
 			return null;
@@ -76,7 +84,14 @@ public enum Requests {
 					request.addHeader(header.getName(), header.getValue());
 				}
 				request.setEntity(entity);
-				return EntityUtils.toString(CLIENT.execute(request).getEntity());
+                HttpResponse response = CLIENT.execute(request);
+                int responseCode = response.getStatusLine().getStatusCode();
+                if(responseCode == 404) {
+                    Discord4J.logger.error("Received 404 error, please notify the developer and include the URL ({})", url);
+                } else if(responseCode == 403) {
+                    Discord4J.logger.error("Received 403 error, please log in again!");
+                }
+				return EntityUtils.toString(response.getEntity());
 			} else {
 				Discord4J.logger.error("Tried to attach HTTP entity to invalid type! ({})",
 						this.requestClass.getSimpleName());

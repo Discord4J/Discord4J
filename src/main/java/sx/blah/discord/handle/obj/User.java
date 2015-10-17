@@ -20,6 +20,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.DiscordEndpoints;
+import sx.blah.discord.util.Presences;
 
 /**
  * @author qt
@@ -56,7 +57,7 @@ public class User {
      * This user's presence.
      * One of [online/idle/offline].
      */
-    private String presence;
+    private Presences presence;
 
 	/**
 	 * The user's avatar in URL form.
@@ -97,11 +98,11 @@ public class User {
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
 
-    public String getPresence() {
+    public Presences getPresence() {
         return presence;
     }
 
-    public void setPresence(String presence) {
+    public void setPresence(Presences presence) {
         this.presence = presence;
     }
 }
