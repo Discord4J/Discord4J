@@ -1,7 +1,7 @@
 # Discord4J  
 ![](https://travis-ci.org/nerd/Discord4J.svg)  
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
-The API is also available in these languages :
+The API is also available in these languages:
 * [.NET](https://github.com/RogueException/Discord.Net)
 * [C#](https://github.com/Luigifan/DiscordSharp)
 * [Node.js](https://github.com/discord-js/discord.js) / [Alternative](https://github.com/izy521/discord.io)
