@@ -212,7 +212,7 @@ public final class DiscordClient {
 
             try {
                 String response = Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages",
-                        new StringEntity("{\"content\":\"" + content + "\",\"mentions\":[]}"),
+                        new StringEntity("{\"content\":\"" + content + "\",\"mentions\":[]}","UTF-8"),
                         new BasicNameValuePair("authorization", token),
                         new BasicNameValuePair("content-type", "application/json"));
 
