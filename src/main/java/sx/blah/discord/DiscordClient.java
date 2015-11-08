@@ -19,6 +19,7 @@
 
 package sx.blah.discord;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
@@ -210,6 +211,8 @@ public final class DiscordClient {
     public Message sendMessage(String content, String channelID) throws IOException, ParseException {
         if (null != ws) {
 
+            content = StringEscapeUtils.escapeJson(content);
+            
             try {
                 String response = Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages",
                         new StringEntity("{\"content\":\"" + content + "\",\"mentions\":[]}","UTF-8"),
