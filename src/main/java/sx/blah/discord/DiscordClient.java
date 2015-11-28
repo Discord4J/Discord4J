@@ -638,7 +638,7 @@ public final class DiscordClient {
                         if(null != guild) {
                             guild.addUser(user);
                             Discord4J.logger.debug("User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
-                            dispatcher.dispatch(new UserJoinEvent(user, convertFromTimestamp((String) d.get("joined_at"))));
+                            dispatcher.dispatch(new UserJoinEvent(guild, user, convertFromTimestamp((String) d.get("joined_at"))));
                         }
                         break;
 
@@ -650,7 +650,7 @@ public final class DiscordClient {
                                 && guild.getUsers().contains(user)) {
                             guild.getUsers().remove(user);
                             Discord4J.logger.debug("User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
-                            dispatcher.dispatch(new UserLeaveEvent(user));
+                            dispatcher.dispatch(new UserLeaveEvent(guild, user));
                         }
                         break;
 

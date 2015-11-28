@@ -20,6 +20,7 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.obj.Guild;
 import sx.blah.discord.handle.obj.User;
 
 import java.time.LocalDateTime;
@@ -30,10 +31,12 @@ import java.time.LocalDateTime;
  * Project: Discord4J
  */
 public class UserJoinEvent implements IEvent {
+    private final Guild guild;
     private final LocalDateTime joinTime;
     private final User userJoined;
 
-    public UserJoinEvent(User user, LocalDateTime when) {
+    public UserJoinEvent(Guild guild, User user, LocalDateTime when) {
+        this.guild = guild;
         this.joinTime = when;
         this.userJoined = user;
     }
@@ -44,5 +47,9 @@ public class UserJoinEvent implements IEvent {
 
     public User getUser() {
         return userJoined;
+    }
+    
+    public Guild getGuild() {
+        return guild;
     }
 }

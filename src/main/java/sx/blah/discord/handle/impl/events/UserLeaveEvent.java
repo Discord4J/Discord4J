@@ -20,6 +20,7 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.obj.Guild;
 import sx.blah.discord.handle.obj.User;
 
 /**
@@ -28,13 +29,19 @@ import sx.blah.discord.handle.obj.User;
  * Project: Discord4J
  */
 public class UserLeaveEvent implements IEvent {
+    private final Guild guild;
     private final User user;
 
-    public UserLeaveEvent(User user) {
+    public UserLeaveEvent(Guild guild, User user) {
+        this.guild = guild;
         this.user = user;
     }
 
     public User getUser() {
         return user;
+    }
+    
+    public Guild getGuild() {
+        return guild;
     }
 }
