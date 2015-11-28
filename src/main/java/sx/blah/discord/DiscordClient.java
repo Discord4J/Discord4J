@@ -523,6 +523,24 @@ public final class DiscordClient {
                                 }
                             }
                         }
+    
+                        JSONArray privateChannelsArray = (JSONArray) d.get("private_channels");
+    
+                        for (Object o : privateChannelsArray) {
+                            JSONObject privateChannel = (JSONObject) o;
+                            String id = (String) privateChannel.get("id");
+                            JSONObject user = (JSONObject) privateChannel.get("recipient");
+                            User recipient = new User((String)user.get("username"), (String)user.get("id"), (String)user.get("avatar"));
+                            PrivateChannel channel = new PrivateChannel(recipient, id);
+                            try {
+                                DiscordClient.this.getChannelMessages(channel);
+                            } catch (HTTP403Exception e) {
+                                Discord4J.logger.error("No permission for the private channel for \"{}\". Are you logged in properly?", channel.getRecipient().getName());
+                            } catch (Exception e) {
+                                Discord4J.logger.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
+                            }
+                            privateChannels.add(channel);
+                        }
 
                         Discord4J.logger.debug("Logged in as {} (ID {}).", DiscordClient.this.ourUser.getName(), DiscordClient.this.ourUser.getID());
                         new Thread(() -> {
@@ -638,7 +656,7 @@ public final class DiscordClient {
                         if(null != guild) {
                             guild.addUser(user);
                             Discord4J.logger.debug("User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
-                            dispatcher.dispatch(new UserJoinEvent(user, convertFromTimestamp((String) d.get("joined_at"))));
+                            dispatcher.dispatch(new UserJoinEvent(guild, user, convertFromTimestamp((String) d.get("joined_at"))));
                         }
                         break;
 
@@ -650,7 +668,7 @@ public final class DiscordClient {
                                 && guild.getUsers().contains(user)) {
                             guild.getUsers().remove(user);
                             Discord4J.logger.debug("User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
-                            dispatcher.dispatch(new UserLeaveEvent(user));
+                            dispatcher.dispatch(new UserLeaveEvent(guild, user));
                         }
                         break;
 

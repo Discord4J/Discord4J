@@ -35,7 +35,6 @@ import sx.blah.discord.Discord4J;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.NoSuchElementException;
 
 /**
  * New Request system. Reflection is cool, right guys?
@@ -71,6 +70,8 @@ public enum Requests {
                 Discord4J.logger.error("Received 404 error, please notify the developer and include the URL ({})", url);
             } else if (responseCode == 403) {
                 throw new HTTP403Exception("Unable to make request to " + url);
+            } else if (responseCode == 204) { //There is a no content response when deleting messages
+                return null;
             }
             return EntityUtils.toString(response.getEntity());
         } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -94,6 +95,8 @@ public enum Requests {
                     Discord4J.logger.error("Received 404 error, please notify the developer and include the URL ({})", url);
                 } else if (responseCode == 403) {
                     throw new HTTP403Exception("Unable to make request to " + url);
+                } else if (responseCode == 204) { //There is a no content response when deleting messages
+                    return null;
                 }
                 return EntityUtils.toString(response.getEntity());
             } else {
