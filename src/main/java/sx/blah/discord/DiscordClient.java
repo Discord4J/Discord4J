@@ -220,13 +220,15 @@ public final class DiscordClient {
                         new BasicNameValuePair("content-type", "application/json"));
 
 
-            JSONObject object1 = (JSONObject) JSON_PARSER.parse(response);
-            String time = (String) object1.get("timestamp");
-            String messageID = (String) object1.get("id");
+                JSONObject object1 = (JSONObject) JSON_PARSER.parse(response);
+                String time = (String) object1.get("timestamp");
+                String messageID = (String) object1.get("id");
 
-            Message message = new Message(messageID, content, this.ourUser, getChannelByID(channelID), this.convertFromTimestamp(time));
-            DiscordClient.this.dispatcher.dispatch(new MessageSendEvent(message));
-                return message;
+                Channel channel = getChannelByID(channelID);
+                Message message = new Message(messageID, content, this.ourUser, channel, this.convertFromTimestamp(time));
+                channel.addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
+                DiscordClient.this.dispatcher.dispatch(new MessageSendEvent(message));
+            return message;
             } catch (HTTP403Exception e) {
                 Discord4J.logger.error("Received 403 error attempting to send message; is your login correct?");
                 return null;
@@ -237,7 +239,51 @@ public final class DiscordClient {
             return null;
         }
     }
-
+	
+	/**
+     * Edits a specified message. Currently, Discord only allows you to edit your own message
+     * 
+     * @param content   The new content of the message
+     * @param messageID The id of the message to edit
+     * @param channelID The channel the message exists in
+     * @throws ParseException
+     */
+    public void editMessage(String content, String messageID, String channelID) throws ParseException {
+        if (null != ws) {
+    
+            content = StringEscapeUtils.escapeJson(content);
+            
+            Channel channel = getChannelByID(channelID);
+            if (channel == null) {
+                Discord4J.logger.error("Channel id " +  channelID + " doesn't exist!");
+                return;
+            }
+            
+            Message oldMessage = channel.getMessageByID(messageID);
+            
+            try {
+                String response = Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages/" + messageID, 
+                        new StringEntity("{\"content\":\"" + content + "\", \"mentions\":[]}", "UTF-8"), 
+                        new BasicNameValuePair("authorization", token),
+                        new BasicNameValuePair("content-type", "application/json"));
+    
+                JSONObject object1 = (JSONObject) JSON_PARSER.parse(response);
+    
+                Message newMessage = new Message((String) object1.get("id"), content, this.ourUser, getChannelByID(channelID), 
+                        this.convertFromTimestamp((String) object1.get("timestamp")));
+                //Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
+                // the event chain goes like this:
+                //Original message edited to null, then the null message edited to the new content
+                DiscordClient.this.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, newMessage));
+            } catch (HTTP403Exception e) {
+                Discord4J.logger.error("Received 403 error attempting to send message; is your login correct?");
+            }
+    
+        } else {
+            Discord4J.logger.error("Bot has not signed in yet!");
+        }
+    }
+    
     /**
      * Deletes a message with given ID from provided channel ID.
      *
@@ -585,8 +631,8 @@ public final class DiscordClient {
                         if (null != channel) {
                             Message message1 = new Message(messageID, content, DiscordClient.get().getUserByID(id),
                                     channel, DiscordClient.get().convertFromTimestamp(time));
-                            channel.addMessage(message1);
                             if (!id.equalsIgnoreCase(DiscordClient.get().getOurUser().getID())) {
+                                channel.addMessage(message1);
                                 Discord4J.logger.debug("Message from: {} ({}) in channel ID {}: {}", username, id, channelID, content);
                                 if (content.contains("discord.gg/")) {
                                     String inviteCode = content.split("discord\\.gg/")[1].split(" ")[0];
@@ -680,6 +726,7 @@ public final class DiscordClient {
                         channel = DiscordClient.this.getChannelByID(channelID);
                         Message m = channel.getMessageByID(id);
                         if(null != m
+                                && !m.getAuthor().getID().equals(getOurUser().getID())
                                 && !m.getContent().equals(content)) {
                             Message newMessage;
                             int index = channel.getMessages().indexOf(m);
