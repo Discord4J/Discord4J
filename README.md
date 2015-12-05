@@ -19,6 +19,7 @@ All dependencies are managed via Maven with pom.xml.
 * [Apache HTTPClient and HTTPCore](https://hc.apache.org/)
 * [JSON Simple](https://github.com/fangyidong/json-simple)
 * [Java Websocket](https://github.com/TooTallNate/Java-WebSocket)
+* [Apache Commons Lang3](https://commons.apache.org/proper/commons-lang/)
 
 
 ### Pull requests
