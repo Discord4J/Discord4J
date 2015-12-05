@@ -37,6 +37,7 @@ import sx.blah.discord.util.Presences;
 import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,6 +45,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author qt
@@ -118,9 +120,19 @@ public final class DiscordClient {
      * All of the private message channels that the bot is connected to.
      */
     private final List<PrivateChannel> privateChannels = new ArrayList<>();
+	
+	/**
+     * A cached json object of the games list to prevent unessesary slowdown from file i/o
+     */
+    private JSONArray games;
 
     private DiscordClient() {
         this.dispatcher = new EventDispatcher();
+        try {
+            games = (JSONArray) JSON_PARSER.parse(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("games.json")));
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -472,6 +484,30 @@ public final class DiscordClient {
 
         return null;
     }
+	
+	/**
+     * Attempts to get the name of the game based on its id
+     * @param gameId The game id (nullable!)
+     * @return The game name, the Optional will be empty if the game couldn't be found
+     */
+    public Optional<String> getGameByID(Long gameId) {
+        if (games == null || gameId == null || gameId.equals("null"))
+            return Optional.empty();
+        
+        for (Object object : games) {
+            if (!(object instanceof JSONObject))
+                continue;
+            
+            JSONObject jsonObject = (JSONObject)object;
+            Long id = (Long) jsonObject.get("id");
+            if (id != null) {
+                if (id.equals(gameId))
+                    return Optional.ofNullable((String) jsonObject.get("name"));
+            }
+        }
+        
+        return Optional.empty();
+    }
 
     /**
      * Returns a user from raw JSON data.
@@ -549,6 +585,7 @@ public final class DiscordClient {
                                 JSONObject presence = (JSONObject) o1;
                                 User user = g.getUserByID((String) ((JSONObject) presence.get("user")).get("id"));
                                 user.setPresence(Presences.valueOf(((String) presence.get("status")).toUpperCase()));
+                                user.setGameID((Long) presence.get("game_id"));
                             }
 
                             for (Object o1 : channels) {
@@ -752,14 +789,23 @@ public final class DiscordClient {
 
                     case "PRESENCE_UPDATE":
                         Presences presences = Presences.valueOf(((String) d.get("status")).toUpperCase());
+                        Long gameId = (Long) d.get("game_id");
                         guild = getGuildByID((String) d.get("guild_id"));
                         if(null != guild
                                 && null != presences) {
                             user = guild.getUserByID((String)((JSONObject) d.get("user")).get("id"));
                             if(null != user) {
-                                dispatcher.dispatch(new PresenceUpdateEvent(guild, user, user.getPresence(), presences));
-                                user.setPresence(presences);
-                                Discord4J.logger.debug("User \"{}\" changed presence to {}.", user.getName(), user.getPresence());
+                                if (!user.getPresence().equals(presences)) {
+                                    dispatcher.dispatch(new PresenceUpdateEvent(guild, user, user.getPresence(), presences));
+                                    user.setPresence(presences);
+                                    Discord4J.logger.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
+                                }
+                                if (!user.getGameID().equals(Optional.ofNullable(gameId))) {
+                                    dispatcher.dispatch(new GameChangeEvent(guild, user, user.getGameID().isPresent() ? user.getGameID().get() : null, gameId));
+                                    user.setGameID(gameId);
+                                    Discord4J.logger.debug("User \"{}\" changed game to {}.", user.getName(), getGameByID(gameId).isPresent() ? getGameByID(gameId).get() : "null");
+                                }
+                                System.out.printf("User %s changed presence to %s with the game %s.\n", user.getName(), user.getPresence(), getGameByID(gameId).isPresent() ? getGameByID(gameId).get() : "null");
                             }
                         }
                         break;

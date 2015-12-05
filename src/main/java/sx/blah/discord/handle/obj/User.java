@@ -22,6 +22,8 @@ package sx.blah.discord.handle.obj;
 import sx.blah.discord.DiscordEndpoints;
 import sx.blah.discord.util.Presences;
 
+import java.util.Optional;
+
 /**
  * @author qt
  * @since 5:40 PM 15 Aug, 2015
@@ -39,6 +41,11 @@ public class User {
      * The user's avatar location.
      */
     private String avatar;
+	
+	/**
+     * The id of the game the user is playing, either null or a Long id
+     */
+    private Long gameID;
 
     /**
      * User ID.
@@ -79,6 +86,14 @@ public class User {
 
     public String getName() {
         return name;
+    }
+    
+    public Optional<Long> getGameID() {
+        return Optional.ofNullable(gameID);
+    }
+    
+    public void setGameID(Long gameID) {
+        this.gameID = gameID;
     }
 
     public void setName(String name) {
