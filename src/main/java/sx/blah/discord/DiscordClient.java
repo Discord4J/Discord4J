@@ -122,7 +122,7 @@ public final class DiscordClient {
     private final List<PrivateChannel> privateChannels = new ArrayList<>();
 	
 	/**
-     * A cached json object of the games list to prevent unessesary slowdown from file i/o
+     * A cached json object of the games list to prevent unnecessary slowdown from file i/o
      */
     private JSONArray games;
 
@@ -346,7 +346,17 @@ public final class DiscordClient {
         } catch (HTTP403Exception e) {
             Discord4J.logger.error("Received 403 error attempting to change account details; is your login correct?");
         }
-
+    }
+    
+    public void updatePresence(boolean isIdle, Optional<Long> gameID) {
+        String json = "{\"op\":3,\"d\":{\"idle_since\":" + (isIdle ? System.currentTimeMillis() : "null") + 
+                ",\"game_id\":" + (gameID.isPresent() ? gameID.get() : "null") + "}}";
+        Discord4J.logger.debug(json); 
+        
+        ws.send(json);
+        
+        getOurUser().setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
+        getOurUser().setGameID(gameID.orElse(null));
     }
 
     /**
@@ -491,7 +501,7 @@ public final class DiscordClient {
      * @return The game name, the Optional will be empty if the game couldn't be found
      */
     public Optional<String> getGameByID(Long gameId) {
-        if (games == null || gameId == null || gameId.equals("null"))
+        if (games == null || gameId == null)
             return Optional.empty();
         
         for (Object object : games) {
@@ -508,6 +518,30 @@ public final class DiscordClient {
         
         return Optional.empty();
     }
+    
+    /**
+     * Attempts to get the id of a game based on its name
+     * @param gameName The game name (nullable!)
+     * @return The game id, the Optional will be empty if the game couldn't be found
+     */
+    public Optional<Long> getGameIDByGame(String gameName) {
+        if (gameName == null || gameName.isEmpty() || gameName.equals("null"))
+            return Optional.empty();
+    
+        for (Object object : games) {
+            if (!(object instanceof JSONObject))
+                continue;
+        
+            JSONObject jsonObject = (JSONObject)object;
+            String name = (String) jsonObject.get("name");
+            if (name != null) {
+                if (name.equalsIgnoreCase(gameName))
+                    return Optional.ofNullable((Long) jsonObject.get("id"));
+            }
+        }
+    
+        return Optional.empty();
+    }
 
     /**
      * Returns a user from raw JSON data.
@@ -517,7 +551,10 @@ public final class DiscordClient {
         String username = (String) user.get("username");
         String avatar = (String) user.get("avatar");
 
-        return new User(username, id, avatar);
+        User ourUser = new User(username, id, avatar);
+        ourUser.setPresence(Presences.ONLINE);
+        
+        return ourUser;
     }
 
     class DiscordWS extends WebSocketClient {
@@ -805,7 +842,6 @@ public final class DiscordClient {
                                     user.setGameID(gameId);
                                     Discord4J.logger.debug("User \"{}\" changed game to {}.", user.getName(), getGameByID(gameId).isPresent() ? getGameByID(gameId).get() : "null");
                                 }
-                                System.out.printf("User %s changed presence to %s with the game %s.\n", user.getName(), user.getPresence(), getGameByID(gameId).isPresent() ? getGameByID(gameId).get() : "null");
                             }
                         }
                         break;

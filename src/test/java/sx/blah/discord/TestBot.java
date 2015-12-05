@@ -29,8 +29,10 @@ import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
 import sx.blah.discord.handle.obj.PrivateChannel;
 import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.Presences;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * @author qt
@@ -87,7 +89,21 @@ public class TestBot {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    }
+                    } else if (m.getContent().startsWith(".presence")) {
+						DiscordClient.get().updatePresence(!DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
+								DiscordClient.get().getOurUser().getGameID());
+					} else if (m.getContent().startsWith(".game")) {
+						String game = m.getContent().length() > 6 ? m.getContent().substring(6) : "null";
+						Long id;
+						try {
+							id = Long.parseLong(game);
+						} catch (NumberFormatException e) {
+							id = DiscordClient.get().getGameIDByGame(game).orElse(null);
+						}
+						DiscordClient.get().getOurUser().getPresence();
+						DiscordClient.get().updatePresence(DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
+								Optional.ofNullable(id));
+					}
 				}
 			});
 
