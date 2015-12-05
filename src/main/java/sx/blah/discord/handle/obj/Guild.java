@@ -19,6 +19,8 @@
 
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.DiscordEndpoints;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,19 +51,57 @@ public class Guild {
      * The ID of this guild.
      */
     private final String id;
+	
+	/**
+     * The location of the guild icon
+     */
+    private String icon;
+	
+	/**
+     * The url pointing to the guild icon
+     */
+    private String iconURL;
+	
+	/**
+     * The user id for the owner of the guild
+     */
+    private final String ownerID;
 
-    public Guild(String name, String id) {
+    public Guild(String name, String id, String icon, String ownerID) {
         this.name = name;
         this.id = id;
         this.channels = new ArrayList<>();
         this.users = new ArrayList<>();
+        this.icon = icon;
+        this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
+        this.ownerID = ownerID;
     }
 
-    public Guild(String name, String id, List<Channel> channels, List<User> users) {
+    public Guild(String name, String id, String icon, String ownerID, List<Channel> channels, List<User> users) {
         this.name = name;
         this.channels = channels;
         this.users = users;
         this.id = id;
+        this.icon = icon;
+        this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
+        this.ownerID = ownerID;
+    }
+    
+    public String getOwnerID() {
+        return ownerID;
+    }
+    
+    public String getIcon() {
+        return icon;
+    }
+    
+    public String getIconURL() {
+        return iconURL;
+    }
+    
+    public void setIcon(String icon) {
+        this.icon = icon;
+        this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
     }
 
     /**

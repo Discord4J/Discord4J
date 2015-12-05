@@ -64,4 +64,9 @@ public final class DiscordEndpoints {
 	 * Formatted string for getting avatar URLs.
 	 */
 	public static final String AVATARS = "https://cdn.discordapp.com/avatars/%s/%s.jpg";
+	
+	/**
+     * Formatted string for getting guild icon URLs.
+     */
+    public static final String ICONS = "https://cdn.discordapp.com/icons/%s/%s.jpg";
 }

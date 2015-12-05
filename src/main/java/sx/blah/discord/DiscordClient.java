@@ -347,7 +347,13 @@ public final class DiscordClient {
             Discord4J.logger.error("Received 403 error attempting to change account details; is your login correct?");
         }
     }
-    
+	
+	/**
+     * Changes the bot's presence
+     * 
+     * @param isIdle Set to true to make the bot idle or false for it to be online
+     * @param gameID The (optional) gameID of the game the bot is playing
+     */
     public void updatePresence(boolean isIdle, Optional<Long> gameID) {
         String json = "{\"op\":3,\"d\":{\"idle_since\":" + (isIdle ? System.currentTimeMillis() : "null") + 
                 ",\"game_id\":" + (gameID.isPresent() ? gameID.get() : "null") + "}}";
@@ -497,6 +503,7 @@ public final class DiscordClient {
 	
 	/**
      * Attempts to get the name of the game based on its id
+     * 
      * @param gameId The game id (nullable!)
      * @return The game name, the Optional will be empty if the game couldn't be found
      */
@@ -521,6 +528,7 @@ public final class DiscordClient {
     
     /**
      * Attempts to get the id of a game based on its name
+     * 
      * @param gameName The game name (nullable!)
      * @return The game id, the Optional will be empty if the game couldn't be found
      */
@@ -609,9 +617,11 @@ public final class DiscordClient {
                             JSONArray presences = (JSONArray) guild.get("presences");
                             String name = (String) guild.get("name");
                             String guildID = (String) guild.get("id");
+                            String icon = (String) guild.get("icon");
+                            String owner = (String) guild.get("owner_id");
 
                             Guild g;
-                            guildList.add(g = new Guild(name, guildID));
+                            guildList.add(g = new Guild(name, guildID, icon, owner));
 
                             for (Object o1 : members) {
                                 JSONObject member = (JSONObject) ((JSONObject) o1).get("user");
@@ -744,7 +754,10 @@ public final class DiscordClient {
                         id = (String) d.get("id");
                         JSONArray members = (JSONArray) d.get("members");
                         JSONArray channels = (JSONArray) d.get("channels");
-                        Guild guild = new Guild(name, id);
+                        String icon = (String) d.get("icon");
+                        String owner = (String) d.get("owner_id");
+                        
+                        Guild guild = new Guild(name, id, icon, owner);
                         DiscordClient.this.guildList.add(guild);
 
                         for (Object o : members) {
