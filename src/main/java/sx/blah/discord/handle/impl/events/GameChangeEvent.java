@@ -21,7 +21,7 @@ public class GameChangeEvent implements IEvent {
 		this.newGameID = newGameID;
 	}
 	
-	public long getNewGameID() {
+	public Long getNewGameID() {
 		return newGameID;
 	}
 	
@@ -29,7 +29,7 @@ public class GameChangeEvent implements IEvent {
 		return user;
 	}
 	
-	public long getOldGameID() {
+	public Long getOldGameID() {
 		return oldGameID;
 	}
 	
