@@ -282,11 +282,12 @@ public final class DiscordClient {
                 JSONObject object1 = (JSONObject) JSON_PARSER.parse(response);
     
                 Message newMessage = new Message((String) object1.get("id"), content, this.ourUser, getChannelByID(channelID), 
-                        this.convertFromTimestamp((String) object1.get("timestamp")));
+                        oldMessage.getTimestamp());
                 //Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
                 // the event chain goes like this:
                 //Original message edited to null, then the null message edited to the new content
                 DiscordClient.this.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, newMessage));
+                oldMessage.setContent(content);
             } catch (HTTP403Exception e) {
                 Discord4J.logger.error("Received 403 error attempting to send message; is your login correct?");
             }

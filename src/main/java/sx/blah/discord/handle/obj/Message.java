@@ -42,7 +42,7 @@ public class Message {
      * The actual message (what you see
      * on your screen, the content).
      */
-    private final String content;
+    private String content;
 
 	/**
 	 * The User who sent the message.
@@ -67,11 +67,15 @@ public class Message {
 	    this.timestamp = timestamp;
     }
 
-    // Getters. Boring.
+    // Getters and Setters. Boring.
 
     public String getContent() {
         return content;
     }
+	
+	public void setContent(String content) {
+		this.content = content;
+	}
 
     public Channel getChannel() {
         return channel;
