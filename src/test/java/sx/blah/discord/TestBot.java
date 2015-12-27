@@ -25,6 +25,7 @@ import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.Channel;
 import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
@@ -34,6 +35,7 @@ import sx.blah.discord.util.Presences;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author qt
@@ -44,7 +46,9 @@ import java.util.Optional;
  */
 public class TestBot {
 	
-	@Test
+	private static final String CI_URL = "https://drone.io/github.com/austinv11/Discord4J/";
+	
+	@Test(timeout = 60000L)
 	public void testBot() {
 		main(System.getenv("USER"), System.getenv("PSW"), "CITest");
 	}
@@ -61,7 +65,32 @@ public class TestBot {
 
 			if (args.length > 2) { //CI Testing
 				Discord4J.logger.debug("CI Test Initiated");
-			
+				final AtomicBoolean didTest = new AtomicBoolean(false);
+				DiscordClient.get().getDispatcher().registerListener(new IListener<ReadyEvent>() {
+					@Override
+					public void receive(ReadyEvent messageReceivedEvent) {
+						try {
+							Invite testInvite = new Invite(System.getenv("INVITE").replace("https://discord.gg/", ""));
+							Invite.InviteResponse response = testInvite.details();
+							Channel testChannel = DiscordClient.get().getChannelByID(response.getChannelID());
+							String buildNumber = System.getenv("BUILD_ID");
+							
+							new MessageBuilder().withChannel(testChannel).withContent("Initiating Discord4J Unit Tests for Build #"+
+									buildNumber, MessageBuilder.Styles.BOLD).build();
+							
+							//TODO: Real unit tests
+							
+							new MessageBuilder().withChannel(testChannel).withContent("Success! The build complete. See the log here: "+
+									CI_URL+buildNumber, MessageBuilder.Styles.BOLD).build();
+							didTest.set(true);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+				
+				while (!didTest.get()) {};
+				
 			} else { //Dev testing
 				DiscordClient.get().getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override

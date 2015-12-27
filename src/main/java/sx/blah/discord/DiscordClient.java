@@ -541,8 +541,7 @@ public final class DiscordClient {
 
                 switch (s) {
                     case "READY":
-
-                        System.out.println(frame);
+                        
                         DiscordClient.this.ourUser = DiscordClient.this.constructUserFromJSON((JSONObject) d.get("user"));
 
                         DiscordClient.this.heartbeat = (long) d.get("heartbeat_interval");
