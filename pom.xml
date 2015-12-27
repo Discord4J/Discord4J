@@ -33,7 +33,7 @@
         <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
         <maven.compiler.testSource>1.8</maven.compiler.testSource>
     </properties>
-
+    
     <repositories>
         <repository>
             <id>tomp2p.net</id>
@@ -79,12 +79,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.12</version>
-        </dependency>
-
-        <dependency>
             <groupId>net.tomp2p</groupId>
             <artifactId>opus-wrapper</artifactId>
             <version>1.3</version>
@@ -109,6 +103,17 @@
             <version>3.4</version>
         </dependency>
     </dependencies>
-
-
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <argLine>-Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

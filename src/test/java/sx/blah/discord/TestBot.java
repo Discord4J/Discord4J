@@ -20,6 +20,7 @@
 package sx.blah.discord;
 
 import org.json.simple.parser.ParseException;
+import org.junit.Test;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
@@ -42,7 +43,12 @@ import java.util.Optional;
  * General testing bot. Also a demonstration of how to use the bot.
  */
 public class TestBot {
-
+	
+	@Test
+	public void testBot() {
+		main(System.getProperty("USER"), System.getProperty("PSW"), "CITest");
+	}
+	
 	/**
 	 * Starts the bot. This can be done any place you want.
 	 * The main method is for demonstration.
