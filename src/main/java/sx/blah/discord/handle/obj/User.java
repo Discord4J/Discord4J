@@ -43,9 +43,9 @@ public class User {
     private String avatar;
 	
 	/**
-     * The id of the game the user is playing, either null or a Long id
+     * The game the user is playing, either null or String
      */
-    private Long gameID;
+    private String game;
 
     /**
      * User ID.
@@ -88,12 +88,12 @@ public class User {
         return name;
     }
     
-    public Optional<Long> getGameID() {
-        return Optional.ofNullable(gameID);
+    public Optional<String> getGame() {
+        return Optional.ofNullable(game);
     }
     
-    public void setGameID(Long gameID) {
-        this.gameID = gameID;
+    public void setGame(String game) {
+        this.game = game;
     }
 
     public void setName(String name) {

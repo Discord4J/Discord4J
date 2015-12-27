@@ -12,25 +12,25 @@ import sx.blah.discord.handle.obj.User;
 public class GameChangeEvent implements IEvent {
 	private final Guild guild;
 	private final User user;
-	private final Long oldGameID, newGameID;
+	private final String oldGame, newGame;
 	
-	public GameChangeEvent(Guild guild, User user, Long oldGameID, Long newGameID) {
+	public GameChangeEvent(Guild guild, User user, String oldGame, String newGame) {
 		this.guild = guild;
 		this.user = user;
-		this.oldGameID = oldGameID;
-		this.newGameID = newGameID;
+		this.oldGame = oldGame;
+		this.newGame = newGame;
 	}
 	
-	public Long getNewGameID() {
-		return newGameID;
+	public String getNewGame() {
+		return newGame;
 	}
 	
 	public User getUser() {
 		return user;
 	}
 	
-	public Long getOldGameID() {
-		return oldGameID;
+	public String getOldGame() {
+		return oldGame;
 	}
 	
 	public Guild getGuild() {

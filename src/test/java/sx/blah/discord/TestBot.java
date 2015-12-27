@@ -91,18 +91,11 @@ public class TestBot {
                         }
                     } else if (m.getContent().startsWith(".presence")) {
 						DiscordClient.get().updatePresence(!DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
-								DiscordClient.get().getOurUser().getGameID());
+								DiscordClient.get().getOurUser().getGame());
 					} else if (m.getContent().startsWith(".game")) {
-						String game = m.getContent().length() > 6 ? m.getContent().substring(6) : "null";
-						Long id;
-						try {
-							id = Long.parseLong(game);
-						} catch (NumberFormatException e) {
-							id = DiscordClient.get().getGameIDByGame(game).orElse(null);
-						}
-						DiscordClient.get().getOurUser().getPresence();
+						String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
 						DiscordClient.get().updatePresence(DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
-								Optional.ofNullable(id));
+								Optional.ofNullable(game));
 					}
 				}
 			});
