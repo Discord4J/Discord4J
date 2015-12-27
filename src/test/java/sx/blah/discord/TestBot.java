@@ -53,79 +53,87 @@ public class TestBot {
 		try {
 			DiscordClient.get().login(args[0] /* username */, args[1] /* password */);
 
-			DiscordClient.get().getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
-				@Override public void receive(MessageReceivedEvent messageReceivedEvent) {
-					Message m = messageReceivedEvent.getMessage();
-					if (m.getContent().startsWith(".meme")
-							|| m.getContent().startsWith(".nicememe")) {
+			if (args.length > 2) { //CI Testing
+				Discord4J.logger.debug("CI Test Initiated");
+			
+			} else { //Dev testing
+				DiscordClient.get().getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
+					@Override
+					public void receive(MessageReceivedEvent messageReceivedEvent) {
+						Message m = messageReceivedEvent.getMessage();
+						if (m.getContent().startsWith(".meme")
+								|| m.getContent().startsWith(".nicememe")) {
 							new MessageBuilder().appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
-                                    .appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
-                                    .build();
-					} else if (m.getContent().startsWith(".clear")) {
-						Channel c = DiscordClient.get().getChannelByID(m.getChannel().getID());
-						if (null != c) {
-							c.getMessages().stream().filter(message -> message.getAuthor().getID()
-									.equalsIgnoreCase(DiscordClient.get().getOurUser().getID())).forEach(message -> {
-								try {
-									Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
-									DiscordClient.get().deleteMessage(message.getID(), message.getChannel().getID());
-								} catch (IOException e) {
-									Discord4J.logger.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
-								}
-							});
+									.appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
+									.build();
+						} else if (m.getContent().startsWith(".clear")) {
+							Channel c = DiscordClient.get().getChannelByID(m.getChannel().getID());
+							if (null != c) {
+								c.getMessages().stream().filter(message->message.getAuthor().getID()
+										.equalsIgnoreCase(DiscordClient.get().getOurUser().getID())).forEach(message->{
+									try {
+										Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
+										DiscordClient.get().deleteMessage(message.getID(), message.getChannel().getID());
+									} catch (IOException e) {
+										Discord4J.logger.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
+									}
+								});
+							}
+						} else if (m.getContent().startsWith(".name ")) {
+							String s = m.getContent().split(" ", 2)[1];
+							try {
+								DiscordClient.get().changeAccountInfo(s, "", "");
+								m.reply("is this better?");
+							} catch (ParseException | IOException e) {
+								e.printStackTrace();
+							}
+						} else if (m.getContent().startsWith(".pm")) {
+							try {
+								PrivateChannel channel = DiscordClient.get().getOrCreatePMChannel(m.getAuthor());
+								new MessageBuilder().withChannel(channel).withContent("SUP DUDE").build();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						} else if (m.getContent().startsWith(".presence")) {
+							DiscordClient.get().updatePresence(!DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
+									DiscordClient.get().getOurUser().getGame());
+						} else if (m.getContent().startsWith(".game")) {
+							String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
+							DiscordClient.get().updatePresence(DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
+									Optional.ofNullable(game));
 						}
-					} else if (m.getContent().startsWith(".name ")) {
-						String s = m.getContent().split(" ", 2)[1];
+					}
+				});
+				
+				DiscordClient.get().getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
+					@Override
+					public void receive(InviteReceivedEvent event) {
+						Invite invite = event.getInvite();
 						try {
-							DiscordClient.get().changeAccountInfo(s, "", "");
-							m.reply("is this better?");
-						} catch (ParseException | IOException e) {
+							Invite.InviteResponse response = invite.details();
+							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
+							invite.accept();
+							DiscordClient.get().sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild! I was invited by %s!",
+									response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()),
+									response.getChannelID());
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
-					} else if(m.getContent().startsWith(".pm")) {
-                        try {
-                            PrivateChannel channel = DiscordClient.get().getOrCreatePMChannel(m.getAuthor());
-                            new MessageBuilder().withChannel(channel).withContent("SUP DUDE").build();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else if (m.getContent().startsWith(".presence")) {
-						DiscordClient.get().updatePresence(!DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
-								DiscordClient.get().getOurUser().getGame());
-					} else if (m.getContent().startsWith(".game")) {
-						String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
-						DiscordClient.get().updatePresence(DiscordClient.get().getOurUser().getPresence().equals(Presences.IDLE),
-								Optional.ofNullable(game));
+						
 					}
-				}
-			});
-
-			DiscordClient.get().getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
-				@Override public void receive(InviteReceivedEvent event) {
-					Invite invite = event.getInvite();
-					try {
-						Invite.InviteResponse response = invite.details();
-						event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
-                        invite.accept();
-                        DiscordClient.get().sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild! I was invited by %s!",
-                                        response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()),
-								response.getChannelID());
-					} catch (Exception e) {
-						e.printStackTrace();
+				});
+				
+				DiscordClient.get().getDispatcher().registerListener(new IListener<MessageDeleteEvent>() {
+					@Override
+					public void receive(MessageDeleteEvent event) {
+						try {
+							event.getMessage().reply("you said, \\\""+event.getMessage().getContent()+"\\\"");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
-
-				}
-			});
-
-			DiscordClient.get().getDispatcher().registerListener(new IListener<MessageDeleteEvent>() {
-				@Override public void receive(MessageDeleteEvent event) {
-					try {
-						event.getMessage().reply("you said, \\\"" + event.getMessage().getContent() + "\\\"");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			});
+				});
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
