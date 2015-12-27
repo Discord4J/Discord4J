@@ -46,7 +46,7 @@ public class TestBot {
 	
 	@Test
 	public void testBot() {
-		main(System.getProperty("USER"), System.getProperty("PSW"), "CITest");
+		main(System.getenv("USER"), System.getenv("PSW"), "CITest");
 	}
 	
 	/**
