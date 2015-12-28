@@ -79,7 +79,6 @@ public class Invite {
 			String response = Requests.GET.makeRequest(DiscordEndpoints.INVITE + inviteCode,
 					new BasicNameValuePair("authorization", DiscordClient.get().getToken()));
 			
-			System.out.println(response);
 			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
 
 			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name, 
