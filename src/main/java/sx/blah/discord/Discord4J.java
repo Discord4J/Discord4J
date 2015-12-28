@@ -31,11 +31,15 @@ import org.slf4j.LoggerFactory;
  * Main class. :D
  */
 public class Discord4J {
-    public static final String PROJECT_NAME = "Discord4J";
-    public static final double PROJECT_VERSION = 1.3;
+    public static final String NAME = "_NAME_";
+    public static final String VERSION = "_VERSION_";
 
     /**
      * SLF4J Instance
      */
     public static final Logger logger = LoggerFactory.getLogger(Discord4J.class);
+    
+    static  {
+        logger.info(NAME+" v"+VERSION);
+    }
 }
