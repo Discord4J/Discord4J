@@ -19,7 +19,6 @@
 
 package sx.blah.discord;
 
-import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
@@ -80,7 +79,7 @@ public class TestBot {
 							
 							//TODO: Real unit tests
 							
-							new MessageBuilder().withChannel(testChannel).withContent("Success! The build complete. See the log here: "+
+							new MessageBuilder().withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+
 									CI_URL+buildNumber, MessageBuilder.Styles.BOLD).build();
 							didTest.set(true);
 						} catch (Exception e) {
@@ -119,7 +118,7 @@ public class TestBot {
 							try {
 								DiscordClient.get().changeAccountInfo(s, "", "");
 								m.reply("is this better?");
-							} catch (ParseException | IOException e) {
+							} catch (IOException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".pm")) {

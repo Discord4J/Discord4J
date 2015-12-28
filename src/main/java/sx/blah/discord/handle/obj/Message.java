@@ -19,7 +19,6 @@
 
 package sx.blah.discord.handle.obj;
 
-import org.json.simple.parser.ParseException;
 import sx.blah.discord.DiscordClient;
 
 import java.io.IOException;
@@ -99,7 +98,7 @@ public class Message {
      *
      * @param content Message to send.
      */
-    public void reply(String content) throws IOException, ParseException {
+    public void reply(String content) throws IOException {
         DiscordClient.get().sendMessage(String.format("%s, %s", this.getAuthor(), content), this.getChannel().getID());
     }
 }
