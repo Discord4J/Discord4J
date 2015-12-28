@@ -22,6 +22,10 @@ package sx.blah.discord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * @author qt
  * @since 7:56 PM 16 Aug, 2015
@@ -31,15 +35,26 @@ import org.slf4j.LoggerFactory;
  * Main class. :D
  */
 public class Discord4J {
-    public static final String NAME = "_NAME_";
-    public static final String VERSION = "_VERSION_";
+    
+    public static String NAME;
+    public static String VERSION;
 
     /**
      * SLF4J Instance
      */
     public static final Logger logger = LoggerFactory.getLogger(Discord4J.class);
     
-    static  {
+    static {
+        InputStream stream = Discord4J.class.getClassLoader().getResourceAsStream("app.properties");
+        Properties properties = new Properties();
+        try {
+            properties.load(stream);
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        NAME = properties.getProperty("application.name");
+        VERSION = properties.getProperty("application.version");
         logger.info(NAME+" v"+VERSION);
     }
 }

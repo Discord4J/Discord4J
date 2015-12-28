@@ -120,35 +120,12 @@
                     <argLine>-Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG</argLine>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>
-                        <include>**/Discord4J.java</include>
-                    </includes>
-                    <replacements>
-                        <replacement>
-                            <token>_VERSION_</token>
-                            <value>${project.version}</value>
-                        </replacement>
-                        <replacement>
-                            <token>_NAME_</token>
-                            <value>${project.artifactId}</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
-            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 </project>
