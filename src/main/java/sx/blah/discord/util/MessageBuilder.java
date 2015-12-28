@@ -19,8 +19,7 @@
 
 package sx.blah.discord.util;
 
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.DiscordClient;
+import sx.blah.discord.api.DiscordClient;
 import sx.blah.discord.handle.obj.Channel;
 
 /**
@@ -28,6 +27,7 @@ import sx.blah.discord.handle.obj.Channel;
  * @since 10/2/2015
  * <p>
  * Utility class designed to make message sending easier.
+ * FIXME
  */
 public class MessageBuilder {
 	private String content = "";
@@ -98,13 +98,14 @@ public class MessageBuilder {
 	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
+	 * @param client The discord client
 	 */
-	public void build() {
+	public void build(DiscordClient client) {
 		if (null == content || null == channelID) {
 			throw new RuntimeException("You need content and a channel ID to send a message!");
 		} else {
 			try {
-				DiscordClient.get().sendMessage(content, channelID);
+				client.sendMessage(content, channelID);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -114,8 +115,8 @@ public class MessageBuilder {
 	/**
 	 * Alternate name, in case people don't know that build() sends.
 	 */
-	public void send() {
-		build();
+	public void send(DiscordClient client) {
+		build(client);
 	}
 
     /**

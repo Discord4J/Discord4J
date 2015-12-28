@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord;
+package sx.blah.discord.api;
 
 import com.google.gson.*;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -25,12 +25,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.IDispatcher;
 import sx.blah.discord.handle.impl.EventDispatcher;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.*;
-import sx.blah.discord.json.events.*;
+import sx.blah.discord.json.responses.*;
+import sx.blah.discord.json.responses.events.*;
 import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Presences;
 import sx.blah.discord.util.Requests;
@@ -42,6 +43,7 @@ import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,11 +101,11 @@ public final class DiscordClient {
      * Private copy of the password you used to log in.
      */
     private String password;
-
-    /**
-     * Local instance of DiscordClient.
-     */
-    private static final DiscordClient __INSTANCE = new DiscordClient();
+	
+	/**
+	 * The features enabled for this client
+	 */
+	private EnumSet<Features> features;
 
     /**
      * WebSocket over which to communicate with Discord.
@@ -120,8 +122,11 @@ public final class DiscordClient {
      */
     private final List<PrivateChannel> privateChannels = new ArrayList<>();
 
-    private DiscordClient() {
+    protected DiscordClient(String email, String password, EnumSet<Features> features) {
         this.dispatcher = new EventDispatcher();
+		this.email = email;
+		this.password = password;
+		this.features = features;
     }
 
     /**
@@ -131,13 +136,6 @@ public final class DiscordClient {
      */
     public void setDispatcher(IDispatcher dispatcher) {
         this.dispatcher = dispatcher;
-    }
-
-    /**
-     * @return Singleton instance
-     */
-    public static DiscordClient get() {
-        return __INSTANCE;
     }
 
     /**
@@ -160,14 +158,11 @@ public final class DiscordClient {
      * <p>
      * Very important to use this method.
      */
-    public void login(String email, String password)
+    public void login()
             throws IOException, URISyntaxException {
         if (null != ws) {
             ws.close();
         }
-
-        this.email = email;
-        this.password = password;
 
         try {
             LoginResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
@@ -178,7 +173,7 @@ public final class DiscordClient {
             e.printStackTrace();
         }
 
-        this.ws = new DiscordWS(new URI(obtainGateway(this.token)));
+        this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
     }
 
     /**
@@ -489,8 +484,12 @@ public final class DiscordClient {
     }
 
     class DiscordWS extends WebSocketClient {
-        public DiscordWS(URI serverURI) {
+		
+		private DiscordClient client;
+		
+        public DiscordWS(DiscordClient client, URI serverURI) {
             super(serverURI);
+			this.client = client;
             this.connect();
         }
 
@@ -597,19 +596,19 @@ public final class DiscordClient {
 					MessageResponse event1 = GSON.fromJson(eventObject, MessageResponse.class);
                     boolean mentioned = event1.mention_everyone || event1.content.contains("<@"+ourUser.getID()+">");
                     
-                    Channel channel = DiscordClient.get().getChannelByID(event1.channel_id);
+                    Channel channel = client.getChannelByID(event1.channel_id);
                     
                     if (null != channel) {
-                        Message message1 = new Message(event1.id, event1.content, DiscordClient.get().getUserByID(event1.author.id),
-                                channel, DiscordClient.get().convertFromTimestamp(event1.timestamp));
-                        if (!event1.author.id.equalsIgnoreCase(DiscordClient.get().getOurUser().getID())) {
+                        Message message1 = new Message(event1.id, event1.content, client.getUserByID(event1.author.id),
+                                channel, client.convertFromTimestamp(event1.timestamp));
+                        if (!event1.author.id.equalsIgnoreCase(client.getOurUser().getID())) {
                             channel.addMessage(message1);
                             Discord4J.logger.debug("Message from: {} ({}) in channel ID {}: {}", message1.getAuthor().getName(), 
                                     event1.author.id, event1.channel_id, event1.content);
                             if (event1.content.contains("discord.gg/")) {
                                 String inviteCode = event1.content.split("discord\\.gg/")[1].split(" ")[0];
                                 Discord4J.logger.debug("Received invite code \"{}\"", inviteCode);
-                                DiscordClient.get().dispatcher.dispatch(new InviteReceivedEvent(new Invite(inviteCode), message1));
+								client.dispatcher.dispatch(new InviteReceivedEvent(new Invite(client, inviteCode), message1));
                             }
                             if (mentioned) {
                                 DiscordClient.this.dispatcher.dispatch(new MentionEvent(message1));
@@ -665,7 +664,7 @@ public final class DiscordClient {
                         }
                     }
 
-                    DiscordClient.get().dispatcher.dispatch(new GuildCreateEvent(guild));
+                    client.dispatcher.dispatch(new GuildCreateEvent(guild));
                     Discord4J.logger.debug("New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
                     break;
 
@@ -723,7 +722,7 @@ public final class DiscordClient {
                         if (null != message
                                 && !message.getAuthor().getID().equalsIgnoreCase(DiscordClient.this.ourUser.getID())) {
                             channel.getMessages().remove(message);
-                            DiscordClient.get().dispatcher.dispatch(new MessageDeleteEvent(message));
+                            client.dispatcher.dispatch(new MessageDeleteEvent(message));
                         }
                     }
                     break;

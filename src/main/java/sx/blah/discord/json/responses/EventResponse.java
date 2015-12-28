@@ -1,4 +1,4 @@
-package sx.blah.discord.json;
+package sx.blah.discord.json.responses;
 
 /**
  * A generic json for receiving events

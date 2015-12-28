@@ -1,7 +1,7 @@
-package sx.blah.discord.json.events;
+package sx.blah.discord.json.responses.events;
 
-import sx.blah.discord.json.GuildResponse;
-import sx.blah.discord.json.UserResponse;
+import sx.blah.discord.json.responses.GuildResponse;
+import sx.blah.discord.json.responses.UserResponse;
 
 /**
  * This is sent when a new member joins a guild

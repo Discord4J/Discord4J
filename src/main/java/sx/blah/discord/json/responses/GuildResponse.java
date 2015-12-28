@@ -1,4 +1,4 @@
-package sx.blah.discord.json;
+package sx.blah.discord.json.responses;
 
 /**
  * Response representing a guild

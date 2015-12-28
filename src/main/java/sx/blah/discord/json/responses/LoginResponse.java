@@ -1,4 +1,4 @@
-package sx.blah.discord.json;
+package sx.blah.discord.json.responses;
 
 /**
  * The json response received from logging in

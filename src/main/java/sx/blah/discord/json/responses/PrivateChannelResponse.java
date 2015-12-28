@@ -1,4 +1,4 @@
-package sx.blah.discord.json;
+package sx.blah.discord.json.responses;
 
 /**
  * The response received when receiving private channel info

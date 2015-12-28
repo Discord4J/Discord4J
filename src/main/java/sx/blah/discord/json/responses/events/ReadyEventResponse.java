@@ -1,8 +1,8 @@
-package sx.blah.discord.json.events;
+package sx.blah.discord.json.responses.events;
 
-import sx.blah.discord.json.GuildResponse;
-import sx.blah.discord.json.PrivateChannelResponse;
-import sx.blah.discord.json.UserResponse;
+import sx.blah.discord.json.responses.GuildResponse;
+import sx.blah.discord.json.responses.PrivateChannelResponse;
+import sx.blah.discord.json.responses.UserResponse;
 
 public class ReadyEventResponse {
 	

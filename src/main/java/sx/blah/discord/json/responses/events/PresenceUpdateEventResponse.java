@@ -1,6 +1,6 @@
-package sx.blah.discord.json.events;
+package sx.blah.discord.json.responses.events;
 
-import sx.blah.discord.json.PresenceResponse;
+import sx.blah.discord.json.responses.PresenceResponse;
 
 /**
  * This is received when a user's presence changes

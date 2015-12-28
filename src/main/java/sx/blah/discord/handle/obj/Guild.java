@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.DiscordEndpoints;
+import sx.blah.discord.api.DiscordEndpoints;
 
 import java.util.ArrayList;
 import java.util.List;

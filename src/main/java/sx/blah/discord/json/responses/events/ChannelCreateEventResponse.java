@@ -1,6 +1,6 @@
-package sx.blah.discord.json.events;
+package sx.blah.discord.json.responses.events;
 
-import sx.blah.discord.json.ChannelResponse;
+import sx.blah.discord.json.responses.ChannelResponse;
 
 /**
  * This is received when a channel is created

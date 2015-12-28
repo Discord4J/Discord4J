@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.DiscordClient;
+import sx.blah.discord.api.DiscordClient;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -95,10 +95,10 @@ public class Message {
     /**
      * Adds an @mention to the author of the referenced Message
      * object before your content
-     *
+     * FIXME: remove client thingy
      * @param content Message to send.
      */
-    public void reply(String content) throws IOException {
-        DiscordClient.get().sendMessage(String.format("%s, %s", this.getAuthor(), content), this.getChannel().getID());
+    public void reply(DiscordClient client, String content) throws IOException {
+        client.sendMessage(String.format("%s, %s", this.getAuthor(), content), this.getChannel().getID());
     }
 }

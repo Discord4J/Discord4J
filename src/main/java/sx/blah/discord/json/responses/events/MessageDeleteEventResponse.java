@@ -1,4 +1,4 @@
-package sx.blah.discord.json.events;
+package sx.blah.discord.json.responses.events;
 
 /**
  * This response is received when a message is deleted

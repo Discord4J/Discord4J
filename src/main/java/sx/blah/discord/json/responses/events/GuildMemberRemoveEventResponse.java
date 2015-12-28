@@ -1,6 +1,6 @@
-package sx.blah.discord.json.events;
+package sx.blah.discord.json.responses.events;
 
-import sx.blah.discord.json.UserResponse;
+import sx.blah.discord.json.responses.UserResponse;
 
 /**
  * This response is received when a user leaves a guild

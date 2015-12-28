@@ -1,4 +1,4 @@
-package sx.blah.discord.json;
+package sx.blah.discord.json.responses;
 
 /**
  * Represents a channel
@@ -53,12 +53,12 @@ public class ChannelResponse {
 		public String id;
 		
 		/**
-		 * Permissions to deny, see {@link sx.blah.discord.json.GuildResponse.RoleResponse#permissions}
+		 * Permissions to deny, see {@link GuildResponse.RoleResponse#permissions}
 		 */
 		public int deny;
 		
 		/**
-		 * Permissions to allow, see {@link sx.blah.discord.json.GuildResponse.RoleResponse#permissions}
+		 * Permissions to allow, see {@link GuildResponse.RoleResponse#permissions}
 		 */
 		public int allow;
 	}

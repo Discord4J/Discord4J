@@ -1,4 +1,4 @@
-package sx.blah.discord.json.events;
+package sx.blah.discord.json.responses.events;
 
 /**
  * A response sent when a user starts typing
