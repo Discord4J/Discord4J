@@ -308,6 +308,7 @@ public final class DiscordClient {
 			if (!this.token.equals(response.token)) {
 				Discord4J.LOGGER.debug("Token changed, reopening the websocket.");
 				this.token = response.token;
+				((DiscordWS) this.ws).disconnect();
 				this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
 			}
         } catch (HTTP403Exception e) {
@@ -470,12 +471,18 @@ public final class DiscordClient {
     class DiscordWS extends WebSocketClient {
 		
 		private DiscordClient client;
+		public boolean isConnected = true;
 		
         public DiscordWS(DiscordClient client, URI serverURI) {
             super(serverURI);
 			this.client = client;
             this.connect();
         }
+		
+		public void disconnect() {
+			isConnected = false;
+			close();
+		}
 
         @Override
         public void onOpen(ServerHandshake serverHandshake) {
@@ -565,7 +572,7 @@ public final class DiscordClient {
 					Discord4J.LOGGER.debug("Logged in as {} (ID {}).", DiscordClient.this.ourUser.getName(), DiscordClient.this.ourUser.getID());
 					new Thread(() -> {
 						// Keep alive
-						while (null != ws) {
+						while (this.isConnected) {
 							long l;
 							if ((l = (System.currentTimeMillis() - timer)) >= heartbeat) {
 								Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);

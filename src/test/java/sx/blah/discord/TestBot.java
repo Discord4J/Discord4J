@@ -82,8 +82,9 @@ public class TestBot {
 							
 							//TODO: Real unit tests
 							
-							new MessageBuilder().withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+
-									CI_URL+buildNumber, MessageBuilder.Styles.BOLD).build(client);
+							new MessageBuilder().withChannel(testChannel).withContent("Success! The build is complete. See the log here:", 
+									MessageBuilder.Styles.BOLD).build(client);
+							new MessageBuilder().withChannel(testChannel).withContent(CI_URL+buildNumber).build(client);
 							didTest.set(true);
 						} catch (Exception e) {
 							e.printStackTrace();
