@@ -88,7 +88,7 @@ public class EventDispatcher {
 	 * @param event The event
 	 */
 	public void dispatch(Event event) {
-		Discord4J.logger.debug("Dispatching event of type {}", event.getClass().getSimpleName());
+		Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());
 		event.client = client;
 		if (methodListeners.containsKey(event.getClass())) {
 			HashMap<Method, Object> methodListeners = this.methodListeners.get(event.getClass());
@@ -96,7 +96,7 @@ public class EventDispatcher {
 				try {
 					method.invoke(methodListeners.get(method), event);
 				} catch (IllegalAccessException | InvocationTargetException e) {
-					Discord4J.logger.error("Error dispatching event "+event.getClass().getSimpleName(), e);
+					Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
 				}
 		}
 		

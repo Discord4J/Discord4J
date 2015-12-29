@@ -42,7 +42,7 @@ public class Discord4J {
     /**
      * SLF4J Instance
      */
-    public static final Logger logger = LoggerFactory.getLogger(Discord4J.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(Discord4J.class);
     
     static {
         InputStream stream = Discord4J.class.getClassLoader().getResourceAsStream("app.properties");
@@ -55,6 +55,6 @@ public class Discord4J {
         }
         NAME = properties.getProperty("application.name");
         VERSION = properties.getProperty("application.version");
-        logger.info("{} v{}", NAME, VERSION);
+        LOGGER.info("{} v{}", NAME, VERSION);
     }
 }

@@ -35,6 +35,7 @@ import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.Presences;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -65,7 +66,7 @@ public class TestBot {
 			DiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).login();
 
 			if (args.length > 2) { //CI Testing
-				Discord4J.logger.debug("CI Test Initiated");
+				Discord4J.LOGGER.debug("CI Test Initiated");
 				final AtomicBoolean didTest = new AtomicBoolean(false);
 				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 					@Override
@@ -108,10 +109,10 @@ public class TestBot {
 								c.getMessages().stream().filter(message->message.getAuthor().getID()
 										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message->{
 									try {
-										Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
+										Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
 										client.deleteMessage(message.getID(), message.getChannel().getID());
 									} catch (IOException e) {
-										Discord4J.logger.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
+										Discord4J.LOGGER.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
 									}
 								});
 							}
@@ -120,7 +121,7 @@ public class TestBot {
 							try {
 								client.changeAccountInfo(s, "", "");
 								m.reply(client, "is this better?");
-							} catch (IOException e) {
+							} catch (IOException | URISyntaxException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".pm")) {

@@ -61,13 +61,13 @@ public class ClientBuilder {
 		for (Features feature : features) {
 			switch (feature.status) {
 				case UNSUPPORTED:
-					Discord4J.logger.warn("Feature '{}' is unsupported by Discord4J!", feature.name());
+					Discord4J.LOGGER.warn("Feature '{}' is unsupported by Discord4J!", feature.name());
 					break;
 				case DEPRECATED:
-					Discord4J.logger.warn("Feature '{}' has been deprecated by Discord4J! It may not work as intended and may be changed in the future.", feature.name());
+					Discord4J.LOGGER.warn("Feature '{}' has been deprecated by Discord4J! It may not work as intended and may be changed in the future.", feature.name());
 					break;
 				case EXPERIMENTAL:
-					Discord4J.logger.warn("Feature '{}' is experimental! It is still WIP and is incomplete.", feature.name());
+					Discord4J.LOGGER.warn("Feature '{}' is experimental! It is still WIP and is incomplete.", feature.name());
 					break;
 				case SUPPORTED:
 				case READ_ONLY:

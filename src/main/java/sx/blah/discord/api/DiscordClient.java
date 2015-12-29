@@ -180,9 +180,9 @@ public final class DiscordClient {
                     new BasicNameValuePair("authorization", token)), GatewayResponse.class);
             gateway = response.url.replaceAll("wss", "ws");
         } catch (HTTP403Exception e) {
-            Discord4J.logger.error("Received 403 error attempting to get gateway; is your login correct?");
+            Discord4J.LOGGER.error("Received 403 error attempting to get gateway; is your login correct?");
         }
-        Discord4J.logger.debug("Obtained gateway {}.", gateway);
+        Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
         return gateway;
     }
 
@@ -214,12 +214,12 @@ public final class DiscordClient {
                 DiscordClient.this.dispatcher.dispatch(new MessageSendEvent(message));
             return message;
             } catch (HTTP403Exception e) {
-                Discord4J.logger.error("Received 403 error attempting to send message; is your login correct?");
+                Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
                 return null;
             }
 
         } else {
-            Discord4J.logger.error("Bot has not signed in yet!");
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
             return null;
         }
     }
@@ -238,7 +238,7 @@ public final class DiscordClient {
             
             Channel channel = getChannelByID(channelID);
             if (channel == null) {
-                Discord4J.logger.error("Channel id " +  channelID + " doesn't exist!");
+                Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
                 return;
             }
             
@@ -258,11 +258,11 @@ public final class DiscordClient {
                 DiscordClient.this.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, newMessage));
                 oldMessage.setContent(content);
             } catch (HTTP403Exception e) {
-                Discord4J.logger.error("Received 403 error attempting to send message; is your login correct?");
+                Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
             }
     
         } else {
-            Discord4J.logger.error("Bot has not signed in yet!");
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
         }
     }
     
@@ -279,10 +279,10 @@ public final class DiscordClient {
                 Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages/" + messageID,
                         new BasicNameValuePair("authorization", token));
             } catch (HTTP403Exception e) {
-                Discord4J.logger.error("Received 403 error attempting to delete message; is your login correct?");
+                Discord4J.LOGGER.error("Received 403 error attempting to delete message; is your login correct?");
             }
         } else {
-            Discord4J.logger.error("Bot has not signed in yet!");
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
         }
     }
 
@@ -296,7 +296,7 @@ public final class DiscordClient {
      * @param password Password (if you want to change it).
      */
     public void changeAccountInfo(String username, String email, String password) throws UnsupportedEncodingException, URISyntaxException {
-        Discord4J.logger.debug("Token: {}", token);
+        Discord4J.LOGGER.debug("Changing account info.");
         try {
             AccountInfoChangeResponse response = GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
                     new StringEntity(GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email, 
@@ -306,11 +306,12 @@ public final class DiscordClient {
                     new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
             
 			if (!this.token.equals(response.token)) {
+				Discord4J.LOGGER.debug("Token changed, reopening the websocket.");
 				this.token = response.token;
 				this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
 			}
         } catch (HTTP403Exception e) {
-            Discord4J.logger.error("Received 403 error attempting to change account details; is your login correct?");
+            Discord4J.LOGGER.error("Received 403 error attempting to change account details; is your login correct?");
         }
     }
 	
@@ -480,7 +481,7 @@ public final class DiscordClient {
         public void onOpen(ServerHandshake serverHandshake) {
             if (!token.isEmpty()) {
 				send(GSON.toJson(new ConnectRequest(token, "Java", "Discord4J", "Discord4J", "", "")));
-                Discord4J.logger.debug("Connected to the Discord websocket.");
+                Discord4J.LOGGER.debug("Connected to the Discord websocket.");
             } else 
 				System.err.println("Use the login() method to set your token first!");
         }
@@ -499,9 +500,9 @@ public final class DiscordClient {
             if (object.has("message")) {
 				String message = object.get("message").getAsString();
 				if (message == null || message.isEmpty()) {
-					Discord4J.logger.error("Received unknown error from Discord. Complain to the Discord devs, not me!");
+					Discord4J.LOGGER.error("Received unknown error from Discord. Complain to the Discord devs, not me!");
 				} else
-					Discord4J.logger.debug("Received error from Discord: {}", message);
+					Discord4J.LOGGER.debug("Received error from Discord: {}", message);
 			}
             String type = object.get("t").getAsString();
             JsonElement eventObject = object.get("d");
@@ -514,7 +515,7 @@ public final class DiscordClient {
 					DiscordClient.this.ourUser = DiscordClient.this.constructUserFromJSON(event.user);
 
 					DiscordClient.this.heartbeat = event.heartbeat_interval;
-					Discord4J.logger.debug("Received heartbeat interval of {}.", DiscordClient.this.heartbeat);
+					Discord4J.LOGGER.debug("Received heartbeat interval of {}.", DiscordClient.this.heartbeat);
 
 					// I hope you like loops.
 					for (GuildResponse guildResponse : event.guilds) {
@@ -539,9 +540,9 @@ public final class DiscordClient {
 								try {
 									DiscordClient.this.getChannelMessages(channel);
 								} catch (HTTP403Exception e) {
-									Discord4J.logger.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", channelResponse.name, guildResponse.name);
+									Discord4J.LOGGER.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", channelResponse.name, guildResponse.name);
 								} catch (Exception e) {
-									Discord4J.logger.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", channelResponse.name, guildResponse.name, e.getClass().getSimpleName());
+									Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", channelResponse.name, guildResponse.name, e.getClass().getSimpleName());
 								}
 							}
 						}
@@ -554,20 +555,20 @@ public final class DiscordClient {
 						try {
 							DiscordClient.this.getChannelMessages(channel);
 						} catch (HTTP403Exception e) {
-							Discord4J.logger.error("No permission for the private channel for \"{}\". Are you logged in properly?", channel.getRecipient().getName());
+							Discord4J.LOGGER.error("No permission for the private channel for \"{}\". Are you logged in properly?", channel.getRecipient().getName());
 						} catch (Exception e) {
-							Discord4J.logger.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
+							Discord4J.LOGGER.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
 						}
 						privateChannels.add(channel);
 					}
 
-					Discord4J.logger.debug("Logged in as {} (ID {}).", DiscordClient.this.ourUser.getName(), DiscordClient.this.ourUser.getID());
+					Discord4J.LOGGER.debug("Logged in as {} (ID {}).", DiscordClient.this.ourUser.getName(), DiscordClient.this.ourUser.getID());
 					new Thread(() -> {
 						// Keep alive
 						while (null != ws) {
 							long l;
 							if ((l = (System.currentTimeMillis() - timer)) >= heartbeat) {
-								Discord4J.logger.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+								Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 								send("{\"op\":1,\"d\":" + System.currentTimeMillis() + "}");
 								timer = System.currentTimeMillis();
 							}
@@ -588,11 +589,11 @@ public final class DiscordClient {
                                 channel, client.convertFromTimestamp(event1.timestamp));
                         if (!event1.author.id.equalsIgnoreCase(client.getOurUser().getID())) {
                             channel.addMessage(message1);
-                            Discord4J.logger.debug("Message from: {} ({}) in channel ID {}: {}", message1.getAuthor().getName(), 
+                            Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message1.getAuthor().getName(), 
                                     event1.author.id, event1.channel_id, event1.content);
                             if (event1.content.contains("discord.gg/")) {
                                 String inviteCode = event1.content.split("discord\\.gg/")[1].split(" ")[0];
-                                Discord4J.logger.debug("Received invite code \"{}\"", inviteCode);
+                                Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
 								client.dispatcher.dispatch(new InviteReceivedEvent(new Invite(client, inviteCode), message1));
                             }
                             if (mentioned) {
@@ -642,15 +643,15 @@ public final class DiscordClient {
                             try {
                                 DiscordClient.this.getChannelMessages(channel1);
                             } catch (HTTP403Exception e) {
-                                Discord4J.logger.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", channelResponse.name, event3.name);
+                                Discord4J.LOGGER.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", channelResponse.name, event3.name);
                             } catch (Exception e) {
-                                Discord4J.logger.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", channelResponse.name, event3.name, e.getClass().getSimpleName());
+                                Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", channelResponse.name, event3.name, e.getClass().getSimpleName());
                             }
                         }
                     }
 
                     client.dispatcher.dispatch(new GuildCreateEvent(guild));
-                    Discord4J.logger.debug("New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
+                    Discord4J.LOGGER.debug("New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
                     break;
 
                 case "GUILD_MEMBER_ADD":
@@ -660,7 +661,7 @@ public final class DiscordClient {
                     guild = getGuildByID(guildID);
                     if(null != guild) {
                         guild.addUser(user);
-                        Discord4J.logger.debug("User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
+                        Discord4J.LOGGER.debug("User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
                         dispatcher.dispatch(new UserJoinEvent(guild, user, convertFromTimestamp(event4.joined_at)));
                     }
                     break;
@@ -673,7 +674,7 @@ public final class DiscordClient {
                     if(null != guild
                             && guild.getUsers().contains(user)) {
                         guild.getUsers().remove(user);
-                        Discord4J.logger.debug("User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
+                        Discord4J.LOGGER.debug("User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
                         dispatcher.dispatch(new UserLeaveEvent(guild, user));
                     }
                     break;
@@ -724,12 +725,12 @@ public final class DiscordClient {
                             if (!user.getPresence().equals(presences)) {
                                 dispatcher.dispatch(new PresenceUpdateEvent(guild, user, user.getPresence(), presences));
                                 user.setPresence(presences);
-                                Discord4J.logger.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
+                                Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
                             }
                             if (!user.getGame().equals(Optional.ofNullable(gameName))) {
                                 dispatcher.dispatch(new GameChangeEvent(guild, user, user.getGame().isPresent() ? user.getGame().get() : null, gameName));
                                 user.setGame(gameName);
-                                Discord4J.logger.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
+                                Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
                             }
                         }
                     }
@@ -739,7 +740,7 @@ public final class DiscordClient {
                     GuildResponse event9 = GSON.fromJson(eventObject, GuildResponse.class);
                     guild = getGuildByID(event9.id);
                     getGuilds().remove(guild);
-                    Discord4J.logger.debug("You have been kicked from or left \"{}\"! :O", guild.getName());
+                    Discord4J.LOGGER.debug("You have been kicked from or left \"{}\"! :O", guild.getName());
                     dispatcher.dispatch(new GuildLeaveEvent(guild));
                     break;
 
@@ -796,7 +797,7 @@ public final class DiscordClient {
                     break;
 
                 default:
-                    Discord4J.logger.warn("Unknown message received: {} (ignoring): {}", eventObject.toString(), frame);
+                    Discord4J.LOGGER.warn("Unknown message received: {} (ignoring): {}", eventObject.toString(), frame);
 			}
         }
 
