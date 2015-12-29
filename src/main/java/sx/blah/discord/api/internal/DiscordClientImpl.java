@@ -19,9 +19,6 @@
 
 package sx.blah.discord.api.internal;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
@@ -29,11 +26,15 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
-import sx.blah.discord.handle.impl.events.MessageSendEvent;
-import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.*;
-import sx.blah.discord.json.responses.*;
+import sx.blah.discord.json.requests.AccountInfoChangeRequest;
+import sx.blah.discord.json.requests.LoginRequest;
+import sx.blah.discord.json.requests.PresenceUpdateRequest;
+import sx.blah.discord.json.requests.PrivateChannelRequest;
+import sx.blah.discord.json.responses.AccountInfoChangeResponse;
+import sx.blah.discord.json.responses.GatewayResponse;
+import sx.blah.discord.json.responses.LoginResponse;
+import sx.blah.discord.json.responses.PrivateChannelResponse;
 import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Presences;
 import sx.blah.discord.util.Requests;
@@ -45,8 +46,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author qt
@@ -57,7 +56,6 @@ import java.util.regex.Pattern;
  * This class receives and
  * sends messages, as well
  * as holds our user data.
- * TODO: Make the code cleaner
  */
 public final class DiscordClientImpl implements IDiscordClient {
     /**
@@ -87,12 +85,7 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Local copy of all guilds/servers.
      */
 	protected final List<Guild> guildList = new ArrayList<>();
-	
-	/**
-     * Re-usable instance of Gson.
-     */
-	protected static final Gson GSON = new GsonBuilder().serializeNulls().create();
-
+    
     /**
      * Private copy of the email you logged in with.
      */
@@ -122,15 +115,6 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Whether the api is logged in.
      */
     protected boolean isReady = false;
-	
-	/**
-     * Used to find urls in order to not escape them
-     */
-    private static final Pattern urlPattern = Pattern.compile(
-            "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
-                    + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
-                    + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
-            Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
     
     public DiscordClientImpl(String email, String password) {
         this.dispatcher = new EventDispatcher(this);
@@ -155,8 +139,8 @@ public final class DiscordClientImpl implements IDiscordClient {
         }
 
         try {
-            LoginResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
-                    new StringEntity(GSON.toJson(new LoginRequest(email, password))),
+            LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
+                    new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
                     new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
             this.token = response.token;
         } catch (HTTP403Exception e) {
@@ -175,7 +159,7 @@ public final class DiscordClientImpl implements IDiscordClient {
     private String obtainGateway(String token) {
         String gateway = null;
         try {
-            GatewayResponse response = GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
+            GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
                     new BasicNameValuePair("authorization", token)), GatewayResponse.class);
             gateway = response.url.replaceAll("wss", "ws");
         } catch (HTTP403Exception e) {
@@ -187,98 +171,46 @@ public final class DiscordClientImpl implements IDiscordClient {
 
     @Override
     public Message sendMessage(String content, String channelID) throws IOException {
-        if (isReady()) {
-            
-            //All this weird regex stuff is to prevent any urls from being escaped and therefore breaking them
-            List<String> urls = new ArrayList<>();
-            Matcher matcher = urlPattern.matcher(content);
-            while (matcher.find()) {
-                int matchStart = matcher.start(1);
-                int matchEnd = matcher.end();
-                String url = content.substring(matchStart, matchEnd);
-                urls.add(url);
-                content = matcher.replaceFirst("@@URL"+(urls.size()-1)+"@@");//Hopefully no one will ever want to send a message with @@URL#@@
-            }
-            
-            content = StringEscapeUtils.escapeJson(content);
-            
-            for (int i = 0; i < urls.size(); i++) {
-                content = content.replace("@@URL"+i+"@@", " "+urls.get(i));
-            }
-            
-            try {
-                MessageResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages",
-                        new StringEntity(GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
-                        new BasicNameValuePair("authorization", token),
-                        new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
-                
-                String time = response.timestamp;
-                String messageID = response.id;
-
-                Channel channel = getChannelByID(channelID);
-                Message message = new Message(this, messageID, content, this.ourUser, channel, DiscordUtils.convertFromTimestamp(time));
-                channel.addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
-                DiscordClientImpl.this.dispatcher.dispatch(new MessageSendEvent(message));
-            return message;
-            } catch (HTTP403Exception e) {
-                Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
-                return null;
-            }
-
-        } else {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
+        Channel channel = getChannelByID(channelID);
+        if (channel == null) {
+            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
             return null;
         }
+        return channel.sendMessage(content);
     }
 	
     @Override
-    public void editMessage(String content, String messageID, String channelID) {
-        if (isReady()) {
-    
-            content = StringEscapeUtils.escapeJson(content);
-            
-            Channel channel = getChannelByID(channelID);
-            if (channel == null) {
-                Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
-                return;
-            }
-            
-            Message oldMessage = channel.getMessageByID(messageID);
-            
-            try {
-                MessageResponse response = GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages/" + messageID, 
-                        new StringEntity(GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
-                        new BasicNameValuePair("authorization", token),
-                        new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
-    
-                Message newMessage = new Message(this, response.id, content, this.ourUser, getChannelByID(channelID), 
-                        oldMessage.getTimestamp());
-                //Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
-                // the event chain goes like this:
-                //Original message edited to null, then the null message edited to the new content
-                DiscordClientImpl.this.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, newMessage));
-                oldMessage.setContent(content);
-            } catch (HTTP403Exception e) {
-                Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
-            }
-    
-        } else {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
+    public Message editMessage(String content, String messageID, String channelID) {
+        Channel channel = getChannelByID(channelID);
+        if (channel == null) {
+            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
+            return null;
         }
+        
+        Message message = channel.getMessageByID(messageID);
+        if (message == null) {
+            Discord4J.LOGGER.error("Message id " +  messageID + " doesn't exist!");
+            return null;
+        }
+        
+        return message.edit(content);
     }
     
     @Override
     public void deleteMessage(String messageID, String channelID) throws IOException {
-        if (this.isReady()) {
-            try {
-                Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages/" + messageID,
-                        new BasicNameValuePair("authorization", token));
-            } catch (HTTP403Exception e) {
-                Discord4J.LOGGER.error("Received 403 error attempting to delete message; is your login correct?");
-            }
-        } else {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
+        Channel channel = getChannelByID(channelID);
+        if (channel == null) {
+            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
+            return;
         }
+        
+        Message message = channel.getMessageByID(messageID);
+        if (message == null) {
+            Discord4J.LOGGER.error("Message id " +  messageID + " doesn't exist!");
+            return;
+        }
+        
+        message.delete();
     }
 
     
@@ -286,8 +218,8 @@ public final class DiscordClientImpl implements IDiscordClient {
     public void changeAccountInfo(String username, String email, String password) throws UnsupportedEncodingException, URISyntaxException {
         Discord4J.LOGGER.debug("Changing account info.");
         try {
-            AccountInfoChangeResponse response = GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
-                    new StringEntity(GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email, 
+            AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
+                    new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email, 
 							this.password, password, username == null || username.isEmpty() ? ourUser.getName() : username,
 							ourUser.getAvatar()))),
                     new BasicNameValuePair("Authorization", token),
@@ -306,7 +238,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
     @Override
     public void updatePresence(boolean isIdle, Optional<String> game) {
-        ws.send(GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.isPresent() ? game.get() : null)));
+        ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.isPresent() ? game.get() : null)));
         
         getOurUser().setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
         getOurUser().setGame(game.orElse(null));
@@ -375,8 +307,8 @@ public final class DiscordClientImpl implements IDiscordClient {
         }
 
         try {
-            PrivateChannelResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS + this.ourUser.getID() + "/channels",
-                    new StringEntity(GSON.toJson(new PrivateChannelRequest(user.getID()))),
+            PrivateChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS + this.ourUser.getID() + "/channels",
+                    new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
                     new BasicNameValuePair("authorization", this.token),
                     new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
            

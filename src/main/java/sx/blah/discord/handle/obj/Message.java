@@ -19,7 +19,17 @@
 
 package sx.blah.discord.handle.obj;
 
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
+import sx.blah.discord.json.requests.MessageRequest;
+import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -56,7 +66,7 @@ public class Message {
 	/**
      * The time the message was received.
      */
-    protected final LocalDateTime timestamp;
+    protected LocalDateTime timestamp;
 	
 	/**
 	 * The client that created this object.
@@ -93,6 +103,10 @@ public class Message {
     public String getID() {
         return messageID;
     }
+	
+	public void setTimestamp(LocalDateTime timestamp) {
+		this.timestamp = timestamp;
+	}
 
 	public LocalDateTime getTimestamp() {
 		return timestamp;
@@ -104,6 +118,46 @@ public class Message {
      * @param content Message to send.
      */
     public void reply(String content) throws IOException {
-        client.sendMessage(String.format("%s, %s", this.getAuthor(), content), this.getChannel().getID());
+        getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
     }
+	
+	public Message edit(String content) {
+		if (client.isReady()) {
+			content = DiscordUtils.escapeString(content);
+			
+			try {
+				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + messageID,
+						new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+				
+				Message oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp);
+				this.content = response.content;
+				this.timestamp = DiscordUtils.convertFromTimestamp(response.edited_timestamp);
+				//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
+				// the event chain goes like this:
+				//Original message edited to null, then the null message edited to the new content
+				client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
+			} catch (HTTP403Exception e) {
+				Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
+			}
+			
+		} else {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+		}
+		return this;
+	}
+	
+	public void delete() {
+		if (client.isReady()) {
+			try {
+				Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + messageID,
+						new BasicNameValuePair("authorization", client.getToken()));
+			} catch (HTTP403Exception e) {
+				Discord4J.LOGGER.error("Received 403 error attempting to delete message; is your login correct?");
+			}
+		} else {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+		}
+	}
 }

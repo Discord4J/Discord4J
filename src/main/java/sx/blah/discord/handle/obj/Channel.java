@@ -19,7 +19,17 @@
 
 package sx.blah.discord.handle.obj;
 
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.impl.events.MessageSendEvent;
+import sx.blah.discord.json.requests.MessageRequest;
+import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.Requests;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +42,7 @@ import java.util.List;
  * Defines a text channel in a guild/server.
  */
 public class Channel {
+    
     /**
      * User-friendly channel name (e.g. "general")
      */
@@ -117,6 +128,34 @@ public class Channel {
         return "<#" + this.getID() + ">";
     }
 
+    public Message sendMessage(String content) {
+        if (client.isReady()) {
+           content = DiscordUtils.escapeString(content);
+        
+            try {
+                MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
+                        new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
+                        new BasicNameValuePair("authorization", client.getToken()),
+                        new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+            
+                String time = response.timestamp;
+                String messageID = response.id;
+            
+                Message message = new Message(client, messageID, content, client.getOurUser(), this, DiscordUtils.convertFromTimestamp(time));
+                addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
+                client.getDispatcher().dispatch(new MessageSendEvent(message));
+                return message;
+            } catch (HTTP403Exception e) {
+                Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
+                return null;
+            }
+        
+        } else {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return null;
+        }
+    }
+    
     @Override 
     public String toString() {
         return mention();

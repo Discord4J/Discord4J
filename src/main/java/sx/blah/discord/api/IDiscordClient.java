@@ -52,8 +52,9 @@ public interface IDiscordClient {
 	 * @param content The new content for the message to contain.
 	 * @param messageID The message id of the message to edit.
 	 * @param channelID The channel id of the channel the message belongs to.
+	 * @return The new message.
 	 */
-	void editMessage(String content, String messageID, String channelID);
+	Message editMessage(String content, String messageID, String channelID);
 	
 	/**
 	 * Deletes a message.
