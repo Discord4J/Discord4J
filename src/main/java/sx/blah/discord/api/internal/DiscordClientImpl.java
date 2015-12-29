@@ -197,7 +197,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
     @Override
     public Message sendMessage(String content, String channelID) throws IOException {
-        if (null != ws) {
+        if (isReady()) {
             
             //All this weird regex stuff is to prevent any urls from being escaped and therefore breaking them
             List<String> urls = new ArrayList<>();
@@ -243,7 +243,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
     @Override
     public void editMessage(String content, String messageID, String channelID) {
-        if (null != ws) {
+        if (isReady()) {
     
             content = StringEscapeUtils.escapeJson(content);
             
@@ -347,7 +347,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
     @Override
     public boolean isReady() {
-        return isReady;
+        return isReady && ws != null;
     }
 
     @Override
