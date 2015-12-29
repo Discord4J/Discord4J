@@ -295,7 +295,7 @@ public final class DiscordClient {
      * @param email    Email (if you want to change it)
      * @param password Password (if you want to change it).
      */
-    public void changeAccountInfo(String username, String email, String password) throws UnsupportedEncodingException {
+    public void changeAccountInfo(String username, String email, String password) throws UnsupportedEncodingException, URISyntaxException {
         Discord4J.logger.debug("Token: {}", token);
         try {
             AccountInfoChangeResponse response = GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
@@ -305,7 +305,10 @@ public final class DiscordClient {
                     new BasicNameValuePair("Authorization", token),
                     new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
             
-            this.token = response.token;
+			if (!this.token.equals(response.token)) {
+				this.token = response.token;
+				this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
+			}
         } catch (HTTP403Exception e) {
             Discord4J.logger.error("Received 403 error attempting to change account details; is your login correct?");
         }
