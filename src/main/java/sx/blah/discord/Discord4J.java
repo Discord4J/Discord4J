@@ -38,6 +38,8 @@ public class Discord4J {
     
     public static String NAME;
     public static String VERSION;
+    public static String DESCRIPTION;
+    public static String URL;
 
     /**
      * SLF4J Instance
@@ -55,6 +57,10 @@ public class Discord4J {
         }
         NAME = properties.getProperty("application.name");
         VERSION = properties.getProperty("application.version");
+        DESCRIPTION = properties.getProperty("application.description");
+        URL = properties.getProperty("application.url");
+        
         LOGGER.info("{} v{}", NAME, VERSION);
+        LOGGER.info("{}", DESCRIPTION);
     }
 }

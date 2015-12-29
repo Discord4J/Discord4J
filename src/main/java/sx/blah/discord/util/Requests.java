@@ -31,10 +31,11 @@ import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import sx.blah.discord.Discord4J;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+
+import static sx.blah.discord.Discord4J.*;
 
 /**
  * New Request system. Reflection is cool, right guys?
@@ -45,8 +46,10 @@ public enum Requests {
     GET(HttpGet.class),
     DELETE(HttpDelete.class),
     PATCH(HttpPatch.class);
+    private static final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
 
-    static final HttpClient CLIENT = HttpClients.createDefault();
+    //Same as HttpClients.createDefault() but with the proper user-agent
+    static final HttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
 
     final Class<? extends HttpUriRequest> requestClass;
 
@@ -67,7 +70,7 @@ public enum Requests {
             HttpResponse response = CLIENT.execute(request);
             int responseCode = response.getStatusLine().getStatusCode();
             if (responseCode == 404) {
-                Discord4J.LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+                LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
             } else if (responseCode == 403) {
                 throw new HTTP403Exception("Unable to make request to " + url);
             } else if (responseCode == 204) { //There is a no content response when deleting messages
@@ -92,7 +95,7 @@ public enum Requests {
                 HttpResponse response = CLIENT.execute(request);
                 int responseCode = response.getStatusLine().getStatusCode();
                 if (responseCode == 404) {
-                    Discord4J.LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+                    LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
                 } else if (responseCode == 403) {
                     throw new HTTP403Exception("Unable to make request to " + url);
                 } else if (responseCode == 204) { //There is a no content response when deleting messages
@@ -100,7 +103,7 @@ public enum Requests {
                 }
                 return EntityUtils.toString(response.getEntity());
             } else {
-                Discord4J.LOGGER.error("Tried to attach HTTP entity to invalid type! ({})",
+                LOGGER.error("Tried to attach HTTP entity to invalid type! ({})",
                         this.requestClass.getSimpleName());
             }
         } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
