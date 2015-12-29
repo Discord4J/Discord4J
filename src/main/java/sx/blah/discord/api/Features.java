@@ -6,11 +6,14 @@ package sx.blah.discord.api;
  */
 public enum Features {
 	
-	MESSAGING(FeatureStatus.DEPRECATED), DISCORD_STATUS(FeatureStatus.UNSUPPORTED), 
-	ACCOUNT_MANAGEMENT(FeatureStatus.DEPRECATED), CHANNEL_MANAGEMENT(FeatureStatus.DEPRECATED), 
+	MESSAGING(FeatureStatus.SUPPORTED), DISCORD_STATUS(FeatureStatus.UNSUPPORTED), 
+	ACCOUNT_MANAGEMENT(FeatureStatus.SUPPORTED), CHANNEL_MANAGEMENT(FeatureStatus.UNSUPPORTED), 
 	SERVER_MANAGEMENT(FeatureStatus.UNSUPPORTED), ROLE_MANAGEMENT(FeatureStatus.UNSUPPORTED), 
-	VOICE(FeatureStatus.UNSUPPORTED), INVITES(FeatureStatus.DEPRECATED);
+	VOICE(FeatureStatus.UNSUPPORTED), INVITES(FeatureStatus.READ_ONLY);
 	
+	/**
+	 * How the feature has been implemented into the api
+	 */
 	public FeatureStatus status;
 	
 	Features(FeatureStatus status) {
