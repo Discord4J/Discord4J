@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author qt
@@ -129,6 +131,15 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Whether the api is logged in.
      */
     protected boolean isReady = false;
+	
+	/**
+     * Used to find urls in order to not escape them
+     */
+    private static final Pattern urlPattern = Pattern.compile(
+            "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
+                    + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
+                    + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
+            Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
     
     public DiscordClientImpl(String email, String password, EnumSet<Features> features) {
         this.dispatcher = new EventDispatcher(this);
@@ -187,8 +198,23 @@ public final class DiscordClientImpl implements IDiscordClient {
     @Override
     public Message sendMessage(String content, String channelID) throws IOException {
         if (null != ws) {
-
+            
+            //All this weird regex stuff is to prevent any urls from being escaped and therefore breaking them
+            List<String> urls = new ArrayList<>();
+            Matcher matcher = urlPattern.matcher(content);
+            while (matcher.find()) {
+                int matchStart = matcher.start(1);
+                int matchEnd = matcher.end();
+                String url = content.substring(matchStart, matchEnd);
+                urls.add(url);
+                content = matcher.replaceFirst("@@URL"+(urls.size()-1)+"@@");//Hopefully no one will ever want to send a message with @@URL#@@
+            }
+            
             content = StringEscapeUtils.escapeJson(content);
+            
+            for (int i = 0; i < urls.size(); i++) {
+                content = content.replace("@@URL"+i+"@@", " "+urls.get(i));
+            }
             
             try {
                 MessageResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages",
