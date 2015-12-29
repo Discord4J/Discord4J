@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author qt
@@ -471,7 +472,7 @@ public final class DiscordClient {
     class DiscordWS extends WebSocketClient {
 		
 		private DiscordClient client;
-		public boolean isConnected = true;
+		public AtomicBoolean isConnected = new AtomicBoolean(true);
 		
         public DiscordWS(DiscordClient client, URI serverURI) {
             super(serverURI);
@@ -480,7 +481,7 @@ public final class DiscordClient {
         }
 		
 		public void disconnect() {
-			isConnected = false;
+			isConnected.set(false);
 			close();
 		}
 
@@ -572,7 +573,7 @@ public final class DiscordClient {
 					Discord4J.LOGGER.debug("Logged in as {} (ID {}).", DiscordClient.this.ourUser.getName(), DiscordClient.this.ourUser.getID());
 					new Thread(() -> {
 						// Keep alive
-						while (this.isConnected) {
+						while (this.isConnected.get()) {
 							long l;
 							if ((l = (System.currentTimeMillis() - timer)) >= heartbeat) {
 								Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
