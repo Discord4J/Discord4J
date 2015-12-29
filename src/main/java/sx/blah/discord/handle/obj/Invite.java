@@ -31,18 +31,17 @@ import sx.blah.discord.util.Requests;
  * @author qt
  * @since 9:48 PM 17 Aug, 2015
  * Project: DiscordAPI
- * FIXME: Remove the client dependency
  */
 public class Invite {
 	/**
 	 * An invite code, AKA an invite URL minus the https://discord.gg/
 	 */
-	private final String inviteCode;
+	protected final String inviteCode;
 	
 	/**
-	 * The discord client instance
+	 * The client that created this object.
 	 */
-	private final IDiscordClient client;
+	protected final IDiscordClient client;
 
 	public Invite(IDiscordClient client, String inviteCode) {
 		this.client = client;

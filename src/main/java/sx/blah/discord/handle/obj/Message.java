@@ -35,31 +35,37 @@ public class Message {
     /**
      * The ID of the message. Used for message updating.
      */
-    private final String messageID;
+    protected final String messageID;
 
     /**
      * The actual message (what you see
      * on your screen, the content).
      */
-    private String content;
+    protected String content;
 
 	/**
 	 * The User who sent the message.
 	 */
-	private final User author;
+	protected final User author;
 
     /**
      * The ID of the channel the message was sent in.
      */
-    private final Channel channel;
+    protected final Channel channel;
 
 	/**
      * The time the message was received.
      */
-    private final LocalDateTime timestamp;
+    protected final LocalDateTime timestamp;
+	
+	/**
+	 * The client that created this object.
+	 */
+	protected final IDiscordClient client;
 
-    public Message(String messageID, String content, User user, Channel channel, LocalDateTime timestamp) {
-        this.messageID = messageID;
+    public Message(IDiscordClient client, String messageID, String content, User user, Channel channel, LocalDateTime timestamp) {
+        this.client = client;
+		this.messageID = messageID;
         this.content = content;
 	    this.author = user;
         this.channel = channel;
@@ -95,10 +101,9 @@ public class Message {
     /**
      * Adds an @mention to the author of the referenced Message
      * object before your content
-     * FIXME: remove client thingy
      * @param content Message to send.
      */
-    public void reply(IDiscordClient client, String content) throws IOException {
+    public void reply(String content) throws IOException {
         client.sendMessage(String.format("%s, %s", this.getAuthor(), content), this.getChannel().getID());
     }
 }

@@ -20,6 +20,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.Presences;
 
 import java.util.Optional;
@@ -35,22 +36,22 @@ public class User {
     /**
      * Display name of the user.
      */
-    private String name;
+    protected String name;
 
     /**
      * The user's avatar location.
      */
-    private String avatar;
+    protected String avatar;
 	
 	/**
      * The game the user is playing, either null or String
      */
-    private String game;
+    protected String game;
 
     /**
      * User ID.
      */
-    private final String id;
+    protected final String id;
 
     /**
      * User discriminator.
@@ -58,21 +59,27 @@ public class User {
      * <p>
      * This is here in case it becomes necessary.
      */
-    private int discriminator;
+    protected int discriminator;
 
     /**
      * This user's presence.
      * One of [online/idle/offline].
      */
-    private Presences presence;
+    protected Presences presence;
 
 	/**
 	 * The user's avatar in URL form.
 	 */
-	private String avatarURL;
+	protected String avatarURL;
+    
+    /**
+     * The client that created this object.
+     */
+    protected final IDiscordClient client;
 
-    public User(String name, String id, String avatar) {
-	    this.id = id;
+    public User(IDiscordClient client, String name, String id, String avatar) {
+	    this.client = client;
+        this.id = id;
 	    this.name = name;
 	    this.avatar = avatar;
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
@@ -126,7 +133,8 @@ public class User {
         return "<@" + id + ">";
     }
 
-    @Override public String toString() {
+    @Override 
+    public String toString() {
         return mention();
     }
 }

@@ -19,6 +19,8 @@
 
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.IDiscordClient;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,21 +30,26 @@ import java.util.List;
  * Project: Discord4J
  */
 public class PrivateChannel extends Channel {
-    private final User recipient;
-
-    public PrivateChannel(User recipient, String id) {
-        this(recipient, id, new ArrayList<>());
+	
+	/**
+     * The recipient of this private channel.
+     */
+    protected final User recipient;
+    
+    public PrivateChannel(IDiscordClient client, User recipient, String id) {
+        this(client, recipient, id, new ArrayList<>());
     }
 
-    public PrivateChannel(User recipient, String id, List<Message> messages) {
-        super(recipient.getName(), id, null, messages);
+    public PrivateChannel(IDiscordClient client, User recipient, String id, List<Message> messages) {
+        super(client, recipient.getName(), id, null, messages);
         this.recipient = recipient;
         this.isPrivate = true;
     }
 
     /**
      * Indicates the user with whom you are communicating.
-     * @return
+     * 
+     * @return The user.
      */
     public User getRecipient() {
         return recipient;

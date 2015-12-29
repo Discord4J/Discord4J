@@ -120,7 +120,7 @@ public class TestBot {
 							String s = m.getContent().split(" ", 2)[1];
 							try {
 								client.changeAccountInfo(s, "", "");
-								m.reply(client, "is this better?");
+								m.reply("is this better?");
 							} catch (IOException | URISyntaxException e) {
 								e.printStackTrace();
 							}
@@ -148,7 +148,7 @@ public class TestBot {
 						Invite invite = event.getInvite();
 						try {
 							Invite.InviteResponse response = invite.details();
-							event.getMessage().reply(client, String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
+							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
 							invite.accept();
 							client.sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild! I was invited by %s!",
 									response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()),
@@ -164,7 +164,7 @@ public class TestBot {
 					@Override
 					public void handle(MessageDeleteEvent event) {
 						try {
-							event.getMessage().reply(client, "you said, \\\""+event.getMessage().getContent()+"\\\"");
+							event.getMessage().reply("you said, \\\""+event.getMessage().getContent()+"\\\"");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

@@ -19,6 +19,8 @@
 
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.IDiscordClient;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,13 +55,19 @@ public class Channel {
     /**
      * The guild this channel belongs to.
      */
-    private final Guild parent;
+    protected final Guild parent;
+	
+	/**
+     * The client that created this object.
+     */
+    protected final IDiscordClient client;
 
-    public Channel(String name, String id, Guild parent) {
-        this(name, id, parent, new ArrayList<>());
+    public Channel(IDiscordClient client, String name, String id, Guild parent) {
+        this(client, name, id, parent, new ArrayList<>());
     }
 
-    public Channel(String name, String id, Guild parent, List<Message> messages) {
+    public Channel(IDiscordClient client, String name, String id, Guild parent, List<Message> messages) {
+        this.client = client;       
         this.name = name;
         this.id = id;
         this.messages = messages;
@@ -109,7 +117,8 @@ public class Channel {
         return "<#" + this.getID() + ">";
     }
 
-    @Override public String toString() {
+    @Override 
+    public String toString() {
         return mention();
     }
 }

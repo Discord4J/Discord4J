@@ -20,6 +20,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.IDiscordClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,39 +36,45 @@ public class Guild {
     /**
      * All text channels in the guild.
      */
-    private final List<Channel> channels;
+    protected final List<Channel> channels;
 
     /**
      * All users connected to the guild.
      */
-    private final List<User> users;
+    protected final List<User> users;
 
     /**
      * The name of the guild.
      */
-    private final String name;
+    protected final String name;
 
     /**
      * The ID of this guild.
      */
-    private final String id;
+    protected final String id;
 	
 	/**
      * The location of the guild icon
      */
-    private String icon;
+    protected String icon;
 	
 	/**
      * The url pointing to the guild icon
      */
-    private String iconURL;
+    protected String iconURL;
 	
 	/**
      * The user id for the owner of the guild
      */
-    private final String ownerID;
+    protected final String ownerID;
+    
+    /**
+     * The client that created this object.
+     */
+    protected final IDiscordClient client;
 
-    public Guild(String name, String id, String icon, String ownerID) {
+    public Guild(IDiscordClient client, String name, String id, String icon, String ownerID) {
+        this.client = client;
         this.name = name;
         this.id = id;
         this.channels = new ArrayList<>();
@@ -77,7 +84,8 @@ public class Guild {
         this.ownerID = ownerID;
     }
 
-    public Guild(String name, String id, String icon, String ownerID, List<Channel> channels, List<User> users) {
+    public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, List<Channel> channels, List<User> users) {
+        this.client = client;
         this.name = name;
         this.channels = channels;
         this.users = users;

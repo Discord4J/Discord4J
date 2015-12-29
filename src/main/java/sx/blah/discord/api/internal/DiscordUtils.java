@@ -36,7 +36,7 @@ public class DiscordUtils {
 		MessageResponse[] messages = DiscordClientImpl.GSON.fromJson(response, MessageResponse[].class);
 		
 		for (MessageResponse message : messages) {
-			channel.addMessage(new Message(message.id,
+			channel.addMessage(new Message(client, message.id,
 					message.content, client.getUserByID(message.author.id), channel, convertFromTimestamp(message.timestamp)));
 		}
 	}
@@ -54,17 +54,17 @@ public class DiscordUtils {
 	/**
 	 * Returns a user from raw JSON data.
 	 */
-	protected static User constructUserFromJSON(String user) {
+	public static User constructUserFromJSON(IDiscordClient client, String user) {
 		UserResponse response = DiscordClientImpl.GSON.fromJson(user, UserResponse.class);
 		
-		return constructUserFromJSON(response);
+		return constructUserFromJSON(client, response);
 	}
 	
 	/**
 	 * Returns a user from the java form of the raw JSON data.
 	 */
-	protected static User constructUserFromJSON(UserResponse response) {
-		User ourUser = new User(response.username, response.id, response.avatar);
+	public static User constructUserFromJSON(IDiscordClient client, UserResponse response) {
+		User ourUser = new User(client, response.username, response.id, response.avatar);
 		ourUser.setPresence(Presences.ONLINE);
 		
 		return ourUser;

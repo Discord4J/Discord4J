@@ -11,7 +11,6 @@ import java.util.EnumSet;
 public class ClientBuilder {
 	
 	private String[] loginInfo = new String[0];
-	private EnumSet<Features> features = EnumSet.allOf(Features.class);
 	
 	/**
 	 * Sets the login info for the client. This is a REQUIRED step
@@ -25,32 +24,6 @@ public class ClientBuilder {
 	}
 	
 	/**
-	 * Adds features available to the client instance. The builder defaults with
-	 * @param features The features the client is allowed to use
-	 * @return The instance of the builder
-	 */
-	public ClientBuilder withFeatures(EnumSet<Features> features) {
-		for (Features feature : features) {
-			if (!this.features.contains(feature))
-				this.features.add(feature);
-		}
-		return this;
-	}
-	
-	/**
-	 * Removes features available to the client instance
-	 * @param features The features the client can't use
-	 * @return The instance of the builder
-	 */
-	public ClientBuilder withoutFeatures(EnumSet<Features> features) {
-		for (Features feature : features) {
-			if (this.features.contains(feature))
-				this.features.remove(feature);
-		}
-		return this;
-	}
-	
-	/**
 	 * Creates the discord instance with the desired features
 	 * @return The discord instance
 	 * @throws DiscordInstantiationException Thrown if the instance isn't built correctly
@@ -59,7 +32,8 @@ public class ClientBuilder {
 		if (loginInfo.length < 2)
 			throw new DiscordInstantiationException("No login info present!");
 		
-		for (Features feature : features) {
+		//Warnings for the current version of this api.
+		for (Features feature : EnumSet.allOf(Features.class)) {
 			switch (feature.status) {
 				case UNSUPPORTED:
 					Discord4J.LOGGER.warn("Feature '{}' is unsupported by Discord4J!", feature.name());
@@ -70,12 +44,14 @@ public class ClientBuilder {
 				case EXPERIMENTAL:
 					Discord4J.LOGGER.warn("Feature '{}' is experimental! It is still WIP and is incomplete.", feature.name());
 					break;
-				case SUPPORTED:
 				case READ_ONLY:
 				case WRITE_ONLY:
+					Discord4J.LOGGER.warn("Feature '{}' is {}!", feature.name(), feature.status.name());
+					break;
+				case SUPPORTED:
 			}
 		}
-		return new DiscordClientImpl(loginInfo[0], loginInfo[1], features);
+		return new DiscordClientImpl(loginInfo[0], loginInfo[1]);
 	}
 	
 	/**

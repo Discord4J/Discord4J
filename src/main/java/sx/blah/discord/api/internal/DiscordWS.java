@@ -74,7 +74,7 @@ public class DiscordWS extends WebSocketClient {
 				
 				ReadyEventResponse event = GSON.fromJson(eventObject, ReadyEventResponse.class);
 				
-				client.ourUser = DiscordUtils.constructUserFromJSON(event.user);
+				client.ourUser = DiscordUtils.constructUserFromJSON(client, event.user);
 
 				client.heartbeat = event.heartbeat_interval;
 				Discord4J.LOGGER.debug("Received heartbeat interval of {}.", client.heartbeat);
@@ -82,10 +82,10 @@ public class DiscordWS extends WebSocketClient {
 				// I hope you like loops.
 				for (GuildResponse guildResponse : event.guilds) {
 					Guild guild;
-					client.guildList.add(guild = new Guild(guildResponse.name, guildResponse.name, guildResponse.icon, guildResponse.owner_id));
+					client.guildList.add(guild = new Guild(client, guildResponse.name, guildResponse.name, guildResponse.icon, guildResponse.owner_id));
 
 					for (GuildResponse.MemberResponse member : guildResponse.members) {
-						guild.addUser(new User(member.user.username, member.user.id, member.user.avatar));
+						guild.addUser(new User(client, member.user.username, member.user.id, member.user.avatar));
 					}
 
 					for (PresenceResponse presence : guildResponse.presences) {
@@ -98,7 +98,7 @@ public class DiscordWS extends WebSocketClient {
 						String channelType = channelResponse.type;
 						if ("text".equalsIgnoreCase(channelType)) {
 							Channel channel;
-							guild.addChannel(channel = new Channel(channelResponse.name, channelResponse.id, guild));
+							guild.addChannel(channel = new Channel(client, channelResponse.name, channelResponse.id, guild));
 							try {
 								DiscordUtils.getChannelMessages(client, channel);
 							} catch (HTTP403Exception e) {
@@ -112,8 +112,8 @@ public class DiscordWS extends WebSocketClient {
 
 				for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
 					String id = privateChannelResponse.id;
-					User recipient = new User(privateChannelResponse.recipient.username, privateChannelResponse.recipient.id, privateChannelResponse.recipient.avatar);
-					PrivateChannel channel = new PrivateChannel(recipient, id);
+					User recipient = new User(client, privateChannelResponse.recipient.username, privateChannelResponse.recipient.id, privateChannelResponse.recipient.avatar);
+					PrivateChannel channel = new PrivateChannel(client, recipient, id);
 					try {
 						DiscordUtils.getChannelMessages(client, channel);
 					} catch (HTTP403Exception e) {
@@ -148,7 +148,7 @@ public class DiscordWS extends WebSocketClient {
 				Channel channel = client.getChannelByID(event1.channel_id);
 				
 				if (null != channel) {
-					Message message1 = new Message(event1.id, event1.content, client.getUserByID(event1.author.id),
+					Message message1 = new Message(client, event1.id, event1.content, client.getUserByID(event1.author.id),
 							channel, DiscordUtils.convertFromTimestamp(event1.timestamp));
 					if (!event1.author.id.equalsIgnoreCase(client.getOurUser().getID())) {
 						channel.addMessage(message1);
@@ -185,11 +185,11 @@ public class DiscordWS extends WebSocketClient {
 
 			case "GUILD_CREATE":
 				GuildResponse event3 = GSON.fromJson(eventObject, GuildResponse.class);
-				Guild guild = new Guild(event3.name, event3.id, event3.icon, event3.owner_id);
+				Guild guild = new Guild(client, event3.name, event3.id, event3.icon, event3.owner_id);
 				client.guildList.add(guild);
 
 				for (GuildResponse.MemberResponse member : event3.members) {
-					guild.addUser(new User(member.user.username, member.user.id, member.user.avatar));
+					guild.addUser(new User(client, member.user.username, member.user.id, member.user.avatar));
 				}
 
 				for (PresenceResponse presence : event3.presences) {
@@ -202,7 +202,7 @@ public class DiscordWS extends WebSocketClient {
 					String channelType = channelResponse.type;
 					if ("text".equalsIgnoreCase(channelType)) {
 						Channel channel1;
-						guild.addChannel(channel1 = new Channel(channelResponse.name, channelResponse.id, guild));
+						guild.addChannel(channel1 = new Channel(client, channelResponse.name, channelResponse.id, guild));
 						try {
 							DiscordUtils.getChannelMessages(client, channel1);
 						} catch (HTTP403Exception e) {
@@ -219,7 +219,7 @@ public class DiscordWS extends WebSocketClient {
 
 			case "GUILD_MEMBER_ADD":
 				GuildMemberAddEventResponse event4 = GSON.fromJson(eventObject, GuildMemberAddEventResponse.class);
-				user = DiscordUtils.constructUserFromJSON(event4.user);
+				user = DiscordUtils.constructUserFromJSON(client, event4.user);
 				String guildID = event4.guild_id;
 				guild = client.getGuildByID(guildID);
 				if(null != guild) {
@@ -231,7 +231,7 @@ public class DiscordWS extends WebSocketClient {
 
 			case "GUILD_MEMBER_REMOVE":
 				GuildMemberRemoveEventResponse event5 = GSON.fromJson(eventObject, GuildMemberRemoveEventResponse.class);
-				user = DiscordUtils.constructUserFromJSON(event5.user);
+				user = DiscordUtils.constructUserFromJSON(client, event5.user);
 				guildID = event5.guild_id;
 				guild = client.getGuildByID(guildID);
 				if(null != guild
@@ -256,7 +256,7 @@ public class DiscordWS extends WebSocketClient {
 					Message newMessage;
 					int index = channel.getMessages().indexOf(m);
 					channel.getMessages().remove(m);
-					channel.getMessages().add(index, newMessage = new Message(id, content, m.getAuthor(), channel, m.getTimestamp()));
+					channel.getMessages().add(index, newMessage = new Message(client, id, content, m.getAuthor(), channel, m.getTimestamp()));
 					client.dispatcher.dispatch(new MessageUpdateEvent(m, newMessage));
 				}
 				break;
@@ -320,9 +320,9 @@ public class DiscordWS extends WebSocketClient {
 					}
 
 					if(b) break; // we already have this PM channel; no need to create another.
-					user = DiscordUtils.constructUserFromJSON(event10.recipient);
+					user = DiscordUtils.constructUserFromJSON(client, event10.recipient);
 					PrivateChannel privateChannel;
-					client.privateChannels.add(privateChannel = new PrivateChannel(user, id));
+					client.privateChannels.add(privateChannel = new PrivateChannel(client, user, id));
 					try {
 						DiscordUtils.getChannelMessages(client, privateChannel);
 					} catch (Exception e) {
@@ -338,7 +338,7 @@ public class DiscordWS extends WebSocketClient {
 						guildID = event10.guild_id;
 						guild = client.getGuildByID(guildID);
 						if(null != guild) {
-							channel = new Channel(name, id, guild);
+							channel = new Channel(client, name, id, guild);
 							try {
 								DiscordUtils.getChannelMessages(client, channel);
 							} catch (Exception e) {
@@ -363,7 +363,7 @@ public class DiscordWS extends WebSocketClient {
 				UserUpdateEventResponse event12 = GSON.fromJson(eventObject, UserUpdateEventResponse.class);
 				User newUser = client.getUserByID(event12.id);
 				if (newUser != null) {
-					User oldUser = new User(newUser.getName(), newUser.getID(), newUser.getAvatar());
+					User oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getAvatar());
 					newUser.setName(event12.username);
 					newUser.setAvatar(event12.avatar);
 					client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));

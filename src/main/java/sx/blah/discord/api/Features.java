@@ -1,8 +1,8 @@
 package sx.blah.discord.api;
 
 /**
- * This represents feature modules that This api supports.
- * This allows for bots to be modular by enabling and disabling certain features.
+ * This represents feature modules that this api supports.
+ * This allows for progressive api versions to warn bot developers about changes to the api.
  */
 public enum Features {
 	
@@ -26,7 +26,7 @@ public enum Features {
 	 * READ_ONLY = Feature can only read the status of something without the ability to modify
 	 * WRITE_ONLY = Feature can only change the status of something without the ability to get the status
 	 */
-	public static enum FeatureStatus {
+	public enum FeatureStatus {
 		SUPPORTED, UNSUPPORTED, DEPRECATED, EXPERIMENTAL, READ_ONLY, WRITE_ONLY
 	}
 }

@@ -27,7 +27,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
-import sx.blah.discord.api.Features;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
@@ -44,7 +43,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -104,11 +102,6 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Private copy of the password you used to log in.
      */
 	protected String password;
-	
-	/**
-	 * The features enabled for this client
-	 */
-	protected EnumSet<Features> features;
 
     /**
      * WebSocket over which to communicate with Discord.
@@ -139,11 +132,10 @@ public final class DiscordClientImpl implements IDiscordClient {
                     + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
     
-    public DiscordClientImpl(String email, String password, EnumSet<Features> features) {
+    public DiscordClientImpl(String email, String password) {
         this.dispatcher = new EventDispatcher(this);
 		this.email = email;
 		this.password = password;
-		this.features = features;
     }
     
     @Override
@@ -224,7 +216,7 @@ public final class DiscordClientImpl implements IDiscordClient {
                 String messageID = response.id;
 
                 Channel channel = getChannelByID(channelID);
-                Message message = new Message(messageID, content, this.ourUser, channel, DiscordUtils.convertFromTimestamp(time));
+                Message message = new Message(this, messageID, content, this.ourUser, channel, DiscordUtils.convertFromTimestamp(time));
                 channel.addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
                 DiscordClientImpl.this.dispatcher.dispatch(new MessageSendEvent(message));
             return message;
@@ -259,7 +251,7 @@ public final class DiscordClientImpl implements IDiscordClient {
                         new BasicNameValuePair("authorization", token),
                         new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
     
-                Message newMessage = new Message(response.id, content, this.ourUser, getChannelByID(channelID), 
+                Message newMessage = new Message(this, response.id, content, this.ourUser, getChannelByID(channelID), 
                         oldMessage.getTimestamp());
                 //Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
                 // the event chain goes like this:
@@ -388,7 +380,7 @@ public final class DiscordClientImpl implements IDiscordClient {
                     new BasicNameValuePair("authorization", this.token),
                     new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
            
-            PrivateChannel channel = new PrivateChannel(user, response.id);
+            PrivateChannel channel = new PrivateChannel(this, user, response.id);
             privateChannels.add(channel);
             return channel;
         } catch (HTTP403Exception e) {
