@@ -6,7 +6,6 @@ import sx.blah.discord.handle.obj.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,14 +82,6 @@ public interface IDiscordClient {
 	 * @param game The optional name of the game the bot is playing. If empty, the bot simply won't be playing a game.
 	 */
 	void updatePresence(boolean isIdle, Optional<String> game);
-	
-	/**
-	 * Converts a String timestamp into a java object timestamp.
-	 * 
-	 * @param time The String timestamp.
-	 * @return The java object representing the timestamp.
-	 */
-	LocalDateTime convertFromTimestamp(String time);
 	
 	/**
 	 * Checks if the api is ready to be interacted with (if it is logged in).

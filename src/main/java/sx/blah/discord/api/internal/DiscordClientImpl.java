@@ -43,8 +43,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -226,7 +224,7 @@ public final class DiscordClientImpl implements IDiscordClient {
                 String messageID = response.id;
 
                 Channel channel = getChannelByID(channelID);
-                Message message = new Message(messageID, content, this.ourUser, channel, this.convertFromTimestamp(time));
+                Message message = new Message(messageID, content, this.ourUser, channel, DiscordUtils.convertFromTimestamp(time));
                 channel.addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
                 DiscordClientImpl.this.dispatcher.dispatch(new MessageSendEvent(message));
             return message;
@@ -321,30 +319,7 @@ public final class DiscordClientImpl implements IDiscordClient {
         getOurUser().setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
         getOurUser().setGame(game.orElse(null));
     }
-
-    /**
-     * Gets the last 50 messages from a given channel ID.
-     *
-     * @param channel The channel to get messages from.
-     * @return Last 50 messages from the channel.
-     * @throws IOException
-     */
-    protected void getChannelMessages(Channel channel) throws IOException, HTTP403Exception {
-        String response = Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages?limit=50",
-                new BasicNameValuePair("authorization", token));
-        MessageResponse[] messages = GSON.fromJson(response, MessageResponse[].class);
-
-        for (MessageResponse message : messages) {
-            channel.addMessage(new Message(message.id,
-                    message.content, this.getUserByID(message.author.id), channel, this.convertFromTimestamp(message.timestamp)));
-        }
-    }
-
-    @Override
-    public LocalDateTime convertFromTimestamp(String time) {
-        return LocalDateTime.parse(time.split("\\+")[0]).atZone(ZoneId.of("UTC+00:00")).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
-    }
-
+    
     @Override
     public boolean isReady() {
         return isReady && ws != null;
@@ -421,24 +396,5 @@ public final class DiscordClientImpl implements IDiscordClient {
         }
 
         return null;
-    }
-
-    /**
-     * Returns a user from raw JSON data.
-     */
-    private User constructUserFromJSON(String user) {
-        UserResponse response = GSON.fromJson(user, UserResponse.class);
-
-        return constructUserFromJSON(response);
-    }
-    
-    /**
-     * Returns a user from the java form of the raw JSON data.
-     */
-    protected User constructUserFromJSON(UserResponse response) {
-        User ourUser = new User(response.username, response.id, response.avatar);
-        ourUser.setPresence(Presences.ONLINE);
-    
-        return ourUser;
     }
 }

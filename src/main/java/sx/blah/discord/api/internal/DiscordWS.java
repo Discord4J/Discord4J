@@ -38,10 +38,11 @@ public class DiscordWS extends WebSocketClient {
 		close();
 	}
 
+	
 	@Override
 	public void onOpen(ServerHandshake serverHandshake) {
 		if (!client.token.isEmpty()) {
-			send(GSON.toJson(new ConnectRequest(client.token, "Java", "Discord4J", "Discord4J", "", "")));
+			send(GSON.toJson(new ConnectRequest(client.token, "Java", Discord4J.NAME, Discord4J.NAME, "", "")));
 			Discord4J.LOGGER.debug("Connected to the Discord websocket.");
 		} else 
 			Discord4J.LOGGER.error("Use the login() method to set your token first!");
@@ -73,7 +74,7 @@ public class DiscordWS extends WebSocketClient {
 				
 				ReadyEventResponse event = GSON.fromJson(eventObject, ReadyEventResponse.class);
 				
-				client.ourUser = client.constructUserFromJSON(event.user);
+				client.ourUser = DiscordUtils.constructUserFromJSON(event.user);
 
 				client.heartbeat = event.heartbeat_interval;
 				Discord4J.LOGGER.debug("Received heartbeat interval of {}.", client.heartbeat);
@@ -99,7 +100,7 @@ public class DiscordWS extends WebSocketClient {
 							Channel channel;
 							guild.addChannel(channel = new Channel(channelResponse.name, channelResponse.id, guild));
 							try {
-								client.getChannelMessages(channel);
+								DiscordUtils.getChannelMessages(client, channel);
 							} catch (HTTP403Exception e) {
 								Discord4J.LOGGER.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", channelResponse.name, guildResponse.name);
 							} catch (Exception e) {
@@ -114,7 +115,7 @@ public class DiscordWS extends WebSocketClient {
 					User recipient = new User(privateChannelResponse.recipient.username, privateChannelResponse.recipient.id, privateChannelResponse.recipient.avatar);
 					PrivateChannel channel = new PrivateChannel(recipient, id);
 					try {
-						client.getChannelMessages(channel);
+						DiscordUtils.getChannelMessages(client, channel);
 					} catch (HTTP403Exception e) {
 						Discord4J.LOGGER.error("No permission for the private channel for \"{}\". Are you logged in properly?", channel.getRecipient().getName());
 					} catch (Exception e) {
@@ -148,7 +149,7 @@ public class DiscordWS extends WebSocketClient {
 				
 				if (null != channel) {
 					Message message1 = new Message(event1.id, event1.content, client.getUserByID(event1.author.id),
-							channel, client.convertFromTimestamp(event1.timestamp));
+							channel, DiscordUtils.convertFromTimestamp(event1.timestamp));
 					if (!event1.author.id.equalsIgnoreCase(client.getOurUser().getID())) {
 						channel.addMessage(message1);
 						Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message1.getAuthor().getName(), 
@@ -203,7 +204,7 @@ public class DiscordWS extends WebSocketClient {
 						Channel channel1;
 						guild.addChannel(channel1 = new Channel(channelResponse.name, channelResponse.id, guild));
 						try {
-							client.getChannelMessages(channel1);
+							DiscordUtils.getChannelMessages(client, channel1);
 						} catch (HTTP403Exception e) {
 							Discord4J.LOGGER.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", channelResponse.name, event3.name);
 						} catch (Exception e) {
@@ -218,19 +219,19 @@ public class DiscordWS extends WebSocketClient {
 
 			case "GUILD_MEMBER_ADD":
 				GuildMemberAddEventResponse event4 = GSON.fromJson(eventObject, GuildMemberAddEventResponse.class);
-				user = client.constructUserFromJSON(event4.user);
+				user = DiscordUtils.constructUserFromJSON(event4.user);
 				String guildID = event4.guild_id;
 				guild = client.getGuildByID(guildID);
 				if(null != guild) {
 					guild.addUser(user);
 					Discord4J.LOGGER.debug("User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
-					client.dispatcher.dispatch(new UserJoinEvent(guild, user, client.convertFromTimestamp(event4.joined_at)));
+					client.dispatcher.dispatch(new UserJoinEvent(guild, user, DiscordUtils.convertFromTimestamp(event4.joined_at)));
 				}
 				break;
 
 			case "GUILD_MEMBER_REMOVE":
 				GuildMemberRemoveEventResponse event5 = GSON.fromJson(eventObject, GuildMemberRemoveEventResponse.class);
-				user = client.constructUserFromJSON(event5.user);
+				user = DiscordUtils.constructUserFromJSON(event5.user);
 				guildID = event5.guild_id;
 				guild = client.getGuildByID(guildID);
 				if(null != guild
@@ -319,11 +320,11 @@ public class DiscordWS extends WebSocketClient {
 					}
 
 					if(b) break; // we already have this PM channel; no need to create another.
-					user = client.constructUserFromJSON(event10.recipient);
+					user = DiscordUtils.constructUserFromJSON(event10.recipient);
 					PrivateChannel privateChannel;
 					client.privateChannels.add(privateChannel = new PrivateChannel(user, id));
 					try {
-						client.getChannelMessages(privateChannel);
+						DiscordUtils.getChannelMessages(client, privateChannel);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -339,7 +340,7 @@ public class DiscordWS extends WebSocketClient {
 						if(null != guild) {
 							channel = new Channel(name, id, guild);
 							try {
-								client.getChannelMessages(channel);
+								DiscordUtils.getChannelMessages(client, channel);
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
