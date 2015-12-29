@@ -29,6 +29,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
 import sx.blah.discord.util.HTTP403Exception;
@@ -156,7 +157,7 @@ public final class DiscordClient {
 
         try {
             LoginResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
-                    new StringEntity("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"),
+                    new StringEntity(GSON.toJson(new LoginRequest(email, password))),
                     new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
             this.token = response.token;
         } catch (HTTP403Exception e) {
@@ -200,7 +201,7 @@ public final class DiscordClient {
             
             try {
                 MessageResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages",
-                        new StringEntity("{\"content\":\"" + content + "\",\"mentions\":[]}","UTF-8"), //TODO: remove mentions array
+                        new StringEntity(GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
                         new BasicNameValuePair("authorization", token),
                         new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
                 
@@ -245,7 +246,7 @@ public final class DiscordClient {
             
             try {
                 MessageResponse response = GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channelID + "/messages/" + messageID, 
-                        new StringEntity("{\"content\":\"" + content + "\", \"mentions\":[]}", "UTF-8"), //TODO: remove mentions array
+                        new StringEntity(GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
                         new BasicNameValuePair("authorization", token),
                         new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
     
@@ -294,20 +295,13 @@ public final class DiscordClient {
      * @param email    Email (if you want to change it)
      * @param password Password (if you want to change it).
      */
-    public void changeAccountInfo(String username, String email, String password)
-            throws UnsupportedEncodingException {
-        String s = "{\"username\":\"" +
-                (username.isEmpty() ? this.ourUser.getName() : username) +
-                "\",\"email\":\"" + (email.isEmpty() ? this.email : email)
-                + "\",\"password\":\""
-                + this.password
-                + "\",\"avatar\":\"" + this.ourUser.getAvatar() + "\",\"new_password\":"
-                + (password.isEmpty() ? "null" : "\"" + password + "\"") + "}";
+    public void changeAccountInfo(String username, String email, String password) throws UnsupportedEncodingException {
         Discord4J.logger.debug("Token: {}", token);
-        Discord4J.logger.debug(s);
         try {
             AccountInfoChangeResponse response = GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
-                    new StringEntity(s),
+                    new StringEntity(GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email, 
+							this.password, password, username == null || username.isEmpty() ? ourUser.getName() : username,
+							ourUser.getAvatar()))),
                     new BasicNameValuePair("Authorization", token),
                     new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
             
@@ -324,11 +318,7 @@ public final class DiscordClient {
      * @param game The (optional) game the game the bot is playing
      */
     public void updatePresence(boolean isIdle, Optional<String> game) {
-        String json = "{\"op\":3,\"d\":{\"idle_since\":" + (isIdle ? System.currentTimeMillis() : "null") + 
-                ",\"game\":{\"name\":\"" + (game.isPresent() ? "\""+game.get()+"\"" : "null") + "}}}";
-        Discord4J.logger.debug(json); 
-        
-        ws.send(json);
+        ws.send(GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.isPresent() ? game.get() : null)));
         
         getOurUser().setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
         getOurUser().setGame(game.orElse(null));
@@ -440,7 +430,7 @@ public final class DiscordClient {
 
         try {
             PrivateChannelResponse response = GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS + this.ourUser.getID() + "/channels",
-                    new StringEntity("{\"recipient_id\":\"" + user.getID() + "\"}"),
+                    new StringEntity(GSON.toJson(new PrivateChannelRequest(user.getID()))),
                     new BasicNameValuePair("authorization", this.token),
                     new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
            
@@ -486,9 +476,10 @@ public final class DiscordClient {
         @Override
         public void onOpen(ServerHandshake serverHandshake) {
             if (!token.isEmpty()) {
-                send("{\"op\":2,\"d\":{\"token\":\"" + token + "\",\"properties\":{\"$os\":\"Linux\",\"$browser\":\"DesuBot\",\"$device\":\"DesuBot\",\"$referrer\":\"\",\"$referring_domain\":\"\"},\"v\":2}}");
+				send(GSON.toJson(new ConnectRequest(token, "Java", "Discord4J", "Discord4J", "", "")));
                 Discord4J.logger.debug("Connected to the Discord websocket.");
-            } else System.err.println("Use the login() method to set your token first!");
+            } else 
+				System.err.println("Use the login() method to set your token first!");
         }
 
         /**
@@ -498,7 +489,8 @@ public final class DiscordClient {
          *
          * @param frame raw JSON data from Discord servers
          */
-        @Override public final void onMessage(String frame) {
+        @Override 
+		public final void onMessage(String frame) {
             JsonParser parser = new JsonParser();
             JsonObject object = parser.parse(frame).getAsJsonObject();
             if (object.has("message")) {
@@ -805,7 +797,8 @@ public final class DiscordClient {
 			}
         }
 
-        @Override public void onClose(int i, String s, boolean b) {
+        @Override 
+		public void onClose(int i, String s, boolean b) {
 
         }
 
