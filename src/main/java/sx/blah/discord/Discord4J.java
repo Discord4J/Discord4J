@@ -35,10 +35,22 @@ import java.util.Properties;
  * Main class. :D
  */
 public class Discord4J {
-    
+	
+	/**
+     * The name of the project
+     */
     public static String NAME;
+	/**
+     * The version of the api
+     */
     public static String VERSION;
+	/**
+     * The api's description
+     */
     public static String DESCRIPTION;
+	/**
+     * The github repo for the api
+     */
     public static String URL;
 
     /**
@@ -46,6 +58,7 @@ public class Discord4J {
      */
     public static final Logger LOGGER = LoggerFactory.getLogger(Discord4J.class);
     
+    //Dynamically getting various information from maven
     static {
         InputStream stream = Discord4J.class.getClassLoader().getResourceAsStream("app.properties");
         Properties properties = new Properties();
