@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.api.DiscordClient;
+import sx.blah.discord.api.IDiscordClient;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -98,7 +98,7 @@ public class Message {
      * FIXME: remove client thingy
      * @param content Message to send.
      */
-    public void reply(DiscordClient client, String content) throws IOException {
+    public void reply(IDiscordClient client, String content) throws IOException {
         client.sendMessage(String.format("%s, %s", this.getAuthor(), content), this.getChannel().getID());
     }
 }

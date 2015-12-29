@@ -19,7 +19,7 @@
 
 package sx.blah.discord.util;
 
-import sx.blah.discord.api.DiscordClient;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.Channel;
 
 /**
@@ -100,7 +100,7 @@ public class MessageBuilder {
 	 * my builder classes.
 	 * @param client The discord client
 	 */
-	public void build(DiscordClient client) {
+	public void build(IDiscordClient client) {
 		if (null == content || null == channelID) {
 			throw new RuntimeException("You need content and a channel ID to send a message!");
 		} else {
@@ -115,7 +115,7 @@ public class MessageBuilder {
 	/**
 	 * Alternate name, in case people don't know that build() sends.
 	 */
-	public void send(DiscordClient client) {
+	public void send(IDiscordClient client) {
 		build(client);
 	}
 

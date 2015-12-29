@@ -21,7 +21,7 @@ package sx.blah.discord;
 
 import org.junit.Test;
 import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.DiscordClient;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
@@ -63,7 +63,7 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
-			DiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).login();
+			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).login();
 
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");

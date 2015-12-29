@@ -1,11 +1,12 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 
 import java.util.EnumSet;
 
 /**
- * Use this as a factory to create {@link DiscordClient} instances
+ * Use this as a factory to create {@link IDiscordClient} instances
  */
 public class ClientBuilder {
 	
@@ -54,7 +55,7 @@ public class ClientBuilder {
 	 * @return The discord instance
 	 * @throws DiscordInstantiationException Thrown if the instance isn't built correctly
 	 */
-	public DiscordClient build() throws DiscordInstantiationException {
+	public IDiscordClient build() throws DiscordInstantiationException {
 		if (loginInfo.length < 2)
 			throw new DiscordInstantiationException("No login info present!");
 		
@@ -74,7 +75,7 @@ public class ClientBuilder {
 				case WRITE_ONLY:
 			}
 		}
-		return new DiscordClient(loginInfo[0], loginInfo[1], features);
+		return new DiscordClientImpl(loginInfo[0], loginInfo[1], features);
 	}
 	
 	/**
@@ -82,8 +83,8 @@ public class ClientBuilder {
 	 * @return The discord instance
 	 * @throws DiscordInstantiationException Thrown if the instance isn't built correctly
 	 */
-	public DiscordClient login() throws DiscordInstantiationException {
-		DiscordClient client = build();
+	public IDiscordClient login() throws DiscordInstantiationException {
+		IDiscordClient client = build();
 		try {
 			client.login();
 		} catch (Exception e) {

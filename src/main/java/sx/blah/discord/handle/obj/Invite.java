@@ -22,8 +22,8 @@ package sx.blah.discord.handle.obj;
 import com.google.gson.Gson;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.DiscordClient;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.json.responses.InviteJSONResponse;
 import sx.blah.discord.util.Requests;
 
@@ -42,9 +42,9 @@ public class Invite {
 	/**
 	 * The discord client instance
 	 */
-	private final DiscordClient client;
+	private final IDiscordClient client;
 
-	public Invite(DiscordClient client, String inviteCode) {
+	public Invite(IDiscordClient client, String inviteCode) {
 		this.client = client;
 		this.inviteCode = inviteCode;
 	}

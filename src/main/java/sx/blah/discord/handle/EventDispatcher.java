@@ -2,7 +2,7 @@ package sx.blah.discord.handle;
 
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.DiscordClient;
+import sx.blah.discord.api.IDiscordClient;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,9 +17,9 @@ public class EventDispatcher {
 	
 	private HashMap<Class<?>, HashMap<Method, Object>> methodListeners = new HashMap<>();
 	private HashMap<Class<?>, List<IListener>> classListeners = new HashMap<>();
-	private DiscordClient client;
+	private IDiscordClient client;
 	
-	public EventDispatcher(DiscordClient client) {
+	public EventDispatcher(IDiscordClient client) {
 		this.client = client;
 	}
 	
