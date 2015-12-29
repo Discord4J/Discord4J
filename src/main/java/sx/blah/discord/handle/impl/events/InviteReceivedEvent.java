@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
 
@@ -27,7 +27,8 @@ import sx.blah.discord.handle.obj.Message;
  * @author x
  * @since 10/8/2015
  */
-public class InviteReceivedEvent implements IEvent {
+public class InviteReceivedEvent extends Event {
+	
 	private final Invite invite;
 	private final Message message;
 

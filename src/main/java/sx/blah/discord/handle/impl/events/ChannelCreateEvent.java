@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Channel;
 
 /**
@@ -27,7 +27,8 @@ import sx.blah.discord.handle.obj.Channel;
  * @since 2:42 PM, 10/17/15
  * Project: Discord4J
  */
-public class ChannelCreateEvent implements IEvent {
+public class ChannelCreateEvent extends Event {
+    
     private final Channel channel;
 
     public ChannelCreateEvent(Channel channel) {

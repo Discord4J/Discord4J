@@ -26,8 +26,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.IDispatcher;
-import sx.blah.discord.handle.impl.EventDispatcher;
+import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.responses.*;
@@ -115,7 +114,7 @@ public final class DiscordClient {
     /**
      * Event dispatcher.
      */
-    private IDispatcher dispatcher;
+    private EventDispatcher dispatcher;
 
     /**
      * All of the private message channels that the bot is connected to.
@@ -123,25 +122,16 @@ public final class DiscordClient {
     private final List<PrivateChannel> privateChannels = new ArrayList<>();
 
     protected DiscordClient(String email, String password, EnumSet<Features> features) {
-        this.dispatcher = new EventDispatcher();
+        this.dispatcher = new EventDispatcher(this);
 		this.email = email;
 		this.password = password;
 		this.features = features;
     }
 
     /**
-     * Allows you to use a custom event dispatcher.
-     *
-     * @param dispatcher An instance of IDispatcher.
-     */
-    public void setDispatcher(IDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
-
-    /**
      * @return the event dispatcher. This will send events to all listeners
      */
-    public IDispatcher getDispatcher() {
+    public EventDispatcher getDispatcher() {
         return dispatcher;
     }
 

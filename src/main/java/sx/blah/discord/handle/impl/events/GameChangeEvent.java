@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Guild;
 import sx.blah.discord.handle.obj.User;
 
@@ -9,7 +9,8 @@ import sx.blah.discord.handle.obj.User;
  * @since 9:10 PM, 12/4/15
  * Project: Discord4J
  */
-public class GameChangeEvent implements IEvent {
+public class GameChangeEvent extends Event {
+	
 	private final Guild guild;
 	private final User user;
 	private final String oldGame, newGame;

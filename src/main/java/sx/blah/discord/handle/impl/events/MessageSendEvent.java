@@ -19,14 +19,15 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Message;
 
 /**
  * @author x
  * @since 10/9/2015
  */
-public class MessageSendEvent implements IEvent {
+public class MessageSendEvent extends Event {
+	
 	private Message message;
 
 	public MessageSendEvent(Message message) {

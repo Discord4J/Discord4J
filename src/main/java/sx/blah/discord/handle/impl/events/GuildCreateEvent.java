@@ -19,14 +19,15 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Guild;
 
 /**
  * @author x
  * @since 10/8/2015
  */
-public class GuildCreateEvent implements IEvent {
+public class GuildCreateEvent extends Event {
+	
 	private final Guild guild;
 
 	public GuildCreateEvent(Guild guild) {

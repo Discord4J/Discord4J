@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Guild;
 
 /**
@@ -27,7 +27,8 @@ import sx.blah.discord.handle.obj.Guild;
  * @since 1:56 PM, 10/17/15
  * Project: Discord4J
  */
-public class GuildLeaveEvent implements IEvent {
+public class GuildLeaveEvent extends Event {
+    
     private final Guild guild;
 
     public GuildLeaveEvent(Guild guild) {

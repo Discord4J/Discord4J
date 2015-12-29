@@ -19,9 +19,16 @@
 
 package sx.blah.discord.handle;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * @author x
- * @since 10/2/2015
+ * Represents a method that handles events
  */
-public interface IEvent {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EventSubscriber {
+	
 }

@@ -55,6 +55,6 @@ public class Discord4J {
         }
         NAME = properties.getProperty("application.name");
         VERSION = properties.getProperty("application.version");
-        logger.info(NAME+" v"+VERSION);
+        logger.info("{} v{}", NAME, VERSION);
     }
 }

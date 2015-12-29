@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Channel;
 import sx.blah.discord.handle.obj.User;
 
@@ -28,7 +28,8 @@ import sx.blah.discord.handle.obj.User;
  * @since 1:39 AM, 10/17/15
  * Project: Discord4J
  */
-public class TypingEvent implements IEvent {
+public class TypingEvent extends Event {
+    
     private final User user;
     private final Channel channel;
 

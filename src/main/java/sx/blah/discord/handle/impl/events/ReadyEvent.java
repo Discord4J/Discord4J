@@ -19,11 +19,12 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 
 /**
  * @author x
  * @since 10/9/2015
  */
-public class ReadyEvent implements IEvent {
+public class ReadyEvent extends Event {
+	
 }

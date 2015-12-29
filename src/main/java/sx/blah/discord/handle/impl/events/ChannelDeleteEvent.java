@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Channel;
 
 /**
@@ -27,7 +27,8 @@ import sx.blah.discord.handle.obj.Channel;
  * @since 2:49 PM, 10/17/15
  * Project: Discord4J
  */
-public class ChannelDeleteEvent implements IEvent {
+public class ChannelDeleteEvent extends Event {
+    
     private final Channel channel;
 
     public ChannelDeleteEvent(Channel channel) {

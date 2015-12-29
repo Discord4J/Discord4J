@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.IEvent;
+import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Message;
 
 /**
@@ -27,7 +27,8 @@ import sx.blah.discord.handle.obj.Message;
  * @since 12:46 AM, 10/17/15
  * Project: Discord4J
  */
-public class MessageUpdateEvent implements IEvent {
+public class MessageUpdateEvent extends Event {
+    
     private final Message oldMessage, newMessage;
 
     public MessageUpdateEvent(Message oldMessage, Message newMessage) {

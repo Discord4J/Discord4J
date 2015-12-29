@@ -69,7 +69,7 @@ public class TestBot {
 				final AtomicBoolean didTest = new AtomicBoolean(false);
 				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 					@Override
-					public void receive(ReadyEvent messageReceivedEvent) {
+					public void handle(ReadyEvent messageReceivedEvent) {
 						try {
 							Invite testInvite = new Invite(client, System.getenv("INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse response = testInvite.details();
@@ -95,7 +95,7 @@ public class TestBot {
 			} else { //Dev testing
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
-					public void receive(MessageReceivedEvent messageReceivedEvent) {
+					public void handle(MessageReceivedEvent messageReceivedEvent) {
 						Message m = messageReceivedEvent.getMessage();
 						if (m.getContent().startsWith(".meme")
 								|| m.getContent().startsWith(".nicememe")) {
@@ -143,7 +143,7 @@ public class TestBot {
 				
 				client.getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
 					@Override
-					public void receive(InviteReceivedEvent event) {
+					public void handle(InviteReceivedEvent event) {
 						Invite invite = event.getInvite();
 						try {
 							Invite.InviteResponse response = invite.details();
@@ -161,7 +161,7 @@ public class TestBot {
 				
 				client.getDispatcher().registerListener(new IListener<MessageDeleteEvent>() {
 					@Override
-					public void receive(MessageDeleteEvent event) {
+					public void handle(MessageDeleteEvent event) {
 						try {
 							event.getMessage().reply(client, "you said, \\\""+event.getMessage().getContent()+"\\\"");
 						} catch (Exception e) {
