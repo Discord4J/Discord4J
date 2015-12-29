@@ -802,9 +802,20 @@ public final class DiscordClient {
                         channel.getParent().getChannels().remove(channel);
                     }
                     break;
+				
+				case "USER_UPDATE":
+					UserUpdateEventResponse event12 = GSON.fromJson(eventObject, UserUpdateEventResponse.class);
+					User newUser = getUserByID(event12.id);
+					if (newUser != null) {
+						User oldUser = new User(newUser.getName(), newUser.getID(), newUser.getAvatar());
+						newUser.setName(event12.username);
+						newUser.setAvatar(event12.avatar);
+						dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
+					}
+					break;
 
                 default:
-                    Discord4J.LOGGER.warn("Unknown message received: {} (ignoring): {}", eventObject.toString(), frame);
+                    Discord4J.LOGGER.warn("Unknown message received: {} REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", eventObject.toString(), frame);
 			}
         }
 
