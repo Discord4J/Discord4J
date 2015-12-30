@@ -137,4 +137,12 @@
             </resource>
         </resources>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>bintray-austinv11-maven</id>
+            <name>austinv11-maven</name>
+            <url>https://api.bintray.com/maven/austinv11/maven/Discord4J/;publish=1</url>
+        </repository>
+    </distributionManagement>
 </project>
