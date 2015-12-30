@@ -139,4 +139,19 @@ public interface IDiscordClient {
 	 * @throws Exception
 	 */
 	PrivateChannel getOrCreatePMChannel(User user) throws Exception;
+	
+	/**
+	 * Toggles whether the bot is "typing".
+	 * 
+	 * @param channelId The channel to maintain the typing status to.
+	 */
+	void toggleTypingStatus(String channelId);
+	
+	/**
+	 * Gets whether the bot is "typing".
+	 * 
+	 * @param channelId The channel to get the typing status for for this bot.
+	 * @return True if the bot is typing, false if otherwise.
+	 */
+	boolean getTypingStatus(String channelId);
 }

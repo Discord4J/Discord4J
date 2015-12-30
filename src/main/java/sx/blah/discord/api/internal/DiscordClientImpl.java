@@ -46,6 +46,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author qt
@@ -115,6 +116,21 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Whether the api is logged in.
      */
     protected boolean isReady = false;
+	
+	/**
+     * Whether the bot should send out a typing status
+     */
+    protected volatile ConcurrentHashMap<String, Boolean> isTyping = new ConcurrentHashMap<>();
+	
+	/**
+     * Keeps track of the time to handle repeated typing status broadcasts
+     */
+    protected volatile ConcurrentHashMap<String, Long> typingTimer = new ConcurrentHashMap<>();
+	
+	/**
+     * 5 seconds, the time it takes for one typing status to "wear off"
+     */
+    protected static final long TIME_FOR_TYPE_STATUS = 5000;
     
     public DiscordClientImpl(String email, String password) {
         this.dispatcher = new EventDispatcher(this);
@@ -320,5 +336,31 @@ public final class DiscordClientImpl implements IDiscordClient {
         }
 
         return null;
+    }
+    
+    @Override
+    public synchronized void toggleTypingStatus(final String channelId) {
+        isTyping.put(channelId, !getTypingStatus(channelId));
+        
+        if (isTyping.get(channelId)) {
+            typingTimer.put(channelId, System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
+            new Thread(() -> {
+                while (getTypingStatus(channelId)) {
+                    if (typingTimer.get(channelId) <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
+                        try {
+                            Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+channelId+"/typing",
+									new BasicNameValuePair("authorization", this.token));
+                        } catch (HTTP403Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+        }
+    }
+    
+    @Override
+    public synchronized boolean getTypingStatus(String channelId) {
+        return isTyping.containsKey(channelId) ? isTyping.get(channelId) : false;
     }
 }

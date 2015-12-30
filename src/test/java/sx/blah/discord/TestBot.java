@@ -138,6 +138,8 @@ public class TestBot {
 							String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
 							client.updatePresence(client.getOurUser().getPresence().equals(Presences.IDLE),
 									Optional.ofNullable(game));
+						} else if (m.getContent().startsWith(".type")) {
+							client.toggleTypingStatus(m.getChannel().getID());
 						}
 					}
 				});
