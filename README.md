@@ -3,6 +3,8 @@
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://blog.discordapp.com/the-robot-revolution-has-unofficially-begun/)
 
+For the latest dev builds, [download it from my ci server.](https://drone.io/github.com/austinv11/Discord4J/files)
+
 ### Development
 The Discord API is still in development. Functions may break at any time.  
 In such an event, please contact me or submit a pull request.
