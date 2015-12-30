@@ -15,3 +15,5 @@
 # Maven
 log/
 target/
+# So only I could push releases
+settings.xml
