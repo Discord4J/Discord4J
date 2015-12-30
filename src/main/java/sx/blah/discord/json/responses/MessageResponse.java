@@ -21,10 +21,9 @@ public class MessageResponse {
 	public boolean tts;
 	
 	/**
-	 * Any embedded content in the message (note: this only gets added in a MESSAGE_UPDATE event
-	 * FIXME: Needs to be able to handle all possible embed "types"
+	 * Any embedded content in the message (note: this only gets added in a MESSAGE_UPDATE event)
 	 */
-//	public EmbedResponse[] embeds;
+	public EmbedResponse[] embeds;
 	
 	/**
 	 * The timestamp for the message
@@ -65,6 +64,115 @@ public class MessageResponse {
 	 * The users mentioned in the message
 	 */
 	public UserResponse[] mentions;
+	
+	/**
+	 * Represents embeded data
+	 */
+	public static class EmbedResponse {
+		
+		/**
+		 * The author of the embed link, nullable.
+		 */
+		public AuthorResponse author;
+		
+		/**
+		 * A description of the embed link, nullable.
+		 */
+		public String description;
+		
+		/**
+		 * The embed link provider, nullable.
+		 */
+		public ProviderResponse provider;
+		
+		/**
+		 * The thumbnail of the embed link, nullable.
+		 */
+		public ThumbnailResponse thumbnail;
+		
+		/**
+		 * The title of the embed link, nullable.
+		 */
+		public String title;
+		
+		/**
+		 * The type of embed link, nullable.
+		 * Ex. "article",null,"video","html","link","image","xivdb","rich","json","text","photo", etc.
+		 */
+		public String type;
+		
+		/**
+		 * The url of the embed link.
+		 */
+		public String url;
+		
+		/**
+		 * The video for the embed link, nullable.
+		 */
+		public VideoResponse video;
+		
+		/**
+		 * Represents an author object.
+		 */
+		public static class AuthorResponse {
+			
+			/**
+			 * The name of the author.
+			 */
+			public String name;
+			
+			/**
+			 * The url of the author, nullable.
+			 */
+			public String url;
+		}
+		
+		/**
+		 * Represents a provider object.
+		 */
+		public static class ProviderResponse {
+			
+			/**
+			 * The name of the data provider.
+			 */
+			public String name;
+			
+			/**
+			 * The provider's url, nullable.
+			 */
+			public String url;
+		}
+		
+		/**
+		 * Represents a thumbnail object.
+		 */
+		public static class ThumbnailResponse {
+			
+			/**
+			 * The height, in pixels of the thumbnail.
+			 */
+			public int height;
+			
+			/**
+			 * The width, in pixels of the thumbnail.
+			 */
+			public int width;
+			
+			/**
+			 * The discord hosted thumbnail image.
+			 */
+			public String proxy_url;
+			
+			/**
+			 * The direct link to the image.
+			 */
+			public String url;
+		}
+		
+		public static class VideoResponse {
+			
+		}
+	}
 	
 	/**
 	 * A representation of a file attachment
