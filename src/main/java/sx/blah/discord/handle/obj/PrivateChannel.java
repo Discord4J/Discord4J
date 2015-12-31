@@ -25,9 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author qt
- * @since 11:58 PM, 10/16/15
- * Project: Discord4J
+ * Represents a private channel where you could direct message a user.
  */
 public class PrivateChannel extends Channel {
 	

@@ -23,8 +23,7 @@ import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Message;
 
 /**
- * @author x
- * @since 10/4/2015
+ * This event is dispatched whenever a message is received.
  */
 public class MessageReceivedEvent extends Event {
 	
@@ -33,7 +32,12 @@ public class MessageReceivedEvent extends Event {
 	public MessageReceivedEvent(Message message) {
 		this.message = message;
 	}
-
+	
+	/**
+	 * Gets the message received.
+	 * 
+	 * @return The message.
+	 */
 	public Message getMessage() {
 		return message;
 	}

@@ -23,9 +23,7 @@ import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Message;
 
 /**
- * @author qt
- * @since 12:46 AM, 10/17/15
- * Project: Discord4J
+ * This event is dispatched whenever a message is edited.
  */
 public class MessageUpdateEvent extends Event {
     
@@ -35,11 +33,21 @@ public class MessageUpdateEvent extends Event {
         this.oldMessage = oldMessage;
         this.newMessage = newMessage;
     }
-
+	
+	/**
+     * The original message.
+     * 
+     * @return The message.
+     */
     public Message getOldMessage() {
         return oldMessage;
     }
-
+	
+	/**
+     * The new message.
+     * 
+     * @return The message.
+     */
     public Message getNewMessage() {
         return newMessage;
     }

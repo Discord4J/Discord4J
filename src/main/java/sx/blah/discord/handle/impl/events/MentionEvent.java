@@ -23,8 +23,7 @@ import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Message;
 
 /**
- * @author x
- * @since 10/8/2015
+ * This event is dispatched whenever the bot is @mentioned.
  */
 public class MentionEvent extends Event {
 	
@@ -33,7 +32,12 @@ public class MentionEvent extends Event {
 	public MentionEvent(Message message) {
 		this.message = message;
 	}
-
+	
+	/**
+	 * Gets the messaged which @mention'd the bot.
+	 * 
+	 * @return The message.
+	 */
 	public Message getMessage() {
 		return message;
 	}

@@ -21,22 +21,25 @@ package sx.blah.discord.util;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.Channel;
+import sx.blah.discord.handle.obj.Message;
 
 /**
- * @author x
- * @since 10/2/2015
- * <p>
  * Utility class designed to make message sending easier.
- * FIXME
  */
 public class MessageBuilder {
 	private String content = "";
-	private String channelID;
+	private Channel channel;
+	private IDiscordClient client;
+	
+	public MessageBuilder(IDiscordClient client) {
+		this.client = client;
+	}
 
     /**
      * Sets the content of the message.
-     * @param content
-     * @return
+	 * 
+     * @param content The message contents.
+     * @return The message builder instance.
      */
 	public MessageBuilder withContent(String content) {
 		this.content = content;
@@ -45,9 +48,10 @@ public class MessageBuilder {
 
     /**
      * Sets the content of the message with a given style.
-     * @param content
-     * @param styles
-     * @return
+	 * 
+     * @param content The message contents.
+     * @param styles The style to be applied to the content.
+     * @return The message builder instance.
      */
     public MessageBuilder withContent(String content, Styles styles) {
 		this.content = styles.getMarkdown() + content + styles.getReverseMarkdown();
@@ -56,8 +60,9 @@ public class MessageBuilder {
 
     /**
      * Appends extra text to the current content.
-     * @param content
-     * @return
+	 * 
+     * @param content The content to append.
+     * @return The message builder instance.
      */
     public MessageBuilder appendContent(String content) {
         this.content += content;
@@ -66,9 +71,10 @@ public class MessageBuilder {
 
     /**
      * Appends extra text to the current content with given style.
-     * @param content
-     * @param styles
-     * @return
+	 * 
+     * @param content The content to append.
+     * @param styles The style to be applied to the new content.
+     * @return The message builder instance.
      */
     public MessageBuilder appendContent(String content, Styles styles) {
         this.content += (styles.getMarkdown() + content + styles.getReverseMarkdown());
@@ -77,46 +83,53 @@ public class MessageBuilder {
 
     /**
      * Sets the channel that the message should go to.
-     * @param channelID
-     * @return
+	 * 
+     * @param channelID The channel to send the message to.
+     * @return The message builder instance.
      */
 	public MessageBuilder withChannel(String channelID) {
-		this.channelID = channelID;
+		this.channel = client.getChannelByID(channelID);
 		return this;
 	}
 
     /**
      * Sets the channel that the message should go to.
-     * @param channel
-     * @return
+	 * 
+     * @param channel The channel to send the mssage to.
+     * @return The message builder instance.
      */
 	public MessageBuilder withChannel(Channel channel) {
-		this.channelID = channel.getID();
+		this.channel = channel;
 		return this;
 	}
 
 	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
-	 * @param client The discord client
+	 * Sends and creates the message object.
+	 * 
+	 * @return The message object representing the sent message.
 	 */
-	public void build(IDiscordClient client) {
-		if (null == content || null == channelID) {
-			throw new RuntimeException("You need content and a channel ID to send a message!");
+	public Message build() {
+		if (null == content || null == channel) {
+			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
 			try {
-				client.sendMessage(content, channelID);
+				return channel.sendMessage(content);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		return null;
 	}
 
 	/**
-	 * Alternate name, in case people don't know that build() sends.
+	 * Sends the message, does the same thing as {@link #build()}.
+	 * 
+	 * @return The message object representing the sent message.
 	 */
-	public void send(IDiscordClient client) {
-		build(client);
+	public Message send() {
+		return build();
 	}
 
     /**
@@ -128,6 +141,7 @@ public class MessageBuilder {
         BOLD_ITALICS("***"),
         STRIKEOUT("~~"),
         CODE("```"),
+		INLINE_CODE("`"),
         UNDERLINE("__"),
         UNDERLINE_ITALICS("__*"),
         UNDERLINE_BOLD("__**"),
@@ -138,11 +152,21 @@ public class MessageBuilder {
             this.markdown = markdown;
             this.reverseMarkdown = new StringBuilder(markdown).reverse().toString();
         }
-
+	
+		/**
+		 * Gets the markdown formatting for the style.
+		 * 
+		 * @return The markdown formatting.
+		 */
         public String getMarkdown() {
             return markdown;
         }
-
+	
+		/**
+		 * Reverses the markdown formatting to be appended to the end of a formatted string.
+		 * 
+		 * @return The reversed markdown formatting.
+		 */
         public String getReverseMarkdown() {
             return reverseMarkdown;
         }

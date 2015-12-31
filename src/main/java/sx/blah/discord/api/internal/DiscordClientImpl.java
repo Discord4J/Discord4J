@@ -45,10 +45,6 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @author qt
- * @since 7:00 PM 16 Aug, 2015
- * Project: DiscordAPI
- * <p>
  * Defines the client.
  * This class receives and
  * sends messages, as well
@@ -238,7 +234,7 @@ public final class DiscordClientImpl implements IDiscordClient {
         ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.isPresent() ? game.get() : null)));
         
         getOurUser().setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
-        getOurUser().setGame(game.orElse(null));
+        getOurUser().setGame(game);
     }
     
     @Override

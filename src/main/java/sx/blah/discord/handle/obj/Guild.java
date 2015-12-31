@@ -26,10 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author qt
- * @since 4:05 PM 17 Aug, 2015
- * Project: DiscordAPI
- * <p>
  * This class defines a guild/server/clan/whatever it's called.
  */
 public class Guild {
@@ -94,25 +90,57 @@ public class Guild {
         this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
         this.ownerID = ownerID;
     }
-    
+	
+	/**
+     * Gets the user id for the owner of this guild.
+     * 
+     * @return The owner id.
+     */
     public String getOwnerID() {
         return ownerID;
     }
-    
+	
+	/**
+     * Gets the user object for the owner of this guild.
+     * 
+     * @return The owner.
+     */
+    public User getOwner() {
+        return client.getUserByID(ownerID);
+    }
+	
+	/**
+     * Gets the icon id for this guild.
+     * 
+     * @return The icon id.
+     */
     public String getIcon() {
         return icon;
     }
-    
+	
+	/**
+     * Gets the direct link to the guild's icon.
+     * 
+     * @return The icon url.
+     */
     public String getIconURL() {
         return iconURL;
     }
-    
+	
+	/**
+     * Sets the CACHED icon id for the guild.
+     * 
+     * @param icon The icon id.
+     */
+    @Deprecated
     public void setIcon(String icon) {
         this.icon = icon;
         this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
     }
 
     /**
+     * Gets all the channels on the server.
+     * 
      * @return All channels on the server.
      */
     public List<Channel> getChannels() {
@@ -120,6 +148,8 @@ public class Guild {
     }
 
     /**
+     * Gets a channel on the guild by a specific channel id.
+     * 
      * @param id The ID of the channel you want to find.
      * @return The channel with given ID.
      */
@@ -133,6 +163,8 @@ public class Guild {
     }
 
     /**
+     * Gets all the users connected to the guild.
+     * 
      * @return All users connected to the guild.
      */
     public List<User> getUsers() {
@@ -140,6 +172,8 @@ public class Guild {
     }
 
     /**
+     * Gets a user by its id in the guild.
+     * 
      * @param id ID of the user you want to find.
      * @return The user with given ID.
      */
@@ -157,6 +191,8 @@ public class Guild {
     }
 
     /**
+     * Gets the name of the guild.
+     * 
      * @return The name of the guild
      */
     public String getName() {
@@ -164,16 +200,30 @@ public class Guild {
     }
 
     /**
+     * Gets the id of the guild.
+     * 
      * @return The ID of this guild.
      */
     public String getID() {
         return id;
     }
-
+	
+	/**
+     * CACHES a user to the guild.
+     * 
+     * @param user The user.
+     */
+    @Deprecated
     public void addUser(User user) {
 		this.users.add(user);
     }
-
+	
+	/**
+     * CACHES a channel to the guild.
+     * 
+     * @param channel The channel.
+     */
+    @Deprecated
 	public void addChannel(Channel channel) {
 		this.channels.add(channel);
 	}

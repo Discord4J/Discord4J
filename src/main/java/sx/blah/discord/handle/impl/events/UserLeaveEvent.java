@@ -24,9 +24,7 @@ import sx.blah.discord.handle.obj.Guild;
 import sx.blah.discord.handle.obj.User;
 
 /**
- * @author qt
- * @since 1:17 AM, 10/17/15
- * Project: Discord4J
+ * This event is dispatched when a guild member is removed/leaves from a guild
  */
 public class UserLeaveEvent extends Event {
     private final Guild guild;
@@ -36,11 +34,21 @@ public class UserLeaveEvent extends Event {
         this.guild = guild;
         this.user = user;
     }
-
+	
+	/**
+     * The user involved.
+     * 
+     * @return The user.
+     */
     public User getUser() {
         return user;
     }
-    
+	
+	/**
+     * The guild involved.
+     * 
+     * @return The guild.
+     */
     public Guild getGuild() {
         return guild;
     }

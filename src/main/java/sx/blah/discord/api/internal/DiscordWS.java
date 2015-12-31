@@ -89,7 +89,7 @@ public class DiscordWS extends WebSocketClient {
 					for (PresenceResponse presence : guildResponse.presences) {
 						User user = guild.getUserByID(presence.user.id);
 						user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
-						user.setGame(presence.game == null ? null : presence.game.name);
+						user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
 					}
 
 					for (ChannelResponse channelResponse : guildResponse.channels) {
@@ -193,7 +193,7 @@ public class DiscordWS extends WebSocketClient {
 				for (PresenceResponse presence : event3.presences) {
 					User user1 = guild.getUserByID(presence.user.id);
 					user1.setPresence(Presences.valueOf((presence.status).toUpperCase()));
-					user1.setGame(presence.game == null ? null : presence.game.name);
+					user1.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
 				}
 
 				for (ChannelResponse channelResponse : event3.channels) {
@@ -289,8 +289,8 @@ public class DiscordWS extends WebSocketClient {
 							Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 						}
 						if (!user.getGame().equals(Optional.ofNullable(gameName))) {
-							client.dispatcher.dispatch(new GameChangeEvent(guild, user, user.getGame().isPresent() ? user.getGame().get() : null, gameName));
-							user.setGame(gameName);
+							client.dispatcher.dispatch(new GameChangeEvent(guild, user, user.getGame(), Optional.ofNullable(gameName)));
+							user.setGame(Optional.ofNullable(gameName));
 							Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
 						}
 					}

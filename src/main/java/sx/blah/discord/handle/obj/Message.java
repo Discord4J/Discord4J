@@ -35,11 +35,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 /**
- * @author qt
- * @since 7:53 PM 16 Aug, 2015
- * Project: DiscordAPI
- * <p>
- * Stores relevant data about messages.
+ * Represents a discord message.
  */
 public class Message {
     /**
@@ -81,46 +77,88 @@ public class Message {
         this.channel = channel;
 	    this.timestamp = timestamp;
     }
-
-    // Getters and Setters. Boring.
-
+	
+	/**
+	 * Gets the string content of the message.
+	 * 
+	 * @return The content of the message
+	 */
     public String getContent() {
         return content;
     }
 	
+	/**
+	 * Sets the CACHED content of the message.
+	 * 
+	 * @param content The new message content.
+	 */
+	@Deprecated
 	public void setContent(String content) {
 		this.content = content;
 	}
-
+	
+	/**
+	 * Gets the channel that this message belongs to.
+	 * 
+	 * @return The channel.
+	 */
     public Channel getChannel() {
         return channel;
     }
-
+	
+	/**
+	 * Gets the user who authored this message.
+	 * 
+	 * @return The author.
+	 */
 	public User getAuthor() {
 		return author;
 	}
-
+	
+	/**
+	 * Gets the message id.
+	 * 
+	 * @return The id.
+	 */
     public String getID() {
         return messageID;
     }
 	
+	/**
+	 * Sets the CACHED version of the message timestamp.
+	 * 
+	 * @param timestamp The timestamp.
+	 */
+	@Deprecated
 	public void setTimestamp(LocalDateTime timestamp) {
 		this.timestamp = timestamp;
 	}
-
+	
+	/**
+	 * Gets the timestamp for when this message was sent/edited.
+	 * 
+	 * @return The timestamp.
+	 */
 	public LocalDateTime getTimestamp() {
 		return timestamp;
 	}
 
     /**
-     * Adds an @mention to the author of the referenced Message
+     * Adds an "@mention," to the author of the referenced Message
      * object before your content
+	 * 
      * @param content Message to send.
      */
     public void reply(String content) throws IOException {
         getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
     }
 	
+	/**
+	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
+	 *
+	 * @param content The new content for the message to contain.
+	 * @return The new message (this).
+	 */
 	public Message edit(String content) {
 		if (client.isReady()) {
 			content = DiscordUtils.escapeString(content);
@@ -148,6 +186,9 @@ public class Message {
 		return this;
 	}
 	
+	/**
+	 * Deletes the message.
+	 */
 	public void delete() {
 		if (client.isReady()) {
 			try {

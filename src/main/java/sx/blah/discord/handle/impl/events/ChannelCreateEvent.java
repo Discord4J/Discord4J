@@ -23,9 +23,7 @@ import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Channel;
 
 /**
- * @author qt
- * @since 2:42 PM, 10/17/15
- * Project: Discord4J
+ * This event is dispatched when a channel is created.
  */
 public class ChannelCreateEvent extends Event {
     
@@ -34,7 +32,12 @@ public class ChannelCreateEvent extends Event {
     public ChannelCreateEvent(Channel channel) {
         this.channel = channel;
     }
-
+	
+	/**
+     * Gets the channel involved.
+     * 
+     * @return The channel.
+     */
     public Channel getChannel() {
         return channel;
     }

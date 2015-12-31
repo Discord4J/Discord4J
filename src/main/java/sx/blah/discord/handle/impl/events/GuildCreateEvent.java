@@ -23,8 +23,7 @@ import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Guild;
 
 /**
- * @author x
- * @since 10/8/2015
+ * This event is dispatched when a guild is created/ the bot joins the guild.
  */
 public class GuildCreateEvent extends Event {
 	
@@ -33,7 +32,12 @@ public class GuildCreateEvent extends Event {
 	public GuildCreateEvent(Guild guild) {
 		this.guild = guild;
 	}
-
+	
+	/**
+	 * Gets the guild involved.
+	 * 
+	 * @return The guild.
+	 */
 	public Guild getGuild() {
 		return guild;
 	}

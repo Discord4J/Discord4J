@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Manages event listeners and event logic
+ * Manages event listeners and event logic.
  */
 public class EventDispatcher {
 	
@@ -24,8 +24,9 @@ public class EventDispatcher {
 	}
 	
 	/**
-	 * Registers a listener using {@link EventSubscriber} method annotations
-	 * @param listener The listener
+	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 * 
+	 * @param listener The listener.
 	 */
 	public void registerListener(Object listener) {
 		for (Method method : listener.getClass().getDeclaredMethods()) {
@@ -42,8 +43,9 @@ public class EventDispatcher {
 	}
 	
 	/**
-	 * Registers a single event listener
-	 * @param listener The listener
+	 * Registers a single event listener.
+	 * 
+	 * @param listener The listener.
 	 */
 	public void registerListener(IListener listener) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
@@ -56,8 +58,9 @@ public class EventDispatcher {
 	}
 	
 	/**
-	 * Unregisters a listener using {@link EventSubscriber} method annotations
-	 * @param listener The listener
+	 * Unregisters a listener using {@link EventSubscriber} method annotations.
+	 * 
+	 * @param listener The listener.
 	 */
 	public void unregisterListener(Object listener) {
 		for (Method method : listener.getClass().getDeclaredMethods()) {
@@ -72,8 +75,9 @@ public class EventDispatcher {
 	}
 	
 	/**
-	 * Unregisters a single event listener
-	 * @param listener The listener
+	 * Unregisters a single event listener.
+	 * 
+	 * @param listener The listener.
 	 */
 	public void unregisterListener(IListener listener) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
@@ -84,8 +88,9 @@ public class EventDispatcher {
 	}
 	
 	/**
-	 * Dispatches an event
-	 * @param event The event
+	 * Dispatches an event.
+	 * 
+	 * @param event The event.
 	 */
 	public void dispatch(Event event) {
 		Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());

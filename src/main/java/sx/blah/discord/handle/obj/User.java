@@ -26,10 +26,6 @@ import sx.blah.discord.util.Presences;
 import java.util.Optional;
 
 /**
- * @author qt
- * @since 5:40 PM 15 Aug, 2015
- * Project: DiscordAPI
- * <p>
  * This class defines the Discord user.
  */
 public class User {
@@ -44,9 +40,9 @@ public class User {
     protected String avatar;
 	
 	/**
-     * The game the user is playing, either null or String
+     * The game the user is playing.
      */
-    protected String game;
+    protected Optional<String> game;
 
     /**
      * User ID.
@@ -56,8 +52,8 @@ public class User {
     /**
      * User discriminator.
      * Distinguishes users with the same name.
-     * <p>
      * This is here in case it becomes necessary.
+     * TODO: implement
      */
     protected int discriminator;
 
@@ -85,50 +81,105 @@ public class User {
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
 
-    // -- Getters and setters. Pretty boring.
-
+	/**
+     * Gets the user's unique id.
+     * 
+     * @return The user's id.
+     */
     public String getID() {
         return id;
     }
-
+	
+	/**
+     * Gets the user's username.
+     * 
+     * @return The username.
+     */
     public String getName() {
         return name;
     }
-    
+	
+	/**
+     * Gets the game the user is playing, no value if the user isn't playing a game.
+     * 
+     * @return The game.
+     */
     public Optional<String> getGame() {
-        return Optional.ofNullable(game);
+        return game;
     }
-    
-    public void setGame(String game) {
+	
+	/**
+     * Sets the user's CACHED game.
+     * 
+     * @param game The game.
+     */
+	@Deprecated
+    public void setGame(Optional<String> game) {
         this.game = game;
     }
-
+	
+	/**
+     * Sets the user's CACHED username.
+     * 
+     * @param name The username.
+     */
+	@Deprecated
     public void setName(String name) {
         this.name = name;
     }
-
+	
+	/**
+     * Gets the user's avatar id.
+     * 
+     * @return The avatar id.
+     */
     public String getAvatar() {
         return avatar;
     }
-
+	
+	/**
+     * Gets the user's avatar direct link.
+     * 
+     * @return The avatar url.
+     */
     public String getAvatarURL() {
 		return avatarURL;
     }
-
+	
+	/**
+     * Sets the user's CACHED avatar id.
+     * @param avatar The user's avatar id.
+     */
+	@Deprecated
     public void setAvatar(String avatar) {
         this.avatar = avatar;
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
-
+	
+	/**
+     * Gets the user's presence.
+     * 
+     * @return The user's presence.
+     */
     public Presences getPresence() {
         return presence;
     }
-
+	
+	/**
+     * Sets the CACHED presence of the user.
+     * 
+     * @param presence The new presence.
+     */
+	@Deprecated
     public void setPresence(Presences presence) {
         this.presence = presence;
     }
-
-    // STOLEN: idea from hydrabolt :P
+	
+	/**
+     * Formats a string to @mention the user.
+     * 
+     * @return The formatted string.
+     */
     public String mention() {
         return "<@" + id + ">";
     }

@@ -25,9 +25,7 @@ import sx.blah.discord.handle.obj.User;
 import sx.blah.discord.util.Presences;
 
 /**
- * @author qt
- * @since 1:52 AM, 10/17/15
- * Project: Discord4J
+ * This event is dispatched when a user changes his/her presence.
  */
 public class PresenceUpdateEvent extends Event {
     
@@ -41,19 +39,39 @@ public class PresenceUpdateEvent extends Event {
         this.oldPresence = oldPresence;
         this.newPresence = newPresence;
     }
-
+	
+	/**
+     * Gets the user's new presence.
+     * 
+     * @return The presence.
+     */
     public Presences getNewPresence() {
         return newPresence;
     }
-
+	
+	/**
+     * Gets the user's old presence.
+     * 
+     * @return The presence.
+     */
     public Presences getOldPresence() {
         return oldPresence;
     }
-
+	
+	/**
+     * Gets the user involved.
+     * 
+     * @return The user.
+     */
     public User getUser() {
         return user;
     }
-
+	
+	/**
+     * Gets the guild involved.
+     * 
+     * @return The guild.
+     */
     public Guild getGuild() {
         return guild;
     }

@@ -19,11 +19,6 @@
 
 package sx.blah.discord.util;
 
-/**
- * @author x
- * @since 10/2/2015
- */
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -38,14 +33,29 @@ import java.lang.reflect.InvocationTargetException;
 import static sx.blah.discord.Discord4J.*;
 
 /**
- * New Request system. Reflection is cool, right guys?
- * R-right...?
+ * Represents request types to be sent.
  */
 public enum Requests {
+	
+	/**
+     * Used to send POST Requests
+     */
     POST(HttpPost.class),
+	/**
+     * Used to send GET requests
+     */
     GET(HttpGet.class),
+	/**
+     * Used to send DELETE requests
+     */
     DELETE(HttpDelete.class),
+	/**
+     * Used to send PATCH requests
+     */
     PATCH(HttpPatch.class);
+	/**
+     * The user-agent, as per @Jake's request
+     */
     private static final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
 
     //Same as HttpClients.createDefault() but with the proper user-agent
@@ -56,11 +66,25 @@ public enum Requests {
     Requests(Class<? extends HttpUriRequest> clazz) {
         this.requestClass = clazz;
     }
-
+	
+	/**
+     * Gets the HttpREQUEST.class represented by the enum.
+     * 
+     * @return The Http request class.
+     */
     public Class<? extends HttpUriRequest> getRequestClass() {
         return requestClass;
     }
-
+	
+	/**
+     * Makes a request.
+     * 
+     * @param url The url to make the request to.
+     * @param headers The headers to include in the request.
+     * @return The result (if any) returned by the request.
+     * 
+     * @throws HTTP403Exception
+     */
     public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP403Exception {
         try {
             HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
@@ -82,7 +106,17 @@ public enum Requests {
             return null;
         }
     }
-
+    
+    /**
+     * Makes a request.
+     *
+     * @param entity Any data to send with the request.
+     * @param url The url to make the request to.
+     * @param headers The headers to include in the request.
+     * @return The result (if any) returned by the request.
+     *
+     * @throws HTTP403Exception
+     */
     public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP403Exception {
         try {
             if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {

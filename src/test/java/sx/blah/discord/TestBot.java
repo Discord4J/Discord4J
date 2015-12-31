@@ -77,13 +77,13 @@ public class TestBot {
 							Channel testChannel = client.getChannelByID(response.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 							
-							new MessageBuilder().withChannel(testChannel).withContent("Initiating Discord4J Unit Tests for Build #"+
-									buildNumber, MessageBuilder.Styles.BOLD).build(client);
+							new MessageBuilder(client).withChannel(testChannel).withContent("Initiating Discord4J Unit Tests for Build #"+
+									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
 							//TODO: Real unit tests
 							
-							new MessageBuilder().withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber, 
-									MessageBuilder.Styles.BOLD).build(client);
+							new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber, 
+									MessageBuilder.Styles.BOLD).build();
 							didTest.set(true);
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -100,9 +100,9 @@ public class TestBot {
 						Message m = messageReceivedEvent.getMessage();
 						if (m.getContent().startsWith(".meme")
 								|| m.getContent().startsWith(".nicememe")) {
-							new MessageBuilder().appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
+							new MessageBuilder(client).appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
 									.appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
-									.build(client);
+									.build();
 						} else if (m.getContent().startsWith(".clear")) {
 							Channel c = client.getChannelByID(m.getChannel().getID());
 							if (null != c) {
@@ -127,7 +127,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".pm")) {
 							try {
 								PrivateChannel channel = client.getOrCreatePMChannel(m.getAuthor());
-								new MessageBuilder().withChannel(channel).withContent("SUP DUDE").build(client);
+								new MessageBuilder(client).withChannel(channel).withContent("SUP DUDE").build();
 							} catch (Exception e) {
 								e.printStackTrace();
 							}

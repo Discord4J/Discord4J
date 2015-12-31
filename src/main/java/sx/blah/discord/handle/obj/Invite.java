@@ -29,9 +29,7 @@ import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Requests;
 
 /**
- * @author qt
- * @since 9:48 PM 17 Aug, 2015
- * Project: DiscordAPI
+ * Represents an invite into a channel.
  */
 public class Invite {
 	/**
@@ -118,7 +116,10 @@ public class Invite {
 		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE + inviteCode,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
-
+	
+	/**
+	 * Represents the details of an invite.
+	 */
 	public class InviteResponse {
 		/**
 		 * ID of the guild you were invited to.
@@ -147,19 +148,39 @@ public class Invite {
 			this.channelID = channelID;
 			this.channelName = channelName;
 		}
-
+		
+		/**
+		 * Gets the guild id the invite leads to.
+		 * 
+		 * @return The guild id.
+		 */
 		public String getGuildID() {
 			return guildID;
 		}
-
+		
+		/**
+		 * Gets the name of the guild the invite leads to.
+		 * 
+		 * @return The guild name.
+		 */
 		public String getGuildName() {
 			return guildName;
 		}
-
+		
+		/**
+		 * Gets the channel id the invite leads to.
+		 * 
+		 * @return The channel id.
+		 */
 		public String getChannelID() {
 			return channelID;
 		}
-
+		
+		/**
+		 * Gets the channel name the invite leads to.
+		 * 
+		 * @return The channel name.
+		 */
 		public String getChannelName() {
 			return channelName;
 		}

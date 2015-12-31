@@ -40,10 +40,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @author qt
- * @since 4:57 PM 17 Aug, 2015
- * Project: DiscordAPI
- * <p>
  * Defines a text channel in a guild/server.
  */
 public class Channel {
@@ -105,22 +101,41 @@ public class Channel {
         this.parent = parent;
         this.isPrivate = false;
     }
-
-    // Getters.
-
+	
+	/**
+     * Gets the name of this channel.
+     * 
+     * @return The channel name.
+     */
     public String getName() {
         return name;
     }
-
+	
+	/**
+     * Gets the id of this channel.
+     * 
+     * @return The channel id.
+     */
     public String getID() {
         return id;
     }
-
+	
+	/**
+     * Gets the messages in this channel.
+     * 
+     * @return The list of messages in the channel.
+     */
     public List<Message> getMessages() {
         return messages;
     }
-
-	public Message getMessageByID(String messageID) {
+	
+	/**
+     * Gets a specific message by its id.
+     * 
+     * @param messageID The message id.
+     * @return The message (if found).
+     */
+    public Message getMessageByID(String messageID) {
 		for (Message message : messages) {
 			if (message.getID().equalsIgnoreCase(messageID))
 				return message;
@@ -128,26 +143,63 @@ public class Channel {
 
 		return null;
 	}
-
+	
+	/**
+     * CACHES a message to the channel.
+     * 
+     * @param message The message.
+     */
+    @Deprecated
     public void addMessage(Message message) {
         if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
             messages.add(message);
         }
     }
-
+	
+	/**
+     * Gets the guild this channel is a part of.
+     * 
+     * @return The guild.
+     * @deprecated Use {@link #getGuild()} instead.
+     */
+    @Deprecated
     public Guild getParent() {
         return parent;
     }
-
+    
+    /**
+     * Gets the guild this channel is a part of.
+     * 
+     * @return The guild.
+     */
+    public Guild getGuild() {
+        return parent;
+    }
+	
+	/**
+     * Gets whether or not this channel is a private one–if it is a private one, this object is an instance of {@link PrivateChannel}.
+     * 
+     * @return True if the channel is private, false if otherwise.
+     */
     public boolean isPrivate() {
         return isPrivate;
     }
-
-    // still STOLEN from hydrabolt :P
+	
+	/**
+     * Formats a string to be able to #mention this channel.
+     * 
+     * @return The formatted string.
+     */
     public String mention() {
         return "<#" + this.getID() + ">";
     }
-
+    
+    /**
+     * Sends a message to the desired channel.
+     *
+     * @param content The content of the message.
+     * @return The message object representing the sent message
+     */
     public Message sendMessage(String content) {
         if (client.isReady()) {
            content = DiscordUtils.escapeString(content);
@@ -200,6 +252,10 @@ public class Channel {
         return null;
     }
     
+    /**
+     * Toggles whether the bot is "typing".
+     *
+     */
     public synchronized void toggleTypingStatus() {
         isTyping.set(!isTyping.get());
         
@@ -221,6 +277,11 @@ public class Channel {
         }
     }
     
+    /**
+     * Gets whether the bot is "typing".
+     *
+     * @return True if the bot is typing, false if otherwise.
+     */
     public synchronized boolean getTypingStatus() {
         return isTyping.get();
     }

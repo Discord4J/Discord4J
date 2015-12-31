@@ -20,12 +20,19 @@
 package sx.blah.discord.util;
 
 /**
- * @author qt
- * @since 1:47 AM, 10/17/15
- * Project: Discord4J
+ * Represents presences that a user can have.
  */
 public enum Presences {
+	/**
+     * Represents that the user is online
+     */
     ONLINE,
+	/**
+     * Represents that the user is idle
+     */
     IDLE,
-    OFFLINE;
+	/**
+     * Represents that the user is offline
+     */
+    OFFLINE
 }

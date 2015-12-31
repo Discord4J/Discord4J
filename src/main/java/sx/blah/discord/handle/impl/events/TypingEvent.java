@@ -24,9 +24,7 @@ import sx.blah.discord.handle.obj.Channel;
 import sx.blah.discord.handle.obj.User;
 
 /**
- * @author qt
- * @since 1:39 AM, 10/17/15
- * Project: Discord4J
+ * This event is dispatched if a user is typing.
  */
 public class TypingEvent extends Event {
     
@@ -37,11 +35,21 @@ public class TypingEvent extends Event {
         this.user = user;
         this.channel = channel;
     }
-
+	
+	/**
+     * The user involved.
+     * 
+     * @return The user.
+     */
     public User getUser() {
         return user;
     }
-
+	
+	/**
+     * The channel involved.
+     * 
+     * @return The channel.
+     */
     public Channel getChannel() {
         return channel;
     }

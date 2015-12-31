@@ -26,9 +26,7 @@ import sx.blah.discord.handle.obj.User;
 import java.time.LocalDateTime;
 
 /**
- * @author qt
- * @since 1:01 AM, 10/17/15
- * Project: Discord4J
+ * This is dispatched when a user is added/joins a guild.
  */
 public class UserJoinEvent extends Event {
     
@@ -41,15 +39,30 @@ public class UserJoinEvent extends Event {
         this.joinTime = when;
         this.userJoined = user;
     }
-
+	
+	/**
+     * Gets the timestamp for when the user joined the guild.
+     * 
+     * @return The timestamp.
+     */
     public LocalDateTime getJoinTime() {
         return joinTime;
     }
-
+	
+	/**
+     * Gets the user involved.
+     * 
+     * @return The user.
+     */
     public User getUser() {
         return userJoined;
     }
-    
+	
+	/**
+     * Gets the guild involved.
+     * 
+     * @return The guild.
+     */
     public Guild getGuild() {
         return guild;
     }

@@ -20,10 +20,6 @@
 package sx.blah.discord.api;
 
 /**
- * @author qt
- * @since 5:44 PM 15 Aug, 2015
- * Project: DiscordAPI
- * <p>
  * Static class that contains
  * URLs useful to us.
  */

@@ -20,9 +20,7 @@
 package sx.blah.discord.util;
 
 /**
- * @author qt
- * @since 1:17 PM, 10/17/15
- * Project: Discord4J
+ * Represents a 403 FORBIDDEN return code from a url connection.
  */
 public class HTTP403Exception extends Exception {
     public HTTP403Exception(String cause) {

@@ -23,9 +23,7 @@ import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.Guild;
 
 /**
- * @author qt
- * @since 1:56 PM, 10/17/15
- * Project: Discord4J
+ * This event is dispatched when a guild is deleted or the bot is kicked.
  */
 public class GuildLeaveEvent extends Event {
     
@@ -34,7 +32,12 @@ public class GuildLeaveEvent extends Event {
     public GuildLeaveEvent(Guild guild) {
         this.guild = guild;
     }
-
+	
+	/**
+     * Gets the guild involved.
+     * 
+     * @return The guild.
+     */
     public Guild getGuild() {
         return guild;
     }

@@ -11,12 +11,12 @@ public class EventResponse {
 	public String t;
 	
 	/**
-	 * Should be 1 FIXME ???
+	 * From @Voltana "s is the sequence value - it's used for getting all messages you've missed after a gateway redirect"
 	 */
 	public int s;
 	
 	/**
-	 * Should be 0 FIXME ???
+	 * The opcode for the event, TODO: list all the opcode meanings
 	 */
 	public int op;
 	

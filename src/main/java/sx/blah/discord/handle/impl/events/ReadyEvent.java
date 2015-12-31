@@ -22,8 +22,7 @@ package sx.blah.discord.handle.impl.events;
 import sx.blah.discord.handle.Event;
 
 /**
- * @author x
- * @since 10/9/2015
+ * This event is dispatched when the bot is ready to interact with the api.
  */
 public class ReadyEvent extends Event {
 	
