@@ -121,6 +121,11 @@ public class DiscordWS extends WebSocketClient {
 					}
 					client.privateChannels.add(channel);
 				}
+				
+				for (ReadyEventResponse.ReadStateResponse readState : event.read_state) {
+					Channel channel = client.getChannelByID(readState.id);
+					channel.setLastReadMessageID(readState.last_message_id);
+				}
 
 				Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
 				new Thread(() -> {
@@ -374,7 +379,22 @@ public class DiscordWS extends WebSocketClient {
 				ChannelUpdateEventResponse event13 = DiscordUtils.GSON.fromJson(eventObject, ChannelUpdateEventResponse.class);
 				if (!event13.is_private) {
 					Channel toUpdate = client.getChannelByID(event13.id);
-					toUpdate.setTopic(event13.topic);
+					if (toUpdate != null) {
+						Channel oldChannel = new Channel(client, toUpdate.getName(),
+								toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic());
+						toUpdate.setTopic(event13.topic);
+						client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+					}
+				}
+				break;
+				
+			case "MESSAGE_ACK":
+				MessageAcknowledgedEventResponse event14 = DiscordUtils.GSON.fromJson(eventObject, MessageAcknowledgedEventResponse.class);
+				Channel channelAck = client.getChannelByID(event14.channel_id);
+				if (channelAck != null) {
+					Message messageAck = channelAck.getMessageByID(event14.message_id);
+					if (messageAck != null)
+						client.getDispatcher().dispatch(new MessageAcknowledgedEvent(messageAck));
 				}
 				break;
 				

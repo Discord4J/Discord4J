@@ -201,4 +201,27 @@ public class Message {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 		}
 	}
+	
+	/**
+	 * Acknowledges a message (marks it as "read")
+	 */
+	public void acknowledge() throws HTTP403Exception {
+		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getChannel().getID() + "/messages/" + getID() + "/ack",
+				new BasicNameValuePair("authorization", client.getToken()));
+		channel.setLastReadMessageID(getID());
+	}
+	
+	/**
+	 * Checks if the message has been read by this account.
+	 * 
+	 * @return True if the message has been read, false if otherwise.
+	 */
+	public boolean isAcknowledged() {
+		if (channel.getLastReadMessageID().equals(getID()))
+			return true;
+		
+		Message lastRead = channel.getLastReadMessage();
+		LocalDateTime timeStamp = lastRead.getTimestamp();
+		return timeStamp.compareTo(getTimestamp()) >= 0;
+	}
 }

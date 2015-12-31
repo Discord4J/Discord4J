@@ -73,6 +73,11 @@ public class Channel {
      * The channel's topic message.
      */
     protected String topic;
+	
+	/**
+     * The last read message.
+     */
+    protected String lastReadMessageID = null;
     
     /**
      * Whether the bot should send out a typing status
@@ -159,6 +164,8 @@ public class Channel {
     public void addMessage(Message message) {
         if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
             messages.add(message);
+            if (lastReadMessageID == null)
+                lastReadMessageID = message.getID();
         }
     }
 	
@@ -309,6 +316,34 @@ public class Channel {
      */
     public synchronized boolean getTypingStatus() {
         return isTyping.get();
+    }
+	
+	/**
+     * Gets the last read message id.
+     * 
+     * @return The message id.
+     */
+    public String getLastReadMessageID() {
+        return lastReadMessageID;
+    }
+	
+	/**
+     * Gets the last read message
+     * 
+     * @return The message.
+     */
+    public Message getLastReadMessage() {
+        return getMessageByID(lastReadMessageID);
+    }
+	
+	/**
+     * Sets the CACHED last read message id.
+     * 
+     * @param lastReadMessageID The message id.
+     */
+    @Deprecated
+    public void setLastReadMessageID(String lastReadMessageID) {
+        this.lastReadMessageID = lastReadMessageID;
     }
     
     @Override 

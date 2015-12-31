@@ -46,6 +46,9 @@ public class ReadyEventResponse {
 	 */
 	public long heartbeat_interval;
 	
+	/**
+	 * The guilds the user is a part of
+	 */
 	public GuildResponse[] guilds; 
 	
 	/**
