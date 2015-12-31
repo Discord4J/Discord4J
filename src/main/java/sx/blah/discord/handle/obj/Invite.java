@@ -117,6 +117,12 @@ public class Invite {
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 	
+	
+	@Override
+	public boolean equals(Object other) {
+		return this.getClass().isAssignableFrom(other.getClass()) && ((Invite) other).getInviteCode().equals(getInviteCode());
+	}
+	
 	/**
 	 * Represents the details of an invite.
 	 */

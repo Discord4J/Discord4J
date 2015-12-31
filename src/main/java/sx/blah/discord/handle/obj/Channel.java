@@ -350,4 +350,10 @@ public class Channel {
     public String toString() {
         return mention();
     }
+    
+    
+    @Override
+    public boolean equals(Object other) {
+        return this.getClass().isAssignableFrom(other.getClass()) && ((Channel) other).getID().equals(getID());
+    }
 }

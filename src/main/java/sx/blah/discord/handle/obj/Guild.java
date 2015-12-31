@@ -227,4 +227,10 @@ public class Guild {
 	public void addChannel(Channel channel) {
 		this.channels.add(channel);
 	}
+    
+    
+    @Override
+    public boolean equals(Object other) {
+        return this.getClass().isAssignableFrom(other.getClass()) && ((Guild) other).getID().equals(getID());
+    }
 }

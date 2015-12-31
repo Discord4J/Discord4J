@@ -224,4 +224,10 @@ public class Message {
 		LocalDateTime timeStamp = lastRead.getTimestamp();
 		return timeStamp.compareTo(getTimestamp()) >= 0;
 	}
+	
+	
+	@Override
+	public boolean equals(Object other) {
+		return this.getClass().isAssignableFrom(other.getClass()) && ((Message) other).getID().equals(getID());
+	}
 }

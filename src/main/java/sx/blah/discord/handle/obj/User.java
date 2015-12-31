@@ -188,4 +188,9 @@ public class User {
     public String toString() {
         return mention();
     }
+	
+	@Override
+	public boolean equals(Object other) {
+		return this.getClass().isAssignableFrom(other.getClass()) && ((User) other).getID().equals(getID());
+	}
 }
