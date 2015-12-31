@@ -25,6 +25,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.json.responses.InviteJSONResponse;
+import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Requests;
 
 /**
@@ -39,13 +40,19 @@ public class Invite {
 	protected final String inviteCode;
 	
 	/**
+	 * The human-readable version of the invite code, if available.
+	 */
+	protected final String xkcdPass;
+	
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
 
-	public Invite(IDiscordClient client, String inviteCode) {
+	public Invite(IDiscordClient client, String inviteCode, String xkcdPass) {
 		this.client = client;
 		this.inviteCode = inviteCode;
+		this.xkcdPass = xkcdPass;
 	}
 
 	/**
@@ -53,6 +60,13 @@ public class Invite {
 	 */
 	public String getInviteCode() {
 		return inviteCode;
+	}
+	
+	/**
+	 * @return The xkcd pass, this is null if it doesn't exist!
+	 */
+	public String getXkcdPass() {
+		return xkcdPass;
 	}
 
 	/**
@@ -93,6 +107,16 @@ public class Invite {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return null;
 		}
+	}
+	
+	/**
+	 * Attempts to delete the invite this object represents.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	public void delete() throws HTTP403Exception {
+		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE + inviteCode,
+				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
 	public class InviteResponse {

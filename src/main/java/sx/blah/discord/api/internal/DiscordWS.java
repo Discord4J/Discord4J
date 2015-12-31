@@ -155,7 +155,7 @@ public class DiscordWS extends WebSocketClient {
 						if (event1.content.contains("discord.gg/")) {
 							String inviteCode = event1.content.split("discord\\.gg/")[1].split(" ")[0];
 							Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
-							client.dispatcher.dispatch(new InviteReceivedEvent(new Invite(client, inviteCode), message1));
+							client.dispatcher.dispatch(new InviteReceivedEvent(client.getInviteForCode(inviteCode), message1));
 						}
 						if (mentioned) {
 							client.dispatcher.dispatch(new MentionEvent(message1));
@@ -342,6 +342,7 @@ public class DiscordWS extends WebSocketClient {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
+							guild.addChannel(channel);
 							client.dispatcher.dispatch(new ChannelCreateEvent(channel));
 						}
 					}

@@ -31,10 +31,7 @@ import sx.blah.discord.json.requests.AccountInfoChangeRequest;
 import sx.blah.discord.json.requests.LoginRequest;
 import sx.blah.discord.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.json.requests.PrivateChannelRequest;
-import sx.blah.discord.json.responses.AccountInfoChangeResponse;
-import sx.blah.discord.json.responses.GatewayResponse;
-import sx.blah.discord.json.responses.LoginResponse;
-import sx.blah.discord.json.responses.PrivateChannelResponse;
+import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Presences;
 import sx.blah.discord.util.Requests;
@@ -338,7 +335,7 @@ public final class DiscordClientImpl implements IDiscordClient {
         return null;
     }
     
-    @Override
+    @Override//TODO: Move these to the Channel object
     public synchronized void toggleTypingStatus(final String channelId) {
         isTyping.put(channelId, !getTypingStatus(channelId));
         
@@ -362,5 +359,29 @@ public final class DiscordClientImpl implements IDiscordClient {
     @Override
     public synchronized boolean getTypingStatus(String channelId) {
         return isTyping.containsKey(channelId) ? isTyping.get(channelId) : false;
+    }
+    
+    @Override
+    public Invite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) {
+        Channel channel = getChannelByID(channelID);
+        if (channel == null) {
+            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
+            return null;
+        }
+        
+        return channel.createInvite(maxAge, maxUses, temporary, useXkcdPass);
+    }
+    
+    @Override
+    public Invite getInviteForCode(String code) {
+        try {
+            InviteJSONResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.INVITE + code,
+					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
+            
+            return DiscordUtils.getInviteFromJSON(this, response);
+        } catch (HTTP403Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -7,8 +7,10 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.Channel;
+import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
 import sx.blah.discord.handle.obj.User;
+import sx.blah.discord.json.responses.InviteJSONResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.json.responses.UserResponse;
 import sx.blah.discord.util.HTTP403Exception;
@@ -116,5 +118,16 @@ public class DiscordUtils {
 		}
 		
 		return string;
+	}
+	
+	/**
+	 * Creates a java {@link Invite} object for a json response.
+	 * 
+	 * @param client The discord client to use.
+	 * @param json The json response to use.
+	 * @return The java invite object.
+	 */
+	public static Invite getInviteFromJSON(IDiscordClient client, InviteJSONResponse json) {
+		return new Invite(client, json.code, json.xkcdpass);
 	}
 }

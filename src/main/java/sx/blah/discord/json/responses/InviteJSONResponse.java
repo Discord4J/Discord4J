@@ -1,7 +1,7 @@
 package sx.blah.discord.json.responses;
 
 /**
- * The response
+ * The generic invite json response
  */
 public class InviteJSONResponse {
 	

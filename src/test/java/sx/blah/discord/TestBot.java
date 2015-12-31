@@ -72,8 +72,8 @@ public class TestBot {
 					@Override
 					public void handle(ReadyEvent messageReceivedEvent) {
 						try {
-							Invite testInvite = new Invite(client, System.getenv("INVITE").replace("https://discord.gg/", ""));
-							Invite.InviteResponse response = testInvite.details();
+							Invite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
+							Invite.InviteResponse response = testInvite.accept();
 							Channel testChannel = client.getChannelByID(response.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 							
@@ -140,6 +140,12 @@ public class TestBot {
 									Optional.ofNullable(game));
 						} else if (m.getContent().startsWith(".type")) {
 							client.toggleTypingStatus(m.getChannel().getID());
+						} else if (m.getContent().startsWith(".invite")) {
+							try {
+								m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				});

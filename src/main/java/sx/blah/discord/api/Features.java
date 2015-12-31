@@ -9,7 +9,7 @@ public enum Features {
 	MESSAGING(FeatureStatus.SUPPORTED), DISCORD_STATUS(FeatureStatus.UNSUPPORTED), 
 	ACCOUNT_MANAGEMENT(FeatureStatus.SUPPORTED), CHANNEL_MANAGEMENT(FeatureStatus.UNSUPPORTED), 
 	SERVER_MANAGEMENT(FeatureStatus.UNSUPPORTED), ROLE_MANAGEMENT(FeatureStatus.UNSUPPORTED), 
-	VOICE(FeatureStatus.UNSUPPORTED), INVITES(FeatureStatus.READ_ONLY);
+	VOICE(FeatureStatus.UNSUPPORTED), INVITES(FeatureStatus.SUPPORTED);
 	
 	/**
 	 * How the feature has been implemented into the api

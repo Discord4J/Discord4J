@@ -43,7 +43,10 @@ public interface IDiscordClient {
 	 * @param channelID The channel id of the channel to receive the message.
 	 * @return The message object representing the sent message
 	 * @throws IOException
+	 * 
+	 * @deprecated Use {@link Channel#sendMessage(String)}
 	 */
+	@Deprecated
 	Message sendMessage(String content, String channelID) throws IOException;
 	
 	/**
@@ -53,7 +56,10 @@ public interface IDiscordClient {
 	 * @param messageID The message id of the message to edit.
 	 * @param channelID The channel id of the channel the message belongs to.
 	 * @return The new message.
+	 * 
+	 * @deprecated Use {@link Message#edit(String)}
 	 */
+	@Deprecated
 	Message editMessage(String content, String messageID, String channelID);
 	
 	/**
@@ -62,7 +68,10 @@ public interface IDiscordClient {
 	 * @param messageID The message id of the message to delete.
 	 * @param channelID The channel id of the channel the message belongs to.
 	 * @throws IOException
+	 * 
+	 * @deprecated Use {@link Message#delete()}
 	 */
+	@Deprecated
 	void deleteMessage(String messageID, String channelID) throws IOException;
 	
 	/**
@@ -154,4 +163,27 @@ public interface IDiscordClient {
 	 * @return True if the bot is typing, false if otherwise.
 	 */
 	boolean getTypingStatus(String channelId);
+	
+	/**
+	 * Generates an invite for this channel.
+	 *
+	 * @param maxAge How long the invite should be valid, setting it to 0 makes it last forever.
+	 * @param maxUses The maximum uses for the invite, setting it to 0 makes the invite have unlimited uses.
+	 * @param temporary Whether users admitted with this invite are temporary.
+	 * @param useXkcdPass Whether to generate a human-readable code, maxAge cannot be 0 for this to work.
+	 * @param channelID The channel to get the invite for.
+	 * @return The newly generated invite.
+	 * 
+	 * @deprecated Use {@link Channel#createInvite(int, int, boolean, boolean)}
+	 */
+	@Deprecated
+	Invite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID);
+	
+	/**
+	 * Gets the invite for a code.
+	 * 
+	 * @param code The invite code or xkcd pass.
+	 * @return The invite, or null if it doesn't exist.
+	 */
+	Invite getInviteForCode(String code);
 }

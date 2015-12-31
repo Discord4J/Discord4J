@@ -26,11 +26,14 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
+import sx.blah.discord.json.requests.InviteRequest;
 import sx.blah.discord.json.requests.MessageRequest;
+import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Requests;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,6 +157,30 @@ public class Channel {
             Discord4J.LOGGER.error("Bot has not signed in yet!");
             return null;
         }
+    }
+    
+    /**
+     * Generates an invite for this channel.
+     * 
+     * @param maxAge How long the invite should be valid, setting it to 0 makes it last forever.
+     * @param maxUses The maximum uses for the invite, setting it to 0 makes the invite have unlimited uses.
+     * @param temporary Whether users admitted with this invite are temporary.
+     * @param useXkcdPass Whether to generate a human-readable code, maxAge cannot be 0 for this to work.
+     * @return The newly generated invite.
+	 */
+    public Invite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) {
+        try {
+            ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/invites",
+					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary, useXkcdPass))),
+					new BasicNameValuePair("authorization", client.getToken()),
+                    new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
+            
+            return DiscordUtils.getInviteFromJSON(client, response);
+        } catch (HTTP403Exception | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
     }
     
     @Override 
