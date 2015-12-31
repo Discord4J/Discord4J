@@ -119,7 +119,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".name ")) {
 							String s = m.getContent().split(" ", 2)[1];
 							try {
-								client.changeAccountInfo(s, "", "");
+								client.changeAccountInfo(s, "", "", IDiscordClient.Image.forUser(client.getOurUser()));
 								m.reply("is this better?");
 							} catch (IOException | URISyntaxException e) {
 								e.printStackTrace();
@@ -144,6 +144,17 @@ public class TestBot {
 							try {
 								m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
 							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						} else if (m.getContent().startsWith(".avatar")) {
+							try {
+								if (m.getContent().split(" ").length > 1) {
+									String url = m.getContent().split(" ")[1];
+									client.changeAccountInfo("", "", "", IDiscordClient.Image.forUrl(url.substring(url.lastIndexOf('.')), url));
+								} else {
+									client.changeAccountInfo("", "", "", IDiscordClient.Image.defaultAvatar());
+								}
+							} catch (Exception e) {
 								e.printStackTrace();
 							}
 						}

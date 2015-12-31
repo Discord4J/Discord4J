@@ -212,13 +212,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 
     
     @Override
-    public void changeAccountInfo(String username, String email, String password) throws UnsupportedEncodingException, URISyntaxException {
+    public void changeAccountInfo(String username, String email, String password, Image avatar) throws UnsupportedEncodingException, URISyntaxException {
         Discord4J.LOGGER.debug("Changing account info.");
         try {
-            AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
+             AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
                     new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email, 
 							this.password, password, username == null || username.isEmpty() ? ourUser.getName() : username,
-							ourUser.getAvatar()))),
+							avatar == null ? Image.defaultAvatar().getData() : avatar.getData()))),
                     new BasicNameValuePair("Authorization", token),
                     new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
             
