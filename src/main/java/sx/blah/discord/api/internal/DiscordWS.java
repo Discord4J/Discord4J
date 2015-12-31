@@ -96,7 +96,7 @@ public class DiscordWS extends WebSocketClient {
 						String channelType = channelResponse.type;
 						if ("text".equalsIgnoreCase(channelType)) {
 							Channel channel;
-							guild.addChannel(channel = new Channel(client, channelResponse.name, channelResponse.id, guild));
+							guild.addChannel(channel = new Channel(client, channelResponse.name, channelResponse.id, guild, channelResponse.topic));
 							try {
 								DiscordUtils.getChannelMessages(client, channel);
 							} catch (HTTP403Exception e) {
@@ -170,14 +170,15 @@ public class DiscordWS extends WebSocketClient {
 
 				User user;
 				channel = client.getChannelByID(event2.channel_id);
-				if (channel.isPrivate()) {
-					user = ((PrivateChannel)channel).getRecipient();
-				} else {
-					user = channel.getParent().getUserByID(event2.user_id);
-				}
-				if(null != channel
-						&& null != user) {
-					client.dispatcher.dispatch(new TypingEvent(user, channel));
+				if (channel != null) {
+					if (channel.isPrivate()) {
+						user = ((PrivateChannel) channel).getRecipient();
+					} else {
+						user = channel.getParent().getUserByID(event2.user_id);
+					}
+					if (null != user) {
+						client.dispatcher.dispatch(new TypingEvent(user, channel));
+					}
 				}
 				break;
 
@@ -200,7 +201,7 @@ public class DiscordWS extends WebSocketClient {
 					String channelType = channelResponse.type;
 					if ("text".equalsIgnoreCase(channelType)) {
 						Channel channel1;
-						guild.addChannel(channel1 = new Channel(client, channelResponse.name, channelResponse.id, guild));
+						guild.addChannel(channel1 = new Channel(client, channelResponse.name, channelResponse.id, guild, channelResponse.topic));
 						try {
 							DiscordUtils.getChannelMessages(client, channel1);
 						} catch (HTTP403Exception e) {
@@ -336,7 +337,7 @@ public class DiscordWS extends WebSocketClient {
 						guildID = event10.guild_id;
 						guild = client.getGuildByID(guildID);
 						if(null != guild) {
-							channel = new Channel(client, name, id, guild);
+							channel = new Channel(client, name, id, guild, event10.topic);
 							try {
 								DiscordUtils.getChannelMessages(client, channel);
 							} catch (Exception e) {
@@ -369,6 +370,14 @@ public class DiscordWS extends WebSocketClient {
 				}
 				break;
 
+			case "CHANNEL_UPDATE":
+				ChannelUpdateEventResponse event13 = DiscordUtils.GSON.fromJson(eventObject, ChannelUpdateEventResponse.class);
+				if (!event13.is_private) {
+					Channel toUpdate = client.getChannelByID(event13.id);
+					toUpdate.setTopic(event13.topic);
+				}
+				break;
+				
 			default:
 				Discord4J.LOGGER.warn("Unknown message received: {} REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", eventObject.toString(), frame);
 		}

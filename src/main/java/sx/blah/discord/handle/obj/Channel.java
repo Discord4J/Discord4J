@@ -68,6 +68,11 @@ public class Channel {
      * The guild this channel belongs to.
      */
     protected final Guild parent;
+	
+	/**
+     * The channel's topic message.
+     */
+    protected String topic;
     
     /**
      * Whether the bot should send out a typing status
@@ -89,17 +94,18 @@ public class Channel {
      */
     protected final IDiscordClient client;
 
-    public Channel(IDiscordClient client, String name, String id, Guild parent) {
-        this(client, name, id, parent, new ArrayList<>());
+    public Channel(IDiscordClient client, String name, String id, Guild parent, String topic) {
+        this(client, name, id, parent, topic, new ArrayList<>());
     }
 
-    public Channel(IDiscordClient client, String name, String id, Guild parent, List<Message> messages) {
+    public Channel(IDiscordClient client, String name, String id, Guild parent, String topic,  List<Message> messages) {
         this.client = client;       
         this.name = name;
         this.id = id;
         this.messages = messages;
         this.parent = parent;
         this.isPrivate = false;
+        this.topic = topic;
     }
 	
 	/**
@@ -183,6 +189,25 @@ public class Channel {
      */
     public boolean isPrivate() {
         return isPrivate;
+    }
+	
+	/**
+     * Gets the topic for the channel.
+     * 
+     * @return The channel topic (null if not set).
+     */
+    public String getTopic() {
+        return topic;
+    }
+	
+	/**
+     * Sets the CACHED topic for the channel.
+     * 
+     * @param topic The new channel topic
+     */
+    @Deprecated
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 	
 	/**
