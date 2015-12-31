@@ -152,17 +152,23 @@ public interface IDiscordClient {
 	/**
 	 * Toggles whether the bot is "typing".
 	 * 
-	 * @param channelId The channel to maintain the typing status to.
+	 * @param channelID The channel to maintain the typing status to.
+	 * 
+	 * @deprecated Use {@link Channel#toggleTypingStatus()}
 	 */
-	void toggleTypingStatus(String channelId);
+	@Deprecated
+	void toggleTypingStatus(String channelID);
 	
 	/**
 	 * Gets whether the bot is "typing".
 	 * 
-	 * @param channelId The channel to get the typing status for for this bot.
+	 * @param channelID The channel to get the typing status for for this bot.
 	 * @return True if the bot is typing, false if otherwise.
+	 * 
+	 * @deprecated Use {@link Channel#getTypingStatus()}
 	 */
-	boolean getTypingStatus(String channelId);
+	@Deprecated
+	boolean getTypingStatus(String channelID);
 	
 	/**
 	 * Generates an invite for this channel.

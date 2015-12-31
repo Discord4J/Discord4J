@@ -43,7 +43,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author qt
@@ -113,21 +112,6 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Whether the api is logged in.
      */
     protected boolean isReady = false;
-	
-	/**
-     * Whether the bot should send out a typing status
-     */
-    protected volatile ConcurrentHashMap<String, Boolean> isTyping = new ConcurrentHashMap<>();
-	
-	/**
-     * Keeps track of the time to handle repeated typing status broadcasts
-     */
-    protected volatile ConcurrentHashMap<String, Long> typingTimer = new ConcurrentHashMap<>();
-	
-	/**
-     * 5 seconds, the time it takes for one typing status to "wear off"
-     */
-    protected static final long TIME_FOR_TYPE_STATUS = 5000;
     
     public DiscordClientImpl(String email, String password) {
         this.dispatcher = new EventDispatcher(this);
@@ -310,7 +294,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
         return u;
     }
-
+    
     @Override
     public PrivateChannel getOrCreatePMChannel(User user) throws Exception {
         for(PrivateChannel channel : privateChannels) {
@@ -318,47 +302,43 @@ public final class DiscordClientImpl implements IDiscordClient {
                 return channel;
             }
         }
-
+        
         try {
             PrivateChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS + this.ourUser.getID() + "/channels",
                     new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
                     new BasicNameValuePair("authorization", this.token),
                     new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
-           
+            
             PrivateChannel channel = new PrivateChannel(this, user, response.id);
             privateChannels.add(channel);
             return channel;
         } catch (HTTP403Exception e) {
             e.printStackTrace();
         }
-
+        
         return null;
     }
     
-    @Override//TODO: Move these to the Channel object
-    public synchronized void toggleTypingStatus(final String channelId) {
-        isTyping.put(channelId, !getTypingStatus(channelId));
-        
-        if (isTyping.get(channelId)) {
-            typingTimer.put(channelId, System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
-            new Thread(() -> {
-                while (getTypingStatus(channelId)) {
-                    if (typingTimer.get(channelId) <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
-                        try {
-                            Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+channelId+"/typing",
-									new BasicNameValuePair("authorization", this.token));
-                        } catch (HTTP403Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }).start();
+    @Override
+    public void toggleTypingStatus(String channelID) {
+        Channel channel = getChannelByID(channelID);
+        if (channel == null) {
+            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
+            return;
         }
+        
+        channel.toggleTypingStatus();
     }
     
     @Override
-    public synchronized boolean getTypingStatus(String channelId) {
-        return isTyping.containsKey(channelId) ? isTyping.get(channelId) : false;
+    public boolean getTypingStatus(String channelID) {
+        Channel channel = getChannelByID(channelID);
+        if (channel == null) {
+            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
+            return false;
+        }
+    
+        return channel.getTypingStatus();
     }
     
     @Override

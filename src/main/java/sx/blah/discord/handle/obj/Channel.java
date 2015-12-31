@@ -36,6 +36,8 @@ import sx.blah.discord.util.Requests;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author qt
@@ -70,7 +72,22 @@ public class Channel {
      * The guild this channel belongs to.
      */
     protected final Guild parent;
-	
+    
+    /**
+     * Whether the bot should send out a typing status
+     */
+    protected AtomicBoolean isTyping = new AtomicBoolean(false);
+    
+    /**
+     * Keeps track of the time to handle repeated typing status broadcasts
+     */
+    protected AtomicLong typingTimer = new AtomicLong(0);
+    
+    /**
+     * 5 seconds, the time it takes for one typing status to "wear off"
+     */
+    protected static final long TIME_FOR_TYPE_STATUS = 5000;
+    
 	/**
      * The client that created this object.
      */
@@ -181,6 +198,31 @@ public class Channel {
         }
         
         return null;
+    }
+    
+    public synchronized void toggleTypingStatus() {
+        isTyping.set(!isTyping.get());
+        
+        if (isTyping.get()) {
+            typingTimer.set(System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
+            new Thread(() -> {
+                while (isTyping.get()) {
+                    if (typingTimer.get() <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
+                        typingTimer.set(System.currentTimeMillis());
+                        try {
+                            Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
+                                    new BasicNameValuePair("authorization", client.getToken()));
+                        } catch (HTTP403Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+        }
+    }
+    
+    public synchronized boolean getTypingStatus() {
+        return isTyping.get();
     }
     
     @Override 
