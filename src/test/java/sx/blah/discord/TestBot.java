@@ -45,8 +45,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TestBot {
 	
 	private static final String CI_URL = "https://drone.io/github.com/austinv11/Discord4J/";
+	private static final long MAX_TEST_TIME = 60000L;
 	
-	@Test(timeout = 60000L)
+	@Test(timeout = 300000L)
 	public void testBot() {
 		main(System.getenv("USER"), System.getenv("PSW"), "CITest");
 	}
@@ -80,10 +81,16 @@ public class TestBot {
 									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
 							SpoofBot spoofBot = new SpoofBot(System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
-							
-							new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber, 
+							final long now = System.currentTimeMillis();
+							new Thread(() -> {
+								while (!didTest.get()) {
+									if (now+MAX_TEST_TIME <= System.currentTimeMillis()) {
+										didTest.set(true);
+									}
+								}
+							}).start();
+							new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
 									MessageBuilder.Styles.BOLD).build();
-//							didTest.set(true);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
