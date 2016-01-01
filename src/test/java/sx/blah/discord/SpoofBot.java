@@ -35,7 +35,7 @@ public class SpoofBot {
 			@Override
 			public void handle(ReadyEvent event) {
 				try {
-					channel = client.getChannelByID(client.getInviteForCode(invite.replace("https://discord,gg/", "")).accept().getChannelID());
+					channel = client.getChannelByID(client.getInviteForCode(invite.replace("https://discord.gg/", "")).accept().getChannelID());
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new RuntimeException("Spoofing failed!");
