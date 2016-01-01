@@ -40,10 +40,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author qt
- * @since 8:00 PM 16 Aug, 2015
- * Project: DiscordAPI
- * <p>
  * General testing bot. Also a demonstration of how to use the bot.
  */
 public class TestBot {
@@ -74,13 +70,16 @@ public class TestBot {
 						try {
 							Invite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse response = testInvite.accept();
+							Invite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
+							Invite.InviteResponse spoofResponse = spoofInvite.accept();
 							Channel testChannel = client.getChannelByID(response.getChannelID());
+							Channel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 							
 							new MessageBuilder(client).withChannel(testChannel).withContent("Initiating Discord4J Unit Tests for Build #"+
 									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
-							//TODO: Real unit tests
+							SpoofBot spoofBot = new SpoofBot(System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
 							
 							new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber, 
 									MessageBuilder.Styles.BOLD).build();
