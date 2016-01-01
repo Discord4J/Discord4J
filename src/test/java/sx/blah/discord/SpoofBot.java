@@ -3,6 +3,8 @@ package sx.blah.discord;
 import org.apache.commons.lang3.ClassUtils;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.IListener;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.Channel;
 import sx.blah.discord.handle.obj.Message;
 import sx.blah.discord.util.Presences;
@@ -28,54 +30,65 @@ public class SpoofBot {
 	
 	public SpoofBot(String email, String password, String invite) throws Exception {
 		client = new ClientBuilder().withLogin(email, password).login();
-		channel = client.getChannelByID(client.getInviteForCode(invite.replace("http://discord,gg/", "")).accept().getChannelID());
-		timer = 1;
-		lastTime = System.currentTimeMillis()-timer;
-		new Thread(() -> {
-			while (true) {
-				if (lastTime <= System.currentTimeMillis()-timer) {
-					timer = getRandTimer();
-					lastTime = System.currentTimeMillis();
-					synchronized (client) {
-						if (!enqueued.isEmpty()) {
-							Spoofs toSpoof = enqueued.pop();
-							if (toSpoof.getDependent() == null || toSpoof.getDependent().equals(lastSpoof)) {
-								switch (toSpoof) {
-									case MESSAGE:
-										channel.toggleTypingStatus();
-										lastSpoofData = channel.sendMessage(getRandMessage());
-										break;
-									
-									case MESSAGE_EDIT:
-										((Message)lastSpoofData).edit(getRandString());
-										break;
-									
-									case TYPING_TOGGLE:
-										channel.toggleTypingStatus();
-										break;
-									
-									case GAME:
-										client.updatePresence(client.getOurUser().getPresence() == Presences.IDLE, 
-												Optional.ofNullable(rng.nextBoolean() ? getRandString() : null));
-										break;
-									
-									case PRESENCE:
-										client.updatePresence(rng.nextBoolean(), client.getOurUser().getGame());
-										break;
+		client.getDispatcher().registerListener(new IListener<ReadyEvent>(){
+			
+			@Override
+			public void handle(ReadyEvent event) {
+				try {
+					channel = client.getChannelByID(client.getInviteForCode(invite.replace("http://discord,gg/", "")).accept().getChannelID());
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RuntimeException("Spoofing failed!");
+				}
+				timer = 1;
+				lastTime = System.currentTimeMillis()-timer;
+				new Thread(()->{
+					while (true) {
+						if (lastTime <= System.currentTimeMillis()-timer) {
+							timer = getRandTimer();
+							lastTime = System.currentTimeMillis();
+							synchronized (client) {
+								if (!enqueued.isEmpty()) {
+									Spoofs toSpoof = enqueued.pop();
+									if (toSpoof.getDependent() == null || toSpoof.getDependent().equals(lastSpoof)) {
+										switch (toSpoof) {
+											case MESSAGE:
+												channel.toggleTypingStatus();
+												lastSpoofData = channel.sendMessage(getRandMessage());
+												break;
+											
+											case MESSAGE_EDIT:
+												((Message) lastSpoofData).edit(getRandString());
+												break;
+											
+											case TYPING_TOGGLE:
+												channel.toggleTypingStatus();
+												break;
+											
+											case GAME:
+												client.updatePresence(client.getOurUser().getPresence() == Presences.IDLE,
+														Optional.ofNullable(rng.nextBoolean() ? getRandString() : null));
+												break;
+											
+											case PRESENCE:
+												client.updatePresence(rng.nextBoolean(), client.getOurUser().getGame());
+												break;
+										}
+										lastSpoof = toSpoof;
+									} else {
+										enqueued.addFirst(toSpoof);
+										enqueued.addFirst(toSpoof.getDependent());
+									}
+								} else {
+									for (int i = 0; i < 10; i++)
+										enqueued.add(Spoofs.values()[rng.nextInt(EnumSet.allOf(Spoofs.class).size())]);
 								}
-								lastSpoof = toSpoof;
-							} else {
-								enqueued.addFirst(toSpoof);
-								enqueued.addFirst(toSpoof.getDependent());
 							}
-						} else {
-							for (int i = 0; i < 10; i++)
-								enqueued.add(Spoofs.values()[rng.nextInt(EnumSet.allOf(Spoofs.class).size())]);
 						}
 					}
-				}
+				}).start();
 			}
-		}).start();
+		});
 	}
 	
 	public static String getRandMessage() {
