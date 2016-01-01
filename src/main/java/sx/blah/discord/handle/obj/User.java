@@ -105,7 +105,7 @@ public class User {
      * @return The game.
      */
     public Optional<String> getGame() {
-        return game;
+        return game == null ? Optional.empty() : game;
     }
 	
 	/**

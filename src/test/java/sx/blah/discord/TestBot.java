@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TestBot {
 	
 	private static final String CI_URL = "https://drone.io/github.com/austinv11/Discord4J/";
-	private static final long MAX_TEST_TIME = 60000L;
+	private static final long MAX_TEST_TIME = 120000L;
 	
 	@Test(timeout = 300000L)
 	public void testBot() {
@@ -67,8 +67,9 @@ public class TestBot {
 				final AtomicBoolean didTest = new AtomicBoolean(false);
 				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 					@Override
-					public void handle(ReadyEvent messageReceivedEvent) {
+					public void handle(ReadyEvent readyEvent) {
 						try {
+							//Initialize required data
 							Invite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse response = testInvite.accept();
 							Invite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
@@ -77,20 +78,31 @@ public class TestBot {
 							Channel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 							
+							//Start testing
 							new MessageBuilder(client).withChannel(testChannel).withContent("Initiating Discord4J Unit Tests for Build #"+
 									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
-							SpoofBot spoofBot = new SpoofBot(System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
+							//Clearing spoofbot's mess from before
+							for (Message message : spoofChannel.getMessages()) {
+									message.delete();
+							}
+							
+							//Time to unleash the ai
+							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
+							
 							final long now = System.currentTimeMillis();
 							new Thread(() -> {
 								while (!didTest.get()) {
 									if (now+MAX_TEST_TIME <= System.currentTimeMillis()) {
+										//Test timer up!
+										synchronized (client) {
+											new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
+													MessageBuilder.Styles.BOLD).build();
+										}
 										didTest.set(true);
 									}
 								}
 							}).start();
-							new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
-									MessageBuilder.Styles.BOLD).build();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

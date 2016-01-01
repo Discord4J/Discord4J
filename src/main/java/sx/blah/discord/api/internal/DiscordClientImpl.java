@@ -231,7 +231,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
     @Override
     public void updatePresence(boolean isIdle, Optional<String> game) {
-        ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.isPresent() ? game.get() : null)));
+        ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
         
         getOurUser().setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
         getOurUser().setGame(game);

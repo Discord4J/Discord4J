@@ -6,6 +6,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.Channel;
+import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
 import sx.blah.discord.util.Presences;
 
@@ -26,9 +27,11 @@ public class SpoofBot {
 	private ArrayDeque<Spoofs> enqueued = new ArrayDeque<>();
 	private volatile long lastTime;
 	private volatile long timer;
+	private final IDiscordClient other;
 	private final IDiscordClient client;
 	
-	public SpoofBot(String email, String password, String invite) throws Exception {
+	public SpoofBot(IDiscordClient other, String email, String password, String invite) throws Exception {
+		this.other = other;
 		client = new ClientBuilder().withLogin(email, password).login();
 		client.getDispatcher().registerListener(new IListener<ReadyEvent>(){
 			
@@ -45,20 +48,23 @@ public class SpoofBot {
 				new Thread(()->{
 					while (true) {
 						if (lastTime <= System.currentTimeMillis()-timer) {
+							//Time for the next spoof
 							timer = getRandTimer();
 							lastTime = System.currentTimeMillis();
 							synchronized (client) {
 								if (!enqueued.isEmpty()) {
 									Spoofs toSpoof = enqueued.pop();
 									if (toSpoof.getDependent() == null || toSpoof.getDependent().equals(lastSpoof)) {
+										//Handle each spoof
 										switch (toSpoof) {
 											case MESSAGE:
 												channel.toggleTypingStatus();
-												lastSpoofData = channel.sendMessage(getRandMessage());
+												lastSpoofData = channel.sendMessage((rng.nextInt(10) == 9 ? 
+														other.getOurUser().mention()+" " : "") + getRandMessage());
 												break;
 											
 											case MESSAGE_EDIT:
-												((Message) lastSpoofData).edit(getRandString());
+												((Message) lastSpoofData).edit(getRandMessage());
 												break;
 											
 											case TYPING_TOGGLE:
@@ -73,13 +79,28 @@ public class SpoofBot {
 											case PRESENCE:
 												client.updatePresence(rng.nextBoolean(), client.getOurUser().getGame());
 												break;
+											
+											case MESSAGE_DELETE:
+												((Message)lastSpoofData).delete();
+												break;
+											
+											case INVITE:
+												Invite invite = client.getGuilds().get(0).getChannels().get(
+														rng.nextInt(client.getGuilds().get(0).getChannels().size()))
+														.createInvite(18000, 1, false, false);
+												channel.sendMessage("https://discord.gg/"+invite.getInviteCode());
+												lastSpoofData = invite;
+												break;
 										}
 										lastSpoof = toSpoof;
 									} else {
+										//Dependent missing? Not a problem, we'll just do the dependent instead
 										enqueued.addFirst(toSpoof);
 										enqueued.addFirst(toSpoof.getDependent());
+										timer = 0;
 									}
 								} else {
+									//No spoofs queued, better randomize them
 									for (int i = 0; i < 10; i++)
 										enqueued.add(Spoofs.values()[rng.nextInt(EnumSet.allOf(Spoofs.class).size())]);
 								}
@@ -91,8 +112,13 @@ public class SpoofBot {
 		});
 	}
 	
+	/**
+	 * Generates a random message.
+	 * 
+	 * @return The random message.
+	 */
 	public static String getRandMessage() {
-		int sentenceCount = rng.nextInt(3)+1;
+		int sentenceCount = rng.nextInt(3)+1; //The message will have 1-3 sentences.
 		String[] sentences = new String[sentenceCount];
 		for (int i = 0; i < sentences.length; i++) {
 			sentences[i] = getRandSentence();
@@ -100,24 +126,42 @@ public class SpoofBot {
 		
 		String message = "";
 		for (String sentence : sentences) {
-			message += getRandEndingPunctuation()+" ";
+			message += sentence+getRandEndingPunctuation()+" ";
 		}
 		return message;
 	}
 	
+	/**
+	 * Generates a random sentence.
+	 * 
+	 * @return The random sentence.
+	 */
 	public static String getRandSentence() {
 		int wordCount = rng.nextInt(10)+1;
-		StringJoiner joiner = new StringJoiner(" ");
+		String[] words = new String[wordCount];
 		for (int i = 0; i < wordCount; i++)
-			joiner.add(rng.nextInt(9) == 8 ? String.valueOf(rng.nextInt(100)) : getRandString());
+			words[i] = rng.nextInt(9) == 8 ? String.valueOf(rng.nextInt(100)) : getRandString(); //Gets either a random number or a random string
 		
-		String message = joiner.toString();
+		String message = "";
+		for (String word : words) {
+			message += word+getRandCharacter("      :,;".toCharArray()); //randomizes inline punctuation, weighs spaces more heavily
+			if (message.charAt(message.length()-1) != ' ')
+				message += " ";
+		}
+		message = message.substring(0, message.length()-2);
+		
 		if (!isNumber(String.valueOf(message.charAt(0)))) {
 			message = Character.toUpperCase(message.charAt(0)) + message.substring(1);
 		}
 		return message;
 	}
 	
+	/**
+	 * Checks whether a string is a number.
+	 * 
+	 * @param s The string to check.
+	 * @return True if the string is a number, false if otherwise.
+	 */
 	public static boolean isNumber(String s) {
 		try {
 			Integer.valueOf(s);
@@ -127,51 +171,106 @@ public class SpoofBot {
 		}
 	}
 	
+	/**
+	 * Gets a random ending punctuation.
+	 * 
+	 * @return The random character.
+	 */
 	public static Character getRandEndingPunctuation() {
 		return getRandCharacter("?!....".toCharArray()); //Weighted towards periods
 	}
 	
+	/**
+	 * Randomizes the time to wait until the next spoof action.
+	 * 
+	 * @return The time in milliseconds.
+	 */
 	public static long getRandTimer() {
-		return (long) rng.nextDouble() * 5000L;
+		return 1000L +(long)(rng.nextDouble()*(3000L - 1000L)); //Timer between 1 to 3 seconds
 	}
 	
+	/**
+	 * Gets a random number based on the number type provided.
+	 * 
+	 * @param clazz The number type class.
+	 * @return The randomized number.
+	 */
 	public static Number getRandNumber(Class<? extends Number> clazz) {
 		Long bound;
 		try {
 			Field max_value = clazz.getDeclaredField("MAX_VALUE");
 			bound = (Long) max_value.get(null);
 		} catch (NoSuchFieldException | IllegalAccessException e) {
-			bound = (long)  Byte.MAX_VALUE;
+			bound = (long)  Byte.MAX_VALUE; //Supports all possible number types
 		}
 		return rng.nextDouble() * bound;
 	}
 	
+	/**
+	 * Gets a random boolean.
+	 * 
+	 * @return The random boolean.
+	 */
 	public static Boolean getRandBoolean() {
 		return rng.nextBoolean();
 	}
 	
+	/**
+	 * Gets a randomized character from the specificed charset.
+	 * 
+	 * @param charSet The character set.
+	 * @return The randomized character.
+	 */
 	public static Character getRandCharacter(char[] charSet) {
 		return charSet[rng.nextInt(charSet.length)];
 	}
 	
+	/**
+	 * Gets a random alphabetical character.
+	 * 
+	 * @return The random character.
+	 */
 	public static Character getRandCharacter() {
 		return getRandCharacter("abcdefghijklmnopqrstuvwxyz".toCharArray());
 	}
 	
+	/**
+	 * Randomizes a string.
+	 * 
+	 * @return The random string.
+	 */
 	public static String getRandString() {
-		char[] characters = new char[rng.nextInt(64)+1];
+		char[] characters = new char[rng.nextInt(16)+1]; //Uses 1-16 characters
 		for (int i = 0; i < characters.length; i++) {
 			characters[i] = getRandCharacter();
 		}
 		return new String(characters);
 	}
 	
-	public static boolean isAllowed(Class clazz) {
+	/**
+	 * Checks if the class is supported to be randomized without recursion.
+	 * 
+	 * @param clazz The class to check.
+	 * @return True if supported, false if otherwise.
+	 */
+	public static boolean canBeRandomized(Class clazz) {
 		return ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.equals(String.class) || clazz.equals(IDiscordClient.class);
 	}
 	
+	/**
+	 * Randomly constructs an object.
+	 * 
+	 * @param client The discord client.
+	 * @param clazz The class to construct.
+	 * @param <T> The type of object to construct.
+	 * @return The constructed object (or null if not possible).
+	 * 
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws InstantiationException
+	 */
 	public static <T> T randomizeObject(IDiscordClient client, Class<T> clazz) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-		if (isAllowed(clazz)) {
+		if (canBeRandomized(clazz)) {
 			if (String.class.isAssignableFrom(clazz))
 				return (T) getRandString();
 			else if (Character.class.isAssignableFrom(clazz))
@@ -189,7 +288,7 @@ public class SpoofBot {
 			outer:for (Constructor constructor : clazz.getConstructors()) {
 				Object[] parameters = new Object[constructor.getParameterCount()];
 				for (Class<?> param : constructor.getParameterTypes()) {
-					if (!isAllowed(param))
+					if (!canBeRandomized(param))
 						continue outer;
 				}
 				if (parameters.length > 0) {
@@ -205,12 +304,21 @@ public class SpoofBot {
 		return null;
 	}
 	
+	/**
+	 * Adds specific spoofs
+	 * 
+	 * @param toSpoof The specific spoof to add
+	 */
 	public void spoof(Spoofs toSpoof) {
 		enqueued.addLast(toSpoof);
 	}
 	
+	/**
+	 * Represents the kind of spoofing this bot is capable of.
+	 */
 	public enum Spoofs {
-		MESSAGE("TYPING_TOGGLE"), MESSAGE_EDIT("MESSAGE"), TYPING_TOGGLE(null), GAME(null), PRESENCE(null); 
+		MESSAGE("TYPING_TOGGLE"), MESSAGE_EDIT("MESSAGE"), TYPING_TOGGLE(null), GAME(null), PRESENCE(null), 
+		MESSAGE_DELETE("MESSAGE"), INVITE(null); 
 		
 		String dependsOn;
 		
@@ -218,6 +326,11 @@ public class SpoofBot {
 			this.dependsOn = dependsOn;
 		}
 		
+		/**
+		 * Gets the spoof required for this spoof to run.
+		 * 
+		 * @return The dependent spoof.
+		 */
 		public Spoofs getDependent() {
 			return dependsOn == null ? null : Spoofs.valueOf(dependsOn);
 		}
