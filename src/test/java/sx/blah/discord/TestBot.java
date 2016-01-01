@@ -83,7 +83,7 @@ public class TestBot {
 							
 							new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber, 
 									MessageBuilder.Styles.BOLD).build();
-							didTest.set(true);
+//							didTest.set(true);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
