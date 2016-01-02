@@ -1,4 +1,4 @@
-# Discord4J  [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest)
+# Discord4J  [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [ ![Download](https://api.bintray.com/packages/austinv11/maven/Discord4J/images/download.svg) ](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)
 
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://blog.discordapp.com/the-robot-revolution-has-unofficially-begun/)
