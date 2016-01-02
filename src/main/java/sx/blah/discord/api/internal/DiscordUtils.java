@@ -60,7 +60,8 @@ public class DiscordUtils {
 		
 		for (MessageResponse message : messages) {
 			channel.addMessage(new Message(client, message.id,
-					message.content, client.getUserByID(message.author.id), channel, convertFromTimestamp(message.timestamp)));
+					message.content, client.getUserByID(message.author.id), channel, 
+					convertFromTimestamp(message.timestamp), mentionsFromJSON(client, message), attachmentsFromJSON(message)));
 		}
 	}
 	
@@ -87,7 +88,7 @@ public class DiscordUtils {
 	 * Returns a user from the java form of the raw JSON data.
 	 */
 	public static User constructUserFromJSON(IDiscordClient client, UserResponse response) {
-		User ourUser = new User(client, response.username, response.id, response.avatar);
+		User ourUser = new User(client, response.username, response.id, response.discriminator, response.avatar);
 		ourUser.setPresence(Presences.ONLINE);
 		
 		return ourUser;
@@ -129,5 +130,39 @@ public class DiscordUtils {
 	 */
 	public static Invite getInviteFromJSON(IDiscordClient client, InviteJSONResponse json) {
 		return new Invite(client, json.code, json.xkcdpass);
+	}
+	
+	/**
+	 * Gets the users mentioned from a message json object.
+	 * 
+	 * @param client The discord client to use.
+	 * @param json The json response to use.
+	 * @return The list of mentioned users.
+	 */
+	public static List<User> mentionsFromJSON(IDiscordClient client, MessageResponse json) {
+		List<User> mentions = new ArrayList<>();
+		if (json.mention_everyone) {
+			mentions = client.getChannelByID(json.channel_id).getGuild().getUsers();
+		} else {
+			for (UserResponse response : json.mentions)
+				mentions.add(client.getUserByID(response.id));
+		}
+		
+		return mentions;
+	}
+	
+	/**
+	 * Gets the attachments on a message.
+	 * 
+	 * @param json The json response to use.
+	 * @return The attached messages.
+	 */
+	public static List<Message.Attachment> attachmentsFromJSON(MessageResponse json) {
+		List<Message.Attachment> attachments = new ArrayList<>();
+		for (MessageResponse.AttachmentResponse response : json.attachments) {
+			attachments.add(new Message.Attachment(response.filename, response.size, response.id, response.url));
+		}
+		
+		return attachments;
 	}
 }

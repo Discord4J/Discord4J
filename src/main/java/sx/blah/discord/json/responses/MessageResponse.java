@@ -21,7 +21,7 @@ public class MessageResponse {
 	public boolean tts;
 	
 	/**
-	 * Any embedded content in the message (note: this only gets added in a MESSAGE_UPDATE event)
+	 * Any embedded content in the message (note: this only gets added in a MESSAGE_UPDATE event) TODO: Actually implement into java somehow
 	 */
 	public EmbedResponse[] embeds;
 	
@@ -168,7 +168,7 @@ public class MessageResponse {
 			 */
 			public String url;
 		}
-		
+		//FIXME
 		public static class VideoResponse {
 			
 		}

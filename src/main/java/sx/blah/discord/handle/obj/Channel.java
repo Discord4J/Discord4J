@@ -227,25 +227,38 @@ public class Channel {
     }
     
     /**
-     * Sends a message to the desired channel.
+     * Sends a message without tts to the desired channel.
      *
      * @param content The content of the message.
      * @return The message object representing the sent message
      */
     public Message sendMessage(String content) {
+        return sendMessage(content, false);
+    }
+    
+    /**
+     * Sends a message to the desired channel.
+     *
+     * @param content The content of the message.
+     * @param tts Whether the message should use tts or not.
+     * @return The message object representing the sent message
+     */
+    public Message sendMessage(String content, boolean tts) {
         if (client.isReady()) {
            content = DiscordUtils.escapeString(content);
         
             try {
                 MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
-                        new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
+                        new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
                         new BasicNameValuePair("authorization", client.getToken()),
                         new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
             
                 String time = response.timestamp;
                 String messageID = response.id;
             
-                Message message = new Message(client, messageID, content, client.getOurUser(), this, DiscordUtils.convertFromTimestamp(time));
+                Message message = new Message(client, messageID, content, client.getOurUser(), this, 
+                        DiscordUtils.convertFromTimestamp(time), DiscordUtils.mentionsFromJSON(client, response),
+                        DiscordUtils.attachmentsFromJSON(response));
                 addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
                 client.getDispatcher().dispatch(new MessageSendEvent(message));
                 return message;
@@ -350,7 +363,6 @@ public class Channel {
     public String toString() {
         return mention();
     }
-    
     
     @Override
     public boolean equals(Object other) {

@@ -53,9 +53,8 @@ public class User {
      * User discriminator.
      * Distinguishes users with the same name.
      * This is here in case it becomes necessary.
-     * TODO: implement
      */
-    protected int discriminator;
+    protected final String discriminator;
 
     /**
      * This user's presence.
@@ -73,10 +72,11 @@ public class User {
      */
     protected final IDiscordClient client;
 
-    public User(IDiscordClient client, String name, String id, String avatar) {
+    public User(IDiscordClient client, String name, String id, String discriminator, String avatar) {
 	    this.client = client;
         this.id = id;
 	    this.name = name;
+		this.discriminator = discriminator;
 	    this.avatar = avatar;
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
@@ -183,7 +183,16 @@ public class User {
     public String mention() {
         return "<@" + id + ">";
     }
-
+	
+	/**
+	 * Gets the discriminator for the user. This is used by Discord to differentiate between two users with the same name.
+	 * 
+	 * @return The discriminator.
+	 */
+	public String getDiscriminator() {
+		return discriminator;
+	}
+	
     @Override 
     public String toString() {
         return mention();

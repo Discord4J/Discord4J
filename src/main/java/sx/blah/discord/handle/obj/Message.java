@@ -33,6 +33,7 @@ import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Represents a discord message.
@@ -65,17 +66,30 @@ public class Message {
     protected LocalDateTime timestamp;
 	
 	/**
+	 * The list of users mentioned by this message.
+	 */
+	protected List<User> mentions;
+	
+	/**
+	 * The attachments, if any, on the message.
+	 */
+	protected List<Attachment> attachments;
+	
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
 
-    public Message(IDiscordClient client, String messageID, String content, User user, Channel channel, LocalDateTime timestamp) {
+    public Message(IDiscordClient client, String messageID, String content, User user, Channel channel,
+				   LocalDateTime timestamp, List<User> mentions, List<Attachment> attachments) {
         this.client = client;
 		this.messageID = messageID;
         this.content = content;
 	    this.author = user;
         this.channel = channel;
 	    this.timestamp = timestamp;
+		this.mentions = mentions;
+		this.attachments = attachments;
     }
 	
 	/**
@@ -142,6 +156,24 @@ public class Message {
 	public LocalDateTime getTimestamp() {
 		return timestamp;
 	}
+	
+	/**
+	 * Gets the users mentioned in this message.
+	 * 
+	 * @return The users mentioned.
+	 */
+	public List<User> getMentions() {
+		return mentions;
+	}
+	
+	/**
+	 * Gets the attachments in this message.
+	 * 
+	 * @return The attachments.
+	 */
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
 
     /**
      * Adds an "@mention," to the author of the referenced Message
@@ -165,13 +197,15 @@ public class Message {
 			
 			try {
 				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + messageID,
-						new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0])), "UTF-8"),
+						new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false)), "UTF-8"),
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 				
-				Message oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp);
+				Message oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentions, attachments);
 				this.content = response.content;
 				this.timestamp = DiscordUtils.convertFromTimestamp(response.edited_timestamp);
+				this.mentions = DiscordUtils.mentionsFromJSON(client, response);
+				this.attachments = DiscordUtils.attachmentsFromJSON(response);
 				//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 				// the event chain goes like this:
 				//Original message edited to null, then the null message edited to the new content
@@ -203,7 +237,7 @@ public class Message {
 	}
 	
 	/**
-	 * Acknowledges a message (marks it as "read")
+	 * Acknowledges a message and all others before it (marks it as "read").
 	 */
 	public void acknowledge() throws HTTP403Exception {
 		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getChannel().getID() + "/messages/" + getID() + "/ack",
@@ -229,5 +263,74 @@ public class Message {
 	@Override
 	public boolean equals(Object other) {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((Message) other).getID().equals(getID());
+	}
+	
+	/**
+	 * Represents an attachment included in the message.
+	 */
+	public static class Attachment {
+		
+		/**
+		 * The file name of the attachment.
+		 */
+		protected final String filename;
+		
+		/**
+		 * The size, in bytes of the attachment.
+		 */
+		protected final int filesize;
+		
+		/**
+		 * The attachment id.
+		 */
+		protected final String id;
+		
+		/**
+		 * The download link for the attachment.
+		 */
+		protected final String url;
+		
+		public Attachment(String filename, int filesize, String id, String url) {
+			this.filename = filename;
+			this.filesize = filesize;
+			this.id = id;
+			this.url = url;
+		}
+		
+		/**
+		 * Gets the file name for the attachment.
+		 * 
+		 * @return The file name of the attachment.
+		 */
+		public String getFilename() {
+			return filename;
+		}
+		
+		/**
+		 * Gets the size of the attachment.
+		 * 
+		 * @return The size, in bytes of the attachment.
+		 */
+		public int getFilesize() {
+			return filesize;
+		}
+		
+		/**
+		 * Gets the id of the attachment.
+		 * 
+		 * @return The attachment id.
+		 */
+		public String getId() {
+			return id;
+		}
+		
+		/**
+		 * Gets the direct link to the attachment.
+		 * 
+		 * @return The download link for the attachment.
+		 */
+		public String getUrl() {
+			return url;
+		}
 	}
 }
