@@ -19,7 +19,10 @@
 
 package sx.blah.discord.handle.obj;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
@@ -33,7 +36,10 @@ import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Requests;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -267,6 +273,35 @@ public class Channel {
                 return null;
             }
         
+        } else {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return null;
+        }
+    }
+	
+	/**
+     * Sends a file to the channel.
+     * 
+     * @param file The file to send.
+     * @return The message sent.
+     * 
+     * @throws HTTP403Exception
+     * @throws IOException
+     */
+    public Message sendFile(File file) throws HTTP403Exception, IOException {
+        if (client.isReady()) {
+            //These next two lines of code took WAAAAAY too long to figure out than I care to admit
+            HttpEntity fileEntity = MultipartEntityBuilder.create().addBinaryBody("file", file, 
+                    ContentType.create(Files.probeContentType(file.toPath())), file.getName()).build();
+            MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
+                    DiscordEndpoints.CHANNELS + id + "/messages",
+                    fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
+            Message message = new Message(client, response.id, response.content, client.getOurUser(), this,
+                    DiscordUtils.convertFromTimestamp(response.timestamp), DiscordUtils.mentionsFromJSON(client, response),
+                    DiscordUtils.attachmentsFromJSON(response));
+            addMessage(message);
+            client.getDispatcher().dispatch(new MessageSendEvent(message));
+            return message;
         } else {
             Discord4J.LOGGER.error("Bot has not signed in yet!");
             return null;
