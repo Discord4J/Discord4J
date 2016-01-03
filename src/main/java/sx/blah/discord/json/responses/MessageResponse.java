@@ -190,7 +190,7 @@ public class MessageResponse {
 		public int size;
 		
 		/**
-		 * The url for the thumbnail? FIXME
+		 * The url for used for the embed.
 		 */
 		public String proxy_url;
 		

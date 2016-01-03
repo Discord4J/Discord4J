@@ -108,6 +108,16 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Whether the api is logged in.
      */
     protected boolean isReady = false;
+	
+	/**
+     * The websocket session id.
+     */
+    protected String sessionId;
+	
+	/**
+     * Caches the last operation done by the websocket, required for handling redirects.
+     */
+    protected long lastSequence = 0;
     
     public DiscordClientImpl(String email, String password) {
         this.dispatcher = new EventDispatcher(this);
