@@ -25,7 +25,7 @@ public class EventResponse {
 	 * 5 = To ensure the voice server is still up, only use if the voice connection fails/drops TODO: Implement
 	 * 6 = Resume a connection after a redirect occurs
 	 * 7 = Notifies the client to redirect to another gateway
-	 * 8 = To request all guild member withheld by large_threshold TODO: Implement
+	 * 8 = To request all guild member withheld by large_threshold
 	 */
 	public int op;
 	

@@ -56,7 +56,7 @@ public final class DiscordClientImpl implements IDiscordClient {
      * that we sent the keep alive so we can accurately
      * time our keep alive messages.
      */
-    protected long timer = System.currentTimeMillis();
+    protected volatile long timer = System.currentTimeMillis();
 
     /**
      * User we are logged in as
@@ -72,7 +72,7 @@ public final class DiscordClientImpl implements IDiscordClient {
      * Time (in ms) between keep alive
      * messages.
      */
-	protected long heartbeat;
+	protected volatile long heartbeat;
 
     /**
      * Local copy of all guilds/servers.

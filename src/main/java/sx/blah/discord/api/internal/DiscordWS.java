@@ -9,6 +9,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.ConnectRequest;
+import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
@@ -25,6 +26,10 @@ public class DiscordWS extends WebSocketClient {
 
 	private DiscordClientImpl client;
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
+	/**
+	 * The amount of users a guild must have to be considered "large"
+	 */
+	public static final int LARGE_THRESHOLD = 50;
 	
 	public DiscordWS(DiscordClientImpl client, URI serverURI) {
 		super(serverURI);
@@ -47,10 +52,24 @@ public class DiscordWS extends WebSocketClient {
 			send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence)));
 			Discord4J.LOGGER.debug("Reconnected to the Discord websocket.");
 		} else if (!client.token.isEmpty()) {
-			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.token, "Java", Discord4J.NAME, Discord4J.NAME, "", "")));
+			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.token, "Java", Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
 			Discord4J.LOGGER.debug("Connected to the Discord websocket.");
 		} else 
 			Discord4J.LOGGER.error("Use the login() method to set your token first!");
+	}
+	
+	private void startKeepalive() {
+		new Thread(()->{
+			// Keep alive
+			while (this.isConnected.get()) {
+				long l;
+				if ((l = (System.currentTimeMillis()-client.timer)) >= client.heartbeat) {
+					Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+					send(DiscordUtils.GSON.toJson(new KeepAliveRequest()));
+					client.timer = System.currentTimeMillis();
+				}
+			}
+		}).start();
 	}
 
 	/**
@@ -82,6 +101,11 @@ public class DiscordWS extends WebSocketClient {
 			
 			switch (type) {
 				case "RESUMED":
+					ResumedEventResponse event0 = DiscordUtils.GSON.fromJson(eventObject, ResumedEventResponse.class);
+					client.heartbeat = event0.heartbeat_interval;
+					startKeepalive();
+					break;
+					
 				case "READY":
 					
 					ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
@@ -95,12 +119,21 @@ public class DiscordWS extends WebSocketClient {
 					
 					// I hope you like loops.
 					for (GuildResponse guildResponse : event.guilds) {
+						if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
+							Discord4J.LOGGER.warn("Guild with id {} is unavailable, ignoring it. Is there an outage?", guildResponse.id);
+							continue;
+						}
+						
 						Guild guild;
 						client.guildList.add(guild = new Guild(client, guildResponse.name, guildResponse.name, guildResponse.icon, guildResponse.owner_id));
 						
 						for (GuildResponse.MemberResponse member : guildResponse.members) {
 							guild.addUser(new User(client, member.user.username, member.user.id,
 									member.user.discriminator, member.user.avatar));
+						}
+						
+						if (guildResponse.large) { //The guild is large, we have to send a request to get the offline users
+							send(DiscordUtils.GSON.toJson(new GuildMembersRequest(guildResponse.id)));
 						}
 						
 						for (PresenceResponse presence : guildResponse.presences) {
@@ -147,17 +180,8 @@ public class DiscordWS extends WebSocketClient {
 					}
 					
 					Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
-					new Thread(()->{
-						// Keep alive
-						while (this.isConnected.get()) {
-							long l;
-							if ((l = (System.currentTimeMillis()-client.timer)) >= client.heartbeat) {
-								Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-								send(DiscordUtils.GSON.toJson(new KeepAliveRequest()));
-								client.timer = System.currentTimeMillis();
-							}
-						}
-					}).start();
+					
+					startKeepalive();
 					
 					client.isReady = true;
 					client.dispatcher.dispatch(new ReadyEvent());
@@ -421,6 +445,20 @@ public class DiscordWS extends WebSocketClient {
 					}
 					break;
 				
+				case "GUILD_MEMBERS_CHUNK":
+					GuildMemberChunkEventResponse event15 = DiscordUtils.GSON.fromJson(eventObject, GuildMemberChunkEventResponse.class);
+					Guild guildToUpdate = client.getGuildByID(event15.guild_id);
+					if (guildToUpdate == null) {
+						Discord4J.LOGGER.warn("Can't receive guild members chunk for guild id {}, the guild is null!", event15.guild_id);
+						break;
+					}
+					
+					for (GuildResponse.MemberResponse member : event15.members) {
+						guildToUpdate.addUser(new User(client, member.user.username, member.user.id,
+								member.user.discriminator, member.user.avatar));
+					}
+					break;
+					
 				default:
 					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", eventObject.toString(), frame);
 			}

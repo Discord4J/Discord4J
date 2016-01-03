@@ -6,6 +6,11 @@ package sx.blah.discord.json.responses;
 public class GuildResponse {
 	
 	/**
+	 * True if the guild is unavailable due to an outage or something similar.
+	 */
+	public boolean unavailable = false;
+	
+	/**
 	 * The voice states in the guild
 	 */
 	public VoiceStateResponse[] voice_states;

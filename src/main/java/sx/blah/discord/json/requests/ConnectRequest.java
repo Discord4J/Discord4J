@@ -17,8 +17,8 @@ public class ConnectRequest {
 	 */
 	public EventObject d;
 	
-	public ConnectRequest(String token, String os, String browser, String device, String referrer, String referring_domain) {
-		d = new EventObject(token, new PropertiesObject(os, browser, device, referrer, referring_domain));
+	public ConnectRequest(String token, String os, String browser, String device, String referrer, String referring_domain, int large_threshold, boolean compress) {
+		d = new EventObject(token, new PropertiesObject(os, browser, device, referrer, referring_domain), large_threshold, compress);
 	}
 	
 	/**
@@ -37,13 +37,25 @@ public class ConnectRequest {
 		public PropertiesObject properties;
 		
 		/**
-		 * The version?? of the event, always 2
+		 * The version?? of the event, always 3
 		 */
-		public int v = 2;
+		public int v = 3;
 		
-		public EventObject(String token, PropertiesObject properties) {
+		/**
+		 * The amount of users in a guild before the guild is perceived as "large" 
+		 */
+		public int large_threshold;
+		
+		/**
+		 * Whether the READY event should be compressed with a gzip format
+		 */
+		public boolean compress;
+		
+		public EventObject(String token, PropertiesObject properties, int large_threshold, boolean compress) {
 			this.token = token;
 			this.properties = properties;
+			this.large_threshold = large_threshold;
+			this.compress = compress;
 		}
 	}
 	
