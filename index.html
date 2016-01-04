@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Discord4j by austinv11</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Discord4j</h1>
+      <h2 class="project-tagline">Java interface for the Discord API</h2>
+      <a href="https://github.com/austinv11/Discord4J" class="btn">View on GitHub</a>
+      <a href="https://github.com/austinv11/Discord4J/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/austinv11/Discord4J/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="discord4j-----" class="anchor" href="#discord4j-----" aria-hidden="true"><span class="octicon octicon-link"></span></a>Discord4J  <a href="https://drone.io/github.com/austinv11/Discord4J/latest"><img src="https://drone.io/github.com/austinv11/Discord4J/status.png" alt="Build Status"></a> <a href="https://bintray.com/austinv11/maven/Discord4J/_latestVersion"> <img src="https://api.bintray.com/packages/austinv11/maven/Discord4J/images/download.svg" alt="Download"> </a>
+</h1>
+
+<p>Java interface for the unofficial <a href="https://discordapp.com/">Discord</a> API, written in Java 8.
+<a href="https://blog.discordapp.com/the-robot-revolution-has-unofficially-begun/">The API is also available in a few other languages.</a></p>
+
+<p>For the latest dev builds, <a href="https://drone.io/github.com/austinv11/Discord4J/files">download it from my ci server.</a></p>
+
+<h2>
+<a id="adding-discord4j-as-a-dependency-for-a-project" class="anchor" href="#adding-discord4j-as-a-dependency-for-a-project" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adding Discord4J as a dependency for a project</h2>
+
+<p>Given that <code>@VERSION@</code> = the latest version of Discord4J.</p>
+
+<h3>
+<a id="with-maven" class="anchor" href="#with-maven" aria-hidden="true"><span class="octicon octicon-link"></span></a>With maven</h3>
+
+<p>In your <code>pom.xml</code> add:</p>
+
+<div class="highlight highlight-text-xml"><pre>...
+&lt;<span class="pl-ent">repositories</span>&gt;
+  ...
+  &lt;<span class="pl-ent">repository</span>&gt;
+    &lt;<span class="pl-ent">snapshots</span>&gt;
+      &lt;<span class="pl-ent">enabled</span>&gt;false&lt;/<span class="pl-ent">enabled</span>&gt;
+    &lt;/<span class="pl-ent">snapshots</span>&gt;
+    &lt;<span class="pl-ent">id</span>&gt;bintray-austinv11-maven&lt;/<span class="pl-ent">id</span>&gt;
+    &lt;<span class="pl-ent">name</span>&gt;bintray&lt;/<span class="pl-ent">name</span>&gt;
+    &lt;<span class="pl-ent">url</span>&gt;http://dl.bintray.com/austinv11/maven&lt;/<span class="pl-ent">url</span>&gt;
+  &lt;/<span class="pl-ent">repository</span>&gt;
+&lt;/<span class="pl-ent">repositories</span>&gt;
+...
+&lt;<span class="pl-ent">dependencies</span>&gt;
+  ...
+  &lt;<span class="pl-ent">dependency</span>&gt;
+    &lt;<span class="pl-ent">groupId</span>&gt;sx.blah&lt;/<span class="pl-ent">groupId</span>&gt;
+    &lt;<span class="pl-ent">artifactId</span>&gt;Discord4J&lt;/<span class="pl-ent">artifactId</span>&gt;
+    &lt;<span class="pl-ent">version</span>&gt;@VERSION@&lt;/<span class="pl-ent">version</span>&gt;
+  &lt;/<span class="pl-ent">dependency</span>&gt;
+&lt;/<span class="pl-ent">dependencies</span>&gt;
+...</pre></div>
+
+<h3>
+<a id="with-gradle" class="anchor" href="#with-gradle" aria-hidden="true"><span class="octicon octicon-link"></span></a>With Gradle</h3>
+
+<p>In your <code>build.gradle</code> add:</p>
+
+<div class="highlight highlight-source-groovy"><pre><span class="pl-k">..</span>.
+repositories {
+  <span class="pl-k">..</span>.
+  maven {
+    url  <span class="pl-s"><span class="pl-pds">"</span>http://dl.bintray.com/austinv11/maven<span class="pl-pds">"</span></span> 
+  }
+}
+<span class="pl-k">..</span>.
+dependencies {
+  <span class="pl-k">..</span>.
+  compile <span class="pl-s"><span class="pl-pds">"</span>sx.blah:Discord4J:@VERSION@<span class="pl-pds">"</span></span>
+}
+<span class="pl-k">..</span>.</pre></div>
+
+<h2>
+<a id="deprecation-policy" class="anchor" href="#deprecation-policy" aria-hidden="true"><span class="octicon octicon-link"></span></a>Deprecation policy</h2>
+
+<p>Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.</p>
+
+<h2>
+<a id="development" class="anchor" href="#development" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development</h2>
+
+<p>The Discord API is still in development. Functions may break at any time.<br>
+In such an event, please contact me or submit a pull request.</p>
+
+<h2>
+<a id="pull-requests" class="anchor" href="#pull-requests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pull requests</h2>
+
+<p>No one is perfect at programming and I am no exception. If you see something that can be improved, please feel free to submit a pull request! </p>
+
+<h2>
+<a id="other-info" class="anchor" href="#other-info" aria-hidden="true"><span class="octicon octicon-link"></span></a>Other info</h2>
+
+<p>More information can be found in the <a href="https://discordapi.readthedocs.org/en/latest/">docs</a>. 
+You can contact me on the <a href="https://discord.gg/0SBTUU1wZTU7PCok">Discord API server</a> in the #java_discord4j channel.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/austinv11/Discord4J">Discord4j</a> is maintained by <a href="https://github.com/austinv11">austinv11</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
