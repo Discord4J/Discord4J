@@ -47,7 +47,7 @@ public class ConnectRequest {
 		public int large_threshold;
 		
 		/**
-		 * Whether the READY event should be compressed with a gzip format
+		 * Whether events should be compressed with a gzip format
 		 */
 		public boolean compress;
 		

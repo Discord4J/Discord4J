@@ -99,7 +99,9 @@ public class DiscordUtils {
 	 * 
 	 * @param string The string to escape
 	 * @return The escaped string
+	 * @deprecated No longer required for discord to handle special characters
 	 */
+	@Deprecated
 	public static String escapeString(String string) {
 		//All this weird regex stuff is to prevent any urls from being escaped and therefore breaking them
 		List<String> urls = new ArrayList<>();

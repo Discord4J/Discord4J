@@ -193,7 +193,7 @@ public class Message {
 	 */
 	public Message edit(String content) {
 		if (client.isReady()) {
-			content = DiscordUtils.escapeString(content);
+//			content = DiscordUtils.escapeString(content);
 			
 			try {
 				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + messageID,

@@ -22,16 +22,23 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+//FIXME: Make compression actually happen
 public class DiscordWS extends WebSocketClient {
 
 	private DiscordClientImpl client;
+//	private static final HashMap<String, String> headers = new HashMap<>();
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
 	/**
 	 * The amount of users a guild must have to be considered "large"
 	 */
 	public static final int LARGE_THRESHOLD = 50;
 	
+//	static {
+//		headers.put("Accept-Encoding", "gzip");
+//	}
+	
 	public DiscordWS(DiscordClientImpl client, URI serverURI) {
+//		super(serverURI, new Draft_10(), headers, 0); //Same as super(serverURI) but I added custom headers
 		super(serverURI);
 		this.client = client;
 		this.connect();
@@ -475,7 +482,12 @@ public class DiscordWS extends WebSocketClient {
 			Discord4J.LOGGER.warn("Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
 	}
-
+//	
+//	@Override
+//	public void onMessage(ByteBuffer bytes) {
+//		System.out.print("Asndlas");
+//	}
+	
 	@Override 
 	public void onClose(int i, String s, boolean b) {
 
