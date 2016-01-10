@@ -52,7 +52,7 @@ public final class DiscordEndpoints {
     public static final String CHANNELS = APIBASE + "/channels/";
 
     /**
-     * Used for accapting invites
+     * Used for accepting invites
      */
     public static final String INVITE = APIBASE + "/invite/";
 
@@ -65,4 +65,14 @@ public final class DiscordEndpoints {
      * Formatted string for getting guild icon URLs.
      */
     public static final String ICONS = "https://cdn.discordapp.com/icons/%s/%s.jpg";
+	
+	/**
+	 * Formatted string for getting api metric information.
+	 */
+	public static final String METRICS = "https://srhpyqt94yxb.statuspage.io/metrics-display/d5cggll8phl5/%s.json";
+	
+	/**
+	 * Formatted string for getting maintenance information.
+	 */
+	public static final String STATUS = "https://status.discordapp.com/api/v2/scheduled-maintenances/%s.json";
 }

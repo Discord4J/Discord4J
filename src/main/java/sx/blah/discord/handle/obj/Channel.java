@@ -251,9 +251,7 @@ public class Channel {
      */
     public Message sendMessage(String content, boolean tts) {
         if (client.isReady()) {
-            System.out.println(content);
 //            content = DiscordUtils.escapeString(content);
-            System.out.println(content);
         
             try {
                 MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
