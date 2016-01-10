@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.HTTP403Exception;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -39,6 +40,13 @@ public interface IDiscordClient {
 	 * @throws URISyntaxException
 	 */
 	void login() throws IOException, URISyntaxException;
+	
+	/**
+	 * Logs out the client.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void logout() throws HTTP403Exception;
 	
 	/**
 	 * Sends a message to the desired channel.

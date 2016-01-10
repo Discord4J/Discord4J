@@ -45,7 +45,7 @@ public class DiscordWS extends WebSocketClient {
 	}
 	
 	/**
-	 * Disconnects the client.
+	 * Disconnects the client WS.
 	 */
 	public void disconnect() {
 		isConnected.set(false);

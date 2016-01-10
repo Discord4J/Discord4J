@@ -21,7 +21,6 @@ package sx.blah.discord.api.internal;
 
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.java_websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
@@ -92,7 +91,7 @@ public final class DiscordClientImpl implements IDiscordClient {
     /**
      * WebSocket over which to communicate with Discord.
      */
-	protected WebSocketClient ws;
+	protected DiscordWS ws;
 
     /**
      * Event dispatcher.
@@ -152,7 +151,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 
         this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
     }
-
+    
+    @Override
+    public void logout() throws HTTP403Exception {
+        if (isReady()) {
+            ws.disconnect();
+            
+            Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
+                    new BasicNameValuePair("authorization", token));
+        } else
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+    }
+    
     /**
      * Gets the WebSocket gateway
      *
