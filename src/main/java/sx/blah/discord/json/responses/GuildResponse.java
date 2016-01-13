@@ -152,8 +152,8 @@ public class GuildResponse {
 		public int position;
 		
 		/**
-		 * The permissions the user has. See http://bit.ly/1OnxVZe. TO see if the user has a permission, 
-		 * 1 << [permOffset] & [permissions number] must be greater than 0. Remember to check the manage roles permission!
+		 * The permissions the user has. See http://bit.ly/1OnxVZe. To see if the user has a permission, 
+		 * {@code 1 << [permOffset] & [permissions number] must be greater than 0. Remember to check the manage roles permission!}
 		 * That permissions supercedes all others
 		 */
 		public int permissions;

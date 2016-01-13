@@ -27,11 +27,6 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * @author qt
- * @since 7:56 PM 16 Aug, 2015
- * Project: DiscordAPI
- * <p>
- * <p>
  * Main class. :D
  */
 public class Discord4J {

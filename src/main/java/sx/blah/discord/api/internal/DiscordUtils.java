@@ -49,7 +49,6 @@ public class DiscordUtils {
 	 *
 	 * @param client The discord client to use
 	 * @param channel The channel to get messages from.
-	 * @return Last 50 messages from the channel.
 	 * 
 	 * @throws IOException
 	 */
