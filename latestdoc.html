@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <!--<meta http-equiv="refresh" content="1;url=http://example.com">-->
+    <script type="text/javascript">
+        var rawFile = new XMLHttpRequest();
+        rawFile.open("GET", "http://austinv11.github.io/Discord4J/latest.txt", false);
+        rawFile.onreadystatechange = function () {
+            if(rawFile.readyState === 4) {
+                if(rawFile.status === 200 || rawFile.status == 0) {
+                    var allText = rawFile.responseText;
+                    window.location.href = "http://austinv11.github.io/Discord4J/docs/"+allText+"/";
+                }
+            }
+        }
+        rawFile.send(null);
+    </script>
+</head>
+<body>
+    If you are not redirected automatically, please enable javascript or follow the <a href='http://austinv11.github.io/Discord4J/'>link back to the homepage</a>
+</body>
+</html>
