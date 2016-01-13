@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.events.*;
@@ -17,29 +18,35 @@ import sx.blah.discord.json.responses.events.*;
 import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Presences;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.InflaterInputStream;
 
-//FIXME: Make compression actually happen
 public class DiscordWS extends WebSocketClient {
 
 	private DiscordClientImpl client;
-//	private static final HashMap<String, String> headers = new HashMap<>();
+	private static final HashMap<String, String> headers = new HashMap<>();
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
 	/**
 	 * The amount of users a guild must have to be considered "large"
 	 */
 	public static final int LARGE_THRESHOLD = 50;
 	
-//	static {
-//		headers.put("Accept-Encoding", "gzip");
-//	}
+	static {
+		headers.put("Accept-Encoding", "gzip");
+	}
 	
 	public DiscordWS(DiscordClientImpl client, URI serverURI) {
-//		super(serverURI, new Draft_10(), headers, 0); //Same as super(serverURI) but I added custom headers
-		super(serverURI);
+		super(serverURI, new Draft_10(), headers, 0); //Same as super(serverURI) but I added custom headers
+//		super(serverURI);
 		this.client = client;
 		this.connect();
 	}
@@ -482,11 +489,29 @@ public class DiscordWS extends WebSocketClient {
 			Discord4J.LOGGER.warn("Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
 	}
-//	
-//	@Override
-//	public void onMessage(ByteBuffer bytes) {
-//		System.out.print("Asndlas");
-//	}
+	
+	@Override
+	public void onMessage(ByteBuffer bytes) {
+		//Converts binary data to readable string data
+		try {
+			InflaterInputStream inputStream = new InflaterInputStream(new ByteArrayInputStream(bytes.array()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+			
+			StringBuilder sb = new StringBuilder();
+			String read;
+			while ((read = reader.readLine()) != null){
+				sb.append(read);
+			}
+			
+			String data = sb.toString();
+			reader.close();
+			inputStream.close();
+			
+			onMessage(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	@Override 
 	public void onClose(int i, String s, boolean b) {
