@@ -36,13 +36,15 @@
                     if(rawFile.status === 200 || rawFile.status == 0) {
                         var allText = rawFile.responseText.split(";").reverse();
                         for (i = 0; i < allText.length; i++) {
-                            var btn = document.createElement("li");
-                            btn.setAttribute("href", "http://austinv11.github.io/Discord4J/docs/"+allText[i].replace(".", "-")+"/");
-                            //btn.setAttribute("class", "btn");
-                            btn.innerHTML = "<a href=http://austinv11.github.io/Discord4J/docs/"+allText[i].replace(".", "-")+"/>"+allText[i]+"</a>"
-                            //btn.appendChild(document.createTextNode(allText[i]));
-                            list.appendChild(btn);
-                            //alert("test");
+                            if (allText[i] !== null && allText[i].trim().length > 1) {
+                                var btn = document.createElement("li");
+                                //btn.setAttribute("href", "http://austinv11.github.io/Discord4J/docs/"+allText[i].replace(".", "-")+"/");
+                                //btn.setAttribute("class", "btn");
+                                btn.innerHTML = "<a href=http://austinv11.github.io/Discord4J/docs/"+allText[i].split(".").join("-")+"/>"+allText[i]+"</a>"
+                                //btn.appendChild(document.createTextNode(allText[i]));
+                                list.appendChild(btn);
+                                //alert("test");
+                            }
                         }
                     }
                 }
