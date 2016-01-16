@@ -87,8 +87,10 @@ public class TestBot {
 									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
 							//Clearing spoofbot's mess from before
-							for (IMessage message : spoofChannel.getMessages()) {
+							synchronized (spoofChannel) {
+								for (IMessage message : spoofChannel.getMessages()) {
 									message.delete();
+								}
 							}
 							
 							//Time to unleash the ai
