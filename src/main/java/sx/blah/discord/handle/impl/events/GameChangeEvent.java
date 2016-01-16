@@ -1,8 +1,8 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Guild;
-import sx.blah.discord.handle.obj.User;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Optional;
 
@@ -11,11 +11,11 @@ import java.util.Optional;
  */
 public class GameChangeEvent extends Event {
 	
-	private final Guild guild;
-	private final User user;
+	private final IGuild guild;
+	private final IUser user;
 	private final Optional<String>  oldGame, newGame;
 	
-	public GameChangeEvent(Guild guild, User user, Optional<String> oldGame, Optional<String>  newGame) {
+	public GameChangeEvent(IGuild guild, IUser user, Optional<String> oldGame, Optional<String>  newGame) {
 		this.guild = guild;
 		this.user = user;
 		this.oldGame = oldGame;
@@ -36,7 +36,7 @@ public class GameChangeEvent extends Event {
 	 * 
 	 * @return The user.
 	 */
-	public User getUser() {
+	public IUser getUser() {
 		return user;
 	}
 	
@@ -54,7 +54,7 @@ public class GameChangeEvent extends Event {
 	 * 
 	 * @return The guild.
 	 */
-	public Guild getGuild() {
+	public IGuild getGuild() {
 		return guild;
 	}
 	

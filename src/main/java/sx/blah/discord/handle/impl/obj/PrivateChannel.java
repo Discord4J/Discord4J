@@ -17,39 +17,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.impl.events;
+package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IUser;
 
-/**
- * This event is dispatched when a guild member is removed/leaves from a guild
- */
-public class UserLeaveEvent extends Event {
-    private final IGuild guild;
-    private final IUser user;
+import java.util.ArrayList;
+import java.util.List;
 
-    public UserLeaveEvent(IGuild guild, IUser user) {
-        this.guild = guild;
-        this.user = user;
-    }
+public class PrivateChannel extends Channel implements IPrivateChannel {
 	
 	/**
-     * The user involved.
-     * 
-     * @return The user.
+     * The recipient of this private channel.
      */
-    public IUser getUser() {
-        return user;
+    protected final IUser recipient;
+    
+    public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
+        this(client, recipient, id, new ArrayList<>());
     }
-	
-	/**
-     * The guild involved.
-     * 
-     * @return The guild.
-     */
-    public IGuild getGuild() {
-        return guild;
+
+    public PrivateChannel(IDiscordClient client, IUser recipient, String id, List<IMessage> messages) {
+        super(client, recipient.getName(), id, null, null, messages);
+        this.recipient = recipient;
+        this.isPrivate = true;
+    }
+
+    @Override
+    public IUser getRecipient() {
+        return recipient;
     }
 }

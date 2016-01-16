@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.obj;
+package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -26,6 +26,9 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP403Exception;
@@ -35,10 +38,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Represents a discord message.
- */
-public class Message {
+public class Message implements IMessage {
+	
     /**
      * The ID of the message. Used for message updating.
      */
@@ -68,7 +69,7 @@ public class Message {
 	/**
 	 * The list of users mentioned by this message.
 	 */
-	protected List<User> mentions;
+	protected List<IUser> mentions;
 	
 	/**
 	 * The attachments, if any, on the message.
@@ -80,24 +81,20 @@ public class Message {
 	 */
 	protected final IDiscordClient client;
 
-    public Message(IDiscordClient client, String messageID, String content, User user, Channel channel,
-				   LocalDateTime timestamp, List<User> mentions, List<Attachment> attachments) {
+    public Message(IDiscordClient client, String messageID, String content, IUser user, IChannel channel,
+				   LocalDateTime timestamp, List<IUser> mentions, List<Attachment> attachments) {
         this.client = client;
 		this.messageID = messageID;
         this.content = content;
-	    this.author = user;
-        this.channel = channel;
+	    this.author = (User) user;
+        this.channel = (Channel) channel;
 	    this.timestamp = timestamp;
 		this.mentions = mentions;
 		this.attachments = attachments;
     }
 	
-	/**
-	 * Gets the string content of the message.
-	 * 
-	 * @return The content of the message
-	 */
-    public String getContent() {
+	@Override
+	public String getContent() {
         return content;
     }
 	
@@ -106,35 +103,22 @@ public class Message {
 	 * 
 	 * @param content The new message content.
 	 */
-	@Deprecated
 	public void setContent(String content) {
 		this.content = content;
 	}
 	
-	/**
-	 * Gets the channel that this message belongs to.
-	 * 
-	 * @return The channel.
-	 */
-    public Channel getChannel() {
+	@Override
+	public IChannel getChannel() {
         return channel;
     }
 	
-	/**
-	 * Gets the user who authored this message.
-	 * 
-	 * @return The author.
-	 */
-	public User getAuthor() {
+	@Override
+	public IUser getAuthor() {
 		return author;
 	}
 	
-	/**
-	 * Gets the message id.
-	 * 
-	 * @return The id.
-	 */
-    public String getID() {
+	@Override
+	public String getID() {
         return messageID;
     }
 	
@@ -143,55 +127,32 @@ public class Message {
 	 * 
 	 * @param timestamp The timestamp.
 	 */
-	@Deprecated
 	public void setTimestamp(LocalDateTime timestamp) {
 		this.timestamp = timestamp;
 	}
 	
-	/**
-	 * Gets the timestamp for when this message was sent/edited.
-	 * 
-	 * @return The timestamp.
-	 */
+	@Override
 	public LocalDateTime getTimestamp() {
 		return timestamp;
 	}
 	
-	/**
-	 * Gets the users mentioned in this message.
-	 * 
-	 * @return The users mentioned.
-	 */
-	public List<User> getMentions() {
+	@Override
+	public List<IUser> getMentions() {
 		return mentions;
 	}
 	
-	/**
-	 * Gets the attachments in this message.
-	 * 
-	 * @return The attachments.
-	 */
+	@Override
 	public List<Attachment> getAttachments() {
 		return attachments;
 	}
 
-    /**
-     * Adds an "@mention," to the author of the referenced Message
-     * object before your content
-	 * 
-     * @param content Message to send.
-     */
-    public void reply(String content) throws IOException {
+    @Override
+	public void reply(String content) throws IOException {
         getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
     }
 	
-	/**
-	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
-	 *
-	 * @param content The new content for the message to contain.
-	 * @return The new message (this).
-	 */
-	public Message edit(String content) {
+	@Override
+	public IMessage edit(String content) {
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 			
@@ -201,7 +162,7 @@ public class Message {
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 				
-				Message oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentions, attachments);
+				IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentions, attachments);
 				this.content = response.content;
 				this.timestamp = DiscordUtils.convertFromTimestamp(response.edited_timestamp);
 				this.mentions = DiscordUtils.mentionsFromJSON(client, response);
@@ -220,9 +181,7 @@ public class Message {
 		return this;
 	}
 	
-	/**
-	 * Deletes the message.
-	 */
+	@Override
 	public void delete() {
 		if (client.isReady()) {
 			try {
@@ -236,25 +195,19 @@ public class Message {
 		}
 	}
 	
-	/**
-	 * Acknowledges a message and all others before it (marks it as "read").
-	 */
+	@Override
 	public void acknowledge() throws HTTP403Exception {
 		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getChannel().getID() + "/messages/" + getID() + "/ack",
 				new BasicNameValuePair("authorization", client.getToken()));
 		channel.setLastReadMessageID(getID());
 	}
 	
-	/**
-	 * Checks if the message has been read by this account.
-	 * 
-	 * @return True if the message has been read, false if otherwise.
-	 */
+	@Override
 	public boolean isAcknowledged() {
 		if (channel.getLastReadMessageID().equals(getID()))
 			return true;
 		
-		Message lastRead = channel.getLastReadMessage();
+		IMessage lastRead = channel.getLastReadMessage();
 		LocalDateTime timeStamp = lastRead.getTimestamp();
 		return timeStamp.compareTo(getTimestamp()) >= 0;
 	}
@@ -262,75 +215,6 @@ public class Message {
 	
 	@Override
 	public boolean equals(Object other) {
-		return this.getClass().isAssignableFrom(other.getClass()) && ((Message) other).getID().equals(getID());
-	}
-	
-	/**
-	 * Represents an attachment included in the message.
-	 */
-	public static class Attachment {
-		
-		/**
-		 * The file name of the attachment.
-		 */
-		protected final String filename;
-		
-		/**
-		 * The size, in bytes of the attachment.
-		 */
-		protected final int filesize;
-		
-		/**
-		 * The attachment id.
-		 */
-		protected final String id;
-		
-		/**
-		 * The download link for the attachment.
-		 */
-		protected final String url;
-		
-		public Attachment(String filename, int filesize, String id, String url) {
-			this.filename = filename;
-			this.filesize = filesize;
-			this.id = id;
-			this.url = url;
-		}
-		
-		/**
-		 * Gets the file name for the attachment.
-		 * 
-		 * @return The file name of the attachment.
-		 */
-		public String getFilename() {
-			return filename;
-		}
-		
-		/**
-		 * Gets the size of the attachment.
-		 * 
-		 * @return The size, in bytes of the attachment.
-		 */
-		public int getFilesize() {
-			return filesize;
-		}
-		
-		/**
-		 * Gets the id of the attachment.
-		 * 
-		 * @return The attachment id.
-		 */
-		public String getId() {
-			return id;
-		}
-		
-		/**
-		 * Gets the direct link to the attachment.
-		 * 
-		 * @return The download link for the attachment.
-		 */
-		public String getUrl() {
-			return url;
-		}
+		return this.getClass().isAssignableFrom(other.getClass()) && ((IMessage) other).getID().equals(getID());
 	}
 }

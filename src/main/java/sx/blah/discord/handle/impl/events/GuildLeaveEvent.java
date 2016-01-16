@@ -20,16 +20,16 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Guild;
+import sx.blah.discord.handle.obj.IGuild;
 
 /**
  * This event is dispatched when a guild is deleted or the bot is kicked.
  */
 public class GuildLeaveEvent extends Event {
     
-    private final Guild guild;
+    private final IGuild guild;
 
-    public GuildLeaveEvent(Guild guild) {
+    public GuildLeaveEvent(IGuild guild) {
         this.guild = guild;
     }
 	
@@ -38,7 +38,7 @@ public class GuildLeaveEvent extends Event {
      * 
      * @return The guild.
      */
-    public Guild getGuild() {
+    public IGuild getGuild() {
         return guild;
     }
 }

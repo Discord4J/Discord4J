@@ -6,7 +6,7 @@ package sx.blah.discord.api;
  */
 public enum Features {
 	
-	MESSAGING(FeatureStatus.SUPPORTED), DISCORD_STATUS(FeatureStatus.UNSUPPORTED), 
+	MESSAGING(FeatureStatus.SUPPORTED), DISCORD_STATUS(FeatureStatus.SUPPORTED), 
 	ACCOUNT_MANAGEMENT(FeatureStatus.SUPPORTED), CHANNEL_MANAGEMENT(FeatureStatus.UNSUPPORTED), 
 	SERVER_MANAGEMENT(FeatureStatus.UNSUPPORTED), ROLE_MANAGEMENT(FeatureStatus.UNSUPPORTED), 
 	VOICE(FeatureStatus.UNSUPPORTED), INVITES(FeatureStatus.SUPPORTED);

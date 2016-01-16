@@ -27,12 +27,9 @@ import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.Channel;
-import sx.blah.discord.handle.obj.Invite;
-import sx.blah.discord.handle.obj.Message;
-import sx.blah.discord.handle.obj.PrivateChannel;
+import sx.blah.discord.handle.impl.obj.Invite;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.Presences;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -70,12 +67,12 @@ public class TestBot {
 					public void handle(ReadyEvent readyEvent) {
 						try {
 							//Initialize required data
-							Invite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
+							IInvite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse response = testInvite.accept();
-							Invite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
+							IInvite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse spoofResponse = spoofInvite.accept();
-							Channel testChannel = client.getChannelByID(response.getChannelID());
-							Channel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
+							IChannel testChannel = client.getChannelByID(response.getChannelID());
+							IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 							
 							//Start testing
@@ -83,7 +80,7 @@ public class TestBot {
 									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
 							//Clearing spoofbot's mess from before
-							for (Message message : spoofChannel.getMessages()) {
+							for (IMessage message : spoofChannel.getMessages()) {
 									message.delete();
 							}
 							
@@ -115,14 +112,14 @@ public class TestBot {
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
 					public void handle(MessageReceivedEvent messageReceivedEvent) {
-						Message m = messageReceivedEvent.getMessage();
+						IMessage m = messageReceivedEvent.getMessage();
 						if (m.getContent().startsWith(".meme")
 								|| m.getContent().startsWith(".nicememe")) {
 							new MessageBuilder(client).appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
 									.appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
 									.build();
 						} else if (m.getContent().startsWith(".clear")) {
-							Channel c = client.getChannelByID(m.getChannel().getID());
+							IChannel c = client.getChannelByID(m.getChannel().getID());
 							if (null != c) {
 								c.getMessages().stream().filter(message->message.getAuthor().getID()
 										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message->{
@@ -144,7 +141,7 @@ public class TestBot {
 							}
 						} else if (m.getContent().startsWith(".pm")) {
 							try {
-								PrivateChannel channel = client.getOrCreatePMChannel(m.getAuthor());
+								IPrivateChannel channel = client.getOrCreatePMChannel(m.getAuthor());
 								new MessageBuilder(client).withChannel(channel).withContent("SUP DUDE").build();
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -182,7 +179,7 @@ public class TestBot {
 				client.getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
 					@Override
 					public void handle(InviteReceivedEvent event) {
-						Invite invite = event.getInvite();
+						IInvite invite = event.getInvite();
 						try {
 							Invite.InviteResponse response = invite.details();
 							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));

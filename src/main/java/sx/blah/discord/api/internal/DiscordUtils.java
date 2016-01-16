@@ -6,15 +6,18 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.Channel;
-import sx.blah.discord.handle.obj.Invite;
-import sx.blah.discord.handle.obj.Message;
-import sx.blah.discord.handle.obj.User;
+import sx.blah.discord.handle.impl.obj.Channel;
+import sx.blah.discord.handle.obj.IInvite;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.impl.obj.Invite;
+import sx.blah.discord.handle.impl.obj.Message;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.json.responses.InviteJSONResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.json.responses.UserResponse;
 import sx.blah.discord.util.HTTP403Exception;
-import sx.blah.discord.util.Presences;
+import sx.blah.discord.handle.obj.Presences;
 import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
@@ -77,7 +80,7 @@ public class DiscordUtils {
 	/**
 	 * Returns a user from raw JSON data.
 	 */
-	public static User constructUserFromJSON(IDiscordClient client, String user) {
+	public static IUser constructUserFromJSON(IDiscordClient client, String user) {
 		UserResponse response = GSON.fromJson(user, UserResponse.class);
 		
 		return constructUserFromJSON(client, response);
@@ -129,7 +132,7 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The java invite object.
 	 */
-	public static Invite getInviteFromJSON(IDiscordClient client, InviteJSONResponse json) {
+	public static IInvite getInviteFromJSON(IDiscordClient client, InviteJSONResponse json) {
 		return new Invite(client, json.code, json.xkcdpass);
 	}
 	
@@ -140,8 +143,8 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The list of mentioned users.
 	 */
-	public static List<User> mentionsFromJSON(IDiscordClient client, MessageResponse json) {
-		List<User> mentions = new ArrayList<>();
+	public static List<IUser> mentionsFromJSON(IDiscordClient client, MessageResponse json) {
+		List<IUser> mentions = new ArrayList<>();
 		if (json.mention_everyone) {
 			mentions = client.getChannelByID(json.channel_id).getGuild().getUsers();
 		} else {
@@ -158,10 +161,10 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The attached messages.
 	 */
-	public static List<Message.Attachment> attachmentsFromJSON(MessageResponse json) {
-		List<Message.Attachment> attachments = new ArrayList<>();
+	public static List<IMessage.Attachment> attachmentsFromJSON(MessageResponse json) {
+		List<IMessage.Attachment> attachments = new ArrayList<>();
 		for (MessageResponse.AttachmentResponse response : json.attachments) {
-			attachments.add(new Message.Attachment(response.filename, response.size, response.id, response.url));
+			attachments.add(new IMessage.Attachment(response.filename, response.size, response.id, response.url));
 		}
 		
 		return attachments;

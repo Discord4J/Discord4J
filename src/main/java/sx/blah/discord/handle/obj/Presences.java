@@ -19,37 +19,20 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.api.IDiscordClient;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Represents a private channel where you could direct message a user.
+ * Represents presences that a user can have.
  */
-public class PrivateChannel extends Channel {
-	
+public enum Presences {
 	/**
-     * The recipient of this private channel.
+     * Represents that the user is online
      */
-    protected final User recipient;
-    
-    public PrivateChannel(IDiscordClient client, User recipient, String id) {
-        this(client, recipient, id, new ArrayList<>());
-    }
-
-    public PrivateChannel(IDiscordClient client, User recipient, String id, List<Message> messages) {
-        super(client, recipient.getName(), id, null, null, messages);
-        this.recipient = recipient;
-        this.isPrivate = true;
-    }
-
-    /**
-     * Indicates the user with whom you are communicating.
-     * 
-     * @return The user.
+    ONLINE,
+	/**
+     * Represents that the user is idle
      */
-    public User getRecipient() {
-        return recipient;
-    }
+    IDLE,
+	/**
+     * Represents that the user is offline
+     */
+    OFFLINE
 }

@@ -5,15 +5,18 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.Channel;
-import sx.blah.discord.handle.obj.Invite;
-import sx.blah.discord.handle.obj.Message;
-import sx.blah.discord.util.Presences;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IInvite;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.Presences;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Random;
 
 /**
  * Used to simulate a server.
@@ -21,7 +24,7 @@ import java.util.*;
 public class SpoofBot {
 	
 	private static final Random rng = new Random();
-	private Channel channel;
+	private IChannel channel;
 	private Spoofs lastSpoof;
 	private Object lastSpoofData;
 	private ArrayDeque<Spoofs> enqueued = new ArrayDeque<>();
@@ -64,7 +67,7 @@ public class SpoofBot {
 												break;
 											
 											case MESSAGE_EDIT:
-												((Message) lastSpoofData).edit(getRandMessage());
+												((IMessage) lastSpoofData).edit(getRandMessage());
 												break;
 											
 											case TYPING_TOGGLE:
@@ -81,11 +84,11 @@ public class SpoofBot {
 												break;
 											
 											case MESSAGE_DELETE:
-												((Message)lastSpoofData).delete();
+												((IMessage)lastSpoofData).delete();
 												break;
 											
 											case INVITE:
-												Invite invite = client.getGuilds().get(0).getChannels().get(
+												IInvite invite = client.getGuilds().get(0).getChannels().get(
 														rng.nextInt(client.getGuilds().get(0).getChannels().size()))
 														.createInvite(18000, 1, false, false);
 												channel.sendMessage("https://discord.gg/"+invite.getInviteCode());

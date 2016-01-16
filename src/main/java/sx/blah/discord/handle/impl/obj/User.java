@@ -17,18 +17,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.obj;
+package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.Presences;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Presences;
 
 import java.util.Optional;
 
-/**
- * This class defines the Discord user.
- */
-public class User {
+public class User implements IUser {
+	
     /**
      * Display name of the user.
      */
@@ -81,30 +80,18 @@ public class User {
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
 
-	/**
-     * Gets the user's unique id.
-     * 
-     * @return The user's id.
-     */
-    public String getID() {
+	@Override
+	public String getID() {
         return id;
     }
 	
-	/**
-     * Gets the user's username.
-     * 
-     * @return The username.
-     */
-    public String getName() {
+	@Override
+	public String getName() {
         return name;
     }
 	
-	/**
-     * Gets the game the user is playing, no value if the user isn't playing a game.
-     * 
-     * @return The game.
-     */
-    public Optional<String> getGame() {
+	@Override
+	public Optional<String> getGame() {
         return game == null ? Optional.empty() : game;
     }
 	
@@ -113,7 +100,6 @@ public class User {
      * 
      * @param game The game.
      */
-	@Deprecated
     public void setGame(Optional<String> game) {
         this.game = game;
     }
@@ -123,26 +109,17 @@ public class User {
      * 
      * @param name The username.
      */
-	@Deprecated
     public void setName(String name) {
         this.name = name;
     }
 	
-	/**
-     * Gets the user's avatar id.
-     * 
-     * @return The avatar id.
-     */
-    public String getAvatar() {
+	@Override
+	public String getAvatar() {
         return avatar;
     }
 	
-	/**
-     * Gets the user's avatar direct link.
-     * 
-     * @return The avatar url.
-     */
-    public String getAvatarURL() {
+	@Override
+	public String getAvatarURL() {
 		return avatarURL;
     }
 	
@@ -150,18 +127,13 @@ public class User {
      * Sets the user's CACHED avatar id.
      * @param avatar The user's avatar id.
      */
-	@Deprecated
     public void setAvatar(String avatar) {
         this.avatar = avatar;
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
     }
 	
-	/**
-     * Gets the user's presence.
-     * 
-     * @return The user's presence.
-     */
-    public Presences getPresence() {
+	@Override
+	public Presences getPresence() {
         return presence;
     }
 	
@@ -170,25 +142,16 @@ public class User {
      * 
      * @param presence The new presence.
      */
-	@Deprecated
     public void setPresence(Presences presence) {
         this.presence = presence;
     }
 	
-	/**
-     * Formats a string to @mention the user.
-     * 
-     * @return The formatted string.
-     */
-    public String mention() {
+	@Override
+	public String mention() {
         return "<@" + id + ">";
     }
 	
-	/**
-	 * Gets the discriminator for the user. This is used by Discord to differentiate between two users with the same name.
-	 * 
-	 * @return The discriminator.
-	 */
+	@Override
 	public String getDiscriminator() {
 		return discriminator;
 	}
@@ -200,6 +163,6 @@ public class User {
 	
 	@Override
 	public boolean equals(Object other) {
-		return this.getClass().isAssignableFrom(other.getClass()) && ((User) other).getID().equals(getID());
+		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
 	}
 }

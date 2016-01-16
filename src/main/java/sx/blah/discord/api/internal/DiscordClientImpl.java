@@ -25,6 +25,8 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
+import sx.blah.discord.handle.impl.obj.PrivateChannel;
+import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.AccountInfoChangeRequest;
 import sx.blah.discord.json.requests.LoginRequest;
@@ -32,7 +34,6 @@ import sx.blah.discord.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.json.requests.PrivateChannelRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
-import sx.blah.discord.util.Presences;
 import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
@@ -76,7 +77,7 @@ public final class DiscordClientImpl implements IDiscordClient {
     /**
      * Local copy of all guilds/servers.
      */
-	protected final List<Guild> guildList = new ArrayList<>();
+	protected final List<IGuild> guildList = new ArrayList<>();
     
     /**
      * Private copy of the email you logged in with.
@@ -101,7 +102,7 @@ public final class DiscordClientImpl implements IDiscordClient {
     /**
      * All of the private message channels that the bot is connected to.
      */
-    protected final List<PrivateChannel> privateChannels = new ArrayList<>();
+    protected final List<IPrivateChannel> privateChannels = new ArrayList<>();
 	
 	/**
      * Whether the api is logged in.
@@ -183,8 +184,8 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
 
     @Override
-    public Message sendMessage(String content, String channelID) throws IOException {
-        Channel channel = getChannelByID(channelID);
+    public IMessage sendMessage(String content, String channelID) throws IOException {
+        IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
             return null;
@@ -193,14 +194,14 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
 	
     @Override
-    public Message editMessage(String content, String messageID, String channelID) {
-        Channel channel = getChannelByID(channelID);
+    public IMessage editMessage(String content, String messageID, String channelID) {
+        IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
             return null;
         }
         
-        Message message = channel.getMessageByID(messageID);
+        IMessage message = channel.getMessageByID(messageID);
         if (message == null) {
             Discord4J.LOGGER.error("Message id " +  messageID + " doesn't exist!");
             return null;
@@ -211,13 +212,13 @@ public final class DiscordClientImpl implements IDiscordClient {
     
     @Override
     public void deleteMessage(String messageID, String channelID) throws IOException {
-        Channel channel = getChannelByID(channelID);
+        IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
             return;
         }
         
-        Message message = channel.getMessageByID(messageID);
+        IMessage message = channel.getMessageByID(messageID);
         if (message == null) {
             Discord4J.LOGGER.error("Message id " +  messageID + " doesn't exist!");
             return;
@@ -253,8 +254,8 @@ public final class DiscordClientImpl implements IDiscordClient {
     public void updatePresence(boolean isIdle, Optional<String> game) {
         ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
         
-        getOurUser().setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
-        getOurUser().setGame(game);
+        ((User) getOurUser()).setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
+        ((User) getOurUser()).setGame(game);
     }
     
     @Override
@@ -263,20 +264,20 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
 
     @Override
-    public User getOurUser() {
+    public IUser getOurUser() {
         return ourUser;
     }
 
     @Override
-    public Channel getChannelByID(String id) {
-        for (Guild guild : guildList) {
-            for (Channel channel : guild.getChannels()) {
+    public IChannel getChannelByID(String id) {
+        for (IGuild guild : guildList) {
+            for (IChannel channel : guild.getChannels()) {
                 if (channel.getID().equalsIgnoreCase(id))
                     return channel;
             }
         }
 
-        for(PrivateChannel channel : privateChannels) {
+        for(IPrivateChannel channel : privateChannels) {
             if(channel.getID().equalsIgnoreCase(id))
                 return channel;
         }
@@ -285,8 +286,8 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
 
     @Override
-    public Guild getGuildByID(String guildID) {
-        for (Guild guild : guildList) {
+    public IGuild getGuildByID(String guildID) {
+        for (IGuild guild : guildList) {
             if (guild.getID().equalsIgnoreCase(guildID))
                 return guild;
         }
@@ -295,14 +296,14 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
 
     @Override
-    public List<Guild> getGuilds() {
+    public List<IGuild> getGuilds() {
         return guildList;
     }
     
     @Override
-	public User getUserByID(String userID) {
-        User u = null;
-        for (Guild guild : guildList) {
+	public IUser getUserByID(String userID) {
+        IUser u = null;
+        for (IGuild guild : guildList) {
             if (null == u) {
                 u = guild.getUserByID(userID);
             }
@@ -312,8 +313,8 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
     
     @Override
-    public PrivateChannel getOrCreatePMChannel(User user) throws Exception {
-        for(PrivateChannel channel : privateChannels) {
+    public IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception {
+        for(IPrivateChannel channel : privateChannels) {
             if(channel.getRecipient().getID().equalsIgnoreCase(user.getID())) {
                 return channel;
             }
@@ -337,7 +338,7 @@ public final class DiscordClientImpl implements IDiscordClient {
     
     @Override
     public void toggleTypingStatus(String channelID) {
-        Channel channel = getChannelByID(channelID);
+        IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
             return;
@@ -348,7 +349,7 @@ public final class DiscordClientImpl implements IDiscordClient {
     
     @Override
     public boolean getTypingStatus(String channelID) {
-        Channel channel = getChannelByID(channelID);
+        IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
             return false;
@@ -358,8 +359,8 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
     
     @Override
-    public Invite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) {
-        Channel channel = getChannelByID(channelID);
+    public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) {
+        IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
             return null;
@@ -369,7 +370,7 @@ public final class DiscordClientImpl implements IDiscordClient {
     }
     
     @Override
-    public Invite getInviteForCode(String code) {
+    public IInvite getInviteForCode(String code) {
         try {
             InviteJSONResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.INVITE + code,
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);

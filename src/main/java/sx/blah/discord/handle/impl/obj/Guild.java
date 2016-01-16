@@ -17,27 +17,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.obj;
+package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This class defines a guild/server/clan/whatever it's called.
- */
-public class Guild {
+public class Guild implements IGuild {
     /**
      * All text channels in the guild.
      */
-    protected final List<Channel> channels;
+    protected final List<IChannel> channels;
 
     /**
      * All users connected to the guild.
      */
-    protected final List<User> users;
+    protected final List<IUser> users;
 
     /**
      * The name of the guild.
@@ -80,7 +80,7 @@ public class Guild {
         this.ownerID = ownerID;
     }
 
-    public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, List<Channel> channels, List<User> users) {
+    public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, List<IChannel> channels, List<IUser> users) {
         this.client = client;
         this.name = name;
         this.channels = channels;
@@ -91,38 +91,22 @@ public class Guild {
         this.ownerID = ownerID;
     }
 	
-	/**
-     * Gets the user id for the owner of this guild.
-     * 
-     * @return The owner id.
-     */
+	@Override
     public String getOwnerID() {
         return ownerID;
     }
 	
-	/**
-     * Gets the user object for the owner of this guild.
-     * 
-     * @return The owner.
-     */
-    public User getOwner() {
+	@Override
+    public IUser getOwner() {
         return client.getUserByID(ownerID);
     }
 	
-	/**
-     * Gets the icon id for this guild.
-     * 
-     * @return The icon id.
-     */
+	@Override
     public String getIcon() {
         return icon;
     }
 	
-	/**
-     * Gets the direct link to the guild's icon.
-     * 
-     * @return The icon url.
-     */
+	@Override
     public String getIconURL() {
         return iconURL;
     }
@@ -132,29 +116,19 @@ public class Guild {
      * 
      * @param icon The icon id.
      */
-    @Deprecated
     public void setIcon(String icon) {
         this.icon = icon;
         this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
     }
 
-    /**
-     * Gets all the channels on the server.
-     * 
-     * @return All channels on the server.
-     */
-    public List<Channel> getChannels() {
+    @Override
+    public List<IChannel> getChannels() {
         return channels;
     }
 
-    /**
-     * Gets a channel on the guild by a specific channel id.
-     * 
-     * @param id The ID of the channel you want to find.
-     * @return The channel with given ID.
-     */
-    public Channel getChannelByID(String id) {
-        for (Channel c : channels) {
+    @Override
+    public IChannel getChannelByID(String id) {
+        for (IChannel c : channels) {
             if (c.getID().equalsIgnoreCase(id))
                 return c;
         }
@@ -162,25 +136,16 @@ public class Guild {
         return null; // Not found, return null.
     }
 
-    /**
-     * Gets all the users connected to the guild.
-     * 
-     * @return All users connected to the guild.
-     */
-    public List<User> getUsers() {
+    @Override
+    public List<IUser> getUsers() {
         return users;
     }
 
-    /**
-     * Gets a user by its id in the guild.
-     * 
-     * @param id ID of the user you want to find.
-     * @return The user with given ID.
-     */
-    public User getUserByID(String id) {
+    @Override
+    public IUser getUserByID(String id) {
 	    if(null == users)
 		    return null;
-        for (User user : users) {
+        for (IUser user : users) {
             if (null != user
 		            && null != user.getID()
                     && user.getID().equalsIgnoreCase(id))
@@ -190,20 +155,12 @@ public class Guild {
         return null; // Not found, return null.
     }
 
-    /**
-     * Gets the name of the guild.
-     * 
-     * @return The name of the guild
-     */
+    @Override
     public String getName() {
         return name;
     }
 
-    /**
-     * Gets the id of the guild.
-     * 
-     * @return The ID of this guild.
-     */
+    @Override
     public String getID() {
         return id;
     }
@@ -213,8 +170,7 @@ public class Guild {
      * 
      * @param user The user.
      */
-    @Deprecated
-    public void addUser(User user) {
+    public void addUser(IUser user) {
 		this.users.add(user);
     }
 	
@@ -223,14 +179,13 @@ public class Guild {
      * 
      * @param channel The channel.
      */
-    @Deprecated
-	public void addChannel(Channel channel) {
+	public void addChannel(IChannel channel) {
 		this.channels.add(channel);
 	}
     
     
     @Override
     public boolean equals(Object other) {
-        return this.getClass().isAssignableFrom(other.getClass()) && ((Guild) other).getID().equals(getID());
+        return this.getClass().isAssignableFrom(other.getClass()) && ((IGuild) other).getID().equals(getID());
     }
 }

@@ -1,16 +1,16 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Message;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * This event is dispatched when this bot's account acknowledges a message.
  */
 public class MessageAcknowledgedEvent extends Event {
 	
-	private final Message acknowledged;
+	private final IMessage acknowledged;
 	
-	public MessageAcknowledgedEvent(Message acknowledged) {
+	public MessageAcknowledgedEvent(IMessage acknowledged) {
 		this.acknowledged = acknowledged;
 	}
 	
@@ -19,7 +19,7 @@ public class MessageAcknowledgedEvent extends Event {
 	 * 
 	 * @return The acknowledged message.
 	 */
-	public Message getAcknowledgedMessage() {
+	public IMessage getAcknowledgedMessage() {
 		return acknowledged;
 	}
 }

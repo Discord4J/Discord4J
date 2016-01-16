@@ -8,6 +8,7 @@ import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.ConnectRequest;
 import sx.blah.discord.json.requests.GuildMembersRequest;
@@ -16,7 +17,7 @@ import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
 import sx.blah.discord.util.HTTP403Exception;
-import sx.blah.discord.util.Presences;
+import sx.blah.discord.handle.obj.Presences;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -151,7 +152,7 @@ public class DiscordWS extends WebSocketClient {
 						}
 						
 						for (PresenceResponse presence : guildResponse.presences) {
-							User user = guild.getUserByID(presence.user.id);
+							User user = (User) guild.getUserByID(presence.user.id);
 							user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
 							user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
 						}
@@ -189,7 +190,7 @@ public class DiscordWS extends WebSocketClient {
 					}
 					
 					for (ReadyEventResponse.ReadStateResponse readState : event.read_state) {
-						Channel channel = client.getChannelByID(readState.id);
+						Channel channel = (Channel) client.getChannelByID(readState.id);
 						if (channel != null)
 							channel.setLastReadMessageID(readState.last_message_id);
 					}
@@ -206,10 +207,10 @@ public class DiscordWS extends WebSocketClient {
 					MessageResponse event1 = DiscordUtils.GSON.fromJson(eventObject, MessageResponse.class);
 					boolean mentioned = event1.mention_everyone || event1.content.contains("<@"+client.ourUser.getID()+">");
 					
-					Channel channel = client.getChannelByID(event1.channel_id);
+					Channel channel = (Channel) client.getChannelByID(event1.channel_id);
 					
 					if (null != channel) {
-						Message message1 = new Message(client, event1.id, event1.content, client.getUserByID(event1.author.id),
+						IMessage message1 = new Message(client, event1.id, event1.content, client.getUserByID(event1.author.id),
 								channel, DiscordUtils.convertFromTimestamp(event1.timestamp),
 								DiscordUtils.mentionsFromJSON(client, event1), DiscordUtils.attachmentsFromJSON(event1));
 						if (!event1.author.id.equalsIgnoreCase(client.getOurUser().getID())) {
@@ -233,12 +234,12 @@ public class DiscordWS extends WebSocketClient {
 					TypingEventResponse event2 = DiscordUtils.GSON.fromJson(eventObject, TypingEventResponse.class);
 					
 					User user;
-					channel = client.getChannelByID(event2.channel_id);
+					channel = (Channel) client.getChannelByID(event2.channel_id);
 					if (channel != null) {
 						if (channel.isPrivate()) {
-							user = ((PrivateChannel) channel).getRecipient();
+							user = (User) ((IPrivateChannel) channel).getRecipient();
 						} else {
-							user = channel.getParent().getUserByID(event2.user_id);
+							user = (User) channel.getGuild().getUserByID(event2.user_id);
 						}
 						if (null != user) {
 							client.dispatcher.dispatch(new TypingEvent(user, channel));
@@ -256,7 +257,7 @@ public class DiscordWS extends WebSocketClient {
 					}
 					
 					for (PresenceResponse presence : event3.presences) {
-						User user1 = guild.getUserByID(presence.user.id);
+						User user1 = (User) guild.getUserByID(presence.user.id);
 						user1.setPresence(Presences.valueOf((presence.status).toUpperCase()));
 						user1.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
 					}
@@ -284,7 +285,7 @@ public class DiscordWS extends WebSocketClient {
 					GuildMemberAddEventResponse event4 = DiscordUtils.GSON.fromJson(eventObject, GuildMemberAddEventResponse.class);
 					user = DiscordUtils.constructUserFromJSON(client, event4.user);
 					String guildID = event4.guild_id;
-					guild = client.getGuildByID(guildID);
+					guild = (Guild) client.getGuildByID(guildID);
 					if (null != guild) {
 						guild.addUser(user);
 						Discord4J.LOGGER.debug("User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
@@ -296,7 +297,7 @@ public class DiscordWS extends WebSocketClient {
 					GuildMemberRemoveEventResponse event5 = DiscordUtils.GSON.fromJson(eventObject, GuildMemberRemoveEventResponse.class);
 					user = DiscordUtils.constructUserFromJSON(client, event5.user);
 					guildID = event5.guild_id;
-					guild = client.getGuildByID(guildID);
+					guild = (Guild) client.getGuildByID(guildID);
 					if (null != guild
 							&& guild.getUsers().contains(user)) {
 						guild.getUsers().remove(user);
@@ -311,12 +312,12 @@ public class DiscordWS extends WebSocketClient {
 					String channelID = event6.channel_id;
 					String content = event6.content;
 					
-					channel = client.getChannelByID(channelID);
-					Message m = channel.getMessageByID(id);
+					channel = (Channel) client.getChannelByID(channelID);
+					IMessage m = channel.getMessageByID(id);
 					if (null != m
 							&& !m.getAuthor().getID().equals(client.getOurUser().getID())
 							&& !m.getContent().equals(content)) {
-						Message newMessage;
+						IMessage newMessage;
 						int index = channel.getMessages().indexOf(m);
 						channel.getMessages().remove(m);
 						channel.getMessages().add(index, newMessage = new Message(client, id, content, m.getAuthor(),
@@ -330,9 +331,9 @@ public class DiscordWS extends WebSocketClient {
 					MessageDeleteEventResponse event7 = DiscordUtils.GSON.fromJson(eventObject, MessageDeleteEventResponse.class);
 					id = event7.id;
 					channelID = event7.channel_id;
-					channel = client.getChannelByID(channelID);
+					channel = (Channel) client.getChannelByID(channelID);
 					if (null != channel) {
-						Message message = channel.getMessageByID(id);
+						IMessage message = channel.getMessageByID(id);
 						if (null != message
 								&& !message.getAuthor().getID().equalsIgnoreCase(client.ourUser.getID())) {
 							channel.getMessages().remove(message);
@@ -345,10 +346,10 @@ public class DiscordWS extends WebSocketClient {
 					PresenceUpdateEventResponse event8 = DiscordUtils.GSON.fromJson(eventObject, PresenceUpdateEventResponse.class);
 					Presences presences = Presences.valueOf(event8.status.toUpperCase());
 					String gameName = event8.game == null ? null : event8.game.name;
-					guild = client.getGuildByID(event8.guild_id);
+					guild = (Guild) client.getGuildByID(event8.guild_id);
 					if (null != guild
 							&& null != presences) {
-						user = guild.getUserByID(event8.user.id);
+						user = (User) guild.getUserByID(event8.user.id);
 						if (null != user) {
 							if (!user.getPresence().equals(presences)) {
 								client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, user.getPresence(), presences));
@@ -366,7 +367,7 @@ public class DiscordWS extends WebSocketClient {
 				
 				case "GUILD_DELETE":
 					GuildResponse event9 = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
-					guild = client.getGuildByID(event9.id);
+					guild = (Guild) client.getGuildByID(event9.id);
 					client.getGuilds().remove(guild);
 					Discord4J.LOGGER.debug("You have been kicked from or left \"{}\"! :O", guild.getName());
 					client.dispatcher.dispatch(new GuildLeaveEvent(guild));
@@ -379,7 +380,7 @@ public class DiscordWS extends WebSocketClient {
 						PrivateChannelResponse event10 = DiscordUtils.GSON.fromJson(eventObject, PrivateChannelResponse.class);
 						id = event10.id;
 						boolean b = false;
-						for (PrivateChannel privateChannel : client.privateChannels) {
+						for (IPrivateChannel privateChannel : client.privateChannels) {
 							if (privateChannel.getID().equalsIgnoreCase(id))
 								b = true;
 						}
@@ -402,7 +403,7 @@ public class DiscordWS extends WebSocketClient {
 						if ("text".equalsIgnoreCase(type)) {
 							String name = event10.name;
 							guildID = event10.guild_id;
-							guild = client.getGuildByID(guildID);
+							guild = (Guild) client.getGuildByID(guildID);
 							if (null != guild) {
 								channel = new Channel(client, name, id, guild, event10.topic);
 								try {
@@ -420,7 +421,7 @@ public class DiscordWS extends WebSocketClient {
 				case "CHANNEL_DELETE":
 					ChannelCreateEventResponse event11 = DiscordUtils.GSON.fromJson(eventObject, ChannelCreateEventResponse.class);
 					if ("text".equalsIgnoreCase(event11.type)) {
-						channel = client.getChannelByID(event11.id);
+						channel = (Channel) client.getChannelByID(event11.id);
 						client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 						channel.getParent().getChannels().remove(channel);
 					}
@@ -428,9 +429,9 @@ public class DiscordWS extends WebSocketClient {
 				
 				case "USER_UPDATE":
 					UserUpdateEventResponse event12 = DiscordUtils.GSON.fromJson(eventObject, UserUpdateEventResponse.class);
-					User newUser = client.getUserByID(event12.id);
+					User newUser = (User) client.getUserByID(event12.id);
 					if (newUser != null) {
-						User oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar());
+						IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar());
 						newUser.setName(event12.username);
 						newUser.setAvatar(event12.avatar);
 						client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
@@ -440,9 +441,9 @@ public class DiscordWS extends WebSocketClient {
 				case "CHANNEL_UPDATE":
 					ChannelUpdateEventResponse event13 = DiscordUtils.GSON.fromJson(eventObject, ChannelUpdateEventResponse.class);
 					if (!event13.is_private) {
-						Channel toUpdate = client.getChannelByID(event13.id);
+						Channel toUpdate = (Channel) client.getChannelByID(event13.id);
 						if (toUpdate != null) {
-							Channel oldChannel = new Channel(client, toUpdate.getName(),
+							IChannel oldChannel = new Channel(client, toUpdate.getName(),
 									toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic());
 							toUpdate.setTopic(event13.topic);
 							client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
@@ -452,9 +453,9 @@ public class DiscordWS extends WebSocketClient {
 				
 				case "MESSAGE_ACK":
 					MessageAcknowledgedEventResponse event14 = DiscordUtils.GSON.fromJson(eventObject, MessageAcknowledgedEventResponse.class);
-					Channel channelAck = client.getChannelByID(event14.channel_id);
+					IChannel channelAck = client.getChannelByID(event14.channel_id);
 					if (channelAck != null) {
-						Message messageAck = channelAck.getMessageByID(event14.message_id);
+						IMessage messageAck = channelAck.getMessageByID(event14.message_id);
 						if (messageAck != null)
 							client.getDispatcher().dispatch(new MessageAcknowledgedEvent(messageAck));
 					}
@@ -462,7 +463,7 @@ public class DiscordWS extends WebSocketClient {
 				
 				case "GUILD_MEMBERS_CHUNK":
 					GuildMemberChunkEventResponse event15 = DiscordUtils.GSON.fromJson(eventObject, GuildMemberChunkEventResponse.class);
-					Guild guildToUpdate = client.getGuildByID(event15.guild_id);
+					Guild guildToUpdate = (Guild) client.getGuildByID(event15.guild_id);
 					if (guildToUpdate == null) {
 						Discord4J.LOGGER.warn("Can't receive guild members chunk for guild id {}, the guild is null!", event15.guild_id);
 						break;

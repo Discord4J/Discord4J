@@ -1,16 +1,16 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.User;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  * This is dispatched whenever a user updates his/her info
  */
 public class UserUpdateEvent extends Event {
 	
-	private User oldUser, newUser;
+	private IUser oldUser, newUser;
 	
-	public UserUpdateEvent(User oldUser, User newUser) {
+	public UserUpdateEvent(IUser oldUser, IUser newUser) {
 		this.oldUser = oldUser;
 		this.newUser = newUser;
 	}
@@ -19,7 +19,7 @@ public class UserUpdateEvent extends Event {
 	 * Gets the old user info
 	 * @return The old user object
 	 */
-	public User getOldUser() {
+	public IUser getOldUser() {
 		return oldUser;
 	}
 	
@@ -27,7 +27,7 @@ public class UserUpdateEvent extends Event {
 	 * Gets the new user info
 	 * @return The new user object
 	 */
-	public User getNewUser() {
+	public IUser getNewUser() {
 		return newUser;
 	}
 }

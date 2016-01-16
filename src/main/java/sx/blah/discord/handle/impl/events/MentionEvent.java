@@ -20,16 +20,16 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Message;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * This event is dispatched whenever the bot is @mentioned.
  */
 public class MentionEvent extends Event {
 	
-	private final Message message;
+	private final IMessage message;
 
-	public MentionEvent(Message message) {
+	public MentionEvent(IMessage message) {
 		this.message = message;
 	}
 	
@@ -38,7 +38,7 @@ public class MentionEvent extends Event {
 	 * 
 	 * @return The message.
 	 */
-	public Message getMessage() {
+	public IMessage getMessage() {
 		return message;
 	}
 }

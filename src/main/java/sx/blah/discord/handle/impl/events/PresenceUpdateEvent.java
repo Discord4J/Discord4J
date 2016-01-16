@@ -20,20 +20,20 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Guild;
-import sx.blah.discord.handle.obj.User;
-import sx.blah.discord.util.Presences;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Presences;
 
 /**
  * This event is dispatched when a user changes his/her presence.
  */
 public class PresenceUpdateEvent extends Event {
     
-    private final Guild guild;
-    private final User user;
+    private final IGuild guild;
+    private final IUser user;
     private final Presences oldPresence, newPresence;
 
-    public PresenceUpdateEvent(Guild guild, User user, Presences oldPresence, Presences newPresence) {
+    public PresenceUpdateEvent(IGuild guild, IUser user, Presences oldPresence, Presences newPresence) {
         this.guild = guild;
         this.user = user;
         this.oldPresence = oldPresence;
@@ -63,7 +63,7 @@ public class PresenceUpdateEvent extends Event {
      * 
      * @return The user.
      */
-    public User getUser() {
+    public IUser getUser() {
         return user;
     }
 	
@@ -72,7 +72,7 @@ public class PresenceUpdateEvent extends Event {
      * 
      * @return The guild.
      */
-    public Guild getGuild() {
+    public IGuild getGuild() {
         return guild;
     }
 }

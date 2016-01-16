@@ -20,15 +20,15 @@
 package sx.blah.discord.util;
 
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.Channel;
-import sx.blah.discord.handle.obj.Message;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Utility class designed to make message sending easier.
  */
 public class MessageBuilder {
 	private String content = "";
-	private Channel channel;
+	private IChannel channel;
 	private IDiscordClient client;
 	
 	public MessageBuilder(IDiscordClient client) {
@@ -98,7 +98,7 @@ public class MessageBuilder {
      * @param channel The channel to send the mssage to.
      * @return The message builder instance.
      */
-	public MessageBuilder withChannel(Channel channel) {
+	public MessageBuilder withChannel(IChannel channel) {
 		this.channel = channel;
 		return this;
 	}
@@ -110,7 +110,7 @@ public class MessageBuilder {
 	 * 
 	 * @return The message object representing the sent message.
 	 */
-	public Message build() {
+	public IMessage build() {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
@@ -128,7 +128,7 @@ public class MessageBuilder {
 	 * 
 	 * @return The message object representing the sent message.
 	 */
-	public Message send() {
+	public IMessage send() {
 		return build();
 	}
 

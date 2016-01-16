@@ -20,16 +20,16 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Message;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * This event is dispatched whenever a message is received.
  */
 public class MessageReceivedEvent extends Event {
 	
-	private final Message message;
+	private final IMessage message;
 
-	public MessageReceivedEvent(Message message) {
+	public MessageReceivedEvent(IMessage message) {
 		this.message = message;
 	}
 	
@@ -38,7 +38,7 @@ public class MessageReceivedEvent extends Event {
 	 * 
 	 * @return The message.
 	 */
-	public Message getMessage() {
+	public IMessage getMessage() {
 		return message;
 	}
 }

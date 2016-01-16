@@ -4,6 +4,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import sx.blah.discord.handle.EventDispatcher;
+import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.HTTP403Exception;
 
@@ -59,7 +60,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link Channel#sendMessage(String)}
 	 */
 	@Deprecated
-	Message sendMessage(String content, String channelID) throws IOException;
+	IMessage sendMessage(String content, String channelID) throws IOException;
 	
 	/**
 	 * Edits a message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -72,7 +73,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link Message#edit(String)}
 	 */
 	@Deprecated
-	Message editMessage(String content, String messageID, String channelID);
+	IMessage editMessage(String content, String messageID, String channelID);
 	
 	/**
 	 * Deletes a message.
@@ -118,7 +119,7 @@ public interface IDiscordClient {
 	 * 
 	 * @return The user object.
 	 */
-	User getOurUser();
+	IUser getOurUser();
 	
 	/**
 	 * Gets a channel by its unique id.
@@ -126,7 +127,7 @@ public interface IDiscordClient {
 	 * @param channelID The id of the desired channel.
 	 * @return The {@link Channel} object with the provided id.
 	 */
-	Channel getChannelByID(String channelID);
+	IChannel getChannelByID(String channelID);
 	
 	/**
 	 * Gets a guild by its unique id.
@@ -134,14 +135,14 @@ public interface IDiscordClient {
 	 * @param guildID The id of the desired guild.
 	 * @return The {@link Guild} object with the provided id.
 	 */
-	Guild getGuildByID(String guildID);
+	IGuild getGuildByID(String guildID);
 	
 	/**
 	 * Gets all the guilds the user the api represents is connected to.
 	 * 
 	 * @return The list of {@link Guild}s the api is connected to.
 	 */
-	List<Guild> getGuilds();
+	List<IGuild> getGuilds();
 	
 	/**
 	 * Gets a user by its unique id.
@@ -149,7 +150,7 @@ public interface IDiscordClient {
 	 * @param userID The id of the desired user.
 	 * @return The {@link User} object with the provided id.
 	 */
-	User getUserByID(String userID);
+	IUser getUserByID(String userID);
 	
 	/**
 	 * Gets a {@link PrivateChannel} for the provided recipient.
@@ -159,7 +160,7 @@ public interface IDiscordClient {
 	 * 
 	 * @throws Exception
 	 */
-	PrivateChannel getOrCreatePMChannel(User user) throws Exception;
+	IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception;
 	
 	/**
 	 * Toggles whether the bot is "typing".
@@ -195,7 +196,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link Channel#createInvite(int, int, boolean, boolean)}
 	 */
 	@Deprecated
-	Invite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID);
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID);
 	
 	/**
 	 * Gets the invite for a code.
@@ -203,7 +204,7 @@ public interface IDiscordClient {
 	 * @param code The invite code or xkcd pass.
 	 * @return The invite, or null if it doesn't exist.
 	 */
-	Invite getInviteForCode(String code);
+	IInvite getInviteForCode(String code);
 	
 	/**
 	 * Represents an avatar image.
@@ -224,7 +225,7 @@ public interface IDiscordClient {
 		 * @param user The user to get the avatar id for.
 		 * @return The user's avatar image.
 		 */
-		static Image forUser(User user) {
+		static Image forUser(IUser user) {
 			return user::getAvatar;
 		}
 		

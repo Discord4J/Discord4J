@@ -20,16 +20,16 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Message;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * This event is dispatched whenever a message is edited.
  */
 public class MessageUpdateEvent extends Event {
     
-    private final Message oldMessage, newMessage;
+    private final IMessage oldMessage, newMessage;
 
-    public MessageUpdateEvent(Message oldMessage, Message newMessage) {
+    public MessageUpdateEvent(IMessage oldMessage, IMessage newMessage) {
         this.oldMessage = oldMessage;
         this.newMessage = newMessage;
     }
@@ -39,7 +39,7 @@ public class MessageUpdateEvent extends Event {
      * 
      * @return The message.
      */
-    public Message getOldMessage() {
+    public IMessage getOldMessage() {
         return oldMessage;
     }
 	
@@ -48,7 +48,7 @@ public class MessageUpdateEvent extends Event {
      * 
      * @return The message.
      */
-    public Message getNewMessage() {
+    public IMessage getNewMessage() {
         return newMessage;
     }
 }

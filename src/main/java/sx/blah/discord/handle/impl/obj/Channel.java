@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.handle.obj;
+package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -29,6 +29,7 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.InviteRequest;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
@@ -45,10 +46,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Defines a text channel in a guild/server.
- */
-public class Channel {
+public class Channel implements IChannel {
     
     /**
      * User-friendly channel name (e.g. "general")
@@ -63,7 +61,7 @@ public class Channel {
     /**
      * Messages that have been sent into this channel
      */
-    protected final List<Message> messages;
+    protected final List<IMessage> messages;
 
     /**
      * Indicates whether or not this channel is a PM channel.
@@ -73,7 +71,7 @@ public class Channel {
     /**
      * The guild this channel belongs to.
      */
-    protected final Guild parent;
+    protected final IGuild parent;
 	
 	/**
      * The channel's topic message.
@@ -105,11 +103,11 @@ public class Channel {
      */
     protected final IDiscordClient client;
 
-    public Channel(IDiscordClient client, String name, String id, Guild parent, String topic) {
+    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic) {
         this(client, name, id, parent, topic, new ArrayList<>());
     }
 
-    public Channel(IDiscordClient client, String name, String id, Guild parent, String topic,  List<Message> messages) {
+    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, List<IMessage> messages) {
         this.client = client;       
         this.name = name;
         this.id = id;
@@ -119,41 +117,24 @@ public class Channel {
         this.topic = topic;
     }
 	
-	/**
-     * Gets the name of this channel.
-     * 
-     * @return The channel name.
-     */
+	@Override
     public String getName() {
         return name;
     }
 	
-	/**
-     * Gets the id of this channel.
-     * 
-     * @return The channel id.
-     */
+	@Override
     public String getID() {
         return id;
     }
 	
-	/**
-     * Gets the messages in this channel.
-     * 
-     * @return The list of messages in the channel.
-     */
-    public List<Message> getMessages() {
+	@Override
+    public List<IMessage> getMessages() {
         return messages;
     }
 	
-	/**
-     * Gets a specific message by its id.
-     * 
-     * @param messageID The message id.
-     * @return The message (if found).
-     */
-    public Message getMessageByID(String messageID) {
-		for (Message message : messages) {
+	@Override
+    public IMessage getMessageByID(String messageID) {
+		for (IMessage message : messages) {
 			if (message.getID().equalsIgnoreCase(messageID))
 				return message;
 		}
@@ -166,8 +147,7 @@ public class Channel {
      * 
      * @param message The message.
      */
-    @Deprecated
-    public void addMessage(Message message) {
+    public void addMessage(IMessage message) {
         if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
             messages.add(message);
             if (lastReadMessageID == null)
@@ -175,40 +155,23 @@ public class Channel {
         }
     }
 	
-	/**
-     * Gets the guild this channel is a part of.
-     * 
-     * @return The guild.
-     * @deprecated Use {@link #getGuild()} instead.
-     */
+	@Override
     @Deprecated
-    public Guild getParent() {
+    public IGuild getParent() {
         return parent;
     }
     
-    /**
-     * Gets the guild this channel is a part of.
-     * 
-     * @return The guild.
-     */
-    public Guild getGuild() {
+    @Override
+    public IGuild getGuild() {
         return parent;
     }
 	
-	/**
-     * Gets whether or not this channel is a private one–if it is a private one, this object is an instance of {@link PrivateChannel}.
-     * 
-     * @return True if the channel is private, false if otherwise.
-     */
+	@Override
     public boolean isPrivate() {
         return isPrivate;
     }
 	
-	/**
-     * Gets the topic for the channel.
-     * 
-     * @return The channel topic (null if not set).
-     */
+	@Override
     public String getTopic() {
         return topic;
     }
@@ -218,38 +181,22 @@ public class Channel {
      * 
      * @param topic The new channel topic
      */
-    @Deprecated
     public void setTopic(String topic) {
         this.topic = topic;
     }
 	
-	/**
-     * Formats a string to be able to #mention this channel.
-     * 
-     * @return The formatted string.
-     */
+	@Override
     public String mention() {
         return "<#" + this.getID() + ">";
     }
     
-    /**
-     * Sends a message without tts to the desired channel.
-     *
-     * @param content The content of the message.
-     * @return The message object representing the sent message
-     */
-    public Message sendMessage(String content) {
+    @Override
+    public IMessage sendMessage(String content) {
         return sendMessage(content, false);
     }
     
-    /**
-     * Sends a message to the desired channel.
-     *
-     * @param content The content of the message.
-     * @param tts Whether the message should use tts or not.
-     * @return The message object representing the sent message
-     */
-    public Message sendMessage(String content, boolean tts) {
+    @Override
+    public IMessage sendMessage(String content, boolean tts) {
         if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
         
@@ -262,7 +209,7 @@ public class Channel {
                 String time = response.timestamp;
                 String messageID = response.id;
             
-                Message message = new Message(client, messageID, content, client.getOurUser(), this, 
+                IMessage message = new Message(client, messageID, content, client.getOurUser(), this, 
                         DiscordUtils.convertFromTimestamp(time), DiscordUtils.mentionsFromJSON(client, response),
                         DiscordUtils.attachmentsFromJSON(response));
                 addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
@@ -279,16 +226,8 @@ public class Channel {
         }
     }
 	
-	/**
-     * Sends a file to the channel.
-     * 
-     * @param file The file to send.
-     * @return The message sent.
-     * 
-     * @throws HTTP403Exception
-     * @throws IOException
-     */
-    public Message sendFile(File file) throws HTTP403Exception, IOException {
+	@Override
+    public IMessage sendFile(File file) throws HTTP403Exception, IOException {
         if (client.isReady()) {
             //These next two lines of code took WAAAAAY too long to figure out than I care to admit
             HttpEntity fileEntity = MultipartEntityBuilder.create().addBinaryBody("file", file, 
@@ -296,7 +235,7 @@ public class Channel {
             MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
                     DiscordEndpoints.CHANNELS + id + "/messages",
                     fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
-            Message message = new Message(client, response.id, response.content, client.getOurUser(), this,
+            IMessage message = new Message(client, response.id, response.content, client.getOurUser(), this,
                     DiscordUtils.convertFromTimestamp(response.timestamp), DiscordUtils.mentionsFromJSON(client, response),
                     DiscordUtils.attachmentsFromJSON(response));
             addMessage(message);
@@ -308,16 +247,8 @@ public class Channel {
         }
     }
     
-    /**
-     * Generates an invite for this channel.
-     * 
-     * @param maxAge How long the invite should be valid, setting it to 0 makes it last forever.
-     * @param maxUses The maximum uses for the invite, setting it to 0 makes the invite have unlimited uses.
-     * @param temporary Whether users admitted with this invite are temporary.
-     * @param useXkcdPass Whether to generate a human-readable code, maxAge cannot be 0 for this to work.
-     * @return The newly generated invite.
-	 */
-    public Invite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) {
+    @Override
+    public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) {
         try {
             ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/invites",
 					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary, useXkcdPass))),
@@ -332,10 +263,7 @@ public class Channel {
         return null;
     }
     
-    /**
-     * Toggles whether the bot is "typing".
-     *
-     */
+    @Override
     public synchronized void toggleTypingStatus() {
         isTyping.set(!isTyping.get());
         
@@ -357,30 +285,18 @@ public class Channel {
         }
     }
     
-    /**
-     * Gets whether the bot is "typing".
-     *
-     * @return True if the bot is typing, false if otherwise.
-     */
+    @Override
     public synchronized boolean getTypingStatus() {
         return isTyping.get();
     }
 	
-	/**
-     * Gets the last read message id.
-     * 
-     * @return The message id.
-     */
+	@Override
     public String getLastReadMessageID() {
         return lastReadMessageID;
     }
 	
-	/**
-     * Gets the last read message
-     * 
-     * @return The message.
-     */
-    public Message getLastReadMessage() {
+	@Override
+    public IMessage getLastReadMessage() {
         return getMessageByID(lastReadMessageID);
     }
 	
@@ -389,7 +305,6 @@ public class Channel {
      * 
      * @param lastReadMessageID The message id.
      */
-    @Deprecated
     public void setLastReadMessageID(String lastReadMessageID) {
         this.lastReadMessageID = lastReadMessageID;
     }
@@ -401,6 +316,6 @@ public class Channel {
     
     @Override
     public boolean equals(Object other) {
-        return this.getClass().isAssignableFrom(other.getClass()) && ((Channel) other).getID().equals(getID());
+        return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
     }
 }
