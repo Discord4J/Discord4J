@@ -181,6 +181,12 @@ public class TestBot {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
+						} else if (m.getContent().startsWith(".test")) {
+							try {
+								client.createChannel(m.getChannel().getGuild(), "Test");
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				});

@@ -360,8 +360,6 @@ public class Channel implements IChannel {
     public void delete() throws HTTP403Exception {
         Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id, 
                 new BasicNameValuePair("authorization", client.getToken()));
-        
-        parent.getChannels().remove(this);
     }
     
     /**

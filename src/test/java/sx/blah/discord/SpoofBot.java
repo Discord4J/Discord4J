@@ -116,7 +116,7 @@ public class SpoofBot {
 											
 											case CHANNEL_EDIT:
 												try {
-													channel.edit(Optional.of(getRandString()), Optional.of(getRandNumber(Integer.class).intValue()), Optional.of(getRandSentence()));
+													channel.edit(Optional.of(getRandString()), Optional.of(channel.getPosition()), Optional.of(getRandSentence()));
 												} catch (DiscordException | HTTP403Exception e) {
 													e.printStackTrace();
 												}

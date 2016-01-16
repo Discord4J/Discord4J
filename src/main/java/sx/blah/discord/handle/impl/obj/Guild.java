@@ -70,14 +70,7 @@ public class Guild implements IGuild {
     protected final IDiscordClient client;
 
     public Guild(IDiscordClient client, String name, String id, String icon, String ownerID) {
-        this.client = client;
-        this.name = name;
-        this.id = id;
-        this.channels = new ArrayList<>();
-        this.users = new ArrayList<>();
-        this.icon = icon;
-        this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
-        this.ownerID = ownerID;
+        this(client, name, id, icon, ownerID, new ArrayList<>(), new ArrayList<>());
     }
 
     public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, List<IChannel> channels, List<IUser> users) {

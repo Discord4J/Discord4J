@@ -140,7 +140,7 @@ public class DiscordWS extends WebSocketClient {
 						}
 						
 						Guild guild;
-						client.guildList.add(guild = new Guild(client, guildResponse.name, guildResponse.name, guildResponse.icon, guildResponse.owner_id));
+						client.guildList.add(guild = new Guild(client, guildResponse.name, guildResponse.id, guildResponse.icon, guildResponse.owner_id));
 						
 						for (GuildResponse.MemberResponse member : guildResponse.members) {
 							guild.addUser(new User(client, member.user.username, member.user.id,
