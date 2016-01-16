@@ -21,6 +21,7 @@ package sx.blah.discord;
 
 import org.junit.Test;
 import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
@@ -61,6 +62,12 @@ public class TestBot {
 
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
+				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
+				
+				for (DiscordStatus.Maintenance maintenance : DiscordStatus.getUpcomingMaintenances()) {
+					Discord4J.LOGGER.warn("Discord has upcoming maintenance: {} on {}", maintenance.getName(), maintenance.getStart().toString());
+				}
+				
 				final AtomicBoolean didTest = new AtomicBoolean(false);
 				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 					@Override
