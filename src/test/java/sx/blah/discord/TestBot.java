@@ -58,7 +58,7 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
-			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).login();
+			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
 
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
@@ -67,6 +67,8 @@ public class TestBot {
 				for (DiscordStatus.Maintenance maintenance : DiscordStatus.getUpcomingMaintenances()) {
 					Discord4J.LOGGER.warn("Discord has upcoming maintenance: {} on {}", maintenance.getName(), maintenance.getStart().toString());
 				}
+				
+				client.login();
 				
 				final AtomicBoolean didTest = new AtomicBoolean(false);
 				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
@@ -118,6 +120,8 @@ public class TestBot {
 				while (!didTest.get()) {};
 				
 			} else { //Dev testing
+				client.login();
+				
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
 					public void handle(MessageReceivedEvent messageReceivedEvent) {

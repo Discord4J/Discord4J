@@ -71,13 +71,14 @@ public class User implements IUser {
      */
     protected final IDiscordClient client;
 
-    public User(IDiscordClient client, String name, String id, String discriminator, String avatar) {
+    public User(IDiscordClient client, String name, String id, String discriminator, String avatar, Presences presence) {
 	    this.client = client;
         this.id = id;
 	    this.name = name;
 		this.discriminator = discriminator;
 	    this.avatar = avatar;
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
+		this.presence = presence;
     }
 
 	@Override

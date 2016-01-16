@@ -90,8 +90,7 @@ public class DiscordUtils {
 	 * Returns a user from the java form of the raw JSON data.
 	 */
 	public static User constructUserFromJSON(IDiscordClient client, UserResponse response) {
-		User ourUser = new User(client, response.username, response.id, response.discriminator, response.avatar);
-		ourUser.setPresence(Presences.ONLINE);
+		User ourUser = new User(client, response.username, response.id, response.discriminator, response.avatar, Presences.OFFLINE);
 		
 		return ourUser;
 	}

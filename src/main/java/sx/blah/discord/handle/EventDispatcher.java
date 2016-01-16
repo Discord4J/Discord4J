@@ -93,21 +93,23 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public void dispatch(Event event) {
-		Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());
-		event.client = client;
-		if (methodListeners.containsKey(event.getClass())) {
-			HashMap<Method, Object> methodListeners = this.methodListeners.get(event.getClass());
-			for (Method method : methodListeners.keySet())
-				try {
-					method.invoke(methodListeners.get(method), event);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
-				}
-		}
-		
-		if (classListeners.containsKey(event.getClass())) {
-			for (IListener listener : classListeners.get(event.getClass()))
-				listener.handle(event);
+		if (client.isReady()) {
+			Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());
+			event.client = client;
+			if (methodListeners.containsKey(event.getClass())) {
+				HashMap<Method, Object> methodListeners = this.methodListeners.get(event.getClass());
+				for (Method method : methodListeners.keySet())
+					try {
+						method.invoke(methodListeners.get(method), event);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
+					}
+			}
+			
+			if (classListeners.containsKey(event.getClass())) {
+				for (IListener listener : classListeners.get(event.getClass()))
+					listener.handle(event);
+			}
 		}
 	}
 }

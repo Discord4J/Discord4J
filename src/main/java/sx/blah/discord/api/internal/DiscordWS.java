@@ -144,7 +144,7 @@ public class DiscordWS extends WebSocketClient {
 						
 						for (GuildResponse.MemberResponse member : guildResponse.members) {
 							guild.addUser(new User(client, member.user.username, member.user.id,
-									member.user.discriminator, member.user.avatar));
+									member.user.discriminator, member.user.avatar, Presences.OFFLINE));
 						}
 						
 						if (guildResponse.large) { //The guild is large, we have to send a request to get the offline users
@@ -175,8 +175,10 @@ public class DiscordWS extends WebSocketClient {
 					
 					for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
 						String id = privateChannelResponse.id;
-						User recipient = new User(client, privateChannelResponse.recipient.username, privateChannelResponse.recipient.id,
-								privateChannelResponse.recipient.discriminator, privateChannelResponse.recipient.avatar);
+						User recipient = (User) client.getUserByID(id);
+						if (recipient == null)
+							 recipient = new User(client, privateChannelResponse.recipient.username, privateChannelResponse.recipient.id,
+									privateChannelResponse.recipient.discriminator, privateChannelResponse.recipient.avatar, Presences.OFFLINE);
 						PrivateChannel channel = new PrivateChannel(client, recipient, id);
 						channel.setLastReadMessageID(privateChannelResponse.last_message_id);
 						try {
@@ -253,7 +255,8 @@ public class DiscordWS extends WebSocketClient {
 					client.guildList.add(guild);
 					
 					for (GuildResponse.MemberResponse member : event3.members) {
-						guild.addUser(new User(client, member.user.username, member.user.id, member.user.discriminator, member.user.avatar));
+						guild.addUser(new User(client, member.user.username, member.user.id, member.user.discriminator, 
+								member.user.avatar, Presences.OFFLINE));
 					}
 					
 					for (PresenceResponse presence : event3.presences) {
@@ -430,7 +433,7 @@ public class DiscordWS extends WebSocketClient {
 					UserUpdateEventResponse event12 = DiscordUtils.GSON.fromJson(eventObject, UserUpdateEventResponse.class);
 					User newUser = (User) client.getUserByID(event12.id);
 					if (newUser != null) {
-						IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar());
+						IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar(), newUser.getPresence());
 						newUser.setName(event12.username);
 						newUser.setAvatar(event12.avatar);
 						client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
@@ -473,7 +476,7 @@ public class DiscordWS extends WebSocketClient {
 					
 					for (GuildResponse.MemberResponse member : event15.members) {
 						guildToUpdate.addUser(new User(client, member.user.username, member.user.id,
-								member.user.discriminator, member.user.avatar));
+								member.user.discriminator, member.user.avatar, Presences.OFFLINE));
 					}
 					break;
 					
