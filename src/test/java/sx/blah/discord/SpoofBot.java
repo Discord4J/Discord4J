@@ -2,6 +2,7 @@ package sx.blah.discord;
 
 import org.apache.commons.lang3.ClassUtils;
 import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -9,6 +10,7 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.Presences;
+import sx.blah.discord.util.HTTP403Exception;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -93,6 +95,31 @@ public class SpoofBot {
 														.createInvite(18000, 1, false, false);
 												channel.sendMessage("https://discord.gg/"+invite.getInviteCode());
 												lastSpoofData = invite;
+												break;
+											
+											case CHANNEL_CREATE_AND_DELETE:
+												try {
+													final IChannel newChannel = client.createChannel(channel.getGuild(), getRandString());
+													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
+													new Thread(() -> {
+														while (deletionTimer > System.currentTimeMillis()) {}
+														try {
+															newChannel.delete();
+														} catch (HTTP403Exception e) {
+															e.printStackTrace();
+														}
+													}).start();
+												} catch (DiscordException | HTTP403Exception e) {
+													e.printStackTrace();
+												}
+												break;
+											
+											case CHANNEL_EDIT:
+												try {
+													channel.edit(Optional.of(getRandString()), Optional.of(getRandNumber(Integer.class).intValue()), Optional.of(getRandSentence()));
+												} catch (DiscordException | HTTP403Exception e) {
+													e.printStackTrace();
+												}
 												break;
 										}
 										lastSpoof = toSpoof;
@@ -321,7 +348,7 @@ public class SpoofBot {
 	 */
 	public enum Spoofs {
 		MESSAGE("TYPING_TOGGLE"), MESSAGE_EDIT("MESSAGE"), TYPING_TOGGLE(null), GAME(null), PRESENCE(null), 
-		MESSAGE_DELETE("MESSAGE"), INVITE(null); 
+		MESSAGE_DELETE("MESSAGE"), INVITE(null), CHANNEL_CREATE_AND_DELETE(null), CHANNEL_EDIT(null); 
 		
 		String dependsOn;
 		

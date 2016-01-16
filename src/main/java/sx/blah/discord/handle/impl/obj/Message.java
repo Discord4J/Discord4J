@@ -187,6 +187,7 @@ public class Message implements IMessage {
 			try {
 				Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + messageID,
 						new BasicNameValuePair("authorization", client.getToken()));
+				channel.getMessages().remove(this);
 			} catch (HTTP403Exception e) {
 				Discord4J.LOGGER.error("Received 403 error attempting to delete message; is your login correct?");
 			}

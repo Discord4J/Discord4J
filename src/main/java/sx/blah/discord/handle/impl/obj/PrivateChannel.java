@@ -39,7 +39,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
     }
 
     public PrivateChannel(IDiscordClient client, IUser recipient, String id, List<IMessage> messages) {
-        super(client, recipient.getName(), id, null, null, messages);
+        super(client, recipient.getName(), id, null, null, 0, messages);
         this.recipient = recipient;
         this.isPrivate = true;
     }

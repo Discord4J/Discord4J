@@ -207,6 +207,17 @@ public interface IDiscordClient {
 	IInvite getInviteForCode(String code);
 	
 	/**
+	 * Creates a new channel.
+	 * 
+	 * @param guild The guild to create the channel for.
+	 * @param name The name of the new channel. MUST be between 2-100 characters long.
+	 * @return The new channel.
+	 * 
+	 * @throws DiscordException
+	 */
+	IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception;
+	
+	/**
 	 * Represents an avatar image.
 	 */
 	@FunctionalInterface

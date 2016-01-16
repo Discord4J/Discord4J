@@ -78,8 +78,8 @@ public class TestBot {
 							Invite.InviteResponse response = testInvite.accept();
 							IInvite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse spoofResponse = spoofInvite.accept();
-							IChannel testChannel = client.getChannelByID(response.getChannelID());
-							IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
+							final IChannel testChannel = client.getChannelByID(response.getChannelID());
+							final IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 							
 							//Start testing

@@ -26,10 +26,12 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.requests.ChannelEditRequest;
 import sx.blah.discord.json.requests.InviteRequest;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
@@ -43,6 +45,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -97,17 +100,22 @@ public class Channel implements IChannel {
      * 5 seconds, the time it takes for one typing status to "wear off"
      */
     protected static final long TIME_FOR_TYPE_STATUS = 5000;
+	
+	/**
+     * The position of this channel in the channel list
+     */
+    protected int position;
     
 	/**
      * The client that created this object.
      */
     protected final IDiscordClient client;
 
-    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic) {
-        this(client, name, id, parent, topic, new ArrayList<>());
+    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
+        this(client, name, id, parent, topic, position, new ArrayList<>());
     }
 
-    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, List<IMessage> messages) {
+    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages) {
         this.client = client;       
         this.name = name;
         this.id = id;
@@ -115,11 +123,21 @@ public class Channel implements IChannel {
         this.parent = parent;
         this.isPrivate = false;
         this.topic = topic;
+        this.position = position;
     }
 	
 	@Override
     public String getName() {
         return name;
+    }
+	
+	/**
+     * Sets the CACHED name of the channel.
+     * 
+     * @param name The name.
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 	
 	@Override
@@ -249,6 +267,11 @@ public class Channel implements IChannel {
     
     @Override
     public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) {
+        if (!client.isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return null;
+        }
+        
         try {
             ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/invites",
 					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary, useXkcdPass))),
@@ -299,8 +322,49 @@ public class Channel implements IChannel {
     public IMessage getLastReadMessage() {
         return getMessageByID(lastReadMessageID);
     }
+    
+    @Override
+    public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception {
+        String newName = name.orElse(this.name);
+        int newPosition = position.orElse(this.position);
+        String newTopic = topic.orElse(this.topic);
+        
+        if (newName == null || newName.length() < 2 || newName.length() > 100)
+            throw new DiscordException("Channel name can only be between 2 and 100 characters!");
+    
+        try {
+            Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id, 
+					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @Override
+    public int getPosition() {
+        return position;
+    }
 	
 	/**
+     * Sets the CACHED position of the channel.
+     * 
+     * @param position The position.
+     */
+    public void setPosition(int position) {
+        this.position = position;
+    }
+    
+    @Override
+    public void delete() throws HTTP403Exception {
+        Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id, 
+                new BasicNameValuePair("authorization", client.getToken()));
+        
+        parent.getChannels().remove(this);
+    }
+    
+    /**
      * Sets the CACHED last read message id.
      * 
      * @param lastReadMessageID The message id.

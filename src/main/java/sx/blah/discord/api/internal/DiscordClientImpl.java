@@ -23,15 +23,15 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
+import sx.blah.discord.handle.impl.obj.Channel;
+import sx.blah.discord.handle.impl.obj.Guild;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.AccountInfoChangeRequest;
-import sx.blah.discord.json.requests.LoginRequest;
-import sx.blah.discord.json.requests.PresenceUpdateRequest;
-import sx.blah.discord.json.requests.PrivateChannelRequest;
+import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.Requests;
@@ -231,6 +231,12 @@ public final class DiscordClientImpl implements IDiscordClient {
     @Override
     public void changeAccountInfo(String username, String email, String password, Image avatar) throws UnsupportedEncodingException, URISyntaxException {
         Discord4J.LOGGER.debug("Changing account info.");
+    
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return;
+        }
+        
         try {
              AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
                     new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email, 
@@ -252,6 +258,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
     @Override
     public void updatePresence(boolean isIdle, Optional<String> game) {
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return;
+        }
+        
         ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
         
         ((User) getOurUser()).setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
@@ -265,6 +276,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 
     @Override
     public IUser getOurUser() {
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return null;
+        }
         return ourUser;
     }
 
@@ -314,6 +329,11 @@ public final class DiscordClientImpl implements IDiscordClient {
     
     @Override
     public IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception {
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return null;
+        }
+        
         for(IPrivateChannel channel : privateChannels) {
             if(channel.getRecipient().getID().equalsIgnoreCase(user.getID())) {
                 return channel;
@@ -338,6 +358,11 @@ public final class DiscordClientImpl implements IDiscordClient {
     
     @Override
     public void toggleTypingStatus(String channelID) {
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return;
+        }
+        
         IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
@@ -349,6 +374,11 @@ public final class DiscordClientImpl implements IDiscordClient {
     
     @Override
     public boolean getTypingStatus(String channelID) {
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return false;
+        }
+        
         IChannel channel = getChannelByID(channelID);
         if (channel == null) {
             Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
@@ -371,12 +401,43 @@ public final class DiscordClientImpl implements IDiscordClient {
     
     @Override
     public IInvite getInviteForCode(String code) {
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return null;
+        }
+        
         try {
             InviteJSONResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.INVITE + code,
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
             
             return DiscordUtils.getInviteFromJSON(this, response);
         } catch (HTTP403Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    @Override
+    public IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception {
+        if (!isReady()) {
+            Discord4J.LOGGER.error("Bot has not signed in yet!");
+            return null;
+        }
+        
+        if (name == null || name.length() < 2 || name.length() > 100)
+            throw new DiscordException("Channel name can only be between 2 and 100 characters!");
+        try {
+            ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS + guild.getID() + "/channels",
+					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text"))),
+					new BasicNameValuePair("authorization", this.token),
+					new BasicNameValuePair("content-type", "application/json")),
+					ChannelResponse.class);
+            
+            Channel channel = new Channel(this, response.name, response.id, guild, null, response.position);
+            ((Guild) guild).addChannel(channel);
+            
+            return channel;
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         return null;

@@ -1,11 +1,13 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.util.HTTP403Exception;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Defines a text channel in a guild/server.
@@ -138,9 +140,34 @@ public interface IChannel {
     String getLastReadMessageID();
     
     /**
-     * Gets the last read message
+     * Gets the last read message.
      * 
      * @return The message.
      */
     IMessage getLastReadMessage();
+	
+	/**
+     * Edits the channel.
+     * 
+     * @param name The new name of the channel.
+     * @param position The new position of the channel.
+     * @param topic The new topic of the channel.
+     * @throws DiscordException
+     * @throws HTTP403Exception
+     */
+    void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception;
+	
+	/**
+     * Gets the position of the channel on the channel list.
+     * 
+     * @return The position.
+     */
+    int getPosition();
+    
+    /**
+     * Deletes this channel. 
+     * 
+     * @throws HTTP403Exception
+     */
+    void delete() throws HTTP403Exception;
 }

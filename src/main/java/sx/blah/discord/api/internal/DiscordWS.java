@@ -161,7 +161,7 @@ public class DiscordWS extends WebSocketClient {
 							String channelType = channelResponse.type;
 							if ("text".equalsIgnoreCase(channelType)) {
 								Channel channel;
-								guild.addChannel(channel = new Channel(client, channelResponse.name, channelResponse.id, guild, channelResponse.topic));
+								guild.addChannel(channel = new Channel(client, channelResponse.name, channelResponse.id, guild, channelResponse.topic, channelResponse.position));
 								try {
 									DiscordUtils.getChannelMessages(client, channel);
 								} catch (HTTP403Exception e) {
@@ -266,7 +266,7 @@ public class DiscordWS extends WebSocketClient {
 						String channelType = channelResponse.type;
 						if ("text".equalsIgnoreCase(channelType)) {
 							Channel channel1;
-							guild.addChannel(channel1 = new Channel(client, channelResponse.name, channelResponse.id, guild, channelResponse.topic));
+							guild.addChannel(channel1 = new Channel(client, channelResponse.name, channelResponse.id, guild, channelResponse.topic, channelResponse.position));
 							try {
 								DiscordUtils.getChannelMessages(client, channel1);
 							} catch (HTTP403Exception e) {
@@ -405,7 +405,7 @@ public class DiscordWS extends WebSocketClient {
 							guildID = event10.guild_id;
 							guild = (Guild) client.getGuildByID(guildID);
 							if (null != guild) {
-								channel = new Channel(client, name, id, guild, event10.topic);
+								channel = new Channel(client, name, id, guild, event10.topic, event10.position);
 								try {
 									DiscordUtils.getChannelMessages(client, channel);
 								} catch (Exception e) {
@@ -444,8 +444,11 @@ public class DiscordWS extends WebSocketClient {
 						Channel toUpdate = (Channel) client.getChannelByID(event13.id);
 						if (toUpdate != null) {
 							IChannel oldChannel = new Channel(client, toUpdate.getName(),
-									toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic());
+									toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(), 
+									toUpdate.getMessages());
 							toUpdate.setTopic(event13.topic);
+							toUpdate.setPosition(event13.position);
+							toUpdate.setName(event13.name);
 							client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 						}
 					}
@@ -475,6 +478,19 @@ public class DiscordWS extends WebSocketClient {
 					}
 					break;
 					
+				case "GUILD_UPDATE": 
+					GuildResponse guildResponse = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
+					Guild toUpdate = (Guild) client.getGuildByID(guildResponse.id);
+					
+					if (toUpdate != null) {
+						Guild oldGuild = new Guild(client, toUpdate.getName(), toUpdate.getID(), toUpdate.getIcon(),
+								toUpdate.getOwnerID(), toUpdate.getChannels(), toUpdate.getUsers());
+						toUpdate.setIcon(guildResponse.icon);
+						toUpdate.setName(guildResponse.name);
+						client.dispatcher.dispatch(new GuildUpdateEvent(oldGuild, toUpdate));
+					}
+					break;
+				
 				default:
 					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", eventObject.toString(), frame);
 			}

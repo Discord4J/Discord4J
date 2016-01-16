@@ -42,7 +42,7 @@ public class Guild implements IGuild {
     /**
      * The name of the guild.
      */
-    protected final String name;
+    protected String name;
 
     /**
      * The ID of this guild.
@@ -158,6 +158,15 @@ public class Guild implements IGuild {
     @Override
     public String getName() {
         return name;
+    }
+	
+	/**
+     * Sets the CACHED name of the guild.
+     * 
+     * @param name The name.
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
