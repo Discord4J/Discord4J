@@ -87,7 +87,7 @@ public class TestBot {
 									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
 							//Clearing spoofbot's mess from before
-							synchronized (spoofChannel) {
+							synchronized (client) {
 								for (IMessage message : spoofChannel.getMessages()) {
 									message.delete();
 								}
