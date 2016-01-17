@@ -188,6 +188,22 @@ public interface IChannel {
 	Map<String, PermissionOverride> getRoleOverrides();
 	
 	/**
+	 * Gets the permissions available for a user with all permission overrides taken into account.
+	 * 
+	 * @param user The user to get the permissions for.
+	 * @return The set of permissions.
+	 */
+	EnumSet<Permissions> getModifiedPermissions(IUser user);
+	
+	/**
+	 * Gets the permissions available for a role with all permission overrides taken into account.
+	 *
+	 * @param role The role to get the permissions for.
+	 * @return The set of permissions.
+	 */
+	EnumSet<Permissions> getModifiedPermissions(IRole role);
+	
+	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
 	class PermissionOverride {

@@ -391,6 +391,53 @@ public class Channel implements IChannel {
 		return roleOverrides;
 	}
 	
+	@Override
+	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
+		List<IRole> roles = user.getRolesForGuild(parent.getID());
+		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
+		
+		for (IRole role : roles) { //Gets permissions granted from roles
+			for (Permissions permission : getModifiedPermissions(role))
+				if (!permissions.contains(permission))
+					permissions.add(permission);
+		}
+		
+		PermissionOverride override = getUserOverrides().get(user.getID());
+		if (override == null)
+			return permissions;
+		
+		for (Permissions permission : override.allow()) {
+			if (!permissions.contains(permission))
+				permissions.add(permission);
+		}
+		for (Permissions permission : override.deny()) {
+			if (permissions.contains(permission)) {
+				permissions.remove(permission);
+			}
+		}
+		return permissions;
+	}
+	
+	@Override
+	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
+		EnumSet<Permissions> base = role.getPermissions();
+		PermissionOverride override = getRoleOverrides().get(role.getId());
+		
+		if (override == null)
+			return base;
+		
+		for (Permissions permission : override.allow()) {
+			if (!base.contains(permission))
+				base.add(permission);
+		}
+		for (Permissions permission : override.deny()) {
+			if (base.contains(permission)) {
+				base.remove(permission);
+			}
+		}
+		return base;
+	}
+	
 	/**
 	 * CACHES a permissions override for a user in this channel.
 	 *
