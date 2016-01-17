@@ -273,7 +273,7 @@ public class SpoofBot {
 	 * @return The random string.
 	 */
 	public static String getRandString() {
-		char[] characters = new char[rng.nextInt(16)+2]; //Uses 2-16 characters
+		char[] characters = new char[rng.nextInt(16)+3]; //Uses 3-16 characters
 		for (int i = 0; i < characters.length; i++) {
 			characters[i] = getRandCharacter();
 		}

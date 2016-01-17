@@ -221,7 +221,7 @@ public interface IChannel {
 	 * 
 	 * @throws HTTP403Exception
 	 */
-	void overrrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception;
+	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception;
 	
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -232,7 +232,7 @@ public interface IChannel {
 	 *
 	 * @throws HTTP403Exception
 	 */
-	void overrrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception;
+	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception;
 	
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.

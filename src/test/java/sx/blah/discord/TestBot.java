@@ -211,7 +211,7 @@ public class TestBot {
 							}
 						} else if (m.getContent().startsWith(".test")) {
 							try {
-								m.getChannel().overrrideUserPermissions(m.getMentions().get(0).getID(), EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.CREATE_INVITE));
+								m.getChannel().overrideUserPermissions(m.getMentions().get(0).getID(), EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.CREATE_INVITE));
 							} catch (HTTP403Exception e) {
 								e.printStackTrace();
 							}

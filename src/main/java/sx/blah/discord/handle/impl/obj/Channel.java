@@ -464,12 +464,12 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void overrrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
 		overridePermissions("role", roleID, toAdd, toRemove);
 	}
 	
 	@Override
-	public void overrrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
 		overridePermissions("member", userID, toAdd, toRemove);
 	}
 	
