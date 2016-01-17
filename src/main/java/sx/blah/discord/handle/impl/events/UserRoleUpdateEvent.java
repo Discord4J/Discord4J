@@ -22,7 +22,7 @@ public class UserRoleUpdateEvent extends Event {
 	
 	/**
 	 * Gets the old roles for the user.
-	 * 
+	 *
 	 * @return The old roles.
 	 */
 	public List<IRole> getOldRoles() {
@@ -31,7 +31,7 @@ public class UserRoleUpdateEvent extends Event {
 	
 	/**
 	 * Gets the new roles for the user.
-	 * 
+	 *
 	 * @return The new roles.
 	 */
 	public List<IRole> getNewRoles() {
@@ -40,7 +40,7 @@ public class UserRoleUpdateEvent extends Event {
 	
 	/**
 	 * Gets the user involved.
-	 * 
+	 *
 	 * @return The user.
 	 */
 	public IUser getUser() {

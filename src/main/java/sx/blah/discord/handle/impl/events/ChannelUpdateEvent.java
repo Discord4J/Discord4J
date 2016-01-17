@@ -17,7 +17,7 @@ public class ChannelUpdateEvent extends Event {
 	
 	/**
 	 * Gets the original channel.
-	 * 
+	 *
 	 * @return The un-updated instance of the channel.
 	 */
 	public IChannel getOldChannel() {
@@ -26,7 +26,7 @@ public class ChannelUpdateEvent extends Event {
 	
 	/**
 	 * Gets the new channel.
-	 * 
+	 *
 	 * @return The updated instance of the channel.
 	 */
 	public IChannel getNewChannel() {

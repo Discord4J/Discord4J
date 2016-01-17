@@ -9,15 +9,15 @@ import sx.blah.discord.util.Requests;
 import java.time.LocalDateTime;
 
 /**
- * This class is used to get general information about the status regarding discord servers 
+ * This class is used to get general information about the status regarding discord servers
  */
 public class DiscordStatus {
 	
 	/**
 	 * Fetches the mean discord api response time for today.
-	 * 
+	 *
 	 * @return The mean response time (in milliseconds).
-	 * 
+	 *
 	 * @throws HTTP403Exception
 	 */
 	public static double getAPIResponseTimeForDay() throws HTTP403Exception {
@@ -54,9 +54,9 @@ public class DiscordStatus {
 	
 	/**
 	 * Gets the active maintenance statuses.
-	 * 
+	 *
 	 * @return The maintenance statuses.
-	 * 
+	 *
 	 * @throws HTTP403Exception
 	 */
 	public static Maintenance[] getActiveMaintenances() throws HTTP403Exception {
@@ -66,8 +66,8 @@ public class DiscordStatus {
 		
 		for (int i = 0; i < maintenances.length; i++) {
 			StatusResponse.MaintenanceResponse maintenanceResponse = response.scheduled_maintenances[i];
-			maintenances[i] = new Maintenance(maintenanceResponse.name, maintenanceResponse.incident_updates[0].body, 
-					maintenanceResponse.id, DiscordUtils.convertFromTimestamp(maintenanceResponse.scheduled_for), 
+			maintenances[i] = new Maintenance(maintenanceResponse.name, maintenanceResponse.incident_updates[0].body,
+					maintenanceResponse.id, DiscordUtils.convertFromTimestamp(maintenanceResponse.scheduled_for),
 					DiscordUtils.convertFromTimestamp(maintenanceResponse.scheduled_until));
 		}
 		return maintenances;
@@ -112,7 +112,7 @@ public class DiscordStatus {
 		
 		/**
 		 * Gets the name of the maintenance.
-		 * 
+		 *
 		 * @return The name.
 		 */
 		public String getName() {
@@ -121,7 +121,7 @@ public class DiscordStatus {
 		
 		/**
 		 * Gets the maintenance description.
-		 * 
+		 *
 		 * @return The description.
 		 */
 		public String getDescription() {
@@ -130,7 +130,7 @@ public class DiscordStatus {
 		
 		/**
 		 * Gets the maintenance id.
-		 * 
+		 *
 		 * @return The id.
 		 */
 		public String getID() {
@@ -139,7 +139,7 @@ public class DiscordStatus {
 		
 		/**
 		 * Gets when the maintenance is scheduled to start.
-		 * 
+		 *
 		 * @return The start time.
 		 */
 		public LocalDateTime getStart() {

@@ -48,376 +48,376 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Channel implements IChannel {
-    
-    /**
-     * User-friendly channel name (e.g. "general")
-     */
-    protected String name;
-
-    /**
-     * Channel ID.
-     */
-    protected final String id;
-
-    /**
-     * Messages that have been sent into this channel
-     */
-    protected final List<IMessage> messages;
-
-    /**
-     * Indicates whether or not this channel is a PM channel.
-     */
-    protected boolean isPrivate;
-
-    /**
-     * The guild this channel belongs to.
-     */
-    protected final IGuild parent;
 	
 	/**
-     * The channel's topic message.
-     */
-    protected String topic;
+	 * User-friendly channel name (e.g. "general")
+	 */
+	protected String name;
 	
 	/**
-     * The last read message.
-     */
-    protected String lastReadMessageID = null;
-    
-    /**
-     * Whether the bot should send out a typing status
-     */
-    protected AtomicBoolean isTyping = new AtomicBoolean(false);
-    
-    /**
-     * Keeps track of the time to handle repeated typing status broadcasts
-     */
-    protected AtomicLong typingTimer = new AtomicLong(0);
-    
-    /**
-     * 5 seconds, the time it takes for one typing status to "wear off"
-     */
-    protected static final long TIME_FOR_TYPE_STATUS = 5000;
+	 * Channel ID.
+	 */
+	protected final String id;
 	
 	/**
-     * The position of this channel in the channel list
-     */
-    protected int position;
+	 * Messages that have been sent into this channel
+	 */
+	protected final List<IMessage> messages;
 	
 	/**
-     * The permission overrides for users (key = user id)
-     */
-    protected Map<String, PermissionOverride> userOverrides;
+	 * Indicates whether or not this channel is a PM channel.
+	 */
+	protected boolean isPrivate;
 	
 	/**
-     * The permission overrides for roles (key = user id)
-     */
-    protected Map<String, PermissionOverride> roleOverrides;
-    
+	 * The guild this channel belongs to.
+	 */
+	protected final IGuild parent;
+	
 	/**
-     * The client that created this object.
-     */
-    protected final IDiscordClient client;
-
-    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-        this(client, name, id, parent, topic, position, new ArrayList<>(), new HashMap<>(), new HashMap<>());
-    }
-
-    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
-        this.client = client;       
-        this.name = name;
-        this.id = id;
-        this.messages = messages;
-        this.parent = parent;
-        this.isPrivate = false;
-        this.topic = topic;
-        this.position = position;
-        this.roleOverrides = roleOverrides;
-        this.userOverrides = userOverrides;
-    }
+	 * The channel's topic message.
+	 */
+	protected String topic;
+	
+	/**
+	 * The last read message.
+	 */
+	protected String lastReadMessageID = null;
+	
+	/**
+	 * Whether the bot should send out a typing status
+	 */
+	protected AtomicBoolean isTyping = new AtomicBoolean(false);
+	
+	/**
+	 * Keeps track of the time to handle repeated typing status broadcasts
+	 */
+	protected AtomicLong typingTimer = new AtomicLong(0);
+	
+	/**
+	 * 5 seconds, the time it takes for one typing status to "wear off"
+	 */
+	protected static final long TIME_FOR_TYPE_STATUS = 5000;
+	
+	/**
+	 * The position of this channel in the channel list
+	 */
+	protected int position;
+	
+	/**
+	 * The permission overrides for users (key = user id)
+	 */
+	protected Map<String, PermissionOverride> userOverrides;
+	
+	/**
+	 * The permission overrides for roles (key = user id)
+	 */
+	protected Map<String, PermissionOverride> roleOverrides;
+	
+	/**
+	 * The client that created this object.
+	 */
+	protected final IDiscordClient client;
+	
+	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
+		this(client, name, id, parent, topic, position, new ArrayList<>(), new HashMap<>(), new HashMap<>());
+	}
+	
+	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+		this.client = client;
+		this.name = name;
+		this.id = id;
+		this.messages = messages;
+		this.parent = parent;
+		this.isPrivate = false;
+		this.topic = topic;
+		this.position = position;
+		this.roleOverrides = roleOverrides;
+		this.userOverrides = userOverrides;
+	}
 	
 	@Override
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 	
 	/**
-     * Sets the CACHED name of the channel.
-     * 
-     * @param name The name.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+	 * Sets the CACHED name of the channel.
+	 *
+	 * @param name The name.
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 	
 	@Override
-    public String getID() {
-        return id;
-    }
+	public String getID() {
+		return id;
+	}
 	
 	@Override
-    public List<IMessage> getMessages() {
-        return messages;
-    }
+	public List<IMessage> getMessages() {
+		return messages;
+	}
 	
 	@Override
-    public IMessage getMessageByID(String messageID) {
+	public IMessage getMessageByID(String messageID) {
 		for (IMessage message : messages) {
 			if (message.getID().equalsIgnoreCase(messageID))
 				return message;
 		}
-
+		
 		return null;
 	}
 	
 	/**
-     * CACHES a message to the channel.
-     * 
-     * @param message The message.
-     */
-    public void addMessage(IMessage message) {
-        if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
-            messages.add(message);
-            if (lastReadMessageID == null)
-                lastReadMessageID = message.getID();
-        }
-    }
+	 * CACHES a message to the channel.
+	 *
+	 * @param message The message.
+	 */
+	public void addMessage(IMessage message) {
+		if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
+			messages.add(message);
+			if (lastReadMessageID == null)
+				lastReadMessageID = message.getID();
+		}
+	}
 	
 	@Override
-    @Deprecated
-    public IGuild getParent() {
-        return parent;
-    }
-    
-    @Override
-    public IGuild getGuild() {
-        return parent;
-    }
+	@Deprecated
+	public IGuild getParent() {
+		return parent;
+	}
 	
 	@Override
-    public boolean isPrivate() {
-        return isPrivate;
-    }
+	public IGuild getGuild() {
+		return parent;
+	}
 	
 	@Override
-    public String getTopic() {
-        return topic;
-    }
+	public boolean isPrivate() {
+		return isPrivate;
+	}
+	
+	@Override
+	public String getTopic() {
+		return topic;
+	}
 	
 	/**
-     * Sets the CACHED topic for the channel.
-     * 
-     * @param topic The new channel topic
-     */
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
+	 * Sets the CACHED topic for the channel.
+	 *
+	 * @param topic The new channel topic
+	 */
+	public void setTopic(String topic) {
+		this.topic = topic;
+	}
 	
 	@Override
-    public String mention() {
-        return "<#" + this.getID() + ">";
-    }
-    
-    @Override
-    public IMessage sendMessage(String content) {
-        return sendMessage(content, false);
-    }
-    
-    @Override
-    public IMessage sendMessage(String content, boolean tts) {
-        if (client.isReady()) {
+	public String mention() {
+		return "<#"+this.getID()+">";
+	}
+	
+	@Override
+	public IMessage sendMessage(String content) {
+		return sendMessage(content, false);
+	}
+	
+	@Override
+	public IMessage sendMessage(String content, boolean tts) {
+		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
-        
-            try {
-                MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
-                        new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
-                        new BasicNameValuePair("authorization", client.getToken()),
-                        new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
-            
-                String time = response.timestamp;
-                String messageID = response.id;
-            
-                IMessage message = new Message(client, messageID, content, client.getOurUser(), this, 
-                        DiscordUtils.convertFromTimestamp(time), DiscordUtils.getMentionsFromJSON(client, response),
-                        DiscordUtils.getAttachmentsFromJSON(response));
-                addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
-                client.getDispatcher().dispatch(new MessageSendEvent(message));
-                return message;
-            } catch (HTTP403Exception e) {
-                Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
-                return null;
-            }
-        
-        } else {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return null;
-        }
-    }
+			
+			try {
+				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
+						new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+				
+				String time = response.timestamp;
+				String messageID = response.id;
+				
+				IMessage message = new Message(client, messageID, content, client.getOurUser(), this,
+						DiscordUtils.convertFromTimestamp(time), DiscordUtils.getMentionsFromJSON(client, response),
+						DiscordUtils.getAttachmentsFromJSON(response));
+				addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
+				client.getDispatcher().dispatch(new MessageSendEvent(message));
+				return message;
+			} catch (HTTP403Exception e) {
+				Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
+				return null;
+			}
+			
+		} else {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return null;
+		}
+	}
 	
 	@Override
-    public IMessage sendFile(File file) throws HTTP403Exception, IOException {
-        if (client.isReady()) {
-            //These next two lines of code took WAAAAAY too long to figure out than I care to admit
-            HttpEntity fileEntity = MultipartEntityBuilder.create().addBinaryBody("file", file, 
-                    ContentType.create(Files.probeContentType(file.toPath())), file.getName()).build();
-            MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
-                    DiscordEndpoints.CHANNELS + id + "/messages",
-                    fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
-            IMessage message = new Message(client, response.id, response.content, client.getOurUser(), this,
-                    DiscordUtils.convertFromTimestamp(response.timestamp), DiscordUtils.getMentionsFromJSON(client, response),
-                    DiscordUtils.getAttachmentsFromJSON(response));
-            addMessage(message);
-            client.getDispatcher().dispatch(new MessageSendEvent(message));
-            return message;
-        } else {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return null;
-        }
-    }
-    
-    @Override
-    public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) {
-        if (!client.isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return null;
-        }
-        
-        try {
-            ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/invites",
+	public IMessage sendFile(File file) throws HTTP403Exception, IOException {
+		if (client.isReady()) {
+			//These next two lines of code took WAAAAAY too long to figure out than I care to admit
+			HttpEntity fileEntity = MultipartEntityBuilder.create().addBinaryBody("file", file,
+					ContentType.create(Files.probeContentType(file.toPath())), file.getName()).build();
+			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
+					DiscordEndpoints.CHANNELS+id+"/messages",
+					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
+			IMessage message = new Message(client, response.id, response.content, client.getOurUser(), this,
+					DiscordUtils.convertFromTimestamp(response.timestamp), DiscordUtils.getMentionsFromJSON(client, response),
+					DiscordUtils.getAttachmentsFromJSON(response));
+			addMessage(message);
+			client.getDispatcher().dispatch(new MessageSendEvent(message));
+			return message;
+		} else {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return null;
+		}
+	}
+	
+	@Override
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) {
+		if (!client.isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return null;
+		}
+		
+		try {
+			ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
 					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary, useXkcdPass))),
 					new BasicNameValuePair("authorization", client.getToken()),
-                    new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
-            
-            return DiscordUtils.getInviteFromJSON(client, response);
-        } catch (HTTP403Exception | UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        
-        return null;
-    }
-    
-    @Override
-    public synchronized void toggleTypingStatus() {
-        isTyping.set(!isTyping.get());
-        
-        if (isTyping.get()) {
-            typingTimer.set(System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
-            new Thread(() -> {
-                while (isTyping.get()) {
-                    if (typingTimer.get() <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
-                        typingTimer.set(System.currentTimeMillis());
-                        try {
-                            Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
-                                    new BasicNameValuePair("authorization", client.getToken()));
-                        } catch (HTTP403Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }).start();
-        }
-    }
-    
-    @Override
-    public synchronized boolean getTypingStatus() {
-        return isTyping.get();
-    }
+					new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
+			
+			return DiscordUtils.getInviteFromJSON(client, response);
+		} catch (HTTP403Exception | UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 	
 	@Override
-    public String getLastReadMessageID() {
-        return lastReadMessageID;
-    }
+	public synchronized void toggleTypingStatus() {
+		isTyping.set(!isTyping.get());
+		
+		if (isTyping.get()) {
+			typingTimer.set(System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
+			new Thread(()->{
+				while (isTyping.get()) {
+					if (typingTimer.get() <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
+						typingTimer.set(System.currentTimeMillis());
+						try {
+							Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
+									new BasicNameValuePair("authorization", client.getToken()));
+						} catch (HTTP403Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}).start();
+		}
+	}
 	
 	@Override
-    public IMessage getLastReadMessage() {
-        return getMessageByID(lastReadMessageID);
-    }
-    
-    @Override
-    public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception {
-        String newName = name.orElse(this.name);
-        int newPosition = position.orElse(this.position);
-        String newTopic = topic.orElse(this.topic);
-        
-        if (newName == null || newName.length() < 2 || newName.length() > 100)
-            throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-    
-        try {
-            Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id, 
+	public synchronized boolean getTypingStatus() {
+		return isTyping.get();
+	}
+	
+	@Override
+	public String getLastReadMessageID() {
+		return lastReadMessageID;
+	}
+	
+	@Override
+	public IMessage getLastReadMessage() {
+		return getMessageByID(lastReadMessageID);
+	}
+	
+	@Override
+	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception {
+		String newName = name.orElse(this.name);
+		int newPosition = position.orElse(this.position);
+		String newTopic = topic.orElse(this.topic);
+		
+		if (newName == null || newName.length() < 2 || newName.length() > 100)
+			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
+		
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    @Override
-    public int getPosition() {
-        return position;
-    }
-	
-	/**
-     * Sets the CACHED position of the channel.
-     * 
-     * @param position The position.
-     */
-    public void setPosition(int position) {
-        this.position = position;
-    }
-    
-    @Override
-    public void delete() throws HTTP403Exception {
-        Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id, 
-                new BasicNameValuePair("authorization", client.getToken()));
-    }
-    
-    /**
-     * Sets the CACHED last read message id.
-     * 
-     * @param lastReadMessageID The message id.
-     */
-    public void setLastReadMessageID(String lastReadMessageID) {
-        this.lastReadMessageID = lastReadMessageID;
-    }
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	@Override
-    public Map<String, PermissionOverride> getUserOverrides() {
-        return userOverrides;
-    }
-    
-    @Override
-    public Map<String, PermissionOverride> getRoleOverrides() {
-        return roleOverrides;
-    }
+	public int getPosition() {
+		return position;
+	}
 	
 	/**
-     * CACHES a permissions override for a user in this channel.
-     * 
-     * @param userId The user the permissions override is for.
-     * @param override The permissions override.
-     */
-    public void addUserOverride(String userId, PermissionOverride override) {
-        userOverrides.put(userId, override);
-    }
-    
-    /**
-     * CACHES a permissions override for a role in this channel.
-     *
-     * @param roleId The role the permissions override is for.
-     * @param override The permissions override.
-     */
-    public void addRoleOverride(String roleId, PermissionOverride override) {
-        roleOverrides.put(roleId, override);
-    }
-    
-    @Override 
-    public String toString() {
-        return mention();
-    }
-    
-    @Override
-    public boolean equals(Object other) {
-        return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
-    }
+	 * Sets the CACHED position of the channel.
+	 *
+	 * @param position The position.
+	 */
+	public void setPosition(int position) {
+		this.position = position;
+	}
+	
+	@Override
+	public void delete() throws HTTP403Exception {
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
+				new BasicNameValuePair("authorization", client.getToken()));
+	}
+	
+	/**
+	 * Sets the CACHED last read message id.
+	 *
+	 * @param lastReadMessageID The message id.
+	 */
+	public void setLastReadMessageID(String lastReadMessageID) {
+		this.lastReadMessageID = lastReadMessageID;
+	}
+	
+	@Override
+	public Map<String, PermissionOverride> getUserOverrides() {
+		return userOverrides;
+	}
+	
+	@Override
+	public Map<String, PermissionOverride> getRoleOverrides() {
+		return roleOverrides;
+	}
+	
+	/**
+	 * CACHES a permissions override for a user in this channel.
+	 *
+	 * @param userId The user the permissions override is for.
+	 * @param override The permissions override.
+	 */
+	public void addUserOverride(String userId, PermissionOverride override) {
+		userOverrides.put(userId, override);
+	}
+	
+	/**
+	 * CACHES a permissions override for a role in this channel.
+	 *
+	 * @param roleId The role the permissions override is for.
+	 * @param override The permissions override.
+	 */
+	public void addRoleOverride(String roleId, PermissionOverride override) {
+		roleOverrides.put(roleId, override);
+	}
+	
+	@Override
+	public String toString() {
+		return mention();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
+	}
 }

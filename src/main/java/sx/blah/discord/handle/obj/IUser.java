@@ -9,57 +9,57 @@ import java.util.Optional;
 public interface IUser {
 	
 	/**
-     * Gets the user's unique id.
-     * 
-     * @return The user's id.
-     */
+	 * Gets the user's unique id.
+	 *
+	 * @return The user's id.
+	 */
 	String getID();
 	
 	/**
-     * Gets the user's username.
-     * 
-     * @return The username.
-     */
+	 * Gets the user's username.
+	 *
+	 * @return The username.
+	 */
 	String getName();
 	
 	/**
-     * Gets the game the user is playing, no value if the user isn't playing a game.
-     * 
-     * @return The game.
-     */
+	 * Gets the game the user is playing, no value if the user isn't playing a game.
+	 *
+	 * @return The game.
+	 */
 	Optional<String> getGame();
 	
 	/**
-     * Gets the user's avatar id.
-     * 
-     * @return The avatar id.
-     */
+	 * Gets the user's avatar id.
+	 *
+	 * @return The avatar id.
+	 */
 	String getAvatar();
 	
 	/**
-     * Gets the user's avatar direct link.
-     * 
-     * @return The avatar url.
-     */
+	 * Gets the user's avatar direct link.
+	 *
+	 * @return The avatar url.
+	 */
 	String getAvatarURL();
 	
 	/**
-     * Gets the user's presence.
-     * 
-     * @return The user's presence.
-     */
+	 * Gets the user's presence.
+	 *
+	 * @return The user's presence.
+	 */
 	Presences getPresence();
 	
 	/**
-     * Formats a string to @mention the user.
-     * 
-     * @return The formatted string.
-     */
+	 * Formats a string to @mention the user.
+	 *
+	 * @return The formatted string.
+	 */
 	String mention();
 	
 	/**
 	 * Gets the discriminator for the user. This is used by Discord to differentiate between two users with the same name.
-	 * 
+	 *
 	 * @return The discriminator.
 	 */
 	String getDiscriminator();

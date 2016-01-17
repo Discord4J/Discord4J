@@ -25,7 +25,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Registers a listener using {@link EventSubscriber} method annotations.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void registerListener(Object listener) {
@@ -44,7 +44,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Registers a single event listener.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void registerListener(IListener listener) {
@@ -59,7 +59,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Unregisters a listener using {@link EventSubscriber} method annotations.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void unregisterListener(Object listener) {
@@ -76,7 +76,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Unregisters a single event listener.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void unregisterListener(IListener listener) {
@@ -89,7 +89,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Dispatches an event.
-	 * 
+	 *
 	 * @param event The event.
 	 */
 	public void dispatch(Event event) {

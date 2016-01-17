@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
 
 public class DiscordWS extends WebSocketClient {
-
+	
 	private DiscordClientImpl client;
 	private static final HashMap<String, String> headers = new HashMap<>();
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
@@ -58,7 +58,7 @@ public class DiscordWS extends WebSocketClient {
 		isConnected.set(false);
 		close();
 	}
-
+	
 	
 	@Override
 	public void onOpen(ServerHandshake serverHandshake) {
@@ -68,7 +68,7 @@ public class DiscordWS extends WebSocketClient {
 		} else if (!client.token.isEmpty()) {
 			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.token, "Java", Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
 			Discord4J.LOGGER.debug("Connected to the Discord websocket.");
-		} else 
+		} else
 			Discord4J.LOGGER.error("Use the login() method to set your token first!");
 	}
 	
@@ -85,7 +85,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}).start();
 	}
-
+	
 	/**
 	 * Called when the websocket receives a message.
 	 * This method is parses from raw JSON to objects,
@@ -93,7 +93,7 @@ public class DiscordWS extends WebSocketClient {
 	 *
 	 * @param frame raw JSON data from Discord servers
 	 */
-	@Override 
+	@Override
 	public final void onMessage(String frame) {
 		JsonParser parser = new JsonParser();
 		JsonObject object = parser.parse(frame).getAsJsonObject();
@@ -106,7 +106,7 @@ public class DiscordWS extends WebSocketClient {
 		}
 		int op = object.get("op").getAsInt();
 		
-		if (op !=  7) //Not a redirect op, so cache the last sequence value
+		if (op != 7) //Not a redirect op, so cache the last sequence value
 			client.lastSequence = object.get("s").getAsLong();
 		
 		if (op == 0) { //Event dispatched
@@ -117,7 +117,7 @@ public class DiscordWS extends WebSocketClient {
 				case "RESUMED":
 					resumed(eventObject);
 					break;
-					
+				
 				case "READY":
 					ready(eventObject);
 					break;
@@ -185,8 +185,8 @@ public class DiscordWS extends WebSocketClient {
 				case "GUILD_MEMBERS_CHUNK":
 					guildMembersChunk(eventObject);
 					break;
-					
-				case "GUILD_UPDATE": 
+				
+				case "GUILD_UPDATE":
 					guildUpdate(eventObject);
 					break;
 				
@@ -531,7 +531,7 @@ public class DiscordWS extends WebSocketClient {
 			
 			StringBuilder sb = new StringBuilder();
 			String read;
-			while ((read = reader.readLine()) != null){
+			while ((read = reader.readLine()) != null) {
 				sb.append(read);
 			}
 			
@@ -545,11 +545,11 @@ public class DiscordWS extends WebSocketClient {
 		}
 	}
 	
-	@Override 
+	@Override
 	public void onClose(int i, String s, boolean b) {
-
+		
 	}
-
+	
 	@Override
 	public void onError(Exception e) {
 		e.printStackTrace();

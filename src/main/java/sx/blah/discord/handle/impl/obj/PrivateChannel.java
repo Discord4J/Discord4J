@@ -31,22 +31,22 @@ import java.util.List;
 public class PrivateChannel extends Channel implements IPrivateChannel {
 	
 	/**
-     * The recipient of this private channel.
-     */
-    protected final IUser recipient;
-    
-    public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
-        this(client, recipient, id, new ArrayList<>());
-    }
-
-    public PrivateChannel(IDiscordClient client, IUser recipient, String id, List<IMessage> messages) {
-        super(client, recipient.getName(), id, null, null, 0, messages, new HashMap<>(), new HashMap<>());
-        this.recipient = recipient;
-        this.isPrivate = true;
-    }
-
-    @Override
-    public IUser getRecipient() {
-        return recipient;
-    }
+	 * The recipient of this private channel.
+	 */
+	protected final IUser recipient;
+	
+	public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
+		this(client, recipient, id, new ArrayList<>());
+	}
+	
+	public PrivateChannel(IDiscordClient client, IUser recipient, String id, List<IMessage> messages) {
+		super(client, recipient.getName(), id, null, null, 0, messages, new HashMap<>(), new HashMap<>());
+		this.recipient = recipient;
+		this.isPrivate = true;
+	}
+	
+	@Override
+	public IUser getRecipient() {
+		return recipient;
+	}
 }

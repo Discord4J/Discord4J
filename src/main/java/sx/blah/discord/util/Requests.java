@@ -38,111 +38,111 @@ import static sx.blah.discord.Discord4J.*;
 public enum Requests {
 	
 	/**
-     * Used to send POST Requests
-     */
-    POST(HttpPost.class),
+	 * Used to send POST Requests
+	 */
+	POST(HttpPost.class),
 	/**
-     * Used to send GET requests
-     */
-    GET(HttpGet.class),
+	 * Used to send GET requests
+	 */
+	GET(HttpGet.class),
 	/**
-     * Used to send DELETE requests
-     */
-    DELETE(HttpDelete.class),
+	 * Used to send DELETE requests
+	 */
+	DELETE(HttpDelete.class),
 	/**
-     * Used to send PATCH requests
-     */
-    PATCH(HttpPatch.class);
+	 * Used to send PATCH requests
+	 */
+	PATCH(HttpPatch.class);
 	/**
-     * The user-agent, as per @Jake's request
-     */
-    private static final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
-
-    //Same as HttpClients.createDefault() but with the proper user-agent
-    static final HttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
-
-    final Class<? extends HttpUriRequest> requestClass;
-
-    Requests(Class<? extends HttpUriRequest> clazz) {
-        this.requestClass = clazz;
-    }
+	 * The user-agent, as per @Jake's request
+	 */
+	private static final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
+	
+	//Same as HttpClients.createDefault() but with the proper user-agent
+	static final HttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
+	
+	final Class<? extends HttpUriRequest> requestClass;
+	
+	Requests(Class<? extends HttpUriRequest> clazz) {
+		this.requestClass = clazz;
+	}
 	
 	/**
-     * Gets the HttpREQUEST.class represented by the enum.
-     * 
-     * @return The Http request class.
-     */
-    public Class<? extends HttpUriRequest> getRequestClass() {
-        return requestClass;
-    }
+	 * Gets the HttpREQUEST.class represented by the enum.
+	 *
+	 * @return The Http request class.
+	 */
+	public Class<? extends HttpUriRequest> getRequestClass() {
+		return requestClass;
+	}
 	
 	/**
-     * Makes a request.
-     * 
-     * @param url The url to make the request to.
-     * @param headers The headers to include in the request.
-     * @return The result (if any) returned by the request.
-     * 
-     * @throws HTTP403Exception
-     */
-    public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP403Exception {
-        try {
-            HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
-            for (BasicNameValuePair header : headers) {
-                request.addHeader(header.getName(), header.getValue());
-            }
-            HttpResponse response = CLIENT.execute(request);
-            int responseCode = response.getStatusLine().getStatusCode();
-            if (responseCode == 404) {
-                LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
-            } else if (responseCode == 403) {
-                throw new HTTP403Exception("Unable to make request to " + url);
-            } else if (responseCode == 204) { //There is a no content response when deleting messages
-                return null;
-            }
-            return EntityUtils.toString(response.getEntity());
-        } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    
-    /**
-     * Makes a request.
-     *
-     * @param entity Any data to send with the request.
-     * @param url The url to make the request to.
-     * @param headers The headers to include in the request.
-     * @return The result (if any) returned by the request.
-     *
-     * @throws HTTP403Exception
-     */
-    public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP403Exception {
-        try {
-            if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
-                HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
-                        this.requestClass.getConstructor(String.class).newInstance(url);
-                for (BasicNameValuePair header : headers) {
-                    request.addHeader(header.getName(), header.getValue());
-                }
-                request.setEntity(entity);
-                HttpResponse response = CLIENT.execute(request);
-                int responseCode = response.getStatusLine().getStatusCode();
-                if (responseCode == 404) {
-                    LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
-                } else if (responseCode == 403) {
-                    throw new HTTP403Exception("Unable to make request to " + url);
-                } else if (responseCode == 204) { //There is a no content response when deleting messages
-                    return null;
-                }
-                return EntityUtils.toString(response.getEntity());
-            } else {
-                LOGGER.error("Tried to attach HTTP entity to invalid type! ({})",
-                        this.requestClass.getSimpleName());
-            }
-        } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	 * Makes a request.
+	 *
+	 * @param url The url to make the request to.
+	 * @param headers The headers to include in the request.
+	 * @return The result (if any) returned by the request.
+	 *
+	 * @throws HTTP403Exception
+	 */
+	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP403Exception {
+		try {
+			HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
+			for (BasicNameValuePair header : headers) {
+				request.addHeader(header.getName(), header.getValue());
+			}
+			HttpResponse response = CLIENT.execute(request);
+			int responseCode = response.getStatusLine().getStatusCode();
+			if (responseCode == 404) {
+				LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+			} else if (responseCode == 403) {
+				throw new HTTP403Exception("Unable to make request to "+url);
+			} else if (responseCode == 204) { //There is a no content response when deleting messages
+				return null;
+			}
+			return EntityUtils.toString(response.getEntity());
+		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * Makes a request.
+	 *
+	 * @param entity Any data to send with the request.
+	 * @param url The url to make the request to.
+	 * @param headers The headers to include in the request.
+	 * @return The result (if any) returned by the request.
+	 *
+	 * @throws HTTP403Exception
+	 */
+	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP403Exception {
+		try {
+			if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
+				HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
+						this.requestClass.getConstructor(String.class).newInstance(url);
+				for (BasicNameValuePair header : headers) {
+					request.addHeader(header.getName(), header.getValue());
+				}
+				request.setEntity(entity);
+				HttpResponse response = CLIENT.execute(request);
+				int responseCode = response.getStatusLine().getStatusCode();
+				if (responseCode == 404) {
+					LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+				} else if (responseCode == 403) {
+					throw new HTTP403Exception("Unable to make request to "+url);
+				} else if (responseCode == 204) { //There is a no content response when deleting messages
+					return null;
+				}
+				return EntityUtils.toString(response.getEntity());
+			} else {
+				LOGGER.error("Tried to attach HTTP entity to invalid type! ({})",
+						this.requestClass.getSimpleName());
+			}
+		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

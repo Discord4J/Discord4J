@@ -16,7 +16,7 @@ public class MessageAcknowledgedEvent extends Event {
 	
 	/**
 	 * Gets the message that was acknowledged.
-	 * 
+	 *
 	 * @return The acknowledged message.
 	 */
 	public IMessage getAcknowledgedMessage() {

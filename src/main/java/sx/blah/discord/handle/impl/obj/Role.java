@@ -60,7 +60,7 @@ public class Role implements IRole {
 	
 	/**
 	 * Sets the CACHED role position.
-	 * 
+	 *
 	 * @param position The role position.
 	 */
 	public void setPosition(int position) {
@@ -74,7 +74,7 @@ public class Role implements IRole {
 	
 	/**
 	 * Sets the CACHED enabled permissions.
-	 * 
+	 *
 	 * @param permissions The permissions number.
 	 */
 	public void setPermissions(int permissions) {
@@ -88,7 +88,7 @@ public class Role implements IRole {
 	
 	/**
 	 * Sets the CACHED role name.
-	 * 
+	 *
 	 * @param name The name.
 	 */
 	public void setName(String name) {
@@ -112,7 +112,7 @@ public class Role implements IRole {
 	
 	/**
 	 * Sets whether this role is hoisted in the CACHE.
-	 * 
+	 *
 	 * @param hoist True if hoisted, false if otherwise.
 	 */
 	public void setHoist(boolean hoist) {
@@ -126,7 +126,7 @@ public class Role implements IRole {
 	
 	/**
 	 * Sets the CACHED role color.
-	 * 
+	 *
 	 * @param color The color decimal number.
 	 */
 	public void setColor(int color) {

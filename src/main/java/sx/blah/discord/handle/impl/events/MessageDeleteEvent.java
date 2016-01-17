@@ -28,14 +28,14 @@ import sx.blah.discord.handle.obj.IMessage;
 public class MessageDeleteEvent extends Event {
 	
 	private final IMessage message;
-
+	
 	public MessageDeleteEvent(IMessage message) {
 		this.message = message;
 	}
 	
 	/**
 	 * Gets the message deleted.
-	 * 
+	 *
 	 * @return The message.
 	 */
 	public IMessage getMessage() {

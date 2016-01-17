@@ -13,49 +13,49 @@ public interface IMessage {
 	
 	/**
 	 * Gets the string content of the message.
-	 * 
+	 *
 	 * @return The content of the message
 	 */
 	String getContent();
 	
 	/**
 	 * Gets the channel that this message belongs to.
-	 * 
+	 *
 	 * @return The channel.
 	 */
 	IChannel getChannel();
 	
 	/**
 	 * Gets the user who authored this message.
-	 * 
+	 *
 	 * @return The author.
 	 */
 	IUser getAuthor();
 	
 	/**
 	 * Gets the message id.
-	 * 
+	 *
 	 * @return The id.
 	 */
 	String getID();
 	
 	/**
 	 * Gets the timestamp for when this message was sent/edited.
-	 * 
+	 *
 	 * @return The timestamp.
 	 */
 	LocalDateTime getTimestamp();
 	
 	/**
 	 * Gets the users mentioned in this message.
-	 * 
+	 *
 	 * @return The users mentioned.
 	 */
 	List<IUser> getMentions();
 	
 	/**
 	 * Gets the attachments in this message.
-	 * 
+	 *
 	 * @return The attachments.
 	 */
 	List<Attachment> getAttachments();
@@ -63,7 +63,7 @@ public interface IMessage {
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
 	 * object before your content
-	 * 
+	 *
 	 * @param content Message to send.
 	 */
 	void reply(String content) throws IOException;
@@ -88,7 +88,7 @@ public interface IMessage {
 	
 	/**
 	 * Checks if the message has been read by this account.
-	 * 
+	 *
 	 * @return True if the message has been read, false if otherwise.
 	 */
 	boolean isAcknowledged();
@@ -127,7 +127,7 @@ public interface IMessage {
 		
 		/**
 		 * Gets the file name for the attachment.
-		 * 
+		 *
 		 * @return The file name of the attachment.
 		 */
 		public String getFilename() {
@@ -136,7 +136,7 @@ public interface IMessage {
 		
 		/**
 		 * Gets the size of the attachment.
-		 * 
+		 *
 		 * @return The size, in bytes of the attachment.
 		 */
 		public int getFilesize() {
@@ -145,7 +145,7 @@ public interface IMessage {
 		
 		/**
 		 * Gets the id of the attachment.
-		 * 
+		 *
 		 * @return The attachment id.
 		 */
 		public String getId() {
@@ -154,7 +154,7 @@ public interface IMessage {
 		
 		/**
 		 * Gets the direct link to the attachment.
-		 * 
+		 *
 		 * @return The download link for the attachment.
 		 */
 		public String getUrl() {

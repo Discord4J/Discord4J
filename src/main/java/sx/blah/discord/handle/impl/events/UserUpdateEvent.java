@@ -17,6 +17,7 @@ public class UserUpdateEvent extends Event {
 	
 	/**
 	 * Gets the old user info
+	 *
 	 * @return The old user object
 	 */
 	public IUser getOldUser() {
@@ -25,6 +26,7 @@ public class UserUpdateEvent extends Event {
 	
 	/**
 	 * Gets the new user info
+	 *
 	 * @return The new user object
 	 */
 	public IUser getNewUser() {

@@ -50,395 +50,395 @@ import java.util.Optional;
  * as holds our user data.
  */
 public final class DiscordClientImpl implements IDiscordClient {
-    /**
-     * Used for keep alive. Keeps last time (in ms)
-     * that we sent the keep alive so we can accurately
-     * time our keep alive messages.
-     */
-    protected volatile long timer = System.currentTimeMillis();
-
-    /**
-     * User we are logged in as
-     */
-    protected User ourUser;
-
-    /**
-     * Our token, so we can send XHR to Discord.
-     */
+	/**
+	 * Used for keep alive. Keeps last time (in ms)
+	 * that we sent the keep alive so we can accurately
+	 * time our keep alive messages.
+	 */
+	protected volatile long timer = System.currentTimeMillis();
+	
+	/**
+	 * User we are logged in as
+	 */
+	protected User ourUser;
+	
+	/**
+	 * Our token, so we can send XHR to Discord.
+	 */
 	protected String token;
-
-    /**
-     * Time (in ms) between keep alive
-     * messages.
-     */
+	
+	/**
+	 * Time (in ms) between keep alive
+	 * messages.
+	 */
 	protected volatile long heartbeat;
-
-    /**
-     * Local copy of all guilds/servers.
-     */
+	
+	/**
+	 * Local copy of all guilds/servers.
+	 */
 	protected final List<IGuild> guildList = new ArrayList<>();
-    
-    /**
-     * Private copy of the email you logged in with.
-     */
+	
+	/**
+	 * Private copy of the email you logged in with.
+	 */
 	protected String email;
-
-    /**
-     * Private copy of the password you used to log in.
-     */
+	
+	/**
+	 * Private copy of the password you used to log in.
+	 */
 	protected String password;
-
-    /**
-     * WebSocket over which to communicate with Discord.
-     */
+	
+	/**
+	 * WebSocket over which to communicate with Discord.
+	 */
 	protected DiscordWS ws;
-
-    /**
-     * Event dispatcher.
-     */
+	
+	/**
+	 * Event dispatcher.
+	 */
 	protected EventDispatcher dispatcher;
-
-    /**
-     * All of the private message channels that the bot is connected to.
-     */
-    protected final List<IPrivateChannel> privateChannels = new ArrayList<>();
 	
 	/**
-     * Whether the api is logged in.
-     */
-    protected boolean isReady = false;
+	 * All of the private message channels that the bot is connected to.
+	 */
+	protected final List<IPrivateChannel> privateChannels = new ArrayList<>();
 	
 	/**
-     * The websocket session id.
-     */
-    protected String sessionId;
+	 * Whether the api is logged in.
+	 */
+	protected boolean isReady = false;
 	
 	/**
-     * Caches the last operation done by the websocket, required for handling redirects.
-     */
-    protected long lastSequence = 0;
-    
-    public DiscordClientImpl(String email, String password) {
-        this.dispatcher = new EventDispatcher(this);
+	 * The websocket session id.
+	 */
+	protected String sessionId;
+	
+	/**
+	 * Caches the last operation done by the websocket, required for handling redirects.
+	 */
+	protected long lastSequence = 0;
+	
+	public DiscordClientImpl(String email, String password) {
+		this.dispatcher = new EventDispatcher(this);
 		this.email = email;
 		this.password = password;
-    }
-    
-    @Override
-    public EventDispatcher getDispatcher() {
-        return dispatcher;
-    }
-
-    @Override
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public void login() throws IOException, URISyntaxException {
-        if (null != ws) {
-            ws.close();
-        }
-
-        try {
-            LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
-                    new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
-                    new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
-            this.token = response.token;
-        } catch (HTTP403Exception e) {
-            e.printStackTrace();
-        }
-
-        this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
-    }
-    
-    @Override
-    public void logout() throws HTTP403Exception {
-        if (isReady()) {
-            ws.disconnect();
-            
-            Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
-                    new BasicNameValuePair("authorization", token));
-        } else
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-    }
-    
-    /**
-     * Gets the WebSocket gateway
-     *
-     * @param token Our login token
-     * @return the WebSocket URL of which to connect
-     */
-    private String obtainGateway(String token) {
-        String gateway = null;
-        try {
-            GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
-                    new BasicNameValuePair("authorization", token)), GatewayResponse.class);
-            gateway = response.url.replaceAll("wss", "ws");
-        } catch (HTTP403Exception e) {
-            Discord4J.LOGGER.error("Received 403 error attempting to get gateway; is your login correct?");
-        }
-        Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
-        return gateway;
-    }
-
-    @Override
-    public IMessage sendMessage(String content, String channelID) throws IOException {
-        IChannel channel = getChannelByID(channelID);
-        if (channel == null) {
-            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
-            return null;
-        }
-        return channel.sendMessage(content);
-    }
+	}
 	
-    @Override
-    public IMessage editMessage(String content, String messageID, String channelID) {
-        IChannel channel = getChannelByID(channelID);
-        if (channel == null) {
-            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
-            return null;
-        }
-        
-        IMessage message = channel.getMessageByID(messageID);
-        if (message == null) {
-            Discord4J.LOGGER.error("Message id " +  messageID + " doesn't exist!");
-            return null;
-        }
-        
-        return message.edit(content);
-    }
-    
-    @Override
-    public void deleteMessage(String messageID, String channelID) throws IOException {
-        IChannel channel = getChannelByID(channelID);
-        if (channel == null) {
-            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
-            return;
-        }
-        
-        IMessage message = channel.getMessageByID(messageID);
-        if (message == null) {
-            Discord4J.LOGGER.error("Message id " +  messageID + " doesn't exist!");
-            return;
-        }
-        
-        message.delete();
-    }
-
-    
-    @Override
-    public void changeAccountInfo(String username, String email, String password, Image avatar) throws UnsupportedEncodingException, URISyntaxException {
-        Discord4J.LOGGER.debug("Changing account info.");
-    
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return;
-        }
-        
-        try {
-             AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS + "@me",
-                    new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email, 
+	@Override
+	public EventDispatcher getDispatcher() {
+		return dispatcher;
+	}
+	
+	@Override
+	public String getToken() {
+		return token;
+	}
+	
+	@Override
+	public void login() throws IOException, URISyntaxException {
+		if (null != ws) {
+			ws.close();
+		}
+		
+		try {
+			LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
+					new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
+					new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
+			this.token = response.token;
+		} catch (HTTP403Exception e) {
+			e.printStackTrace();
+		}
+		
+		this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
+	}
+	
+	@Override
+	public void logout() throws HTTP403Exception {
+		if (isReady()) {
+			ws.disconnect();
+			
+			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
+					new BasicNameValuePair("authorization", token));
+		} else
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+	}
+	
+	/**
+	 * Gets the WebSocket gateway
+	 *
+	 * @param token Our login token
+	 * @return the WebSocket URL of which to connect
+	 */
+	private String obtainGateway(String token) {
+		String gateway = null;
+		try {
+			GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
+					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
+			gateway = response.url.replaceAll("wss", "ws");
+		} catch (HTTP403Exception e) {
+			Discord4J.LOGGER.error("Received 403 error attempting to get gateway; is your login correct?");
+		}
+		Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
+		return gateway;
+	}
+	
+	@Override
+	public IMessage sendMessage(String content, String channelID) throws IOException {
+		IChannel channel = getChannelByID(channelID);
+		if (channel == null) {
+			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
+			return null;
+		}
+		return channel.sendMessage(content);
+	}
+	
+	@Override
+	public IMessage editMessage(String content, String messageID, String channelID) {
+		IChannel channel = getChannelByID(channelID);
+		if (channel == null) {
+			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
+			return null;
+		}
+		
+		IMessage message = channel.getMessageByID(messageID);
+		if (message == null) {
+			Discord4J.LOGGER.error("Message id "+messageID+" doesn't exist!");
+			return null;
+		}
+		
+		return message.edit(content);
+	}
+	
+	@Override
+	public void deleteMessage(String messageID, String channelID) throws IOException {
+		IChannel channel = getChannelByID(channelID);
+		if (channel == null) {
+			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
+			return;
+		}
+		
+		IMessage message = channel.getMessageByID(messageID);
+		if (message == null) {
+			Discord4J.LOGGER.error("Message id "+messageID+" doesn't exist!");
+			return;
+		}
+		
+		message.delete();
+	}
+	
+	
+	@Override
+	public void changeAccountInfo(String username, String email, String password, Image avatar) throws UnsupportedEncodingException, URISyntaxException {
+		Discord4J.LOGGER.debug("Changing account info.");
+		
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return;
+		}
+		
+		try {
+			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
+					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email,
 							this.password, password, username == null || username.isEmpty() ? ourUser.getName() : username,
 							avatar == null ? Image.defaultAvatar().getData() : avatar.getData()))),
-                    new BasicNameValuePair("Authorization", token),
-                    new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
-            
+					new BasicNameValuePair("Authorization", token),
+					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
+			
 			if (!this.token.equals(response.token)) {
 				Discord4J.LOGGER.debug("Token changed, reopening the websocket.");
 				this.token = response.token;
 				((DiscordWS) this.ws).disconnect();
 				this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
 			}
-        } catch (HTTP403Exception e) {
-            Discord4J.LOGGER.error("Received 403 error attempting to change account details; is your login correct?");
-        }
-    }
+		} catch (HTTP403Exception e) {
+			Discord4J.LOGGER.error("Received 403 error attempting to change account details; is your login correct?");
+		}
+	}
 	
-    @Override
-    public void updatePresence(boolean isIdle, Optional<String> game) {
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return;
-        }
-        
-        ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
-        
-        ((User) getOurUser()).setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
-        ((User) getOurUser()).setGame(game);
-    }
-    
-    @Override
-    public boolean isReady() {
-        return isReady && ws != null;
-    }
-
-    @Override
-    public IUser getOurUser() {
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return null;
-        }
-        return ourUser;
-    }
-
-    @Override
-    public IChannel getChannelByID(String id) {
-        for (IGuild guild : guildList) {
-            for (IChannel channel : guild.getChannels()) {
-                if (channel.getID().equalsIgnoreCase(id))
-                    return channel;
-            }
-        }
-
-        for(IPrivateChannel channel : privateChannels) {
-            if(channel.getID().equalsIgnoreCase(id))
-                return channel;
-        }
-
-        return null;
-    }
-
-    @Override
-    public IGuild getGuildByID(String guildID) {
-        for (IGuild guild : guildList) {
-            if (guild.getID().equalsIgnoreCase(guildID))
-                return guild;
-        }
-
-        return null;
-    }
-
-    @Override
-    public List<IGuild> getGuilds() {
-        return guildList;
-    }
-    
-    @Override
+	@Override
+	public void updatePresence(boolean isIdle, Optional<String> game) {
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return;
+		}
+		
+		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
+		
+		((User) getOurUser()).setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
+		((User) getOurUser()).setGame(game);
+	}
+	
+	@Override
+	public boolean isReady() {
+		return isReady && ws != null;
+	}
+	
+	@Override
+	public IUser getOurUser() {
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return null;
+		}
+		return ourUser;
+	}
+	
+	@Override
+	public IChannel getChannelByID(String id) {
+		for (IGuild guild : guildList) {
+			for (IChannel channel : guild.getChannels()) {
+				if (channel.getID().equalsIgnoreCase(id))
+					return channel;
+			}
+		}
+		
+		for (IPrivateChannel channel : privateChannels) {
+			if (channel.getID().equalsIgnoreCase(id))
+				return channel;
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public IGuild getGuildByID(String guildID) {
+		for (IGuild guild : guildList) {
+			if (guild.getID().equalsIgnoreCase(guildID))
+				return guild;
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public List<IGuild> getGuilds() {
+		return guildList;
+	}
+	
+	@Override
 	public IUser getUserByID(String userID) {
-        IUser u = null;
-        for (IGuild guild : guildList) {
-            if (null == u) {
-                u = guild.getUserByID(userID);
-            }
-        }
-
-        return u;
-    }
-    
-    @Override
-    public IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception {
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return null;
-        }
-        
-        for(IPrivateChannel channel : privateChannels) {
-            if(channel.getRecipient().getID().equalsIgnoreCase(user.getID())) {
-                return channel;
-            }
-        }
-        
-        try {
-            PrivateChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS + this.ourUser.getID() + "/channels",
-                    new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
-                    new BasicNameValuePair("authorization", this.token),
-                    new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
-            
-            IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
-            privateChannels.add(channel);
-            return channel;
-        } catch (HTTP403Exception e) {
-            e.printStackTrace();
-        }
-        
-        return null;
-    }
-    
-    @Override
-    public void toggleTypingStatus(String channelID) {
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return;
-        }
-        
-        IChannel channel = getChannelByID(channelID);
-        if (channel == null) {
-            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
-            return;
-        }
-        
-        channel.toggleTypingStatus();
-    }
-    
-    @Override
-    public boolean getTypingStatus(String channelID) {
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return false;
-        }
-        
-        IChannel channel = getChannelByID(channelID);
-        if (channel == null) {
-            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
-            return false;
-        }
-    
-        return channel.getTypingStatus();
-    }
-    
-    @Override
-    public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) {
-        IChannel channel = getChannelByID(channelID);
-        if (channel == null) {
-            Discord4J.LOGGER.error("Channel id " +  channelID + " doesn't exist!");
-            return null;
-        }
-        
-        return channel.createInvite(maxAge, maxUses, temporary, useXkcdPass);
-    }
-    
-    @Override
-    public IInvite getInviteForCode(String code) {
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return null;
-        }
-        
-        try {
-            InviteJSONResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.INVITE + code,
+		IUser u = null;
+		for (IGuild guild : guildList) {
+			if (null == u) {
+				u = guild.getUserByID(userID);
+			}
+		}
+		
+		return u;
+	}
+	
+	@Override
+	public IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception {
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return null;
+		}
+		
+		for (IPrivateChannel channel : privateChannels) {
+			if (channel.getRecipient().getID().equalsIgnoreCase(user.getID())) {
+				return channel;
+			}
+		}
+		
+		try {
+			PrivateChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
+					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
+					new BasicNameValuePair("authorization", this.token),
+					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
+			
+			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
+			privateChannels.add(channel);
+			return channel;
+		} catch (HTTP403Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public void toggleTypingStatus(String channelID) {
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return;
+		}
+		
+		IChannel channel = getChannelByID(channelID);
+		if (channel == null) {
+			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
+			return;
+		}
+		
+		channel.toggleTypingStatus();
+	}
+	
+	@Override
+	public boolean getTypingStatus(String channelID) {
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return false;
+		}
+		
+		IChannel channel = getChannelByID(channelID);
+		if (channel == null) {
+			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
+			return false;
+		}
+		
+		return channel.getTypingStatus();
+	}
+	
+	@Override
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) {
+		IChannel channel = getChannelByID(channelID);
+		if (channel == null) {
+			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
+			return null;
+		}
+		
+		return channel.createInvite(maxAge, maxUses, temporary, useXkcdPass);
+	}
+	
+	@Override
+	public IInvite getInviteForCode(String code) {
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return null;
+		}
+		
+		try {
+			InviteJSONResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.INVITE+code,
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
-            
-            return DiscordUtils.getInviteFromJSON(this, response);
-        } catch (HTTP403Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
-    @Override
-    public IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception {
-        if (!isReady()) {
-            Discord4J.LOGGER.error("Bot has not signed in yet!");
-            return null;
-        }
-        
-        if (name == null || name.length() < 2 || name.length() > 100)
-            throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-        try {
-            ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS + guild.getID() + "/channels",
+			
+			return DiscordUtils.getInviteFromJSON(this, response);
+		} catch (HTTP403Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@Override
+	public IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception {
+		if (!isReady()) {
+			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			return null;
+		}
+		
+		if (name == null || name.length() < 2 || name.length() > 100)
+			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
+		try {
+			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS+guild.getID()+"/channels",
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text"))),
 					new BasicNameValuePair("authorization", this.token),
 					new BasicNameValuePair("content-type", "application/json")),
 					ChannelResponse.class);
-            
-            Channel channel = new Channel(this, response.name, response.id, guild, null, response.position);
-            ((Guild) guild).addChannel(channel);
-            
-            return channel;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+			
+			Channel channel = new Channel(this, response.name, response.id, guild, null, response.position);
+			((Guild) guild).addChannel(channel);
+			
+			return channel;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

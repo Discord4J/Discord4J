@@ -11,7 +11,7 @@ public abstract class Event {
 	
 	/**
 	 * Gets the client instance this event was fired from.
-	 * 
+	 *
 	 * @return The client instance.
 	 */
 	public IDiscordClient getClient() {

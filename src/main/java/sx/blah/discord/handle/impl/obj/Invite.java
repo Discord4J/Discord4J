@@ -44,13 +44,13 @@ public class Invite implements IInvite {
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
-
+	
 	public Invite(IDiscordClient client, String inviteCode, String xkcdPass) {
 		this.client = client;
 		this.inviteCode = inviteCode;
 		this.xkcdPass = xkcdPass;
 	}
-
+	
 	@Override
 	public String getInviteCode() {
 		return inviteCode;
@@ -60,11 +60,11 @@ public class Invite implements IInvite {
 	public String getXkcdPass() {
 		return xkcdPass;
 	}
-
+	
 	@Override
 	public InviteResponse accept() throws Exception {
 		if (client.isReady()) {
-			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE + inviteCode,
+			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
 			
 			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
@@ -76,16 +76,16 @@ public class Invite implements IInvite {
 			return null;
 		}
 	}
-
+	
 	@Override
 	public InviteResponse details() throws Exception {
 		if (client.isReady()) {
-			String response = Requests.GET.makeRequest(DiscordEndpoints.INVITE + inviteCode,
+			String response = Requests.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
 			
 			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
-
-			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name, 
+			
+			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
 					inviteResponse.channel.id, inviteResponse.channel.name);
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
@@ -95,7 +95,7 @@ public class Invite implements IInvite {
 	
 	@Override
 	public void delete() throws HTTP403Exception {
-		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE + inviteCode,
+		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 	

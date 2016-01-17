@@ -40,31 +40,31 @@ import java.util.List;
 
 public class Message implements IMessage {
 	
-    /**
-     * The ID of the message. Used for message updating.
-     */
-    protected final String messageID;
-
-    /**
-     * The actual message (what you see
-     * on your screen, the content).
-     */
-    protected String content;
-
+	/**
+	 * The ID of the message. Used for message updating.
+	 */
+	protected final String messageID;
+	
+	/**
+	 * The actual message (what you see
+	 * on your screen, the content).
+	 */
+	protected String content;
+	
 	/**
 	 * The User who sent the message.
 	 */
 	protected final User author;
-
-    /**
-     * The ID of the channel the message was sent in.
-     */
-    protected final Channel channel;
-
+	
 	/**
-     * The time the message was received.
-     */
-    protected LocalDateTime timestamp;
+	 * The ID of the channel the message was sent in.
+	 */
+	protected final Channel channel;
+	
+	/**
+	 * The time the message was received.
+	 */
+	protected LocalDateTime timestamp;
 	
 	/**
 	 * The list of users mentioned by this message.
@@ -80,27 +80,27 @@ public class Message implements IMessage {
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
-
-    public Message(IDiscordClient client, String messageID, String content, IUser user, IChannel channel,
+	
+	public Message(IDiscordClient client, String messageID, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, List<IUser> mentions, List<Attachment> attachments) {
-        this.client = client;
+		this.client = client;
 		this.messageID = messageID;
-        this.content = content;
-	    this.author = (User) user;
-        this.channel = (Channel) channel;
-	    this.timestamp = timestamp;
+		this.content = content;
+		this.author = (User) user;
+		this.channel = (Channel) channel;
+		this.timestamp = timestamp;
 		this.mentions = mentions;
 		this.attachments = attachments;
-    }
+	}
 	
 	@Override
 	public String getContent() {
-        return content;
-    }
+		return content;
+	}
 	
 	/**
 	 * Sets the CACHED content of the message.
-	 * 
+	 *
 	 * @param content The new message content.
 	 */
 	public void setContent(String content) {
@@ -109,7 +109,7 @@ public class Message implements IMessage {
 	
 	/**
 	 * Sets the CACHED mentions in this message.
-	 * 
+	 *
 	 * @param mentions The new mentions.
 	 */
 	public void setMentions(List<IUser> mentions) {
@@ -118,7 +118,7 @@ public class Message implements IMessage {
 	
 	/**
 	 * Sets the CACHED attachments in this message.
-	 * 
+	 *
 	 * @param attachments The new attachements.
 	 */
 	public void setAttachments(List<Attachment> attachments) {
@@ -127,8 +127,8 @@ public class Message implements IMessage {
 	
 	@Override
 	public IChannel getChannel() {
-        return channel;
-    }
+		return channel;
+	}
 	
 	@Override
 	public IUser getAuthor() {
@@ -137,12 +137,12 @@ public class Message implements IMessage {
 	
 	@Override
 	public String getID() {
-        return messageID;
-    }
+		return messageID;
+	}
 	
 	/**
 	 * Sets the CACHED version of the message timestamp.
-	 * 
+	 *
 	 * @param timestamp The timestamp.
 	 */
 	public void setTimestamp(LocalDateTime timestamp) {
@@ -163,11 +163,11 @@ public class Message implements IMessage {
 	public List<Attachment> getAttachments() {
 		return attachments;
 	}
-
-    @Override
+	
+	@Override
 	public void reply(String content) throws IOException {
-        getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
-    }
+		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
+	}
 	
 	@Override
 	public IMessage edit(String content) {
@@ -175,7 +175,7 @@ public class Message implements IMessage {
 //			content = DiscordUtils.escapeString(content);
 			
 			try {
-				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + messageID,
+				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
 						new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false)), "UTF-8"),
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
@@ -203,7 +203,7 @@ public class Message implements IMessage {
 	public void delete() {
 		if (client.isReady()) {
 			try {
-				Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + messageID,
+				Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
 						new BasicNameValuePair("authorization", client.getToken()));
 			} catch (HTTP403Exception e) {
 				Discord4J.LOGGER.error("Received 403 error attempting to delete message; is your login correct?");
@@ -215,7 +215,7 @@ public class Message implements IMessage {
 	
 	@Override
 	public void acknowledge() throws HTTP403Exception {
-		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getChannel().getID() + "/messages/" + getID() + "/ack",
+		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getChannel().getID()+"/messages/"+getID()+"/ack",
 				new BasicNameValuePair("authorization", client.getToken()));
 		channel.setLastReadMessageID(getID());
 	}

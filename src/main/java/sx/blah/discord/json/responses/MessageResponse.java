@@ -168,6 +168,7 @@ public class MessageResponse {
 			 */
 			public String url;
 		}
+		
 		//FIXME
 		public static class VideoResponse {
 			

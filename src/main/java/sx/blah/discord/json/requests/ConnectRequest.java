@@ -42,7 +42,7 @@ public class ConnectRequest {
 		public int v = 3;
 		
 		/**
-		 * The amount of users in a guild before the guild is perceived as "large" 
+		 * The amount of users in a guild before the guild is perceived as "large"
 		 */
 		public int large_threshold;
 		

@@ -28,14 +28,14 @@ import sx.blah.discord.handle.obj.IMessage;
 public class MessageSendEvent extends Event {
 	
 	private IMessage message;
-
+	
 	public MessageSendEvent(IMessage message) {
 		this.message = message;
 	}
 	
 	/**
 	 * Gets the message sent.
-	 * 
+	 *
 	 * @return The message.
 	 */
 	public IMessage getMessage() {

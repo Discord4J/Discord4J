@@ -28,14 +28,14 @@ import sx.blah.discord.handle.obj.IMessage;
 public class MentionEvent extends Event {
 	
 	private final IMessage message;
-
+	
 	public MentionEvent(IMessage message) {
 		this.message = message;
 	}
 	
 	/**
 	 * Gets the messaged which @mention'd the bot.
-	 * 
+	 *
 	 * @return The message.
 	 */
 	public IMessage getMessage() {

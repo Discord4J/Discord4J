@@ -14,18 +14,21 @@ public class ClientBuilder {
 	
 	/**
 	 * Sets the login info for the client. This is a REQUIRED step
+	 *
 	 * @param email The user's email
 	 * @param password The user's password
 	 * @return The instance of the builder
 	 */
 	public ClientBuilder withLogin(String email, String password) {
-		loginInfo = new String[] {email, password};
+		loginInfo = new String[]{email, password};
 		return this;
 	}
 	
 	/**
 	 * Creates the discord instance with the desired features
+	 *
 	 * @return The discord instance
+	 *
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
 	public IDiscordClient build() throws DiscordException {
@@ -56,7 +59,9 @@ public class ClientBuilder {
 	
 	/**
 	 * Performs {@link #build()} and logs in automatically
+	 *
 	 * @return The discord instance
+	 *
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
 	public IDiscordClient login() throws DiscordException {

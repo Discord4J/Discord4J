@@ -59,7 +59,7 @@ public class TestBot {
 	public static void main(String... args) {
 		try {
 			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
-
+			
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
 				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
@@ -99,7 +99,7 @@ public class TestBot {
 							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
 							
 							final long now = System.currentTimeMillis();
-							new Thread(() -> {
+							new Thread(()->{
 								while (!didTest.get()) {
 									if (now+MAX_TEST_TIME <= System.currentTimeMillis()) {
 										//Test timer up!
@@ -117,7 +117,9 @@ public class TestBot {
 					}
 				});
 				
-				while (!didTest.get()) {};
+				while (!didTest.get()) {
+				}
+				;
 				
 			} else { //Dev testing
 				client.login();

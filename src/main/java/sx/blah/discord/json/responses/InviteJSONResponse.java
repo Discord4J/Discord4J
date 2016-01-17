@@ -63,5 +63,5 @@ public class InviteJSONResponse {
 		 * The channel name
 		 */
 		public String name;
-	} 
+	}
 }

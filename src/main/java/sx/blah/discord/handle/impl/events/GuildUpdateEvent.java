@@ -17,7 +17,7 @@ public class GuildUpdateEvent extends Event {
 	
 	/**
 	 * Gets the unupdated guild.
-	 * 
+	 *
 	 * @return The old guild.
 	 */
 	public IGuild getOldGuild() {
@@ -26,7 +26,7 @@ public class GuildUpdateEvent extends Event {
 	
 	/**
 	 * Gets the updated guild.
-	 * 
+	 *
 	 * @return The new guild.
 	 */
 	public IGuild getNewGuild() {

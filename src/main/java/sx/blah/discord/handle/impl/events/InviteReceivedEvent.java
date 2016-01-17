@@ -30,7 +30,7 @@ public class InviteReceivedEvent extends Event {
 	
 	private final IInvite invite;
 	private final IMessage message;
-
+	
 	public InviteReceivedEvent(IInvite invite, IMessage message) {
 		this.invite = invite;
 		this.message = message;
@@ -38,7 +38,7 @@ public class InviteReceivedEvent extends Event {
 	
 	/**
 	 * Gets the invite received.
-	 * 
+	 *
 	 * @return The invite.
 	 */
 	public IInvite getInvite() {
@@ -47,7 +47,7 @@ public class InviteReceivedEvent extends Event {
 	
 	/**
 	 * Gets the message which contains the invite.
-	 * 
+	 *
 	 * @return The message.
 	 */
 	public IMessage getMessage() {

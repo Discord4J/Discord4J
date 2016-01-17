@@ -28,14 +28,14 @@ import sx.blah.discord.handle.obj.IGuild;
 public class GuildCreateEvent extends Event {
 	
 	private final IGuild guild;
-
+	
 	public GuildCreateEvent(IGuild guild) {
 		this.guild = guild;
 	}
 	
 	/**
 	 * Gets the guild involved.
-	 * 
+	 *
 	 * @return The guild.
 	 */
 	public IGuild getGuild() {

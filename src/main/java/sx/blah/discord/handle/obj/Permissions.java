@@ -3,7 +3,7 @@ package sx.blah.discord.handle.obj;
 import java.util.EnumSet;
 
 /**
- * This represents Discord permissions. 
+ * This represents Discord permissions.
  */
 public enum Permissions {
 	
@@ -108,7 +108,7 @@ public enum Permissions {
 	
 	/**
 	 * Checks whether a provided "permissions number" contains this permission.
-	 * 
+	 *
 	 * @param permissionsNumber The raw permissions number.
 	 * @return True if the user has this permission, false if otherwise.
 	 */
@@ -123,7 +123,7 @@ public enum Permissions {
 	
 	/**
 	 * Generates a set of Permissions represented by the give raw permissions number.
-	 * 
+	 *
 	 * @param permissionsNumber The raw permissions number.
 	 * @return The set of permissions represented by the number.
 	 */
@@ -140,7 +140,7 @@ public enum Permissions {
 	
 	/**
 	 * Generates a raw permissions number for the provided set of permissions.
-	 * 
+	 *
 	 * @param permissions The permissions.
 	 * @return The raw permissions number.
 	 */

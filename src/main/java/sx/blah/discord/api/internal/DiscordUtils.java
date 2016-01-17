@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 public class DiscordUtils {
 	
 	/**
-     * Re-usable instance of Gson.
-     */
+	 * Re-usable instance of Gson.
+	 */
 	public static final Gson GSON = new GsonBuilder().serializeNulls().create();
 	
 	/**
@@ -39,8 +39,8 @@ public class DiscordUtils {
 	 */
 	private static final Pattern urlPattern = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
-					+ "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
-					+ "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
+					+"(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
+					+"[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 	
 	/**
@@ -48,17 +48,16 @@ public class DiscordUtils {
 	 *
 	 * @param client The discord client to use
 	 * @param channel The channel to get messages from.
-	 * 
 	 * @throws IOException
 	 */
 	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP403Exception {
-		String response = Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages?limit=50",
+		String response = Requests.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages?limit=50",
 				new BasicNameValuePair("authorization", client.getToken()));
 		MessageResponse[] messages = GSON.fromJson(response, MessageResponse[].class);
 		
 		for (MessageResponse message : messages) {
 			channel.addMessage(new Message(client, message.id,
-					message.content, client.getUserByID(message.author.id), channel, 
+					message.content, client.getUserByID(message.author.id), channel,
 					convertFromTimestamp(message.timestamp), getMentionsFromJSON(client, message), getAttachmentsFromJSON(message)));
 		}
 	}
@@ -98,9 +97,10 @@ public class DiscordUtils {
 	
 	/**
 	 * Escapes a string to ensure that the Discord websocket receives it correctly.
-	 * 
+	 *
 	 * @param string The string to escape
 	 * @return The escaped string
+	 *
 	 * @deprecated No longer required for discord to handle special characters
 	 */
 	@Deprecated
@@ -127,7 +127,7 @@ public class DiscordUtils {
 	
 	/**
 	 * Creates a java {@link Invite} object for a json response.
-	 * 
+	 *
 	 * @param client The discord client to use.
 	 * @param json The json response to use.
 	 * @return The java invite object.
@@ -138,7 +138,7 @@ public class DiscordUtils {
 	
 	/**
 	 * Gets the users mentioned from a message json object.
-	 * 
+	 *
 	 * @param client The discord client to use.
 	 * @param json The json response to use.
 	 * @return The list of mentioned users.
@@ -157,7 +157,7 @@ public class DiscordUtils {
 	
 	/**
 	 * Gets the attachments on a message.
-	 * 
+	 *
 	 * @param json The json response to use.
 	 * @return The attached messages.
 	 */
@@ -172,7 +172,7 @@ public class DiscordUtils {
 	
 	/**
 	 * Creates a guild object from a json response.
-	 * 
+	 *
 	 * @param client The discord client.
 	 * @param json The json response.
 	 * @return The guild object.
@@ -314,7 +314,7 @@ public class DiscordUtils {
 			return message;
 		} else
 			return new Message(client, json.id, json.content, client.getUserByID(json.author.id),
-					channel, convertFromTimestamp(json.timestamp), getMentionsFromJSON(client, json), 
+					channel, convertFromTimestamp(json.timestamp), getMentionsFromJSON(client, json),
 					getAttachmentsFromJSON(json));
 	}
 	
