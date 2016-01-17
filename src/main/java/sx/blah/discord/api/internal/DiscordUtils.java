@@ -257,6 +257,7 @@ public class DiscordUtils {
 			if (roleObj != null && !user.getRolesForGuild(guild.getID()).contains(roleObj))
 				user.addRole(guild.getID(), roleObj);
 		}
+		user.addRole(guild.getID(), guild.getRoleForId(guild.getID())); //@everyone role
 		return user;
 	}
 	

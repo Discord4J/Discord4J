@@ -35,6 +35,7 @@ import sx.blah.discord.util.MessageBuilder;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -187,10 +188,21 @@ public class TestBot {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						} else if (m.getContent().startsWith(".test")) {
+						} else if (m.getContent().startsWith(".permissions")) {
+							if (m.getMentions().size() < 1)
+								return;
+							StringJoiner roleJoiner = new StringJoiner(", ");
+							StringJoiner permissionsJoiner = new StringJoiner(", ");
+							for (IRole role : m.getMentions().get(0).getRolesForGuild(m.getChannel().getGuild().getID())) {
+								for (Permissions permissions : role.getPermissions()) {
+									permissionsJoiner.add(permissions.toString());
+								}
+								roleJoiner.add(role.getName()+" ("+permissionsJoiner.toString()+")");
+								permissionsJoiner = new StringJoiner(", ");
+							}
 							try {
-								client.createChannel(m.getChannel().getGuild(), "Test");
-							} catch (Exception e) {
+								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
+							} catch (IOException e) {
 								e.printStackTrace();
 							}
 						}

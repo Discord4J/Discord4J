@@ -343,6 +343,8 @@ public class DiscordWS extends WebSocketClient {
 			for (String role : event.roles)
 				user.addRole(guild.getID(), guild.getRoleForId(role));
 			
+			user.addRole(guild.getID(), guild.getRoleForId(guild.getID())); //@everyone role
+			
 			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild.getID()), user));
 		}
 	}

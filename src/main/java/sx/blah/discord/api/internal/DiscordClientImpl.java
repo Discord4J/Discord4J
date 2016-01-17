@@ -316,14 +316,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
 	@Override
 	public IUser getUserByID(String userID) {
-		IUser u = null;
+		IUser user = null;
 		for (IGuild guild : guildList) {
-			if (null == u) {
-				u = guild.getUserByID(userID);
+			if (null == user) {
+				user = guild.getUserByID(userID);
 			}
 		}
 		
-		return u;
+		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user;
 	}
 	
 	@Override
