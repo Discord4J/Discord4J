@@ -1,22 +1,3 @@
-/*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2015
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
@@ -36,6 +17,7 @@ import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Message implements IMessage {
@@ -69,7 +51,7 @@ public class Message implements IMessage {
 	/**
 	 * The list of users mentioned by this message.
 	 */
-	protected List<IUser> mentions;
+	protected List<String> mentions;
 	
 	/**
 	 * The attachments, if any, on the message.
@@ -77,12 +59,17 @@ public class Message implements IMessage {
 	protected List<Attachment> attachments;
 	
 	/**
+	 * Whether the 
+	 */
+	protected boolean mentionsEveryone;
+	
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
 	
 	public Message(IDiscordClient client, String messageID, String content, IUser user, IChannel channel,
-				   LocalDateTime timestamp, List<IUser> mentions, List<Attachment> attachments) {
+				   LocalDateTime timestamp, boolean mentionsEveryone, List<String> mentions, List<Attachment> attachments) {
 		this.client = client;
 		this.messageID = messageID;
 		this.content = content;
@@ -91,6 +78,7 @@ public class Message implements IMessage {
 		this.timestamp = timestamp;
 		this.mentions = mentions;
 		this.attachments = attachments;
+		this.mentionsEveryone = mentionsEveryone;
 	}
 	
 	@Override
@@ -112,7 +100,7 @@ public class Message implements IMessage {
 	 *
 	 * @param mentions The new mentions.
 	 */
-	public void setMentions(List<IUser> mentions) {
+	public void setMentions(List<String> mentions) {
 		this.mentions = mentions;
 	}
 	
@@ -156,7 +144,12 @@ public class Message implements IMessage {
 	
 	@Override
 	public List<IUser> getMentions() {
-		return mentions;
+		if (mentionsEveryone)
+			return channel.getGuild().getUsers();
+		List<IUser> mentionedUsers = new ArrayList<>();
+		for (String mentioned : mentions)
+			mentionedUsers.add(client.getUserByID(mentioned));
+		return mentionedUsers;
 	}
 	
 	@Override
@@ -180,11 +173,8 @@ public class Message implements IMessage {
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 				
-				IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentions, attachments);
-				this.content = response.content;
-				this.timestamp = DiscordUtils.convertFromTimestamp(response.edited_timestamp);
-				this.mentions = DiscordUtils.getMentionsFromJSON(client, response);
-				this.attachments = DiscordUtils.getAttachmentsFromJSON(response);
+				IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentionsEveryone, mentions, attachments);
+				DiscordUtils.getMessageFromJSON(client, channel, response);
 				//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 				// the event chain goes like this:
 				//Original message edited to null, then the null message edited to the new content
@@ -197,6 +187,29 @@ public class Message implements IMessage {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 		}
 		return this;
+	}
+	
+	/**
+	 * Gets the raw list of mentioned user ids.
+	 * 
+	 * @return Mentioned user list.
+	 */
+	public List<String> getRawMentions() {
+		return mentions;
+	}
+	
+	@Override
+	public boolean mentionsEveryone() {
+		return mentionsEveryone;
+	}
+	
+	/**
+	 * CACHES whether the message mentions everyone.
+	 * 
+	 * @param mentionsEveryone True to mention everyone false if otherwise.
+	 */
+	public void setMentionsEveryone(boolean mentionsEveryone) {
+		this.mentionsEveryone = mentionsEveryone;
 	}
 	
 	@Override

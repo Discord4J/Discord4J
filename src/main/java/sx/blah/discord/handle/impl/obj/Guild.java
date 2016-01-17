@@ -209,7 +209,7 @@ public class Guild implements IGuild {
 	@Override
 	public IRole getRoleForId(String id) {
 		for (IRole role : roles) {
-			if (role.getId().equals(id))
+			if (role.getID().equals(id))
 				return role;
 		}
 		return null;

@@ -101,7 +101,7 @@ public class Role implements IRole {
 	}
 	
 	@Override
-	public String getId() {
+	public String getID() {
 		return id;
 	}
 	

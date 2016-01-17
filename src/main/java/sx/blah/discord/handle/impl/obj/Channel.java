@@ -31,6 +31,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.requests.ChannelEditRequest;
 import sx.blah.discord.json.requests.InviteRequest;
 import sx.blah.discord.json.requests.MessageRequest;
@@ -234,12 +235,7 @@ public class Channel implements IChannel {
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 				
-				String time = response.timestamp;
-				String messageID = response.id;
-				
-				IMessage message = new Message(client, messageID, content, client.getOurUser(), this,
-						DiscordUtils.convertFromTimestamp(time), DiscordUtils.getMentionsFromJSON(client, response),
-						DiscordUtils.getAttachmentsFromJSON(response));
+				IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
 				addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
 				client.getDispatcher().dispatch(new MessageSendEvent(message));
 				return message;
@@ -263,9 +259,7 @@ public class Channel implements IChannel {
 			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
 					DiscordEndpoints.CHANNELS+id+"/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
-			IMessage message = new Message(client, response.id, response.content, client.getOurUser(), this,
-					DiscordUtils.convertFromTimestamp(response.timestamp), DiscordUtils.getMentionsFromJSON(client, response),
-					DiscordUtils.getAttachmentsFromJSON(response));
+			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
 			addMessage(message);
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
@@ -421,7 +415,7 @@ public class Channel implements IChannel {
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
 		EnumSet<Permissions> base = role.getPermissions();
-		PermissionOverride override = getRoleOverrides().get(role.getId());
+		PermissionOverride override = getRoleOverrides().get(role.getID());
 		
 		if (override == null)
 			return base;
@@ -456,6 +450,39 @@ public class Channel implements IChannel {
 	 */
 	public void addRoleOverride(String roleId, PermissionOverride override) {
 		roleOverrides.put(roleId, override);
+	}
+	
+	@Override
+	public void removePermissionsOverride(String id) throws HTTP403Exception {
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
+				new BasicNameValuePair("authorization", client.getToken()));
+		if (roleOverrides.containsKey(id)) {
+			roleOverrides.remove(id);
+		} else {
+			userOverrides.remove(id);
+		}
+	}
+	
+	@Override
+	public void overrrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+		overridePermissions("role", roleID, toAdd, toRemove);
+	}
+	
+	@Override
+	public void overrrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+		overridePermissions("member", userID, toAdd, toRemove);
+	}
+	
+	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+		try {
+			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
+					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id, 
+							Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)))),
+							new BasicNameValuePair("authorization", client.getToken()),
+							new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

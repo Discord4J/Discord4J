@@ -9,6 +9,7 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
@@ -58,7 +59,7 @@ public class DiscordUtils {
 		for (MessageResponse message : messages) {
 			channel.addMessage(new Message(client, message.id,
 					message.content, client.getUserByID(message.author.id), channel,
-					convertFromTimestamp(message.timestamp), getMentionsFromJSON(client, message), getAttachmentsFromJSON(message)));
+					convertFromTimestamp(message.timestamp), message.mention_everyone, getMentionsFromJSON(client, message), getAttachmentsFromJSON(message)));
 		}
 	}
 	
@@ -69,6 +70,9 @@ public class DiscordUtils {
 	 * @return The java object representing the timestamp.
 	 */
 	public static LocalDateTime convertFromTimestamp(String time) {
+		if (time == null) {
+			return LocalDateTime.now();
+		}
 		return LocalDateTime.parse(time.split("\\+")[0]).atZone(ZoneId.of("UTC+00:00")).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
 	}
 	
@@ -143,14 +147,11 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The list of mentioned users.
 	 */
-	public static List<IUser> getMentionsFromJSON(IDiscordClient client, MessageResponse json) {
-		List<IUser> mentions = new ArrayList<>();
-		if (json.mention_everyone) {
-			mentions = client.getChannelByID(json.channel_id).getGuild().getUsers();
-		} else {
+	public static List<String> getMentionsFromJSON(IDiscordClient client, MessageResponse json) {
+		List<String> mentions = new ArrayList<>();
+		if (json.mentions != null)
 			for (UserResponse response : json.mentions)
-				mentions.add(client.getUserByID(response.id));
-		}
+				mentions.add(response.id);
 		
 		return mentions;
 	}
@@ -163,9 +164,10 @@ public class DiscordUtils {
 	 */
 	public static List<IMessage.Attachment> getAttachmentsFromJSON(MessageResponse json) {
 		List<IMessage.Attachment> attachments = new ArrayList<>();
-		for (MessageResponse.AttachmentResponse response : json.attachments) {
-			attachments.add(new IMessage.Attachment(response.filename, response.size, response.id, response.url));
-		}
+		if (json.attachments != null)
+			for (MessageResponse.AttachmentResponse response : json.attachments) {
+				attachments.add(new IMessage.Attachment(response.filename, response.size, response.id, response.url));
+			}
 		
 		return attachments;
 	}
@@ -204,7 +206,7 @@ public class DiscordUtils {
 			
 			for (IUser user : guild.getUsers()) { //Removes all deprecated roles
 				for (IRole role : user.getRolesForGuild(guild.getID())) {
-					if (guild.getRoleForId(role.getId()) == null) {
+					if (guild.getRoleForId(role.getID()) == null) {
 						user.getRolesForGuild(guild.getID()).remove(role);
 					}
 				}
@@ -289,6 +291,7 @@ public class DiscordUtils {
 				Discord4J.LOGGER.error("No permission for the private channel for \"{}\". Are you logged in properly?", channel.getRecipient().getName());
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
+				e.printStackTrace();
 			}
 		}
 		
@@ -310,12 +313,13 @@ public class DiscordUtils {
 		if ((message = (Message) channel.getMessageByID(json.id)) != null) {
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setContent(json.content);
+			message.setMentionsEveryone(json.mention_everyone);
 			message.setMentions(getMentionsFromJSON(client, json));
 			message.setTimestamp(convertFromTimestamp(json.edited_timestamp == null ? json.timestamp : json.edited_timestamp));
 			return message;
 		} else
 			return new Message(client, json.id, json.content, client.getUserByID(json.author.id),
-					channel, convertFromTimestamp(json.timestamp), getMentionsFromJSON(client, json),
+					channel, convertFromTimestamp(json.timestamp), json.mention_everyone, getMentionsFromJSON(client, json),
 					getAttachmentsFromJSON(json));
 	}
 	
@@ -336,7 +340,7 @@ public class DiscordUtils {
 			channel.setTopic(json.topic);
 			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
 			HashMap<String, IChannel.PermissionOverride> roleOverrides = new HashMap<>();
-			for (ChannelResponse.PermissionOverwriteResponse overrides : json.permission_overwrites) {
+			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				if (overrides.type.equalsIgnoreCase("role")) {
 					if (channel.getRoleOverrides().containsKey(overrides.id)) {
 						roleOverrides.put(overrides.id, channel.getRoleOverrides().get(overrides.id));
@@ -370,9 +374,10 @@ public class DiscordUtils {
 				Discord4J.LOGGER.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", json.name, guild.getName());
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", json.name, guild.getName(), e.getClass().getSimpleName());
+				e.printStackTrace();
 			}
 			
-			for (ChannelResponse.PermissionOverwriteResponse overrides : json.permission_overwrites) {
+			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
 						Permissions.getAllPermissionsForNumber(overrides.allow),
 						Permissions.getAllPermissionsForNumber(overrides.deny));

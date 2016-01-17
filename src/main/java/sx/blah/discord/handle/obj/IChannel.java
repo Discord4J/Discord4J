@@ -204,6 +204,37 @@ public interface IChannel {
 	EnumSet<Permissions> getModifiedPermissions(IRole role);
 	
 	/**
+	 * Removes a permissions override on this channel.
+	 * 
+	 * @param id The id of the override to remove, this is either a user id or role id.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void removePermissionsOverride(String id) throws HTTP403Exception;
+	
+	/**
+	 * Creates/edits permission overrides for this channel.
+	 * 
+	 * @param roleID The role id of the role to create/edit the permission overrides for.
+	 * @param toAdd The permissions to add.
+	 * @param toRemove The permissions to remove.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void overrrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception;
+	
+	/**
+	 * Creates/edits permission overrides for this channel.
+	 *
+	 * @param userID The user id of the user to create/edit the permission overrides for.
+	 * @param toAdd The permissions to add.
+	 * @param toRemove The permissions to remove.
+	 *
+	 * @throws HTTP403Exception
+	 */
+	void overrrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception;
+	
+	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
 	class PermissionOverride {

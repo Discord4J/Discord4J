@@ -77,6 +77,13 @@ public interface IMessage {
 	IMessage edit(String content);
 	
 	/**
+	 * Returns whether this message mentions everyone.
+	 * 
+	 * @return True if it mentions everyone, false if otherwise.
+	 */
+	boolean mentionsEveryone();
+	
+	/**
 	 * Deletes the message.
 	 */
 	void delete();

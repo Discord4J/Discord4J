@@ -41,7 +41,7 @@ public interface IRole {
 	 *
 	 * @return The role id.
 	 */
-	String getId();
+	String getID();
 	
 	/**
 	 * Gets whether the role is hoisted–meaning that it is displayed separately from the @everyone role.

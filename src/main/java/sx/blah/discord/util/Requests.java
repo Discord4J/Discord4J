@@ -52,7 +52,11 @@ public enum Requests {
 	/**
 	 * Used to send PATCH requests
 	 */
-	PATCH(HttpPatch.class);
+	PATCH(HttpPatch.class),
+	/**
+	 * Used to send PUT requests
+	 */
+	PUT(HttpPut.class);
 	/**
 	 * The user-agent, as per @Jake's request
 	 */

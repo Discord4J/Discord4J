@@ -30,10 +30,12 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -194,6 +196,7 @@ public class TestBot {
 							StringJoiner roleJoiner = new StringJoiner(", ");
 							StringJoiner permissionsJoiner = new StringJoiner(", ");
 							for (IRole role : m.getMentions().get(0).getRolesForGuild(m.getChannel().getGuild().getID())) {
+								Discord4J.LOGGER.info("{}", role.getID());
 								for (Permissions permissions : role.getPermissions()) {
 									permissionsJoiner.add(permissions.toString());
 								}
@@ -201,8 +204,15 @@ public class TestBot {
 								permissionsJoiner = new StringJoiner(", ");
 							}
 							try {
+								Discord4J.LOGGER.info("{}", m.getAuthor().getID());
 								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
 							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						} else if (m.getContent().startsWith(".test")) {
+							try {
+								m.getChannel().overrrideUserPermissions(m.getMentions().get(0).getID(), EnumSet.noneOf(Permissions.class), EnumSet.of(Permissions.CREATE_INVITE));
+							} catch (HTTP403Exception e) {
 								e.printStackTrace();
 							}
 						}
