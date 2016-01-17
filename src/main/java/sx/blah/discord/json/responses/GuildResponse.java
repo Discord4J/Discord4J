@@ -187,7 +187,7 @@ public class GuildResponse {
 	/**
 	 * Represents a guild member
 	 */
-	public class MemberResponse {
+	public static class MemberResponse {
 		
 		/**
 		 * The user this member object represents
@@ -213,5 +213,10 @@ public class GuildResponse {
 		 * The timestamp for when the user joined the guild
 		 */
 		public String joined_at;
+		
+		public MemberResponse(UserResponse user, String[] roles) {
+			this.user = user;
+			this.roles = roles;
+		}
 	}
 }

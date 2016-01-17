@@ -78,4 +78,19 @@ public interface IGuild {
      * @return The ID of this guild.
      */
     String getID();
+    
+    /**
+     * Gets the roles contained in this guild.
+     * 
+     * @return The list of roles in the guild.
+     */
+    List<IRole> getRoles();
+    
+    /**
+     * Gets a role object for its unique id.
+     * 
+     * @param id The role id of the desired role.
+     * @return The role, or null if not found.
+     */
+    IRole getRoleForId(String id);
 }

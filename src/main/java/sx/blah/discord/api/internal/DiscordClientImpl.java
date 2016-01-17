@@ -28,7 +28,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.Channel;
 import sx.blah.discord.handle.impl.obj.Guild;
-import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
@@ -346,7 +345,7 @@ public final class DiscordClientImpl implements IDiscordClient {
                     new BasicNameValuePair("authorization", this.token),
                     new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
             
-            PrivateChannel channel = new PrivateChannel(this, user, response.id);
+            IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
             privateChannels.add(channel);
             return channel;
         } catch (HTTP403Exception e) {

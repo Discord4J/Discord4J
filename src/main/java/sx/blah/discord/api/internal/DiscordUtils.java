@@ -4,27 +4,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.obj.Channel;
-import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.impl.obj.Invite;
-import sx.blah.discord.handle.impl.obj.Message;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.impl.obj.User;
-import sx.blah.discord.json.responses.InviteJSONResponse;
-import sx.blah.discord.json.responses.MessageResponse;
-import sx.blah.discord.json.responses.UserResponse;
+import sx.blah.discord.handle.impl.obj.*;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.requests.GuildMembersRequest;
+import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
-import sx.blah.discord.handle.obj.Presences;
 import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,7 +59,7 @@ public class DiscordUtils {
 		for (MessageResponse message : messages) {
 			channel.addMessage(new Message(client, message.id,
 					message.content, client.getUserByID(message.author.id), channel, 
-					convertFromTimestamp(message.timestamp), mentionsFromJSON(client, message), attachmentsFromJSON(message)));
+					convertFromTimestamp(message.timestamp), getMentionsFromJSON(client, message), getAttachmentsFromJSON(message)));
 		}
 	}
 	
@@ -80,19 +76,24 @@ public class DiscordUtils {
 	/**
 	 * Returns a user from raw JSON data.
 	 */
-	public static IUser constructUserFromJSON(IDiscordClient client, String user) {
+	public static IUser getUserFromJSON(IDiscordClient client, String user) {
 		UserResponse response = GSON.fromJson(user, UserResponse.class);
 		
-		return constructUserFromJSON(client, response);
+		return getUserFromJSON(client, response);
 	}
 	
 	/**
 	 * Returns a user from the java form of the raw JSON data.
 	 */
-	public static User constructUserFromJSON(IDiscordClient client, UserResponse response) {
-		User ourUser = new User(client, response.username, response.id, response.discriminator, response.avatar, Presences.OFFLINE);
-		
-		return ourUser;
+	public static User getUserFromJSON(IDiscordClient client, UserResponse response) {
+		User user;
+		if ((user = (User) client.getUserByID(response.id)) != null) {
+			user.setAvatar(response.avatar);
+			user.setName(response.username);
+		} else {
+			user = new User(client, response.username, response.id, response.discriminator, response.avatar, Presences.OFFLINE);
+		}
+		return user;
 	}
 	
 	/**
@@ -142,7 +143,7 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The list of mentioned users.
 	 */
-	public static List<IUser> mentionsFromJSON(IDiscordClient client, MessageResponse json) {
+	public static List<IUser> getMentionsFromJSON(IDiscordClient client, MessageResponse json) {
 		List<IUser> mentions = new ArrayList<>();
 		if (json.mention_everyone) {
 			mentions = client.getChannelByID(json.channel_id).getGuild().getUsers();
@@ -160,12 +161,232 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The attached messages.
 	 */
-	public static List<IMessage.Attachment> attachmentsFromJSON(MessageResponse json) {
+	public static List<IMessage.Attachment> getAttachmentsFromJSON(MessageResponse json) {
 		List<IMessage.Attachment> attachments = new ArrayList<>();
 		for (MessageResponse.AttachmentResponse response : json.attachments) {
 			attachments.add(new IMessage.Attachment(response.filename, response.size, response.id, response.url));
 		}
 		
 		return attachments;
+	}
+	
+	/**
+	 * Creates a guild object from a json response.
+	 * 
+	 * @param client The discord client.
+	 * @param json The json response.
+	 * @return The guild object.
+	 */
+	public static IGuild getGuildFromJSON(IDiscordClient client, GuildResponse json) {
+		Guild guild;
+		
+		if ((guild = (Guild) client.getGuildByID(json.id)) != null) {
+			guild.setIcon(json.icon);
+			guild.setName(json.name);
+			
+			List<IRole> newRoles = new ArrayList<>();
+			for (GuildResponse.RoleResponse roleResponse : json.roles) {
+				if (guild.getRoleForId(roleResponse.id) != null) {
+					Role role = (Role) guild.getRoleForId(roleResponse.id);
+					role.setColor(roleResponse.color);
+					role.setHoist(roleResponse.hoist);
+					role.setName(roleResponse.name);
+					role.setPermissions(roleResponse.permissions);
+					role.setPosition(roleResponse.position);
+					newRoles.add(role);
+				} else {
+					newRoles.add(new Role(roleResponse.position, roleResponse.permissions, roleResponse.name,
+							roleResponse.managed, roleResponse.id, roleResponse.hoist, roleResponse.color));
+				}
+			}
+			guild.getRoles().clear();
+			guild.getRoles().addAll(newRoles);
+			
+			for (IUser user : guild.getUsers()) { //Removes all deprecated roles
+				for (IRole role : user.getRolesForGuild(guild.getID())) {
+					if (guild.getRoleForId(role.getId()) == null) {
+						user.getRolesForGuild(guild.getID()).remove(role);
+					}
+				}
+			}
+		} else {
+			guild = new Guild(client, json.name, json.id, json.icon, json.owner_id);
+			
+			for (GuildResponse.RoleResponse roleResponse : json.roles) {
+				guild.addRole(new Role(roleResponse.position, roleResponse.permissions, roleResponse.name,
+						roleResponse.managed, roleResponse.id, roleResponse.hoist, roleResponse.color));
+			}
+			
+			for (GuildResponse.MemberResponse member : json.members) {
+				guild.addUser(getUserFromGuildMemberResponse(client, guild, member));
+			}
+			
+			if (json.large) { //The guild is large, we have to send a request to get the offline users
+				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new GuildMembersRequest(json.id)));
+			}
+			
+			for (PresenceResponse presence : json.presences) {
+				User user = (User) guild.getUserByID(presence.user.id);
+				user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
+				user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
+			}
+			
+			for (ChannelResponse channelResponse : json.channels) {
+				String channelType = channelResponse.type;
+				if ("text".equalsIgnoreCase(channelType)) {
+					guild.addChannel(getChannelFromJSON(client, guild, channelResponse));
+				}
+			}
+		}
+		
+		return guild;
+	}
+	
+	/**
+	 * Creates a user object from a guild member json response.
+	 *
+	 * @param client The discord client.
+	 * @param guild The guild the member belongs to.
+	 * @param json The json response.
+	 * @return The user object.
+	 */
+	public static IUser getUserFromGuildMemberResponse(IDiscordClient client, IGuild guild, GuildResponse.MemberResponse json) {
+		User user = getUserFromJSON(client, json.user);
+		for (String role : json.roles) {
+			Role roleObj = (Role) guild.getRoleForId(role);
+			if (roleObj != null && !user.getRolesForGuild(guild.getID()).contains(roleObj))
+				user.addRole(guild.getID(), roleObj);
+		}
+		return user;
+	}
+	
+	/**
+	 * Creates a private channel object from a json response.
+	 *
+	 * @param client The discord client.
+	 * @param json The json response.
+	 * @return The private channel object.
+	 */
+	public static IPrivateChannel getPrivateChannelFromJSON(IDiscordClient client, PrivateChannelResponse json) {
+		String id = json.id;
+		User recipient = (User) client.getUserByID(id);
+		if (recipient == null)
+			recipient = getUserFromJSON(client, json.recipient);
+		
+		PrivateChannel channel = null;
+		for (IPrivateChannel privateChannel : ((DiscordClientImpl) client).privateChannels) {
+			if (privateChannel.getRecipient().equals(recipient)) {
+				channel = (PrivateChannel) privateChannel;
+				break;
+			}
+		}
+		if (channel == null) {
+			channel = new PrivateChannel(client, recipient, id);
+			try {
+				DiscordUtils.getChannelMessages(client, channel);
+			} catch (HTTP403Exception e) {
+				Discord4J.LOGGER.error("No permission for the private channel for \"{}\". Are you logged in properly?", channel.getRecipient().getName());
+			} catch (Exception e) {
+				Discord4J.LOGGER.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
+			}
+		}
+		
+		channel.setLastReadMessageID(json.last_message_id);
+		
+		return channel;
+	}
+	
+	/**
+	 * Creates a message object from a json response.
+	 *
+	 * @param client The discord client.
+	 * @param channel The channel.
+	 * @param json The json response.
+	 * @return The message object.
+	 */
+	public static IMessage getMessageFromJSON(IDiscordClient client, IChannel channel, MessageResponse json) {
+		Message message;
+		if ((message = (Message) channel.getMessageByID(json.id)) != null) {
+			message.setAttachments(getAttachmentsFromJSON(json));
+			message.setContent(json.content);
+			message.setMentions(getMentionsFromJSON(client, json));
+			message.setTimestamp(convertFromTimestamp(json.edited_timestamp == null ? json.timestamp : json.edited_timestamp));
+			return message;
+		} else
+			return new Message(client, json.id, json.content, client.getUserByID(json.author.id),
+					channel, convertFromTimestamp(json.timestamp), getMentionsFromJSON(client, json), 
+					getAttachmentsFromJSON(json));
+	}
+	
+	/**
+	 * Creates a channel object from a json response.
+	 *
+	 * @param client The discord client.
+	 * @param guild the guild.
+	 * @param json The json response.
+	 * @return The channel object.
+	 */
+	public static IChannel getChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) {
+		Channel channel;
+		
+		if ((channel = (Channel) guild.getChannelByID(json.id)) != null) {
+			channel.setName(json.name);
+			channel.setPosition(json.position);
+			channel.setTopic(json.topic);
+			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
+			HashMap<String, IChannel.PermissionOverride> roleOverrides = new HashMap<>();
+			for (ChannelResponse.PermissionOverwriteResponse overrides : json.permission_overwrites) {
+				if (overrides.type.equalsIgnoreCase("role")) {
+					if (channel.getRoleOverrides().containsKey(overrides.id)) {
+						roleOverrides.put(overrides.id, channel.getRoleOverrides().get(overrides.id));
+					} else {
+						roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
+								Permissions.getAllPermissionsForNumber(overrides.allow),
+								Permissions.getAllPermissionsForNumber(overrides.deny)));
+					}
+				} else if (overrides.type.equalsIgnoreCase("member")) {
+					if (channel.getUserOverrides().containsKey(overrides.id)) {
+						userOverrides.put(overrides.id, channel.getUserOverrides().get(overrides.id));
+					} else {
+						userOverrides.put(overrides.id, new IChannel.PermissionOverride(
+								Permissions.getAllPermissionsForNumber(overrides.allow),
+								Permissions.getAllPermissionsForNumber(overrides.deny)));
+					}
+				} else {
+					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+				}
+			}
+			channel.getUserOverrides().clear();
+			channel.getUserOverrides().putAll(userOverrides);
+			channel.getRoleOverrides().clear();
+			channel.getRoleOverrides().putAll(roleOverrides);
+		} else {
+			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position);
+			
+			try {
+				DiscordUtils.getChannelMessages(client, channel);
+			} catch (HTTP403Exception e) {
+				Discord4J.LOGGER.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", json.name, guild.getName());
+			} catch (Exception e) {
+				Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", json.name, guild.getName(), e.getClass().getSimpleName());
+			}
+			
+			for (ChannelResponse.PermissionOverwriteResponse overrides : json.permission_overwrites) {
+				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
+						Permissions.getAllPermissionsForNumber(overrides.allow),
+						Permissions.getAllPermissionsForNumber(overrides.deny));
+				if (overrides.type.equalsIgnoreCase("role")) {
+					channel.addRoleOverride(overrides.id, override);
+				} else if (overrides.type.equalsIgnoreCase("member")) {
+					channel.addUserOverride(overrides.id, override);
+				} else {
+					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+				}
+			}
+		}
+		
+		channel.setLastReadMessageID(json.last_message_id);
+		
+		return channel;
 	}
 }

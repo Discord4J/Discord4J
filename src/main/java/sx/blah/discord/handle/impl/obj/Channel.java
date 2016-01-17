@@ -43,9 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -105,6 +103,16 @@ public class Channel implements IChannel {
      * The position of this channel in the channel list
      */
     protected int position;
+	
+	/**
+     * The permission overrides for users (key = user id)
+     */
+    protected Map<String, PermissionOverride> userOverrides;
+	
+	/**
+     * The permission overrides for roles (key = user id)
+     */
+    protected Map<String, PermissionOverride> roleOverrides;
     
 	/**
      * The client that created this object.
@@ -112,10 +120,10 @@ public class Channel implements IChannel {
     protected final IDiscordClient client;
 
     public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-        this(client, name, id, parent, topic, position, new ArrayList<>());
+        this(client, name, id, parent, topic, position, new ArrayList<>(), new HashMap<>(), new HashMap<>());
     }
 
-    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages) {
+    public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
         this.client = client;       
         this.name = name;
         this.id = id;
@@ -124,6 +132,8 @@ public class Channel implements IChannel {
         this.isPrivate = false;
         this.topic = topic;
         this.position = position;
+        this.roleOverrides = roleOverrides;
+        this.userOverrides = userOverrides;
     }
 	
 	@Override
@@ -228,8 +238,8 @@ public class Channel implements IChannel {
                 String messageID = response.id;
             
                 IMessage message = new Message(client, messageID, content, client.getOurUser(), this, 
-                        DiscordUtils.convertFromTimestamp(time), DiscordUtils.mentionsFromJSON(client, response),
-                        DiscordUtils.attachmentsFromJSON(response));
+                        DiscordUtils.convertFromTimestamp(time), DiscordUtils.getMentionsFromJSON(client, response),
+                        DiscordUtils.getAttachmentsFromJSON(response));
                 addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
                 client.getDispatcher().dispatch(new MessageSendEvent(message));
                 return message;
@@ -254,8 +264,8 @@ public class Channel implements IChannel {
                     DiscordEndpoints.CHANNELS + id + "/messages",
                     fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
             IMessage message = new Message(client, response.id, response.content, client.getOurUser(), this,
-                    DiscordUtils.convertFromTimestamp(response.timestamp), DiscordUtils.mentionsFromJSON(client, response),
-                    DiscordUtils.attachmentsFromJSON(response));
+                    DiscordUtils.convertFromTimestamp(response.timestamp), DiscordUtils.getMentionsFromJSON(client, response),
+                    DiscordUtils.getAttachmentsFromJSON(response));
             addMessage(message);
             client.getDispatcher().dispatch(new MessageSendEvent(message));
             return message;
@@ -369,6 +379,36 @@ public class Channel implements IChannel {
      */
     public void setLastReadMessageID(String lastReadMessageID) {
         this.lastReadMessageID = lastReadMessageID;
+    }
+	
+	@Override
+    public Map<String, PermissionOverride> getUserOverrides() {
+        return userOverrides;
+    }
+    
+    @Override
+    public Map<String, PermissionOverride> getRoleOverrides() {
+        return roleOverrides;
+    }
+	
+	/**
+     * CACHES a permissions override for a user in this channel.
+     * 
+     * @param userId The user the permissions override is for.
+     * @param override The permissions override.
+     */
+    public void addUserOverride(String userId, PermissionOverride override) {
+        userOverrides.put(userId, override);
+    }
+    
+    /**
+     * CACHES a permissions override for a role in this channel.
+     *
+     * @param roleId The role the permissions override is for.
+     * @param override The permissions override.
+     */
+    public void addRoleOverride(String roleId, PermissionOverride override) {
+        roleOverrides.put(roleId, override);
     }
     
     @Override 

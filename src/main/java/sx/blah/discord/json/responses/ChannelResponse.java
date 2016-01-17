@@ -11,6 +11,11 @@ public class ChannelResponse {
 	public String type;
 	
 	/**
+	 * The guild this channel belongs to.
+	 */
+	public String guild_id;
+	
+	/**
 	 * The channel topic, can be null
 	 */
 	public String topic;

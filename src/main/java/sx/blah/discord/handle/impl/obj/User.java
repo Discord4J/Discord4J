@@ -21,9 +21,13 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Presences;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 public class User implements IUser {
@@ -65,6 +69,11 @@ public class User implements IUser {
 	 * The user's avatar in URL form.
 	 */
 	protected String avatarURL;
+	
+	/**
+	 * The roles the user is a part of. (Key = guild id).
+	 */
+	protected HashMap<String, List<IRole>> roles;
     
     /**
      * The client that created this object.
@@ -79,6 +88,7 @@ public class User implements IUser {
 	    this.avatar = avatar;
 	    this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
 		this.presence = presence;
+		this.roles = new HashMap<>();
     }
 
 	@Override
@@ -157,7 +167,26 @@ public class User implements IUser {
 		return discriminator;
 	}
 	
-    @Override 
+	@Override
+	public List<IRole> getRolesForGuild(String guildID) {
+		return roles.getOrDefault(guildID, new ArrayList<>());
+	}
+	
+	/**
+	 * CACHES a role to the user.
+	 * 
+	 * @param guildID The guild the role is for.
+	 * @param role The role.
+	 */
+	public void addRole(String guildID, IRole role) {
+		if (!roles.containsKey(guildID)) {
+			roles.put(guildID, new ArrayList<>());
+		}
+		
+		roles.get(guildID).add(role);
+	}
+	
+	@Override 
     public String toString() {
         return mention();
     }

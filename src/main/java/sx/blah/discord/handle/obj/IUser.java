@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -62,4 +63,12 @@ public interface IUser {
 	 * @return The discriminator.
 	 */
 	String getDiscriminator();
+	
+	/**
+	 * Gets the roles the user is a part of.
+	 *
+	 * @param guildID The guild id to check the roles for.
+	 * @return The roles.
+	 */
+	List<IRole> getRolesForGuild(String guildID);
 }

@@ -6,7 +6,9 @@ import sx.blah.discord.util.HTTP403Exception;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -170,4 +172,57 @@ public interface IChannel {
      * @throws HTTP403Exception
      */
     void delete() throws HTTP403Exception;
+    
+    /**
+* Gets the permissions overrides for users. (Key = User id).
+* 
+* @return The user permissions overrides for this channel.
+*/
+    Map<String, PermissionOverride> getUserOverrides();
+    
+    /**
+     * Gets the permissions overrides for users. (Key = User id).
+     *
+     * @return The user permissions overrides for this channel.
+     */
+    Map<String, PermissionOverride> getRoleOverrides();
+    
+    /**
+     * Represents specific permission overrides for a user/role in the channel.
+     */
+    class PermissionOverride {
+		
+		/**
+		 * Permissions to add.
+         */
+        protected final EnumSet<Permissions> allow;
+		
+		/**
+		 * Permissions to remove.
+         */
+        protected final EnumSet<Permissions> deny;
+        
+        public PermissionOverride(EnumSet<Permissions> allow, EnumSet<Permissions> deny) {
+            this.allow = allow;
+            this.deny = deny;
+        }
+		
+		/**
+		 * Gets the permissions to add to the user/role.
+         * 
+         * @return The permissions.
+         */
+        public EnumSet<Permissions> allow() {
+            return allow;
+        }
+        
+        /**
+         * Gets the permissions to remove from the user/role.
+         *
+         * @return The permissions.
+         */
+        public EnumSet<Permissions> deny() {
+            return deny;
+        }
+    }
 }

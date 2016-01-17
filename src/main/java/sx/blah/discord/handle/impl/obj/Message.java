@@ -107,6 +107,24 @@ public class Message implements IMessage {
 		this.content = content;
 	}
 	
+	/**
+	 * Sets the CACHED mentions in this message.
+	 * 
+	 * @param mentions The new mentions.
+	 */
+	public void setMentions(List<IUser> mentions) {
+		this.mentions = mentions;
+	}
+	
+	/**
+	 * Sets the CACHED attachments in this message.
+	 * 
+	 * @param attachments The new attachements.
+	 */
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
+	}
+	
 	@Override
 	public IChannel getChannel() {
         return channel;
@@ -165,8 +183,8 @@ public class Message implements IMessage {
 				IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentions, attachments);
 				this.content = response.content;
 				this.timestamp = DiscordUtils.convertFromTimestamp(response.edited_timestamp);
-				this.mentions = DiscordUtils.mentionsFromJSON(client, response);
-				this.attachments = DiscordUtils.attachmentsFromJSON(response);
+				this.mentions = DiscordUtils.getMentionsFromJSON(client, response);
+				this.attachments = DiscordUtils.getAttachmentsFromJSON(response);
 				//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 				// the event chain goes like this:
 				//Original message edited to null, then the null message edited to the new content

@@ -23,6 +23,7 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
@@ -63,6 +64,11 @@ public class Guild implements IGuild {
      * The user id for the owner of the guild
      */
     protected final String ownerID;
+	
+	/**
+     * The roles the guild contains.
+     */
+    protected final List<IRole> roles;
     
     /**
      * The client that created this object.
@@ -70,10 +76,10 @@ public class Guild implements IGuild {
     protected final IDiscordClient client;
 
     public Guild(IDiscordClient client, String name, String id, String icon, String ownerID) {
-        this(client, name, id, icon, ownerID, new ArrayList<>(), new ArrayList<>());
+        this(client, name, id, icon, ownerID, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
-    public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, List<IChannel> channels, List<IUser> users) {
+    public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, List<IRole> roles, List<IChannel> channels, List<IUser> users) {
         this.client = client;
         this.name = name;
         this.channels = channels;
@@ -82,6 +88,7 @@ public class Guild implements IGuild {
         this.icon = icon;
         this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
         this.ownerID = ownerID;
+        this.roles = roles;
     }
 	
 	@Override
@@ -184,7 +191,29 @@ public class Guild implements IGuild {
 	public void addChannel(IChannel channel) {
 		this.channels.add(channel);
 	}
-    
+	
+	@Override
+    public List<IRole> getRoles() {
+        return roles;
+    }
+	
+	/**
+     * CACHES a role to the guild.
+     * 
+     * @param role The role.
+     */
+    public void addRole(IRole role) {
+        this.roles.add(role);
+    }
+	
+	@Override
+    public IRole getRoleForId(String id) {
+        for (IRole role : roles) {
+            if (role.getId().equals(id))
+                return role;
+        }
+        return null;
+    }
     
     @Override
     public boolean equals(Object other) {

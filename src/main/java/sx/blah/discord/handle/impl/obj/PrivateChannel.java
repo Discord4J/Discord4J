@@ -25,6 +25,7 @@ import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class PrivateChannel extends Channel implements IPrivateChannel {
@@ -39,7 +40,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
     }
 
     public PrivateChannel(IDiscordClient client, IUser recipient, String id, List<IMessage> messages) {
-        super(client, recipient.getName(), id, null, null, 0, messages);
+        super(client, recipient.getName(), id, null, null, 0, messages, new HashMap<>(), new HashMap<>());
         this.recipient = recipient;
         this.isPrivate = true;
     }
