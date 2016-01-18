@@ -186,6 +186,10 @@ public class DiscordUtils {
 		if ((guild = (Guild) client.getGuildByID(json.id)) != null) {
 			guild.setIcon(json.icon);
 			guild.setName(json.name);
+			guild.setOwnerID(json.owner_id);
+			guild.setAFKChannel(json.afk_channel_id);
+			guild.setAfkTimeout(json.afk_timeout);
+			guild.setRegion(json.region);
 			
 			List<IRole> newRoles = new ArrayList<>();
 			for (RoleResponse roleResponse : json.roles) {
@@ -196,13 +200,13 @@ public class DiscordUtils {
 			
 			for (IUser user : guild.getUsers()) { //Removes all deprecated roles
 				for (IRole role : user.getRolesForGuild(guild.getID())) {
-					if (guild.getRoleForId(role.getID()) == null) {
+					if (guild.getRoleForID(role.getID()) == null) {
 						user.getRolesForGuild(guild.getID()).remove(role);
 					}
 				}
 			}
 		} else {
-			guild = new Guild(client, json.name, json.id, json.icon, json.owner_id);
+			guild = new Guild(client, json.name, json.id, json.icon, json.owner_id, json.afk_channel_id, json.afk_timeout, json.region);
 			
 			for (RoleResponse roleResponse : json.roles) {
 				guild.addRole(getRoleFromJSON(guild, roleResponse));
@@ -224,8 +228,10 @@ public class DiscordUtils {
 			
 			for (ChannelResponse channelResponse : json.channels) {
 				String channelType = channelResponse.type;
-				if ("text".equalsIgnoreCase(channelType)) {
+				if (channelType.equalsIgnoreCase("text")) {
 					guild.addChannel(getChannelFromJSON(client, guild, channelResponse));
+				} else if (channelType.equalsIgnoreCase("voice")) {
+					guild.addVoiceChannel(getVoiceChannelFromJSON(client, guild, channelResponse));
 				}
 			}
 		}
@@ -244,11 +250,11 @@ public class DiscordUtils {
 	public static IUser getUserFromGuildMemberResponse(IDiscordClient client, IGuild guild, GuildResponse.MemberResponse json) {
 		User user = getUserFromJSON(client, json.user);
 		for (String role : json.roles) {
-			Role roleObj = (Role) guild.getRoleForId(role);
+			Role roleObj = (Role) guild.getRoleForID(role);
 			if (roleObj != null && !user.getRolesForGuild(guild.getID()).contains(roleObj))
 				user.addRole(guild.getID(), roleObj);
 		}
-		user.addRole(guild.getID(), guild.getRoleForId(guild.getID())); //@everyone role
+		user.addRole(guild.getID(), guild.getRoleForID(guild.getID())); //@everyone role
 		return user;
 	}
 	
@@ -385,9 +391,16 @@ public class DiscordUtils {
 		return channel;
 	}
 	
+	/**
+	 * Creates a role object from a json response.
+	 *
+	 * @param guild the guild.
+	 * @param json The json response.
+	 * @return The role object.
+	 */
 	public static IRole getRoleFromJSON(IGuild guild, RoleResponse json) {
 		Role role;
-		if ((role = (Role) guild.getRoleForId(json.id)) != null) {
+		if ((role = (Role) guild.getRoleForID(json.id)) != null) {
 			role.setColor(json.color);
 			role.setHoist(json.hoist);
 			role.setName(json.name);
@@ -397,5 +410,77 @@ public class DiscordUtils {
 			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color, guild);
 		}
 		return role;
+	}
+	
+	/**
+	 * Creates a region object from a json response.
+	 *
+	 * @param client The discord client.
+	 * @param json The json response.
+	 * @return The region object.
+	 */
+	public static IRegion getRegionFromJSON(IDiscordClient client, RegionResponse json) {
+		return new Region(json.id, json.name, json.vip);
+	}
+	
+	/**
+	 * Creates a channel object from a json response.
+	 *
+	 * @param client The discord client.
+	 * @param guild the guild.
+	 * @param json The json response.
+	 * @return The channel object.
+	 */
+	public static IVoiceChannel getVoiceChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) { //FIXME
+		VoiceChannel channel;
+		
+		if ((channel = (VoiceChannel) guild.getVoiceChannelForID(json.id)) != null) {
+			channel.setName(json.name);
+			channel.setPosition(json.position);
+			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
+			HashMap<String, IChannel.PermissionOverride> roleOverrides = new HashMap<>();
+			for (PermissionOverwrite overrides : json.permission_overwrites) {
+				if (overrides.type.equalsIgnoreCase("role")) {
+					if (channel.getRoleOverrides().containsKey(overrides.id)) {
+						roleOverrides.put(overrides.id, channel.getRoleOverrides().get(overrides.id));
+					} else {
+						roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
+								Permissions.getAllPermissionsForNumber(overrides.allow),
+								Permissions.getAllPermissionsForNumber(overrides.deny)));
+					}
+				} else if (overrides.type.equalsIgnoreCase("member")) {
+					if (channel.getUserOverrides().containsKey(overrides.id)) {
+						userOverrides.put(overrides.id, channel.getUserOverrides().get(overrides.id));
+					} else {
+						userOverrides.put(overrides.id, new IChannel.PermissionOverride(
+								Permissions.getAllPermissionsForNumber(overrides.allow),
+								Permissions.getAllPermissionsForNumber(overrides.deny)));
+					}
+				} else {
+					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+				}
+			}
+			channel.getUserOverrides().clear();
+			channel.getUserOverrides().putAll(userOverrides);
+			channel.getRoleOverrides().clear();
+			channel.getRoleOverrides().putAll(roleOverrides);
+		} else {
+			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position);
+			
+			for (PermissionOverwrite overrides : json.permission_overwrites) {
+				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
+						Permissions.getAllPermissionsForNumber(overrides.allow),
+						Permissions.getAllPermissionsForNumber(overrides.deny));
+				if (overrides.type.equalsIgnoreCase("role")) {
+					channel.addRoleOverride(overrides.id, override);
+				} else if (overrides.type.equalsIgnoreCase("member")) {
+					channel.addUserOverride(overrides.id, override);
+				} else {
+					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+				}
+			}
+		}
+		
+		return channel;
 	}
 }

@@ -75,4 +75,9 @@ public final class DiscordEndpoints {
 	 * Formatted string for getting maintenance information.
 	 */
 	public static final String STATUS = "https://status.discordapp.com/api/v2/scheduled-maintenances/%s.json";
+	
+	/**
+	 * Voice url.
+	 */
+	public static final String VOICE = APIBASE + "/voice/";
 }

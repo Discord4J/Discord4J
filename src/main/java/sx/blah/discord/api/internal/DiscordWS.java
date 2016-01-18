@@ -202,6 +202,14 @@ public class DiscordWS extends WebSocketClient {
 					guildRoleDelete(eventObject);
 					break;
 				
+				case "GUILD_BAN_ADD":
+					guildBanAdd(eventObject);
+					break;
+				
+				case "GUILD_BAN_REMOVE":
+					guildBanRemove(eventObject);
+					break;
+				
 				default:
 					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", eventObject.toString(), frame);
 			}
@@ -353,9 +361,9 @@ public class DiscordWS extends WebSocketClient {
 			List<IRole> oldRoles = new ArrayList<>(user.getRolesForGuild(guild.getID()));
 			user.getRolesForGuild(guild.getID()).clear();
 			for (String role : event.roles)
-				user.addRole(guild.getID(), guild.getRoleForId(role));
+				user.addRole(guild.getID(), guild.getRoleForID(role));
 			
-			user.addRole(guild.getID(), guild.getRoleForId(guild.getID())); //@everyone role
+			user.addRole(guild.getID(), guild.getRoleForID(guild.getID())); //@everyone role
 			
 			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild.getID()), user));
 		}
@@ -450,12 +458,16 @@ public class DiscordWS extends WebSocketClient {
 		} else { // Regular channel.
 			ChannelResponse event = DiscordUtils.GSON.fromJson(eventObject, ChannelResponse.class);
 			String type = event.type;
-			if (type.equalsIgnoreCase("text")) { //Text channel
-				Guild guild = (Guild) client.getGuildByID(event.guild_id);
-				if (guild != null) {
+			Guild guild = (Guild) client.getGuildByID(event.guild_id);
+			if (guild != null) {
+				if (type.equalsIgnoreCase("text")) { //Text channel
 					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(client, guild, event);
 					guild.addChannel(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
+				} else if (type.equalsIgnoreCase("voice")) { //FIXME
+					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, guild, event);
+					guild.addVoiceChannel(channel);
+					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
 				}
 			}
 		}
@@ -468,6 +480,12 @@ public class DiscordWS extends WebSocketClient {
 			if (channel != null) {
 				channel.getGuild().getChannels().remove(channel);
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
+			}
+		} else if (event.type.equalsIgnoreCase("voice")) { //FIXME
+			VoiceChannel channel = (VoiceChannel) client.getVoiceChannelByID(event.id);
+			if (channel != null) {
+				channel.getGuild().getVoiceChannels().remove(channel);
+				client.dispatcher.dispatch(new VoiceChannelDeleteEvent(channel));
 			}
 		}
 	}
@@ -485,16 +503,29 @@ public class DiscordWS extends WebSocketClient {
 	private void channelUpdate(JsonElement eventObject) {
 		ChannelUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ChannelUpdateEventResponse.class);
 		if (!event.is_private) {
-			Channel toUpdate = (Channel) client.getChannelByID(event.id);
-			if (toUpdate != null) {
-				Channel oldChannel = new Channel(client, toUpdate.getName(),
-						toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
-						toUpdate.getMessages(), toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
-				oldChannel.setLastReadMessageID(toUpdate.getLastReadMessageID());
-				
-				toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), event);
-				
-				client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+			if (event.type.equalsIgnoreCase("text")) {
+				Channel toUpdate = (Channel) client.getChannelByID(event.id);
+				if (toUpdate != null) {
+					Channel oldChannel = new Channel(client, toUpdate.getName(),
+							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
+							toUpdate.getMessages(), toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
+					oldChannel.setLastReadMessageID(toUpdate.getLastReadMessageID());
+					
+					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), event);
+					
+					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+				}
+			} else if (event.type.equalsIgnoreCase("voice")) { //FIXME
+				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(event.id);
+				if (toUpdate != null) {
+					VoiceChannel oldChannel = new VoiceChannel(client, toUpdate.getName(),
+							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
+							toUpdate.getMessages(), toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
+					
+					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), event);
+					
+					client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
+				}
 			}
 		}
 	}
@@ -528,7 +559,9 @@ public class DiscordWS extends WebSocketClient {
 		
 		if (toUpdate != null) {
 			Guild oldGuild = new Guild(client, toUpdate.getName(), toUpdate.getID(), toUpdate.getIcon(),
-					toUpdate.getOwnerID(), toUpdate.getRoles(), toUpdate.getChannels(), toUpdate.getUsers());
+					toUpdate.getOwnerID(), toUpdate.getAFKChannel() == null ? null : toUpdate.getAFKChannel().getID(), 
+					toUpdate.getAFKTimeout(), toUpdate.getRegion().getID(), toUpdate.getRoles(), toUpdate.getChannels(), toUpdate.getVoiceChannels(), 
+					toUpdate.getUsers());
 			
 			toUpdate = (Guild) DiscordUtils.getGuildFromJSON(client, guildResponse);
 			
@@ -550,7 +583,7 @@ public class DiscordWS extends WebSocketClient {
 		GuildRoleEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
-			IRole toUpdate = guild.getRoleForId(event.role.id);
+			IRole toUpdate = guild.getRoleForID(event.role.id);
 			if (toUpdate != null) {
 				IRole oldRole = new Role(toUpdate.getPosition(), 
 						Permissions.generatePermissionsNumber(toUpdate.getPermissions()), toUpdate.getName(), 
@@ -565,11 +598,33 @@ public class DiscordWS extends WebSocketClient {
 		GuildRoleDeleteEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleDeleteEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
-			IRole role = guild.getRoleForId(event.role_id);
+			IRole role = guild.getRoleForID(event.role_id);
 			if (role != null) {
 				guild.getRoles().remove(role);
 				client.dispatcher.dispatch(new RoleDeleteEvent(role, guild));
 			}
+		}
+	}
+	
+	private void guildBanAdd(JsonElement eventObject) {
+		GuildBanEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildBanEventResponse.class);
+		IGuild guild = client.getGuildByID(event.guild_id);
+		if (guild != null) {
+			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
+			if (client.getUserByID(user.getID()) != null)
+				guild.getUsers().remove(user);
+			
+			client.dispatcher.dispatch(new UserBanEvent(user, guild));
+		}
+	}
+	
+	private void guildBanRemove(JsonElement eventObject) {
+		GuildBanEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildBanEventResponse.class);
+		IGuild guild = client.getGuildByID(event.guild_id);
+		if (guild != null) {
+			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
+			
+			client.dispatcher.dispatch(new UserPardonEvent(user, guild));
 		}
 	}
 	

@@ -129,6 +129,14 @@ public interface IDiscordClient {
 	IChannel getChannelByID(String channelID);
 	
 	/**
+	 * Gets a voice channel from a given id.
+	 * 
+	 * @param id The voice channel id.
+	 * @return The voice channel (or null if not found).
+	 */
+	IVoiceChannel getVoiceChannelByID(String id);
+	
+	/**
 	 * Gets a guild by its unique id.
 	 *
 	 * @param guildID The id of the desired guild.
@@ -212,8 +220,39 @@ public interface IDiscordClient {
 	 * @return The new channel.
 	 *
 	 * @throws DiscordException
+	 * @deprecated Use {@link IGuild#createChannel(String)}
 	 */
+	@Deprecated
 	IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception;
+	
+	/**
+	 * Gets the regions available for discord.
+	 * 
+	 * @return The list of available regions.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	List<IRegion> getRegions() throws HTTP403Exception;
+	
+	/**
+	 * Gets the corresponding region for a given id.
+	 * 
+	 * @param regionID The region id.
+	 * @return The region (or null if not found).
+	 */
+	IRegion getRegionForID(String regionID);
+	
+	/**
+	 * Creates a new guild.
+	 * 
+	 * @param name The name of the guild.
+	 * @param regionID The region id for the guild (defaults to us-west).
+	 * @param icon The icon for the guild.
+	 * @return The new guild.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception;
 	
 	/**
 	 * Represents an avatar image.

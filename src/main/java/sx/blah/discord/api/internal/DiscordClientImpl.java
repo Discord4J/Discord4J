@@ -26,8 +26,6 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
-import sx.blah.discord.handle.impl.obj.Channel;
-import sx.blah.discord.handle.impl.obj.Guild;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
@@ -117,6 +115,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Caches the last operation done by the websocket, required for handling redirects.
 	 */
 	protected long lastSequence = 0;
+	
+	/**
+	 * Caches the available regions for discord.
+	 */
+	protected final List<IRegion> REGIONS = new ArrayList<>();
 	
 	public DiscordClientImpl(String email, String password) {
 		this.dispatcher = new EventDispatcher(this);
@@ -300,6 +303,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
+	public IVoiceChannel getVoiceChannelByID(String id) {
+		for (IGuild guild : guildList) {
+			for (IVoiceChannel channel : guild.getVoiceChannels()) {
+				if (channel.getID().equals(id))
+					return channel;
+			}
+		}
+		
+		return null;
+	}
+	
+	@Override
 	public IGuild getGuildByID(String guildID) {
 		for (IGuild guild : guildList) {
 			if (guild.getID().equalsIgnoreCase(guildID))
@@ -418,24 +433,46 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
 	@Override
 	public IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception {
-		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
-			return null;
+		return guild.createChannel(name);
+	}
+	
+	@Override
+	public List<IRegion> getRegions() throws HTTP403Exception {
+		if (REGIONS.isEmpty()) {
+			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+					DiscordEndpoints.VOICE + "regions",
+					new BasicNameValuePair("authorization", this.token)),
+					RegionResponse[].class);
+			
+			for (RegionResponse regionResponse : regions) {
+				REGIONS.add(DiscordUtils.getRegionFromJSON(this, regionResponse));
+			}
 		}
 		
-		if (name == null || name.length() < 2 || name.length() > 100)
-			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
+		return REGIONS;
+	}
+	
+	@Override
+	public IRegion getRegionForID(String regionID) {
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS+guild.getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text"))),
+			for (IRegion region : getRegions()) {
+				if (region.getID().equals(regionID))
+					return region;
+			}
+		} catch (HTTP403Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@Override
+	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception {
+		try {
+			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS,
+					new StringEntity(DiscordUtils.GSON.toJson(new CreateGuildRequest(name, regionID.orElse(null), icon.orElse(null)))),
 					new BasicNameValuePair("authorization", this.token),
-					new BasicNameValuePair("content-type", "application/json")),
-					ChannelResponse.class);
-			
-			Channel channel = new Channel(this, response.name, response.id, guild, null, response.position);
-			((Guild) guild).addChannel(channel);
-			
-			return channel;
+					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
+			return DiscordUtils.getGuildFromJSON(this, guildResponse);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

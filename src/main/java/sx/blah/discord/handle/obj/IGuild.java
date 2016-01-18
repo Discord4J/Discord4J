@@ -1,8 +1,11 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.HTTP403Exception;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class defines a guild/server/clan/whatever it's called.
@@ -94,7 +97,36 @@ public interface IGuild {
 	 * @param id The role id of the desired role.
 	 * @return The role, or null if not found.
 	 */
-	IRole getRoleForId(String id);
+	IRole getRoleForID(String id);
+	
+	/**
+	 * Gets the voice channels in this guild.
+	 * 
+	 * @return The voice channels.
+	 */
+	List<IVoiceChannel> getVoiceChannels();
+	
+	/**
+	 * Gets a voice channel for a give id.
+	 * 
+	 * @param id The channel id.
+	 * @return The voice channel (or null if not found).
+	 */
+	IVoiceChannel getVoiceChannelForID(String id);
+	
+	/**
+	 * Gets the channel where afk users are placed.
+	 * 
+	 * @return The voice channel (or null if nonexistant).
+	 */
+	IVoiceChannel getAFKChannel();
+	
+	/**
+	 * Gets the timeout (in seconds) before a user is placed in the AFK channel.
+	 * 
+	 * @return The timeout.
+	 */
+	int getAFKTimeout();
 	
 	/**
 	 * Creates a new role in this guild.
@@ -104,4 +136,107 @@ public interface IGuild {
 	 * @throws HTTP403Exception
 	 */
 	IRole createRole() throws HTTP403Exception;
+	
+	/**
+	 * Retrieves the list of banned users from this guild.
+	 * 
+	 * @return The list of banned users.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	List<IUser> getBannedUsers() throws HTTP403Exception;
+	
+	/**
+	 * Bans a user from this guild.
+	 * 
+	 * @param userID The user to ban.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void banUser(String userID) throws HTTP403Exception;
+	
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The user to ban.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
+	 * @throws HTTP403Exception
+	 */
+	void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception;
+	
+	/**
+	 * This removes a ban on a user.
+	 * 
+	 * @param userID The user to unban.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void pardonUser(String userID) throws HTTP403Exception;
+	
+	/**
+	 * Kicks a user from the guild.
+	 * 
+	 * @param userID The user to kick.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void kickUser(String userID) throws HTTP403Exception;
+	
+	/**
+	 * Edits the roles a user is a part of.
+	 * 
+	 * @param userID The user to edit the roles for.
+	 * @param roleIDs The roles for the user to have.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception;
+	
+	/**
+	 * Edits the guild.
+	 * 
+	 * @param name The name of the guild.
+	 * @param regionID The region id for the guild.
+	 * @param icon The icon for the guild.
+	 * @param afkChannelID The afk channel for the guild. NOTE: if not present there will be no afk channel.
+	 * @param afkTimeout The afk timeout for the guild.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception;
+	
+	/**
+	 * Deletes the channel if you are its owner or leaves it if not.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void deleteOrLeaveGuild() throws HTTP403Exception;
+	
+	/**
+	 * Creates a new channel.
+	 *
+	 * @param name The name of the new channel. MUST be between 2-100 characters long.
+	 * @return The new channel.
+	 *
+	 * @throws DiscordException
+	 */
+	IChannel createChannel(String name) throws DiscordException, HTTP403Exception;
+	
+	/**
+	 * Creates a new voice channel.
+	 *
+	 * @param name The name of the new channel. MUST be between 2-100 characters long.
+	 * @return The new channel.
+	 *
+	 * @throws DiscordException
+	 */
+	IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception;
+	
+	/**
+	 * Gets the region this guild is located in.
+	 * 
+	 * @return The region.
+	 */
+	IRegion getRegion();
 }

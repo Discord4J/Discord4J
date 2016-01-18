@@ -174,4 +174,14 @@ public class Role implements IRole {
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id, 
 				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
 	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return this.getClass().isAssignableFrom(other.getClass()) && ((IRole) other).getID().equals(getID());
+	}
 }

@@ -243,6 +243,10 @@ public class Message implements IMessage {
 		return timeStamp.compareTo(getTimestamp()) >= 0;
 	}
 	
+	@Override
+	public String toString() {
+		return content;
+	}
 	
 	@Override
 	public boolean equals(Object other) {
