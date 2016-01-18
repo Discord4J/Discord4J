@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Future;
 
 /**
  * Represents the main discord api
@@ -248,11 +249,11 @@ public interface IDiscordClient {
 	 * @param name The name of the guild.
 	 * @param regionID The region id for the guild (defaults to us-west).
 	 * @param icon The icon for the guild.
-	 * @return The new guild.
+	 * @return The new guild. NOTE: This is a future because discord doesn't return a full guild object until the guild create event.
 	 * 
 	 * @throws HTTP403Exception
 	 */
-	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception;
+	Future<IGuild> createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception;
 	
 	/**
 	 * Represents an avatar image.

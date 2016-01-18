@@ -26,6 +26,8 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
+import sx.blah.discord.handle.IListener;
+import sx.blah.discord.handle.impl.events.GuildCreateEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
@@ -40,6 +42,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Defines the client.
@@ -466,16 +472,68 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception {
+	public Future<IGuild> createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception {
 		try {
-			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS,
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new CreateGuildRequest(name, regionID.orElse(null), icon.orElse(null)))),
+			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE + "/guilds",
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
+							new CreateGuildRequest(name, regionID.orElse(null), icon.orElse(null)))),
 					new BasicNameValuePair("authorization", this.token),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
-			return DiscordUtils.getGuildFromJSON(this, guildResponse);
+			GuildCreateFuture future = new GuildCreateFuture(guildResponse.id);
+			dispatcher.registerListener(future);
+			return future;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	//This is necessary because creating a guild doesn't return a full guild object.
+	private class GuildCreateFuture implements Future<IGuild>, IListener<GuildCreateEvent> {
+		
+		private String guildID;
+		private IGuild guild;
+		
+		public GuildCreateFuture(String guildID) {
+			this.guildID = guildID;
+		}
+		
+		@Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			return false;
+		}
+		
+		@Override
+		public boolean isCancelled() {
+			return false;
+		}
+		
+		@Override
+		public boolean isDone() {
+			return guild != null;
+		}
+		
+		@Override
+		public IGuild get() throws InterruptedException, ExecutionException {
+			while (guild == null) {}
+			return guild;
+		}
+		
+		@Override
+		public IGuild get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+			long timeToStop = unit.toMillis(timeout)+System.currentTimeMillis();
+			while (guild == null || System.currentTimeMillis() < timeToStop) {}
+			if (guild == null)
+				throw new TimeoutException();
+			return guild;
+		}
+		
+		@Override
+		public void handle(GuildCreateEvent event) {
+			if (event.getGuild().getID().equals(guildID)) {
+				this.guild = event.getGuild();
+				dispatcher.unregisterListener(this);
+			}
+		}
 	}
 }
