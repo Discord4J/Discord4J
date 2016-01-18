@@ -469,7 +469,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS,
-					new StringEntity(DiscordUtils.GSON.toJson(new CreateGuildRequest(name, regionID.orElse("us-west"), icon.orElse(Image.defaultAvatar())))),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new CreateGuildRequest(name, regionID.orElse(null), icon.orElse(null)))),
 					new BasicNameValuePair("authorization", this.token),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 			return DiscordUtils.getGuildFromJSON(this, guildResponse);

@@ -35,6 +35,10 @@ public class DiscordUtils {
 	 * Re-usable instance of Gson.
 	 */
 	public static final Gson GSON = new GsonBuilder().serializeNulls().create();
+	/**
+	 * Like {@link #GSON} but it doesn't serialize nulls.
+	 */
+	public static final Gson GSON_NO_NULLS = new GsonBuilder().create();
 	
 	/**
 	 * Used to find urls in order to not escape them
