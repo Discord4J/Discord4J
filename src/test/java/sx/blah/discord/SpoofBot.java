@@ -6,12 +6,10 @@ import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.Presences;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.HTTP403Exception;
 
+import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -104,8 +102,7 @@ public class SpoofBot {
 													final IChannel newChannel = client.createChannel(channel.getGuild(), getRandString());
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
 													new Thread(()->{
-														while (deletionTimer > System.currentTimeMillis()) {
-														}
+														while (deletionTimer > System.currentTimeMillis()) {}
 														try {
 															newChannel.delete();
 														} catch (HTTP403Exception e) {
@@ -124,6 +121,25 @@ public class SpoofBot {
 													e.printStackTrace();
 												}
 												break;
+											
+											case ROLE_CREATE_EDIT_AND_DELETE:
+												try {
+													final IRole role = channel.getGuild().createRole();
+													role.edit(Optional.of(new Color(rng.nextInt(255), rng.nextInt(255), rng.nextInt(255))),
+															Optional.of(getRandBoolean()), Optional.of(getRandString()), 
+															Optional.of(EnumSet.allOf(Permissions.class)));
+													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
+													new Thread(()->{
+														while (deletionTimer > System.currentTimeMillis()) {}
+														try {
+															role.delete();
+														} catch (HTTP403Exception e) {
+															e.printStackTrace();
+														}
+													}).start();
+												} catch (HTTP403Exception e) {
+													e.printStackTrace();
+												}
 										}
 										lastSpoof = toSpoof;
 									} else {
@@ -352,7 +368,8 @@ public class SpoofBot {
 	 */
 	public enum Spoofs {
 		MESSAGE("TYPING_TOGGLE"), MESSAGE_EDIT("MESSAGE"), TYPING_TOGGLE(null), GAME(null), PRESENCE(null),
-		MESSAGE_DELETE("MESSAGE"), INVITE(null), CHANNEL_CREATE_AND_DELETE(null), CHANNEL_EDIT(null);
+		MESSAGE_DELETE("MESSAGE"), INVITE(null), CHANNEL_CREATE_AND_DELETE(null), CHANNEL_EDIT(null), 
+		ROLE_CREATE_EDIT_AND_DELETE(null);
 		
 		String dependsOn;
 		

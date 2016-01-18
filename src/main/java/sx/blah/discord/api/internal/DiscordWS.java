@@ -190,6 +190,18 @@ public class DiscordWS extends WebSocketClient {
 					guildUpdate(eventObject);
 					break;
 				
+				case "GUILD_ROLE_CREATE":
+					guildRoleCreate(eventObject);
+					break;
+				
+				case "GUILD_ROLE_UPDATE":
+					guildRoleUpdate(eventObject);
+					break;
+				
+				case "GUILD_ROLE_DELETE":
+					guildRoleDelete(eventObject);
+					break;
+				
 				default:
 					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", eventObject.toString(), frame);
 			}
@@ -510,7 +522,7 @@ public class DiscordWS extends WebSocketClient {
 		}
 	}
 	
-	public void guildUpdate(JsonElement eventObject) {
+	private void guildUpdate(JsonElement eventObject) {
 		GuildResponse guildResponse = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
 		Guild toUpdate = (Guild) client.getGuildByID(guildResponse.id);
 		
@@ -521,6 +533,43 @@ public class DiscordWS extends WebSocketClient {
 			toUpdate = (Guild) DiscordUtils.getGuildFromJSON(client, guildResponse);
 			
 			client.dispatcher.dispatch(new GuildUpdateEvent(oldGuild, toUpdate));
+		}
+	}
+	
+	private void guildRoleCreate(JsonElement eventObject) {
+		GuildRoleEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleEventResponse.class);
+		IGuild guild = client.getGuildByID(event.guild_id);
+		if (guild != null) {
+			IRole role = DiscordUtils.getRoleFromJSON(guild, event.role);
+			((Guild) guild).addRole(role);
+			client.dispatcher.dispatch(new RoleCreateEvent(role, guild));
+		}
+	}
+	
+	private void guildRoleUpdate(JsonElement eventObject) {
+		GuildRoleEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleEventResponse.class);
+		IGuild guild = client.getGuildByID(event.guild_id);
+		if (guild != null) {
+			IRole toUpdate = guild.getRoleForId(event.role.id);
+			if (toUpdate != null) {
+				IRole oldRole = new Role(toUpdate.getPosition(), 
+						Permissions.generatePermissionsNumber(toUpdate.getPermissions()), toUpdate.getName(), 
+						toUpdate.isManaged(), toUpdate.getID(), toUpdate.isHoisted(), toUpdate.getColor().getRGB(), guild);
+				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
+				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
+			}
+		}
+	}
+	
+	private void guildRoleDelete(JsonElement eventObject) {
+		GuildRoleDeleteEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleDeleteEventResponse.class);
+		IGuild guild = client.getGuildByID(event.guild_id);
+		if (guild != null) {
+			IRole role = guild.getRoleForId(event.role_id);
+			if (role != null) {
+				guild.getRoles().remove(role);
+				client.dispatcher.dispatch(new RoleDeleteEvent(role, guild));
+			}
 		}
 	}
 	

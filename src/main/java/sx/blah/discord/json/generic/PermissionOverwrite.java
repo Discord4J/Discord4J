@@ -1,7 +1,5 @@
 package sx.blah.discord.json.generic;
 
-import sx.blah.discord.json.responses.GuildResponse;
-
 /**
  * Represents a permissions overwrite json object.
  */
@@ -18,12 +16,12 @@ public class PermissionOverwrite {
 	public String id;
 	
 	/**
-	 * Permissions to deny, see {@link GuildResponse.RoleResponse#permissions}
+	 * Permissions to deny, see {@link RoleResponse#permissions}
 	 */
 	public int deny;
 	
 	/**
-	 * Permissions to allow, see {@link GuildResponse.RoleResponse#permissions}
+	 * Permissions to allow, see {@link RoleResponse#permissions}
 	 */
 	public int allow;
 	

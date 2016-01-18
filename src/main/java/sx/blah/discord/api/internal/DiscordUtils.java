@@ -10,6 +10,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.PermissionOverwrite;
+import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
@@ -187,19 +188,8 @@ public class DiscordUtils {
 			guild.setName(json.name);
 			
 			List<IRole> newRoles = new ArrayList<>();
-			for (GuildResponse.RoleResponse roleResponse : json.roles) {
-				if (guild.getRoleForId(roleResponse.id) != null) {
-					Role role = (Role) guild.getRoleForId(roleResponse.id);
-					role.setColor(roleResponse.color);
-					role.setHoist(roleResponse.hoist);
-					role.setName(roleResponse.name);
-					role.setPermissions(roleResponse.permissions);
-					role.setPosition(roleResponse.position);
-					newRoles.add(role);
-				} else {
-					newRoles.add(new Role(roleResponse.position, roleResponse.permissions, roleResponse.name,
-							roleResponse.managed, roleResponse.id, roleResponse.hoist, roleResponse.color));
-				}
+			for (RoleResponse roleResponse : json.roles) {
+				newRoles.add(getRoleFromJSON(guild, roleResponse));
 			}
 			guild.getRoles().clear();
 			guild.getRoles().addAll(newRoles);
@@ -214,9 +204,8 @@ public class DiscordUtils {
 		} else {
 			guild = new Guild(client, json.name, json.id, json.icon, json.owner_id);
 			
-			for (GuildResponse.RoleResponse roleResponse : json.roles) {
-				guild.addRole(new Role(roleResponse.position, roleResponse.permissions, roleResponse.name,
-						roleResponse.managed, roleResponse.id, roleResponse.hoist, roleResponse.color));
+			for (RoleResponse roleResponse : json.roles) {
+				guild.addRole(getRoleFromJSON(guild, roleResponse));
 			}
 			
 			for (GuildResponse.MemberResponse member : json.members) {
@@ -394,5 +383,19 @@ public class DiscordUtils {
 		channel.setLastReadMessageID(json.last_message_id);
 		
 		return channel;
+	}
+	
+	public static IRole getRoleFromJSON(IGuild guild, RoleResponse json) {
+		Role role;
+		if ((role = (Role) guild.getRoleForId(json.id)) != null) {
+			role.setColor(json.color);
+			role.setHoist(json.hoist);
+			role.setName(json.name);
+			role.setPermissions(json.permissions);
+			role.setPosition(json.position);
+		} else {
+			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color);
+		}
+		return role;
 	}
 }

@@ -19,12 +19,17 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.json.generic.RoleResponse;
+import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.Requests;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -213,6 +218,14 @@ public class Guild implements IGuild {
 				return role;
 		}
 		return null;
+	}
+	
+	@Override
+	public IRole createRole() throws HTTP403Exception {
+		RoleResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS + id + "/roles",
+				new BasicNameValuePair("authorization", client.getToken())), RoleResponse.class);
+		IRole role = DiscordUtils.getRoleFromJSON(this, response);
+		return role;
 	}
 	
 	@Override

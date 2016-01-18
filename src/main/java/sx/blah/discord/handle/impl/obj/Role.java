@@ -1,10 +1,21 @@
 package sx.blah.discord.handle.impl.obj;
 
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.json.generic.RoleResponse;
+import sx.blah.discord.json.requests.RoleEditRequest;
+import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.Requests;
 
 import java.awt.*;
+import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
+import java.util.Optional;
 
 public class Role implements IRole {
 	
@@ -43,7 +54,12 @@ public class Role implements IRole {
 	 */
 	protected Color color;
 	
-	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color) {
+	/**
+	 * The guild this role belongs to
+	 */
+	protected IGuild guild;
+	
+	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, IGuild guild) {
 		this.position = position;
 		this.permissions = Permissions.getAllPermissionsForNumber(permissions);
 		this.name = name;
@@ -51,6 +67,7 @@ public class Role implements IRole {
 		this.id = id;
 		this.hoist = hoist;
 		this.color = new Color(color);
+		this.guild = guild;
 	}
 	
 	@Override
@@ -131,5 +148,30 @@ public class Role implements IRole {
 	 */
 	public void setColor(int color) {
 		this.color = new Color(color);
+	}
+	
+	@Override
+	public IGuild getGuild() {
+		return guild;
+	}
+	
+	@Override
+	public void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws HTTP403Exception {
+		try {
+			RoleResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
+					DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id,
+					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()), 
+							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions())))),
+					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
+					new BasicNameValuePair("content-type", "application/json")), RoleResponse.class);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void delete() throws HTTP403Exception {
+		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id, 
+				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
 	}
 }

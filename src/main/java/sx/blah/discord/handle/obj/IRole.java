@@ -1,7 +1,10 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.util.HTTP403Exception;
+
 import java.awt.*;
 import java.util.EnumSet;
+import java.util.Optional;
 
 /**
  * Represents a role.
@@ -56,4 +59,30 @@ public interface IRole {
 	 * @return The color.
 	 */
 	Color getColor();
+	
+	/**
+	 * Gets the guild this role belongs to.
+	 * 
+	 * @return The guild.
+	 */
+	IGuild getGuild();
+	
+	/**
+	 * Edits this role.
+	 * 
+	 * @param color The new color for the role.
+	 * @param hoist Whether the role should now be hoisted.
+	 * @param name The new name for the role.
+	 * @param permissions The new permissions for the role.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws HTTP403Exception;
+	
+	/**
+	 * Attempts to delete this role.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	void delete() throws HTTP403Exception;
 }

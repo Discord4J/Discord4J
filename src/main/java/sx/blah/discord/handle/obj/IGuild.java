@@ -1,5 +1,7 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.util.HTTP403Exception;
+
 import java.util.List;
 
 /**
@@ -93,4 +95,13 @@ public interface IGuild {
 	 * @return The role, or null if not found.
 	 */
 	IRole getRoleForId(String id);
+	
+	/**
+	 * Creates a new role in this guild.
+	 * 
+	 * @return The new role.
+	 * 
+	 * @throws HTTP403Exception
+	 */
+	IRole createRole() throws HTTP403Exception;
 }
