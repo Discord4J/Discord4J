@@ -394,7 +394,7 @@ public class DiscordUtils {
 			role.setPermissions(json.permissions);
 			role.setPosition(json.position);
 		} else {
-			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color);
+			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color, guild);
 		}
 		return role;
 	}
