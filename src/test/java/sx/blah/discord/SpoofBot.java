@@ -17,10 +17,6 @@ import java.util.ArrayDeque;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Used to simulate a server.
@@ -148,8 +144,8 @@ public class SpoofBot {
 											
 											case GUILD_CREATE_EDIT_AND_DELETE:
 												try {
-													Future<IGuild> futureGuild = client.createGuild(getRandString(), Optional.empty(), Optional.empty());
-													IGuild guild = futureGuild.get(2000, TimeUnit.MILLISECONDS);
+													String guildId = client.createGuild(getRandString(), Optional.empty(), Optional.empty());
+													IGuild guild = client.getGuildByID(guildId);
 													guild.edit(Optional.of(getRandString()), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(getRandNumber(Integer.class).intValue()));
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
 													new Thread(()->{
@@ -160,7 +156,7 @@ public class SpoofBot {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (HTTP403Exception | TimeoutException | ExecutionException | InterruptedException e) {
+												} catch (HTTP403Exception e) {
 													e.printStackTrace();
 												}
 												break;

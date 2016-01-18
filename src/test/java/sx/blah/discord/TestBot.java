@@ -30,7 +30,6 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.io.IOException;
@@ -203,12 +202,6 @@ public class TestBot {
 								Discord4J.LOGGER.info("{}", m.getAuthor().getID());
 								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
 							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						} else if (m.getContent().startsWith(".test")) {
-							try {
-								client.createGuild("Test", Optional.empty(), Optional.empty());
-							} catch (HTTP403Exception e) {
 								e.printStackTrace();
 							}
 						}
