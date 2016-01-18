@@ -141,25 +141,6 @@ public class SpoofBot {
 													e.printStackTrace();
 												}
 												break;
-											
-											case GUILD_CREATE_EDIT_AND_DELETE:
-												try {
-													String guildId = client.createGuild(getRandString(), Optional.empty(), Optional.empty());
-													IGuild guild = client.getGuildByID(guildId);
-													guild.edit(Optional.of(getRandString()), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(getRandNumber(Integer.class).intValue()));
-													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
-													new Thread(()->{
-														while (deletionTimer > System.currentTimeMillis()) {}
-														try {
-															guild.deleteOrLeaveGuild();
-														} catch (HTTP403Exception e) {
-															e.printStackTrace();
-														}
-													}).start();
-												} catch (HTTP403Exception e) {
-													e.printStackTrace();
-												}
-												break;
 										}
 										lastSpoof = toSpoof;
 									} else {
@@ -389,7 +370,7 @@ public class SpoofBot {
 	public enum Spoofs {
 		MESSAGE("TYPING_TOGGLE"), MESSAGE_EDIT("MESSAGE"), TYPING_TOGGLE(null), GAME(null), PRESENCE(null),
 		MESSAGE_DELETE("MESSAGE"), INVITE(null), CHANNEL_CREATE_AND_DELETE(null), CHANNEL_EDIT(null), 
-		ROLE_CREATE_EDIT_AND_DELETE(null), GUILD_CREATE_EDIT_AND_DELETE(null);
+		ROLE_CREATE_EDIT_AND_DELETE(null);
 		
 		String dependsOn;
 		
