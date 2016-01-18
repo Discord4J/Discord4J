@@ -9,14 +9,15 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages event listeners and event logic.
  */
 public class EventDispatcher {
 	
-	private HashMap<Class<?>, HashMap<Method, Object>> methodListeners = new HashMap<>();
-	private HashMap<Class<?>, List<IListener>> classListeners = new HashMap<>();
+	private ConcurrentHashMap<Class<?>, HashMap<Method, Object>> methodListeners = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<Class<?>, List<IListener>> classListeners = new ConcurrentHashMap<>();
 	private IDiscordClient client;
 	
 	public EventDispatcher(IDiscordClient client) {
