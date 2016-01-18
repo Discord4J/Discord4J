@@ -6,10 +6,10 @@ import sx.blah.discord.api.IDiscordClient;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages event listeners and event logic.
@@ -52,7 +52,7 @@ public class EventDispatcher {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (Event.class.isAssignableFrom(rawType)) {
 			if (!classListeners.containsKey(rawType))
-				classListeners.put(rawType, new ArrayList<>());
+				classListeners.put(rawType, new CopyOnWriteArrayList<>());
 			
 			classListeners.get(rawType).add(listener);
 		}
