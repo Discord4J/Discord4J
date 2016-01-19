@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Discord4J - Unofficial wrapper for Discord API
-  ~ Copyright (c) 2015
+  ~ Copyright (c) 2016
   ~
   ~ This program is free software; you can redistribute it and/or
   ~ modify it under the terms of the GNU General Public License
@@ -25,8 +25,8 @@
 
     <groupId>sx.blah</groupId>
     <artifactId>Discord4J</artifactId>
-    <version>2.0.3</version>
-    <description>A Java binding for the unofficial Discord API, forked from https://github.com/nerd/Discord4J. Copyright (c) 2015, Licensed under GNU GPLv2</description>
+    <version>2.1.0-SNAPSHOT</version>
+    <description>A Java binding for the unofficial Discord API, forked from https://github.com/nerd/Discord4J. Copyright (c) 2016, Licensed under GNU GPLv2</description>
     <url>https://github.com/austinv11/Discord4J</url>
     <licenses>
         <license>
@@ -42,14 +42,14 @@
         <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
         <maven.compiler.testSource>1.8</maven.compiler.testSource>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.12</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -73,7 +73,7 @@
             <artifactId>httpmime</artifactId>
             <version>4.5</version>
         </dependency>
-        
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -110,7 +110,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -133,6 +133,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
             </plugin>
         </plugins>
         <resources>
