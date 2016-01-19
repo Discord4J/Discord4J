@@ -20,37 +20,37 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.handle.Event;
-import sx.blah.discord.handle.obj.Channel;
-import sx.blah.discord.handle.obj.User;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  * This event is dispatched if a user is typing.
  */
 public class TypingEvent extends Event {
-    
-    private final User user;
-    private final Channel channel;
-
-    public TypingEvent(User user, Channel channel) {
-        this.user = user;
-        this.channel = channel;
-    }
+	
+	private final IUser user;
+	private final IChannel channel;
+	
+	public TypingEvent(IUser user, IChannel channel) {
+		this.user = user;
+		this.channel = channel;
+	}
 	
 	/**
-     * The user involved.
-     * 
-     * @return The user.
-     */
-    public User getUser() {
-        return user;
-    }
+	 * The user involved.
+	 *
+	 * @return The user.
+	 */
+	public IUser getUser() {
+		return user;
+	}
 	
 	/**
-     * The channel involved.
-     * 
-     * @return The channel.
-     */
-    public Channel getChannel() {
-        return channel;
-    }
+	 * The channel involved.
+	 *
+	 * @return The channel.
+	 */
+	public IChannel getChannel() {
+		return channel;
+	}
 }

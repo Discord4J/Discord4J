@@ -1,5 +1,7 @@
 package sx.blah.discord.json.responses;
 
+import sx.blah.discord.json.generic.RoleResponse;
+
 /**
  * Response representing a guild
  */
@@ -51,9 +53,9 @@ public class GuildResponse {
 	public MemberResponse[] members;
 	
 	/**
-	 * FIXME ??
+	 * Whether the the guild is large and requires a separate request to retrieve offline guild members. 
 	 */
-	public boolean large;
+	public boolean large = false;
 	
 	/**
 	 * The timestamp for when the guild was created
@@ -142,52 +144,9 @@ public class GuildResponse {
 	}
 	
 	/**
-	 * Represents a role
-	 */
-	public class RoleResponse {
-		
-		/**
-		 * Where the role should be displayed. -1 is @everyone, it is always last
-		 */
-		public int position;
-		
-		/**
-		 * The permissions the user has. See http://bit.ly/1OnxVZe. TO see if the user has a permission, 
-		 * 1 << [permOffset] & [permissions number] must be greater than 0. Remember to check the manage roles permission!
-		 * That permissions supercedes all others
-		 */
-		public int permissions;
-		
-		/**
-		 * The role name
-		 */
-		public String name;
-		
-		/**
-		 * Whether this role is managed via plugins like twitch
-		 */
-		public boolean managed;
-		
-		/**
-		 * The role id
-		 */
-		public String id;
-		
-		/**
-		 * Whether to display this role separately from others
-		 */
-		public boolean hoist;
-		
-		/**
-		 * The DECIMAL format for the color
-		 */
-		public int color;
-	}
-	
-	/**
 	 * Represents a guild member
 	 */
-	public class MemberResponse {
+	public static class MemberResponse {
 		
 		/**
 		 * The user this member object represents
@@ -213,5 +172,10 @@ public class GuildResponse {
 		 * The timestamp for when the user joined the guild
 		 */
 		public String joined_at;
+		
+		public MemberResponse(UserResponse user, String[] roles) {
+			this.user = user;
+			this.roles = roles;
+		}
 	}
 }

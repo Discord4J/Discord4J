@@ -6,17 +6,18 @@ import sx.blah.discord.api.IDiscordClient;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages event listeners and event logic.
  */
 public class EventDispatcher {
 	
-	private HashMap<Class<?>, HashMap<Method, Object>> methodListeners = new HashMap<>();
-	private HashMap<Class<?>, List<IListener>> classListeners = new HashMap<>();
+	private ConcurrentHashMap<Class<?>, HashMap<Method, Object>> methodListeners = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<Class<?>, List<IListener>> classListeners = new ConcurrentHashMap<>();
 	private IDiscordClient client;
 	
 	public EventDispatcher(IDiscordClient client) {
@@ -25,7 +26,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Registers a listener using {@link EventSubscriber} method annotations.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void registerListener(Object listener) {
@@ -44,14 +45,14 @@ public class EventDispatcher {
 	
 	/**
 	 * Registers a single event listener.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void registerListener(IListener listener) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (Event.class.isAssignableFrom(rawType)) {
 			if (!classListeners.containsKey(rawType))
-				classListeners.put(rawType, new ArrayList<>());
+				classListeners.put(rawType, new CopyOnWriteArrayList<>());
 			
 			classListeners.get(rawType).add(listener);
 		}
@@ -59,7 +60,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Unregisters a listener using {@link EventSubscriber} method annotations.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void unregisterListener(Object listener) {
@@ -76,7 +77,7 @@ public class EventDispatcher {
 	
 	/**
 	 * Unregisters a single event listener.
-	 * 
+	 *
 	 * @param listener The listener.
 	 */
 	public void unregisterListener(IListener listener) {
@@ -89,25 +90,27 @@ public class EventDispatcher {
 	
 	/**
 	 * Dispatches an event.
-	 * 
+	 *
 	 * @param event The event.
 	 */
 	public void dispatch(Event event) {
-		Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());
-		event.client = client;
-		if (methodListeners.containsKey(event.getClass())) {
-			HashMap<Method, Object> methodListeners = this.methodListeners.get(event.getClass());
-			for (Method method : methodListeners.keySet())
-				try {
-					method.invoke(methodListeners.get(method), event);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
-				}
-		}
-		
-		if (classListeners.containsKey(event.getClass())) {
-			for (IListener listener : classListeners.get(event.getClass()))
-				listener.handle(event);
+		if (client.isReady()) {
+			Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());
+			event.client = client;
+			if (methodListeners.containsKey(event.getClass())) {
+				HashMap<Method, Object> methodListeners = this.methodListeners.get(event.getClass());
+				for (Method method : methodListeners.keySet())
+					try {
+						method.invoke(methodListeners.get(method), event);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
+					}
+			}
+			
+			if (classListeners.containsKey(event.getClass())) {
+				for (IListener listener : classListeners.get(event.getClass()))
+					listener.handle(event);
+			}
 		}
 	}
 }

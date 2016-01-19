@@ -49,7 +49,7 @@ public class ReadyEventResponse {
 	/**
 	 * The guilds the user is a part of
 	 */
-	public GuildResponse[] guilds; 
+	public GuildResponse[] guilds;
 	
 	/**
 	 * Represents a user's client settings

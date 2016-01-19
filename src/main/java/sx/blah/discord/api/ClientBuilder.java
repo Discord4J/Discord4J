@@ -14,23 +14,26 @@ public class ClientBuilder {
 	
 	/**
 	 * Sets the login info for the client. This is a REQUIRED step
+	 *
 	 * @param email The user's email
 	 * @param password The user's password
 	 * @return The instance of the builder
 	 */
 	public ClientBuilder withLogin(String email, String password) {
-		loginInfo = new String[] {email, password};
+		loginInfo = new String[]{email, password};
 		return this;
 	}
 	
 	/**
 	 * Creates the discord instance with the desired features
+	 *
 	 * @return The discord instance
-	 * @throws DiscordInstantiationException Thrown if the instance isn't built correctly
+	 *
+	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
-	public IDiscordClient build() throws DiscordInstantiationException {
+	public IDiscordClient build() throws DiscordException {
 		if (loginInfo.length < 2)
-			throw new DiscordInstantiationException("No login info present!");
+			throw new DiscordException("No login info present!");
 		
 		//Warnings for the current version of this api.
 		for (Features feature : EnumSet.allOf(Features.class)) {
@@ -56,15 +59,17 @@ public class ClientBuilder {
 	
 	/**
 	 * Performs {@link #build()} and logs in automatically
+	 *
 	 * @return The discord instance
-	 * @throws DiscordInstantiationException Thrown if the instance isn't built correctly
+	 *
+	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
-	public IDiscordClient login() throws DiscordInstantiationException {
+	public IDiscordClient login() throws DiscordException {
 		IDiscordClient client = build();
 		try {
 			client.login();
 		} catch (Exception e) {
-			throw new DiscordInstantiationException("Exception ("+e.getClass().getSimpleName()+") occurred while logging in: "+e.getMessage());
+			throw new DiscordException("Exception ("+e.getClass().getSimpleName()+") occurred while logging in: "+e.getMessage());
 		}
 		return client;
 	}

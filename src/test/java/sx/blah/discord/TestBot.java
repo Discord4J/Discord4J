@@ -21,22 +21,22 @@ package sx.blah.discord;
 
 import org.junit.Test;
 import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.Channel;
-import sx.blah.discord.handle.obj.Invite;
-import sx.blah.discord.handle.obj.Message;
-import sx.blah.discord.handle.obj.PrivateChannel;
+import sx.blah.discord.handle.impl.obj.Invite;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.Presences;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -60,22 +60,29 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
-			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).login();
-
+			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
+				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
+				
+				for (DiscordStatus.Maintenance maintenance : DiscordStatus.getUpcomingMaintenances()) {
+					Discord4J.LOGGER.warn("Discord has upcoming maintenance: {} on {}", maintenance.getName(), maintenance.getStart().toString());
+				}
+				
+				client.login();
+				
 				final AtomicBoolean didTest = new AtomicBoolean(false);
 				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 					@Override
 					public void handle(ReadyEvent readyEvent) {
 						try {
 							//Initialize required data
-							Invite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
+							IInvite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse response = testInvite.accept();
-							Invite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
+							IInvite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
 							Invite.InviteResponse spoofResponse = spoofInvite.accept();
-							Channel testChannel = client.getChannelByID(response.getChannelID());
-							Channel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
+							final IChannel testChannel = client.getChannelByID(response.getChannelID());
+							final IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 							
 							//Start testing
@@ -83,15 +90,17 @@ public class TestBot {
 									buildNumber, MessageBuilder.Styles.BOLD).build();
 							
 							//Clearing spoofbot's mess from before
-							for (Message message : spoofChannel.getMessages()) {
+							synchronized (client) {
+								for (IMessage message : spoofChannel.getMessages()) {
 									message.delete();
+								}
 							}
 							
 							//Time to unleash the ai
 							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
 							
 							final long now = System.currentTimeMillis();
-							new Thread(() -> {
+							new Thread(()->{
 								while (!didTest.get()) {
 									if (now+MAX_TEST_TIME <= System.currentTimeMillis()) {
 										//Test timer up!
@@ -109,20 +118,22 @@ public class TestBot {
 					}
 				});
 				
-				while (!didTest.get()) {};
+				while (!didTest.get()) {}
 				
 			} else { //Dev testing
+				client.login();
+				
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
 					public void handle(MessageReceivedEvent messageReceivedEvent) {
-						Message m = messageReceivedEvent.getMessage();
+						IMessage m = messageReceivedEvent.getMessage();
 						if (m.getContent().startsWith(".meme")
 								|| m.getContent().startsWith(".nicememe")) {
 							new MessageBuilder(client).appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
 									.appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
 									.build();
 						} else if (m.getContent().startsWith(".clear")) {
-							Channel c = client.getChannelByID(m.getChannel().getID());
+							IChannel c = client.getChannelByID(m.getChannel().getID());
 							if (null != c) {
 								c.getMessages().stream().filter(message->message.getAuthor().getID()
 										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message->{
@@ -144,7 +155,7 @@ public class TestBot {
 							}
 						} else if (m.getContent().startsWith(".pm")) {
 							try {
-								PrivateChannel channel = client.getOrCreatePMChannel(m.getAuthor());
+								IPrivateChannel channel = client.getOrCreatePMChannel(m.getAuthor());
 								new MessageBuilder(client).withChannel(channel).withContent("SUP DUDE").build();
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -175,6 +186,31 @@ public class TestBot {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
+						} else if (m.getContent().startsWith(".permissions")) {
+							if (m.getMentions().size() < 1)
+								return;
+							StringJoiner roleJoiner = new StringJoiner(", ");
+							StringJoiner permissionsJoiner = new StringJoiner(", ");
+							for (IRole role : m.getMentions().get(0).getRolesForGuild(m.getChannel().getGuild().getID())) {
+								Discord4J.LOGGER.info("{}", role.getID());
+								for (Permissions permissions : role.getPermissions()) {
+									permissionsJoiner.add(permissions.toString());
+								}
+								roleJoiner.add(role.getName()+" ("+permissionsJoiner.toString()+")");
+								permissionsJoiner = new StringJoiner(", ");
+							}
+							try {
+								Discord4J.LOGGER.info("{}", m.getAuthor().getID());
+								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						} else if (m.getContent().startsWith(".test")) {
+							try {
+								IGuild guild = client.createGuild("Test2", Optional.empty(), Optional.empty());
+							} catch (HTTP403Exception e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				});
@@ -182,7 +218,7 @@ public class TestBot {
 				client.getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
 					@Override
 					public void handle(InviteReceivedEvent event) {
-						Invite invite = event.getInvite();
+						IInvite invite = event.getInvite();
 						try {
 							Invite.InviteResponse response = invite.details();
 							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));

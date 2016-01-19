@@ -1,6 +1,5 @@
 package sx.blah.discord.json.responses.events;
 
-import sx.blah.discord.json.responses.GuildResponse;
 import sx.blah.discord.json.responses.UserResponse;
 
 /**
@@ -16,7 +15,7 @@ public class GuildMemberAddEventResponse {
 	/**
 	 * The roles of the user. TODO: Is this ever not empty?
 	 */
-	public GuildResponse.RoleResponse[] roles;
+	public String[] roles;
 	
 	/**
 	 * Timestamp for when the user joined
