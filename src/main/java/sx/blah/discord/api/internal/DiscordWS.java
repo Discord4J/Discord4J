@@ -417,13 +417,13 @@ public class DiscordWS extends WebSocketClient {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
 				if (!user.getPresence().equals(presences)) {
-					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, user.getPresence(), presences));
 					user.setPresence(presences);
+					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, user.getPresence(), presences));
 					Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
 				if (!user.getGame().equals(Optional.ofNullable(gameName))) {
-					client.dispatcher.dispatch(new GameChangeEvent(guild, user, user.getGame(), Optional.ofNullable(gameName)));
 					user.setGame(Optional.ofNullable(gameName));
+					client.dispatcher.dispatch(new GameChangeEvent(guild, user, user.getGame(), Optional.ofNullable(gameName)));
 					Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
 				}
 			}
