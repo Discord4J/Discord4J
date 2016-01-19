@@ -37,10 +37,9 @@ public interface IDiscordClient {
 	/**
 	 * Logs the client in as the provided account.
 	 *
-	 * @throws IOException
-	 * @throws URISyntaxException
+	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
-	void login() throws IOException, URISyntaxException;
+	void login() throws DiscordException;
 	
 	/**
 	 * Logs out the client.

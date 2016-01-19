@@ -138,21 +138,21 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public void login() throws IOException, URISyntaxException {
-		if (null != ws) {
-			ws.close();
-		}
-		
+	public void login() throws DiscordException {
 		try {
+			if (null != ws) {
+				ws.close();
+			}
+			
 			LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
 					new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
 					new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
 			this.token = response.token;
-		} catch (HTTP403Exception e) {
-			e.printStackTrace();
+			
+			this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
+		} catch (Exception e) {
+			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
-		
-		this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
 	}
 	
 	@Override
