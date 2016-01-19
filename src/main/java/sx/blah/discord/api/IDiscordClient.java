@@ -252,7 +252,7 @@ public interface IDiscordClient {
 	 * 
 	 * @throws HTTP403Exception
 	 */
-	String createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception;
+	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception;
 	
 	/**
 	 * Represents an avatar image.

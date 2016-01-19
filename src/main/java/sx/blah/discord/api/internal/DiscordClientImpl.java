@@ -466,14 +466,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public String createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception {
+	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE + "/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
 							new CreateGuildRequest(name, regionID.orElse(null), icon.orElse(null)))),
 					new BasicNameValuePair("authorization", this.token),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
-			return guildResponse.id; //FIXME: Return object somehow, dammit discord why can't you return the full object?
+			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);
+			guildList.add(guild);
+			return guild;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

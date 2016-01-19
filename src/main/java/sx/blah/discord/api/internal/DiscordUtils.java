@@ -212,32 +212,36 @@ public class DiscordUtils {
 		} else {
 			guild = new Guild(client, json.name, json.id, json.icon, json.owner_id, json.afk_channel_id, json.afk_timeout, json.region);
 			
-			for (RoleResponse roleResponse : json.roles) {
-				guild.addRole(getRoleFromJSON(guild, roleResponse));
-			}
+			if (json.roles != null)
+				for (RoleResponse roleResponse : json.roles) {
+					guild.addRole(getRoleFromJSON(guild, roleResponse));
+				}
 			
-			for (GuildResponse.MemberResponse member : json.members) {
-				guild.addUser(getUserFromGuildMemberResponse(client, guild, member));
-			}
+			if (json.members != null)
+				for (GuildResponse.MemberResponse member : json.members) {
+					guild.addUser(getUserFromGuildMemberResponse(client, guild, member));
+				}
 			
 			if (json.large) { //The guild is large, we have to send a request to get the offline users
 				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new GuildMembersRequest(json.id)));
 			}
 			
-			for (PresenceResponse presence : json.presences) {
-				User user = (User) guild.getUserByID(presence.user.id);
-				user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
-				user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
-			}
-			
-			for (ChannelResponse channelResponse : json.channels) {
-				String channelType = channelResponse.type;
-				if (channelType.equalsIgnoreCase("text")) {
-					guild.addChannel(getChannelFromJSON(client, guild, channelResponse));
-				} else if (channelType.equalsIgnoreCase("voice")) {
-					guild.addVoiceChannel(getVoiceChannelFromJSON(client, guild, channelResponse));
+			if (json.presences != null)
+				for (PresenceResponse presence : json.presences) {
+					User user = (User) guild.getUserByID(presence.user.id);
+					user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
+					user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
 				}
-			}
+			
+			if (json.channels != null)
+				for (ChannelResponse channelResponse : json.channels) {
+					String channelType = channelResponse.type;
+					if (channelType.equalsIgnoreCase("text")) {
+						guild.addChannel(getChannelFromJSON(client, guild, channelResponse));
+					} else if (channelType.equalsIgnoreCase("voice")) {
+						guild.addVoiceChannel(getVoiceChannelFromJSON(client, guild, channelResponse));
+					}
+				}
 		}
 		
 		return guild;

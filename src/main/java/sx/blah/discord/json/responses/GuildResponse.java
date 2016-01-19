@@ -53,9 +53,9 @@ public class GuildResponse {
 	public MemberResponse[] members;
 	
 	/**
-	 * FIXME ??
+	 * Whether the the guild is large and requires a separate request to retrieve offline guild members. 
 	 */
-	public boolean large;
+	public boolean large = false;
 	
 	/**
 	 * The timestamp for when the guild was created
