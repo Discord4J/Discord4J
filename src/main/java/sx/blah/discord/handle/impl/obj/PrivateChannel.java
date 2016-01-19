@@ -134,11 +134,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 	
 	@Override
-	public String getID() {
-		return recipient.getID();
-	}
-	
-	@Override
 	public String getName() {
 		return recipient.getName();
 	}
