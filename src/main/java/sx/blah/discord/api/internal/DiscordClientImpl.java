@@ -248,10 +248,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
 			
 			if (!this.token.equals(response.token)) {
-				Discord4J.LOGGER.debug("Token changed, reopening the websocket.");
+				Discord4J.LOGGER.debug("Token changed, updating it.");
 				this.token = response.token;
-				((DiscordWS) this.ws).disconnect();
-				this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
 			}
 		} catch (HTTP403Exception e) {
 			Discord4J.LOGGER.error("Received 403 error attempting to change account details; is your login correct?");
