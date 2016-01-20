@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
 
@@ -35,6 +38,8 @@ public class DiscordWS extends WebSocketClient {
 	private DiscordClientImpl client;
 	private static final HashMap<String, String> headers = new HashMap<>();
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
+	private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
 	/**
 	 * The amount of users a guild must have to be considered "large"
 	 */
@@ -71,19 +76,19 @@ public class DiscordWS extends WebSocketClient {
 		} else
 			Discord4J.LOGGER.error("Use the login() method to set your token first!");
 	}
-	
+
 	private void startKeepalive() {
-		new Thread(()->{
-			// Keep alive
-			while (this.isConnected.get()) {
-				long l;
-				if ((l = (System.currentTimeMillis()-client.timer)) >= client.heartbeat) {
-					Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-					send(DiscordUtils.GSON.toJson(new KeepAliveRequest()));
-					client.timer = System.currentTimeMillis();
-				}
+		Runnable keepAlive = () -> {
+			if (this.isConnected.get()) {
+				long l = System.currentTimeMillis() - client.timer;
+				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+				send(DiscordUtils.GSON.toJson(new KeepAliveRequest()));
+				client.timer = System.currentTimeMillis();
 			}
-		}).start();
+		};
+		executorService.scheduleAtFixedRate(keepAlive,
+				client.timer + client.heartbeat - System.currentTimeMillis(),
+				client.heartbeat, TimeUnit.MILLISECONDS);
 	}
 	
 	/**
