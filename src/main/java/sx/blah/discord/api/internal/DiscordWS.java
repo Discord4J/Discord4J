@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_10;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.events.*;
@@ -23,6 +24,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +62,7 @@ public class DiscordWS extends WebSocketClient {
 	 * Disconnects the client WS.
 	 */
 	public void disconnect() {
+		client.dispatcher.dispatch(new DiscordDisconnectedEvent());
 		isConnected.set(false);
 		close();
 	}
@@ -681,5 +684,15 @@ public class DiscordWS extends WebSocketClient {
 	@Override
 	public void onError(Exception e) {
 		e.printStackTrace();
+	}
+	
+	@Override
+	public void send(String text) throws NotYetConnectedException {
+		try {
+			super.send(text);
+		} catch (WebsocketNotConnectedException e) {
+			Discord4J.LOGGER.warn("Websocket unexpectedly lost connection!");
+			disconnect();
+		}
 	}
 }
