@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP403Exception;
 
 import java.io.IOException;
@@ -65,16 +66,21 @@ public interface IMessage {
 	 * object before your content
 	 *
 	 * @param content Message to send.
+	 * 
+	 * @throws IOException
+	 * @throws MissingPermissionsException
 	 */
-	void reply(String content) throws IOException;
+	void reply(String content) throws IOException, MissingPermissionsException;
 	
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
 	 *
 	 * @param content The new content for the message to contain.
 	 * @return The new message (this).
+	 *
+	 * @throws MissingPermissionsException
 	 */
-	IMessage edit(String content);
+	IMessage edit(String content) throws MissingPermissionsException;
 	
 	/**
 	 * Returns whether this message mentions everyone.
@@ -85,11 +91,15 @@ public interface IMessage {
 	
 	/**
 	 * Deletes the message.
+	 *
+	 * @throws MissingPermissionsException
 	 */
-	void delete();
+	void delete() throws MissingPermissionsException;
 	
 	/**
 	 * Acknowledges a message and all others before it (marks it as "read").
+	 * 
+	 * @throws HTTP403Exception
 	 */
 	void acknowledge() throws HTTP403Exception;
 	

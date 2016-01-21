@@ -3,6 +3,7 @@ package sx.blah.discord.handle.impl.obj;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -156,7 +157,9 @@ public class Role implements IRole {
 	}
 	
 	@Override
-	public void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws HTTP403Exception {
+	public void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
+		
 		try {
 			RoleResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
 					DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id,
@@ -170,7 +173,9 @@ public class Role implements IRole {
 	}
 	
 	@Override
-	public void delete() throws HTTP403Exception {
+	public void delete() throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
+		
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id, 
 				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
 	}

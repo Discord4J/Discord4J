@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP403Exception;
 
 import java.util.Optional;
@@ -16,8 +17,10 @@ public interface IVoiceChannel extends IChannel {
 	 *
 	 * @param name The new name of the channel.
 	 * @param position The new position of the channel.
+	 * 
 	 * @throws DiscordException
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, HTTP403Exception;
+	void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, HTTP403Exception, MissingPermissionsException;
 }

@@ -2,6 +2,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP403Exception;
 
 import java.util.List;
@@ -134,8 +135,9 @@ public interface IGuild {
 	 * @return The new role.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	IRole createRole() throws HTTP403Exception;
+	IRole createRole() throws HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Retrieves the list of banned users from this guild.
@@ -152,8 +154,9 @@ public interface IGuild {
 	 * @param userID The user to ban.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	void banUser(String userID) throws HTTP403Exception;
+	void banUser(String userID) throws HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Bans a user from this guild.
@@ -162,8 +165,9 @@ public interface IGuild {
 	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
 	 *
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception;
+	void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * This removes a ban on a user.
@@ -171,8 +175,9 @@ public interface IGuild {
 	 * @param userID The user to unban.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	void pardonUser(String userID) throws HTTP403Exception;
+	void pardonUser(String userID) throws HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Kicks a user from the guild.
@@ -180,8 +185,9 @@ public interface IGuild {
 	 * @param userID The user to kick.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	void kickUser(String userID) throws HTTP403Exception;
+	void kickUser(String userID) throws HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Edits the roles a user is a part of.
@@ -190,8 +196,9 @@ public interface IGuild {
 	 * @param roleIDs The roles for the user to have.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception;
+	void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Edits the guild.
@@ -203,8 +210,9 @@ public interface IGuild {
 	 * @param afkTimeout The afk timeout for the guild.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws MissingPermissionsException
 	 */
-	void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception;
+	void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Deletes the channel if you are its owner or leaves it if not.
@@ -220,8 +228,9 @@ public interface IGuild {
 	 * @return The new channel.
 	 *
 	 * @throws DiscordException
+	 * @throws MissingPermissionsException
 	 */
-	IChannel createChannel(String name) throws DiscordException, HTTP403Exception;
+	IChannel createChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Creates a new voice channel.
@@ -230,8 +239,9 @@ public interface IGuild {
 	 * @return The new channel.
 	 *
 	 * @throws DiscordException
+	 * @throws MissingPermissionsException
 	 */
-	IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception;
+	IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Gets the region this guild is located in.

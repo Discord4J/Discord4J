@@ -28,6 +28,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
@@ -220,12 +221,21 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public IMessage sendMessage(String content) {
+	public IMessage sendMessage(String content) throws MissingPermissionsException {
 		return sendMessage(content, false);
 	}
 	
 	@Override
-	public IMessage sendMessage(String content, boolean tts) {
+	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException {
+		EnumSet<Permissions> permissions = EnumSet.of(Permissions.SEND_MESSAGES);
+		if (tts)
+			permissions.add(Permissions.SEND_TTS_MESSAGES);
+		if (DiscordUtils.URL_PATTERN.matcher(content).find()) //See Message#edit()
+			permissions.add(Permissions.EMBED_LINKS);
+		if (content.contains("@everyone"))
+			permissions.add(Permissions.MENTION_EVERYONE);
+		DiscordUtils.checkPermissions(client, this, permissions);
+		
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 			
@@ -251,7 +261,9 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public IMessage sendFile(File file) throws HTTP403Exception, IOException {
+	public IMessage sendFile(File file) throws HTTP403Exception, IOException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
+		
 		if (client.isReady()) {
 			//These next two lines of code took WAAAAAY too long to figure out than I care to admit
 			HttpEntity fileEntity = MultipartEntityBuilder.create().addBinaryBody("file", file,
@@ -270,7 +282,9 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
+		
 		if (!client.isReady()) {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return null;
@@ -328,7 +342,9 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception {
+	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
+		
 		String newName = name.orElse(this.name);
 		int newPosition = position.orElse(this.position);
 		String newTopic = topic.orElse(this.topic);
@@ -361,7 +377,9 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void delete() throws HTTP403Exception {
+	public void delete() throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
+		
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
@@ -453,7 +471,9 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void removePermissionsOverride(String id) throws HTTP403Exception {
+	public void removePermissionsOverride(String id) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
 				new BasicNameValuePair("authorization", client.getToken()));
 		if (roleOverrides.containsKey(id)) {
@@ -464,16 +484,18 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException {
 		overridePermissions("role", roleID, toAdd, toRemove);
 	}
 	
 	@Override
-	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException {
 		overridePermissions("member", userID, toAdd, toRemove);
 	}
 	
-	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		
 		try {
 			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id, 

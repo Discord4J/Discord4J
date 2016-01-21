@@ -5,11 +5,13 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP403Exception;
@@ -18,6 +20,7 @@ import sx.blah.discord.util.Requests;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 public class Message implements IMessage {
@@ -158,12 +161,21 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void reply(String content) throws IOException {
+	public void reply(String content) throws IOException, MissingPermissionsException {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
 	
 	@Override
-	public IMessage edit(String content) {
+	public IMessage edit(String content) throws MissingPermissionsException {
+		if (!this.getAuthor().equals(client.getOurUser()))
+			throw new MissingPermissionsException("Cannot edit other users' messages!");
+		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
+		if (DiscordUtils.URL_PATTERN.matcher(content).find()) //See Channel#sendMessage()
+			permissions.add(Permissions.EMBED_LINKS);
+		if (content.contains("@everyone"))
+			permissions.add(Permissions.MENTION_EVERYONE);
+		DiscordUtils.checkPermissions(client, getChannel(), permissions);
+		
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 			
@@ -213,7 +225,10 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void delete() {
+	public void delete() throws MissingPermissionsException {
+		if (!getAuthor().equals(client.getOurUser()))
+			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+		
 		if (client.isReady()) {
 			try {
 				Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,

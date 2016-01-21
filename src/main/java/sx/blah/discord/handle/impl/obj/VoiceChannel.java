@@ -2,6 +2,7 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -98,7 +99,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 	
 	@Override
-	public void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, HTTP403Exception {
+	public void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, HTTP403Exception, MissingPermissionsException {
 		super.edit(name, position, Optional.empty());
 	}
 }

@@ -17,6 +17,10 @@ public class MissingPermissionsException extends Exception {
 		missing = permissionsMissing;
 	}
 	
+	public MissingPermissionsException(String message) {
+		super(message);
+	}
+	
 	private static String getMessage(EnumSet<Permissions> permissions) {
 		StringJoiner joiner = new StringJoiner(", ");
 		for (Permissions permission : permissions)
@@ -30,6 +34,8 @@ public class MissingPermissionsException extends Exception {
 	 * @return The message.
 	 */
 	public String getErrorMessage() {
+		if (missing == null)
+			return getLocalizedMessage();
 		return getMessage(missing);
 	}
 }

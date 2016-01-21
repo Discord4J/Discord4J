@@ -23,6 +23,7 @@ import org.junit.Test;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
@@ -142,6 +143,8 @@ public class TestBot {
 										client.deleteMessage(message.getID(), message.getChannel().getID());
 									} catch (IOException e) {
 										Discord4J.LOGGER.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
+									} catch (MissingPermissionsException e) {
+										e.printStackTrace();
 									}
 								});
 							}
@@ -151,6 +154,8 @@ public class TestBot {
 								client.changeAccountInfo(s, "", "", IDiscordClient.Image.forUser(client.getOurUser()));
 								m.reply("is this better?");
 							} catch (IOException | URISyntaxException e) {
+								e.printStackTrace();
+							} catch (MissingPermissionsException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".pm")) {
@@ -172,7 +177,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".invite")) {
 							try {
 								m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
-							} catch (IOException e) {
+							} catch (IOException | MissingPermissionsException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".avatar")) {
@@ -202,7 +207,7 @@ public class TestBot {
 							try {
 								Discord4J.LOGGER.info("{}", m.getAuthor().getID());
 								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
-							} catch (IOException e) {
+							} catch (IOException | MissingPermissionsException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {

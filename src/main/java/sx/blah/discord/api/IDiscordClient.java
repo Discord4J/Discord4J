@@ -59,7 +59,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link Channel#sendMessage(String)}
 	 */
 	@Deprecated
-	IMessage sendMessage(String content, String channelID) throws IOException;
+	IMessage sendMessage(String content, String channelID) throws IOException, MissingPermissionsException;
 	
 	/**
 	 * Edits a message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -72,7 +72,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link Message#edit(String)}
 	 */
 	@Deprecated
-	IMessage editMessage(String content, String messageID, String channelID);
+	IMessage editMessage(String content, String messageID, String channelID) throws MissingPermissionsException;
 	
 	/**
 	 * Deletes a message.
@@ -83,7 +83,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link Message#delete()}
 	 */
 	@Deprecated
-	void deleteMessage(String messageID, String channelID) throws IOException;
+	void deleteMessage(String messageID, String channelID) throws IOException, MissingPermissionsException;
 	
 	/**
 	 * FIXME: Fix this because it's fucking stupid.
@@ -201,7 +201,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link Channel#createInvite(int, int, boolean, boolean)}
 	 */
 	@Deprecated
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID);
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) throws MissingPermissionsException;
 	
 	/**
 	 * Gets the invite for a code.
@@ -222,7 +222,7 @@ public interface IDiscordClient {
 	 * @deprecated Use {@link IGuild#createChannel(String)}
 	 */
 	@Deprecated
-	IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception;
+	IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception, MissingPermissionsException;
 	
 	/**
 	 * Gets the regions available for discord.

@@ -25,6 +25,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.RoleResponse;
@@ -39,6 +40,7 @@ import sx.blah.discord.util.Requests;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -297,7 +299,9 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public IRole createRole() throws HTTP403Exception {
+	public IRole createRole() throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
+		
 		RoleResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS + id + "/roles",
 				new BasicNameValuePair("authorization", client.getToken())), RoleResponse.class);
 		IRole role = DiscordUtils.getRoleFromJSON(this, response);
@@ -316,30 +320,38 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void banUser(String userID) throws HTTP403Exception {
+	public void banUser(String userID) throws HTTP403Exception, MissingPermissionsException {
 		banUser(userID, 0);
 	}
 	
 	@Override
-	public void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception {
+	public void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		
 		Requests.PUT.makeRequest(DiscordEndpoints.SERVERS + id + "/bans/" + userID + "?delete-message-days=" + deleteMessagesForDays,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 	
 	@Override
-	public void pardonUser(String userID) throws HTTP403Exception {
+	public void pardonUser(String userID) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + id + "/bans/" + userID,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 	
 	@Override
-	public void kickUser(String userID) throws HTTP403Exception {
+	public void kickUser(String userID) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.KICK));
+		
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + id + "/members/" + userID,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 	
 	@Override
-	public void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception {
+	public void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
+		
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.SERVERS + id + "/members/" + userID,
 					new StringEntity(DiscordUtils.GSON.toJson(new MemberEditRequest(roleIDs))),
@@ -351,7 +363,9 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception {
+	public void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
+		
 		try {
 			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.SERVERS + id,
 					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
@@ -370,7 +384,9 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public IChannel createChannel(String name) throws DiscordException, HTTP403Exception {
+	public IChannel createChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
+		
 		if (!client.isReady()) {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return null;
@@ -396,7 +412,9 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception {
+	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
+		
 		if (!client.isReady()) {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return null;

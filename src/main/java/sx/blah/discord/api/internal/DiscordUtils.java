@@ -41,7 +41,7 @@ public class DiscordUtils {
 	/**
 	 * Used to find urls in order to not escape them
 	 */
-	public static final Pattern urlPattern = Pattern.compile(
+	public static final Pattern URL_PATTERN = Pattern.compile(
 			"(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
 					+"(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
 					+"[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
@@ -120,7 +120,7 @@ public class DiscordUtils {
 	public static String escapeString(String string) {
 		//All this weird regex stuff is to prevent any urls from being escaped and therefore breaking them
 		List<String> urls = new ArrayList<>();
-		Matcher matcher = urlPattern.matcher(string);
+		Matcher matcher = URL_PATTERN.matcher(string);
 		while (matcher.find()) {
 			int matchStart = matcher.start(1);
 			int matchEnd = matcher.end();

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ClassUtils;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
@@ -62,12 +63,20 @@ public class SpoofBot {
 										switch (toSpoof) {
 											case MESSAGE:
 												channel.toggleTypingStatus();
-												lastSpoofData = channel.sendMessage((rng.nextInt(10) == 9 ?
-														other.getOurUser().mention()+" " : "")+getRandMessage());
+												try {
+													lastSpoofData = channel.sendMessage((rng.nextInt(10) == 9 ?
+															other.getOurUser().mention()+" " : "")+getRandMessage());
+												} catch (MissingPermissionsException e) {
+													e.printStackTrace();
+												}
 												break;
 											
 											case MESSAGE_EDIT:
-												((IMessage) lastSpoofData).edit(getRandMessage());
+												try {
+													((IMessage) lastSpoofData).edit(getRandMessage());
+												} catch (MissingPermissionsException e) {
+													e.printStackTrace();
+												}
 												break;
 											
 											case TYPING_TOGGLE:
@@ -84,15 +93,28 @@ public class SpoofBot {
 												break;
 											
 											case MESSAGE_DELETE:
-												((IMessage) lastSpoofData).delete();
+												try {
+													((IMessage) lastSpoofData).delete();
+												} catch (MissingPermissionsException e) {
+													e.printStackTrace();
+												}
 												break;
 											
 											case INVITE:
-												IInvite invite = client.getGuilds().get(0).getChannels().get(
-														rng.nextInt(client.getGuilds().get(0).getChannels().size()))
-														.createInvite(18000, 1, false, false);
+												IInvite invite = null;
+												try {
+													invite = client.getGuilds().get(0).getChannels().get(
+															rng.nextInt(client.getGuilds().get(0).getChannels().size()))
+															.createInvite(18000, 1, false, false);
+												} catch (MissingPermissionsException e) {
+													e.printStackTrace();
+												}
 												if (invite.getInviteCode() != null) {
-													channel.sendMessage("https://discord.gg/"+invite.getInviteCode());
+													try {
+														channel.sendMessage("https://discord.gg/"+invite.getInviteCode());
+													} catch (MissingPermissionsException e) {
+														e.printStackTrace();
+													}
 												}
 												lastSpoofData = invite;
 												break;
@@ -105,11 +127,11 @@ public class SpoofBot {
 														while (deletionTimer > System.currentTimeMillis()) {}
 														try {
 															newChannel.delete();
-														} catch (HTTP403Exception e) {
+														} catch (HTTP403Exception | MissingPermissionsException e) {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (DiscordException | HTTP403Exception e) {
+												} catch (DiscordException | HTTP403Exception | MissingPermissionsException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -117,7 +139,7 @@ public class SpoofBot {
 											case CHANNEL_EDIT:
 												try {
 													channel.edit(Optional.of(getRandString()), Optional.of(channel.getPosition()), Optional.of(getRandSentence()));
-												} catch (DiscordException | HTTP403Exception e) {
+												} catch (DiscordException | HTTP403Exception | MissingPermissionsException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -133,11 +155,11 @@ public class SpoofBot {
 														while (deletionTimer > System.currentTimeMillis()) {}
 														try {
 															role.delete();
-														} catch (HTTP403Exception e) {
+														} catch (HTTP403Exception | MissingPermissionsException e) {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (HTTP403Exception e) {
+												} catch (HTTP403Exception | MissingPermissionsException e) {
 													e.printStackTrace();
 												}
 												break;
