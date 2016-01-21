@@ -325,7 +325,7 @@ public class DiscordUtils {
 			message.setTimestamp(convertFromTimestamp(json.edited_timestamp == null ? json.timestamp : json.edited_timestamp));
 			return message;
 		} else
-			return new Message(client, json.id, json.content, client.getUserByID(json.author.id),
+			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),
 					channel, convertFromTimestamp(json.timestamp), json.mention_everyone, getMentionsFromJSON(client, json),
 					getAttachmentsFromJSON(json));
 	}
