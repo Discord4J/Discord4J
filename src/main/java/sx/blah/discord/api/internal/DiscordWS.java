@@ -332,6 +332,11 @@ public class DiscordWS extends WebSocketClient {
 	
 	private void guildCreate(JsonElement eventObject) {
 		GuildResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
+		if (event.unavailable) { //Guild can't be reached, so we ignore it
+			Discord4J.LOGGER.warn("Guild with id {} is unavailable, ignoring it. Is there an outage?", event.id);
+			return;
+		}
+		
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(client, event);
 		client.guildList.add(guild);
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
@@ -446,8 +451,13 @@ public class DiscordWS extends WebSocketClient {
 		GuildResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
 		Guild guild = (Guild) client.getGuildByID(event.id);
 		client.getGuilds().remove(guild);
-		Discord4J.LOGGER.debug("You have been kicked from or left \"{}\"! :O", guild.getName());
-		client.dispatcher.dispatch(new GuildLeaveEvent(guild));
+		if (event.unavailable) { //Guild can't be reached
+			Discord4J.LOGGER.warn("Guild with id {} is unavailable, is there an outage?", event.id);
+			client.dispatcher.dispatch(new GuildUnavailableEvent(guild));
+		} else {
+			Discord4J.LOGGER.debug("You have been kicked from or left \"{}\"! :O", guild.getName());
+			client.dispatcher.dispatch(new GuildLeaveEvent(guild));
+		}
 	}
 	
 	private void channelCreate(JsonElement eventObject) {
