@@ -248,6 +248,10 @@ public class DiscordWS extends WebSocketClient {
 		client.heartbeat = event.heartbeat_interval;
 		Discord4J.LOGGER.debug("Received heartbeat interval of {}.", client.heartbeat);
 		
+		startKeepalive();
+		
+		client.isReady = true;
+		
 		// I hope you like loops.
 		for (GuildResponse guildResponse : event.guilds) {
 			if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
@@ -255,7 +259,9 @@ public class DiscordWS extends WebSocketClient {
 				continue;
 			}
 			
-			client.guildList.add(DiscordUtils.getGuildFromJSON(client, guildResponse));
+			IGuild guild = DiscordUtils.getGuildFromJSON(client, guildResponse);
+			if (guild != null)
+				client.guildList.add(guild);
 		}
 		
 		for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
@@ -271,9 +277,6 @@ public class DiscordWS extends WebSocketClient {
 		
 		Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
 		
-		startKeepalive();
-		
-		client.isReady = true;
 		client.dispatcher.dispatch(new ReadyEvent());
 	}
 	
@@ -292,6 +295,10 @@ public class DiscordWS extends WebSocketClient {
 				
 				if (event.content.contains("discord.gg/")) {
 					String inviteCode = event.content.split("discord\\.gg/")[1].split(" ")[0];
+					Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
+					client.dispatcher.dispatch(new InviteReceivedEvent(client.getInviteForCode(inviteCode), message));
+				} else if (event.content.contains("discordapp.com/invite/")) {
+					String inviteCode = event.content.split("discordapp\\.com/invite/")[1].split(" ")[0];
 					Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
 					client.dispatcher.dispatch(new InviteReceivedEvent(client.getInviteForCode(inviteCode), message));
 				}
