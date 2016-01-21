@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 
 /**
  * Represents an invite into a channel.
@@ -40,8 +41,9 @@ public interface IInvite {
 	 * Attempts to delete the invite this object represents.
 	 *
 	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
 	 */
-	void delete() throws HTTP403Exception;
+	void delete() throws HTTP403Exception, HTTP429Exception;
 	
 	/**
 	 * Represents the details of an invite.

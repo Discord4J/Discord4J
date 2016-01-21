@@ -15,6 +15,7 @@ import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
@@ -52,10 +53,13 @@ public class DiscordUtils {
 	 *
 	 * @param client The discord client to use
 	 * @param channel The channel to get messages from.
+	 * 
 	 * @throws IOException
+	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
 	 */
 	//TODO: maybe move?
-	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP403Exception {
+	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP403Exception, HTTP429Exception {
 		try {
 			if (!(channel instanceof IPrivateChannel) && !(channel instanceof IVoiceChannel))
 				checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGE_HISTORY));

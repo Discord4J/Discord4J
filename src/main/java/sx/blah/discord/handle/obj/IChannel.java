@@ -4,6 +4,7 @@ import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,8 +92,9 @@ public interface IChannel {
 	 * @return The message object representing the sent message
 	 * 
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	IMessage sendMessage(String content) throws MissingPermissionsException;
+	IMessage sendMessage(String content) throws MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Sends a message to the desired channel.
@@ -102,8 +104,9 @@ public interface IChannel {
 	 * @return The message object representing the sent message
 	 * 
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException;
+	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Sends a file to the channel.
@@ -114,8 +117,9 @@ public interface IChannel {
 	 * @throws HTTP403Exception
 	 * @throws IOException
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	IMessage sendFile(File file) throws HTTP403Exception, IOException, MissingPermissionsException;
+	IMessage sendFile(File file) throws HTTP403Exception, IOException, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Generates an invite for this channel.
@@ -127,8 +131,9 @@ public interface IChannel {
 	 * @return The newly generated invite.
 	 *
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException;
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Toggles whether the bot is "typing".
@@ -166,8 +171,9 @@ public interface IChannel {
 	 * @throws DiscordException
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception, MissingPermissionsException;
+	void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Gets the position of the channel on the channel list.
@@ -181,8 +187,9 @@ public interface IChannel {
 	 *
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void delete() throws HTTP403Exception, MissingPermissionsException;
+	void delete() throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Gets the permissions overrides for users. (Key = User id).
@@ -221,8 +228,9 @@ public interface IChannel {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void removePermissionsOverride(String id) throws HTTP403Exception, MissingPermissionsException;
+	void removePermissionsOverride(String id) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -233,8 +241,9 @@ public interface IChannel {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException;
+	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -245,8 +254,9 @@ public interface IChannel {
 	 *
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException;
+	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.

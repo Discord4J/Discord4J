@@ -89,7 +89,7 @@ public enum Requests {
 	 *
 	 * @throws HTTP403Exception
 	 */
-	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP403Exception {
+	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP403Exception, HTTP429Exception {
 		try {
 			HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 			for (BasicNameValuePair header : headers) {
@@ -103,6 +103,8 @@ public enum Requests {
 				throw new HTTP403Exception("Unable to make request to "+url);
 			} else if (responseCode == 204) { //There is a no content response when deleting messages
 				return null;
+			} else if (responseCode == 429) {
+				throw new HTTP429Exception("Unable to make request to "+url+" you may have hit Discord's rate limit");
 			}
 			return EntityUtils.toString(response.getEntity());
 		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -121,7 +123,7 @@ public enum Requests {
 	 *
 	 * @throws HTTP403Exception
 	 */
-	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP403Exception {
+	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP403Exception, HTTP429Exception {
 		try {
 			if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 				HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -138,6 +140,8 @@ public enum Requests {
 					throw new HTTP403Exception("Unable to make request to "+url);
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
+				} else if (responseCode == 429) {
+					throw new HTTP429Exception("Unable to make request to "+url+" you may have hit Discord's rate limit");
 				}
 				return EntityUtils.toString(response.getEntity());
 			} else {

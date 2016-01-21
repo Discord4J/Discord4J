@@ -11,6 +11,7 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.RoleEditRequest;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
 import java.awt.*;
@@ -157,7 +158,7 @@ public class Role implements IRole {
 	}
 	
 	@Override
-	public void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws HTTP403Exception, MissingPermissionsException {
+	public void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 		
 		try {
@@ -173,7 +174,7 @@ public class Role implements IRole {
 	}
 	
 	@Override
-	public void delete() throws HTTP403Exception, MissingPermissionsException {
+	public void delete() throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 		
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id, 

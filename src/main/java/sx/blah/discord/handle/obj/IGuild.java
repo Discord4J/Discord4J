@@ -4,6 +4,7 @@ import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 
 import java.util.List;
 import java.util.Optional;
@@ -136,8 +137,9 @@ public interface IGuild {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	IRole createRole() throws HTTP403Exception, MissingPermissionsException;
+	IRole createRole() throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Retrieves the list of banned users from this guild.
@@ -145,8 +147,9 @@ public interface IGuild {
 	 * @return The list of banned users.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
 	 */
-	List<IUser> getBannedUsers() throws HTTP403Exception;
+	List<IUser> getBannedUsers() throws HTTP403Exception, HTTP429Exception;
 	
 	/**
 	 * Bans a user from this guild.
@@ -155,8 +158,9 @@ public interface IGuild {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void banUser(String userID) throws HTTP403Exception, MissingPermissionsException;
+	void banUser(String userID) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Bans a user from this guild.
@@ -166,8 +170,9 @@ public interface IGuild {
 	 *
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception, MissingPermissionsException;
+	void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * This removes a ban on a user.
@@ -176,8 +181,9 @@ public interface IGuild {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void pardonUser(String userID) throws HTTP403Exception, MissingPermissionsException;
+	void pardonUser(String userID) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Kicks a user from the guild.
@@ -186,8 +192,9 @@ public interface IGuild {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void kickUser(String userID) throws HTTP403Exception, MissingPermissionsException;
+	void kickUser(String userID) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Edits the roles a user is a part of.
@@ -197,8 +204,9 @@ public interface IGuild {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception, MissingPermissionsException;
+	void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Edits the guild.
@@ -211,15 +219,17 @@ public interface IGuild {
 	 * 
 	 * @throws HTTP403Exception
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception, MissingPermissionsException;
+	void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Deletes the channel if you are its owner or leaves it if not.
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
 	 */
-	void deleteOrLeaveGuild() throws HTTP403Exception;
+	void deleteOrLeaveGuild() throws HTTP403Exception, HTTP429Exception;
 	
 	/**
 	 * Creates a new channel.
@@ -229,8 +239,9 @@ public interface IGuild {
 	 *
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	IChannel createChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException;
+	IChannel createChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Creates a new voice channel.
@@ -240,8 +251,9 @@ public interface IGuild {
 	 *
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException;
+	IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Gets the region this guild is located in.

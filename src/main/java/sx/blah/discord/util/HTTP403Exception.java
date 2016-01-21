@@ -22,7 +22,9 @@ package sx.blah.discord.util;
 /**
  * Represents a 403 FORBIDDEN return code from a url connection.
  */
+@Deprecated
 public class HTTP403Exception extends Exception {
+	
 	public HTTP403Exception(String cause) {
 		super(cause);
 	}

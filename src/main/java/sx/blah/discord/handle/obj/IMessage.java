@@ -2,6 +2,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -69,8 +70,9 @@ public interface IMessage {
 	 * 
 	 * @throws IOException
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void reply(String content) throws IOException, MissingPermissionsException;
+	void reply(String content) throws IOException, MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -80,7 +82,7 @@ public interface IMessage {
 	 *
 	 * @throws MissingPermissionsException
 	 */
-	IMessage edit(String content) throws MissingPermissionsException;
+	IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Returns whether this message mentions everyone.
@@ -93,15 +95,17 @@ public interface IMessage {
 	 * Deletes the message.
 	 *
 	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
 	 */
-	void delete() throws MissingPermissionsException;
+	void delete() throws MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Acknowledges a message and all others before it (marks it as "read").
 	 * 
 	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
 	 */
-	void acknowledge() throws HTTP403Exception;
+	void acknowledge() throws HTTP403Exception, HTTP429Exception;
 	
 	/**
 	 * Checks if the message has been read by this account.

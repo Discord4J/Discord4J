@@ -7,6 +7,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,7 +100,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 	
 	@Override
-	public void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, HTTP403Exception, MissingPermissionsException {
+	public void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception {
 		super.edit(name, position, Optional.empty());
 	}
 }

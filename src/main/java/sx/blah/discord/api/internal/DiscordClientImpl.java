@@ -1,22 +1,3 @@
-/*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2015
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 package sx.blah.discord.api.internal;
 
 import org.apache.http.entity.StringEntity;
@@ -32,12 +13,12 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -157,7 +138,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public void logout() throws HTTP403Exception {
+	public void logout() throws HTTP403Exception, HTTP429Exception {
 		if (isReady()) {
 			ws.disconnect();
 			
@@ -181,13 +162,15 @@ public final class DiscordClientImpl implements IDiscordClient {
 			gateway = response.url.replaceAll("wss", "ws");
 		} catch (HTTP403Exception e) {
 			Discord4J.LOGGER.error("Received 403 error attempting to get gateway; is your login correct?");
+		} catch (HTTP429Exception e) {
+			e.printStackTrace();
 		}
 		Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
 		return gateway;
 	}
 	
 	@Override
-	public IMessage sendMessage(String content, String channelID) throws IOException, MissingPermissionsException {
+	public IMessage sendMessage(String content, String channelID) throws IOException, MissingPermissionsException, HTTP429Exception {
 		IChannel channel = getChannelByID(channelID);
 		if (channel == null) {
 			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
@@ -197,7 +180,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public IMessage editMessage(String content, String messageID, String channelID) throws MissingPermissionsException {
+	public IMessage editMessage(String content, String messageID, String channelID) throws MissingPermissionsException, HTTP429Exception {
 		IChannel channel = getChannelByID(channelID);
 		if (channel == null) {
 			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
@@ -214,7 +197,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public void deleteMessage(String messageID, String channelID) throws IOException, MissingPermissionsException {
+	public void deleteMessage(String messageID, String channelID) throws IOException, MissingPermissionsException, HTTP429Exception {
 		IChannel channel = getChannelByID(channelID);
 		if (channel == null) {
 			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
@@ -232,7 +215,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
 	
 	@Override
-	public void changeAccountInfo(String username, String email, String password, Image avatar) throws UnsupportedEncodingException, URISyntaxException {
+	public void changeAccountInfo(String username, String email, String password, Image avatar) throws HTTP429Exception {
 		Discord4J.LOGGER.debug("Changing account info.");
 		
 		if (!isReady()) {
@@ -254,6 +237,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 			}
 		} catch (HTTP403Exception e) {
 			Discord4J.LOGGER.error("Received 403 error attempting to change account details; is your login correct?");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -402,7 +387,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) throws MissingPermissionsException {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) throws MissingPermissionsException, HTTP429Exception {
 		IChannel channel = getChannelByID(channelID);
 		if (channel == null) {
 			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
@@ -424,19 +409,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
 			
 			return DiscordUtils.getInviteFromJSON(this, response);
-		} catch (HTTP403Exception e) {
+		} catch (HTTP403Exception | HTTP429Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	@Override
-	public IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception, MissingPermissionsException {
+	public IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception {
 		return guild.createChannel(name);
 	}
 	
 	@Override
-	public List<IRegion> getRegions() throws HTTP403Exception {
+	public List<IRegion> getRegions() throws HTTP403Exception, HTTP429Exception {
 		if (REGIONS.isEmpty()) {
 			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					DiscordEndpoints.VOICE + "regions",
@@ -458,14 +443,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 				if (region.getID().equals(regionID))
 					return region;
 			}
-		} catch (HTTP403Exception e) {
+		} catch (HTTP403Exception | HTTP429Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	@Override
-	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception {
+	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception, HTTP429Exception {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE + "/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(

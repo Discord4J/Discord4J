@@ -32,10 +32,10 @@ import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -143,7 +143,7 @@ public class TestBot {
 										client.deleteMessage(message.getID(), message.getChannel().getID());
 									} catch (IOException e) {
 										Discord4J.LOGGER.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
-									} catch (MissingPermissionsException e) {
+									} catch (MissingPermissionsException | HTTP429Exception e) {
 										e.printStackTrace();
 									}
 								});
@@ -153,9 +153,7 @@ public class TestBot {
 							try {
 								client.changeAccountInfo(s, "", "", IDiscordClient.Image.forUser(client.getOurUser()));
 								m.reply("is this better?");
-							} catch (IOException | URISyntaxException e) {
-								e.printStackTrace();
-							} catch (MissingPermissionsException e) {
+							} catch (IOException | HTTP429Exception | MissingPermissionsException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".pm")) {
@@ -177,7 +175,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".invite")) {
 							try {
 								m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
-							} catch (IOException | MissingPermissionsException e) {
+							} catch (IOException | MissingPermissionsException | HTTP429Exception e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".avatar")) {
@@ -207,13 +205,13 @@ public class TestBot {
 							try {
 								Discord4J.LOGGER.info("{}", m.getAuthor().getID());
 								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
-							} catch (IOException | MissingPermissionsException e) {
+							} catch (IOException | MissingPermissionsException | HTTP429Exception e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {
 							try {
 								IGuild guild = client.createGuild("Test2", Optional.empty(), Optional.empty());
-							} catch (HTTP403Exception e) {
+							} catch (HTTP403Exception | HTTP429Exception e) {
 								e.printStackTrace();
 							}
 						}

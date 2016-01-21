@@ -15,6 +15,7 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP403Exception;
+import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
 import java.io.IOException;
@@ -161,12 +162,12 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void reply(String content) throws IOException, MissingPermissionsException {
+	public void reply(String content) throws IOException, MissingPermissionsException, HTTP429Exception {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
 	
 	@Override
-	public IMessage edit(String content) throws MissingPermissionsException {
+	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
@@ -225,7 +226,7 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void delete() throws MissingPermissionsException {
+	public void delete() throws MissingPermissionsException, HTTP429Exception {
 		if (!getAuthor().equals(client.getOurUser()))
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		
@@ -242,7 +243,7 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void acknowledge() throws HTTP403Exception {
+	public void acknowledge() throws HTTP403Exception, HTTP429Exception {
 		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getChannel().getID()+"/messages/"+getID()+"/ack",
 				new BasicNameValuePair("authorization", client.getToken()));
 		channel.setLastReadMessageID(getID());
