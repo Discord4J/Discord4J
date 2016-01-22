@@ -216,6 +216,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	
 	@Override
 	public void changeAccountInfo(String username, String email, String password, Image avatar) throws HTTP429Exception {
+		changeAccountInfo(Optional.ofNullable(username == null || username.isEmpty() ? null : username),
+				Optional.ofNullable(email == null || email.isEmpty() ? null : email),
+				Optional.ofNullable(password == null || password.isEmpty() ? null : password),
+				Optional.ofNullable(avatar));
+	}
+	
+	@Override
+	public void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception {
 		Discord4J.LOGGER.debug("Changing account info.");
 		
 		if (!isReady()) {
@@ -225,9 +233,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 		
 		try {
 			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
-					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email == null || email.isEmpty() ? this.email : email,
-							this.password, password, username == null || username.isEmpty() ? ourUser.getName() : username,
-							avatar == null ? Image.defaultAvatar().getData() : avatar.getData()))),
+					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email.orElse(this.email),
+							this.password, password.orElse(this.password), username.orElse(getOurUser().getName()),
+							avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData()))),
 					new BasicNameValuePair("Authorization", token),
 					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
 			
