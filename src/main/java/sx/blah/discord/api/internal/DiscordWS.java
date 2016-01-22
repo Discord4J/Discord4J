@@ -590,7 +590,11 @@ public class DiscordWS extends WebSocketClient {
 			
 			toUpdate = (Guild) DiscordUtils.getGuildFromJSON(client, guildResponse);
 			
-			client.dispatcher.dispatch(new GuildUpdateEvent(oldGuild, toUpdate));
+			if (!toUpdate.getOwnerID().equals(oldGuild.getOwnerID())) {
+				client.dispatcher.dispatch(new GuildTransferOwnershipEvent(oldGuild.getOwner(), toUpdate.getOwner(), toUpdate));
+			} else {
+				client.dispatcher.dispatch(new GuildUpdateEvent(oldGuild, toUpdate));
+			}
 		}
 	}
 	

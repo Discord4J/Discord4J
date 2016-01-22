@@ -261,4 +261,15 @@ public interface IGuild {
 	 * @return The region.
 	 */
 	IRegion getRegion();
+	
+	/**
+	 * Transfers the ownership of this guild to another user.
+	 * 
+	 * @param newOwnerID The new owner's user id.
+	 * 
+	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
+	 * @throws MissingPermissionsException
+	 */
+	void transferOwnership(String newOwnerID) throws HTTP403Exception, HTTP429Exception, MissingPermissionsException;
 }

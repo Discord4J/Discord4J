@@ -32,6 +32,7 @@ import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.ChannelCreateRequest;
 import sx.blah.discord.json.requests.EditGuildRequest;
 import sx.blah.discord.json.requests.MemberEditRequest;
+import sx.blah.discord.json.requests.TransferOwnershipRequest;
 import sx.blah.discord.json.responses.ChannelResponse;
 import sx.blah.discord.json.responses.GuildResponse;
 import sx.blah.discord.json.responses.UserResponse;
@@ -453,6 +454,20 @@ public class Guild implements IGuild {
 	public void setRegion(String regionID) {
 		this.regionID = regionID;
 	}
+	
+	@Override
+	public void transferOwnership(String newOwnerID) throws HTTP403Exception, HTTP429Exception, MissingPermissionsException {
+		if (!getOwnerID().equals(client.getOurUser().getID()))
+			throw new MissingPermissionsException("Cannot transfer ownership when you aren't the current owner!");
+		try {
+			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.SERVERS + id,
+					new StringEntity(DiscordUtils.GSON.toJson(new TransferOwnershipRequest(newOwnerID))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	} 
 	
 	@Override
 	public boolean equals(Object other) {
