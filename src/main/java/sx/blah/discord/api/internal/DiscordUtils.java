@@ -510,22 +510,24 @@ public class DiscordUtils {
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(IDiscordClient client, IChannel channel, EnumSet<Permissions> required) throws MissingPermissionsException {
-		EnumSet<Permissions> contained = EnumSet.noneOf(Permissions.class);
-		List<IRole> roles = client.getOurUser().getRolesForGuild(channel.getGuild().getID());
-		for (IRole role : roles) {
-			contained.addAll(role.getPermissions());
-			if (channel.getRoleOverrides().containsKey(role.getID())) {
-				IChannel.PermissionOverride override = channel.getRoleOverrides().get(role.getID());
+		try {
+			EnumSet<Permissions> contained = EnumSet.noneOf(Permissions.class);
+			List<IRole> roles = client.getOurUser().getRolesForGuild(channel.getGuild().getID());
+			for (IRole role : roles) {
+				contained.addAll(role.getPermissions());
+				if (channel.getRoleOverrides().containsKey(role.getID())) {
+					IChannel.PermissionOverride override = channel.getRoleOverrides().get(role.getID());
+					contained.addAll(override.allow());
+					contained.removeAll(override.deny());
+				}
+			}
+			if (channel.getUserOverrides().containsKey(client.getOurUser().getID())) {
+				IChannel.PermissionOverride override = channel.getUserOverrides().get(client.getOurUser().getID());
 				contained.addAll(override.allow());
 				contained.removeAll(override.deny());
 			}
-		}
-		if (channel.getUserOverrides().containsKey(client.getOurUser().getID())) {
-			IChannel.PermissionOverride override = channel.getUserOverrides().get(client.getOurUser().getID());
-			contained.addAll(override.allow());
-			contained.removeAll(override.deny());
-		}
-		checkPermissions(contained, required);
+			checkPermissions(contained, required);
+		} catch (UnsupportedOperationException e) {}
 	}
 	
 	/**
@@ -538,12 +540,14 @@ public class DiscordUtils {
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(IDiscordClient client, IGuild guild, EnumSet<Permissions> required) throws MissingPermissionsException {
-		EnumSet<Permissions> contained = EnumSet.noneOf(Permissions.class);
-		List<IRole> roles = client.getOurUser().getRolesForGuild(guild.getID());
-		for (IRole role : roles) {
-			contained.addAll(role.getPermissions());
-		}
-		checkPermissions(contained, required);
+		try {
+			EnumSet<Permissions> contained = EnumSet.noneOf(Permissions.class);
+			List<IRole> roles = client.getOurUser().getRolesForGuild(guild.getID());
+			for (IRole role : roles) {
+				contained.addAll(role.getPermissions());
+			}
+			checkPermissions(contained, required);
+		} catch (UnsupportedOperationException e) {}
 	}
 	
 	/**
