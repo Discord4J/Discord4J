@@ -96,8 +96,22 @@ public interface IDiscordClient {
 	 * @param avatar Image data for the bot's avatar, {@link Image}
 	 *
 	 * @throws HTTP429Exception
+	 * @deprecated Use {@link #changeAccountInfo(Optional, Optional, Optional, Optional)}
 	 */
+	@Deprecated
 	void changeAccountInfo(String username, String email, String password, Image avatar) throws HTTP429Exception;
+	
+	/**
+	 * Allows you to change the info on your bot.
+	 *
+	 * @param username Username (if you want to change it).
+	 * @param email Email (if you want to change it)
+	 * @param password Password (if you want to change it).
+	 * @param avatar Image data for the bot's avatar, {@link Image}
+	 *
+	 * @throws HTTP429Exception
+	 */
+	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception; 
 	
 	/**
 	 * Updates the bot's presence.
