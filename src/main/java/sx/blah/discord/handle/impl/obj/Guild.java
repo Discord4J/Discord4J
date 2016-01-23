@@ -36,7 +36,6 @@ import sx.blah.discord.json.requests.TransferOwnershipRequest;
 import sx.blah.discord.json.responses.ChannelResponse;
 import sx.blah.discord.json.responses.GuildResponse;
 import sx.blah.discord.json.responses.UserResponse;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
@@ -301,7 +300,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public IRole createRole() throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public IRole createRole() throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 		
 		RoleResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.SERVERS + id + "/roles",
@@ -311,7 +310,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public List<IUser> getBannedUsers() throws HTTP403Exception, HTTP429Exception {
+	public List<IUser> getBannedUsers() throws HTTP429Exception {
 		UserResponse[] users = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.SERVERS + id + "/bans",
 				new BasicNameValuePair("authorization", client.getToken())), UserResponse[].class);
 		List<IUser> banned = new ArrayList<>();
@@ -322,12 +321,12 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void banUser(String userID) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void banUser(String userID) throws MissingPermissionsException, HTTP429Exception {
 		banUser(userID, 0);
 	}
 	
 	@Override
-	public void banUser(String userID, int deleteMessagesForDays) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 		
 		Requests.PUT.makeRequest(DiscordEndpoints.SERVERS + id + "/bans/" + userID + "?delete-message-days=" + deleteMessagesForDays,
@@ -335,7 +334,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void pardonUser(String userID) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void pardonUser(String userID) throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 		
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + id + "/bans/" + userID,
@@ -343,7 +342,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void kickUser(String userID) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void kickUser(String userID) throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.KICK));
 		
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + id + "/members/" + userID,
@@ -351,7 +350,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void editUserRoles(String userID, String[] roleIDs) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void editUserRoles(String userID, String[] roleIDs) throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 		
 		try {
@@ -365,7 +364,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		
 		try {
@@ -380,13 +379,13 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void deleteOrLeaveGuild() throws HTTP403Exception, HTTP429Exception {
+	public void deleteOrLeaveGuild() throws HTTP429Exception {
 		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + id,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 	
 	@Override
-	public IChannel createChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public IChannel createChannel(String name) throws DiscordException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 		
 		if (!client.isReady()) {
@@ -414,7 +413,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 		
 		if (!client.isReady()) {
@@ -456,7 +455,7 @@ public class Guild implements IGuild {
 	}
 	
 	@Override
-	public void transferOwnership(String newOwnerID) throws HTTP403Exception, HTTP429Exception, MissingPermissionsException {
+	public void transferOwnership(String newOwnerID) throws HTTP429Exception, MissingPermissionsException {
 		if (!getOwnerID().equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("Cannot transfer ownership when you aren't the current owner!");
 		try {

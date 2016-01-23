@@ -1,7 +1,6 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.MissingPermissionsException;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.IOException;
@@ -102,10 +101,9 @@ public interface IMessage {
 	/**
 	 * Acknowledges a message and all others before it (marks it as "read").
 	 * 
-	 * @throws HTTP403Exception
 	 * @throws HTTP429Exception
 	 */
-	void acknowledge() throws HTTP403Exception, HTTP429Exception;
+	void acknowledge() throws HTTP429Exception;
 	
 	/**
 	 * Checks if the message has been read by this account.

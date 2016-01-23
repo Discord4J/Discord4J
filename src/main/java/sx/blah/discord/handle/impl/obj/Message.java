@@ -14,7 +14,6 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
@@ -180,21 +179,17 @@ public class Message implements IMessage {
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 			
-			try {
-				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
-						new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false)), "UTF-8"),
-						new BasicNameValuePair("authorization", client.getToken()),
-						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
-				
-				IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentionsEveryone, mentions, attachments);
-				DiscordUtils.getMessageFromJSON(client, channel, response);
-				//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
-				// the event chain goes like this:
-				//Original message edited to null, then the null message edited to the new content
-				client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
-			} catch (HTTP403Exception e) {
-				Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
-			}
+			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false)), "UTF-8"),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+			
+			IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentionsEveryone, mentions, attachments);
+			DiscordUtils.getMessageFromJSON(client, channel, response);
+			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
+			// the event chain goes like this:
+			//Original message edited to null, then the null message edited to the new content
+			client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
 			
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
@@ -231,19 +226,15 @@ public class Message implements IMessage {
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		
 		if (client.isReady()) {
-			try {
-				Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
-						new BasicNameValuePair("authorization", client.getToken()));
-			} catch (HTTP403Exception e) {
-				Discord4J.LOGGER.error("Received 403 error attempting to delete message; is your login correct?");
-			}
+			Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
+					new BasicNameValuePair("authorization", client.getToken()));
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 		}
 	}
 	
 	@Override
-	public void acknowledge() throws HTTP403Exception, HTTP429Exception {
+	public void acknowledge() throws HTTP429Exception {
 		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getChannel().getID()+"/messages/"+getID()+"/ack",
 				new BasicNameValuePair("authorization", client.getToken()));
 		channel.setLastReadMessageID(getID());

@@ -6,7 +6,6 @@ import org.apache.commons.io.IOUtils;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.*;
@@ -44,62 +43,9 @@ public interface IDiscordClient {
 	/**
 	 * Logs out the client.
 	 *
-	 * @throws HTTP403Exception
 	 * @throws HTTP429Exception
 	 */
-	void logout() throws HTTP403Exception, HTTP429Exception;
-	
-	/**
-	 * Sends a message to the desired channel.
-	 *
-	 * @param content The content of the message.
-	 * @param channelID The channel id of the channel to receive the message.
-	 * @return The message object representing the sent message
-	 *
-	 * @throws IOException
-	 * @deprecated Use {@link Channel#sendMessage(String)}
-	 */
-	@Deprecated
-	IMessage sendMessage(String content, String channelID) throws IOException, MissingPermissionsException, HTTP429Exception;
-	
-	/**
-	 * Edits a message. NOTE: Discord only supports editing YOUR OWN messages!
-	 *
-	 * @param content The new content for the message to contain.
-	 * @param messageID The message id of the message to edit.
-	 * @param channelID The channel id of the channel the message belongs to.
-	 * @return The new message.
-	 *
-	 * @deprecated Use {@link Message#edit(String)}
-	 */
-	@Deprecated
-	IMessage editMessage(String content, String messageID, String channelID) throws MissingPermissionsException, HTTP429Exception;
-	
-	/**
-	 * Deletes a message.
-	 *
-	 * @param messageID The message id of the message to delete.
-	 * @param channelID The channel id of the channel the message belongs to.
-	 * @throws IOException
-	 * @deprecated Use {@link Message#delete()}
-	 */
-	@Deprecated
-	void deleteMessage(String messageID, String channelID) throws IOException, MissingPermissionsException, HTTP429Exception;
-	
-	/**
-	 * Allows you to change the info on your bot.
-	 * Any fields you don't want to change should be left as an empty string ("") or null.
-	 *
-	 * @param username Username (if you want to change it).
-	 * @param email Email (if you want to change it)
-	 * @param password Password (if you want to change it).
-	 * @param avatar Image data for the bot's avatar, {@link Image}
-	 *
-	 * @throws HTTP429Exception
-	 * @deprecated Use {@link #changeAccountInfo(Optional, Optional, Optional, Optional)}
-	 */
-	@Deprecated
-	void changeAccountInfo(String username, String email, String password, Image avatar) throws HTTP429Exception;
+	void logout() throws HTTP429Exception;
 	
 	/**
 	 * Allows you to change the info on your bot.
@@ -185,41 +131,6 @@ public interface IDiscordClient {
 	IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception;
 	
 	/**
-	 * Toggles whether the bot is "typing".
-	 *
-	 * @param channelID The channel to maintain the typing status to.
-	 * @deprecated Use {@link Channel#toggleTypingStatus()}
-	 */
-	@Deprecated
-	void toggleTypingStatus(String channelID);
-	
-	/**
-	 * Gets whether the bot is "typing".
-	 *
-	 * @param channelID The channel to get the typing status for for this bot.
-	 * @return True if the bot is typing, false if otherwise.
-	 *
-	 * @deprecated Use {@link Channel#getTypingStatus()}
-	 */
-	@Deprecated
-	boolean getTypingStatus(String channelID);
-	
-	/**
-	 * Generates an invite for this channel.
-	 *
-	 * @param maxAge How long the invite should be valid, setting it to 0 makes it last forever.
-	 * @param maxUses The maximum uses for the invite, setting it to 0 makes the invite have unlimited uses.
-	 * @param temporary Whether users admitted with this invite are temporary.
-	 * @param useXkcdPass Whether to generate a human-readable code, maxAge cannot be 0 for this to work.
-	 * @param channelID The channel to get the invite for.
-	 * @return The newly generated invite.
-	 *
-	 * @deprecated Use {@link Channel#createInvite(int, int, boolean, boolean)}
-	 */
-	@Deprecated
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) throws MissingPermissionsException, HTTP429Exception;
-	
-	/**
 	 * Gets the invite for a code.
 	 *
 	 * @param code The invite code or xkcd pass.
@@ -228,27 +139,13 @@ public interface IDiscordClient {
 	IInvite getInviteForCode(String code);
 	
 	/**
-	 * Creates a new channel.
-	 *
-	 * @param guild The guild to create the channel for.
-	 * @param name The name of the new channel. MUST be between 2-100 characters long.
-	 * @return The new channel.
-	 *
-	 * @throws DiscordException
-	 * @deprecated Use {@link IGuild#createChannel(String)}
-	 */
-	@Deprecated
-	IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception;
-	
-	/**
 	 * Gets the regions available for discord.
 	 * 
 	 * @return The list of available regions.
 	 * 
-	 * @throws HTTP403Exception
 	 * @throws HTTP429Exception
 	 */
-	List<IRegion> getRegions() throws HTTP403Exception, HTTP429Exception;
+	List<IRegion> getRegions() throws HTTP429Exception;
 	
 	/**
 	 * Gets the corresponding region for a given id.
@@ -266,10 +163,9 @@ public interface IDiscordClient {
 	 * @param icon The icon for the guild.
 	 * @return The new guild's id.
 	 * 
-	 * @throws HTTP403Exception
 	 * @throws HTTP429Exception
 	 */
-	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception, HTTP429Exception;
+	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception;
 	
 	/**
 	 * Represents an avatar image.

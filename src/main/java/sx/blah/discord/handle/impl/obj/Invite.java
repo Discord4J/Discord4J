@@ -26,7 +26,6 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.json.responses.InviteJSONResponse;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
@@ -95,7 +94,7 @@ public class Invite implements IInvite {
 	}
 	
 	@Override
-	public void delete() throws HTTP403Exception, HTTP429Exception {
+	public void delete() throws HTTP429Exception {
 		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}

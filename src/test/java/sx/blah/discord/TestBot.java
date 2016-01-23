@@ -31,7 +31,6 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MessageBuilder;
 
@@ -140,9 +139,7 @@ public class TestBot {
 										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message->{
 									try {
 										Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
-										client.deleteMessage(message.getID(), message.getChannel().getID());
-									} catch (IOException e) {
-										Discord4J.LOGGER.error("Couldn't delete message {} ({}).", message.getID(), e.getMessage());
+										message.delete();
 									} catch (MissingPermissionsException | HTTP429Exception e) {
 										e.printStackTrace();
 									}
@@ -151,7 +148,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".name ")) {
 							String s = m.getContent().split(" ", 2)[1];
 							try {
-								client.changeAccountInfo(s, "", "", IDiscordClient.Image.forUser(client.getOurUser()));
+								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUser(client.getOurUser())));
 								m.reply("is this better?");
 							} catch (IOException | HTTP429Exception | MissingPermissionsException e) {
 								e.printStackTrace();
@@ -171,7 +168,7 @@ public class TestBot {
 							client.updatePresence(client.getOurUser().getPresence().equals(Presences.IDLE),
 									Optional.ofNullable(game));
 						} else if (m.getContent().startsWith(".type")) {
-							client.toggleTypingStatus(m.getChannel().getID());
+							m.getChannel().toggleTypingStatus();
 						} else if (m.getContent().startsWith(".invite")) {
 							try {
 								m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
@@ -182,9 +179,9 @@ public class TestBot {
 							try {
 								if (m.getContent().split(" ").length > 1) {
 									String url = m.getContent().split(" ")[1];
-									client.changeAccountInfo("", "", "", IDiscordClient.Image.forUrl(url.substring(url.lastIndexOf('.')), url));
+									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUrl(url.substring(url.lastIndexOf('.')), url)));
 								} else {
-									client.changeAccountInfo("", "", "", IDiscordClient.Image.defaultAvatar());
+									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.defaultAvatar()));
 								}
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -211,7 +208,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".test")) {
 							try {
 								IGuild guild = client.createGuild("Test2", Optional.empty(), Optional.empty());
-							} catch (HTTP403Exception | HTTP429Exception e) {
+							} catch (HTTP429Exception e) {
 								e.printStackTrace();
 							}
 						}
@@ -226,9 +223,8 @@ public class TestBot {
 							Invite.InviteResponse response = invite.details();
 							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
 							invite.accept();
-							client.sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild! I was invited by %s!",
-									response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()),
-									response.getChannelID());
+							client.getChannelByID(invite.details().getChannelID()).sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild! I was invited by %s!",
+									response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

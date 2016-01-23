@@ -22,7 +22,6 @@ package sx.blah.discord.handle.impl.obj;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP403Exception;
 
 import java.util.*;
 
@@ -74,22 +73,22 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 	
 	@Override
-	public void removePermissionsOverride(String id) throws HTTP403Exception {
+	public void removePermissionsOverride(String id) {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception {
+	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public void delete() throws HTTP403Exception {
+	public void delete() {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -104,7 +103,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 	
 	@Override
-	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception {
+	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException {
 		throw new UnsupportedOperationException();
 	}
 	

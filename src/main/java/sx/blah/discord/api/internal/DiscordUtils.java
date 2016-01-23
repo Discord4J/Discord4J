@@ -14,7 +14,6 @@ import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
@@ -55,11 +54,10 @@ public class DiscordUtils {
 	 * @param channel The channel to get messages from.
 	 * 
 	 * @throws IOException
-	 * @throws HTTP403Exception
 	 * @throws HTTP429Exception
 	 */
 	//TODO: maybe move?
-	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP403Exception, HTTP429Exception {
+	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP429Exception {
 		try {
 			if (!(channel instanceof IPrivateChannel) && !(channel instanceof IVoiceChannel))
 				checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGE_HISTORY));
@@ -298,8 +296,6 @@ public class DiscordUtils {
 			channel = new PrivateChannel(client, recipient, id);
 			try {
 				DiscordUtils.getChannelMessages(client, channel);
-			} catch (HTTP403Exception e) {
-				Discord4J.LOGGER.error("No permission for the private channel for \"{}\". Are you logged in properly?", channel.getRecipient().getName());
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
 				e.printStackTrace();
@@ -394,8 +390,6 @@ public class DiscordUtils {
 			
 			try {
 				DiscordUtils.getChannelMessages(client, channel);
-			} catch (HTTP403Exception e) {
-				Discord4J.LOGGER.error("No permission for channel \"{}\" in guild \"{}\". Are you logged in properly?", json.name, guild.getName());
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", json.name, guild.getName(), e.getClass().getSimpleName());
 				e.printStackTrace();

@@ -8,7 +8,6 @@ import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.awt.*;
@@ -122,17 +121,17 @@ public class SpoofBot {
 											
 											case CHANNEL_CREATE_AND_DELETE:
 												try {
-													final IChannel newChannel = client.createChannel(channel.getGuild(), getRandString());
+													final IChannel newChannel = channel.getGuild().createChannel(getRandString());
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
 													new Thread(()->{
 														while (deletionTimer > System.currentTimeMillis()) {}
 														try {
 															newChannel.delete();
-														} catch (HTTP403Exception | MissingPermissionsException | HTTP429Exception e) {
+														} catch (MissingPermissionsException | HTTP429Exception e) {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (DiscordException | HTTP403Exception | MissingPermissionsException | HTTP429Exception e) {
+												} catch (DiscordException | MissingPermissionsException | HTTP429Exception e) {
 													e.printStackTrace();
 												}
 												break;
@@ -140,7 +139,7 @@ public class SpoofBot {
 											case CHANNEL_EDIT:
 												try {
 													channel.edit(Optional.of(getRandString()), Optional.of(channel.getPosition()), Optional.of(getRandSentence()));
-												} catch (DiscordException | HTTP403Exception | MissingPermissionsException | HTTP429Exception e) {
+												} catch (DiscordException  | MissingPermissionsException | HTTP429Exception e) {
 													e.printStackTrace();
 												}
 												break;
@@ -156,11 +155,11 @@ public class SpoofBot {
 														while (deletionTimer > System.currentTimeMillis()) {}
 														try {
 															role.delete();
-														} catch (HTTP403Exception | MissingPermissionsException | HTTP429Exception e) {
+														} catch (MissingPermissionsException | HTTP429Exception e) {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (HTTP403Exception | MissingPermissionsException | HTTP429Exception e) {
+												} catch (MissingPermissionsException | HTTP429Exception e) {
 													e.printStackTrace();
 												}
 												break;

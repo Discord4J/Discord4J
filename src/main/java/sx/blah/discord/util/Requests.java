@@ -87,9 +87,9 @@ public enum Requests {
 	 * @param headers The headers to include in the request.
 	 * @return The result (if any) returned by the request.
 	 *
-	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
 	 */
-	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP403Exception, HTTP429Exception {
+	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP429Exception {
 		try {
 			HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 			for (BasicNameValuePair header : headers) {
@@ -100,7 +100,7 @@ public enum Requests {
 			if (responseCode == 404) {
 				LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
 			} else if (responseCode == 403) {
-				throw new HTTP403Exception("Unable to make request to "+url);
+				LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
 			} else if (responseCode == 204) { //There is a no content response when deleting messages
 				return null;
 			} else if (responseCode == 429) {
@@ -121,9 +121,9 @@ public enum Requests {
 	 * @param headers The headers to include in the request.
 	 * @return The result (if any) returned by the request.
 	 *
-	 * @throws HTTP403Exception
+	 * @throws HTTP429Exception
 	 */
-	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP403Exception, HTTP429Exception {
+	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP429Exception {
 		try {
 			if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 				HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -137,7 +137,7 @@ public enum Requests {
 				if (responseCode == 404) {
 					LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
 				} else if (responseCode == 403) {
-					throw new HTTP403Exception("Unable to make request to "+url);
+					LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
 				} else if (responseCode == 429) {

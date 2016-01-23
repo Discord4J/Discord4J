@@ -38,7 +38,6 @@ import sx.blah.discord.json.requests.InviteRequest;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
@@ -240,20 +239,15 @@ public class Channel implements IChannel {
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 			
-			try {
-				MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-						new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
-						new BasicNameValuePair("authorization", client.getToken()),
-						new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
-				
-				IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
-				addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
-				client.getDispatcher().dispatch(new MessageSendEvent(message));
-				return message;
-			} catch (HTTP403Exception e) {
-				Discord4J.LOGGER.error("Received 403 error attempting to send message; is your login correct?");
-				return null;
-			}
+			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+			
+			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
+			addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
+			client.getDispatcher().dispatch(new MessageSendEvent(message));
+			return message;
 			
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
@@ -262,7 +256,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public IMessage sendFile(File file) throws HTTP403Exception, IOException, MissingPermissionsException, HTTP429Exception {
+	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 		
 		if (client.isReady()) {
@@ -298,7 +292,7 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
 			
 			return DiscordUtils.getInviteFromJSON(client, response);
-		} catch (HTTP403Exception | UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 		
@@ -318,7 +312,7 @@ public class Channel implements IChannel {
 						try {
 							Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
 									new BasicNameValuePair("authorization", client.getToken()));
-						} catch (HTTP403Exception | HTTP429Exception e) {
+						} catch (HTTP429Exception e) {
 							e.printStackTrace();
 						}
 					}
@@ -343,7 +337,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 		
 		String newName = name.orElse(this.name);
@@ -378,7 +372,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void delete() throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void delete() throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 		
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
@@ -472,7 +466,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void removePermissionsOverride(String id) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 		
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
@@ -485,16 +479,16 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception {
 		overridePermissions("role", roleID, toAdd, toRemove);
 	}
 	
 	@Override
-	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception {
 		overridePermissions("member", userID, toAdd, toRemove);
 	}
 	
-	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws HTTP403Exception, MissingPermissionsException, HTTP429Exception {
+	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 		
 		try {

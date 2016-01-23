@@ -6,17 +6,14 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
-import sx.blah.discord.util.HTTP403Exception;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -138,7 +135,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public void logout() throws HTTP403Exception, HTTP429Exception {
+	public void logout() throws HTTP429Exception {
 		if (isReady()) {
 			ws.disconnect();
 			
@@ -160,66 +157,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 			GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url.replaceAll("wss", "ws");
-		} catch (HTTP403Exception e) {
-			Discord4J.LOGGER.error("Received 403 error attempting to get gateway; is your login correct?");
 		} catch (HTTP429Exception e) {
 			e.printStackTrace();
 		}
 		Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
 		return gateway;
-	}
-	
-	@Override
-	public IMessage sendMessage(String content, String channelID) throws IOException, MissingPermissionsException, HTTP429Exception {
-		IChannel channel = getChannelByID(channelID);
-		if (channel == null) {
-			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
-			return null;
-		}
-		return channel.sendMessage(content);
-	}
-	
-	@Override
-	public IMessage editMessage(String content, String messageID, String channelID) throws MissingPermissionsException, HTTP429Exception {
-		IChannel channel = getChannelByID(channelID);
-		if (channel == null) {
-			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
-			return null;
-		}
-		
-		IMessage message = channel.getMessageByID(messageID);
-		if (message == null) {
-			Discord4J.LOGGER.error("Message id "+messageID+" doesn't exist!");
-			return null;
-		}
-		
-		return message.edit(content);
-	}
-	
-	@Override
-	public void deleteMessage(String messageID, String channelID) throws IOException, MissingPermissionsException, HTTP429Exception {
-		IChannel channel = getChannelByID(channelID);
-		if (channel == null) {
-			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
-			return;
-		}
-		
-		IMessage message = channel.getMessageByID(messageID);
-		if (message == null) {
-			Discord4J.LOGGER.error("Message id "+messageID+" doesn't exist!");
-			return;
-		}
-		
-		message.delete();
-	}
-	
-	
-	@Override
-	public void changeAccountInfo(String username, String email, String password, Image avatar) throws HTTP429Exception {
-		changeAccountInfo(Optional.ofNullable(username == null || username.isEmpty() ? null : username),
-				Optional.ofNullable(email == null || email.isEmpty() ? null : email),
-				Optional.ofNullable(password == null || password.isEmpty() ? null : password),
-				Optional.ofNullable(avatar));
 	}
 	
 	@Override
@@ -243,8 +185,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 				Discord4J.LOGGER.debug("Token changed, updating it.");
 				this.token = response.token;
 			}
-		} catch (HTTP403Exception e) {
-			Discord4J.LOGGER.error("Received 403 error attempting to change account details; is your login correct?");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -346,63 +286,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 			}
 		}
 		
-		try {
-			PrivateChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
-					new BasicNameValuePair("authorization", this.token),
-					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
-			
-			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
-			privateChannels.add(channel);
-			return channel;
-		} catch (HTTP403Exception e) {
-			e.printStackTrace();
-		}
+		PrivateChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
+				new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
+				new BasicNameValuePair("authorization", this.token),
+				new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
 		
-		return null;
-	}
-	
-	@Override
-	public void toggleTypingStatus(String channelID) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
-			return;
-		}
-		
-		IChannel channel = getChannelByID(channelID);
-		if (channel == null) {
-			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
-			return;
-		}
-		
-		channel.toggleTypingStatus();
-	}
-	
-	@Override
-	public boolean getTypingStatus(String channelID) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
-			return false;
-		}
-		
-		IChannel channel = getChannelByID(channelID);
-		if (channel == null) {
-			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
-			return false;
-		}
-		
-		return channel.getTypingStatus();
-	}
-	
-	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass, String channelID) throws MissingPermissionsException, HTTP429Exception {
-		IChannel channel = getChannelByID(channelID);
-		if (channel == null) {
-			Discord4J.LOGGER.error("Channel id "+channelID+" doesn't exist!");
-			return null;
-		}
-		
-		return channel.createInvite(maxAge, maxUses, temporary, useXkcdPass);
+		IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
+		privateChannels.add(channel);
+		return channel;
 	}
 	
 	@Override
@@ -417,19 +308,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
 			
 			return DiscordUtils.getInviteFromJSON(this, response);
-		} catch (HTTP403Exception | HTTP429Exception e) {
+		} catch (HTTP429Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	@Override
-	public IChannel createChannel(IGuild guild, String name) throws DiscordException, HTTP403Exception, MissingPermissionsException, HTTP429Exception {
-		return guild.createChannel(name);
-	}
-	
-	@Override
-	public List<IRegion> getRegions() throws HTTP403Exception, HTTP429Exception {
+	public List<IRegion> getRegions() throws HTTP429Exception {
 		if (REGIONS.isEmpty()) {
 			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					DiscordEndpoints.VOICE + "regions",
@@ -451,14 +337,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 				if (region.getID().equals(regionID))
 					return region;
 			}
-		} catch (HTTP403Exception | HTTP429Exception e) {
+		} catch (HTTP429Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	@Override
-	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP403Exception, HTTP429Exception {
+	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE + "/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
