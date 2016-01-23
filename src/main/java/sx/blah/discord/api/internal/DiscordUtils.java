@@ -88,15 +88,6 @@ public class DiscordUtils {
 	}
 	
 	/**
-	 * Returns a user from raw JSON data.
-	 */
-	public static IUser getUserFromJSON(IDiscordClient client, String user) {
-		UserResponse response = GSON.fromJson(user, UserResponse.class);
-		
-		return getUserFromJSON(client, response);
-	}
-	
-	/**
 	 * Returns a user from the java form of the raw JSON data.
 	 */
 	public static User getUserFromJSON(IDiscordClient client, UserResponse response) {
@@ -353,16 +344,16 @@ public class DiscordUtils {
 						roleOverrides.put(overrides.id, channel.getRoleOverrides().get(overrides.id));
 					} else {
 						roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllPermissionsForNumber(overrides.allow),
-								Permissions.getAllPermissionsForNumber(overrides.deny)));
+								Permissions.getAllowedPermissionsForNumber(overrides.allow),
+								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else if (overrides.type.equalsIgnoreCase("member")) {
 					if (channel.getUserOverrides().containsKey(overrides.id)) {
 						userOverrides.put(overrides.id, channel.getUserOverrides().get(overrides.id));
 					} else {
 						userOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllPermissionsForNumber(overrides.allow),
-								Permissions.getAllPermissionsForNumber(overrides.deny)));
+								Permissions.getAllowedPermissionsForNumber(overrides.allow),
+								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else {
 					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
@@ -377,8 +368,8 @@ public class DiscordUtils {
 			
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
-						Permissions.getAllPermissionsForNumber(overrides.allow),
-						Permissions.getAllPermissionsForNumber(overrides.deny));
+						Permissions.getAllowedPermissionsForNumber(overrides.allow),
+						Permissions.getDeniedPermissionsForNumber(overrides.deny));
 				if (overrides.type.equalsIgnoreCase("role")) {
 					channel.addRoleOverride(overrides.id, override);
 				} else if (overrides.type.equalsIgnoreCase("member")) {
@@ -455,16 +446,16 @@ public class DiscordUtils {
 						roleOverrides.put(overrides.id, channel.getRoleOverrides().get(overrides.id));
 					} else {
 						roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllPermissionsForNumber(overrides.allow),
-								Permissions.getAllPermissionsForNumber(overrides.deny)));
+								Permissions.getAllowedPermissionsForNumber(overrides.allow),
+								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else if (overrides.type.equalsIgnoreCase("member")) {
 					if (channel.getUserOverrides().containsKey(overrides.id)) {
 						userOverrides.put(overrides.id, channel.getUserOverrides().get(overrides.id));
 					} else {
 						userOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllPermissionsForNumber(overrides.allow),
-								Permissions.getAllPermissionsForNumber(overrides.deny)));
+								Permissions.getAllowedPermissionsForNumber(overrides.allow),
+								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else {
 					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
@@ -479,8 +470,8 @@ public class DiscordUtils {
 			
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
-						Permissions.getAllPermissionsForNumber(overrides.allow),
-						Permissions.getAllPermissionsForNumber(overrides.deny));
+						Permissions.getAllowedPermissionsForNumber(overrides.allow),
+						Permissions.getDeniedPermissionsForNumber(overrides.deny));
 				if (overrides.type.equalsIgnoreCase("role")) {
 					channel.addRoleOverride(overrides.id, override);
 				} else if (overrides.type.equalsIgnoreCase("member")) {
