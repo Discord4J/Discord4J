@@ -511,21 +511,7 @@ public class DiscordUtils {
 	 */
 	public static void checkPermissions(IDiscordClient client, IChannel channel, EnumSet<Permissions> required) throws MissingPermissionsException {
 		try {
-			EnumSet<Permissions> contained = EnumSet.noneOf(Permissions.class);
-			List<IRole> roles = client.getOurUser().getRolesForGuild(channel.getGuild().getID());
-			for (IRole role : roles) {
-				contained.addAll(role.getPermissions());
-				if (channel.getRoleOverrides().containsKey(role.getID())) {
-					IChannel.PermissionOverride override = channel.getRoleOverrides().get(role.getID());
-					contained.addAll(override.allow());
-					contained.removeAll(override.deny());
-				}
-			}
-			if (channel.getUserOverrides().containsKey(client.getOurUser().getID())) {
-				IChannel.PermissionOverride override = channel.getUserOverrides().get(client.getOurUser().getID());
-				contained.addAll(override.allow());
-				contained.removeAll(override.deny());
-			}
+			EnumSet<Permissions> contained = channel.getModifiedPermissions(client.getOurUser());
 			checkPermissions(contained, required);
 		} catch (UnsupportedOperationException e) {}
 	}
