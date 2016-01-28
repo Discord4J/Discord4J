@@ -50,6 +50,63 @@ dependencies {
 }
 ...
 ```
+## So, how do I use this?
+### Starting with the API
+The very first thing you need to do is obtain a "DiscordClient" object. This can be done by using the `ClientBuilder`.
+Example:
+```java
+public class Example {
+
+  public static IDiscordClient getClient(String email, String password, boolean login) { //Returns an instance of the discord client
+    ClientBuilder clientBuilder = new ClientBuilder(); //Creates the ClientBuilder instance
+    clientBuilder.withLogin(email, password); //Adds the login info to the builder
+    if (login) {
+      return clientBuilder.login(); //Creates the client instance and logs the client in
+    } else {
+      return clientBuilder.build(); //Creates the client instance but it doesn't log the client in yet, you would have to call client.login() yourself
+    }
+  }
+}
+```
+### Events
+The Discord4J library is very event driven. Your bot can detect these events through the use of an event listener. There are two ways of creating an event listener.
+Using `IListener`:
+```java
+public class InterfaceListener implements IListener<ReadyEvent> { //The event type in IListener<> can be any class which extends Event
+  
+  @Override
+  public void handle(ReadyEvent event) { //This is called when the ReadyEvent is dispatched
+    doCoolStuff();
+  }
+}
+```
+Using the `@EventSubscriber` annotation:
+```java
+public class AnnotationListener {
+  
+  @EventSubscriber
+  public void onReadyEvent(ReadyEvent event) { //This method is called when the ReadyEvent is dispatched
+    foo();
+  }
+  
+  public void onMessageReceivedEvent(MessageReceivedEvent event) { //This method is NOT called because it doesn't have the @EventSubscriber annotation
+    bar();
+  }
+}
+```
+
+Registering your listener:
+```java
+public class Main {
+  
+  public static void main(String[] args) {
+    IDiscordClient client = Example.getClient(args[0], args[1], true); //Gets the client object (from the first example)
+    EventDispatcher dispatcher = client.getDispatcher(); //Gets the EventDispatcher instance for this client instance
+    dispatcher.registerListener(new InterfaceListener()); //Registers the IListener example class from above
+    dispatcher.registerListener(new AnnotationListener()); //Registers the @EventSubscriber example class from above
+  }
+}
+```
 
 ## Deprecation policy
 Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
