@@ -156,7 +156,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
-			gateway = response.url.replaceAll("wss", "ws");
+			gateway = response.url;//.replaceAll("wss", "ws");
 		} catch (HTTP429Exception e) {
 			e.printStackTrace();
 		}

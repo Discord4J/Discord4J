@@ -17,7 +17,6 @@ import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -161,7 +160,7 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void reply(String content) throws IOException, MissingPermissionsException, HTTP429Exception {
+	public void reply(String content) throws MissingPermissionsException, HTTP429Exception {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
 	

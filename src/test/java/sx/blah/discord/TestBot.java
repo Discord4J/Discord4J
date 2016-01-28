@@ -34,7 +34,6 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MessageBuilder;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -150,7 +149,7 @@ public class TestBot {
 							try {
 								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUser(client.getOurUser())));
 								m.reply("is this better?");
-							} catch (IOException | HTTP429Exception | MissingPermissionsException e) {
+							} catch (HTTP429Exception | MissingPermissionsException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".pm")) {
@@ -172,7 +171,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".invite")) {
 							try {
 								m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
-							} catch (IOException | MissingPermissionsException | HTTP429Exception e) {
+							} catch (MissingPermissionsException | HTTP429Exception e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".avatar")) {
@@ -202,7 +201,7 @@ public class TestBot {
 							try {
 								Discord4J.LOGGER.info("{}", m.getAuthor().getID());
 								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
-							} catch (IOException | MissingPermissionsException | HTTP429Exception e) {
+							} catch (MissingPermissionsException | HTTP429Exception e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {

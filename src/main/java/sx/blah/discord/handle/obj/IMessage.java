@@ -71,7 +71,7 @@ public interface IMessage {
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 */
-	void reply(String content) throws IOException, MissingPermissionsException, HTTP429Exception;
+	void reply(String content) throws MissingPermissionsException, HTTP429Exception;
 	
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!

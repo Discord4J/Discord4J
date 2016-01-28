@@ -3,6 +3,7 @@ package sx.blah.discord.api.internal;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
@@ -17,6 +18,7 @@ import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
 
+import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +58,13 @@ public class DiscordWS extends WebSocketClient {
 		super(serverURI, new Draft_10(), headers, 0); //Same as super(serverURI) but I added custom headers
 //		super(serverURI);
 		this.client = client;
-		this.connect();
+		try {
+			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault()));
+			this.connect();
+		} catch (NoSuchAlgorithmException e) {
+			Discord4J.LOGGER.error("Error setting up SSL connection!");
+			e.printStackTrace();
+		}
 	}
 	
 	/**
