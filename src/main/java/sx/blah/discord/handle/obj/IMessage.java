@@ -3,7 +3,6 @@ package sx.blah.discord.handle.obj;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -67,7 +66,6 @@ public interface IMessage {
 	 *
 	 * @param content Message to send.
 	 * 
-	 * @throws IOException
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 */
