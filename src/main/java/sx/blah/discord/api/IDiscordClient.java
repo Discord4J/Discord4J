@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.*;
@@ -25,6 +26,13 @@ public interface IDiscordClient {
 	 * @return The event dispatcher instance.
 	 */
 	EventDispatcher getDispatcher();
+	
+	/**
+	 * Gets the {@link ModuleLoader} instance for this client.
+	 * 
+	 * @return The module loader instance.
+	 */
+	ModuleLoader getModuleLoader();
 	
 	/**
 	 * Gets the authorization token for this client.

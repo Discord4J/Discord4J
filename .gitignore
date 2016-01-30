@@ -16,8 +16,6 @@
 log/
 target/
 
-# So only I could push releases
-settings.xml
-
-# Misc Planning files
+# Misc files
 Roadmap.md
+modules/

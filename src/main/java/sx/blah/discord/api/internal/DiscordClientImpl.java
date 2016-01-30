@@ -11,6 +11,7 @@ import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
+import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
@@ -100,8 +101,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	protected final List<IRegion> REGIONS = new ArrayList<>();
 	
+	/**
+	 * The module loader for this client.
+	 */
+	protected ModuleLoader loader;
+	
 	public DiscordClientImpl(String email, String password) {
 		this.dispatcher = new EventDispatcher(this);
+		this.loader = new ModuleLoader(this);
 		this.email = email;
 		this.password = password;
 	}
@@ -109,6 +116,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public EventDispatcher getDispatcher() {
 		return dispatcher;
+	}
+	
+	@Override
+	public ModuleLoader getModuleLoader() {
+		return loader;
 	}
 	
 	@Override
