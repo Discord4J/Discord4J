@@ -10,4 +10,9 @@ public class Configuration {
 	 * This is recommended because it automatically resolves dependencies.
 	 */
 	public static boolean AUTOMATICALLY_ENABLE_MODULES = true;
+	
+	/**
+	 * When this is true, modules are dynamically loaded from the modules directory.
+	 */
+	public static boolean LOAD_EXTERNAL_MODULES = true;
 }
