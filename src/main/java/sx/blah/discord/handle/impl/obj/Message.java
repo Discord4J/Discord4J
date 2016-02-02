@@ -168,13 +168,6 @@ public class Message implements IMessage {
 	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
-		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
-		if (DiscordUtils.URL_PATTERN.matcher(content).find()) //See Channel#sendMessage()
-			permissions.add(Permissions.EMBED_LINKS);
-		if (content.contains("@everyone"))
-			permissions.add(Permissions.MENTION_EVERYONE);
-		DiscordUtils.checkPermissions(client, getChannel(), permissions);
-		
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 			

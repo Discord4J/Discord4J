@@ -300,7 +300,7 @@ public class DiscordWS extends WebSocketClient {
 		
 		if (null != channel) {
 			IMessage message = DiscordUtils.getMessageFromJSON(client, channel, event);
-			if (!event.author.id.equalsIgnoreCase(client.getOurUser().getID())) {
+			if (!channel.getMessages().contains(message)) {
 				channel.addMessage(message);
 				Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						event.author.id, event.channel_id, event.content);

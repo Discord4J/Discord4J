@@ -227,14 +227,7 @@ public class Channel implements IChannel {
 	
 	@Override
 	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception {
-		EnumSet<Permissions> permissions = EnumSet.of(Permissions.SEND_MESSAGES);
-		if (tts)
-			permissions.add(Permissions.SEND_TTS_MESSAGES);
-		if (DiscordUtils.URL_PATTERN.matcher(content).find()) //See Message#edit()
-			permissions.add(Permissions.EMBED_LINKS);
-		if (content.contains("@everyone"))
-			permissions.add(Permissions.MENTION_EVERYONE);
-		DiscordUtils.checkPermissions(client, this, permissions);
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 		
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
