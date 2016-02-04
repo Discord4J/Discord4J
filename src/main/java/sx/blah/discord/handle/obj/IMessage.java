@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 
@@ -68,8 +69,9 @@ public interface IMessage {
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void reply(String content) throws MissingPermissionsException, HTTP429Exception;
+	void reply(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -78,8 +80,9 @@ public interface IMessage {
 	 * @return The new message (this).
 	 *
 	 * @throws MissingPermissionsException
+	 * @throws DiscordException
 	 */
-	IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception;
+	IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Returns whether this message mentions everyone.
@@ -93,15 +96,17 @@ public interface IMessage {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, HTTP429Exception;
+	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Acknowledges a message and all others before it (marks it as "read").
 	 * 
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void acknowledge() throws HTTP429Exception;
+	void acknowledge() throws HTTP429Exception, DiscordException;
 	
 	/**
 	 * Checks if the message has been read by this account.

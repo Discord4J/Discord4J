@@ -66,7 +66,7 @@ public class SpoofBot {
 												try {
 													lastSpoofData = channel.sendMessage((rng.nextInt(10) == 9 ?
 															other.getOurUser().mention()+" " : "")+getRandMessage());
-												} catch (MissingPermissionsException | HTTP429Exception e) {
+												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -74,7 +74,7 @@ public class SpoofBot {
 											case MESSAGE_EDIT:
 												try {
 													((IMessage) lastSpoofData).edit(getRandMessage());
-												} catch (MissingPermissionsException | HTTP429Exception e) {
+												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -95,7 +95,7 @@ public class SpoofBot {
 											case MESSAGE_DELETE:
 												try {
 													((IMessage) lastSpoofData).delete();
-												} catch (MissingPermissionsException | HTTP429Exception e) {
+												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -106,13 +106,13 @@ public class SpoofBot {
 													invite = client.getGuilds().get(0).getChannels().get(
 															rng.nextInt(client.getGuilds().get(0).getChannels().size()))
 															.createInvite(18000, 1, false, false);
-												} catch (MissingPermissionsException | HTTP429Exception e) {
+												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 													e.printStackTrace();
 												}
 												if (invite.getInviteCode() != null) {
 													try {
 														channel.sendMessage("https://discord.gg/"+invite.getInviteCode());
-													} catch (MissingPermissionsException | HTTP429Exception e) {
+													} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 														e.printStackTrace();
 													}
 												}
@@ -127,7 +127,7 @@ public class SpoofBot {
 														while (deletionTimer > System.currentTimeMillis()) {}
 														try {
 															newChannel.delete();
-														} catch (MissingPermissionsException | HTTP429Exception e) {
+														} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 															e.printStackTrace();
 														}
 													}).start();
@@ -155,11 +155,11 @@ public class SpoofBot {
 														while (deletionTimer > System.currentTimeMillis()) {}
 														try {
 															role.delete();
-														} catch (MissingPermissionsException | HTTP429Exception e) {
+														} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (MissingPermissionsException | HTTP429Exception e) {
+												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;

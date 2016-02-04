@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -160,12 +161,12 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void reply(String content) throws MissingPermissionsException, HTTP429Exception {
+	public void reply(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
 	
 	@Override
-	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception {
+	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
 		if (client.isReady()) {
@@ -213,7 +214,7 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void delete() throws MissingPermissionsException, HTTP429Exception {
+	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		if (!getAuthor().equals(client.getOurUser()))
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		
@@ -226,7 +227,7 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void acknowledge() throws HTTP429Exception {
+	public void acknowledge() throws HTTP429Exception, DiscordException {
 		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getChannel().getID()+"/messages/"+getID()+"/ack",
 				new BasicNameValuePair("authorization", client.getToken()));
 		channel.setLastReadMessageID(getID());

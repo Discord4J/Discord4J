@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.*;
@@ -55,9 +56,10 @@ public class DiscordUtils {
 	 * 
 	 * @throws IOException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
 	//TODO: maybe move?
-	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP429Exception {
+	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP429Exception, DiscordException {
 		try {
 			if (!(channel instanceof IPrivateChannel) && !(channel instanceof IVoiceChannel))
 				checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGE_HISTORY));

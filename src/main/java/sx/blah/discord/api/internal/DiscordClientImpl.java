@@ -135,7 +135,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public void logout() throws HTTP429Exception {
+	public void logout() throws HTTP429Exception, DiscordException {
 		if (isReady()) {
 			ws.disconnect();
 			
@@ -157,7 +157,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url;//.replaceAll("wss", "ws");
-		} catch (HTTP429Exception e) {
+		} catch (HTTP429Exception | DiscordException e) {
 			e.printStackTrace();
 		}
 		Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
@@ -165,7 +165,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception {
+	public void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException {
 		Discord4J.LOGGER.debug("Changing account info.");
 		
 		if (!isReady()) {
@@ -308,14 +308,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
 			
 			return DiscordUtils.getInviteFromJSON(this, response);
-		} catch (HTTP429Exception e) {
+		} catch (HTTP429Exception | DiscordException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	@Override
-	public List<IRegion> getRegions() throws HTTP429Exception {
+	public List<IRegion> getRegions() throws HTTP429Exception, DiscordException {
 		if (REGIONS.isEmpty()) {
 			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					DiscordEndpoints.VOICE + "regions",
@@ -337,14 +337,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 				if (region.getID().equals(regionID))
 					return region;
 			}
-		} catch (HTTP429Exception e) {
+		} catch (HTTP429Exception | DiscordException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	@Override
-	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception {
+	public IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE + "/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(

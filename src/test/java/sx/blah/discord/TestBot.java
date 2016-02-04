@@ -20,10 +20,7 @@
 package sx.blah.discord;
 
 import org.junit.Test;
-import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.DiscordStatus;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.MissingPermissionsException;
+import sx.blah.discord.api.*;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
@@ -139,7 +136,7 @@ public class TestBot {
 									try {
 										Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
 										message.delete();
-									} catch (MissingPermissionsException | HTTP429Exception e) {
+									} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 										e.printStackTrace();
 									}
 								});
@@ -149,7 +146,7 @@ public class TestBot {
 							try {
 								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUser(client.getOurUser())));
 								m.reply("is this better?");
-							} catch (HTTP429Exception | MissingPermissionsException e) {
+							} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".pm")) {
@@ -171,7 +168,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".invite")) {
 							try {
 								m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
-							} catch (MissingPermissionsException | HTTP429Exception e) {
+							} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".avatar")) {
@@ -201,13 +198,13 @@ public class TestBot {
 							try {
 								Discord4J.LOGGER.info("{}", m.getAuthor().getID());
 								m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
-							} catch (MissingPermissionsException | HTTP429Exception e) {
+							} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {
 							try {
 								IGuild guild = client.createGuild("Test2", Optional.empty(), Optional.empty());
-							} catch (HTTP429Exception e) {
+							} catch (HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}
 						}

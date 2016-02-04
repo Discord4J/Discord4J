@@ -19,6 +19,7 @@
 
 package sx.blah.discord.util;
 
+import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -26,6 +27,7 @@ import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import sx.blah.discord.api.DiscordException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -88,8 +90,9 @@ public enum Requests {
 	 * @return The result (if any) returned by the request.
 	 *
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP429Exception {
+	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP429Exception, DiscordException {
 		try {
 			HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 			for (BasicNameValuePair header : headers) {
@@ -106,7 +109,14 @@ public enum Requests {
 			} else if (responseCode == 429) {
 				throw new HTTP429Exception("Unable to make request to "+url+" you may have hit Discord's rate limit");
 			}
-			return EntityUtils.toString(response.getEntity());
+			
+			String message = EntityUtils.toString(response.getEntity());
+			
+			JsonParser parser = new JsonParser();
+			if (parser.parse(message).isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
+				throw new DiscordException(parser.parse(message).getAsJsonObject().get("message").getAsString());
+			
+			return message;
 		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			e.printStackTrace();
 			return null;
@@ -122,8 +132,9 @@ public enum Requests {
 	 * @return The result (if any) returned by the request.
 	 *
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP429Exception {
+	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP429Exception, DiscordException {
 		try {
 			if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 				HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -143,7 +154,14 @@ public enum Requests {
 				} else if (responseCode == 429) {
 					throw new HTTP429Exception("Unable to make request to "+url+" you may have hit Discord's rate limit");
 				}
-				return EntityUtils.toString(response.getEntity());
+				
+				String message = EntityUtils.toString(response.getEntity());
+				
+				JsonParser parser = new JsonParser();
+				if (parser.parse(message).isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
+					throw new DiscordException(parser.parse(message).getAsJsonObject().get("message").getAsString());
+				
+				return message;
 			} else {
 				LOGGER.error("Tried to attach HTTP entity to invalid type! ({})",
 						this.requestClass.getSimpleName());
