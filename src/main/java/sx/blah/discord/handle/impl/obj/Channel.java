@@ -180,6 +180,7 @@ public class Channel implements IChannel {
 	public void addMessage(IMessage message) {
 		if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
 			messages.add(message);
+			Collections.sort(messages, MessageComparator.INSTANCE);
 			if (lastReadMessageID == null)
 				lastReadMessageID = message.getID();
 		}
@@ -293,7 +294,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public synchronized void toggleTypingStatus() {
+	public synchronized void toggleTypingStatus() { //TODO: Use an alternative to a direct thread
 		isTyping.set(!isTyping.get());
 		
 		if (isTyping.get()) {
@@ -503,5 +504,15 @@ public class Channel implements IChannel {
 	@Override
 	public boolean equals(Object other) {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
+	}
+	
+	public static class MessageComparator implements Comparator<IMessage> {
+		
+		public static final MessageComparator INSTANCE = new MessageComparator();//Singleton instance of the comparator
+		
+		@Override
+		public int compare(IMessage o1, IMessage o2) {
+			return o1.equals(o2) ? 0 : o1.getTimestamp().compareTo(o2.getTimestamp());
+		}
 	}
 }

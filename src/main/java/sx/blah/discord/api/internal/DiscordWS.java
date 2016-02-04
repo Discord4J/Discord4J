@@ -28,10 +28,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -431,6 +428,7 @@ public class DiscordWS extends WebSocketClient {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
 				channel.getMessages().remove(message);
+				Collections.sort(channel.getMessages(), Channel.MessageComparator.INSTANCE);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}
