@@ -219,7 +219,7 @@ public class TestBot {
 							Invite.InviteResponse response = invite.details();
 							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
 							invite.accept();
-							client.getChannelByID(invite.details().getChannelID()).sendMessage(String.format("Hello, #%s and the \\\"%s\\\" guild! I was invited by %s!",
+							client.getChannelByID(invite.details().getChannelID()).sendMessage(String.format("Hello, #%s and the \"%s\" guild! I was invited by %s!",
 									response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()));
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -232,7 +232,7 @@ public class TestBot {
 					@Override
 					public void handle(MessageDeleteEvent event) {
 						try {
-							event.getMessage().reply("you said, \\\""+event.getMessage().getContent()+"\\\"");
+							event.getMessage().reply("you said, \""+event.getMessage().getContent()+"\"");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
