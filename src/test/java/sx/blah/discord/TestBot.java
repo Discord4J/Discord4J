@@ -101,8 +101,12 @@ public class TestBot {
 									if (now+MAX_TEST_TIME <= System.currentTimeMillis()) {
 										//Test timer up!
 										synchronized (client) {
-											new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
-													MessageBuilder.Styles.BOLD).build();
+											try {
+												new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
+														MessageBuilder.Styles.BOLD).build();
+											} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
+												e.printStackTrace();
+											}
 										}
 										didTest.set(true);
 									}
@@ -125,9 +129,13 @@ public class TestBot {
 						IMessage m = messageReceivedEvent.getMessage();
 						if (m.getContent().startsWith(".meme")
 								|| m.getContent().startsWith(".nicememe")) {
-							new MessageBuilder(client).appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
-									.appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
-									.build();
+							try {
+								new MessageBuilder(client).appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
+										.appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
+										.build();
+							} catch (HTTP429Exception | DiscordException | MissingPermissionsException e) {
+								e.printStackTrace();
+							}
 						} else if (m.getContent().startsWith(".clear")) {
 							IChannel c = client.getChannelByID(m.getChannel().getID());
 							if (null != c) {

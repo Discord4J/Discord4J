@@ -19,7 +19,9 @@
 
 package sx.blah.discord.util;
 
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -109,26 +111,29 @@ public class MessageBuilder {
 	 * Sends and creates the message object.
 	 *
 	 * @return The message object representing the sent message.
+	 * 
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
 	 */
-	public IMessage build() {
+	public IMessage build() throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
-			try {
-				return channel.sendMessage(content);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			return channel.sendMessage(content);
 		}
-		return null;
 	}
 	
 	/**
 	 * Sends the message, does the same thing as {@link #build()}.
 	 *
 	 * @return The message object representing the sent message.
+	 * 
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
 	 */
-	public IMessage send() {
+	public IMessage send() throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		return build();
 	}
 	
