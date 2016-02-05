@@ -104,18 +104,20 @@ public enum Requests {
 			HttpResponse response = CLIENT.execute(request);
 			int responseCode = response.getStatusLine().getStatusCode();
 			
-			String message = EntityUtils.toString(response.getEntity());
-			
-			JsonParser parser = new JsonParser();
-			JsonElement element = parser.parse(message);
-			
 			if (responseCode == 404) {
 				LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
 			} else if (responseCode == 403) {
 				LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
 			} else if (responseCode == 204) { //There is a no content response when deleting messages
 				return null;
-			} else if (responseCode == 429) {
+			}
+			
+			String message = EntityUtils.toString(response.getEntity());
+			
+			JsonParser parser = new JsonParser();
+			JsonElement element = parser.parse(message);
+			
+			if (responseCode == 429) {
 				throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
 			}
 			
@@ -152,18 +154,20 @@ public enum Requests {
 				HttpResponse response = CLIENT.execute(request);
 				int responseCode = response.getStatusLine().getStatusCode();
 				
-				String message = EntityUtils.toString(response.getEntity());
-				
-				JsonParser parser = new JsonParser();
-				JsonElement element = parser.parse(message);
-				
 				if (responseCode == 404) {
 					LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
 				} else if (responseCode == 403) {
 					LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
-				} else if (responseCode == 429) {
+				}
+				
+				String message = EntityUtils.toString(response.getEntity());
+				
+				JsonParser parser = new JsonParser();
+				JsonElement element = parser.parse(message);
+				
+				if (responseCode == 429) {
 					throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
 				}
 				
