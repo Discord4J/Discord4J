@@ -14,6 +14,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.JarFile;
 
 /**
@@ -25,10 +26,10 @@ public class ModuleLoader {
 	 * This is the directory external modules are located in
 	 */
 	public static final String MODULE_DIR = "modules";
-	protected static final List<Class<? extends IModule>> modules = new ArrayList<>();
+	protected static final List<Class<? extends IModule>> modules = new CopyOnWriteArrayList<>();
 	
 	private IDiscordClient client;
-	private List<IModule> loadedModules = new ArrayList<>();
+	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
 	
 	static {
 		if (Configuration.LOAD_EXTERNAL_MODULES) {
@@ -47,7 +48,7 @@ public class ModuleLoader {
 			if (files.length > 0) {
 				Discord4J.LOGGER.info("Loading {} external module(s)...", files.length);
 				for (File file : files)
-					loadModules(file);
+					loadExternalModules(file);
 			}
 		}
 	}
@@ -134,7 +135,7 @@ public class ModuleLoader {
 	 * 
 	 * @param file The jar file to load.
 	 */
-	public static synchronized void loadModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
+	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
 		if (file.isFile() && file.getName().endsWith(".jar")) { //Can't be a directory and must be a jar
 			try {
 				//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
