@@ -211,7 +211,7 @@ public class TestBot {
 							}
 						} else if (m.getContent().startsWith(".test")) {
 							try {
-								IGuild guild = client.createGuild("Test2", Optional.empty(), Optional.empty());
+								client.logout();
 							} catch (HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}

@@ -72,6 +72,7 @@ public class DiscordWS extends WebSocketClient {
 		client.dispatcher.dispatch(new DiscordDisconnectedEvent());
 		isConnected.set(false);
 		close();
+		Thread.currentThread().interrupt();
 	}
 	
 	
@@ -94,6 +95,8 @@ public class DiscordWS extends WebSocketClient {
 				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 				send(DiscordUtils.GSON.toJson(new KeepAliveRequest()));
 				client.timer = System.currentTimeMillis();
+			} else {
+				executorService.shutdownNow();
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,
