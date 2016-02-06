@@ -71,8 +71,8 @@ public class ModuleLoader {
 		}
 		
 		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {//Handles module load order and loads the modules
-			List<IModule> toLoad = new ArrayList<>(loadedModules);
-			List<IModule> loaded = new ArrayList<>();
+			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
+			List<IModule> loaded = new CopyOnWriteArrayList<>();
 			while (toLoad.size() > 0) {
 				for (IModule module : toLoad) {
 					Class<? extends IModule> clazz = module.getClass();
