@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.json.responses.InviteJSONResponse;
@@ -94,7 +95,7 @@ public class Invite implements IInvite {
 	}
 	
 	@Override
-	public void delete() throws HTTP429Exception {
+	public void delete() throws HTTP429Exception, DiscordException {
 		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}

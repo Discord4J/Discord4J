@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 
 public class Message implements IMessage {
 	
@@ -51,6 +53,11 @@ public class Message implements IMessage {
 	protected LocalDateTime timestamp;
 	
 	/**
+	 * The time (if it exists) that the message was edited.
+	 */
+	protected Optional<LocalDateTime> editedTimestamp;
+	
+	/**
 	 * The list of users mentioned by this message.
 	 */
 	protected List<String> mentions;
@@ -71,13 +78,15 @@ public class Message implements IMessage {
 	protected final IDiscordClient client;
 	
 	public Message(IDiscordClient client, String messageID, String content, IUser user, IChannel channel,
-				   LocalDateTime timestamp, boolean mentionsEveryone, List<String> mentions, List<Attachment> attachments) {
+				   LocalDateTime timestamp, Optional<LocalDateTime> editedTimestamp, boolean mentionsEveryone, 
+				   List<String> mentions, List<Attachment> attachments) {
 		this.client = client;
 		this.messageID = messageID;
 		this.content = content;
 		this.author = (User) user;
 		this.channel = (Channel) channel;
 		this.timestamp = timestamp;
+		this.editedTimestamp = editedTimestamp;
 		this.mentions = mentions;
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
@@ -160,21 +169,14 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void reply(String content) throws MissingPermissionsException, HTTP429Exception {
+	public void reply(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
 	
 	@Override
-	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception {
+	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
-		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
-		if (DiscordUtils.URL_PATTERN.matcher(content).find()) //See Channel#sendMessage()
-			permissions.add(Permissions.EMBED_LINKS);
-		if (content.contains("@everyone"))
-			permissions.add(Permissions.MENTION_EVERYONE);
-		DiscordUtils.checkPermissions(client, getChannel(), permissions);
-		
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 			
@@ -183,7 +185,7 @@ public class Message implements IMessage {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 			
-			IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentionsEveryone, mentions, attachments);
+			IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, attachments);
 			DiscordUtils.getMessageFromJSON(client, channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
@@ -220,7 +222,7 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void delete() throws MissingPermissionsException, HTTP429Exception {
+	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		if (!getAuthor().equals(client.getOurUser()))
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		
@@ -233,7 +235,7 @@ public class Message implements IMessage {
 	}
 	
 	@Override
-	public void acknowledge() throws HTTP429Exception {
+	public void acknowledge() throws HTTP429Exception, DiscordException {
 		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getChannel().getID()+"/messages/"+getID()+"/ack",
 				new BasicNameValuePair("authorization", client.getToken()));
 		channel.setLastReadMessageID(getID());
@@ -247,6 +249,20 @@ public class Message implements IMessage {
 		IMessage lastRead = channel.getLastReadMessage();
 		LocalDateTime timeStamp = lastRead.getTimestamp();
 		return timeStamp.compareTo(getTimestamp()) >= 0;
+	}
+	
+	@Override
+	public Optional<LocalDateTime> getEditedTimestamp() {
+		return editedTimestamp;
+	}
+	
+	/**
+	 * This sets the CACHED edited timestamp.
+	 * 
+	 * @param editedTimestamp The new timestamp.
+	 */
+	public void setEditedTimestamp(Optional<LocalDateTime> editedTimestamp) {
+		this.editedTimestamp = editedTimestamp;
 	}
 	
 	@Override

@@ -17,12 +17,16 @@ public class DiscordStatus {
 	 * Fetches the mean discord api response time for today.
 	 *
 	 * @return The mean response time (in milliseconds).
-	 *
-	 * @throws HTTP429Exception
 	 */
-	public static double getAPIResponseTimeForDay() throws HTTP429Exception {
-		MetricResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
-				String.format(DiscordEndpoints.METRICS, "day")), MetricResponse.class);
+	public static double getAPIResponseTimeForDay() {
+		MetricResponse response = null;
+		try {
+			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+					String.format(DiscordEndpoints.METRICS, "day")), MetricResponse.class);
+		} catch (HTTP429Exception | DiscordException e) {
+			e.printStackTrace();
+			return -1;
+		}
 		return response.summary.mean;
 	}
 	
@@ -30,12 +34,16 @@ public class DiscordStatus {
 	 * Fetches the mean discord api response time for this week.
 	 *
 	 * @return The mean response time (in milliseconds).
-	 *
-	 * @throws HTTP429Exception
 	 */
-	public static double getAPIResponseTimeForWeek() throws HTTP429Exception {
-		MetricResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
-				String.format(DiscordEndpoints.METRICS, "week")), MetricResponse.class);
+	public static double getAPIResponseTimeForWeek() {
+		MetricResponse response = null;
+		try {
+			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+					String.format(DiscordEndpoints.METRICS, "week")), MetricResponse.class);
+		} catch (DiscordException | HTTP429Exception e) {
+			e.printStackTrace();
+			return -1;
+		}
 		return response.summary.mean;
 	}
 	
@@ -43,12 +51,16 @@ public class DiscordStatus {
 	 * Fetches the mean discord api response time for this month.
 	 *
 	 * @return The mean response time (in milliseconds).
-	 *
-	 * @throws HTTP429Exception
 	 */
-	public static double getAPIResponseTimeForMonth() throws HTTP429Exception {
-		MetricResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
-				String.format(DiscordEndpoints.METRICS, "month")), MetricResponse.class);
+	public static double getAPIResponseTimeForMonth() {
+		MetricResponse response = null;
+		try {
+			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+					String.format(DiscordEndpoints.METRICS, "month")), MetricResponse.class);
+		} catch (HTTP429Exception | DiscordException e) {
+			e.printStackTrace();
+			return -1;
+		}
 		return response.summary.mean;
 	}
 	
@@ -58,8 +70,9 @@ public class DiscordStatus {
 	 * @return The maintenance statuses.
 	 *
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	public static Maintenance[] getActiveMaintenances() throws HTTP429Exception {
+	public static Maintenance[] getActiveMaintenances() throws HTTP429Exception, DiscordException {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "active")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
@@ -79,8 +92,9 @@ public class DiscordStatus {
 	 * @return The maintenance statuses.
 	 *
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	public static Maintenance[] getUpcomingMaintenances() throws HTTP429Exception {
+	public static Maintenance[] getUpcomingMaintenances() throws HTTP429Exception, DiscordException {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "upcoming")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];

@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 
@@ -78,14 +79,16 @@ public interface IRole {
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception;
+	void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Attempts to delete this role.
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, HTTP429Exception;
+	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
 }

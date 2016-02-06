@@ -17,6 +17,7 @@ import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
+import sx.blah.discord.util.MessageComparator;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
@@ -28,10 +29,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -228,13 +226,13 @@ public class DiscordWS extends WebSocketClient {
 					break;
 				
 				default:
-					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", eventObject.toString(), frame);
+					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, frame);
 			}
 		} else if (op == 7) { //Gateway is redirecting us
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info("Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = new DiscordWS(client, new URI(redirectResponse.url.replaceAll("wss", "ws")));
+				client.ws = new DiscordWS(client, new URI(redirectResponse.url));
 				disconnect();
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
@@ -300,7 +298,7 @@ public class DiscordWS extends WebSocketClient {
 		
 		if (null != channel) {
 			IMessage message = DiscordUtils.getMessageFromJSON(client, channel, event);
-			if (!event.author.id.equalsIgnoreCase(client.getOurUser().getID())) {
+			if (!channel.getMessages().contains(message)) {
 				channel.addMessage(message);
 				Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						event.author.id, event.channel_id, event.content);
@@ -413,7 +411,8 @@ public class DiscordWS extends WebSocketClient {
 				&& !toUpdate.getAuthor().getID().equals(client.getOurUser().getID())
 				&& !toUpdate.getContent().equals(content)) {
 			IMessage oldMessage = new Message(client, toUpdate.getID(), toUpdate.getContent(), toUpdate.getAuthor(),
-					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getAttachments());
+					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp(), 
+					toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getAttachments());
 			
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
 			
@@ -431,6 +430,7 @@ public class DiscordWS extends WebSocketClient {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
 				channel.getMessages().remove(message);
+				Collections.sort(channel.getMessages(), MessageComparator.INSTANCE);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}

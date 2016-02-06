@@ -53,7 +53,7 @@ public interface IDiscordClient {
 	 *
 	 * @throws HTTP429Exception
 	 */
-	void logout() throws HTTP429Exception;
+	void logout() throws HTTP429Exception, DiscordException;
 	
 	/**
 	 * Allows you to change the info on your bot.
@@ -64,8 +64,9 @@ public interface IDiscordClient {
 	 * @param avatar Image data for the bot's avatar, {@link Image}
 	 *
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception; 
+	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException; 
 	
 	/**
 	 * Updates the bot's presence.
@@ -152,8 +153,9 @@ public interface IDiscordClient {
 	 * @return The list of available regions.
 	 * 
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	List<IRegion> getRegions() throws HTTP429Exception;
+	List<IRegion> getRegions() throws HTTP429Exception, DiscordException;
 	
 	/**
 	 * Gets the corresponding region for a given id.
@@ -172,8 +174,9 @@ public interface IDiscordClient {
 	 * @return The new guild's id.
 	 * 
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception;
+	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
 	
 	/**
 	 * Represents an avatar image.

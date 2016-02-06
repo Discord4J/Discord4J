@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 
 /**
@@ -40,8 +41,9 @@ public interface IInvite {
 	 * Attempts to delete the invite this object represents.
 	 *
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void delete() throws HTTP429Exception;
+	void delete() throws HTTP429Exception, DiscordException;
 	
 	/**
 	 * Represents the details of an invite.

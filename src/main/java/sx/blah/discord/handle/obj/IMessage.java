@@ -1,10 +1,12 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a discord message.
@@ -68,8 +70,9 @@ public interface IMessage {
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void reply(String content) throws MissingPermissionsException, HTTP429Exception;
+	void reply(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -78,8 +81,9 @@ public interface IMessage {
 	 * @return The new message (this).
 	 *
 	 * @throws MissingPermissionsException
+	 * @throws DiscordException
 	 */
-	IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception;
+	IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Returns whether this message mentions everyone.
@@ -93,15 +97,17 @@ public interface IMessage {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, HTTP429Exception;
+	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Acknowledges a message and all others before it (marks it as "read").
 	 * 
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void acknowledge() throws HTTP429Exception;
+	void acknowledge() throws HTTP429Exception, DiscordException;
 	
 	/**
 	 * Checks if the message has been read by this account.
@@ -109,6 +115,13 @@ public interface IMessage {
 	 * @return True if the message has been read, false if otherwise.
 	 */
 	boolean isAcknowledged();
+	
+	/**
+	 * Gets the time that this message was last edited.
+	 * 
+	 * @return The edited timestamp.
+	 */
+	Optional<LocalDateTime> getEditedTimestamp();
 	
 	/**
 	 * Represents an attachment included in the message.

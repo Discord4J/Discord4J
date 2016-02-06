@@ -92,8 +92,9 @@ public interface IChannel {
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content) throws MissingPermissionsException, HTTP429Exception;
+	IMessage sendMessage(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Sends a message to the desired channel.
@@ -104,8 +105,9 @@ public interface IChannel {
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception;
+	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Sends a file to the channel.
@@ -116,8 +118,9 @@ public interface IChannel {
 	 * @throws IOException
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception;
+	IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Generates an invite for this channel.
@@ -130,8 +133,9 @@ public interface IChannel {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception;
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Toggles whether the bot is "typing".
@@ -184,8 +188,9 @@ public interface IChannel {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, HTTP429Exception;
+	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Gets the permissions overrides for users. (Key = User id).
@@ -224,8 +229,9 @@ public interface IChannel {
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception;
+	void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -236,8 +242,9 @@ public interface IChannel {
 	 * 
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception;
+	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -248,8 +255,9 @@ public interface IChannel {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception;
+	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 	
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.

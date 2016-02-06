@@ -104,12 +104,18 @@ public class EventDispatcher {
 						method.invoke(methodListeners.get(method), event);
 					} catch (IllegalAccessException | InvocationTargetException e) {
 						Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
+					} catch (Exception e) {
+						Discord4J.LOGGER.error("Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
 					}
 			}
 			
 			if (classListeners.containsKey(event.getClass())) {
 				for (IListener listener : classListeners.get(event.getClass()))
-					listener.handle(event);
+					try {
+						listener.handle(event);
+					} catch (Exception e) {
+						Discord4J.LOGGER.error("Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
+					}
 			}
 		}
 	}

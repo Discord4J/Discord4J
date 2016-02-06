@@ -39,6 +39,7 @@ import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.MessageComparator;
 import sx.blah.discord.util.Requests;
 
 import java.io.File;
@@ -180,6 +181,7 @@ public class Channel implements IChannel {
 	public void addMessage(IMessage message) {
 		if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
 			messages.add(message);
+			Collections.sort(messages, MessageComparator.INSTANCE);
 			if (lastReadMessageID == null)
 				lastReadMessageID = message.getID();
 		}
@@ -221,20 +223,13 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public IMessage sendMessage(String content) throws MissingPermissionsException, HTTP429Exception {
+	public IMessage sendMessage(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		return sendMessage(content, false);
 	}
 	
 	@Override
-	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception {
-		EnumSet<Permissions> permissions = EnumSet.of(Permissions.SEND_MESSAGES);
-		if (tts)
-			permissions.add(Permissions.SEND_TTS_MESSAGES);
-		if (DiscordUtils.URL_PATTERN.matcher(content).find()) //See Message#edit()
-			permissions.add(Permissions.EMBED_LINKS);
-		if (content.contains("@everyone"))
-			permissions.add(Permissions.MENTION_EVERYONE);
-		DiscordUtils.checkPermissions(client, this, permissions);
+	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 		
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
@@ -256,7 +251,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception {
+	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 		
 		if (client.isReady()) {
@@ -277,7 +272,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 		
 		if (!client.isReady()) {
@@ -300,7 +295,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public synchronized void toggleTypingStatus() {
+	public synchronized void toggleTypingStatus() { //TODO: Use an alternative to a direct thread
 		isTyping.set(!isTyping.get());
 		
 		if (isTyping.get()) {
@@ -312,7 +307,7 @@ public class Channel implements IChannel {
 						try {
 							Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
 									new BasicNameValuePair("authorization", client.getToken()));
-						} catch (HTTP429Exception e) {
+						} catch (HTTP429Exception | DiscordException e) {
 							e.printStackTrace();
 						}
 					}
@@ -372,7 +367,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void delete() throws MissingPermissionsException, HTTP429Exception {
+	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 		
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
@@ -466,7 +461,7 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception {
+	public void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 		
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
@@ -479,16 +474,16 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception {
+	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		overridePermissions("role", roleID, toAdd, toRemove);
 	}
 	
 	@Override
-	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception {
+	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		overridePermissions("member", userID, toAdd, toRemove);
 	}
 	
-	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception {
+	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 		
 		try {

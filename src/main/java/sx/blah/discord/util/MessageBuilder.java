@@ -19,7 +19,9 @@
 
 package sx.blah.discord.util;
 
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -27,9 +29,11 @@ import sx.blah.discord.handle.obj.IMessage;
  * Utility class designed to make message sending easier.
  */
 public class MessageBuilder {
+	
 	private String content = "";
 	private IChannel channel;
 	private IDiscordClient client;
+	private boolean tts = false;
 	
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
@@ -104,31 +108,44 @@ public class MessageBuilder {
 	}
 	
 	/**
+	 * Sets the message to have tts enabled.
+	 * 
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withTTS() {
+		tts = true;
+		return this;
+	}
+	
+	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
 	 * Sends and creates the message object.
 	 *
 	 * @return The message object representing the sent message.
+	 * 
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
 	 */
-	public IMessage build() {
+	public IMessage build() throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
-			try {
-				return channel.sendMessage(content);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			return channel.sendMessage(content, tts);
 		}
-		return null;
 	}
 	
 	/**
 	 * Sends the message, does the same thing as {@link #build()}.
 	 *
 	 * @return The message object representing the sent message.
+	 * 
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
 	 */
-	public IMessage send() {
+	public IMessage send() throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		return build();
 	}
 	
