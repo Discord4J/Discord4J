@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 
 public class Message implements IMessage {
 	
@@ -52,6 +53,11 @@ public class Message implements IMessage {
 	protected LocalDateTime timestamp;
 	
 	/**
+	 * The time (if it exists) that the message was edited.
+	 */
+	protected Optional<LocalDateTime> editedTimestamp;
+	
+	/**
 	 * The list of users mentioned by this message.
 	 */
 	protected List<String> mentions;
@@ -72,13 +78,15 @@ public class Message implements IMessage {
 	protected final IDiscordClient client;
 	
 	public Message(IDiscordClient client, String messageID, String content, IUser user, IChannel channel,
-				   LocalDateTime timestamp, boolean mentionsEveryone, List<String> mentions, List<Attachment> attachments) {
+				   LocalDateTime timestamp, Optional<LocalDateTime> editedTimestamp, boolean mentionsEveryone, 
+				   List<String> mentions, List<Attachment> attachments) {
 		this.client = client;
 		this.messageID = messageID;
 		this.content = content;
 		this.author = (User) user;
 		this.channel = (Channel) channel;
 		this.timestamp = timestamp;
+		this.editedTimestamp = editedTimestamp;
 		this.mentions = mentions;
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
@@ -177,7 +185,7 @@ public class Message implements IMessage {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 			
-			IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, mentionsEveryone, mentions, attachments);
+			IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, attachments);
 			DiscordUtils.getMessageFromJSON(client, channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
@@ -241,6 +249,20 @@ public class Message implements IMessage {
 		IMessage lastRead = channel.getLastReadMessage();
 		LocalDateTime timeStamp = lastRead.getTimestamp();
 		return timeStamp.compareTo(getTimestamp()) >= 0;
+	}
+	
+	@Override
+	public Optional<LocalDateTime> getEditedTimestamp() {
+		return editedTimestamp;
+	}
+	
+	/**
+	 * This sets the CACHED edited timestamp.
+	 * 
+	 * @param editedTimestamp The new timestamp.
+	 */
+	public void setEditedTimestamp(Optional<LocalDateTime> editedTimestamp) {
+		this.editedTimestamp = editedTimestamp;
 	}
 	
 	@Override

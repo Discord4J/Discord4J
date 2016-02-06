@@ -411,7 +411,8 @@ public class DiscordWS extends WebSocketClient {
 				&& !toUpdate.getAuthor().getID().equals(client.getOurUser().getID())
 				&& !toUpdate.getContent().equals(content)) {
 			IMessage oldMessage = new Message(client, toUpdate.getID(), toUpdate.getContent(), toUpdate.getAuthor(),
-					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getAttachments());
+					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp(), 
+					toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getAttachments());
 			
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
 			

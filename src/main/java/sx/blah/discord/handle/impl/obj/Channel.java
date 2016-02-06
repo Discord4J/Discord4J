@@ -506,5 +506,4 @@ public class Channel implements IChannel {
 	public boolean equals(Object other) {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
 	}
-	
 }

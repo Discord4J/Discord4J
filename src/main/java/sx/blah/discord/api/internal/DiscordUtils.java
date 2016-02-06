@@ -315,12 +315,14 @@ public class DiscordUtils {
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
 			message.setMentions(getMentionsFromJSON(client, json));
-			message.setTimestamp(convertFromTimestamp(json.edited_timestamp == null ? json.timestamp : json.edited_timestamp));
+			message.setTimestamp(convertFromTimestamp(json.timestamp));
+			message.setEditedTimestamp(json.edited_timestamp == null ? Optional.empty() : Optional.of(convertFromTimestamp(json.edited_timestamp)));
 			return message;
 		} else
 			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),
-					channel, convertFromTimestamp(json.timestamp), json.mention_everyone, getMentionsFromJSON(client, json),
-					getAttachmentsFromJSON(json));
+					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ? 
+					Optional.empty() : Optional.of(convertFromTimestamp(json.edited_timestamp)), json.mention_everyone,
+					getMentionsFromJSON(client, json), getAttachmentsFromJSON(json));
 	}
 	
 	/**

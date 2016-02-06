@@ -6,6 +6,7 @@ import sx.blah.discord.util.HTTP429Exception;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a discord message.
@@ -114,6 +115,13 @@ public interface IMessage {
 	 * @return True if the message has been read, false if otherwise.
 	 */
 	boolean isAcknowledged();
+	
+	/**
+	 * Gets the time that this message was last edited.
+	 * 
+	 * @return The edited timestamp.
+	 */
+	Optional<LocalDateTime> getEditedTimestamp();
 	
 	/**
 	 * Represents an attachment included in the message.
