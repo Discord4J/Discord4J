@@ -15,6 +15,7 @@
 # Maven
 log/
 target/
+dependency-reduced-pom.xml
 
 # So only I could push releases
 settings.xml
