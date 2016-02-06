@@ -512,7 +512,7 @@ public class Channel implements IChannel {
 		
 		@Override
 		public int compare(IMessage o1, IMessage o2) {
-			return o1.equals(o2) ? 0 : o1.getTimestamp().compareTo(o2.getTimestamp());
+			return o1.equals(o2) ? 0 : 0-o1.getTimestamp().compareTo(o2.getTimestamp());
 		}
 	}
 }
