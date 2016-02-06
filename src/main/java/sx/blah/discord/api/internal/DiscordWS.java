@@ -17,6 +17,7 @@ import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
+import sx.blah.discord.util.MessageComparator;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
@@ -428,7 +429,7 @@ public class DiscordWS extends WebSocketClient {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
 				channel.getMessages().remove(message);
-				Collections.sort(channel.getMessages(), Channel.MessageComparator.INSTANCE);
+				Collections.sort(channel.getMessages(), MessageComparator.INSTANCE);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}

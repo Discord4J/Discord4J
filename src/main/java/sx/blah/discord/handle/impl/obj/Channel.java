@@ -39,6 +39,7 @@ import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.MessageComparator;
 import sx.blah.discord.util.Requests;
 
 import java.io.File;
@@ -506,13 +507,4 @@ public class Channel implements IChannel {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
 	}
 	
-	public static class MessageComparator implements Comparator<IMessage> {
-		
-		public static final MessageComparator INSTANCE = new MessageComparator();//Singleton instance of the comparator
-		
-		@Override
-		public int compare(IMessage o1, IMessage o2) {
-			return o1.equals(o2) ? 0 : 0-o1.getTimestamp().compareTo(o2.getTimestamp());
-		}
-	}
 }
