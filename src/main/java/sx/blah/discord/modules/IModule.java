@@ -4,12 +4,12 @@ import sx.blah.discord.api.IDiscordClient;
 
 /**
  * This class represents a Discord4J "module", implement it to create a new Module.
- * NOTE: This module must respect the enable() and disable() methods.
+ * NOTE: This module must respect the enable() and disable() methods. And it <b>MUST</b> have a default constructor.
  */
 public interface IModule {
 	
 	/**
-	 * This is called to enable the module.
+	 * This is called to enable the module. NOTE: A new instance of this class is created for each enable() call.
 	 * 
 	 * @param client The client this module instance is being enabled for.
 	 */

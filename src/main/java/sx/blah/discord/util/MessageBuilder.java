@@ -46,8 +46,8 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withContent(String content) {
-		this.content = content;
-		return this;
+		this.content = "";
+		return appendContent(content);
 	}
 	
 	/**
@@ -58,8 +58,8 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withContent(String content, Styles styles) {
-		this.content = styles.getMarkdown()+content+styles.getReverseMarkdown();
-		return this;
+		this.content = "";
+		return appendContent(content, styles);
 	}
 	
 	/**
@@ -118,6 +118,29 @@ public class MessageBuilder {
 	}
 	
 	/**
+	 * Sets the content to a multiline code block with specific language syntax highlighting.
+	 * 
+	 * @param language The language to do syntax highlighting for.
+	 * @param content The content of the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withCode(String language, String content) {
+		this.content = "";
+		return appendCode(language, content);
+	}
+	
+	/**
+	 * Adds a multiline code block with specific language syntax highlighting.
+	 *
+	 * @param language The language to do syntax highlighting for.
+	 * @param content The content of the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder appendCode(String language, String content) {
+		return appendContent(language+" "+content, Styles.CODE_WITH_LANG);
+	}
+	
+	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
 	 * Sends and creates the message object.
@@ -157,12 +180,13 @@ public class MessageBuilder {
 		BOLD("**"),
 		BOLD_ITALICS("***"),
 		STRIKEOUT("~~"),
-		CODE("```"),
+		CODE("``` "),
 		INLINE_CODE("`"),
 		UNDERLINE("__"),
 		UNDERLINE_ITALICS("__*"),
 		UNDERLINE_BOLD("__**"),
-		UNDERLINE_BOLD_ITALICS("__***");
+		UNDERLINE_BOLD_ITALICS("__***"),
+		CODE_WITH_LANG("```");
 		
 		final String markdown, reverseMarkdown;
 		
