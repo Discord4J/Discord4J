@@ -29,9 +29,11 @@ import sx.blah.discord.handle.obj.IMessage;
  * Utility class designed to make message sending easier.
  */
 public class MessageBuilder {
+	
 	private String content = "";
 	private IChannel channel;
 	private IDiscordClient client;
+	private boolean tts = false;
 	
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
@@ -106,6 +108,16 @@ public class MessageBuilder {
 	}
 	
 	/**
+	 * Sets the message to have tts enabled.
+	 * 
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withTTS() {
+		tts = true;
+		return this;
+	}
+	
+	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
 	 * Sends and creates the message object.
@@ -120,7 +132,7 @@ public class MessageBuilder {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
-			return channel.sendMessage(content);
+			return channel.sendMessage(content, tts);
 		}
 	}
 	
