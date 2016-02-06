@@ -212,5 +212,10 @@ public class MessageBuilder {
 		public String getReverseMarkdown() {
 			return reverseMarkdown;
 		}
+		
+		@Override
+		public String toString() {
+			return markdown;
+		}
 	}
 }
