@@ -176,7 +176,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return gateway;
 	}
 	
-	@Override
+	@Override //TODO: Make private
 	public void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException {
 		Discord4J.LOGGER.debug("Changing account info.");
 		
@@ -189,7 +189,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
 					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email.orElse(this.email),
 							this.password, password.orElse(this.password), username.orElse(getOurUser().getName()),
-							avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData()))),
+							avatar == null ? Image.forUser(ourUser).getData() : 
+									(avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData())))),
 					new BasicNameValuePair("Authorization", token),
 					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
 			
@@ -200,6 +201,26 @@ public final class DiscordClientImpl implements IDiscordClient {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void changeUsername(String username) throws DiscordException, HTTP429Exception {
+		changeAccountInfo(Optional.of(username), Optional.empty(), Optional.empty(), null);
+	}
+	
+	@Override
+	public void changeEmail(String email) throws DiscordException, HTTP429Exception {
+		changeAccountInfo(Optional.empty(), Optional.of(email), Optional.empty(), null);
+	}
+	
+	@Override
+	public void changePassword(String password) throws DiscordException, HTTP429Exception {
+		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.of(password), null);
+	}
+	
+	@Override
+	public void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception {
+		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(avatar));
 	}
 	
 	@Override

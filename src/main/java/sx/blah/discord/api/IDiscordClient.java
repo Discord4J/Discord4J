@@ -65,8 +65,51 @@ public interface IDiscordClient {
 	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * 
+	 * @deprecated Use the split methods instead: {@link #changeUsername(String)}, {@link #changeEmail(String)}, {@link #changePassword(String)}, {@link #changeAvatar(Image)}.
 	 */
-	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException; 
+	@Deprecated
+	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException;
+	
+	/**
+	 * Changes this client's account's username.
+	 * 
+	 * @param username The new username.
+	 * 
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changeUsername(String username) throws DiscordException, HTTP429Exception;
+	
+	/**
+	 * Changes this client's account's email.
+	 * 
+	 * @param email The new email.
+	 * 
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changeEmail(String email) throws DiscordException, HTTP429Exception;
+	
+	/**
+	 * Changes this client's account's password.
+	 *
+	 * @param password The new password.
+	 * 
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changePassword(String password) throws DiscordException, HTTP429Exception;
+	
+	/**
+	 * Changes this client's account's avatar.
+	 *
+	 * @param avatar The new avatar.
+	 * 
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception;
 	
 	/**
 	 * Updates the bot's presence.
