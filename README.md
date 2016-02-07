@@ -1,7 +1,7 @@
 # Discord4J  [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [ ![Download](https://api.bintray.com/packages/austinv11/maven/Discord4J/images/download.svg) ](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)
 
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
-[The API is also available in a few other languages.](https://blog.discordapp.com/the-robot-revolution-has-unofficially-begun/)
+[The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
 
 For the latest dev builds, [download it from my ci server.](https://drone.io/github.com/austinv11/Discord4J/files)
 
@@ -69,8 +69,8 @@ public class Example {
 }
 ```
 ### Events
-The Discord4J library is very event driven. Your bot can detect these events through the use of an event listener. There are two ways of creating an event listener.
-Using `IListener`:
+The Discord4J library is very event driven. Your bot can detect these events through the use of an event listener. There are two ways of creating an event listener:
+1. Using `IListener`:
 ```java
 public class InterfaceListener implements IListener<ReadyEvent> { //The event type in IListener<> can be any class which extends Event
   
@@ -80,7 +80,7 @@ public class InterfaceListener implements IListener<ReadyEvent> { //The event ty
   }
 }
 ```
-Using the `@EventSubscriber` annotation:
+.2 Using the `@EventSubscriber` annotation:
 ```java
 public class AnnotationListener {
   
@@ -119,5 +119,5 @@ In such an event, please contact me or submit a pull request.
 No one is perfect at programming and I am no exception. If you see something that can be improved, please feel free to submit a pull request! 
 
 ## Other info
-More information can be found in the [docs](https://discordapi.readthedocs.org/en/latest/). 
+More information can be found in the [docs](http://austinv11.github.io/Discord4J/docs.html). 
 You can contact me on the [Discord API server](https://discord.gg/0SBTUU1wZTU7PCok) in the #java_discord4j channel.
