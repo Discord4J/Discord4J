@@ -47,8 +47,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
 	
@@ -130,7 +132,7 @@ public class Channel implements IChannel {
 		this.client = client;
 		this.name = name;
 		this.id = id;
-		this.messages = messages;
+		this.messages = new CopyOnWriteArrayList<>(messages);
 		this.parent = parent;
 		this.isPrivate = false;
 		this.topic = topic;
@@ -181,7 +183,9 @@ public class Channel implements IChannel {
 	public void addMessage(IMessage message) {
 		if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
 			messages.add(message);
-			Collections.sort(messages, MessageComparator.INSTANCE);
+			List<IMessage> cache = new CopyOnWriteArrayList<>(messages);
+			messages.clear();
+			messages.addAll(cache.stream().sorted(MessageComparator.INSTANCE).collect(Collectors.toList()));
 			if (lastReadMessageID == null)
 				lastReadMessageID = message.getID();
 		}
