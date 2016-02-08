@@ -60,7 +60,7 @@ public class DiscordWS extends WebSocketClient {
 //		super(serverURI);
 		this.client = client;
 		try {
-			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault()));
+			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault(), executorService));
 			this.connect();
 		} catch (NoSuchAlgorithmException e) {
 			Discord4J.LOGGER.error("Error setting up SSL connection!");
@@ -75,6 +75,7 @@ public class DiscordWS extends WebSocketClient {
 		client.dispatcher.dispatch(new DiscordDisconnectedEvent());
 		isConnected.set(false);
 		close();
+		executorService.shutdownNow();
 		Thread.currentThread().interrupt();
 	}
 	
@@ -98,8 +99,6 @@ public class DiscordWS extends WebSocketClient {
 				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 				send(DiscordUtils.GSON.toJson(new KeepAliveRequest()));
 				client.timer = System.currentTimeMillis();
-			} else {
-				executorService.shutdownNow();
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,
