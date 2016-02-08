@@ -173,9 +173,10 @@ public interface IDiscordClient {
 	 * @param user The user who will be the recipient of the private channel.
 	 * @return The {@link PrivateChannel} object.
 	 *
-	 * @throws Exception
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
 	 */
-	IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception;
+	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception;
 	
 	/**
 	 * Gets the invite for a code.

@@ -308,7 +308,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception {
+	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception {
 		if (!isReady()) {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return null;
@@ -320,10 +320,15 @@ public final class DiscordClientImpl implements IDiscordClient {
 			}
 		}
 		
-		PrivateChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
-				new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
-				new BasicNameValuePair("authorization", this.token),
-				new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
+		PrivateChannelResponse response = null;
+		try {
+			response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
+					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
+					new BasicNameValuePair("authorization", this.token),
+					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Error creating creating a private channel!", e);
+		}
 		
 		IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
 		privateChannels.add(channel);

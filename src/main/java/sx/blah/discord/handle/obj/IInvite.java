@@ -19,13 +19,16 @@ public interface IInvite {
 	String getXkcdPass();
 	
 	/**
-	 * @return Accepts the invite and returns relevant information,
+	 * Accepts the invite and returns relevant information,
 	 * such as the Guild ID and name, and the channel the invite
 	 * was created from.
+	 * 
+	 * @return Information about the invite.
 	 *
-	 * @throws Exception
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
 	 */
-	InviteResponse accept() throws Exception;
+	InviteResponse accept() throws DiscordException, HTTP429Exception;
 	
 	/**
 	 * Gains the same information as accepting,
@@ -33,9 +36,10 @@ public interface IInvite {
 	 *
 	 * @return an InviteResponse containing the invite's details.
 	 *
-	 * @throws Exception
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
 	 */
-	InviteResponse details() throws Exception;
+	InviteResponse details() throws DiscordException, HTTP429Exception;
 	
 	/**
 	 * Attempts to delete the invite this object represents.

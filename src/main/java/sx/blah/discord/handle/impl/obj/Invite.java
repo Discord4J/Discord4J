@@ -63,7 +63,7 @@ public class Invite implements IInvite {
 	}
 	
 	@Override
-	public InviteResponse accept() throws Exception {
+	public InviteResponse accept() throws DiscordException, HTTP429Exception {
 		if (client.isReady()) {
 			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
@@ -79,7 +79,7 @@ public class Invite implements IInvite {
 	}
 	
 	@Override
-	public InviteResponse details() throws Exception {
+	public InviteResponse details() throws DiscordException, HTTP429Exception {
 		if (client.isReady()) {
 			String response = Requests.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
