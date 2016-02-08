@@ -188,12 +188,6 @@ public class Channel implements IChannel {
 	}
 	
 	@Override
-	@Deprecated
-	public IGuild getParent() {
-		return parent;
-	}
-	
-	@Override
 	public IGuild getGuild() {
 		return parent;
 	}
@@ -331,7 +325,7 @@ public class Channel implements IChannel {
 		return getMessageByID(lastReadMessageID);
 	}
 	
-	@Override
+	@Override//TODO: make private
 	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 		
@@ -350,6 +344,21 @@ public class Channel implements IChannel {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.of(name), Optional.empty(), Optional.empty());
+	}
+	
+	@Override
+	public void changePosition(int position) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.of(position), Optional.empty());
+	}
+	
+	@Override
+	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.of(topic));
 	}
 	
 	@Override

@@ -128,11 +128,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 	
 	@Override
-	public IGuild getParent() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
 	public String getName() {
 		return recipient.getName();
 	}

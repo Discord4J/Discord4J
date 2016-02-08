@@ -3,10 +3,13 @@ package sx.blah.discord.api.internal;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.java_websocket.WebSocket;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
+import org.java_websocket.framing.Framedata;
+import org.java_websocket.framing.FramedataImpl1;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.events.*;
@@ -700,6 +703,27 @@ public class DiscordWS extends WebSocketClient {
 	@Override
 	public void onError(Exception e) {
 		e.printStackTrace();
+	}
+	
+	@Override
+	public void onWebsocketPing(WebSocket conn, Framedata f) {
+		super.onWebsocketPing(conn, f);
+	}
+	
+	@Override
+	public void onWebsocketPong(WebSocket conn, Framedata f) {
+		super.onWebsocketPong(conn, f);
+	}
+	
+	/**
+	 * Sends a PING frame to the receiving websocket.
+	 * 
+	 * @param conn The websocket connection to use.
+	 */
+	public static void sendPing(WebSocket conn) {//TODO: Implement
+		FramedataImpl1 frame = new FramedataImpl1(Framedata.Opcode.PING);
+		frame.setFin(true);
+		conn.sendFrame(frame);
 	}
 	
 	@Override

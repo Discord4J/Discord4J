@@ -1,9 +1,9 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Image;
 
 import java.util.List;
 import java.util.Optional;
@@ -219,8 +219,66 @@ public interface IGuild {
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * @deprecated See {@link #changeName(String)}, {@link #changeRegion(IRegion)}, {@link #changeIcon(Optional)}, 
+	 * {@link #changeAFKChannel(Optional)}, {@link #changeAFKTimeout(int)}
 	 */
-	void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	@Deprecated
+	void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	
+	/**
+	 * Changes the name of the guild.
+	 * 
+	 * @param name The new name of the guild.
+	 * 
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	
+	/**
+	 * Changes the region of the guild.
+	 *
+	 * @param region The new region of the guild.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeRegion(IRegion region) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	
+	/**
+	 * Changes the name of the guild.
+	 *
+	 * @param icon The new icon of the guild (or empty to remove it).
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	
+	/**
+	 * Changes the AFK voice channel of the guild.
+	 *
+	 * @param channel The new AFK voice channel of the guild (or empty to remove it).
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeAFKChannel(Optional<IVoiceChannel> channel) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	
+	/**
+	 * Changes the AFK timeout for the guild.
+	 *
+	 * @param timeout The new AFK timeout for the guild.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeAFKTimeout(int timeout) throws HTTP429Exception, DiscordException, MissingPermissionsException;
 	
 	/**
 	 * Deletes the channel if you are its owner or leaves it if not.

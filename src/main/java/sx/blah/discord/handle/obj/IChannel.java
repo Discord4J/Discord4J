@@ -50,16 +50,6 @@ public interface IChannel {
 	 * Gets the guild this channel is a part of.
 	 *
 	 * @return The guild.
-	 *
-	 * @deprecated Use {@link #getGuild()} instead.
-	 */
-	@Deprecated
-	IGuild getParent();
-	
-	/**
-	 * Gets the guild this channel is a part of.
-	 *
-	 * @return The guild.
 	 */
 	IGuild getGuild();
 	
@@ -173,8 +163,43 @@ public interface IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @deprecated See {@link #changeName(String)}, {@link #changePosition(int)}, {@link #changeTopic(String)}
 	 */
+	@Deprecated
 	void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception;
+	
+	/**
+	 * Changes the name of the channel
+	 * 
+	 * @param name The new name of the channel.
+	 * 
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	
+	/**
+	 * Changes the position of the channel
+	 *
+	 * @param position The new position of the channel.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changePosition(int position) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	
+	/**
+	 * Changes the topic of the channel
+	 *
+	 * @param topic The new topic of the channel.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException;
 	
 	/**
 	 * Gets the position of the channel on the channel list.

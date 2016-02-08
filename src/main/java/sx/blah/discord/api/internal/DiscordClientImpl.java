@@ -13,6 +13,7 @@ import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Image;
 import sx.blah.discord.util.Requests;
 
 import java.io.UnsupportedEncodingException;

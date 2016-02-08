@@ -37,6 +37,7 @@ import sx.blah.discord.json.responses.ChannelResponse;
 import sx.blah.discord.json.responses.GuildResponse;
 import sx.blah.discord.json.responses.UserResponse;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Image;
 import sx.blah.discord.util.Requests;
 
 import java.io.UnsupportedEncodingException;
@@ -363,19 +364,46 @@ public class Guild implements IGuild {
 		}
 	}
 	
-	@Override
-	public void edit(Optional<String> name, Optional<String> regionID, Optional<IDiscordClient.Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	@Override//TODO: make private
+	public void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		
 		try {
 			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.SERVERS + id,
 					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
-							icon.isPresent() ? icon.get().getData() : this.icon, afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout)))),
+							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null), 
+							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout)))),
 					new BasicNameValuePair("authorization", client.getToken()), 
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.of(name), Optional.empty(), null, null, Optional.empty());
+	}
+	
+	@Override
+	public void changeRegion(IRegion region) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.of(region.getID()), null, null, Optional.empty());
+	}
+	
+	@Override
+	public void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), icon, null, Optional.empty());
+	}
+	
+	@Override
+	public void changeAFKChannel(Optional<IVoiceChannel> channel) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		String id = channel.isPresent() ? channel.get().getID() : null;
+		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
+	}
+	
+	@Override
+	public void changeAFKTimeout(int timeout) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), null, null, Optional.of(timeout));
 	}
 	
 	@Override

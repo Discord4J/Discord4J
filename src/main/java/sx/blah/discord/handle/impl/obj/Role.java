@@ -157,7 +157,7 @@ public class Role implements IRole {
 		return guild;
 	}
 	
-	@Override
+	@Override //TODO make private
 	public void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 		
@@ -171,6 +171,26 @@ public class Role implements IRole {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void changeColor(Color color) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty());
+	}
+	
+	@Override
+	public void changeHoist(boolean hoist) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty());
+	}
+	
+	@Override
+	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty());
+	}
+	
+	@Override
+	public void changePermissions(EnumSet<Permissions> permissions) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions));
 	}
 	
 	@Override

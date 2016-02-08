@@ -29,6 +29,7 @@ import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageBuilder;
 
 import java.util.Optional;
@@ -152,7 +153,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".name ")) {
 							String s = m.getContent().split(" ", 2)[1];
 							try {
-								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUser(client.getOurUser())));
+								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(Image.forUser(client.getOurUser())));
 								m.reply("is this better?");
 							} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
 								e.printStackTrace();
@@ -183,9 +184,9 @@ public class TestBot {
 							try {
 								if (m.getContent().split(" ").length > 1) {
 									String url = m.getContent().split(" ")[1];
-									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUrl(url.substring(url.lastIndexOf('.')), url)));
+									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(Image.forUrl(url.substring(url.lastIndexOf('.')), url)));
 								} else {
-									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.defaultAvatar()));
+									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(Image.defaultAvatar()));
 								}
 							} catch (Exception e) {
 								e.printStackTrace();
