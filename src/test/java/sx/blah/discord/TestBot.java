@@ -22,10 +22,7 @@ package sx.blah.discord;
 import org.junit.Test;
 import sx.blah.discord.api.*;
 import sx.blah.discord.handle.IListener;
-import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
-import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.HTTP429Exception;
@@ -58,6 +55,11 @@ public class TestBot {
 	public static void main(String... args) {
 		try {
 			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
+			
+			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
+				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
+			});
+			
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
 				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());

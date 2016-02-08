@@ -11,6 +11,8 @@ import java.util.EnumSet;
 public class ClientBuilder {
 	
 	private String[] loginInfo = new String[0];
+	private long timeoutTime = -1L;
+	private int maxMissedPingCount = -1;
 	
 	/**
 	 * Sets the login info for the client. This is a REQUIRED step
@@ -21,6 +23,28 @@ public class ClientBuilder {
 	 */
 	public ClientBuilder withLogin(String email, String password) {
 		loginInfo = new String[]{email, password};
+		return this;
+	}
+	
+	/**
+	 * Makes the client have a timeout.
+	 * 
+	 * @param timeoutDelay The timeout delay (in ms).
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withTimeout(long timeoutDelay) {
+		this.timeoutTime = timeoutDelay;
+		return this;
+	}
+	
+	/**
+	 * Makes the client have a ping timeout.
+	 *
+	 * @param maxMissedPings The maximum amount of pings that discord can not respond to before disconnecting.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withPingTimeout(int maxMissedPings) {
+		this.maxMissedPingCount = maxMissedPings;
 		return this;
 	}
 	
@@ -54,7 +78,7 @@ public class ClientBuilder {
 				case SUPPORTED:
 			}
 		}
-		return new DiscordClientImpl(loginInfo[0], loginInfo[1]);
+		return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount);
 	}
 	
 	/**

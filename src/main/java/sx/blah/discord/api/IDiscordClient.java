@@ -216,4 +216,11 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 */
 	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
+	
+	/**
+	 * Gets the latest response time by the discord websocket to a ping.
+	 * 
+	 * @return The response time (in ms).
+	 */
+	long getResponseTime();
 }

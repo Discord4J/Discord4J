@@ -7,6 +7,7 @@ import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
+import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
@@ -107,7 +108,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	protected ModuleLoader loader;
 	
-	public DiscordClientImpl(String email, String password) {
+	/**
+	 * The time for the client to timeout.
+	 */
+	protected final long timeoutTime;
+	
+	/**
+	 * The maximum amount of pings discord can miss.
+	 */
+	protected final int maxMissedPingCount;
+	
+	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount) {
+		this.timeoutTime = timeoutTime;
+		this.maxMissedPingCount = maxMissedPingCount;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 		this.email = email;
@@ -141,7 +154,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
 			this.token = response.token;
 			
-			this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)));
+			this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)), timeoutTime, maxMissedPingCount);
 		} catch (Exception e) {
 			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
@@ -150,7 +163,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void logout() throws HTTP429Exception, DiscordException {
 		if (isReady()) {
-			ws.disconnect();
+			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 			
 			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
@@ -397,5 +410,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	@Override
+	public long getResponseTime() {
+		return ws.getResponseTime();
 	}
 }
