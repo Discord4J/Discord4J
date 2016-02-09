@@ -20,3 +20,4 @@ dependency-reduced-pom.xml
 # Misc files
 Roadmap.md
 modules/
+bin/
