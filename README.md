@@ -80,7 +80,7 @@ public class InterfaceListener implements IListener<ReadyEvent> { //The event ty
   }
 }
 ```
-.2 Using the `@EventSubscriber` annotation:
+2. Using the `@EventSubscriber` annotation:
 ```java
 public class AnnotationListener {
   
