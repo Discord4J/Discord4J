@@ -19,15 +19,28 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRegion;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.ChannelCreateRequest;
 import sx.blah.discord.json.requests.EditGuildRequest;
@@ -39,12 +52,6 @@ import sx.blah.discord.json.responses.UserResponse;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.Requests;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
 
 public class Guild implements IGuild {
 	/**
@@ -177,12 +184,9 @@ public class Guild implements IGuild {
 	
 	@Override
 	public IChannel getChannelByID(String id) {
-		for (IChannel c : channels) {
-			if (c.getID().equalsIgnoreCase(id))
-				return c;
-		}
-		
-		return null; // Not found, return null.
+		return channels.stream()
+				.filter(c -> c.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
 	}
 	
 	@Override
@@ -192,16 +196,13 @@ public class Guild implements IGuild {
 	
 	@Override
 	public IUser getUserByID(String id) {
-		if (null == users)
+		if (users == null)
 			return null;
-		for (IUser user : users) {
-			if (null != user
-					&& null != user.getID()
-					&& user.getID().equalsIgnoreCase(id))
-				return user;
-		}
-		
-		return null; // Not found, return null.
+		return users.stream()
+				.filter(u -> u != null
+						&& u.getID() != null
+						&& u.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
 	}
 	
 	@Override
@@ -257,11 +258,9 @@ public class Guild implements IGuild {
 	
 	@Override
 	public IRole getRoleForID(String id) {
-		for (IRole role : roles) {
-			if (role.getID().equals(id))
-				return role;
-		}
-		return null;
+		return roles.stream()
+				.filter(r -> r.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
 	}
 	
 	@Override
@@ -271,11 +270,9 @@ public class Guild implements IGuild {
 	
 	@Override
 	public IVoiceChannel getVoiceChannelForID(String id) {
-		for (IVoiceChannel channel : voiceChannels)
-			if (channel.getID().equals(id))
-				return channel;
-		
-		return null;
+		return voiceChannels.stream()
+				.filter(c -> c.getID().equals(id))
+				.findAny().orElse(null);
 	}
 	
 	@Override

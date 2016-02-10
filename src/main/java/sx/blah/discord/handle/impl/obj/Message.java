@@ -1,7 +1,14 @@
 package sx.blah.discord.handle.impl.obj;
 
+import java.time.LocalDateTime;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
@@ -17,12 +24,6 @@ import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
 
 public class Message implements IMessage {
 	
@@ -157,10 +158,9 @@ public class Message implements IMessage {
 	public List<IUser> getMentions() {
 		if (mentionsEveryone)
 			return channel.getGuild().getUsers();
-		List<IUser> mentionedUsers = new ArrayList<>();
-		for (String mentioned : mentions)
-			mentionedUsers.add(client.getUserByID(mentioned));
-		return mentionedUsers;
+		return mentions.stream()
+				.map(m -> client.getUserByID(m))
+				.collect(Collectors.toList());
 	}
 	
 	@Override

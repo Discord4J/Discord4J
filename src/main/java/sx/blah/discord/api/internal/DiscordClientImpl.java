@@ -1,7 +1,16 @@
 package sx.blah.discord.api.internal;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
@@ -9,19 +18,31 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.User;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.*;
-import sx.blah.discord.json.responses.*;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IInvite;
+import sx.blah.discord.handle.obj.IPrivateChannel;
+import sx.blah.discord.handle.obj.IRegion;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.Presences;
+import sx.blah.discord.json.requests.AccountInfoChangeRequest;
+import sx.blah.discord.json.requests.CreateGuildRequest;
+import sx.blah.discord.json.requests.LoginRequest;
+import sx.blah.discord.json.requests.PresenceUpdateRequest;
+import sx.blah.discord.json.requests.PrivateChannelRequest;
+import sx.blah.discord.json.responses.AccountInfoChangeResponse;
+import sx.blah.discord.json.responses.GatewayResponse;
+import sx.blah.discord.json.responses.GuildResponse;
+import sx.blah.discord.json.responses.InviteJSONResponse;
+import sx.blah.discord.json.responses.LoginResponse;
+import sx.blah.discord.json.responses.PrivateChannelResponse;
+import sx.blah.discord.json.responses.RegionResponse;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.Lambdas;
 import sx.blah.discord.util.Requests;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Defines the client.
@@ -265,42 +286,41 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
+	public Collection<IChannel> getChannels(boolean priv) {
+		Collection<IChannel> channels = guildList.stream()
+				.map(g -> g.getChannels())
+				.reduce(Lambdas.listReduction()).get();
+		if (priv)
+			channels.addAll(privateChannels);
+		return channels;
+	}
+	
+	@Override
 	public IChannel getChannelByID(String id) {
-		for (IGuild guild : guildList) {
-			for (IChannel channel : guild.getChannels()) {
-				if (channel.getID().equalsIgnoreCase(id))
-					return channel;
-			}
-		}
-		
-		for (IPrivateChannel channel : privateChannels) {
-			if (channel.getID().equalsIgnoreCase(id))
-				return channel;
-		}
-		
-		return null;
+		return getChannels(true).stream()
+				.filter(c -> c.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
+	}
+	
+	@Override
+	public Collection<IVoiceChannel> getVoiceChannels() {
+		return guildList.stream()
+				.map(g -> g.getVoiceChannels())
+				.reduce(Lambdas.listReduction()).get();
 	}
 	
 	@Override
 	public IVoiceChannel getVoiceChannelByID(String id) {
-		for (IGuild guild : guildList) {
-			for (IVoiceChannel channel : guild.getVoiceChannels()) {
-				if (channel.getID().equals(id))
-					return channel;
-			}
-		}
-		
-		return null;
+		return getVoiceChannels().stream()
+				.filter(c -> c.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
 	}
 	
 	@Override
 	public IGuild getGuildByID(String guildID) {
-		for (IGuild guild : guildList) {
-			if (guild.getID().equalsIgnoreCase(guildID))
-				return guild;
-		}
-		
-		return null;
+		return guildList.stream()
+				.filter(g -> g.getID().equalsIgnoreCase(guildID))
+				.findAny().orElse(null);
 	}
 	
 	@Override
@@ -312,9 +332,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public IUser getUserByID(String userID) {
 		IUser user = null;
 		for (IGuild guild : guildList) {
-			if (null == user) {
+			if (user == null)
 				user = guild.getUserByID(userID);
-			}
+			else
+				break;
 		}
 		
 		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user;
@@ -327,11 +348,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return null;
 		}
 		
-		for (IPrivateChannel channel : privateChannels) {
-			if (channel.getRecipient().getID().equalsIgnoreCase(user.getID())) {
-				return channel;
-			}
-		}
+		Optional<IPrivateChannel> opt = privateChannels.stream()
+				.filter(c -> c.getRecipient().getID().equalsIgnoreCase(user.getID()))
+				.findAny();
+		if (opt.isPresent())
+			return opt.get();
 		
 		PrivateChannelResponse response = null;
 		try {
@@ -374,9 +395,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("authorization", this.token)),
 					RegionResponse[].class);
 			
-			for (RegionResponse regionResponse : regions) {
-				REGIONS.add(DiscordUtils.getRegionFromJSON(this, regionResponse));
-			}
+			Arrays.stream(regions)
+					.map(r -> DiscordUtils.getRegionFromJSON(this, r))
+					.forEach(r -> REGIONS.add(r));
 		}
 		
 		return REGIONS;
@@ -385,10 +406,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IRegion getRegionForID(String regionID) {
 		try {
-			for (IRegion region : getRegions()) {
-				if (region.getID().equals(regionID))
-					return region;
-			}
+			return getRegions().stream()
+					.filter(r -> r.getID().equals(regionID))
+					.findAny().orElse(null);
 		} catch (HTTP429Exception | DiscordException e) {
 			e.printStackTrace();
 		}

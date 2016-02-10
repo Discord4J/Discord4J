@@ -19,11 +19,26 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
+
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
@@ -31,7 +46,13 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IInvite;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.requests.ChannelEditRequest;
 import sx.blah.discord.json.requests.InviteRequest;
@@ -39,16 +60,9 @@ import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Lambdas;
 import sx.blah.discord.util.MessageComparator;
 import sx.blah.discord.util.Requests;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Channel implements IChannel {
 	
@@ -165,12 +179,9 @@ public class Channel implements IChannel {
 	
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		for (IMessage message : messages) {
-			if (message.getID().equalsIgnoreCase(messageID))
-				return message;
-		}
-		
-		return null;
+		return messages.stream()
+				.filter(m -> m.getID().equalsIgnoreCase(messageID))
+				.findAny().orElse(null);
 	}
 	
 	/**
@@ -407,25 +418,24 @@ public class Channel implements IChannel {
 		List<IRole> roles = user.getRolesForGuild(parent.getID());
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 		
-		for (IRole role : roles) { //Gets permissions granted from roles
-			for (Permissions permission : getModifiedPermissions(role))
-				if (!permissions.contains(permission))
-					permissions.add(permission);
-		}
+		roles.stream()
+				.map(r -> getModifiedPermissions(r))
+				.reduce(Lambdas.enumSetReduction())
+				.get().stream()
+				.filter(p -> !permissions.contains(p))
+				.forEach(p -> permissions.add(p));
 		
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		if (override == null)
 			return permissions;
 		
 		for (Permissions permission : override.allow()) {
-			if (!permissions.contains(permission))
-				permissions.add(permission);
+			permissions.add(permission);
 		}
 		for (Permissions permission : override.deny()) {
-			if (permissions.contains(permission)) {
-				permissions.remove(permission);
-			}
+			permissions.remove(permission);
 		}
+		
 		return permissions;
 	}
 	
@@ -438,14 +448,12 @@ public class Channel implements IChannel {
 			return base;
 		
 		for (Permissions permission : override.allow()) {
-			if (!base.contains(permission))
-				base.add(permission);
+			base.add(permission);
 		}
 		for (Permissions permission : override.deny()) {
-			if (base.contains(permission)) {
-				base.remove(permission);
-			}
+			base.remove(permission);
 		}
+		
 		return base;
 	}
 	
