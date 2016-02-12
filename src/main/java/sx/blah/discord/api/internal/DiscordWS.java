@@ -46,7 +46,7 @@ public class DiscordWS extends WebSocketClient {
 	/**
 	 * The amount of users a guild must have to be considered "large"
 	 */
-	public static final int LARGE_THRESHOLD = 50;
+	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
 	static {
 		headers.put("Accept-Encoding", "gzip");
