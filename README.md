@@ -108,6 +108,9 @@ public class Main {
 }
 ```
 
+### More examples
+See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
+
 ## Deprecation policy
 Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
 
