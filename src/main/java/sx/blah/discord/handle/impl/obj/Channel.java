@@ -131,7 +131,7 @@ public class Channel implements IChannel {
 		this.client = client;
 		this.name = name;
 		this.id = id;
-		this.messages = new CopyOnWriteArrayList<>(messages);
+		this.messages = messages;
 		this.parent = parent;
 		this.isPrivate = false;
 		this.topic = topic;
