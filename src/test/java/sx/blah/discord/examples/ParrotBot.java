@@ -19,7 +19,7 @@ public class ParrotBot extends BaseBot implements IListener<MessageReceivedEvent
 
 	public ParrotBot(IDiscordClient discordClient) {
 		super(discordClient);
-		EventDispatcher dispatcher = this.client.getDispatcher(); //Gets the client's event dispatcher
+		EventDispatcher dispatcher = discordClient.getDispatcher(); //Gets the client's event dispatcher
 		dispatcher.registerListener(this); //Registers the event listener
 	}
 
