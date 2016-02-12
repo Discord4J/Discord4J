@@ -18,35 +18,35 @@ import java.util.Optional;
  * Represents the main discord api
  */
 public interface IDiscordClient {
-	
+
 	/**
 	 * Gets the {@link EventDispatcher} instance for this client. Use this to handle events.
 	 *
 	 * @return The event dispatcher instance.
 	 */
 	EventDispatcher getDispatcher();
-	
+
 	/**
 	 * Gets the authorization token for this client.
 	 *
 	 * @return The authorization token.
 	 */
 	String getToken();
-	
+
 	/**
 	 * Logs the client in as the provided account.
 	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
 	void login() throws DiscordException;
-	
+
 	/**
 	 * Logs out the client.
 	 *
 	 * @throws HTTP429Exception
 	 */
 	void logout() throws HTTP429Exception, DiscordException;
-	
+
 	/**
 	 * Allows you to change the info on your bot.
 	 *
@@ -58,8 +58,8 @@ public interface IDiscordClient {
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException; 
-	
+	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException;
+
 	/**
 	 * Updates the bot's presence.
 	 *
@@ -67,21 +67,21 @@ public interface IDiscordClient {
 	 * @param game The optional name of the game the bot is playing. If empty, the bot simply won't be playing a game.
 	 */
 	void updatePresence(boolean isIdle, Optional<String> game);
-	
+
 	/**
 	 * Checks if the api is ready to be interacted with (if it is logged in).
 	 *
 	 * @return True if ready, false if otherwise.
 	 */
 	boolean isReady();
-	
+
 	/**
 	 * Gets the {@link User} this bot is representing.
 	 *
 	 * @return The user object.
 	 */
 	IUser getOurUser();
-	
+
 	/**
 	 * Gets a channel by its unique id.
 	 *
@@ -89,15 +89,15 @@ public interface IDiscordClient {
 	 * @return The {@link Channel} object with the provided id.
 	 */
 	IChannel getChannelByID(String channelID);
-	
+
 	/**
 	 * Gets a voice channel from a given id.
-	 * 
+	 *
 	 * @param id The voice channel id.
 	 * @return The voice channel (or null if not found).
 	 */
 	IVoiceChannel getVoiceChannelByID(String id);
-	
+
 	/**
 	 * Gets a guild by its unique id.
 	 *
@@ -105,14 +105,14 @@ public interface IDiscordClient {
 	 * @return The {@link Guild} object with the provided id.
 	 */
 	IGuild getGuildByID(String guildID);
-	
+
 	/**
 	 * Gets all the guilds the user the api represents is connected to.
 	 *
 	 * @return The list of {@link Guild}s the api is connected to.
 	 */
 	List<IGuild> getGuilds();
-	
+
 	/**
 	 * Gets a user by its unique id.
 	 *
@@ -120,7 +120,7 @@ public interface IDiscordClient {
 	 * @return The {@link User} object with the provided id.
 	 */
 	IUser getUserByID(String userID);
-	
+
 	/**
 	 * Gets a {@link PrivateChannel} for the provided recipient.
 	 *
@@ -130,7 +130,7 @@ public interface IDiscordClient {
 	 * @throws Exception
 	 */
 	IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception;
-	
+
 	/**
 	 * Gets the invite for a code.
 	 *
@@ -138,51 +138,51 @@ public interface IDiscordClient {
 	 * @return The invite, or null if it doesn't exist.
 	 */
 	IInvite getInviteForCode(String code);
-	
+
 	/**
 	 * Gets the regions available for discord.
-	 * 
+	 *
 	 * @return The list of available regions.
-	 * 
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
 	List<IRegion> getRegions() throws HTTP429Exception, DiscordException;
-	
+
 	/**
 	 * Gets the corresponding region for a given id.
-	 * 
+	 *
 	 * @param regionID The region id.
 	 * @return The region (or null if not found).
 	 */
 	IRegion getRegionForID(String regionID);
-	
+
 	/**
 	 * Creates a new guild.
-	 * 
+	 *
 	 * @param name The name of the guild.
-	 * @param regionID The region id for the guild (defaults to us-west).
+	 * @param regionID The region id for the guild.
 	 * @param icon The icon for the guild.
 	 * @return The new guild's id.
-	 * 
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
-	
+	IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
+
 	/**
 	 * Represents an avatar image.
 	 */
 	@FunctionalInterface
 	interface Image {
-		
+
 		/**
 		 * Gets the data to send to discord.
 		 *
 		 * @return The data to send to discord, can be null.
 		 */
 		String getData();
-		
+
 		/**
 		 * Gets the image data (avatar id) for for a user's avatar.
 		 *
@@ -192,7 +192,7 @@ public interface IDiscordClient {
 		static Image forUser(IUser user) {
 			return user::getAvatar;
 		}
-		
+
 		/**
 		 * Gets the data (null) for the default discord avatar.
 		 *
@@ -201,7 +201,7 @@ public interface IDiscordClient {
 		static Image defaultAvatar() {
 			return ()->null;
 		}
-		
+
 		/**
 		 * Generates an avatar image from bytes representing an image.
 		 *
@@ -212,7 +212,7 @@ public interface IDiscordClient {
 		static Image forData(String imageType, byte[] data) {
 			return ()->String.format("data:image/%s;base64,%s", imageType, Base64.encodeBase64String(data));
 		}
-		
+
 		/**
 		 * Generates an avatar image from an input stream representing an image.
 		 *
@@ -232,7 +232,7 @@ public interface IDiscordClient {
 				return defaultAvatar().getData();
 			};
 		}
-		
+
 		/**
 		 * Generates an avatar image from a direct link to an image.
 		 *
@@ -252,7 +252,7 @@ public interface IDiscordClient {
 				return defaultAvatar().getData();
 			};
 		}
-		
+
 		/**
 		 * Generates an avatar image from a file.
 		 *
