@@ -112,6 +112,15 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+						<configuration>
+							<artifactSet>
+								<excludes>
+									<exclude>org.slf4j:slf4j-simple</exclude>
+								</excludes>
+							</artifactSet>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>shaded</shadedClassifierName>
+						</configuration>
                     </execution>
                 </executions>
             </plugin>
