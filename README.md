@@ -29,6 +29,7 @@ In your `pom.xml` add:
     <groupId>sx.blah</groupId>
     <artifactId>Discord4J</artifactId>
     <version>@VERSION@</version>
+    <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
   </dependency>
 </dependencies>
 ...
@@ -47,6 +48,7 @@ repositories {
 dependencies {
   ...
   compile "sx.blah:Discord4J:@VERSION@"
+  //compile "sx.blah:Discord4J:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)
 }
 ...
 ```
