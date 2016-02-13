@@ -21,16 +21,16 @@ import java.util.jar.JarFile;
  * This class is used to manage loading and unloading modules for a discord client.
  */
 public class ModuleLoader {
-	
+
 	/**
 	 * This is the directory external modules are located in
 	 */
 	public static final String MODULE_DIR = "modules";
 	protected static final List<Class<? extends IModule>> modules = new CopyOnWriteArrayList<>();
-	
+
 	private IDiscordClient client;
 	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
-	
+
 	static {
 		if (Configuration.LOAD_EXTERNAL_MODULES) {
 			File modulesDir = new File(MODULE_DIR);
@@ -43,7 +43,7 @@ public class ModuleLoader {
 					throw new RuntimeException("Error creating "+MODULE_DIR+" directory");
 				}
 			}
-			
+
 			File[] files = modulesDir.listFiles((FilenameFilter) FileFilterUtils.suffixFileFilter("jar"));
 			if (files.length > 0) {
 				Discord4J.LOGGER.info("Loading {} external module(s)...", files.length);
@@ -52,10 +52,10 @@ public class ModuleLoader {
 			}
 		}
 	}
-	
+
 	public ModuleLoader(IDiscordClient client) {
 		this.client = client;
-		
+
 		for (Class<? extends IModule> clazz : modules) {
 			try {
 				IModule module = clazz.newInstance();
@@ -69,7 +69,7 @@ public class ModuleLoader {
 				Discord4J.LOGGER.error("Unable to load module "+clazz.getName()+"!", e);
 			}
 		}
-		
+
 		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {//Handles module load order and loads the modules
 			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
 			List<IModule> loaded = new CopyOnWriteArrayList<>();
@@ -94,32 +94,32 @@ public class ModuleLoader {
 			}
 		}
 	}
-	
+
 	/**
 	 * Gets the modules loaded in this ModuleLoader instance.
-	 * 
+	 *
 	 * @return The list of loaded modules.
 	 */
 	public List<IModule> getLoadedModules() {
 		return loadedModules;
 	}
-	
+
 	/**
 	 * Manually loads a module. NOTE: This doesn't enable the module!
-	 * 
+	 *
 	 * @param module The module to load.
 	 */
 	public void loadModule(IModule module) {
 		loadedModules.add(module);
 	}
-	
+
 	private boolean hasDependency(List<IModule> modules, String className) {
 		for (IModule module : modules)
 			if (module.getClass().getName().equals(className))
 				return true;
 		return false;
 	}
-	
+
 	private boolean canModuleLoad(IModule module) {
 		String[] versions = module.getVersion().toLowerCase().replace("-SNAPSHOT", "").split("\\.");
 		String[] discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-SNAPSHOT", "").split("\\.");
@@ -129,10 +129,10 @@ public class ModuleLoader {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Loads a jar file and automatically adds any modules.
-	 * 
+	 *
 	 * @param file The jar file to load.
 	 */
 	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
@@ -141,7 +141,7 @@ public class ModuleLoader {
 				//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
 				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 				URL url = file.toURI().toURL();
-				for (URL it : Arrays.asList(loader.getURLs())) {//Ensures duplicate libraries aren't loaded 
+				for (URL it : Arrays.asList(loader.getURLs())) {//Ensures duplicate libraries aren't loaded
 					if (it.equals(url)) {
 						return;
 					}
@@ -149,7 +149,7 @@ public class ModuleLoader {
 				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
 				method.setAccessible(true);
 				method.invoke(loader, new Object[]{url});
-				
+
 				//Scans the jar file for classes which have IModule as a super class
 				List<String> classes = new ArrayList<>();
 				JarFile jar = new JarFile(file);
@@ -170,10 +170,10 @@ public class ModuleLoader {
 			}
 		}
 	}
-	
+
 	/**
 	 * Manually adds a module class to be considered for loading.
-	 * 
+	 *
 	 * @param clazz The module class.
 	 */
 	public static void addModuleClass(Class<? extends IModule> clazz) {

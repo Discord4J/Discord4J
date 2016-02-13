@@ -18,6 +18,7 @@ public class AccountBot extends BaseBot implements IListener<ReadyEvent> {
 
 	/**
 	 * Fired when the bot is ready to interact with Discord. See {@link ReadyBot}
+	 *
 	 * @param event The event object.
 	 */
 	@Override

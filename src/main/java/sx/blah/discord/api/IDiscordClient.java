@@ -21,6 +21,7 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
+
 /**
  * Represents the main discord api
  */
@@ -68,10 +69,8 @@ public interface IDiscordClient {
 	 * @param email Email (if you want to change it)
 	 * @param password Password (if you want to change it).
 	 * @param avatar Image data for the bot's avatar, {@link Image}
-	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
-	 *
 	 * @deprecated Use the split methods instead: {@link #changeUsername(String)}, {@link #changeEmail(String)}, {@link #changePassword(String)}, {@link #changeAvatar(Image)}.
 	 */
 	@Deprecated
@@ -81,7 +80,6 @@ public interface IDiscordClient {
 	 * Changes this client's account's username.
 	 *
 	 * @param username The new username.
-	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */
@@ -91,7 +89,6 @@ public interface IDiscordClient {
 	 * Changes this client's account's email.
 	 *
 	 * @param email The new email.
-	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */
@@ -101,7 +98,6 @@ public interface IDiscordClient {
 	 * Changes this client's account's password.
 	 *
 	 * @param password The new password.
-	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */
@@ -111,7 +107,6 @@ public interface IDiscordClient {
 	 * Changes this client's account's avatar.
 	 *
 	 * @param avatar The new avatar.
-	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */

@@ -26,6 +26,7 @@ public class ReadyBot extends BaseBot implements IListener<ReadyEvent> {
 	/**
 	 * The ReadyEvent is fired when the bot is ready to interact with Discord. Attempting to do so (e.g. Changing account info, sending messages, etc.)
 	 * before the event is fired will result in an error.
+	 *
 	 * @param event The event object.
 	 */
 	@Override

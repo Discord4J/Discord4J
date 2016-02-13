@@ -35,7 +35,7 @@ import java.util.Properties;
  * Main class. :D
  */
 public class Discord4J {
-	
+
 	/**
 	 * The name of the project
 	 */
@@ -52,12 +52,12 @@ public class Discord4J {
 	 * The github repo for the api
 	 */
 	public static String URL;
-	
+
 	/**
 	 * SLF4J Instance
 	 */
 	public static final Logger LOGGER = LoggerFactory.getLogger(Discord4J.class);
-	
+
 	//Dynamically getting various information from maven
 	static {
 		InputStream stream = Discord4J.class.getClassLoader().getResourceAsStream("app.properties");
@@ -72,28 +72,28 @@ public class Discord4J {
 		VERSION = properties.getProperty("application.version");
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
-		
+
 		LOGGER.info("{} v{}", NAME, VERSION);
 		LOGGER.info("{}", DESCRIPTION);
 	}
-	
+
 	/**
 	 * This is used to run Discord4J independent of any bot, making it module dependent.
-	 * 
+	 *
 	 * @param args The args should be email, password IN THAT ORDER
 	 */
 	public static void main(String[] args) {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
 			throw new RuntimeException("Invalid configuration!");
-		
+
 		//There needs to be at least 2 args
 		if (args.length < 2)
 			throw new IllegalArgumentException("At least 2 arguments are required!");
-		
+
 		try {
 			IDiscordClient client = new ClientBuilder().withLogin(args[0], args[1]).login();
-			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
+			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e)->{
 				LOGGER.info("Logged in as {}", e.getClient().getOurUser().getName());
 			});
 			//The modules should handle the rest

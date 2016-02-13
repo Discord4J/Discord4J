@@ -8,16 +8,16 @@ import sx.blah.discord.handle.obj.IGuild;
  * Note: this guild is removed from the guild list when this happens!
  */
 public class GuildUnavailableEvent extends Event {
-	
+
 	private final IGuild guild;
-	
+
 	public GuildUnavailableEvent(IGuild guild) {
 		this.guild = guild;
 	}
-	
+
 	/**
 	 * Gets the guild that became unavailable.
-	 * 
+	 *
 	 * @return The guild.
 	 */
 	public IGuild getGuild() {

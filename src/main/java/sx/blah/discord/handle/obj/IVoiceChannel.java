@@ -11,13 +11,12 @@ import java.util.Optional;
  * TODO
  */
 public interface IVoiceChannel extends IChannel {
-	
+
 	/**
 	 * Edits the channel.
 	 *
 	 * @param name The new name of the channel.
 	 * @param position The new position of the channel.
-	 * 
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception

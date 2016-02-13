@@ -164,7 +164,7 @@ public class Role implements IRole {
 
 		try {
 			RoleResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
-					DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id,
+					DiscordEndpoints.SERVERS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
 							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions())))),
 					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
@@ -198,7 +198,7 @@ public class Role implements IRole {
 	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS + guild.getID() + "/roles/" + id,
+		Requests.DELETE.makeRequest(DiscordEndpoints.SERVERS+guild.getID()+"/roles/"+id,
 				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
 	}
 

@@ -144,7 +144,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void login() throws DiscordException {
 		try {
-			if (null != ws) {
+			if (ws != null) {
 				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			}
 
@@ -266,7 +266,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public Collection<IChannel> getChannels(boolean priv) {
 		Collection<IChannel> channels = guildList.stream()
-				.map(g -> g.getChannels())
+				.map(g->g.getChannels())
 				.reduce(Lambdas.listReduction()).orElse(Collections.emptyList());
 		if (priv)
 			channels.addAll(privateChannels);
@@ -276,28 +276,28 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IChannel getChannelByID(String id) {
 		return getChannels(true).stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
+				.filter(c->c.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
 	}
 
 	@Override
 	public Collection<IVoiceChannel> getVoiceChannels() {
 		return guildList.stream()
-				.map(g -> g.getVoiceChannels())
+				.map(g->g.getVoiceChannels())
 				.reduce(Lambdas.listReduction()).orElse(Collections.emptyList());
 	}
 
 	@Override
 	public IVoiceChannel getVoiceChannelByID(String id) {
 		return getVoiceChannels().stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
+				.filter(c->c.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
 	}
 
 	@Override
 	public IGuild getGuildByID(String guildID) {
 		return guildList.stream()
-				.filter(g -> g.getID().equalsIgnoreCase(guildID))
+				.filter(g->g.getID().equalsIgnoreCase(guildID))
 				.findAny().orElse(null);
 	}
 
@@ -327,7 +327,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		Optional<IPrivateChannel> opt = privateChannels.stream()
-				.filter(c -> c.getRecipient().getID().equalsIgnoreCase(user.getID()))
+				.filter(c->c.getRecipient().getID().equalsIgnoreCase(user.getID()))
 				.findAny();
 		if (opt.isPresent())
 			return opt.get();
@@ -369,13 +369,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public List<IRegion> getRegions() throws HTTP429Exception, DiscordException {
 		if (REGIONS.isEmpty()) {
 			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
-					DiscordEndpoints.VOICE + "regions",
+					DiscordEndpoints.VOICE+"regions",
 					new BasicNameValuePair("authorization", this.token)),
 					RegionResponse[].class);
 
 			Arrays.stream(regions)
-					.map(r -> DiscordUtils.getRegionFromJSON(this, r))
-					.forEach(r -> REGIONS.add(r));
+					.map(r->DiscordUtils.getRegionFromJSON(this, r))
+					.forEach(r->REGIONS.add(r));
 		}
 
 		return REGIONS;
@@ -385,7 +385,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public IRegion getRegionForID(String regionID) {
 		try {
 			return getRegions().stream()
-					.filter(r -> r.getID().equals(regionID))
+					.filter(r->r.getID().equals(regionID))
 					.findAny().orElse(null);
 		} catch (HTTP429Exception | DiscordException e) {
 			e.printStackTrace();
@@ -396,7 +396,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException {
 		try {
-			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE + "/guilds",
+			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
 							new CreateGuildRequest(name, regionID, icon.orElse(null)))),
 					new BasicNameValuePair("authorization", this.token),

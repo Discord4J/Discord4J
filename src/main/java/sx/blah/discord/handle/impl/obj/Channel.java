@@ -168,7 +168,7 @@ public class Channel implements IChannel {
 	@Override
 	public IMessage getMessageByID(String messageID) {
 		return messages.stream()
-				.filter(m -> m.getID().equalsIgnoreCase(messageID))
+				.filter(m->m.getID().equalsIgnoreCase(messageID))
 				.findAny().orElse(null);
 	}
 
@@ -407,11 +407,11 @@ public class Channel implements IChannel {
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 
 		roles.stream()
-				.map(r -> getModifiedPermissions(r))
+				.map(r->getModifiedPermissions(r))
 				.reduce(Lambdas.enumSetReduction())
 				.get().stream()
-				.filter(p -> !permissions.contains(p))
-				.forEach(p -> permissions.add(p));
+				.filter(p->!permissions.contains(p))
+				.forEach(p->permissions.add(p));
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		if (override == null)
@@ -495,8 +495,8 @@ public class Channel implements IChannel {
 			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id,
 							Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)))),
-							new BasicNameValuePair("authorization", client.getToken()),
-							new BasicNameValuePair("content-type", "application/json"));
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

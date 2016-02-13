@@ -16,15 +16,15 @@ import sx.blah.discord.api.IDiscordClient;
  * Manages event listeners and event logic.
  */
 public class EventDispatcher {
-	
+
 	private ConcurrentHashMap<Class<?>, HashMap<Method, Object>> methodListeners = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<Class<?>, List<IListener>> classListeners = new ConcurrentHashMap<>();
 	private IDiscordClient client;
-	
+
 	public EventDispatcher(IDiscordClient client) {
 		this.client = client;
 	}
-	
+
 	/**
 	 * Registers a listener using {@link EventSubscriber} method annotations.
 	 *
@@ -39,13 +39,13 @@ public class EventDispatcher {
 				if (Event.class.isAssignableFrom(eventClass)) {
 					if (!methodListeners.containsKey(eventClass))
 						methodListeners.put(eventClass, new HashMap<>());
-					
+
 					methodListeners.get(eventClass).put(method, listener);
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Registers a single event listener.
 	 *
@@ -56,11 +56,11 @@ public class EventDispatcher {
 		if (Event.class.isAssignableFrom(rawType)) {
 			if (!classListeners.containsKey(rawType))
 				classListeners.put(rawType, new CopyOnWriteArrayList<>());
-			
+
 			classListeners.get(rawType).add(listener);
 		}
 	}
-	
+
 	/**
 	 * Unregisters a listener using {@link EventSubscriber} method annotations.
 	 *
@@ -77,7 +77,7 @@ public class EventDispatcher {
 			}
 		}
 	}
-	
+
 	/**
 	 * Unregisters a single event listener.
 	 *
@@ -90,7 +90,7 @@ public class EventDispatcher {
 				classListeners.get(rawType).remove(listener);
 		}
 	}
-	
+
 	/**
 	 * Dispatches an event.
 	 *
@@ -100,11 +100,11 @@ public class EventDispatcher {
 		if (client.isReady()) {
 			Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());
 			event.client = client;
-			
+
 			methodListeners.entrySet().stream()
-					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-					.map(e -> e.getValue())
-					.forEach(m -> m.forEach((k, v) -> {
+					.filter(e->e.getKey().isAssignableFrom(event.getClass()))
+					.map(e->e.getValue())
+					.forEach(m->m.forEach((k, v)->{
 						try {
 							k.invoke(v, event);
 						} catch (IllegalAccessException | InvocationTargetException e) {
@@ -113,11 +113,11 @@ public class EventDispatcher {
 							Discord4J.LOGGER.error("Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
 						}
 					}));
-			
+
 			classListeners.entrySet().stream()
-					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-					.map(e -> e.getValue())
-					.forEach(s -> s.forEach(l -> {
+					.filter(e->e.getKey().isAssignableFrom(event.getClass()))
+					.map(e->e.getValue())
+					.forEach(s->s.forEach(l->{
 						try {
 							l.handle(event);
 						} catch (Exception e) {

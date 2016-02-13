@@ -159,7 +159,7 @@ public class Message implements IMessage {
 		if (mentionsEveryone)
 			return channel.getGuild().getUsers();
 		return mentions.stream()
-				.map(m -> client.getUserByID(m))
+				.map(m->client.getUserByID(m))
 				.collect(Collectors.toList());
 	}
 

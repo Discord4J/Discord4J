@@ -53,7 +53,6 @@ public class DiscordUtils {
 	 *
 	 * @param client The discord client to use
 	 * @param channel The channel to get messages from.
-	 *
 	 * @throws IOException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
@@ -498,14 +497,14 @@ public class DiscordUtils {
 	 * @param client The client.
 	 * @param channel The channel.
 	 * @param required The permissions required.
-	 *
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(IDiscordClient client, IChannel channel, EnumSet<Permissions> required) throws MissingPermissionsException {
 		try {
 			EnumSet<Permissions> contained = channel.getModifiedPermissions(client.getOurUser());
 			checkPermissions(contained, required);
-		} catch (UnsupportedOperationException e) {}
+		} catch (UnsupportedOperationException e) {
+		}
 	}
 
 	/**
@@ -514,7 +513,6 @@ public class DiscordUtils {
 	 * @param client The client.
 	 * @param guild The guild.
 	 * @param required The permissions required.
-	 *
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(IDiscordClient client, IGuild guild, EnumSet<Permissions> required) throws MissingPermissionsException {
@@ -525,7 +523,8 @@ public class DiscordUtils {
 				contained.addAll(role.getPermissions());
 			}
 			checkPermissions(contained, required);
-		} catch (UnsupportedOperationException e) {}
+		} catch (UnsupportedOperationException e) {
+		}
 	}
 
 	/**
@@ -533,7 +532,6 @@ public class DiscordUtils {
 	 *
 	 * @param contained The permissions contained.
 	 * @param required The permissions required.
-	 *
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(EnumSet<Permissions> contained, EnumSet<Permissions> required) throws MissingPermissionsException {
