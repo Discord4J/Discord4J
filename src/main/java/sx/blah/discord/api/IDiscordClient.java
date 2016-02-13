@@ -25,42 +25,42 @@ import sx.blah.discord.util.Image;
  * Represents the main discord api
  */
 public interface IDiscordClient {
-	
+
 	/**
 	 * Gets the {@link EventDispatcher} instance for this client. Use this to handle events.
 	 *
 	 * @return The event dispatcher instance.
 	 */
 	EventDispatcher getDispatcher();
-	
+
 	/**
 	 * Gets the {@link ModuleLoader} instance for this client.
-	 * 
+	 *
 	 * @return The module loader instance.
 	 */
 	ModuleLoader getModuleLoader();
-	
+
 	/**
 	 * Gets the authorization token for this client.
 	 *
 	 * @return The authorization token.
 	 */
 	String getToken();
-	
+
 	/**
 	 * Logs the client in as the provided account.
 	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
 	void login() throws DiscordException;
-	
+
 	/**
 	 * Logs out the client.
 	 *
 	 * @throws HTTP429Exception
 	 */
 	void logout() throws HTTP429Exception, DiscordException;
-	
+
 	/**
 	 * Allows you to change the info on your bot.
 	 *
@@ -71,52 +71,52 @@ public interface IDiscordClient {
 	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
-	 * 
+	 *
 	 * @deprecated Use the split methods instead: {@link #changeUsername(String)}, {@link #changeEmail(String)}, {@link #changePassword(String)}, {@link #changeAvatar(Image)}.
 	 */
 	@Deprecated
 	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException;
-	
+
 	/**
 	 * Changes this client's account's username.
-	 * 
+	 *
 	 * @param username The new username.
-	 * 
+	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */
 	void changeUsername(String username) throws DiscordException, HTTP429Exception;
-	
+
 	/**
 	 * Changes this client's account's email.
-	 * 
+	 *
 	 * @param email The new email.
-	 * 
+	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */
 	void changeEmail(String email) throws DiscordException, HTTP429Exception;
-	
+
 	/**
 	 * Changes this client's account's password.
 	 *
 	 * @param password The new password.
-	 * 
+	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */
 	void changePassword(String password) throws DiscordException, HTTP429Exception;
-	
+
 	/**
 	 * Changes this client's account's avatar.
 	 *
 	 * @param avatar The new avatar.
-	 * 
+	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
 	 */
 	void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception;
-	
+
 	/**
 	 * Updates the bot's presence.
 	 *
@@ -124,29 +124,30 @@ public interface IDiscordClient {
 	 * @param game The optional name of the game the bot is playing. If empty, the bot simply won't be playing a game.
 	 */
 	void updatePresence(boolean isIdle, Optional<String> game);
-	
+
 	/**
 	 * Checks if the api is ready to be interacted with (if it is logged in).
 	 *
 	 * @return True if ready, false if otherwise.
 	 */
 	boolean isReady();
-	
+
 	/**
 	 * Gets the {@link User} this bot is representing.
 	 *
 	 * @return The user object.
 	 */
 	IUser getOurUser();
-	
+
+
 	/**
 	 * Gets a set of all channels visible to the bot user.
-	 * 
+	 *
 	 * @param includePrivate Whether to include private channels in the set.
 	 * @return A {@link Set} of all {@link Channel} objects.
 	 */
 	Collection<IChannel> getChannels(boolean includePrivate);
-	
+
 	/**
 	 * Gets a channel by its unique id.
 	 *
@@ -154,22 +155,22 @@ public interface IDiscordClient {
 	 * @return The {@link Channel} object with the provided id.
 	 */
 	IChannel getChannelByID(String channelID);
-	
+
 	/**
 	 * Gets a set of all voice channels visible to the bot user.
-	 * 
+	 *
 	 * @return A {@link Set} of all {@link VoiceChannel} objects.
 	 */
 	Collection<IVoiceChannel> getVoiceChannels();
-	
+
 	/**
 	 * Gets a voice channel from a given id.
-	 * 
+	 *
 	 * @param id The voice channel id.
 	 * @return The voice channel (or null if not found).
 	 */
 	IVoiceChannel getVoiceChannelByID(String id);
-	
+
 	/**
 	 * Gets a guild by its unique id.
 	 *
@@ -177,14 +178,14 @@ public interface IDiscordClient {
 	 * @return The {@link Guild} object with the provided id.
 	 */
 	IGuild getGuildByID(String guildID);
-	
+
 	/**
 	 * Gets all the guilds the user the api represents is connected to.
 	 *
 	 * @return The list of {@link Guild}s the api is connected to.
 	 */
 	List<IGuild> getGuilds();
-	
+
 	/**
 	 * Gets a user by its unique id.
 	 *
@@ -192,7 +193,7 @@ public interface IDiscordClient {
 	 * @return The {@link User} object with the provided id.
 	 */
 	IUser getUserByID(String userID);
-	
+
 	/**
 	 * Gets a {@link PrivateChannel} for the provided recipient.
 	 *
@@ -203,7 +204,7 @@ public interface IDiscordClient {
 	 * @throws HTTP429Exception
 	 */
 	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception;
-	
+
 	/**
 	 * Gets the invite for a code.
 	 *
@@ -211,41 +212,41 @@ public interface IDiscordClient {
 	 * @return The invite, or null if it doesn't exist.
 	 */
 	IInvite getInviteForCode(String code);
-	
+
 	/**
 	 * Gets the regions available for discord.
-	 * 
+	 *
 	 * @return The list of available regions.
-	 * 
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
 	List<IRegion> getRegions() throws HTTP429Exception, DiscordException;
-	
+
 	/**
 	 * Gets the corresponding region for a given id.
-	 * 
+	 *
 	 * @param regionID The region id.
 	 * @return The region (or null if not found).
 	 */
 	IRegion getRegionForID(String regionID);
-	
+
 	/**
 	 * Creates a new guild.
-	 * 
+	 *
 	 * @param name The name of the guild.
-	 * @param regionID The region id for the guild (defaults to us-west).
+	 * @param regionID The region id for the guild.
 	 * @param icon The icon for the guild.
 	 * @return The new guild's id.
-	 * 
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	IGuild createGuild(String name, Optional<String> regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
-	
+	IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
+
 	/**
 	 * Gets the latest response time by the discord websocket to a ping.
-	 * 
+	 *
 	 * @return The response time (in ms).
 	 */
 	long getResponseTime();

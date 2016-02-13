@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
 
 public class DiscordWS extends WebSocketClient {
-	
+
 	private DiscordClientImpl client;
 	private static final HashMap<String, String> headers = new HashMap<>();
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
@@ -55,12 +55,12 @@ public class DiscordWS extends WebSocketClient {
 	/**
 	 * The amount of users a guild must have to be considered "large"
 	 */
-	public static final int LARGE_THRESHOLD = 50;
-	
+	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
+
 	static {
 		headers.put("Accept-Encoding", "gzip");
 	}
-	
+
 	public DiscordWS(DiscordClientImpl client, URI serverURI, long timeoutTime, int maxMissedPingCount) {
 		super(serverURI, new Draft_10(), headers, 0); //Same as super(serverURI) but I added custom headers
 //		super(serverURI);
@@ -75,7 +75,7 @@ public class DiscordWS extends WebSocketClient {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Disconnects the client WS.
 	 */
@@ -84,10 +84,11 @@ public class DiscordWS extends WebSocketClient {
 		isConnected.set(false);
 		close();
 		executorService.shutdownNow();
+		client.ws = null;
 		Thread.currentThread().interrupt();
 	}
-	
-	
+
+
 	@Override
 	public void onOpen(ServerHandshake serverHandshake) {
 		if (client.sessionId != null) {
@@ -100,7 +101,7 @@ public class DiscordWS extends WebSocketClient {
 			Discord4J.LOGGER.error("Use the login() method to set your token first!");
 			return;
 		}
-		
+
 		Runnable pingPong = () -> {
 			if (sentPing) {
 				if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
@@ -135,7 +136,7 @@ public class DiscordWS extends WebSocketClient {
 				client.timer + client.heartbeat - System.currentTimeMillis(),
 				client.heartbeat, TimeUnit.MILLISECONDS);
 	}
-	
+
 	/**
 	 * Called when the websocket receives a message.
 	 * This method is parses from raw JSON to objects,
@@ -155,111 +156,111 @@ public class DiscordWS extends WebSocketClient {
 				Discord4J.LOGGER.error("Received error from Discord: {}. Frame: {}", message, frame);
 		}
 		int op = object.get("op").getAsInt();
-		
+
 		if (op != 7) //Not a redirect op, so cache the last sequence value
 			client.lastSequence = object.get("s").getAsLong();
-		
+
 		if (op == 0) { //Event dispatched
 			String type = object.get("t").getAsString();
 			JsonElement eventObject = object.get("d");
-			
+
 			switch (type) {
 				case "RESUMED":
 					resumed(eventObject);
 					break;
-				
+
 				case "READY":
 					ready(eventObject);
 					break;
-				
+
 				case "MESSAGE_CREATE":
 					messageCreate(eventObject);
 					break;
-				
+
 				case "TYPING_START":
 					typingStart(eventObject);
 					break;
-				
+
 				case "GUILD_CREATE":
 					guildCreate(eventObject);
 					break;
-				
+
 				case "GUILD_MEMBER_ADD":
 					guildMemberAdd(eventObject);
 					break;
-				
+
 				case "GUILD_MEMBER_REMOVE":
 					guildMemberRemove(eventObject);
 					break;
-				
+
 				case "GUILD_MEMBER_UPDATE":
 					guildMemberUpdate(eventObject);
 					break;
-				
+
 				case "MESSAGE_UPDATE":
 					messageUpdate(eventObject);
 					break;
-				
+
 				case "MESSAGE_DELETE":
 					messageDelete(eventObject);
 					break;
-				
+
 				case "PRESENCE_UPDATE":
 					presenceUpdate(eventObject);
 					break;
-				
+
 				case "GUILD_DELETE":
 					guildDelete(eventObject);
 					break;
-				
+
 				case "CHANNEL_CREATE":
 					channelCreate(eventObject);
 					break;
-				
+
 				case "CHANNEL_DELETE":
 					channelDelete(eventObject);
 					break;
-				
+
 				case "USER_UPDATE":
 					userUpdate(eventObject);
 					break;
-				
+
 				case "CHANNEL_UPDATE":
 					channelUpdate(eventObject);
 					break;
-				
+
 				case "MESSAGE_ACK":
 					messageAck(eventObject);
 					break;
-				
+
 				case "GUILD_MEMBERS_CHUNK":
 					guildMembersChunk(eventObject);
 					break;
-				
+
 				case "GUILD_UPDATE":
 					guildUpdate(eventObject);
 					break;
-				
+
 				case "GUILD_ROLE_CREATE":
 					guildRoleCreate(eventObject);
 					break;
-				
+
 				case "GUILD_ROLE_UPDATE":
 					guildRoleUpdate(eventObject);
 					break;
-				
+
 				case "GUILD_ROLE_DELETE":
 					guildRoleDelete(eventObject);
 					break;
-				
+
 				case "GUILD_BAN_ADD":
 					guildBanAdd(eventObject);
 					break;
-				
+
 				case "GUILD_BAN_REMOVE":
 					guildBanRemove(eventObject);
 					break;
-				
+
 				default:
 					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, frame);
 			}
@@ -276,68 +277,68 @@ public class DiscordWS extends WebSocketClient {
 			Discord4J.LOGGER.warn("Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
 	}
-	
+
 	private void resumed(JsonElement eventObject) {
 		ResumedEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ResumedEventResponse.class);
 		client.heartbeat = event.heartbeat_interval;
 		startKeepalive();
 	}
-	
+
 	private void ready(JsonElement eventObject) {
 		ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
-		
+
 		client.sessionId = event.session_id;
-		
+
 		client.ourUser = DiscordUtils.getUserFromJSON(client, event.user);
-		
+
 		client.heartbeat = event.heartbeat_interval;
 		Discord4J.LOGGER.debug("Received heartbeat interval of {}.", client.heartbeat);
-		
+
 		startKeepalive();
-		
+
 		client.isReady = true;
-		
+
 		// I hope you like loops.
 		for (GuildResponse guildResponse : event.guilds) {
 			if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
 				Discord4J.LOGGER.warn("Guild with id {} is unavailable, ignoring it. Is there an outage?", guildResponse.id);
 				continue;
 			}
-			
+
 			IGuild guild = DiscordUtils.getGuildFromJSON(client, guildResponse);
 			if (guild != null)
 				client.guildList.add(guild);
 		}
-		
+
 		for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
 			PrivateChannel channel = (PrivateChannel) DiscordUtils.getPrivateChannelFromJSON(client, privateChannelResponse);
 			client.privateChannels.add(channel);
 		}
-		
+
 		for (ReadyEventResponse.ReadStateResponse readState : event.read_state) {
 			Channel channel = (Channel) client.getChannelByID(readState.id);
 			if (channel != null)
 				channel.setLastReadMessageID(readState.last_message_id);
 		}
-		
+
 		Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
-		
+
 		client.dispatcher.dispatch(new ReadyEvent());
 	}
-	
+
 	private void messageCreate(JsonElement eventObject) {
 		MessageResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageResponse.class);
 		boolean mentioned = event.mention_everyone || event.content.contains("<@"+client.ourUser.getID()+">");
-		
+
 		Channel channel = (Channel) client.getChannelByID(event.channel_id);
-		
+
 		if (null != channel) {
 			IMessage message = DiscordUtils.getMessageFromJSON(client, channel, event);
 			if (!channel.getMessages().contains(message)) {
 				channel.addMessage(message);
 				Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						event.author.id, event.channel_id, event.content);
-				
+
 				if (event.content.contains("discord.gg/")) {
 					String inviteCode = event.content.split("discord\\.gg/")[1].split(" ")[0];
 					Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
@@ -347,19 +348,19 @@ public class DiscordWS extends WebSocketClient {
 					Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
 					client.dispatcher.dispatch(new InviteReceivedEvent(client.getInviteForCode(inviteCode), message));
 				}
-				
+
 				if (mentioned) {
 					client.dispatcher.dispatch(new MentionEvent(message));
 				}
-				
+
 				client.dispatcher.dispatch(new MessageReceivedEvent(message));
 			}
 		}
 	}
-	
+
 	private void typingStart(JsonElement eventObject) {
 		TypingEventResponse event = DiscordUtils.GSON.fromJson(eventObject, TypingEventResponse.class);
-		
+
 		User user;
 		Channel channel = (Channel) client.getChannelByID(event.channel_id);
 		if (channel != null) {
@@ -368,26 +369,26 @@ public class DiscordWS extends WebSocketClient {
 			} else {
 				user = (User) channel.getGuild().getUserByID(event.user_id);
 			}
-			
+
 			if (user != null) {
 				client.dispatcher.dispatch(new TypingEvent(user, channel));
 			}
 		}
 	}
-	
+
 	private void guildCreate(JsonElement eventObject) {
 		GuildResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
 		if (event.unavailable) { //Guild can't be reached, so we ignore it
 			Discord4J.LOGGER.warn("Guild with id {} is unavailable, ignoring it. Is there an outage?", event.id);
 			return;
 		}
-		
+
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(client, event);
 		client.guildList.add(guild);
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
 		Discord4J.LOGGER.debug("New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
 	}
-	
+
 	private void guildMemberAdd(JsonElement eventObject) {
 		GuildMemberAddEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildMemberAddEventResponse.class);
 		String guildID = event.guild_id;
@@ -399,7 +400,7 @@ public class DiscordWS extends WebSocketClient {
 			client.dispatcher.dispatch(new UserJoinEvent(guild, user, DiscordUtils.convertFromTimestamp(event.joined_at)));
 		}
 	}
-	
+
 	private void guildMemberRemove(JsonElement eventObject) {
 		GuildMemberRemoveEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildMemberRemoveEventResponse.class);
 		String guildID = event.guild_id;
@@ -413,54 +414,54 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void guildMemberUpdate(JsonElement eventObject) {
 		GuildMemberUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildMemberUpdateEventResponse.class);
 		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		User user = (User) client.getUserByID(event.user.id);
-		
+
 		if (guild != null && user != null) {
 			List<IRole> oldRoles = new ArrayList<>(user.getRolesForGuild(guild.getID()));
 			user.getRolesForGuild(guild.getID()).clear();
 			for (String role : event.roles)
 				user.addRole(guild.getID(), guild.getRoleForID(role));
-			
+
 			user.addRole(guild.getID(), guild.getRoleForID(guild.getID())); //@everyone role
-			
+
 			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild.getID()), user));
 		}
 	}
-	
+
 	private void messageUpdate(JsonElement eventObject) {
 		MessageResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageResponse.class);
 		String id = event.id;
 		String channelID = event.channel_id;
 		String content = event.content;
-		
+
 		Channel channel = (Channel) client.getChannelByID(channelID);
 		if (channel == null)
 			return;
-		
+
 		Message toUpdate = (Message) channel.getMessageByID(id);
 		if (toUpdate != null
 				&& !toUpdate.getAuthor().getID().equals(client.getOurUser().getID())
 				&& !toUpdate.getContent().equals(content)) {
 			IMessage oldMessage = new Message(client, toUpdate.getID(), toUpdate.getContent(), toUpdate.getAuthor(),
-					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp(), 
+					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp(),
 					toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getAttachments());
-			
+
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
-			
+
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		}
 	}
-	
+
 	private void messageDelete(JsonElement eventObject) {
 		MessageDeleteEventResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageDeleteEventResponse.class);
 		String id = event.id;
 		String channelID = event.channel_id;
 		Channel channel = (Channel) client.getChannelByID(channelID);
-		
+
 		if (channel != null) {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
@@ -470,7 +471,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void presenceUpdate(JsonElement eventObject) {
 		PresenceUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, PresenceUpdateEventResponse.class);
 		Presences presences = Presences.valueOf(event.status.toUpperCase());
@@ -493,7 +494,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void guildDelete(JsonElement eventObject) {
 		GuildResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
 		Guild guild = (Guild) client.getGuildByID(event.id);
@@ -506,10 +507,10 @@ public class DiscordWS extends WebSocketClient {
 			client.dispatcher.dispatch(new GuildLeaveEvent(guild));
 		}
 	}
-	
+
 	private void channelCreate(JsonElement eventObject) {
 		boolean isPrivate = eventObject.getAsJsonObject().get("is_private").getAsBoolean();
-		
+
 		if (isPrivate) { // PM channel.
 			PrivateChannelResponse event = DiscordUtils.GSON.fromJson(eventObject, PrivateChannelResponse.class);
 			String id = event.id;
@@ -518,12 +519,12 @@ public class DiscordWS extends WebSocketClient {
 				if (privateChannel.getID().equalsIgnoreCase(id))
 					contained = true;
 			}
-			
+
 			if (contained)
 				return; // we already have this PM channel; no need to create another.
-			
+
 			client.privateChannels.add(DiscordUtils.getPrivateChannelFromJSON(client, event));
-			
+
 		} else { // Regular channel.
 			ChannelResponse event = DiscordUtils.GSON.fromJson(eventObject, ChannelResponse.class);
 			String type = event.type;
@@ -541,7 +542,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void channelDelete(JsonElement eventObject) {
 		ChannelResponse event = DiscordUtils.GSON.fromJson(eventObject, ChannelResponse.class);
 		if (event.type.equalsIgnoreCase("text")) {
@@ -558,7 +559,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void userUpdate(JsonElement eventObject) {
 		UserUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, UserUpdateEventResponse.class);
 		User newUser = (User) client.getUserByID(event.id);
@@ -568,7 +569,7 @@ public class DiscordWS extends WebSocketClient {
 			client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
 		}
 	}
-	
+
 	private void channelUpdate(JsonElement eventObject) {
 		ChannelUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ChannelUpdateEventResponse.class);
 		if (!event.is_private) {
@@ -579,9 +580,9 @@ public class DiscordWS extends WebSocketClient {
 							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
 							toUpdate.getMessages(), toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
 					oldChannel.setLastReadMessageID(toUpdate.getLastReadMessageID());
-					
+
 					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), event);
-					
+
 					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 				}
 			} else if (event.type.equalsIgnoreCase("voice")) { //FIXME
@@ -590,15 +591,15 @@ public class DiscordWS extends WebSocketClient {
 					VoiceChannel oldChannel = new VoiceChannel(client, toUpdate.getName(),
 							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
 							toUpdate.getMessages(), toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
-					
+
 					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), event);
-					
+
 					client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 				}
 			}
 		}
 	}
-	
+
 	private void messageAck(JsonElement eventObject) {
 		MessageAcknowledgedEventResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageAcknowledgedEventResponse.class);
 		IChannel channelAck = client.getChannelByID(event.channel_id);
@@ -608,7 +609,7 @@ public class DiscordWS extends WebSocketClient {
 				client.getDispatcher().dispatch(new MessageAcknowledgedEvent(messageAck));
 		}
 	}
-	
+
 	private void guildMembersChunk(JsonElement eventObject) {
 		GuildMemberChunkEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildMemberChunkEventResponse.class);
 		Guild guildToUpdate = (Guild) client.getGuildByID(event.guild_id);
@@ -616,24 +617,24 @@ public class DiscordWS extends WebSocketClient {
 			Discord4J.LOGGER.warn("Can't receive guild members chunk for guild id {}, the guild is null!", event.guild_id);
 			return;
 		}
-		
+
 		for (GuildResponse.MemberResponse member : event.members) {
 			guildToUpdate.addUser(DiscordUtils.getUserFromGuildMemberResponse(client, guildToUpdate, member));
 		}
 	}
-	
+
 	private void guildUpdate(JsonElement eventObject) {
 		GuildResponse guildResponse = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
 		Guild toUpdate = (Guild) client.getGuildByID(guildResponse.id);
-		
+
 		if (toUpdate != null) {
 			Guild oldGuild = new Guild(client, toUpdate.getName(), toUpdate.getID(), toUpdate.getIcon(),
 					toUpdate.getOwnerID(), toUpdate.getAFKChannel() == null ? null : toUpdate.getAFKChannel().getID(),
 					toUpdate.getAFKTimeout(), toUpdate.getRegion().getID(), toUpdate.getRoles(), toUpdate.getChannels(), toUpdate.getVoiceChannels(),
 					toUpdate.getUsers());
-			
+
 			toUpdate = (Guild) DiscordUtils.getGuildFromJSON(client, guildResponse);
-			
+
 			if (!toUpdate.getOwnerID().equals(oldGuild.getOwnerID())) {
 				client.dispatcher.dispatch(new GuildTransferOwnershipEvent(oldGuild.getOwner(), toUpdate.getOwner(), toUpdate));
 			} else {
@@ -641,7 +642,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void guildRoleCreate(JsonElement eventObject) {
 		GuildRoleEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
@@ -651,7 +652,7 @@ public class DiscordWS extends WebSocketClient {
 			client.dispatcher.dispatch(new RoleCreateEvent(role, guild));
 		}
 	}
-	
+
 	private void guildRoleUpdate(JsonElement eventObject) {
 		GuildRoleEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
@@ -666,7 +667,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void guildRoleDelete(JsonElement eventObject) {
 		GuildRoleDeleteEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleDeleteEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
@@ -678,7 +679,7 @@ public class DiscordWS extends WebSocketClient {
 			}
 		}
 	}
-	
+
 	private void guildBanAdd(JsonElement eventObject) {
 		GuildBanEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildBanEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
@@ -686,60 +687,60 @@ public class DiscordWS extends WebSocketClient {
 			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
 			if (client.getUserByID(user.getID()) != null)
 				guild.getUsers().remove(user);
-			
+
 			client.dispatcher.dispatch(new UserBanEvent(user, guild));
 		}
 	}
-	
+
 	private void guildBanRemove(JsonElement eventObject) {
 		GuildBanEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildBanEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
-			
+
 			client.dispatcher.dispatch(new UserPardonEvent(user, guild));
 		}
 	}
-	
+
 	@Override
 	public void onMessage(ByteBuffer bytes) {
 		//Converts binary data to readable string data
 		try {
 			InflaterInputStream inputStream = new InflaterInputStream(new ByteArrayInputStream(bytes.array()));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-			
+
 			StringBuilder sb = new StringBuilder();
 			String read;
 			while ((read = reader.readLine()) != null) {
 				sb.append(read);
 			}
-			
+
 			String data = sb.toString();
 			reader.close();
 			inputStream.close();
-			
+
 			onMessage(data);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void onClose(int i, String s, boolean b) {
-		
+
 	}
-	
+
 	@Override
 	public void onError(Exception e) {
 		e.printStackTrace();
 	}
-	
+
 	@Override
 	public void onWebsocketPing(WebSocket conn, Framedata f) {
 		Discord4J.LOGGER.debug("Received ping, sending pong...");
 		super.onWebsocketPing(conn, f);
 	}
-	
+
 	@Override
 	public void onWebsocketPong(WebSocket conn, Framedata f) {
 		super.onWebsocketPong(conn, f);
@@ -751,7 +752,7 @@ public class DiscordWS extends WebSocketClient {
 			missedPingCount = 0;
 		}
 	}
-	
+
 	/**
 	 * Sends a PING frame to the receiving websocket.
 	 */
@@ -760,7 +761,7 @@ public class DiscordWS extends WebSocketClient {
 		frame.setFin(true);
 		getConnection().sendFrame(frame);
 	}
-	
+
 	@Override
 	public void send(String text) throws NotYetConnectedException {
 		try {
@@ -770,10 +771,10 @@ public class DiscordWS extends WebSocketClient {
 			disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
 		}
 	}
-	
+
 	/**
 	 * Gets the most recent ping response time by discord.
-	 * 
+	 *
 	 * @return The response time (in ms).
 	 */
 	public long getResponseTime() {

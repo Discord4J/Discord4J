@@ -35,6 +35,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.12</version>
+			<scope>test</scope>
         </dependency>
 
         <dependency>
@@ -118,6 +119,13 @@
                                     <mainClass>sx.blah.discord.Discord4J</mainClass>
                                 </transformer>
                             </transformers>
+							<artifactSet>
+								<excludes>
+									<exclude>org.slf4j:slf4j-simple</exclude>
+								</excludes>
+							</artifactSet>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>shaded</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>
