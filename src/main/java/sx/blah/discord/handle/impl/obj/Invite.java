@@ -30,46 +30,48 @@ import sx.blah.discord.json.responses.InviteJSONResponse;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Requests;
 
+import java.util.Objects;
+
 public class Invite implements IInvite {
 	/**
 	 * An invite code, AKA an invite URL minus the https://discord.gg/
 	 */
 	protected final String inviteCode;
-	
+
 	/**
 	 * The human-readable version of the invite code, if available.
 	 */
 	protected final String xkcdPass;
-	
+
 	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
-	
+
 	public Invite(IDiscordClient client, String inviteCode, String xkcdPass) {
 		this.client = client;
 		this.inviteCode = inviteCode;
 		this.xkcdPass = xkcdPass;
 	}
-	
+
 	@Override
 	public String getInviteCode() {
 		return inviteCode;
 	}
-	
+
 	@Override
 	public String getXkcdPass() {
 		return xkcdPass;
 	}
-	
+
 	@Override
 	public InviteResponse accept() throws DiscordException, HTTP429Exception {
 		if (client.isReady()) {
 			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
-			
+
 			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
-			
+
 			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
 					inviteResponse.channel.id, inviteResponse.channel.name);
 		} else {
@@ -77,15 +79,15 @@ public class Invite implements IInvite {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public InviteResponse details() throws DiscordException, HTTP429Exception {
 		if (client.isReady()) {
 			String response = Requests.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
-			
+
 			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
-			
+
 			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
 					inviteResponse.channel.id, inviteResponse.channel.name);
 		} else {
@@ -93,14 +95,18 @@ public class Invite implements IInvite {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public void delete() throws HTTP429Exception, DiscordException {
 		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
-	
-	
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(inviteCode);
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IInvite) other).getInviteCode().equals(getInviteCode());
