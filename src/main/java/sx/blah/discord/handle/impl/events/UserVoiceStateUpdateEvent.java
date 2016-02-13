@@ -25,28 +25,38 @@ public class UserVoiceStateUpdateEvent extends Event {
 	private final boolean suppressed;
 
 	/**
-	 * Whether or not the user muted themselves. If the user did not mute
-	 * themselves, it was the server.
+	 * Whether or not the user muted themselves.
 	 */
 	private final boolean selfMute;
 
 	/**
-	 * Whether or not the user deafened themselves. If the user did not mute
-	 * themselves, it was the server.
+	 * Whether or not the server muted the user.
+	 */
+	private final boolean mute;
+
+	/**
+	 * Whether or not the user deafened themselves.
 	 */
 	private final boolean selfDeafen;
 
-	public UserVoiceStateUpdateEvent(IUser user, IVoiceChannel channel, boolean selfMute, boolean selfDeafen, boolean suppress) {
+	/**
+	 * Whether or not the server deafened the user.
+	 */
+	private final boolean deafen;
+
+	public UserVoiceStateUpdateEvent(IUser user, IVoiceChannel channel, boolean selfMute, boolean selfDeafen, boolean mute, boolean deafen, boolean suppress) {
 		this.user = user;
 		this.channel = channel;
 		this.selfMute = selfMute;
 		this.selfDeafen = selfDeafen;
+		this.mute = mute;
+		this.deafen = deafen;
 		this.suppressed = suppress;
 	}
 
 	/**
 	 * Retrieves the user that has had their voice status updated.
-	 * 
+	 *
 	 * @return The user that had been updated.
 	 */
 	public IUser getUser() {
@@ -55,7 +65,7 @@ public class UserVoiceStateUpdateEvent extends Event {
 
 	/**
 	 * Retrieves the channel where the update took place.
-	 * 
+	 *
 	 * @return The voice channel where the update took place.
 	 */
 	public IVoiceChannel getChannel() {
@@ -63,29 +73,37 @@ public class UserVoiceStateUpdateEvent extends Event {
 	}
 
 	/**
-	 * Checks if the user muted themselves. If not, then it was the server.
-	 * 
+	 * Checks if the user muted themselves.
+	 *
 	 * @return Whether or not the user muted themselves.
 	 */
-	public boolean isSelfMuted() {
+	public boolean isSelfMute() {
 		return selfMute;
 	}
 
 	/**
-	 * Checks if the user deafened themselves. If not, then it was the server.
-	 * 
+	 * Checks if the user deafened themselves.
+	 *
 	 * @return Whether or not the user deafened themselves.
 	 */
-	public boolean isSelfDeafened() {
+	public boolean isSelfDeafen() {
 		return selfDeafen;
 	}
 
 	/**
 	 * Checks if the user was moved to the AFK room.
-	 * 
+	 *
 	 * @return Whether or not the user was moved to the AFK room.
 	 */
-	public boolean isSuppresed() {
+	public boolean isSuppressed() {
 		return suppressed;
+	}
+
+	public boolean isMute() {
+		return mute;
+	}
+
+	public boolean isDeafen() {
+		return deafen;
 	}
 }

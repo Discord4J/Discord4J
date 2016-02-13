@@ -9,7 +9,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.json.requests.VoiceChannelConnectRequest;
+import sx.blah.discord.json.requests.VoiceChannelRequest;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.File;
@@ -28,13 +28,18 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void joinChannel()
-	{
+	public void joinChannel() {
 		if (client.isReady()) {
-			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelConnectRequest(parent.getID(), id, false, false)));
+			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 		}
+	}
+
+	@Override
+	public void leaveChannel(){
+		((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
+		((DiscordClientImpl) client).voiceWS.close();
 	}
 
 	@Override

@@ -10,13 +10,12 @@ import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.audio.AudioChannel;
 import sx.blah.discord.api.internal.audio.AudioPacket;
-import sx.blah.discord.handle.impl.events.AudioReceiveEvent;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeaking;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.VoiceConnectRequest;
-import sx.blah.discord.json.requests.VoiceSpeaking;
+import sx.blah.discord.json.requests.VoiceSpeakingRequest;
 import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
 
@@ -291,6 +290,6 @@ public class DiscordVoiceWS extends WebSocketClient {
 	public void setSpeaking(boolean speaking) {
 		this.isSpeaking = speaking;
 
-		send(DiscordUtils.GSON.toJson(new VoiceSpeaking(speaking)));
+		send(DiscordUtils.GSON.toJson(new VoiceSpeakingRequest(speaking)));
 	}
 }

@@ -1,6 +1,9 @@
 package sx.blah.discord.json.requests;
 
-public class VoiceChannelConnectRequest {
+/**
+ * Request to join/leave voice channel
+ */
+public class VoiceChannelRequest {
 
     /**
      * The opcode, always 4
@@ -12,7 +15,7 @@ public class VoiceChannelConnectRequest {
      */
     public EventObject d;
 
-    public VoiceChannelConnectRequest(String guild_id, String channel_id, boolean self_mute, boolean self_deaf) {
+    public VoiceChannelRequest(String guild_id, String channel_id, boolean self_mute, boolean self_deaf) {
         d = new EventObject(guild_id, channel_id, self_mute, self_deaf);
     }
 

@@ -1,11 +1,14 @@
 package sx.blah.discord.json.requests;
 
-public class VoiceSpeaking {
+/**
+ * Requests send to the server to tell it's about to receive audio, or telling it the client is going to stop sending audio
+ */
+public class VoiceSpeakingRequest {
 
     public int op = 5;
     public EventObject d;
 
-    public VoiceSpeaking(boolean speaking) {
+    public VoiceSpeakingRequest(boolean speaking) {
         d = new EventObject(speaking);
     }
 

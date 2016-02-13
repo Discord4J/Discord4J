@@ -3,6 +3,9 @@ package sx.blah.discord.handle.impl.events;
 import sx.blah.discord.handle.Event;
 import sx.blah.discord.handle.obj.IUser;
 
+/**
+ * This is dispatched when a user starts or stops speaking
+ */
 public class VoiceUserSpeaking extends Event {
     private final IUser user;
     private final int ssrc;

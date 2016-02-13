@@ -1,5 +1,8 @@
 package sx.blah.discord.json.requests;
 
+/**
+ *
+ */
 public class VoiceConnectRequest {
 
     /**
