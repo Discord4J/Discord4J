@@ -23,4 +23,6 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws HTTP429Exception
 	 */
 	void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, MissingPermissionsException, HTTP429Exception;
+
+	void joinChannel();
 }
