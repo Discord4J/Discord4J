@@ -108,6 +108,13 @@ public class Main {
 }
 ```
 
+### Audio
+Supported Audio Formats:
+Wav
+Ogg
+Mp3
+Flac
+
 ### More examples
 See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
 
