@@ -93,7 +93,7 @@ public class Discord4J {
 
 		try {
 			IDiscordClient client = new ClientBuilder().withLogin(args[0], args[1]).login();
-			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e)->{
+			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info("Logged in as {}", e.getClient().getOurUser().getName());
 			});
 			//The modules should handle the rest

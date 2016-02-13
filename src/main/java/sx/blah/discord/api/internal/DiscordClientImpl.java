@@ -299,7 +299,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IChannel getChannelByID(String id) {
 		return getChannels(true).stream()
-				.filter(c->c.getID().equalsIgnoreCase(id))
+				.filter(c -> c.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
 	}
 
@@ -314,14 +314,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IVoiceChannel getVoiceChannelByID(String id) {
 		return getVoiceChannels().stream()
-				.filter(c->c.getID().equalsIgnoreCase(id))
+				.filter(c -> c.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
 	}
 
 	@Override
 	public IGuild getGuildByID(String guildID) {
 		return guildList.stream()
-				.filter(g->g.getID().equalsIgnoreCase(guildID))
+				.filter(g -> g.getID().equalsIgnoreCase(guildID))
 				.findAny().orElse(null);
 	}
 
@@ -351,7 +351,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		Optional<IPrivateChannel> opt = privateChannels.stream()
-				.filter(c->c.getRecipient().getID().equalsIgnoreCase(user.getID()))
+				.filter(c -> c.getRecipient().getID().equalsIgnoreCase(user.getID()))
 				.findAny();
 		if (opt.isPresent())
 			return opt.get();
@@ -398,8 +398,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 					RegionResponse[].class);
 
 			Arrays.stream(regions)
-					.map(r->DiscordUtils.getRegionFromJSON(this, r))
-					.forEach(r->REGIONS.add(r));
+					.map(r -> DiscordUtils.getRegionFromJSON(this, r))
+					.forEach(r -> REGIONS.add(r));
 		}
 
 		return REGIONS;
@@ -409,7 +409,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public IRegion getRegionForID(String regionID) {
 		try {
 			return getRegions().stream()
-					.filter(r->r.getID().equals(regionID))
+					.filter(r -> r.getID().equals(regionID))
 					.findAny().orElse(null);
 		} catch (HTTP429Exception | DiscordException e) {
 			e.printStackTrace();

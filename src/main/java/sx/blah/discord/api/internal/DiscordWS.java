@@ -102,7 +102,7 @@ public class DiscordWS extends WebSocketClient {
 			return;
 		}
 
-		Runnable pingPong = ()->{
+		Runnable pingPong = () -> {
 			if (sentPing) {
 				if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
 					Discord4J.LOGGER.warn("Missed {} ping responses in a row, disconnecting...", missedPingCount);
@@ -124,7 +124,7 @@ public class DiscordWS extends WebSocketClient {
 	}
 
 	private void startKeepalive() {
-		Runnable keepAlive = ()->{
+		Runnable keepAlive = () -> {
 			if (this.isConnected.get()) {
 				long l = System.currentTimeMillis()-client.timer;
 				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);

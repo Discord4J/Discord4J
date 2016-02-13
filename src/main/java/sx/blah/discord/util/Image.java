@@ -14,14 +14,14 @@ import java.net.URLConnection;
  */
 @FunctionalInterface
 public interface Image {
-	
+
 	/**
 	 * Gets the data to send to discord.
 	 *
 	 * @return The data to send to discord, can be null.
 	 */
 	String getData();
-	
+
 	/**
 	 * Gets the image data (avatar id) for for a user's avatar.
 	 *
@@ -31,16 +31,16 @@ public interface Image {
 	static Image forUser(IUser user) {
 		return user::getAvatar;
 	}
-	
+
 	/**
 	 * Gets the data (null) for the default discord avatar.
 	 *
 	 * @return The default avatar image.
 	 */
 	static Image defaultAvatar() {
-		return ()->null;
+		return () -> null;
 	}
-	
+
 	/**
 	 * Generates an avatar image from bytes representing an image.
 	 *
@@ -49,9 +49,9 @@ public interface Image {
 	 * @return The avatar image.
 	 */
 	static Image forData(String imageType, byte[] data) {
-		return ()->String.format("data:image/%s;base64,%s", imageType, Base64.encodeBase64String(data));
+		return () -> String.format("data:image/%s;base64,%s", imageType, Base64.encodeBase64String(data));
 	}
-	
+
 	/**
 	 * Generates an avatar image from an input stream representing an image.
 	 *
@@ -60,7 +60,7 @@ public interface Image {
 	 * @return The avatar image.
 	 */
 	static Image forStream(String imageType, InputStream stream) {
-		return ()->{
+		return () -> {
 			try {
 				Image image = forData(imageType, IOUtils.toByteArray(stream));
 				stream.close();
@@ -71,7 +71,7 @@ public interface Image {
 			return defaultAvatar().getData();
 		};
 	}
-	
+
 	/**
 	 * Generates an avatar image from a direct link to an image.
 	 *
@@ -80,7 +80,7 @@ public interface Image {
 	 * @return The avatar image.
 	 */
 	static Image forUrl(String imageType, String url) {
-		return ()->{
+		return () -> {
 			try {
 				URLConnection urlConnection = new URL(url).openConnection();
 				InputStream stream = urlConnection.getInputStream();
@@ -91,7 +91,7 @@ public interface Image {
 			return defaultAvatar().getData();
 		};
 	}
-	
+
 	/**
 	 * Generates an avatar image from a file.
 	 *
@@ -99,7 +99,7 @@ public interface Image {
 	 * @return The avatar image.
 	 */
 	static Image forFile(File file) {
-		return ()->{
+		return () -> {
 			String imageType = FilenameUtils.getExtension(file.getName());
 			try {
 				return forStream(imageType, new FileInputStream(file)).getData();

@@ -49,7 +49,7 @@ public class SpoofBot {
 				}
 				timer = 1;
 				lastTime = System.currentTimeMillis()-timer;
-				new Thread(()->{
+				new Thread(() -> {
 					while (true) {
 						if (lastTime <= System.currentTimeMillis()-timer) {
 							//Time for the next spoof
@@ -123,7 +123,7 @@ public class SpoofBot {
 												try {
 													final IChannel newChannel = channel.getGuild().createChannel(getRandString());
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
-													new Thread(()->{
+													new Thread(() -> {
 														while (deletionTimer > System.currentTimeMillis()) {
 														}
 														try {
@@ -152,7 +152,7 @@ public class SpoofBot {
 															Optional.of(getRandBoolean()), Optional.of(getRandString()),
 															Optional.of(EnumSet.allOf(Permissions.class)));
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
-													new Thread(()->{
+													new Thread(() -> {
 														while (deletionTimer > System.currentTimeMillis()) {
 														}
 														try {

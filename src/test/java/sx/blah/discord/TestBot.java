@@ -56,7 +56,7 @@ public class TestBot {
 		try {
 			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
 
-			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event)->{
+			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
 			});
 
@@ -99,7 +99,7 @@ public class TestBot {
 							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
 
 							final long now = System.currentTimeMillis();
-							new Thread(()->{
+							new Thread(() -> {
 								while (!didTest.get()) {
 									if (now+MAX_TEST_TIME <= System.currentTimeMillis()) {
 										//Test timer up!
@@ -143,8 +143,8 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".clear")) {
 							IChannel c = client.getChannelByID(m.getChannel().getID());
 							if (null != c) {
-								c.getMessages().stream().filter(message->message.getAuthor().getID()
-										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message->{
+								c.getMessages().stream().filter(message -> message.getAuthor().getID()
+										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message -> {
 									try {
 										Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
 										message.delete();

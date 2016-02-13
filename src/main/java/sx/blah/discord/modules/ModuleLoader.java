@@ -153,7 +153,7 @@ public class ModuleLoader {
 				//Scans the jar file for classes which have IModule as a super class
 				List<String> classes = new ArrayList<>();
 				JarFile jar = new JarFile(file);
-				jar.stream().forEach(jarEntry->{
+				jar.stream().forEach(jarEntry -> {
 					if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")) {
 						String className = jarEntry.getName().replace('/', '.');
 						classes.add(className.substring(0, className.length()-".class".length()));

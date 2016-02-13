@@ -180,7 +180,7 @@ public class Channel implements IChannel {
 	@Override
 	public IMessage getMessageByID(String messageID) {
 		return messages.stream()
-				.filter(m->m.getID().equalsIgnoreCase(messageID))
+				.filter(m -> m.getID().equalsIgnoreCase(messageID))
 				.findAny().orElse(null);
 	}
 
@@ -305,7 +305,7 @@ public class Channel implements IChannel {
 
 		if (isTyping.get()) {
 			typingTimer.set(System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
-			new Thread(()->{
+			new Thread(() -> {
 				while (isTyping.get()) {
 					if (typingTimer.get() <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
 						typingTimer.set(System.currentTimeMillis());
@@ -419,10 +419,10 @@ public class Channel implements IChannel {
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 
 		roles.stream()
-				.map(r->getModifiedPermissions(r))
+				.map(r -> getModifiedPermissions(r))
 				.flatMap(EnumSet::stream)
-				.filter(p->!permissions.contains(p))
-				.forEach(p->permissions.add(p));
+				.filter(p -> !permissions.contains(p))
+				.forEach(p -> permissions.add(p));
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		if (override == null)

@@ -102,9 +102,9 @@ public class EventDispatcher {
 			event.client = client;
 
 			methodListeners.entrySet().stream()
-					.filter(e->e.getKey().isAssignableFrom(event.getClass()))
-					.map(e->e.getValue())
-					.forEach(m->m.forEach((k, v)->{
+					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
+					.map(e -> e.getValue())
+					.forEach(m -> m.forEach((k, v) -> {
 						try {
 							k.invoke(v, event);
 						} catch (IllegalAccessException | InvocationTargetException e) {
@@ -115,9 +115,9 @@ public class EventDispatcher {
 					}));
 
 			classListeners.entrySet().stream()
-					.filter(e->e.getKey().isAssignableFrom(event.getClass()))
-					.map(e->e.getValue())
-					.forEach(s->s.forEach(l->{
+					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
+					.map(e -> e.getValue())
+					.forEach(s -> s.forEach(l -> {
 						try {
 							l.handle(event);
 						} catch (Exception e) {

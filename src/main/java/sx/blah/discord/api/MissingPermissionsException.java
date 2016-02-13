@@ -24,8 +24,8 @@ public class MissingPermissionsException extends Exception {
 	private static String getMessage(EnumSet<Permissions> permissions) {
 		StringJoiner joiner = new StringJoiner(", ");
 		permissions.stream()
-				.map(p->p.name())
-				.forEach(p->joiner.add(p));
+				.map(p -> p.name())
+				.forEach(p -> joiner.add(p));
 		return "Missing permissions: "+joiner.toString()+"!";
 	}
 
