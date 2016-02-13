@@ -61,7 +61,7 @@ public class DiscordUtils {
 	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP429Exception, DiscordException {
 		try {
 			if (!(channel instanceof IPrivateChannel) && !(channel instanceof IVoiceChannel))
-				checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGE_HISTORY));
+				checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 		} catch (MissingPermissionsException e) {
 			Discord4J.LOGGER.warn("Error getting messages for channel "+channel.getName()+": {}", e.getErrorMessage());
 			return;
