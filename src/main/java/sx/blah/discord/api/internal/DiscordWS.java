@@ -73,6 +73,7 @@ public class DiscordWS extends WebSocketClient {
 		isConnected.set(false);
 		close();
 		executorService.shutdownNow();
+		client.ws = null;
 		Thread.currentThread().interrupt();
 	}
 

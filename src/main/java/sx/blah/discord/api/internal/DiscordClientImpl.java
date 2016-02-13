@@ -120,7 +120,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public void login() throws DiscordException {
 		try {
 			if (null != ws) {
-				ws.close();
+				ws.disconnect();
 			}
 
 			LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
