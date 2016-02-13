@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -289,7 +290,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public Collection<IChannel> getChannels(boolean priv) {
 		Collection<IChannel> channels = guildList.stream()
 				.map(g -> g.getChannels())
-				.reduce(Lambdas.listReduction()).get();
+				.reduce(Lambdas.listReduction()).orElse(Collections.emptyList());
 		if (priv)
 			channels.addAll(privateChannels);
 		return channels;
@@ -306,7 +307,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public Collection<IVoiceChannel> getVoiceChannels() {
 		return guildList.stream()
 				.map(g -> g.getVoiceChannels())
-				.reduce(Lambdas.listReduction()).get();
+				.reduce(Lambdas.listReduction()).orElse(Collections.emptyList());
 	}
 	
 	@Override
