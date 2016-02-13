@@ -387,7 +387,6 @@ public class DiscordUtils {
 			}
 
 			try {
-				DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 				DiscordUtils.getChannelMessages(client, channel);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", json.name, guild.getName(), e.getClass().getSimpleName());
