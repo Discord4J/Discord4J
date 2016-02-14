@@ -736,7 +736,7 @@ public class DiscordWS extends WebSocketClient {
 
 	@Override
 	public void onWebsocketPing(WebSocket conn, Framedata f) {
-		Discord4J.LOGGER.debug("Received ping, sending pong...");
+		Discord4J.LOGGER.trace("Received ping, sending pong...");
 		super.onWebsocketPing(conn, f);
 	}
 

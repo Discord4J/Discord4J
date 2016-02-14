@@ -495,6 +495,20 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public List<IInvite> getInvites() throws DiscordException, HTTP429Exception {
+		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
+				Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
+
+		List<IInvite> invites = new ArrayList<>();
+		for (ExtendedInviteResponse inviteResponse : response)
+			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
+
+		return invites;
+	}
+
+	@Override
 	public String toString() {
 		return mention();
 	}

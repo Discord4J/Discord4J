@@ -278,6 +278,16 @@ public interface IChannel {
 	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
+	 * This gets all the currently available invites for this channel.
+	 *
+	 * @return The list of all available invites.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
+
+	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
 	class PermissionOverride {

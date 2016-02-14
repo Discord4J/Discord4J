@@ -34,6 +34,7 @@ import sx.blah.discord.json.requests.EditGuildRequest;
 import sx.blah.discord.json.requests.MemberEditRequest;
 import sx.blah.discord.json.requests.TransferOwnershipRequest;
 import sx.blah.discord.json.responses.ChannelResponse;
+import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.GuildResponse;
 import sx.blah.discord.json.responses.UserResponse;
 import sx.blah.discord.util.HTTP429Exception;
@@ -486,6 +487,20 @@ public class Guild implements IGuild {
 	@Override
 	public IRole getEveryoneRole() {
 		return getRoles().stream().filter(r -> r.getName().equals("@everyone")).findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IInvite> getInvites() throws DiscordException, HTTP429Exception {
+		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
+				Requests.GET.makeRequest(DiscordEndpoints.SERVERS + id + "/invites",
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
+
+		List<IInvite> invites = new ArrayList<>();
+		for (ExtendedInviteResponse inviteResponse : response)
+			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
+
+		return invites;
 	}
 
 	@Override

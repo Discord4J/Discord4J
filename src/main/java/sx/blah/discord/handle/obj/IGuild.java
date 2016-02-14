@@ -324,4 +324,14 @@ public interface IGuild {
 	 * @return The object representing the @everyone role.
 	 */
 	IRole getEveryoneRole();
+
+	/**
+	 * This gets all the currently available invites for this guild.
+	 *
+	 * @return The list of all available invites.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
 }
