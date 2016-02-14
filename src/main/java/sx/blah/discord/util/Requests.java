@@ -82,37 +82,40 @@ public enum Requests {
 			for (BasicNameValuePair header : headers) {
 				request.addHeader(header.getName(), header.getValue());
 			}
-			CloseableHttpResponse response = CLIENT.execute(request);
-			int responseCode = response.getStatusLine().getStatusCode();
 
-			String message = "";
-			if (response.getEntity() != null)
-				message = EntityUtils.toString(response.getEntity());
+			try (CloseableHttpResponse response = CLIENT.execute(request)) {
+				int responseCode = response.getStatusLine().getStatusCode();
 
-			response.close();
+				String message = "";
+				if (response.getEntity() != null)
+					message = EntityUtils.toString(response.getEntity());
 
-			if (responseCode == 404) {
-				LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
-				return null;
-			} else if (responseCode == 403) {
-				LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
-				return null;
-			} else if (responseCode == 204) { //There is a no content response when deleting messages
+				if (responseCode == 404) {
+					LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+					return null;
+				} else if (responseCode == 403) {
+					LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
+					return null;
+				} else if (responseCode == 204) { //There is a no content response when deleting messages
+					return null;
+				}
+
+				JsonParser parser = new JsonParser();
+				JsonElement element = parser.parse(message);
+
+				if (responseCode == 429) {
+					throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
+				}
+
+				if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
+					throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
+
+				return message;
+			} catch (IOException e) {
+				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 				return null;
 			}
-
-			JsonParser parser = new JsonParser();
-			JsonElement element = parser.parse(message);
-
-			if (responseCode == 429) {
-				throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
-			}
-
-			if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
-				throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
-
-			return message;
-		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			return null;
 		}
@@ -138,41 +141,44 @@ public enum Requests {
 					request.addHeader(header.getName(), header.getValue());
 				}
 				request.setEntity(entity);
-				CloseableHttpResponse response = CLIENT.execute(request);
-				int responseCode = response.getStatusLine().getStatusCode();
 
-				String message = "";
-				if (response.getEntity() != null)
-					message = EntityUtils.toString(response.getEntity());
+				try (CloseableHttpResponse response = CLIENT.execute(request)){
+					int responseCode = response.getStatusLine().getStatusCode();
 
-				response.close();
+					String message = "";
+					if (response.getEntity() != null)
+						message = EntityUtils.toString(response.getEntity());
 
-				if (responseCode == 404) {
-					LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
-					return null;
-				} else if (responseCode == 403) {
-					LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
-					return null;
-				} else if (responseCode == 204) { //There is a no content response when deleting messages
+					if (responseCode == 404) {
+						LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+						return null;
+					} else if (responseCode == 403) {
+						LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
+						return null;
+					} else if (responseCode == 204) { //There is a no content response when deleting messages
+						return null;
+					}
+
+					JsonParser parser = new JsonParser();
+					JsonElement element = parser.parse(message);
+
+					if (responseCode == 429) {
+						throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
+					}
+
+					if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
+						throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
+
+					return message;
+				} catch (IOException e) {
+					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 					return null;
 				}
-
-				JsonParser parser = new JsonParser();
-				JsonElement element = parser.parse(message);
-
-				if (responseCode == 429) {
-					throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
-				}
-
-				if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
-					throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
-
-				return message;
 			} else {
 				LOGGER.error("Tried to attach HTTP entity to invalid type! ({})",
 						this.requestClass.getSimpleName());
 			}
-		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
