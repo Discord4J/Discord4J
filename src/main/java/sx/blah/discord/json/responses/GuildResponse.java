@@ -48,6 +48,11 @@ public class GuildResponse {
 	public String name;
 
 	/**
+	 * The number of members in the guild.
+	 */
+	public int member_count;
+
+	/**
 	 * The members in the channel
 	 */
 	public MemberResponse[] members;
@@ -78,9 +83,9 @@ public class GuildResponse {
 //	public thing[] features;
 
 	/**
-	 * FIXME ??
+	 * Custom emojis for the guild. TODO: maybe implement some day?
 	 */
-//	public thing[] emojis;
+//	public thing[] emojis; TODO
 
 	/**
 	 * The channels in the guild
