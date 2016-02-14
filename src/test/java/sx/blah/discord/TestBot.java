@@ -126,11 +126,6 @@ public class TestBot {
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
 					public void handle(MessageReceivedEvent messageReceivedEvent) {
-						try {
-							Discord4J.LOGGER.info("Regions:"+messageReceivedEvent.getClient().getRegions());
-						} catch (HTTP429Exception | DiscordException e) {
-							e.printStackTrace();
-						}
 						IMessage m = messageReceivedEvent.getMessage();
 						if (m.getContent().startsWith(".meme")
 								|| m.getContent().startsWith(".nicememe")) {
