@@ -45,9 +45,9 @@ public final class DiscordEndpoints {
 	public static final String LOGOUT = APIBASE+"/auth/logout";
 
 	/**
-	 * Servers URL
+	 * Guilds URL
 	 */
-	public static final String SERVERS = APIBASE+"/guilds/";
+	public static final String GUILDS = APIBASE+"/guilds/";
 
 	public static final String CHANNELS = APIBASE+"/channels/";
 

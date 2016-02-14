@@ -334,4 +334,15 @@ public interface IGuild {
 	 * @throws HTTP429Exception
 	 */
 	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
+
+	/**
+	 * This reorders the position of the roles in this guild.
+	 *
+	 * @param rolesInOrder ALL the roles in the server, in the order of desired position. The first role gets position 1, second position 2, etc.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 * @throws MissingPermissionsException
+	 */
+	void reorderRoles(IRole... rolesInOrder) throws DiscordException, HTTP429Exception, MissingPermissionsException;
 }

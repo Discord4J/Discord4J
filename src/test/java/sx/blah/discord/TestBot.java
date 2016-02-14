@@ -10,9 +10,12 @@ import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageBuilder;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * General testing bot. Also a demonstration of how to use the bot.
@@ -194,9 +197,11 @@ public class TestBot {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {
+							List<IRole> roles = m.getChannel().getGuild().getRoles().stream().collect(Collectors.toList());
+							Collections.shuffle(roles);
 							try {
-								client.logout();
-							} catch (HTTP429Exception | DiscordException e) {
+								m.getChannel().getGuild().reorderRoles(roles.toArray(new IRole[roles.size()]));
+							} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
 								e.printStackTrace();
 							}
 						}
