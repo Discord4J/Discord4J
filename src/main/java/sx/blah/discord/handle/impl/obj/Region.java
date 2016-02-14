@@ -17,17 +17,17 @@ public class Region implements IRegion {
 
 	@Override
 	public String getID() {
-		return null;
+		return id;
 	}
 
 	@Override
 	public String getName() {
-		return null;
+		return name;
 	}
 
 	@Override
 	public boolean isVIPOnly() {
-		return false;
+		return vip;
 	}
 
 	@Override
