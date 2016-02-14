@@ -110,10 +110,10 @@ public class DiscordWS extends WebSocketClient {
 					Discord4J.LOGGER.warn("Connection timed out at {}ms", System.currentTimeMillis()-lastPingSent);
 					disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
 				}
-				Discord4J.LOGGER.warn("Last ping was not responded to, skipping ping");
+				Discord4J.LOGGER.debug("Last ping was not responded to, skipping ping");
 				missedPingCount++;
 			} else {
-				Discord4J.LOGGER.debug("Sending ping...");
+				Discord4J.LOGGER.trace("Sending ping...");
 				sentPing = true;
 				lastPingSent = System.currentTimeMillis();
 				sendPing();
@@ -746,7 +746,7 @@ public class DiscordWS extends WebSocketClient {
 		if (!sentPing) {
 			Discord4J.LOGGER.warn("Received pong without sending ping! Is the websocket out of sync?");
 		} else {
-			Discord4J.LOGGER.debug("Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-lastPingSent);
+			Discord4J.LOGGER.trace("Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-lastPingSent);
 			sentPing = false;
 			missedPingCount = 0;
 		}
