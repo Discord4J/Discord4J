@@ -1,17 +1,7 @@
 package sx.blah.discord.api.internal;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
-
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
@@ -19,30 +9,18 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.User;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.handle.obj.IPrivateChannel;
-import sx.blah.discord.handle.obj.IRegion;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.handle.obj.Presences;
-import sx.blah.discord.json.requests.AccountInfoChangeRequest;
-import sx.blah.discord.json.requests.CreateGuildRequest;
-import sx.blah.discord.json.requests.LoginRequest;
-import sx.blah.discord.json.requests.PresenceUpdateRequest;
-import sx.blah.discord.json.requests.PrivateChannelRequest;
-import sx.blah.discord.json.responses.AccountInfoChangeResponse;
-import sx.blah.discord.json.responses.GatewayResponse;
-import sx.blah.discord.json.responses.GuildResponse;
-import sx.blah.discord.json.responses.InviteJSONResponse;
-import sx.blah.discord.json.responses.LoginResponse;
-import sx.blah.discord.json.responses.PrivateChannelResponse;
-import sx.blah.discord.json.responses.RegionResponse;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.requests.*;
+import sx.blah.discord.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.Requests;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Defines the client.
@@ -205,7 +183,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url;//.replaceAll("wss", "ws");
 		} catch (HTTP429Exception | DiscordException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
 		return gateway;
@@ -234,7 +212,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 				this.token = response.token;
 			}
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}
 
@@ -384,7 +362,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 			return DiscordUtils.getInviteFromJSON(this, response);
 		} catch (HTTP429Exception | DiscordException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -412,7 +390,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					.filter(r -> r.getID().equals(regionID))
 					.findAny().orElse(null);
 		} catch (HTTP429Exception | DiscordException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -429,7 +407,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			guildList.add(guild);
 			return guild;
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
 	}

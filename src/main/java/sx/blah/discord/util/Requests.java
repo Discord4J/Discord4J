@@ -9,6 +9,7 @@ import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.json.responses.RateLimitResponse;
@@ -109,7 +110,7 @@ public enum Requests {
 
 			return message;
 		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			return null;
 		}
 	}
@@ -165,7 +166,7 @@ public enum Requests {
 						this.requestClass.getSimpleName());
 			}
 		} catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
 	}

@@ -3,6 +3,7 @@ package sx.blah.discord.util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.*;
@@ -66,7 +67,7 @@ public interface Image {
 				stream.close();
 				return image.getData();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			}
 			return defaultAvatar().getData();
 		};
@@ -86,7 +87,7 @@ public interface Image {
 				InputStream stream = urlConnection.getInputStream();
 				return forStream(imageType, stream).getData();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			}
 			return defaultAvatar().getData();
 		};
@@ -104,7 +105,7 @@ public interface Image {
 			try {
 				return forStream(imageType, new FileInputStream(file)).getData();
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			}
 			return defaultAvatar().getData();
 		};

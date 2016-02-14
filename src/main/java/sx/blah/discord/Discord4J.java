@@ -66,7 +66,7 @@ public class Discord4J {
 			properties.load(stream);
 			stream.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		NAME = properties.getProperty("application.name");
 		VERSION = properties.getProperty("application.version");

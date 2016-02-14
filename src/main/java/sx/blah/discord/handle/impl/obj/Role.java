@@ -2,6 +2,7 @@ package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.MissingPermissionsException;
@@ -170,7 +171,7 @@ public class Role implements IRole {
 					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), RoleResponse.class);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}
 

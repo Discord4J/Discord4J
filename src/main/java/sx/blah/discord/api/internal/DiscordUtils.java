@@ -293,7 +293,6 @@ public class DiscordUtils {
 				DiscordUtils.getChannelMessages(client, channel);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
-				e.printStackTrace();
 			}
 		}
 
@@ -389,7 +388,6 @@ public class DiscordUtils {
 				DiscordUtils.getChannelMessages(client, channel);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", json.name, guild.getName(), e.getClass().getSimpleName());
-				e.printStackTrace();
 			}
 		}
 
