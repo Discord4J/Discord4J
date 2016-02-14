@@ -317,4 +317,11 @@ public interface IGuild {
 	 * @throws DiscordException
 	 */
 	void transferOwnership(String newOwnerID) throws HTTP429Exception, MissingPermissionsException, DiscordException;
+
+	/**
+	 * This retrieves the @everyone role which exists on all guilds.
+	 *
+	 * @return The object representing the @everyone role.
+	 */
+	IRole getEveryoneRole();
 }

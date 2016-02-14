@@ -484,6 +484,11 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public IRole getEveryoneRole() {
+		return getRoles().stream().filter(r -> r.getName().equals("@everyone")).findFirst().orElse(null);
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(id);
 	}

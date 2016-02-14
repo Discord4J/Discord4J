@@ -49,6 +49,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
 
@@ -405,21 +406,17 @@ public class Channel implements IChannel {
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 
 		roles.stream()
-				.map(r -> getModifiedPermissions(r))
+				.map(this::getModifiedPermissions)
 				.flatMap(EnumSet::stream)
 				.filter(p -> !permissions.contains(p))
-				.forEach(p -> permissions.add(p));
+				.forEach(permissions::add);
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		if (override == null)
 			return permissions;
 
-		for (Permissions permission : override.allow()) {
-			permissions.add(permission);
-		}
-		for (Permissions permission : override.deny()) {
-			permissions.remove(permission);
-		}
+		permissions.addAll(override.allow().stream().collect(Collectors.toList()));
+		override.deny().forEach(permissions::remove);
 
 		return permissions;
 	}
@@ -429,15 +426,13 @@ public class Channel implements IChannel {
 		EnumSet<Permissions> base = role.getPermissions();
 		PermissionOverride override = getRoleOverrides().get(role.getID());
 
-		if (override == null)
-			return base;
+		if (override == null) {
+			if ((override = getRoleOverrides().get(parent.getEveryoneRole().getID())) == null)
+				return base;
+		}
 
-		for (Permissions permission : override.allow()) {
-			base.add(permission);
-		}
-		for (Permissions permission : override.deny()) {
-			base.remove(permission);
-		}
+		base.addAll(override.allow().stream().collect(Collectors.toList()));
+		override.deny().forEach(base::remove);
 
 		return base;
 	}
