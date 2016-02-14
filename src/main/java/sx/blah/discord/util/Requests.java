@@ -3,9 +3,8 @@ package sx.blah.discord.util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -49,7 +48,7 @@ public enum Requests {
 	private static final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
 
 	//Same as HttpClients.createDefault() but with the proper user-agent
-	static final HttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
+	static final CloseableHttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
 
 	final Class<? extends HttpUriRequest> requestClass;
 
@@ -82,8 +81,14 @@ public enum Requests {
 			for (BasicNameValuePair header : headers) {
 				request.addHeader(header.getName(), header.getValue());
 			}
-			HttpResponse response = CLIENT.execute(request);
+			CloseableHttpResponse response = CLIENT.execute(request);
 			int responseCode = response.getStatusLine().getStatusCode();
+
+			String message = "";
+			if (response.getEntity() != null)
+				message = EntityUtils.toString(response.getEntity());
+
+			response.close();
 
 			if (responseCode == 404) {
 				LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
@@ -94,8 +99,6 @@ public enum Requests {
 			} else if (responseCode == 204) { //There is a no content response when deleting messages
 				return null;
 			}
-
-			String message = EntityUtils.toString(response.getEntity());
 
 			JsonParser parser = new JsonParser();
 			JsonElement element = parser.parse(message);
@@ -134,8 +137,14 @@ public enum Requests {
 					request.addHeader(header.getName(), header.getValue());
 				}
 				request.setEntity(entity);
-				HttpResponse response = CLIENT.execute(request);
+				CloseableHttpResponse response = CLIENT.execute(request);
 				int responseCode = response.getStatusLine().getStatusCode();
+
+				String message = "";
+				if (response.getEntity() != null)
+					message = EntityUtils.toString(response.getEntity());
+
+				response.close();
 
 				if (responseCode == 404) {
 					LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
@@ -146,8 +155,6 @@ public enum Requests {
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
 				}
-
-				String message = EntityUtils.toString(response.getEntity());
 
 				JsonParser parser = new JsonParser();
 				JsonElement element = parser.parse(message);
