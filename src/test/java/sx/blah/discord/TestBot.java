@@ -39,15 +39,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * General testing bot. Also a demonstration of how to use the bot.
  */
 public class TestBot {
-	
+
 	private static final String CI_URL = "https://drone.io/github.com/austinv11/Discord4J/";
 	private static final long MAX_TEST_TIME = 120000L;
-	
+
 	@Test(timeout = 300000L)
 	public void testBot() {
 		main(System.getenv("USER"), System.getenv("PSW"), "CITest");
 	}
-	
+
 	/**
 	 * Starts the bot. This can be done any place you want.
 	 * The main method is for demonstration.
@@ -60,13 +60,13 @@ public class TestBot {
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
 				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
-				
+
 				for (DiscordStatus.Maintenance maintenance : DiscordStatus.getUpcomingMaintenances()) {
 					Discord4J.LOGGER.warn("Discord has upcoming maintenance: {} on {}", maintenance.getName(), maintenance.getStart().toString());
 				}
-				
+
 				client.login();
-				
+
 				final AtomicBoolean didTest = new AtomicBoolean(false);
 				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 					@Override
@@ -80,21 +80,21 @@ public class TestBot {
 							final IChannel testChannel = client.getChannelByID(response.getChannelID());
 							final IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
-							
+
 							//Start testing
 							new MessageBuilder(client).withChannel(testChannel).withContent("Initiating Discord4J Unit Tests for Build #"+
 									buildNumber, MessageBuilder.Styles.BOLD).build();
-							
+
 							//Clearing spoofbot's mess from before
 							synchronized (client) {
 								for (IMessage message : spoofChannel.getMessages()) {
 									message.delete();
 								}
 							}
-							
+
 							//Time to unleash the ai
 							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
-							
+
 							final long now = System.currentTimeMillis();
 							new Thread(()->{
 								while (!didTest.get()) {
@@ -117,15 +117,20 @@ public class TestBot {
 						}
 					}
 				});
-				
+
 				while (!didTest.get()) {}
-				
+
 			} else { //Dev testing
 				client.login();
-				
+
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
 					public void handle(MessageReceivedEvent messageReceivedEvent) {
+						try {
+							Discord4J.LOGGER.info("Regions:"+messageReceivedEvent.getClient().getRegions());
+						} catch (HTTP429Exception | DiscordException e) {
+							e.printStackTrace();
+						}
 						IMessage m = messageReceivedEvent.getMessage();
 						if (m.getContent().startsWith(".meme")
 								|| m.getContent().startsWith(".nicememe")) {
@@ -218,7 +223,7 @@ public class TestBot {
 						}
 					}
 				});
-				
+
 				client.getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
 					@Override
 					public void handle(InviteReceivedEvent event) {
@@ -232,10 +237,10 @@ public class TestBot {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-						
+
 					}
 				});
-				
+
 				client.getDispatcher().registerListener(new IListener<MessageDeleteEvent>() {
 					@Override
 					public void handle(MessageDeleteEvent event) {
