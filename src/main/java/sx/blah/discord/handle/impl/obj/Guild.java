@@ -347,7 +347,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}
 
@@ -363,7 +363,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}
 
@@ -422,7 +422,7 @@ public class Guild implements IGuild {
 
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -450,7 +450,7 @@ public class Guild implements IGuild {
 
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -479,7 +479,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}
 
