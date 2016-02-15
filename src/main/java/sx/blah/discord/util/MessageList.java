@@ -202,7 +202,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	}
 
 	/**
-	 * This creates a new {@link List<IMessage>} from this message list.
+	 * This creates a new {@link List} from this message list.
 	 *
 	 * @return The copied list. Note: This list is a copy of the current message cache, not a copy of this specific
 	 * instance of {@link MessageList}. It will ONLY ever contain the contents of the current message cache.
