@@ -53,6 +53,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
+	 *
+	 * @throws MissingPermissionsException
 	 */
 	public MessageList(IDiscordClient client, IChannel channel) throws MissingPermissionsException {
 		if (channel instanceof IVoiceChannel)
@@ -70,6 +72,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
 	 * @param initialContents The initial amount of messages to have cached when this list is constructed.
+	 *
+	 * @throws MissingPermissionsException
 	 */
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) throws MissingPermissionsException {
 		this(client, channel);
