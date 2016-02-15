@@ -78,11 +78,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) throws MissingPermissionsException {
 		this(client, channel);
 
-		try {
-			queryMessages(initialContents);
-		} catch (DiscordException | HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-		}
+		load(initialContents);
 	}
 
 	/**
@@ -255,6 +251,21 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public IMessage get(String id) {
 		return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+	}
+
+	/**
+	 * This attempts to load the specified number of messages into the list's cache.
+	 *
+	 * @param messageCount The amount of messages to load.
+	 * @return True if this action was successful, false if otherwise.
+	 */
+	public boolean load(int messageCount) {
+		try {
+			return queryMessages(messageCount);
+		} catch (DiscordException | HTTP429Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+		return false;
 	}
 
 	/**
