@@ -16,6 +16,7 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.responses.MessageResponse;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * This class is a custom implementation of {@link List} for retrieving discord messages.
@@ -28,7 +29,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * This is used to cache message objects to prevent unnecessary queries.
 	 */
-	private ArrayDeque<IMessage> messageCache = new ArrayDeque<>();
+	private final ConcurrentLinkedDeque<IMessage> messageCache = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
@@ -38,29 +39,32 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * The client that this list is respecting.
 	 */
-	private IDiscordClient client;
+	private final IDiscordClient client;
 
 	/**
 	 * The channel the messages are from.
 	 */
-	private IChannel channel;
+	private final IChannel channel;
 
 	/**
 	 * The event listener for this list instance. This is used to update the list when messages are received/removed/etc.
 	 */
-	private MessageListEventListener listener;
+	private final MessageListEventListener listener;
+
+	/**
+	 * This is true if the client object has permission to read this channel's messages.
+	 */
+	private volatile boolean hasPermission;
 
 	/**
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
-	 *
-	 * @throws MissingPermissionsException
 	 */
-	public MessageList(IDiscordClient client, IChannel channel) throws MissingPermissionsException {
+	public MessageList(IDiscordClient client, IChannel channel) {
 		if (channel instanceof IVoiceChannel)
 			throw new UnsupportedOperationException();
 
-		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
+		updatePermissions();
 
 		this.client = client;
 		this.channel = channel;
@@ -72,10 +76,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
 	 * @param initialContents The initial amount of messages to have cached when this list is constructed.
-	 *
-	 * @throws MissingPermissionsException
 	 */
-	public MessageList(IDiscordClient client, IChannel channel, int initialContents) throws MissingPermissionsException {
+	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
 		load(initialContents);
@@ -104,6 +106,9 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	}
 
 	private boolean queryMessages(int messageCount) throws DiscordException, HTTP429Exception {
+		if (!hasPermission)
+			return false;
+
 		int initialSize = size();
 
 		String queryParams = "?limit="+messageCount;
@@ -268,6 +273,16 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		return false;
 	}
 
+	private void updatePermissions() {
+		try {
+			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
+			hasPermission = true;
+		} catch (MissingPermissionsException e) {
+			Discord4J.LOGGER.warn("Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
+			hasPermission = false;
+		}
+	}
+
 	/**
 	 * This is used to automatically update the message list.
 	 */
@@ -314,6 +329,40 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			if (event.getGuild().equals(list.channel.getGuild())) {
 				list.client.getDispatcher().unregisterListener(this);
 			}
+		}
+
+		//The following are to update the hasPermission boolean
+
+		@EventSubscriber
+		public void onRoleUpdate(RoleUpdateEvent event) {
+			if (event.getGuild().equals(list.channel.getGuild()) &&
+					list.client.getOurUser().getRolesForGuild(list.channel.getGuild().getID()).contains(event.getNewRole()))
+				list.updatePermissions();
+		}
+
+		@EventSubscriber
+		public void onGuildUpdate(GuildUpdateEvent event) {
+			if (event.getNewGuild().equals(list.channel.getGuild()))
+				list.updatePermissions();
+		}
+
+		@EventSubscriber
+		public void onUserRoleUpdate(UserRoleUpdateEvent event) {
+			if (event.getUser().equals(list.client.getOurUser()) && event.getGuild().equals(list.channel.getGuild()))
+				list.updatePermissions();
+		}
+
+		@EventSubscriber
+		public void onGuildTransferOwnership(GuildTransferOwnershipEvent event) {
+			if (event.getGuild().equals(list.channel.getGuild())) {
+				list.updatePermissions();
+			}
+		}
+
+		@EventSubscriber
+		public void onChannelUpdateEvent(ChannelUpdateEvent event) {
+			if (event.getNewChannel().equals(list.channel))
+				list.updatePermissions();
 		}
 	}
 }

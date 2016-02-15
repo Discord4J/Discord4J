@@ -137,12 +137,8 @@ public class Channel implements IChannel {
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
-		try {
-			if (!(this instanceof IVoiceChannel))
-				this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
-		} catch (MissingPermissionsException e) {
-			Discord4J.LOGGER.warn("User is missing permissions to read messages for this channel ("+getName()+")");
-		}
+		if (!(this instanceof IVoiceChannel))
+			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
 	}
 
 	@Override
@@ -171,9 +167,6 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		if (messages == null)
-			return null;
-
 		return messages.get(messageID);
 	}
 
@@ -392,6 +385,9 @@ public class Channel implements IChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
+		if (getGuild().getOwner().equals(user))
+			return EnumSet.allOf(Permissions.class);
+
 		List<IRole> roles = user.getRolesForGuild(parent.getID());
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 
