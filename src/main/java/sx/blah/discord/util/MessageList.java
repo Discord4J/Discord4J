@@ -93,13 +93,9 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		MessageResponse[] messages = DiscordUtils.GSON.fromJson(response, MessageResponse[].class);
 
-		List<IMessage> messageList = new ArrayList<>();
 		for (MessageResponse messageResponse : messages)
-			messageList.add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse));
-		Collections.sort(messageList, MessageComparator.INSTANCE);
-
-		for (int i = 0; i < messageList.size(); i++)
-			messageCache.addLast(messageList.get(i));
+			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse)))
+				return false;
 
 		return size() - initialSize == messageCount;
 	}
@@ -111,32 +107,46 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		int initialSize = size();
 
-		if (MessageComparator.INSTANCE.compare(message, messageCache.getFirst()) > -1)
+		if (initialSize == 0) {
+			messageCache.add(message);
+		} else {
+			if (MessageComparator.REVERSED.compare(message, messageCache.getFirst()) > -1)
 				messageCache.addLast(message);
-		else
-			messageCache.addFirst(message);
+			else
+				messageCache.addFirst(message);
+		}
 
 		return initialSize != size();
 	}
 
 	@Override
 	public void forEach(Consumer<? super IMessage> action) {
+		Objects.requireNonNull(action);
 
+		final int expectedModCount = modCount;
+
+		for (int i = 0; modCount == expectedModCount && i < size(); i++) {
+			action.accept(get(i));
+		}
+
+		if (modCount != expectedModCount) {
+			throw new ConcurrentModificationException();
+		}
 	}
 
 	@Override
 	public Spliterator<IMessage> spliterator() {
-		return null;
+		return Spliterators.spliterator(this, 0);
 	}
 
 	@Override
 	public Stream<IMessage> stream() {
-		return null;
+		return super.stream();
 	}
 
 	@Override
 	public Stream<IMessage> parallelStream() {
-		return null;
+		return super.parallelStream();
 	}
 
 	@Override

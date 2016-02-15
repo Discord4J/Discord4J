@@ -179,7 +179,7 @@ public class Channel implements IChannel {
 	public synchronized void addMessage(IMessage message) {
 		if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
 			messages.add(message);
-			Collections.sort(messages, MessageComparator.INSTANCE);
+			Collections.sort(messages, MessageComparator.REVERSED);
 			if (lastReadMessageID == null)
 				lastReadMessageID = message.getID();
 		}

@@ -465,7 +465,7 @@ public class DiscordWS extends WebSocketClient {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
 				channel.getMessages().remove(message);
-				Collections.sort(channel.getMessages(), MessageComparator.INSTANCE);
+				Collections.sort(channel.getMessages(), MessageComparator.REVERSED);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}

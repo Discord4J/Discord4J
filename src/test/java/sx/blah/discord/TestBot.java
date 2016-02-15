@@ -197,7 +197,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".test")) {
 							MessageList list = new MessageList(client, m.getChannel());
 							for (int i = 0; i < 200; i++)
-								System.out.println(String.format("%s [%s] %s", list.get(i).getTimestamp().toString(), list.get(i).getAuthor().getName(), list.get(i).getContent()));
+								System.out.println(String.format("%d (%d): %s", i, i/50, list.get(i).getTimestamp().toString()));
 						}
 					}
 				});
