@@ -1,6 +1,7 @@
 package sx.blah.discord.util;
 
 import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
@@ -13,10 +14,6 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.responses.MessageResponse;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 /**
  * This class is a custom implementation of {@link List} for retrieving discord messages.
@@ -34,7 +31,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
 	 */
-	private static final int MESSAGE_CHUNK_COUNT = 50;
+	public static final int MESSAGE_CHUNK_COUNT = 50;
 
 	/**
 	 * The client that this list is respecting.
@@ -64,6 +61,28 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		this.channel = channel;
 	}
 
+	/**
+	 * @param client The client for this list to respect.
+	 * @param channel The channel to retrieve messages from.
+	 * @param initialContents The initial amount of messages to have cached when this list is constructed.
+	 */
+	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
+		this(client, channel);
+		try {
+			queryMessages(initialContents);
+		} catch (DiscordException | HTTP429Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+	}
+
+	/**
+	 * This implementation of {@link List#get(int)} first checks if the requested message is cached, if so it retrieves
+	 * that object, otherwise it requests messages from discord in chunks of {@link #MESSAGE_CHUNK_COUNT} until it gets
+	 * the requested object. If the object cannot be found, it throws an {@link ArrayIndexOutOfBoundsException}.
+	 *
+	 * @param index The index (starting at 0) of the message in this list.
+	 * @return The message object for this index.
+	 */
 	@Override
 	public IMessage get(int index) {
 		while (size() <= index) {
@@ -97,9 +116,15 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse)))
 				return false;
 
-		return size() - initialSize == messageCount;
+		return size() - initialSize <= messageCount;
 	}
 
+	/**
+	 * This adds a message object to the internal message cache.
+	 *
+	 * @param message The message object to cache.
+	 * @return True if the object was successfully cached, false if otherwise.
+	 */
 	@Override
 	public boolean add(IMessage message) {
 		if (messageCache.contains(message))
@@ -119,53 +144,101 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		return initialSize != size();
 	}
 
-	@Override
-	public void forEach(Consumer<? super IMessage> action) {
-		Objects.requireNonNull(action);
-
-		final int expectedModCount = modCount;
-
-		for (int i = 0; modCount == expectedModCount && i < size(); i++) {
-			action.accept(get(i));
-		}
-
-		if (modCount != expectedModCount) {
-			throw new ConcurrentModificationException();
-		}
-	}
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Spliterator<IMessage> spliterator() {
 		return Spliterators.spliterator(this, 0);
 	}
 
-	@Override
-	public Stream<IMessage> stream() {
-		return super.stream();
-	}
-
-	@Override
-	public Stream<IMessage> parallelStream() {
-		return super.parallelStream();
-	}
-
+	/**
+	 * This implementation of {@link List#size()} gets the size of the internal message cache NOT the total amount of
+	 * messages which exist in a channel in total.
+	 *
+	 * @return The amount of messages in the internal message cache.
+	 */
 	@Override
 	public int size() {
 		return messageCache.size();
 	}
 
 	@Override
-	public boolean removeIf(Predicate<? super IMessage> filter) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void replaceAll(UnaryOperator<IMessage> operator) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void sort(Comparator<? super IMessage> c) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		if (!(o instanceof IMessage) || !((IMessage) o).getChannel().equals(channel))
+			return false;
+
+		return messageCache.remove(o);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IMessage remove(int index) {
+		if (index >= size())
+			throw new ArrayIndexOutOfBoundsException();
+
+		IMessage message = get(index);
+
+		remove(message);
+
+		return message;
+	}
+
+	/**
+	 * This creates a new {@link List<IMessage>} from this message list.
+	 *
+	 * @return The copied list. Note: This list is a copy of the current message cache, not a copy of this specific
+	 * instance of {@link MessageList}. It will ONLY ever contain the contents of the current message cache.
+	 */
+	public List<IMessage> copy() {
+		return new ArrayList<>(this);
+	}
+
+	/**
+	 * A utility method to reverse the order of this list.
+	 *
+	 * @return A reversed COPY of this list.
+	 *
+	 * @see #copy()
+	 */
+	public List<IMessage> reverse() {
+		List<IMessage> messages = copy();
+		messages.sort(MessageComparator.DEFAULT);
+		return messages;
+	}
+
+	/**
+	 * This retrieves the earliest CACHED message.
+	 *
+	 * @return The earliest message. A cleaner version of {@link #get(int)} with an index of {@link #size()}-1.
+	 */
+	public IMessage getEarliestMessage() {
+		return get(size()-1);
+	}
+
+	/**
+	 * This retrieves the latest CACHED message.
+	 *
+	 * @return The latest message. A cleaner version of {@link #get(int)} with an index of 0.
+	 */
+	public IMessage getLatestMessage() {
+		return get(0);
+	}
+
+	/**
+	 * This retrieves a message object with the specified message id.
+	 *
+	 * @param id The message id to search for.
+	 * @return The message object found, or null if nonexistent.
+	 */
+	public IMessage get(String id) {
+		return stream().filter((m) -> m.getID().equals(id)).findFirst().orElse(null);
 	}
 }
