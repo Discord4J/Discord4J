@@ -20,7 +20,6 @@ import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
-import sx.blah.discord.util.MessageComparator;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
@@ -32,7 +31,10 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -334,7 +336,6 @@ public class DiscordWS extends WebSocketClient {
 		if (null != channel) {
 			IMessage message = DiscordUtils.getMessageFromJSON(client, channel, event);
 			if (!channel.getMessages().contains(message)) {
-				channel.addMessage(message);
 				Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						event.author.id, event.channel_id, event.content);
 
@@ -464,8 +465,6 @@ public class DiscordWS extends WebSocketClient {
 		if (channel != null) {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
-				channel.getMessages().remove(message);
-				Collections.sort(channel.getMessages(), MessageComparator.REVERSED);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}
@@ -577,7 +576,7 @@ public class DiscordWS extends WebSocketClient {
 				if (toUpdate != null) {
 					Channel oldChannel = new Channel(client, toUpdate.getName(),
 							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
-							toUpdate.getMessages(), toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
+							toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
 					oldChannel.setLastReadMessageID(toUpdate.getLastReadMessageID());
 
 					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), event);

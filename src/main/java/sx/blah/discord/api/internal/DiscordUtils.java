@@ -3,10 +3,7 @@ package sx.blah.discord.api.internal;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.DiscordEndpoints;
-import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.*;
@@ -15,10 +12,7 @@ import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.Requests;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -47,36 +41,6 @@ public class DiscordUtils {
 					+"(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
 					+"[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-
-	/**
-	 * Gets the last 50 messages from a given channel ID.
-	 *
-	 * @param client The discord client to use
-	 * @param channel The channel to get messages from.
-	 * @throws IOException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 */
-	//TODO: maybe move?
-	public static void getChannelMessages(IDiscordClient client, Channel channel) throws IOException, HTTP429Exception, DiscordException {
-		try {
-			if (!(channel instanceof IPrivateChannel) && !(channel instanceof IVoiceChannel))
-				checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
-		} catch (MissingPermissionsException e) {
-			Discord4J.LOGGER.warn("Error getting messages for channel "+channel.getName()+": {}", e.getErrorMessage());
-			return;
-		}
-		String response = Requests.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages?limit=50",
-				new BasicNameValuePair("authorization", client.getToken()));
-		if (response == null)
-			return;
-
-		MessageResponse[] messages = GSON.fromJson(response, MessageResponse[].class);
-
-		for (MessageResponse message : messages) {
-			channel.addMessage(getMessageFromJSON(client, channel, message));
-		}
-	}
 
 	/**
 	 * Converts a String timestamp into a java object timestamp.
@@ -289,11 +253,6 @@ public class DiscordUtils {
 		}
 		if (channel == null) {
 			channel = new PrivateChannel(client, recipient, id);
-			try {
-				DiscordUtils.getChannelMessages(client, channel);
-			} catch (Exception e) {
-				Discord4J.LOGGER.error("Unable to get messages for the private channel for \"{}\" (Cause: {}).", channel.getRecipient().getName(), e.getClass().getSimpleName());
-			}
 		}
 
 		channel.setLastReadMessageID(json.last_message_id);
@@ -382,12 +341,6 @@ public class DiscordUtils {
 				} else {
 					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
-			}
-
-			try {
-				DiscordUtils.getChannelMessages(client, channel);
-			} catch (Exception e) {
-				Discord4J.LOGGER.error("Unable to get messages for channel \"{}\" in guild \"{}\" (Cause: {}).", json.name, guild.getName(), e.getClass().getSimpleName());
 			}
 		}
 

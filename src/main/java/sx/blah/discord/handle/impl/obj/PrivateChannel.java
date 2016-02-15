@@ -26,117 +26,113 @@ import sx.blah.discord.handle.obj.*;
 import java.util.*;
 
 public class PrivateChannel extends Channel implements IPrivateChannel {
-	
+
 	/**
 	 * The recipient of this private channel.
 	 */
 	protected final IUser recipient;
-	
+
 	public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
-		this(client, recipient, id, new ArrayList<>());
-	}
-	
-	public PrivateChannel(IDiscordClient client, IUser recipient, String id, List<IMessage> messages) {
-		super(client, recipient.getName(), id, null, null, 0, messages, new HashMap<>(), new HashMap<>());
+		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
 		this.recipient = recipient;
 		this.isPrivate = true;
 	}
-	
+
 	@Override
 	public Map<String, PermissionOverride> getUserOverrides() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public Map<String, PermissionOverride> getRoleOverrides() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void addUserOverride(String userId, PermissionOverride override) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void addRoleOverride(String roleId, PermissionOverride override) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void removePermissionsOverride(String id) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void delete() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void setPosition(int position) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public int getPosition() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public String mention() {
 		return recipient.mention();
 	}
-	
+
 	@Override
 	public void setTopic(String topic) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public String getTopic() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public IGuild getGuild() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public String getName() {
 		return recipient.getName();
 	}
-	
+
 	@Override
 	public void setName(String name) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public IUser getRecipient() {
 		return recipient;

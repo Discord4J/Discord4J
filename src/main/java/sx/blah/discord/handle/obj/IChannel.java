@@ -4,6 +4,7 @@ import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.MessageList;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public interface IChannel {
 	 *
 	 * @return The list of messages in the channel.
 	 */
-	List<IMessage> getMessages();
+	MessageList getMessages();
 
 	/**
 	 * Gets a specific message by its id.

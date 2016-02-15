@@ -54,15 +54,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
 	 */
-	public MessageList(IDiscordClient client, IChannel channel) {
+	public MessageList(IDiscordClient client, IChannel channel) throws MissingPermissionsException {
 		if (channel instanceof IVoiceChannel)
 			throw new UnsupportedOperationException();
 
-		try {
-			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
-		} catch (MissingPermissionsException e) {
-			throw new UnsupportedOperationException("The user is messing the required permissions");
-		}
+		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 
 		this.client = client;
 		this.channel = channel;
@@ -75,8 +71,9 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param channel The channel to retrieve messages from.
 	 * @param initialContents The initial amount of messages to have cached when this list is constructed.
 	 */
-	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
+	public MessageList(IDiscordClient client, IChannel channel, int initialContents) throws MissingPermissionsException {
 		this(client, channel);
+
 		try {
 			queryMessages(initialContents);
 		} catch (DiscordException | HTTP429Exception e) {
@@ -253,7 +250,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return The message object found, or null if nonexistent.
 	 */
 	public IMessage get(String id) {
-		return stream().filter((m) -> m.getID().equals(id)).findFirst().orElse(null);
+		return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
 	}
 
 	/**

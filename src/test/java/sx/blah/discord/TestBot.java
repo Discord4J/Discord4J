@@ -9,7 +9,6 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.MessageList;
 
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -194,10 +193,6 @@ public class TestBot {
 							} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}
-						} else if (m.getContent().startsWith(".test")) {
-							MessageList list = new MessageList(client, m.getChannel());
-							for (int i = 0; i < 200; i++)
-								System.out.println(String.format("%d (%d): %s", i, i/50, list.get(i).getTimestamp().toString()));
 						}
 					}
 				});

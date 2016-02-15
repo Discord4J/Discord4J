@@ -39,7 +39,7 @@ import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.MessageComparator;
+import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.Requests;
 
 import java.io.File;
@@ -66,7 +66,7 @@ public class Channel implements IChannel {
 	/**
 	 * Messages that have been sent into this channel
 	 */
-	protected final List<IMessage> messages;
+	protected MessageList messages = null;
 
 	/**
 	 * Indicates whether or not this channel is a PM channel.
@@ -124,20 +124,25 @@ public class Channel implements IChannel {
 	protected final IDiscordClient client;
 
 	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-		this(client, name, id, parent, topic, position, new ArrayList<>(), new HashMap<>(), new HashMap<>());
+		this(client, name, id, parent, topic, position, new HashMap<>(), new HashMap<>());
 	}
 
-	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
-		this.messages = messages;
 		this.parent = parent;
 		this.isPrivate = false;
 		this.topic = topic;
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
+		try {
+			if (!(this instanceof IVoiceChannel))
+				this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
+		} catch (MissingPermissionsException e) {
+			Discord4J.LOGGER.warn("User is missing permissions to read messages for this channel ("+getName()+")");
+		}
 	}
 
 	@Override
@@ -160,29 +165,16 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public List<IMessage> getMessages() {
+	public MessageList getMessages() {
 		return messages;
 	}
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		return messages.stream()
-				.filter(m -> m.getID().equalsIgnoreCase(messageID))
-				.findAny().orElse(null);
-	}
+		if (messages == null)
+			return null;
 
-	/**
-	 * CACHES a message to the channel.
-	 *
-	 * @param message The message.
-	 */
-	public synchronized void addMessage(IMessage message) {
-		if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
-			messages.add(message);
-			Collections.sort(messages, MessageComparator.REVERSED);
-			if (lastReadMessageID == null)
-				lastReadMessageID = message.getID();
-		}
+		return messages.get(messageID);
 	}
 
 	@Override
@@ -232,7 +224,6 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
 			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
-			addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
 
@@ -254,7 +245,6 @@ public class Channel implements IChannel {
 					DiscordEndpoints.CHANNELS+id+"/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
 			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
-			addMessage(message);
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
 		} else {
