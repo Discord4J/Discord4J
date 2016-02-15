@@ -218,7 +218,8 @@ public class Guild implements IGuild {
 	 * @param user The user.
 	 */
 	public void addUser(IUser user) {
-		this.users.add(user);
+		if (!this.users.contains(user))
+			this.users.add(user);
 	}
 
 	/**
@@ -241,7 +242,8 @@ public class Guild implements IGuild {
 	 * @param role The role.
 	 */
 	public void addRole(IRole role) {
-		this.roles.add(role);
+		if (!this.roles.contains(role))
+			this.roles.add(role);
 	}
 
 	@Override
@@ -282,7 +284,8 @@ public class Guild implements IGuild {
 	}
 
 	public void addVoiceChannel(IVoiceChannel channel) {
-		voiceChannels.add(channel);
+		if (voiceChannels.contains(channel))
+			voiceChannels.add(channel);
 	}
 
 	@Override
