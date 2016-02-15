@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 /**
  * This class is used to manage loading and unloading modules for a discord client.
@@ -46,9 +48,8 @@ public class ModuleLoader {
 
 			File[] files = modulesDir.listFiles((FilenameFilter) FileFilterUtils.suffixFileFilter("jar"));
 			if (files.length > 0) {
-				Discord4J.LOGGER.info("Loading {} external module(s)...", files.length);
-				for (File file : files)
-					loadExternalModules(file);
+				Discord4J.LOGGER.info("Attempting to load {} external module(s)...", files.length);
+				loadExternalModules(new ArrayList<>(Arrays.asList(files)));
 			}
 		}
 	}
@@ -72,24 +73,10 @@ public class ModuleLoader {
 
 		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {//Handles module load order and loads the modules
 			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
-			List<IModule> loaded = new CopyOnWriteArrayList<>();
 			while (toLoad.size() > 0) {
 				for (IModule module : toLoad) {
-					Class<? extends IModule> clazz = module.getClass();
-					if (clazz.isAnnotationPresent(Requires.class)) {
-						Requires annotation = clazz.getAnnotation(Requires.class);
-						if (!hasDependency(loaded, annotation.value())) {
-							if (!hasDependency(toLoad, annotation.value())) {
-								Discord4J.LOGGER.warn("Skipped and unloaded module {}. It's missing required module class {}", module.getName(), annotation.value());
-								toLoad.remove(module);
-								loadedModules.remove(module);
-							}
-							continue;
-						}
-					}
-					module.enable(client);
-					loaded.add(module);
-					toLoad.remove(module);
+					if (loadModule(module))
+						toLoad.remove(module);
 				}
 			}
 		}
@@ -105,12 +92,45 @@ public class ModuleLoader {
 	}
 
 	/**
-	 * Manually loads a module. NOTE: This doesn't enable the module!
+	 * Manually loads a module.
 	 *
 	 * @param module The module to load.
+	 * @return True if the module was successfully loaded, false if otherwise.
 	 */
-	public void loadModule(IModule module) {
-		loadedModules.add(module);
+	public boolean loadModule(IModule module) {
+		Class<? extends IModule> clazz = module.getClass();
+		if (clazz.isAnnotationPresent(Requires.class)) {
+			Requires annotation = clazz.getAnnotation(Requires.class);
+			if (!hasDependency(loadedModules, annotation.value())) {
+				return false;
+			}
+		}
+		module.enable(client);
+		if (!loadedModules.contains(module))
+			loadedModules.add(module);
+		return true;
+	}
+
+	/**
+	 * Manually unloads a module.
+	 *
+	 * @param module The module to unload.
+	 */
+	public void unloadModule(IModule module) {
+		loadedModules.remove(module);
+		module.disable();
+
+		loadedModules.removeIf(mod -> {
+			Class<? extends IModule> clazz = module.getClass();
+			if (clazz.isAnnotationPresent(Requires.class)) {
+				Requires annotation = clazz.getAnnotation(Requires.class);
+				if (annotation.value().equals(module.getClass().getName())) {
+					unloadModule(mod);
+					return true;
+				}
+			}
+			return false;
+		});
 	}
 
 	private boolean hasDependency(List<IModule> modules, String className) {
@@ -121,7 +141,7 @@ public class ModuleLoader {
 	}
 
 	private boolean canModuleLoad(IModule module) {
-		String[] versions = module.getVersion().toLowerCase().replace("-SNAPSHOT", "").split("\\.");
+		String[] versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-SNAPSHOT", "").split("\\.");
 		String[] discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-SNAPSHOT", "").split("\\.");
 		for (int i = 0; i < Math.min(versions.length, 3); i++) {
 			if (!(Integer.parseInt(versions[i]) <= Integer.parseInt(discord4jVersion[i])))
@@ -169,6 +189,69 @@ public class ModuleLoader {
 				Discord4J.LOGGER.error("Unable to load module "+file.getName()+"!", e);
 			}
 		}
+	}
+
+	/**
+	 * This loads a list of jar files and automatically resolves any dependency issues.
+	 *
+	 * @param files The jar files to load.
+	 */
+	public static void loadExternalModules(List<File> files) {
+		List<File> independents = new ArrayList<>();
+		List<File> dependents = new ArrayList<>();
+
+		files.forEach((file) -> {
+			try {
+				JarFile jarFile = new JarFile(file);
+				Manifest manifest = jarFile.getManifest();
+				if (manifest.getMainAttributes().containsKey("module-requires")) {
+					dependents.add(file);
+				} else {
+					independents.add(file);
+				}
+			} catch (IOException e) {
+				Discord4J.LOGGER.error("Discord4J Internal Exception");
+			}
+		});
+
+		independents.forEach(ModuleLoader::loadExternalModules);
+
+		List<File> noLongerDependents = dependents.stream().filter(jarFile -> { //loads all dependents whose requirements have been met already
+			try {
+				Class clazz = Class.forName(new JarFile(jarFile).getManifest().getMainAttributes().getValue("module-requires"));
+				return clazz != null;
+			} catch (Exception e) {
+				return false;
+			}
+		}).collect(Collectors.toList());
+		dependents.removeAll(noLongerDependents);
+		noLongerDependents.forEach(ModuleLoader::loadExternalModules);
+
+		dependents.removeIf((file -> { //Filters out all unusable files
+			boolean cannotBeLoaded = true;
+			try {
+				cannotBeLoaded = findFileForClass(dependents,
+						new JarFile(file).getManifest().getMainAttributes().getValue("module-requires")) == null;
+			} catch (IOException ignored) {}
+
+			if (cannotBeLoaded)
+				Discord4J.LOGGER.warn("Unable to load module file {}. Its dependencies cannot be resolved!", file.getName());
+
+			return cannotBeLoaded;
+		}));
+
+		dependents.forEach(ModuleLoader::loadExternalModules);
+	}
+
+	private static File findFileForClass(List<File> files, String clazz) {
+		return files.stream().filter((file) -> {
+			try {
+				JarFile jarFile = new JarFile(file);
+				return jarFile.getJarEntry(clazz.replaceAll("\\.", File.pathSeparator)+".class") != null;
+			} catch (IOException e) {
+				return false;
+			}
+		}).findFirst().orElse(null);
 	}
 
 	/**
