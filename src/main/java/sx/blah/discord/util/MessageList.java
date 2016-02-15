@@ -64,10 +64,10 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (channel instanceof IVoiceChannel)
 			throw new UnsupportedOperationException();
 
-		updatePermissions();
-
 		this.client = client;
 		this.channel = channel;
+
+		updatePermissions();
 
 		client.getDispatcher().registerListener(listener = new MessageListEventListener(this));
 	}

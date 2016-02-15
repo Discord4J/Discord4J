@@ -167,6 +167,9 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
+		if (messages == null)
+			return null;
+
 		return messages.get(messageID);
 	}
 
@@ -385,7 +388,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
-		if (getGuild().getOwner().equals(user))
+		if (isPrivate || getGuild().getOwnerID().equals(user.getID()))
 			return EnumSet.allOf(Permissions.class);
 
 		List<IRole> roles = user.getRolesForGuild(parent.getID());
