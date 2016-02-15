@@ -7,6 +7,8 @@ import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.EventSubscriber;
+import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -44,6 +46,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	private IChannel channel;
 
 	/**
+	 * The event listener for this list instance. This is used to update the list when messages are received/removed/etc.
+	 */
+	private MessageListEventListener listener;
+
+	/**
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
 	 */
@@ -59,6 +66,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		this.client = client;
 		this.channel = channel;
+
+		client.getDispatcher().registerListener(listener = new MessageListEventListener(this));
 	}
 
 	/**
@@ -232,6 +241,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		return get(0);
 	}
 
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
+
 	/**
 	 * This retrieves a message object with the specified message id.
 	 *
@@ -240,5 +254,54 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public IMessage get(String id) {
 		return stream().filter((m) -> m.getID().equals(id)).findFirst().orElse(null);
+	}
+
+	/**
+	 * This is used to automatically update the message list.
+	 */
+	private static class MessageListEventListener {
+
+		private volatile MessageList list;
+
+		public MessageListEventListener(MessageList list) {
+			this.list = list;
+		}
+
+		@EventSubscriber
+		public void onMessageReceived(MessageReceivedEvent event) {
+			if (event.getMessage().getChannel().equals(list.channel)) {
+				list.add(event.getMessage());
+			}
+		}
+
+		@EventSubscriber
+		public void onMessageSent(MessageSendEvent event) {
+			if (event.getMessage().getChannel().equals(list.channel)) {
+				list.add(event.getMessage());
+			}
+		}
+
+		@EventSubscriber
+		public void onMessageDelete(MessageDeleteEvent event) {
+			if (event.getMessage().getChannel().equals(list.channel)) {
+				list.remove(event.getMessage());
+			}
+		}
+
+		//The following are to unregister this listener to optimize the event dispatcher.
+
+		@EventSubscriber
+		public void onChannelDelete(ChannelDeleteEvent event) {
+			if (event.getChannel().equals(list.channel)) {
+				list.client.getDispatcher().unregisterListener(this);
+			}
+		}
+
+		@EventSubscriber
+		public void onGuildRemove(GuildLeaveEvent event) {
+			if (event.getGuild().equals(list.channel.getGuild())) {
+				list.client.getDispatcher().unregisterListener(this);
+			}
+		}
 	}
 }
