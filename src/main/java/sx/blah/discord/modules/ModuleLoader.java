@@ -206,7 +206,8 @@ public class ModuleLoader {
 			try {
 				JarFile jarFile = new JarFile(file);
 				Manifest manifest = jarFile.getManifest();
-				if (manifest.getMainAttributes().containsKey("module-requires")) {
+				if (manifest != null && manifest.getMainAttributes() != null
+						&& manifest.getMainAttributes().containsKey("module-requires")) {
 					dependents.add(file);
 				} else {
 					independents.add(file);
