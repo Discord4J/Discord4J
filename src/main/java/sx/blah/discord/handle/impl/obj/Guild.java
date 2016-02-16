@@ -395,8 +395,29 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void deleteOrLeaveGuild() throws HTTP429Exception, DiscordException {
+	public void deleteOrLeaveGuild() throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		if (ownerID.equals(client.getOurUser().getID())) {
+			deleteGuild();
+		} else {
+			leaveGuild();
+		}
+	}
+
+	@Override
+	public void deleteGuild() throws DiscordException, HTTP429Exception, MissingPermissionsException {
+		if (!ownerID.equals(client.getOurUser().getID()))
+			throw new MissingPermissionsException("You must be the guild owner to delete guilds!");
+
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id,
+				new BasicNameValuePair("authorization", client.getToken()));
+	}
+
+	@Override
+	public void leaveGuild() throws DiscordException, HTTP429Exception {
+		if (ownerID.equals(client.getOurUser().getID()))
+			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
+
+		Requests.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 

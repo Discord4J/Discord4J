@@ -274,8 +274,29 @@ public interface IGuild {
 	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 * @deprecated See {@link #deleteGuild()} and {@link #leaveGuild()}.
 	 */
-	void deleteOrLeaveGuild() throws HTTP429Exception, DiscordException;
+	@Deprecated
+	void deleteOrLeaveGuild() throws HTTP429Exception, DiscordException, MissingPermissionsException;
+
+	/**
+	 * This deletes this guild if and only if you are its owner, otherwise it throws a {@link MissingPermissionsException}.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 * @throws MissingPermissionsException
+	 */
+	void deleteGuild() throws DiscordException, HTTP429Exception, MissingPermissionsException;
+
+	/**
+	 * This leaves the guild, NOTE: it throws a {@link DiscordException} if you are the guilds owner, use
+	 * {@link #deleteGuild()} instead!
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void leaveGuild() throws DiscordException, HTTP429Exception;
 
 	/**
 	 * Creates a new channel.
