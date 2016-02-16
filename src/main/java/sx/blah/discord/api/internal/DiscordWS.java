@@ -532,7 +532,7 @@ public class DiscordWS extends WebSocketClient {
 					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(client, guild, event);
 					guild.addChannel(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
-				} else if (type.equalsIgnoreCase("voice")) { //FIXME
+				} else if (type.equalsIgnoreCase("voice")) {
 					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, guild, event);
 					guild.addVoiceChannel(channel);
 					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));

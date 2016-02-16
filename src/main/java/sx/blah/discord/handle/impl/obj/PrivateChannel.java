@@ -137,4 +137,9 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	public IUser getRecipient() {
 		return recipient;
 	}
+
+	@Override
+	public String toString() {
+		return recipient.toString();
+	}
 }

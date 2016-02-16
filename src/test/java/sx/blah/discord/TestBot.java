@@ -193,6 +193,12 @@ public class TestBot {
 							} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}
+						} else if (m.getContent().startsWith(".test")) {
+							try {
+								m.reply(String.valueOf(m.getChannel().getMessages().size()));
+							} catch (MissingPermissionsException | DiscordException | HTTP429Exception e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				});

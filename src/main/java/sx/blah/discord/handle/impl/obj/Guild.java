@@ -228,7 +228,8 @@ public class Guild implements IGuild {
 	 * @param channel The channel.
 	 */
 	public void addChannel(IChannel channel) {
-		this.channels.add(channel);
+		if (!this.channels.contains(channel) && !(channel instanceof IVoiceChannel) && !(channel instanceof IPrivateChannel))
+			this.channels.add(channel);
 	}
 
 	@Override
@@ -284,7 +285,7 @@ public class Guild implements IGuild {
 	}
 
 	public void addVoiceChannel(IVoiceChannel channel) {
-		if (voiceChannels.contains(channel))
+		if (!voiceChannels.contains(channel) && !(channel instanceof IPrivateChannel))
 			voiceChannels.add(channel);
 	}
 

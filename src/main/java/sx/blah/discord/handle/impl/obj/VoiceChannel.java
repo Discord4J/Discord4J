@@ -45,11 +45,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public String mention() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public IMessage sendMessage(String content) {
 		throw new UnsupportedOperationException();
 	}

@@ -69,7 +69,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		updatePermissions();
 
-		client.getDispatcher().registerListener(listener = new MessageListEventListener(this));
+		listener = new MessageListEventListener(this);
+		client.getDispatcher().registerListener(listener);
 	}
 
 	/**
@@ -298,6 +299,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		public void onMessageReceived(MessageReceivedEvent event) {
 			if (event.getMessage().getChannel().equals(list.channel)) {
 				list.add(event.getMessage());
+				System.out.println(list.size());
 			}
 		}
 
