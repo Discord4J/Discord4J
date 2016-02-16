@@ -16,7 +16,8 @@
  * this, the module loader first verifies that the module is compatible with the current Discord4J version by creating
  * a new instance using a default constructor (constructor with no args) and then comparing the current
  * {@link sx.blah.discord.Discord4J#VERSION} with the {@link sx.blah.discord.modules.IModule#getMinimumDiscord4JVersion()}.
- * If that check is passed, that instance of {@link sx.blah.discord.modules.IModule} then has the
- * {@link sx.blah.discord.modules.IModule#enable(sx.blah.discord.api.IDiscordClient)} method called for it.
+ * If that check is passed, that instance of {@link sx.blah.discord.modules.IModule} then is registered as an event
+ * listener and it has the {@link sx.blah.discord.modules.IModule#enable(sx.blah.discord.api.IDiscordClient)} method
+ * called for it.
  */
 package sx.blah.discord.modules;

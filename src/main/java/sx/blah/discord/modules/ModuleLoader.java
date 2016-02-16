@@ -106,6 +106,7 @@ public class ModuleLoader {
 			}
 		}
 		module.enable(client);
+		client.getDispatcher().registerListener(module);
 		if (!loadedModules.contains(module))
 			loadedModules.add(module);
 		return true;
@@ -119,6 +120,7 @@ public class ModuleLoader {
 	public void unloadModule(IModule module) {
 		loadedModules.remove(module);
 		module.disable();
+		client.getDispatcher().unregisterListener(module);
 
 		loadedModules.removeIf(mod -> {
 			Class<? extends IModule> clazz = module.getClass();
