@@ -1,23 +1,24 @@
 package sx.blah.discord.handle;
 
+import net.jodah.typetools.TypeResolver;
+import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import net.jodah.typetools.TypeResolver;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.IDiscordClient;
 
 /**
  * Manages event listeners and event logic.
  */
 public class EventDispatcher {
 
-	private ConcurrentHashMap<Class<?>, HashMap<Method, Object>> methodListeners = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<Class<?>, HashMap<Method, List<Object>>> methodListeners = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<Class<?>, List<IListener>> classListeners = new ConcurrentHashMap<>();
 	private IDiscordClient client;
 
@@ -40,7 +41,10 @@ public class EventDispatcher {
 					if (!methodListeners.containsKey(eventClass))
 						methodListeners.put(eventClass, new HashMap<>());
 
-					methodListeners.get(eventClass).put(method, listener);
+					if (!methodListeners.get(eventClass).containsKey(method))
+						methodListeners.get(eventClass).put(method, new ArrayList<>());
+
+					methodListeners.get(eventClass).get(method).add(listener);
 				}
 			}
 		}
@@ -72,7 +76,8 @@ public class EventDispatcher {
 				Class<?> eventClass = method.getParameterTypes()[0];
 				if (Event.class.isAssignableFrom(eventClass)) {
 					if (methodListeners.containsKey(eventClass))
-						methodListeners.get(eventClass).remove(method);
+						if (methodListeners.get(eventClass).containsKey(method))
+							methodListeners.get(eventClass).get(method).remove(listener);
 				}
 			}
 		}
@@ -104,15 +109,17 @@ public class EventDispatcher {
 			methodListeners.entrySet().stream()
 					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
 					.map(e -> e.getValue())
-					.forEach(m -> m.forEach((k, v) -> {
-						try {
-							k.invoke(v, event);
-						} catch (IllegalAccessException | InvocationTargetException e) {
-							Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
-						} catch (Exception e) {
-							Discord4J.LOGGER.error("Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
-						}
-					}));
+					.forEach(m ->
+							m.forEach((k, v) ->
+									v.forEach(o -> {
+										try {
+											k.invoke(o, event);
+										} catch (IllegalAccessException | InvocationTargetException e) {
+											Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
+										} catch (Exception e) {
+											Discord4J.LOGGER.error("Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
+										}
+									})));
 
 			classListeners.entrySet().stream()
 					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))

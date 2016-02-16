@@ -6,6 +6,7 @@ import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageBuilder;
@@ -35,6 +36,7 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
+			Configuration.LOAD_EXTERNAL_MODULES = false; //temp
 			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
 
 			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {

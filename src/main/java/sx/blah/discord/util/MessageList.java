@@ -287,7 +287,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * This is used to automatically update the message list.
 	 */
-	private static class MessageListEventListener {
+	public static class MessageListEventListener {
 
 		private volatile MessageList list;
 
@@ -299,7 +299,6 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		public void onMessageReceived(MessageReceivedEvent event) {
 			if (event.getMessage().getChannel().equals(list.channel)) {
 				list.add(event.getMessage());
-				System.out.println(list.size());
 			}
 		}
 
