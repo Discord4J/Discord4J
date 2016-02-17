@@ -143,11 +143,14 @@ public class ModuleLoader {
 	}
 
 	private boolean canModuleLoad(IModule module) {
+		String[] versions;
+		String[] discord4jVersion;
 		try {
-			String[] versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
-			String[] discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
+			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
+			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
 		} catch (NumberFormatException e) {
 			Discord4J.LOGGER.error("Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
+			return false;
 		}
 		for (int i = 0; i < Math.min(versions.length, 3); i++) {
 			if (!(Integer.parseInt(versions[i]) <= Integer.parseInt(discord4jVersion[i])))
