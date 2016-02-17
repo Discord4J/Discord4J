@@ -14,8 +14,9 @@ public interface IModule {
 	 * This is called to enable the module. NOTE: A new instance of this class is created for each enable() call.
 	 *
 	 * @param client The client this module instance is being enabled for.
+	 * @return Whether the module was successfully loaded, true if successful, false if otherwise.
 	 */
-	void enable(IDiscordClient client);
+	boolean enable(IDiscordClient client);
 
 	/**
 	 * This is called to disable the module.

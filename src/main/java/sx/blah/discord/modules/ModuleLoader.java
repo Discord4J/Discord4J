@@ -76,6 +76,7 @@ public class ModuleLoader {
 			while (toLoad.size() > 0) {
 				for (IModule module : toLoad) {
 					if (loadModule(module))
+						Discord4J.LOGGER
 						toLoad.remove(module);
 				}
 			}
@@ -95,7 +96,7 @@ public class ModuleLoader {
 	 * Manually loads a module.
 	 *
 	 * @param module The module to load.
-	 * @return True if the module was successfully loaded, false if otherwise.
+	 * @return True if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
 	 */
 	public boolean loadModule(IModule module) {
 		Class<? extends IModule> clazz = module.getClass();
@@ -105,10 +106,13 @@ public class ModuleLoader {
 				return false;
 			}
 		}
-		module.enable(client);
-		client.getDispatcher().registerListener(module);
-		if (!loadedModules.contains(module))
-			loadedModules.add(module);
+		boolean enabled = module.enable(client);
+		if (enabled) {
+			client.getDispatcher().registerListener(module);
+			if (!loadedModules.contains(module))
+				loadedModules.add(module);
+		}
+
 		return true;
 	}
 
