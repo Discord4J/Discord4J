@@ -76,7 +76,6 @@ public class ModuleLoader {
 			while (toLoad.size() > 0) {
 				for (IModule module : toLoad) {
 					if (loadModule(module))
-						Discord4J.LOGGER
 						toLoad.remove(module);
 				}
 			}
