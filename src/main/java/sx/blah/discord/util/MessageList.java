@@ -9,10 +9,7 @@ import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.EventSubscriber;
 import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.responses.MessageResponse;
 
 import java.util.*;
@@ -327,7 +324,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		@EventSubscriber
 		public void onGuildRemove(GuildLeaveEvent event) {
-			if (event.getGuild().equals(list.channel.getGuild())) {
+			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild())) {
 				list.client.getDispatcher().unregisterListener(this);
 			}
 		}
@@ -336,26 +333,26 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		@EventSubscriber
 		public void onRoleUpdate(RoleUpdateEvent event) {
-			if (event.getGuild().equals(list.channel.getGuild()) &&
+			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild()) &&
 					list.client.getOurUser().getRolesForGuild(list.channel.getGuild().getID()).contains(event.getNewRole()))
 				list.updatePermissions();
 		}
 
 		@EventSubscriber
 		public void onGuildUpdate(GuildUpdateEvent event) {
-			if (event.getNewGuild().equals(list.channel.getGuild()))
+			if (!(list.channel instanceof IPrivateChannel) && event.getNewGuild().equals(list.channel.getGuild()))
 				list.updatePermissions();
 		}
 
 		@EventSubscriber
 		public void onUserRoleUpdate(UserRoleUpdateEvent event) {
-			if (event.getUser().equals(list.client.getOurUser()) && event.getGuild().equals(list.channel.getGuild()))
+			if (!(list.channel instanceof IPrivateChannel) && event.getUser().equals(list.client.getOurUser()) && event.getGuild().equals(list.channel.getGuild()))
 				list.updatePermissions();
 		}
 
 		@EventSubscriber
 		public void onGuildTransferOwnership(GuildTransferOwnershipEvent event) {
-			if (event.getGuild().equals(list.channel.getGuild())) {
+			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild())) {
 				list.updatePermissions();
 			}
 		}
