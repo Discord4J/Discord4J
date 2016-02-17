@@ -7,9 +7,6 @@ import sx.blah.discord.api.IDiscordClient;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -18,8 +15,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class EventDispatcher {
 
-	private ConcurrentHashMap<Class<?>, HashMap<Method, List<Object>>> methodListeners = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<Class<?>, List<IListener>> classListeners = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<Class<?>, ConcurrentHashMap<Method, CopyOnWriteArrayList<Object>>> methodListeners = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<Class<?>, CopyOnWriteArrayList<IListener>> classListeners = new ConcurrentHashMap<>();
 	private IDiscordClient client;
 
 	public EventDispatcher(IDiscordClient client) {
@@ -39,10 +36,10 @@ public class EventDispatcher {
 				Class<?> eventClass = method.getParameterTypes()[0];
 				if (Event.class.isAssignableFrom(eventClass)) {
 					if (!methodListeners.containsKey(eventClass))
-						methodListeners.put(eventClass, new HashMap<>());
+						methodListeners.put(eventClass, new ConcurrentHashMap<>());
 
 					if (!methodListeners.get(eventClass).containsKey(method))
-						methodListeners.get(eventClass).put(method, new ArrayList<>());
+						methodListeners.get(eventClass).put(method, new CopyOnWriteArrayList<>());
 
 					methodListeners.get(eventClass).get(method).add(listener);
 				}
