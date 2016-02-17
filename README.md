@@ -21,6 +21,16 @@ In your `pom.xml` add:
     <name>bintray</name>
     <url>http://dl.bintray.com/austinv11/maven</url>
   </repository>
+  
+  <!-- Include the following repository if you wish to use SNAPSHOT versions -->
+  <repository>
+  	<snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+    <id>snapshots</id>
+    <name>oss-jfrog-artifactory-snapshots</name>
+    <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+  </repository>
 </repositories>
 ...
 <dependencies>
@@ -29,7 +39,7 @@ In your `pom.xml` add:
     <groupId>sx.blah</groupId>
     <artifactId>Discord4J</artifactId>
     <version>@VERSION@</version>
-    <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
+   <!-- <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
   </dependency>
 </dependencies>
 ...
@@ -42,6 +52,11 @@ repositories {
   ...
   maven {
     url  "http://dl.bintray.com/austinv11/maven" 
+  }
+  
+  //Include the following repository if you wish to use SNAPSHOT versions
+  maven {
+  	url "https://oss.jfrog.org/artifactory/oss-snapshot-local"
   }
 }
 ...
