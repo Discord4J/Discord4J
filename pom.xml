@@ -170,5 +170,10 @@
 			<name>austinv11-maven</name>
 			<url>https://api.bintray.com/maven/austinv11/maven/Discord4J/;publish=1</url>
 		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>oss-jfrog-artifactory-snapshots</name>
+			<url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+		</snapshotRepository>
 	</distributionManagement>
 </project>
