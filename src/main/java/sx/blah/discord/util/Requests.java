@@ -1,6 +1,7 @@
 package sx.blah.discord.util;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.*;
@@ -101,7 +102,12 @@ public enum Requests {
 				}
 
 				JsonParser parser = new JsonParser();
-				JsonElement element = parser.parse(message);
+				JsonElement element;
+				try {
+					element = parser.parse(message);
+				} catch (JsonParseException e) {
+					return null;
+				}
 
 				if (responseCode == 429) {
 					throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
@@ -160,7 +166,12 @@ public enum Requests {
 					}
 
 					JsonParser parser = new JsonParser();
-					JsonElement element = parser.parse(message);
+					JsonElement element;
+					try {
+						element = parser.parse(message);
+					} catch (JsonParseException e) {
+						return null;
+					}
 
 					if (responseCode == 429) {
 						throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
