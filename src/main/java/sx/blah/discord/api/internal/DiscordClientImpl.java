@@ -1,5 +1,13 @@
 package sx.blah.discord.api.internal;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
@@ -16,6 +24,7 @@ import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.Requests;
+import sx.blah.discord.util.ServiceUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -29,6 +38,10 @@ import java.util.stream.Collectors;
  * as holds our user data.
  */
 public final class DiscordClientImpl implements IDiscordClient {
+	static {
+		ServiceUtil.loadServices();
+	}
+
 	/**
 	 * Used for keep alive. Keeps last time (in ms)
 	 * that we sent the keep alive so we can accurately
@@ -70,7 +83,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * WebSocket over which to communicate with Discord.
 	 */
-	protected DiscordWS ws;
+	public DiscordWS ws;
+
+	/**
+	 * Voice WebSocket over which to communicate with Discord.
+	 */
+	public DiscordVoiceWS voiceWS;
 
 	/**
 	 * Event dispatcher.
