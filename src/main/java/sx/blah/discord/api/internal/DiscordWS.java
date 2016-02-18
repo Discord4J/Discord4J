@@ -129,7 +129,7 @@ public class DiscordWS extends WebSocketClient {
 			if (this.isConnected.get()) {
 				long l = System.currentTimeMillis()-client.timer;
 				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-				send(DiscordUtils.GSON.toJson(new KeepAliveRequest()));
+				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(1)));
 				client.timer = System.currentTimeMillis();
 			}
 		};
@@ -260,6 +260,14 @@ public class DiscordWS extends WebSocketClient {
 
 				case "GUILD_BAN_REMOVE":
 					guildBanRemove(eventObject);
+					break;
+
+				case "VOICE_STATE_UPDATE":
+					voiceStateUpdate(eventObject);
+					break;
+
+				case "VOICE_SERVER_UPDATE":
+					voiceServerUpdate(eventObject);
 					break;
 
 				default:
@@ -697,6 +705,28 @@ public class DiscordWS extends WebSocketClient {
 			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
 
 			client.dispatcher.dispatch(new UserPardonEvent(user, guild));
+		}
+	}
+
+	private void voiceStateUpdate(JsonElement eventObject) {
+		GuildResponse.VoiceStateResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.VoiceStateResponse.class);
+		IGuild guild = client.getGuildByID(event.guild_id);
+
+		if (guild != null) {
+			IVoiceChannel channel = guild.getVoiceChannelForID(event.channel_id);
+			IUser user = guild.getUserByID(event.user_id);
+
+			client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
+		}
+	}
+
+	private void voiceServerUpdate(JsonElement eventObject) {
+		VoiceUpdateResponse event = DiscordUtils.GSON.fromJson(eventObject, VoiceUpdateResponse.class);
+		try {
+			event.endpoint = event.endpoint.substring(0, event.endpoint.indexOf(":"));
+			client.voiceWS = new DiscordVoiceWS(event, client);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
 		}
 	}
 

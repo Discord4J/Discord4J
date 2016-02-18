@@ -138,6 +138,11 @@ public class GuildResponse {
 		public boolean mute;
 
 		/**
+		 * The guild id of the guild involved.
+		 */
+		public String guild_id;
+
+		/**
 		 * Whether the user is deafened by the server
 		 */
 		public boolean deaf;
