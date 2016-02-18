@@ -3,6 +3,7 @@ package sx.blah.discord.modules;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.impl.events.ModuleEnabledEvent;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -110,6 +111,8 @@ public class ModuleLoader {
 			client.getDispatcher().registerListener(module);
 			if (!loadedModules.contains(module))
 				loadedModules.add(module);
+
+			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
 		}
 
 		return true;
@@ -136,6 +139,8 @@ public class ModuleLoader {
 			}
 			return false;
 		});
+
+		client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
 	}
 
 	private boolean hasDependency(List<IModule> modules, String className) {
