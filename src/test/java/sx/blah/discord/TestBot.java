@@ -7,10 +7,12 @@ import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.util.AudioChannel;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageBuilder;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -196,10 +198,10 @@ public class TestBot {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {
-							try {
-								m.reply(String.valueOf(m.getChannel().getMessages().size()));
-							} catch (MissingPermissionsException | DiscordException | HTTP429Exception e) {
-								e.printStackTrace();
+							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equals("Minecraft")).findFirst().orElse(null);
+							if (channel != null) {
+								channel.joinChannel();
+								AudioChannel.queueFile(new File("./test.mp3"));
 							}
 						}
 					}

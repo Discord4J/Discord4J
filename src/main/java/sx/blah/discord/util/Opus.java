@@ -28,12 +28,12 @@ public interface Opus extends Library {
 
     static String getNative() {
         String lib = "/opus/" + Platform.RESOURCE_PREFIX;
-        if (lib.contains("win")) {
-            if (lib.endsWith("x86"))
-                lib += "-32";
-            lib += "/opus.dll";
-        } else if (lib.contains("darwin")) {
-            lib += "/libopus.dylib";
+        if (lib.contains("darwin")) {
+			lib += "/libopus.dylib";
+		} else if (lib.contains("win")) {
+			if (lib.endsWith("x86"))
+				lib += "-32";
+			lib += "/opus.dll";
         } else if (lib.contains("linux")) {
             lib += "/libopus.so";
         } else {
