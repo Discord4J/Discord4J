@@ -6,7 +6,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.audio.AudioChannel;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.VoiceUserSpeaking;
+import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
@@ -27,9 +27,9 @@ public class VoiceBot {
                 }
             });
 
-            client.getDispatcher().registerListener(new IListener<VoiceUserSpeaking>() {
+            client.getDispatcher().registerListener(new IListener<VoiceUserSpeakingEvent>() {
                 @Override
-                public void handle(VoiceUserSpeaking event) {
+                public void handle(VoiceUserSpeakingEvent event) {
                     try {
                         if (event.isSpeaking())
                             client.getOrCreatePMChannel(event.getUser()).sendMessage("You are speaking");

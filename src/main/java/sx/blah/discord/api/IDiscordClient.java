@@ -1,26 +1,15 @@
 package sx.blah.discord.api;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import sx.blah.discord.handle.EventDispatcher;
-import sx.blah.discord.handle.impl.obj.Channel;
-import sx.blah.discord.handle.impl.obj.Guild;
-import sx.blah.discord.handle.impl.obj.PrivateChannel;
-import sx.blah.discord.handle.impl.obj.User;
-import sx.blah.discord.handle.impl.obj.VoiceChannel;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.handle.obj.IPrivateChannel;
-import sx.blah.discord.handle.obj.IRegion;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.impl.obj.*;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents the main discord api
@@ -139,7 +128,7 @@ public interface IDiscordClient {
 	 * Gets a set of all channels visible to the bot user.
 	 *
 	 * @param includePrivate Whether to include private channels in the set.
-	 * @return A {@link Set} of all {@link Channel} objects.
+	 * @return A {@link Collection} of all {@link Channel} objects.
 	 */
 	Collection<IChannel> getChannels(boolean includePrivate);
 
@@ -154,7 +143,7 @@ public interface IDiscordClient {
 	/**
 	 * Gets a set of all voice channels visible to the bot user.
 	 *
-	 * @return A {@link Set} of all {@link VoiceChannel} objects.
+	 * @return A {@link Collection} of all {@link VoiceChannel} objects.
 	 */
 	Collection<IVoiceChannel> getVoiceChannels();
 

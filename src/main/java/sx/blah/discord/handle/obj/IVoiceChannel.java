@@ -8,7 +8,6 @@ import java.util.Optional;
 
 /**
  * Represents a voice channel.
- * TODO
  */
 public interface IVoiceChannel extends IChannel {
 
@@ -24,7 +23,13 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, MissingPermissionsException, HTTP429Exception;
 
+	/**
+	 * Makes the bot user join this voice channel.
+	 */
 	void joinChannel();
 
+	/**
+	 * Makes the bot user leave this voice channel.
+	 */
 	void leaveChannel();
 }

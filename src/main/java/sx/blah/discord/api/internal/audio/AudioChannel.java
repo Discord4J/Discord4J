@@ -88,6 +88,7 @@ public class AudioChannel {
 	 * Gets the PCM data that needs to be sent.
 	 *
 	 * @param length : How many MS of data needed to be sent.
+	 * @return : The PCM data
 	 */
 	public static byte[] getAudioData(int length) {
 		AudioInputStream data = audioQueue.get(0);

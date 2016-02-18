@@ -99,10 +99,20 @@ public class UserVoiceStateUpdateEvent extends Event {
 		return suppressed;
 	}
 
+	/**
+	 * Gets whether the user is muted.
+	 *
+	 * @return Whether or not the user is muted.
+	 */
 	public boolean isMute() {
 		return mute;
 	}
 
+	/**
+	 * Gets whether the user is deafened.
+	 *
+	 * @return Whether or not the user is deafened.
+	 */
 	public boolean isDeafen() {
 		return deafen;
 	}

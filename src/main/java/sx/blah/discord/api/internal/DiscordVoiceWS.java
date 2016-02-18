@@ -11,8 +11,8 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.audio.AudioChannel;
 import sx.blah.discord.api.internal.audio.AudioPacket;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.VoicePing;
-import sx.blah.discord.handle.impl.events.VoiceUserSpeaking;
+import sx.blah.discord.handle.impl.events.VoicePingEvent;
+import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.VoiceConnectRequest;
@@ -129,7 +129,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			case OP_HEARTBEAT_RETURN: {
 				long timePingSent = object.get("d").getAsLong();
 				Discord4J.LOGGER.info("ping: "+(System.currentTimeMillis()-timePingSent)+"ms");
-				client.dispatcher.dispatch(new VoicePing((System.currentTimeMillis()-timePingSent)));
+				client.dispatcher.dispatch(new VoicePingEvent((System.currentTimeMillis()-timePingSent)));
 				break;
 			}
 			case OP_CONNECTING_COMPLETED: {
@@ -151,7 +151,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 					return;
 				}
 
-				client.dispatcher.dispatch(new VoiceUserSpeaking(user, ssrc, isSpeaking));
+				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(user, ssrc, isSpeaking));
 				break;
 			}
 			default: {
