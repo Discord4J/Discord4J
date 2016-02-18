@@ -1,4 +1,4 @@
-package sx.blah.discord.api.internal.audio;
+package sx.blah.discord.util;
 
 import sx.blah.discord.api.internal.DiscordVoiceWS;
 
@@ -14,10 +14,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is used to interface with voice channels.
+ */
 public class AudioChannel {
 
 	private static List<AudioInputStream> audioQueue = new ArrayList<>();
 
+	/**
+	 * Queues a url to be streamed.
+	 *
+	 * @param url The url to stream.
+	 */
 	public static void queueUrl(String url) {
 		try {
 			queueUrl(new URL(url));
@@ -26,6 +34,11 @@ public class AudioChannel {
 		}
 	}
 
+	/**
+	 * Queues a url to be streamed.
+	 *
+	 * @param url The url to stream.
+	 */
 	public static void queueUrl(URL url) {
 		try {
 			BufferedInputStream bis = new BufferedInputStream(url.openStream());
@@ -35,11 +48,20 @@ public class AudioChannel {
 		}
 	}
 
-
+	/**
+	 * Queues a file to be streamed.
+	 *
+	 * @param file The file to be streamed.
+	 */
 	public static void queueFile(String file) {
 		queueFile(new File(file));
 	}
 
+	/**
+	 * Queues a file to be streamed.
+	 *
+	 * @param file The file to be streamed.
+	 */
 	public static void queueFile(File file) {
 		try {
 			queue(AudioSystem.getAudioInputStream(file));
@@ -48,6 +70,11 @@ public class AudioChannel {
 		}
 	}
 
+	/**
+	 * Queues an {@link AudioInputStream} to be streamed.
+	 *
+	 * @param inSource The input stream to be streamed.
+	 */
 	public static void queue(AudioInputStream inSource) {
 		if (inSource == null)
 			throw new IllegalArgumentException("Cannot create an audio player from a null AudioInputStream!");

@@ -8,7 +8,7 @@ import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.audio.AudioChannel;
+import sx.blah.discord.util.AudioChannel;
 import sx.blah.discord.api.internal.audio.AudioPacket;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
