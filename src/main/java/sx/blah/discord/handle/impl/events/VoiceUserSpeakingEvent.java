@@ -31,7 +31,7 @@ public class VoiceUserSpeakingEvent extends Event {
     }
 
 	/**
-	 * Gets the ssrc.
+	 * Gets the ssrc-a unique number per user.
 	 *
 	 * @return The ssrc.
 	 */

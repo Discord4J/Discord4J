@@ -45,7 +45,7 @@ public class TestBot {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
 			});
 
-			if (args.length > 2) { //CI Testing
+			if (args.length < 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
 				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
 

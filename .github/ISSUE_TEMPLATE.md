@@ -11,6 +11,7 @@ already
 ### Steps to Reproduce
 1. [First step]
 2. [Second step]
+
 ...
 
 **Expected behavior:** [What was supposed to happen]
