@@ -119,11 +119,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.tritonus</groupId>
-			<artifactId>Tritonus</artifactId>
-			<version>0.3.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/libs/Tritonus-0.3.1.jar</systemPath>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>tritonus-share</artifactId>
+			<version>0.3.7-2</version>
 		</dependency>
 	</dependencies>
 

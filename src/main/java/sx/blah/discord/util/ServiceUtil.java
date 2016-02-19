@@ -137,11 +137,8 @@ public class ServiceUtil {
         services.put(FormatConversionProvider.class,
                 Collections.unmodifiableList(
                         Arrays.asList(
-                                "org.tritonus.sampled.convert.jorbis.JorbisFormatConversionProvider",
-                                "javazoom.spi.mpeg.sampled.convert.MpegFormatConversionProvider",
-                                "org.tritonus.sampled.convert.javalayer.MpegFormatConversionProvider",
-                                "org.tritonus.sampled.convert.lame.Mp3LameFormatConversionProvider",
-                                "org.kc7bfi.jflac.sound.spi.FlacFormatConversionProvider"
+								"javazoom.spi.mpeg.sampled.convert.MpegFormatConversionProvider",
+								"org.kc7bfi.jflac.sound.spi.FlacFormatConversionProvider"
                         )
                 )
         );
@@ -149,16 +146,7 @@ public class ServiceUtil {
                 Collections.unmodifiableList(
                         Arrays.asList(
                                 "javazoom.spi.mpeg.sampled.file.MpegAudioFileReader",
-                                "org.tritonus.sampled.file.mpeg.MpegAudioFileReader",
-                                "org.tritonus.sampled.file.jorbis.JorbisAudioFileReader",
                                 "org.kc7bfi.jflac.sound.spi.FlacAudioFileReader"
-                        )
-                )
-        );
-        services.put(AudioFileWriter.class,
-                Collections.unmodifiableList(
-                        Arrays.asList(
-                                "org.tritonus.sampled.file.mpeg.MpegAudioFileWriter"
                         )
                 )
         );

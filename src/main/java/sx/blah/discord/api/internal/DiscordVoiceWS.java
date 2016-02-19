@@ -128,7 +128,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			}
 			case OP_HEARTBEAT_RETURN: {
 				long timePingSent = object.get("d").getAsLong();
-				Discord4J.LOGGER.info("ping: "+(System.currentTimeMillis()-timePingSent)+"ms");
+				Discord4J.LOGGER.debug("ping: "+(System.currentTimeMillis()-timePingSent)+"ms");
 				client.dispatcher.dispatch(new VoicePingEvent((System.currentTimeMillis()-timePingSent)));
 				break;
 			}
