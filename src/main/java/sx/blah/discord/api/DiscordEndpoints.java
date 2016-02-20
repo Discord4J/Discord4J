@@ -80,4 +80,9 @@ public final class DiscordEndpoints {
 	 * Voice url.
 	 */
 	public static final String VOICE = APIBASE+"/voice/";
+	
+	/**
+	 * Used for temporarily registering.
+	 */
+	public static final String REGISTER = APIBASE+"/auth/register";
 }
