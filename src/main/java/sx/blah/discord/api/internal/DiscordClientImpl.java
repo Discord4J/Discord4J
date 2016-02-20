@@ -134,14 +134,42 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * The maximum amount of pings discord can miss.
 	 */
 	protected final int maxMissedPingCount;
+	
+	/**
+	 * Username used for temporary registration.
+	 */
+	protected String username;
+	
+	/**
+	 * Invite used for temporary registration.
+	 */
+	protected String invite;
 
 	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount) {
+		this(email, password, false, timeoutTime, maxMissedPingCount);
+	}
+	
+	public DiscordClientImpl(String name, String cred, boolean register, long timeoutTime, int maxMissedPingCount) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
-		this.email = email;
-		this.password = password;
+		if (register) {
+			this.username = name;
+			this.invite = resolve_invite(cred);
+		} else {
+			this.email = name;
+			this.password = cred;
+		}
+	}
+	
+	private String resolve_invite(String invite) {
+		String[] tokens = invite.split("discord.gg/");
+		
+		if (tokens.length > 1)
+			return tokens[1];
+		
+		return invite;
 	}
 
 	@Override
@@ -165,12 +193,21 @@ public final class DiscordClientImpl implements IDiscordClient {
 			if (ws != null) {
 				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			}
-
-			LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
-					new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
-					new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
+			
+			LoginResponse response = null;
+			if (username != null && invite != null) {
+				response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.REGISTER,
+						new StringEntity(DiscordUtils.GSON.toJson(new RegisterRequest(username, invite))),
+						new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
+			} else if (email != null && password != null) {
+				response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
+						new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
+						new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
+			} else
+				throw new DiscordException("Could not login because the necessary information was not given.");
+			
 			this.token = response.token;
-
+			
 			this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)), timeoutTime, maxMissedPingCount);
 		} catch (Exception e) {
 			throw new DiscordException("Login error occurred! Are your login details correct?");

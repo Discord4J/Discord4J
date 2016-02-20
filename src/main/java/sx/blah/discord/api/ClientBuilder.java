@@ -13,16 +13,40 @@ public class ClientBuilder {
 	private String[] loginInfo = new String[0];
 	private long timeoutTime = -1L;
 	private int maxMissedPingCount = -1;
+	private boolean register = false;
 
 	/**
-	 * Sets the login info for the client. This is a REQUIRED step
+	 * Sets the login info for the client. This is a REQUIRED step if not using 'withRegister' instead.
 	 *
 	 * @param email The user's email
 	 * @param password The user's password
 	 * @return The instance of the builder
 	 */
 	public ClientBuilder withLogin(String email, String password) {
-		loginInfo = new String[]{email, password};
+		return withLoginInfo(email, password, false);
+	}
+	
+	/**
+	 * Sets the register info for the client. This is a REQUIRED step if not using 'withLogin' instead.
+	 * 
+	 * @param username The username you want to temporary register with.
+	 * @param invite The absolute (https://discord.gg/<invite-id>) or relative (<invite-id>) channel invite.
+	 * @return The instance of the builder
+	 */
+	public ClientBuilder withRegister(String username, String invite) {
+		return withLoginInfo(username, invite, true);
+	}
+		
+	/**
+	 * Internal method to set more easily set the login information to either login or register with Discord. 
+	 * 
+	 * @param name This represents either the user's email (for login) or the username (for register)
+	 * @param cred This represents either the user's password (for login) or the invite (either long or short form for register).
+	 * @return The instance of the builder
+	 */
+	private ClientBuilder withLoginInfo(String name, String cred, boolean register) {
+		loginInfo = new String[] {name, cred};
+		this.register = register;
 		return this;
 	}
 
@@ -78,7 +102,7 @@ public class ClientBuilder {
 				case SUPPORTED:
 			}
 		}
-		return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount);
+		return new DiscordClientImpl(loginInfo[0], loginInfo[1], register, timeoutTime, maxMissedPingCount);
 	}
 
 	/**
