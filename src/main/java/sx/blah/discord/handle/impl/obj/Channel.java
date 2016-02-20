@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -165,7 +164,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage getMessageByID(String messageID) {
+	public synchronized IMessage getMessageByID(String messageID) {
 		for (IMessage message : messages) {
 			if (message.getID().equalsIgnoreCase(messageID))
 				return message;
