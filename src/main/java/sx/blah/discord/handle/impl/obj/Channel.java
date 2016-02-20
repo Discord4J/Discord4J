@@ -66,7 +66,7 @@ public class Channel implements IChannel {
 	/**
 	 * Messages that have been sent into this channel
 	 */
-	protected MessageList messages = null;
+	protected final MessageList messages;
 
 	/**
 	 * Indicates whether or not this channel is a PM channel.
@@ -139,6 +139,8 @@ public class Channel implements IChannel {
 		this.userOverrides = userOverrides;
 		if (!(this instanceof IVoiceChannel))
 			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
+		else
+			this.messages = null;
 	}
 
 	@Override
