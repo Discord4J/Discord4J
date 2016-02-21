@@ -207,7 +207,7 @@ public class TestBot {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equals("Minecraft")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.joinChannel();
-								AudioChannel.queueFile(new File("./test.mp3"));
+								AudioChannel.queueFile("test.mp3");
 							}
 						}
 					}
