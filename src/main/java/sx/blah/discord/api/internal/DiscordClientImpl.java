@@ -404,6 +404,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IRegion getRegionForID(String regionID) {
+		return getRegionByID(regionID);
+	}
+
+	@Override
+	public IRegion getRegionByID(String regionID) {
 		try {
 			return getRegions().stream()
 					.filter(r -> r.getID().equals(regionID))

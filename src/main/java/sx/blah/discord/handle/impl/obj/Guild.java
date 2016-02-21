@@ -249,6 +249,11 @@ public class Guild implements IGuild {
 
 	@Override
 	public IRole getRoleForID(String id) {
+		return getRoleByID(id);
+	}
+
+	@Override
+	public IRole getRoleByID(String id) {
 		return roles.stream()
 				.filter(r -> r.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
@@ -261,6 +266,11 @@ public class Guild implements IGuild {
 
 	@Override
 	public IVoiceChannel getVoiceChannelForID(String id) {
+		return getVoiceChannelByID(id);
+	}
+
+	@Override
+	public IVoiceChannel getVoiceChannelByID(String id) {
 		return voiceChannels.stream()
 				.filter(c -> c.getID().equals(id))
 				.findAny().orElse(null);

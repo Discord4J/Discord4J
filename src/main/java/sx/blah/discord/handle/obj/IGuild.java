@@ -97,8 +97,18 @@ public interface IGuild {
 	 *
 	 * @param id The role id of the desired role.
 	 * @return The role, or null if not found.
+	 * @deprecated Use {@link #getRoleByID(String)}
 	 */
+	@Deprecated
 	IRole getRoleForID(String id);
+
+	/**
+	 * Gets a role object for its unique id.
+	 *
+	 * @param id The role id of the desired role.
+	 * @return The role, or null if not found.
+	 */
+	IRole getRoleByID(String id);
 
 	/**
 	 * Gets the voice channels in this guild.
@@ -112,8 +122,18 @@ public interface IGuild {
 	 *
 	 * @param id The channel id.
 	 * @return The voice channel (or null if not found).
+	 * @deprecated Use {@link #getVoiceChannelByID(String)}
 	 */
+	@Deprecated
 	IVoiceChannel getVoiceChannelForID(String id);
+
+	/**
+	 * Gets a voice channel for a give id.
+	 *
+	 * @param id The channel id.
+	 * @return The voice channel (or null if not found).
+	 */
+	IVoiceChannel getVoiceChannelByID(String id);
 
 	/**
 	 * Gets the channel where afk users are placed.

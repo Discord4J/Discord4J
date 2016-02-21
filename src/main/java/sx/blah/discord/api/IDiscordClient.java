@@ -212,8 +212,18 @@ public interface IDiscordClient {
 	 *
 	 * @param regionID The region id.
 	 * @return The region (or null if not found).
+	 * @deprecated Use {@link #getRegionByID(String)}
 	 */
+	@Deprecated
 	IRegion getRegionForID(String regionID);
+
+	/**
+	 * Gets the corresponding region for a given id.
+	 *
+	 * @param regionID The region id.
+	 * @return The region (or null if not found).
+	 */
+	IRegion getRegionByID(String regionID);
 
 	/**
 	 * Creates a new guild.
