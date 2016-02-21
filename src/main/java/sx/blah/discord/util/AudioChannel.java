@@ -6,6 +6,7 @@ import sx.blah.discord.api.internal.DiscordVoiceWS;
 import sx.blah.discord.handle.impl.events.AudioPlayEvent;
 import sx.blah.discord.handle.impl.events.AudioQueuedEvent;
 import sx.blah.discord.handle.impl.events.AudioStopEvent;
+import sx.blah.discord.handle.impl.events.AudioUnqueuedEvent;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
@@ -23,10 +24,74 @@ public class AudioChannel {
 
 	private final List<AudioInputStream> audioQueue = new ArrayList<>();
 	private final List<AudioMetaData> metaDataQueue = new ArrayList<>();
+	private volatile boolean isPaused = false;
 	private final IDiscordClient client;
 
 	public AudioChannel(IDiscordClient client) {
 		this.client = client;
+	}
+
+	/**
+	 * Pauses the audio.
+	 */
+	public void pause() {
+		if (!isPaused) {
+			AudioMetaData data = metaDataQueue.get(0);
+			client.getDispatcher().dispatch(new AudioStopEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format));
+		}
+		isPaused = true;
+	}
+
+	/**
+	 * Resumes the audio if was paused.
+	 */
+	public void resume() {
+		if (isPaused) {
+			AudioMetaData data = metaDataQueue.get(0);
+			client.getDispatcher().dispatch(new AudioPlayEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format));
+		}
+		isPaused = false;
+	}
+
+	/**
+	 * Returns whether or not the audio is paused.
+	 *
+	 * @return True if paused, false if otherwise.
+	 */
+	public boolean isPaused() {
+		return isPaused;
+	}
+
+	/**
+	 * Skips the currently queued audio.
+	 */
+	public void skip() {
+		if (audioQueue.size() > 0) {
+			unqueue(0);
+		}
+	}
+
+	/**
+	 * Un-queues the audio at the specified position in the queue.
+	 *
+	 * @param index The index.
+	 *
+	 * @throws ArrayIndexOutOfBoundsException
+	 */
+	public void unqueue(int index) throws ArrayIndexOutOfBoundsException {
+		AudioMetaData data = metaDataQueue.get(index);
+		client.getDispatcher().dispatch(new AudioUnqueuedEvent(audioQueue.get(index), data.fileSource, data.urlSource, data.format));
+		audioQueue.remove(index);
+		metaDataQueue.remove(index);
+	}
+
+	/**
+	 * Gets the size of the audio queue.
+	 *
+	 * @return The size.
+	 */
+	public int getQueueSize() {
+		return audioQueue.size();
 	}
 
 	/**
@@ -49,9 +114,9 @@ public class AudioChannel {
 	 */
 	public void queueUrl(URL url) {
 		try {
+			metaDataQueue.add(new AudioMetaData(null, url, AudioSystem.getAudioFileFormat(url)));
 			BufferedInputStream bis = new BufferedInputStream(url.openStream());
 			queue(AudioSystem.getAudioInputStream(bis));
-			metaDataQueue.add(new AudioMetaData(null, url, AudioSystem.getAudioFileFormat(url)));
 		} catch (IOException | UnsupportedAudioFileException e) {
 			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
@@ -73,8 +138,8 @@ public class AudioChannel {
 	 */
 	public void queueFile(File file) {
 		try {
-			queue(AudioSystem.getAudioInputStream(file));
 			metaDataQueue.add(new AudioMetaData(file, null, AudioSystem.getAudioFileFormat(file)));
+			queue(AudioSystem.getAudioInputStream(file));
 		} catch (UnsupportedAudioFileException | IOException e) {
 			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
@@ -88,7 +153,6 @@ public class AudioChannel {
 	public void queue(AudioInputStream inSource) {
 		if (inSource == null)
 			throw new IllegalArgumentException("Cannot create an audio player from a null AudioInputStream!");
-
 
 		AudioFormat baseFormat = inSource.getFormat();
 
@@ -141,6 +205,8 @@ public class AudioChannel {
 	 * @return : The PCM data
 	 */
 	public byte[] getAudioData(int length) {
+		if (isPaused)
+			return null;
 		AudioInputStream data = audioQueue.get(0);
 		if (data != null) {
 			AudioMetaData metaData = metaDataQueue.get(0);

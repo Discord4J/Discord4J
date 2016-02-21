@@ -201,16 +201,15 @@ public class TestBot {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {
-							for (int i = 0; i < 31; i++) {
-								final int index = i;
-								RequestBuffer.request((RequestBuffer.IVoidRequest)() -> {
-									try {
-										m.getChannel().sendMessage("Spam: "+index);
-									} catch (MissingPermissionsException | DiscordException e) {
-										e.printStackTrace();
-									}
-								});
+							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
+							if (channel != null) {
+								channel.joinChannel();
+								client.getAudioChannel().queueFile(new File("./test2.mp3"));
 							}
+						} else if (m.getContent().startsWith(".pause")) {
+							client.getAudioChannel().pause();
+						} else if (m.getContent().startsWith(".resume")) {
+							client.getAudioChannel().resume();
 						}
 					}
 				});

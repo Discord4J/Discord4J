@@ -9,9 +9,9 @@ import java.net.URL;
 import java.util.Optional;
 
 /**
- * This event is fired when an audio stream stops to playing from the bot.
+ * This event is fired when audio is unqueued from the {@link sx.blah.discord.util.AudioChannel}
  */
-public class AudioStopEvent extends Event {
+public class AudioUnqueuedEvent extends Event {
 
 	/**
 	 * The audio stream queued
@@ -30,7 +30,7 @@ public class AudioStopEvent extends Event {
 	 */
 	private final AudioFileFormat format;
 
-	public AudioStopEvent(AudioInputStream stream, File fileSource, URL urlSource, AudioFileFormat format) {
+	public AudioUnqueuedEvent(AudioInputStream stream, File fileSource, URL urlSource, AudioFileFormat format) {
 		this.stream = stream;
 		this.format = format;
 		this.fileSource = Optional.ofNullable(fileSource);
