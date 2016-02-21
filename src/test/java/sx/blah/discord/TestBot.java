@@ -7,10 +7,7 @@ import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
-import sx.blah.discord.util.AudioChannel;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.*;
 
 import java.io.File;
 import java.util.Optional;
@@ -69,7 +66,7 @@ public class TestBot {
 							final IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 
-							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equals("Minecraft")).findFirst().orElse(null);
+							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.joinChannel();
 								AudioChannel.queueFile(new File("./test.mp3"));
@@ -204,10 +201,15 @@ public class TestBot {
 								e.printStackTrace();
 							}
 						} else if (m.getContent().startsWith(".test")) {
-							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equals("Minecraft")).findFirst().orElse(null);
-							if (channel != null) {
-								channel.joinChannel();
-								AudioChannel.queueFile("test.mp3");
+							for (int i = 0; i < 31; i++) {
+								final int index = i;
+								RequestBuffer.request((RequestBuffer.IVoidRequest)() -> {
+									try {
+										m.getChannel().sendMessage("Spam: "+index);
+									} catch (MissingPermissionsException | DiscordException e) {
+										e.printStackTrace();
+									}
+								});
 							}
 						}
 					}
