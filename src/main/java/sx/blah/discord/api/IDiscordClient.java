@@ -4,6 +4,7 @@ import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
+import sx.blah.discord.util.AudioChannel;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 
@@ -29,6 +30,13 @@ public interface IDiscordClient {
 	 * @return The module loader instance.
 	 */
 	ModuleLoader getModuleLoader();
+
+	/**
+	 * Gets the audio channel instance for this client.
+	 *
+	 * @return The audio channel.
+	 */
+	AudioChannel getAudioChannel();
 
 	/**
 	 * Gets the authorization token for this client.

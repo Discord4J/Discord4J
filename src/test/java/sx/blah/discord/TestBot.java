@@ -69,7 +69,7 @@ public class TestBot {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.joinChannel();
-								AudioChannel.queueFile(new File("./test.mp3"));
+								client.getAudioChannel().queueFile(new File("./test.mp3"));
 							}
 
 							//Start testing

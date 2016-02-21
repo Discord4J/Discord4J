@@ -8,7 +8,6 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.json.requests.VoiceChannelRequest;
@@ -86,11 +85,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public IMessage sendFile(File file) throws IOException {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		return super.createInvite(maxAge, maxUses, temporary, useXkcdPass);
 	}
 
 	@Override

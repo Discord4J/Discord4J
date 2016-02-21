@@ -1,11 +1,13 @@
 package sx.blah.discord.util;
 
+import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordVoiceWS;
+import sx.blah.discord.handle.impl.events.AudioPlayEvent;
+import sx.blah.discord.handle.impl.events.AudioQueuedEvent;
+import sx.blah.discord.handle.impl.events.AudioStopEvent;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -19,18 +21,24 @@ import java.util.List;
  */
 public class AudioChannel {
 
-	private static List<AudioInputStream> audioQueue = new ArrayList<>();
+	private final List<AudioInputStream> audioQueue = new ArrayList<>();
+	private final List<AudioMetaData> metaDataQueue = new ArrayList<>();
+	private final IDiscordClient client;
+
+	public AudioChannel(IDiscordClient client) {
+		this.client = client;
+	}
 
 	/**
 	 * Queues a url to be streamed.
 	 *
 	 * @param url The url to stream.
 	 */
-	public static void queueUrl(String url) {
+	public void queueUrl(String url) {
 		try {
 			queueUrl(new URL(url));
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
 	}
 
@@ -39,12 +47,13 @@ public class AudioChannel {
 	 *
 	 * @param url The url to stream.
 	 */
-	public static void queueUrl(URL url) {
+	public void queueUrl(URL url) {
 		try {
 			BufferedInputStream bis = new BufferedInputStream(url.openStream());
 			queue(AudioSystem.getAudioInputStream(bis));
+			metaDataQueue.add(new AudioMetaData(null, url, AudioSystem.getAudioFileFormat(url)));
 		} catch (IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
 	}
 
@@ -53,7 +62,7 @@ public class AudioChannel {
 	 *
 	 * @param file The file to be streamed.
 	 */
-	public static void queueFile(String file) {
+	public void queueFile(String file) {
 		queueFile(new File(file));
 	}
 
@@ -62,11 +71,12 @@ public class AudioChannel {
 	 *
 	 * @param file The file to be streamed.
 	 */
-	public static void queueFile(File file) {
+	public void queueFile(File file) {
 		try {
 			queue(AudioSystem.getAudioInputStream(file));
+			metaDataQueue.add(new AudioMetaData(file, null, AudioSystem.getAudioFileFormat(file)));
 		} catch (UnsupportedAudioFileException | IOException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
 	}
 
@@ -75,7 +85,7 @@ public class AudioChannel {
 	 *
 	 * @param inSource The input stream to be streamed.
 	 */
-	public static void queue(AudioInputStream inSource) {
+	public void queue(AudioInputStream inSource) {
 		if (inSource == null)
 			throw new IllegalArgumentException("Cannot create an audio player from a null AudioInputStream!");
 
@@ -106,8 +116,21 @@ public class AudioChannel {
 
 		AudioInputStream outputAudio = AudioSystem.getAudioInputStream(audioFormat, pcmStream);
 
-		if (outputAudio != null)
+		if (metaDataQueue.size() == audioQueue.size()) { //Meta data wasn't added, user directly queued an audio inputstream
+			try {
+				metaDataQueue.add(new AudioMetaData(null, null, AudioSystem.getAudioFileFormat(inSource)));
+				return;
+			} catch (UnsupportedAudioFileException | IOException e) {
+				Discord4J.LOGGER.error("Discord Internal Exception", e);
+			}
+		}
+
+		if (outputAudio != null) {
 			audioQueue.add(outputAudio);
+			AudioMetaData data = metaDataQueue.get(metaDataQueue.size()-1);
+			client.getDispatcher().dispatch(new AudioQueuedEvent(outputAudio, data.fileSource, data.urlSource, data.format));
+		} else
+			metaDataQueue.remove(metaDataQueue.size()-1);
 	}
 
 
@@ -117,9 +140,10 @@ public class AudioChannel {
 	 * @param length : How many MS of data needed to be sent.
 	 * @return : The PCM data
 	 */
-	public static byte[] getAudioData(int length) {
+	public byte[] getAudioData(int length) {
 		AudioInputStream data = audioQueue.get(0);
 		if (data != null) {
+			AudioMetaData metaData = metaDataQueue.get(0);
 			try {
 				int amountRead;
 				byte[] audio = new byte[length*data.getFormat().getFrameSize()];
@@ -127,16 +151,40 @@ public class AudioChannel {
 				amountRead = data.read(audio, 0, audio.length);
 
 				if (amountRead > 0) {
+					if (!metaData.startedReading) {
+						metaData.startedReading = true;
+						client.getDispatcher().dispatch(new AudioPlayEvent(data, metaData.fileSource,
+								metaData.urlSource, metaData.format));
+					}
 					return audio;
 				} else {
 					audioQueue.remove(0);
+					metaDataQueue.remove(0);
+					client.getDispatcher().dispatch(new AudioStopEvent(data, metaData.fileSource,
+							metaData.urlSource, metaData.format));
 					return getAudioData(length);
 				}
 
 			} catch (IOException e) {
-				e.printStackTrace();
+				Discord4J.LOGGER.error("Discord Internal Exception", e);
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Provides a small amount of information regarding the audio being played.
+	 */
+	private class AudioMetaData {
+		protected final File fileSource;
+		protected final URL urlSource;
+		protected final AudioFileFormat format;
+		protected volatile boolean startedReading = false;
+
+		public AudioMetaData(File fileSource, URL urlSource, AudioFileFormat format) {
+			this.fileSource = fileSource;
+			this.urlSource = urlSource;
+			this.format = format;
+		}
 	}
 }

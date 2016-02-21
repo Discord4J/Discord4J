@@ -3,7 +3,6 @@ package sx.blah.discord;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.AudioChannel;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
@@ -14,7 +13,7 @@ public class VoiceBot {
     public static void main(String... args) {
         try {
             IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).login();
-            AudioChannel.queueFile(args[3]);
+            client.getAudioChannel().queueFile(args[3]);
 
             client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 

@@ -18,7 +18,6 @@ import sx.blah.discord.json.requests.VoiceConnectRequest;
 import sx.blah.discord.json.requests.VoiceSpeakingRequest;
 import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
-import sx.blah.discord.util.AudioChannel;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
@@ -74,8 +73,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault()));
 			this.connect();
 		} catch (NoSuchAlgorithmException e) {
-			Discord4J.LOGGER.error("Error setting up SSL connection!");
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Error setting up SSL connection!", e);
 		}
 	}
 
@@ -122,13 +120,12 @@ public class DiscordVoiceWS extends WebSocketClient {
 
 					startKeepalive(eventObject.get("heartbeat_interval").getAsInt());
 				} catch (IOException e) {
-					e.printStackTrace();
+					Discord4J.LOGGER.error("Discord Internal Exception", e);
 				}
 				break;
 			}
 			case OP_HEARTBEAT_RETURN: {
 				long timePingSent = object.get("d").getAsLong();
-				Discord4J.LOGGER.debug("ping: "+(System.currentTimeMillis()-timePingSent)+"ms");
 				client.dispatcher.dispatch(new VoicePingEvent((System.currentTimeMillis()-timePingSent)));
 				break;
 			}
@@ -147,7 +144,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 
 				IUser user = client.getUserByID(userId);
 				if (user == null) {
-					System.out.println("Got an Audio USER_SPEAKING_UPDATE for a non-existent User. JSON: "+object.toString());
+					Discord4J.LOGGER.warn("Got an Audio USER_SPEAKING_UPDATE for a non-existent User. JSON: "+object.toString());
 					return;
 				}
 
@@ -155,7 +152,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 				break;
 			}
 			default: {
-				System.out.println("Uncaught voice packet: "+object);
+				Discord4J.LOGGER.warn("Uncaught voice packet: "+object);
 			}
 		}
 	}
@@ -169,7 +166,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			public void run() {
 				try {
 					if (isConnected.get()) {
-						byte[] rawAudio = AudioChannel.getAudioData(OPUS_FRAME_SIZE);
+						byte[] rawAudio = client.audioChannel.getAudioData(OPUS_FRAME_SIZE);
 						if (rawAudio != null) {
 							client.timer = System.currentTimeMillis();
 							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, rawAudio);
@@ -187,7 +184,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 							setSpeaking(false);
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					Discord4J.LOGGER.error("Discord Internal Exception", e);
 				}
 			}
 		};
@@ -246,30 +243,28 @@ public class DiscordVoiceWS extends WebSocketClient {
 
 			onMessage(data);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
 	}
 
 	@Override
 	public void onClose(int i, String s, boolean b) {
-
-		System.out.println(s);
+//		System.out.println(s);
 	}
 
 	@Override
 	public void onError(Exception e) {
-
-		e.printStackTrace();
+		Discord4J.LOGGER.error("Discord Internal Exception", e);
 	}
 
 	@Override
 	public void send(String text) throws NotYetConnectedException {
-			try {
-				super.send(text);
-			} catch (WebsocketNotConnectedException e) {
-				Discord4J.LOGGER.warn("Voice Websocket unexpectedly lost connection!");
-				disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
-			}
+		try {
+			super.send(text);
+		} catch (WebsocketNotConnectedException e) {
+			Discord4J.LOGGER.warn("Voice Websocket unexpectedly lost connection!");
+			disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
+		}
 	}
 
 	/**

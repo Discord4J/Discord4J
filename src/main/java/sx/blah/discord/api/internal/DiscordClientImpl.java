@@ -14,10 +14,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.Requests;
-import sx.blah.discord.util.ServiceUtil;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -125,6 +122,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected ModuleLoader loader;
 
 	/**
+	 * The audio channel for this client.
+	 */
+	protected AudioChannel audioChannel;
+
+	/**
 	 * The time for the client to timeout.
 	 */
 	protected final long timeoutTime;
@@ -139,6 +141,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
+		this.audioChannel = new AudioChannel(this);
 		this.email = email;
 		this.password = password;
 	}
@@ -151,6 +154,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public ModuleLoader getModuleLoader() {
 		return loader;
+	}
+
+	@Override
+	public AudioChannel getAudioChannel() {
+		return audioChannel;
 	}
 
 	@Override
