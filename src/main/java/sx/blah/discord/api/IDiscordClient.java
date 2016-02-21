@@ -234,4 +234,11 @@ public interface IDiscordClient {
 	 * @return The response time (in ms).
 	 */
 	long getResponseTime();
+
+	/**
+	 * This returns the voice channel the bot is currently connected to (if connected to one)
+	 *
+	 * @return The optional voice channel.
+	 */
+	Optional<IVoiceChannel> getConnectedVoiceChannel();
 }

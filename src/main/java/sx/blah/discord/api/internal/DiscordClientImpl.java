@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
  * as holds our user data.
  */
 public final class DiscordClientImpl implements IDiscordClient {
+
 	static {
 		ServiceUtil.loadServices();
 	}
@@ -92,6 +93,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * All of the private message channels that the bot is connected to.
 	 */
 	protected final List<IPrivateChannel> privateChannels = new ArrayList<>();
+
+	/**
+	 * The voice channel the bot is currently in.
+	 */
+	public IVoiceChannel connectedVoiceChannel = null;
 
 	/**
 	 * Whether the api is logged in.
@@ -428,5 +434,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public long getResponseTime() {
 		return ws.getResponseTime();
+	}
+
+	@Override
+	public Optional<IVoiceChannel> getConnectedVoiceChannel() {
+		return Optional.ofNullable(connectedVoiceChannel);
 	}
 }

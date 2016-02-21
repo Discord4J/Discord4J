@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-//TODO
 public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
@@ -32,7 +31,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void joinChannel() {
 		if (client.isReady()) {
-			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
+			if (!client.getConnectedVoiceChannel().isPresent()) {
+				((DiscordClientImpl) client).connectedVoiceChannel = this;
+				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
+			} else {
+				Discord4J.LOGGER.error("Bot is already connected to voice channel {}", client.getConnectedVoiceChannel().get().getName());
+			}
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 		}
@@ -40,7 +44,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public void leaveChannel(){
-		if(((DiscordClientImpl) client).voiceWS != null && ((DiscordClientImpl) client).voiceWS.isConnected.get()) {
+		if(((DiscordClientImpl) client).voiceWS != null && ((DiscordClientImpl) client).voiceWS.isConnected.get()
+				&& client.getConnectedVoiceChannel().isPresent() && client.getConnectedVoiceChannel().get().equals(this)) {
+			((DiscordClientImpl) client).connectedVoiceChannel = null;
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
 			((DiscordClientImpl) client).voiceWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		}
