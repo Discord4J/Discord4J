@@ -45,7 +45,11 @@ public class VoiceDisconnectedEvent extends Event {
 		/**
 		 * The websocket attempting to reconnect.
 		 */
-		RECONNECTING
+		RECONNECTING,
+		/**
+		 * The user left the voice channel.
+		 */
+		LEFT_CHANNEL
 	}
 }
 

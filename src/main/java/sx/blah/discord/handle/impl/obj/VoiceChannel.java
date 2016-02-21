@@ -6,6 +6,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -41,7 +42,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void leaveChannel(){
 		if(((DiscordClientImpl) client).voiceWS != null && ((DiscordClientImpl) client).voiceWS.isConnected.get()) {
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
-			((DiscordClientImpl) client).voiceWS.disconnect();
+			((DiscordClientImpl) client).voiceWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		}
 	}
 
