@@ -595,8 +595,8 @@ public class DiscordWS extends WebSocketClient {
 				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(event.id);
 				if (toUpdate != null) {
 					VoiceChannel oldChannel = new VoiceChannel(client, toUpdate.getName(),
-							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
-							toUpdate.getMessages(), toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
+							toUpdate.getID(), toUpdate.getGuild(), "", toUpdate.getPosition(),
+							null, toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
 
 					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), event);
 

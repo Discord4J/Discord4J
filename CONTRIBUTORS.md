@@ -3,6 +3,7 @@
 * @grandmind -Added example bots and helped with documentation
 * @phantamanta44 -Added some java 8 goodness
 * @lclc98 -Added audio support
+* @sedmelluq -Realized how utf-8 was ruining audio
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
