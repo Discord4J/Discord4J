@@ -20,7 +20,9 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
+	 * @deprecated Use {@link #changeName(String)} or {@link #changePosition(int)}
 	 */
+	@Deprecated
 	void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, MissingPermissionsException, HTTP429Exception;
 
 	/**

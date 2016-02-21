@@ -76,6 +76,7 @@ public interface IRole {
 	 * @param hoist Whether the role should now be hoisted.
 	 * @param name The new name for the role.
 	 * @param permissions The new permissions for the role.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
@@ -88,6 +89,7 @@ public interface IRole {
 	 * Changes the color of the role.
 	 *
 	 * @param color The new color for the role.
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
@@ -98,6 +100,7 @@ public interface IRole {
 	 * Changes whether to hoist the role.
 	 *
 	 * @param hoist Whether to hoist the role.
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
@@ -108,6 +111,7 @@ public interface IRole {
 	 * Changes the name of the role.
 	 *
 	 * @param name The new name for the role.
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
@@ -118,6 +122,7 @@ public interface IRole {
 	 * Changes the permissions of the role.
 	 *
 	 * @param permissions The new permissions for the role.
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException

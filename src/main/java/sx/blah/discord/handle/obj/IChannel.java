@@ -248,11 +248,36 @@ public interface IChannel {
 	 * Removes a permissions override on this channel.
 	 *
 	 * @param id The id of the override to remove, this is either a user id or role id.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @deprecated Use either {@link #removePermissionsOverride(IUser)} or {@link #removePermissionsOverride(IRole)}
+	 */
+	@Deprecated
+	void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Removes a permissions override on this channel.
+	 *
+	 * @param user The user whose override should be removed.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Removes a permissions override on this channel.
+	 *
+	 * @param role The role whose override should be removed.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 */
+	void removePermissionsOverride(IRole role) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -260,11 +285,27 @@ public interface IChannel {
 	 * @param roleID The role id of the role to create/edit the permission overrides for.
 	 * @param toAdd The permissions to add.
 	 * @param toRemove The permissions to remove.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @deprecated Use {@link #overrideRolePermissions(IRole, EnumSet, EnumSet)}
+	 */
+	@Deprecated
+	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Creates/edits permission overrides for this channel.
+	 *
+	 * @param role The role to create/edit the permission overrides for.
+	 * @param toAdd The permissions to add.
+	 * @param toRemove The permissions to remove.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -272,11 +313,27 @@ public interface IChannel {
 	 * @param userID The user id of the user to create/edit the permission overrides for.
 	 * @param toAdd The permissions to add.
 	 * @param toRemove The permissions to remove.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @deprecated Use {@link #overrideUserPermissions(IUser, EnumSet, EnumSet)}
+	 */
+	@Deprecated
+	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Creates/edits permission overrides for this channel.
+	 *
+	 * @param user The user to create/edit the permission overrides for.
+	 * @param toAdd The permissions to add.
+	 * @param toRemove The permissions to remove.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * This gets all the currently available invites for this channel.

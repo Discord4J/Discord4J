@@ -557,7 +557,7 @@ public class DiscordWS extends WebSocketClient {
 				channel.getGuild().getChannels().remove(channel);
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
-		} else if (event.type.equalsIgnoreCase("voice")) { //FIXME
+		} else if (event.type.equalsIgnoreCase("voice")) {
 			VoiceChannel channel = (VoiceChannel) client.getVoiceChannelByID(event.id);
 			if (channel != null) {
 				channel.getGuild().getVoiceChannels().remove(channel);
@@ -591,7 +591,7 @@ public class DiscordWS extends WebSocketClient {
 
 					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 				}
-			} else if (event.type.equalsIgnoreCase("voice")) { //FIXME
+			} else if (event.type.equalsIgnoreCase("voice")) {
 				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(event.id);
 				if (toUpdate != null) {
 					VoiceChannel oldChannel = new VoiceChannel(client, toUpdate.getName(),

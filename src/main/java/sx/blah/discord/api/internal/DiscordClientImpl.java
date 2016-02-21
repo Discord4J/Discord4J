@@ -421,10 +421,15 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException {
+		return createGuild(name, getRegionByID(regionID), icon);
+	}
+
+	@Override
+	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
-							new CreateGuildRequest(name, regionID, icon.orElse(null)))),
+							new CreateGuildRequest(name, region.getID(), icon.orElse(null)))),
 					new BasicNameValuePair("authorization", this.token),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);

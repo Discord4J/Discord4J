@@ -174,27 +174,57 @@ public interface IGuild {
 	 * Bans a user from this guild.
 	 *
 	 * @param userID The user to ban.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @deprecated Use {@link #banUser(IUser)}
+	 */
+	@Deprecated
+	void banUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param user The user to ban.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void banUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void banUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Bans a user from this guild.
 	 *
 	 * @param userID The user to ban.
 	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @deprecated Use {@link #banUser(IUser, int)}
+	 */
+	@Deprecated
+	void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param user The user to ban.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * This removes a ban on a user.
 	 *
 	 * @param userID The user to unban.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
@@ -205,22 +235,51 @@ public interface IGuild {
 	 * Kicks a user from the guild.
 	 *
 	 * @param userID The user to kick.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @deprecated Use {@link #kickUser(IUser)}
+	 */
+	@Deprecated
+	void kickUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Kicks a user from the guild.
+	 *
+	 * @param user The user to kick.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void kickUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void kickUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Edits the roles a user is a part of.
 	 *
 	 * @param userID The user to edit the roles for.
 	 * @param roleIDs The roles for the user to have.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @deprecated Use {@link #editUserRoles(IUser, IRole[])}
+	 */
+	@Deprecated
+	void editUserRoles(String userID, String[] roleIDs) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * Edits the roles a user is a part of.
+	 *
+	 * @param user The user to edit the roles for.
+	 * @param roles The roles for the user to have.
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 */
-	void editUserRoles(String userID, String[] roleIDs) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Edits the guild.
@@ -353,11 +412,25 @@ public interface IGuild {
 	 * Transfers the ownership of this guild to another user.
 	 *
 	 * @param newOwnerID The new owner's user id.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @deprecated Use {@link #transferOwnership(IUser)}
+	 */
+	@Deprecated
+	void transferOwnership(String newOwnerID) throws HTTP429Exception, MissingPermissionsException, DiscordException;
+
+	/**
+	 * Transfers the ownership of this guild to another user.
+	 *
+	 * @param newOwner The new owner.
+	 *
 	 * @throws HTTP429Exception
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
-	void transferOwnership(String newOwnerID) throws HTTP429Exception, MissingPermissionsException, DiscordException;
+	void transferOwnership(IUser newOwner) throws HTTP429Exception, MissingPermissionsException, DiscordException;
 
 	/**
 	 * This retrieves the @everyone role which exists on all guilds.

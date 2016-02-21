@@ -1,22 +1,3 @@
-/*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2015
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
@@ -326,10 +307,20 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public void banUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		banUser(user, 0);
+	}
+
+	@Override
 	public void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		banUser(getUserByID(userID), deleteMessagesForDays);
+	}
+
+	@Override
+	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 
-		Requests.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID+"?delete-message-days="+deleteMessagesForDays,
+		Requests.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -343,9 +334,14 @@ public class Guild implements IGuild {
 
 	@Override
 	public void kickUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		kickUser(getUserByID(userID));
+	}
+
+	@Override
+	public void kickUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.KICK));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+userID,
+		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -356,6 +352,20 @@ public class Guild implements IGuild {
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+userID,
 					new StringEntity(DiscordUtils.GSON.toJson(new MemberEditRequest(roleIDs))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
+
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					new StringEntity(DiscordUtils.GSON.toJson(new MemberEditRequest(roles))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
@@ -490,7 +500,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IRegion getRegion() {
-		return client.getRegionForID(regionID);
+		return client.getRegionByID(regionID);
 	}
 
 	/**
@@ -504,11 +514,16 @@ public class Guild implements IGuild {
 
 	@Override
 	public void transferOwnership(String newOwnerID) throws HTTP429Exception, MissingPermissionsException, DiscordException {
+		transferOwnership(getUserByID(newOwnerID));
+	}
+
+	@Override
+	public void transferOwnership(IUser newOwner) throws HTTP429Exception, MissingPermissionsException, DiscordException {
 		if (!getOwnerID().equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("Cannot transfer ownership when you aren't the current owner!");
 		try {
 			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new TransferOwnershipRequest(newOwnerID))),
+					new StringEntity(DiscordUtils.GSON.toJson(new TransferOwnershipRequest(newOwner.getID()))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 		} catch (UnsupportedEncodingException e) {

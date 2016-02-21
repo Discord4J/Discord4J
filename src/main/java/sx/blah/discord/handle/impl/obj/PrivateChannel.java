@@ -1,27 +1,10 @@
-/*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2015
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.HTTP429Exception;
 
 import java.util.*;
 
@@ -74,12 +57,37 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
+	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IInvite> getInvites() throws DiscordException, HTTP429Exception {
 		throw new UnsupportedOperationException();
 	}
 
@@ -104,8 +112,28 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
+	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void changePosition(int position) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public String mention() {
 		return recipient.mention();
+	}
+
+	@Override
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

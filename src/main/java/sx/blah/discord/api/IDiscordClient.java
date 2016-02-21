@@ -235,8 +235,23 @@ public interface IDiscordClient {
 	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * @deprecated Use {@link #createGuild(String, IRegion, Optional)}
 	 */
+	@Deprecated
 	IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
+
+	/**
+	 * Creates a new guild.
+	 *
+	 * @param name The name of the guild.
+	 * @param region The region for the guild.
+	 * @param icon The icon for the guild.
+	 * @return The new guild's id.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 */
+	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException;
 
 	/**
 	 * Gets the latest response time by the discord websocket to a ping.

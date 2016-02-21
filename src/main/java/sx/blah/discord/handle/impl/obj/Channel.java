@@ -462,13 +462,43 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID(),
+				new BasicNameValuePair("authorization", client.getToken()));
+
+		userOverrides.remove(user.getID());
+	}
+
+	@Override
+	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID(),
+				new BasicNameValuePair("authorization", client.getToken()));
+
+		roleOverrides.remove(role.getID());
+	}
+
+	@Override
 	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		overridePermissions("role", roleID, toAdd, toRemove);
 	}
 
 	@Override
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		overridePermissions("role", role.getID(), toAdd, toRemove);
+	}
+
+	@Override
 	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		overridePermissions("member", userID, toAdd, toRemove);
+	}
+
+	@Override
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		overridePermissions("member", user.getID(), toAdd, toRemove);
 	}
 
 	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
