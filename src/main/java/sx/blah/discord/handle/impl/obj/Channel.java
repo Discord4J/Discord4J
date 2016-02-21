@@ -221,9 +221,7 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
-			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
-			client.getDispatcher().dispatch(new MessageSendEvent(message));
-			return message;
+			return DiscordUtils.getMessageFromJSON(client, this, response);
 
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");

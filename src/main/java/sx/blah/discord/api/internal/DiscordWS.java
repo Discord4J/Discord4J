@@ -361,7 +361,11 @@ public class DiscordWS extends WebSocketClient {
 					client.dispatcher.dispatch(new MentionEvent(message));
 				}
 
-				client.dispatcher.dispatch(new MessageReceivedEvent(message));
+				if (message.getAuthor().equals(client.getOurUser())) {
+					client.dispatcher.dispatch(new MessageSendEvent(message));
+				} else {
+					client.dispatcher.dispatch(new MessageReceivedEvent(message));
+				}
 			}
 		}
 	}
