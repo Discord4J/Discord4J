@@ -8,9 +8,8 @@ import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.util.AudioChannel;
 import sx.blah.discord.api.internal.audio.AudioPacket;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IUser;
@@ -19,6 +18,7 @@ import sx.blah.discord.json.requests.VoiceConnectRequest;
 import sx.blah.discord.json.requests.VoiceSpeakingRequest;
 import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
+import sx.blah.discord.util.AudioChannel;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
@@ -268,15 +268,15 @@ public class DiscordVoiceWS extends WebSocketClient {
 				super.send(text);
 			} catch (WebsocketNotConnectedException e) {
 				Discord4J.LOGGER.warn("Voice Websocket unexpectedly lost connection!");
-				disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
+				disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
 			}
 	}
 
 	/**
 	 * Disconnects the client WS.
 	 */
-	public synchronized void disconnect(DiscordDisconnectedEvent.Reason reason) {
-		client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
+	public synchronized void disconnect(VoiceDisconnectedEvent.Reason reason) {
+		client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
 		isConnected.set(false);
 		udpSocket.close();
 		close();

@@ -41,7 +41,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void leaveChannel(){
 		if(((DiscordClientImpl) client).voiceWS != null && ((DiscordClientImpl) client).voiceWS.isConnected.get()) {
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
-			((DiscordClientImpl) client).voiceWS.close();
+			((DiscordClientImpl) client).voiceWS.disconnect();
 		}
 	}
 

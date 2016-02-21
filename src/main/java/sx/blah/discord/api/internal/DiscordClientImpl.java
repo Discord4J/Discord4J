@@ -1,13 +1,5 @@
 package sx.blah.discord.api.internal;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
@@ -16,6 +8,7 @@ import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
@@ -181,6 +174,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public void logout() throws HTTP429Exception, DiscordException {
 		if (isReady()) {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
+			if (voiceWS != null)
+				voiceWS.disconnect(VoiceDisconnectedEvent.Reason.LOGGED_OUT);
 
 			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
