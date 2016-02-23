@@ -28,10 +28,10 @@ public interface IVoiceChannel extends IChannel {
 	/**
 	 * Makes the bot user join this voice channel.
 	 */
-	void joinChannel();
+	void join();
 
 	/**
 	 * Makes the bot user leave this voice channel.
 	 */
-	void leaveChannel();
+	void leave();
 }

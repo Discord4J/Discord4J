@@ -68,7 +68,7 @@ public class TestBot {
 
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
-								channel.joinChannel();
+								channel.join();
 								client.getAudioChannel().queueFile(new File("./test.mp3"));
 							}
 
@@ -203,7 +203,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".test")) {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
-								channel.joinChannel();
+								channel.join();
 								client.getAudioChannel().queueFile(new File("./test2.mp3"));
 							}
 						} else if (m.getContent().startsWith(".pause")) {

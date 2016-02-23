@@ -22,7 +22,7 @@ public class VoiceBot {
                 public void handle(ReadyEvent event) {
                     IGuild guild = client.getGuilds().get(1);
                     IVoiceChannel voiceChannel = guild.getVoiceChannels().get(0);
-                    voiceChannel.joinChannel();
+                    voiceChannel.join();
                 }
             });
 

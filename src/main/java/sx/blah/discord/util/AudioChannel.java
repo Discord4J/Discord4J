@@ -14,16 +14,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This is used to interface with voice channels.
  */
 public class AudioChannel {
 
-	private final List<AudioInputStream> audioQueue = new ArrayList<>();
-	private final List<AudioMetaData> metaDataQueue = new ArrayList<>();
+	private final List<AudioInputStream> audioQueue = new CopyOnWriteArrayList<>();
+	private final List<AudioMetaData> metaDataQueue = new CopyOnWriteArrayList<>();
 	private volatile boolean isPaused = false;
 	private final IDiscordClient client;
 

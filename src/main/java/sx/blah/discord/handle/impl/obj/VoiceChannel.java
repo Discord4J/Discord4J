@@ -29,7 +29,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void joinChannel() {
+	public void join() {
 		if (client.isReady()) {
 			if (!client.getConnectedVoiceChannel().isPresent()) {
 				((DiscordClientImpl) client).connectedVoiceChannel = this;
@@ -43,7 +43,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void leaveChannel(){
+	public void leave(){
 		if(((DiscordClientImpl) client).voiceWS != null && ((DiscordClientImpl) client).voiceWS.isConnected.get()
 				&& client.getConnectedVoiceChannel().isPresent() && client.getConnectedVoiceChannel().get().equals(this)) {
 			((DiscordClientImpl) client).connectedVoiceChannel = null;
