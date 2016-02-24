@@ -17,10 +17,7 @@ package sx.blah.discord.util;
 
 import sun.net.spi.nameservice.dns.DNSNameService;
 
-import javax.sound.midi.spi.MidiFileReader;
-import javax.sound.midi.spi.MidiFileWriter;
 import javax.sound.sampled.spi.AudioFileReader;
-import javax.sound.sampled.spi.AudioFileWriter;
 import javax.sound.sampled.spi.FormatConversionProvider;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,7 +45,7 @@ public class ServiceUtil {
 
         try {
             //Creates a new temp file to act as a dummy jar containing only our META-INF/services/ folder.
-            servicesJar = Files.createTempFile("jda-services", "jar").toFile();
+            servicesJar = Files.createTempFile("discord4j-services", "jar").toFile();
             servicesJar.deleteOnExit();     //Sets to delete when the JVM closes, but it wont because it is loaded into the JVM. :/
             fos = new FileOutputStream(servicesJar);    //Opens an output stream so we can write to the file
             zos = new JarOutputStream(fos);             //Wraps the stream so we can treat it like writing to a Jar file

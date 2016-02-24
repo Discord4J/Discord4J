@@ -200,16 +200,20 @@ public class TestBot {
 							} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}
-						} else if (m.getContent().startsWith(".test")) {
+						} else if (m.getContent().startsWith(".play")) {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.join();
-								client.getAudioChannel().queueFile(new File("./test2.mp3"));
+								client.getAudioChannel().queueFile(new File("./test.mp3"));
 							}
 						} else if (m.getContent().startsWith(".pause")) {
 							client.getAudioChannel().pause();
 						} else if (m.getContent().startsWith(".resume")) {
 							client.getAudioChannel().resume();
+						} else if (m.getContent().startsWith(".queue")) {
+							client.getAudioChannel().queueFile(new File("./test2.mp3"));
+						} else if (m.getContent().startsWith(".volume")) {
+							client.getAudioChannel().setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
 						}
 					}
 				});

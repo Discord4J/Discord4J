@@ -123,6 +123,12 @@
 			<artifactId>tritonus-share</artifactId>
 			<version>0.3.7-2</version>
 		</dependency>
+
+		<dependency>
+			<groupId>tritonus</groupId>
+			<artifactId>tritonus-dsp</artifactId>
+			<version>0.3.6</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -210,6 +216,17 @@
 			</resource>
 		</resources>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>tritonous-rehost</id>
+			<url>http://lutece.paris.fr/nexus/content/repositories/lutece_third_party/</url>
+		</repository>
+		<repository>
+			<id>jcenter</id>
+			<url>http://jcenter.bintray.com/</url>
+		</repository>
+	</repositories>
 
 	<distributionManagement>
 		<repository>

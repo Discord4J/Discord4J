@@ -1,5 +1,6 @@
 package sx.blah.discord.util;
 
+import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordVoiceWS;
@@ -22,13 +23,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class AudioChannel {
 
-	private final List<AudioInputStream> audioQueue = new CopyOnWriteArrayList<>();
 	private final List<AudioMetaData> metaDataQueue = new CopyOnWriteArrayList<>();
+	private final List<AmplitudeAudioInputStream> audioQueue = new CopyOnWriteArrayList<>();
 	private volatile boolean isPaused = false;
+	private volatile float volume = 1.0F;
 	private final IDiscordClient client;
 
 	public AudioChannel(IDiscordClient client) {
 		this.client = client;
+	}
+
+	public void setVolume(float volume) {
+		this.volume = volume;
 	}
 
 	/**
@@ -190,7 +196,7 @@ public class AudioChannel {
 		}
 
 		if (outputAudio != null) {
-			audioQueue.add(outputAudio);
+			audioQueue.add(new AmplitudeAudioInputStream(outputAudio));
 			AudioMetaData data = metaDataQueue.get(metaDataQueue.size()-1);
 			client.getDispatcher().dispatch(new AudioQueuedEvent(outputAudio, data.fileSource, data.urlSource, data.format));
 		} else
@@ -207,16 +213,18 @@ public class AudioChannel {
 	public byte[] getAudioData(int length) {
 		if (isPaused)
 			return null;
-		AudioInputStream data = audioQueue.get(0);
+		AmplitudeAudioInputStream data = audioQueue.get(0);
 		if (data != null) {
 			AudioMetaData metaData = metaDataQueue.get(0);
 			try {
 				int amountRead;
 				byte[] audio = new byte[length*data.getFormat().getFrameSize()];
 
+				data.setAmplitudeLinear(volume);
 				amountRead = data.read(audio, 0, audio.length);
 
 				if (amountRead > 0) {
+
 					if (!metaData.startedReading) {
 						metaData.startedReading = true;
 						client.getDispatcher().dispatch(new AudioPlayEvent(data, metaData.fileSource,
