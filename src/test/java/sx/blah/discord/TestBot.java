@@ -214,6 +214,8 @@ public class TestBot {
 							client.getAudioChannel().queueFile(new File("./test2.mp3"));
 						} else if (m.getContent().startsWith(".volume")) {
 							client.getAudioChannel().setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
+						} else if (m.getContent().startsWith(".stop")) {
+							client.getConnectedVoiceChannel().ifPresent(IVoiceChannel::leave);
 						}
 					}
 				});

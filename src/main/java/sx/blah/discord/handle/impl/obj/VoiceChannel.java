@@ -31,12 +31,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void join() {
 		if (client.isReady()) {
-			if (!client.getConnectedVoiceChannel().isPresent()) {
-				((DiscordClientImpl) client).connectedVoiceChannel = this;
-				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
-			} else {
-				Discord4J.LOGGER.error("Bot is already connected to voice channel {}", client.getConnectedVoiceChannel().get().getName());
-			}
+			((DiscordClientImpl) client).connectedVoiceChannel = this;
+			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 		}

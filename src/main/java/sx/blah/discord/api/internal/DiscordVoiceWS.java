@@ -270,13 +270,14 @@ public class DiscordVoiceWS extends WebSocketClient {
 	/**
 	 * Disconnects the client WS.
 	 */
-	public synchronized void disconnect(VoiceDisconnectedEvent.Reason reason) {
+	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
 		client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
 		isConnected.set(false);
 		udpSocket.close();
 		close();
-		Thread.currentThread().interrupt();
-
+		client.voiceWS = null;
+		executorService.shutdownNow();
+//		Thread.currentThread().interrupt();
 	}
 
 	/**
