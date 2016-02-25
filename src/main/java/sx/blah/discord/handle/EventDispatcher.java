@@ -32,12 +32,14 @@ public class EventDispatcher {
 	public void registerListener(Object listener) {
 		for (Method method : listener.getClass().getDeclaredMethods()) {
 			if (method.getParameterCount() == 1) {
-				Class<?> eventClass = method.getParameterTypes()[0];
-				if (Event.class.isAssignableFrom(eventClass)) {
-					if (!methodListeners.containsKey(eventClass))
-						methodListeners.put(eventClass, new HashMap<>());
-					
-					methodListeners.get(eventClass).put(method, listener);
+				if (method.isAnnotationPresent(EventSubscriber.class)) {
+					Class<?> eventClass = method.getParameterTypes()[0];
+					if (Event.class.isAssignableFrom(eventClass)) {
+						if (!methodListeners.containsKey(eventClass))
+							methodListeners.put(eventClass, new HashMap<>());
+
+						methodListeners.get(eventClass).put(method, listener);
+					}
 				}
 			}
 		}
