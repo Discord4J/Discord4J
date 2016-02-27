@@ -32,7 +32,7 @@ public class VoiceUDPConnectRequest {
     private class EventData {
         private final String address;
         private final int port;
-        private final String mode = "plain";
+        private final String mode = "xsalsa20_poly1305";
 
         public EventData(String address, int port) {
             this.address = address;

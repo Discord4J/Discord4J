@@ -16,6 +16,7 @@
 package sx.blah.discord.api.internal.audio;
 
 import com.sun.jna.ptr.PointerByReference;
+import org.peergos.crypto.TweetNaCl;
 import sx.blah.discord.api.internal.DiscordVoiceWS;
 import sx.blah.discord.util.Opus;
 
@@ -74,22 +75,28 @@ public class AudioPacket {
 		this.rawAudio = decodeToPCM(encodedAudio);
 	}
 
-	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio) {
+	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, byte[] secret) {
 		this.seq = seq;
 		this.ssrc = ssrc;
 		this.timestamp = timestamp;
 		this.rawAudio = rawAudio;
-		this.encodedAudio = AudioPacket.encodeToOpus(rawAudio);
 
 
-		ByteBuffer buffer = ByteBuffer.allocate(encodedAudio.length+12);
-		buffer.put(0, (byte) 0x80);
-		buffer.put(1, (byte) 0x78);
-		buffer.putChar(2, seq);
-		buffer.putInt(4, timestamp);
-		buffer.putInt(8, ssrc);
-		System.arraycopy(encodedAudio, 0, buffer.array(), 12, encodedAudio.length);//12 - n
-		this.rawPacket = buffer.array();
+		ByteBuffer nonceBuffer = ByteBuffer.allocate(12);
+		nonceBuffer.put(0, (byte) 0x80);
+		nonceBuffer.put(1, (byte) 0x78);
+		nonceBuffer.putChar(2, seq);
+		nonceBuffer.putInt(4, timestamp);
+		nonceBuffer.putInt(8, ssrc);
+		this.encodedAudio = TweetNaCl.secretbox(AudioPacket.encodeToOpus(rawAudio),
+				Arrays.copyOf(nonceBuffer.array(), 24), //encryption nonce is 24 bytes long while discord's is 12 bytes long
+				secret);
+
+		byte[] packet = new byte[nonceBuffer.capacity()+encodedAudio.length];
+		System.arraycopy(nonceBuffer.array(), 0, packet, 0, 12); //Add nonce
+		System.arraycopy(encodedAudio, 0, packet, 12, encodedAudio.length); //Add audio
+
+		this.rawPacket = packet;
 	}
 
 	public byte[] getRawPacket() {
@@ -135,7 +142,7 @@ public class AudioPacket {
 		nonEncodedBuffer.get(audio);
 		return audio;
 	}
-	
+
 	public byte[] getRawAudio() {
 		return rawAudio;
 	}

@@ -1,5 +1,6 @@
 package sx.blah.discord.api.internal;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
@@ -58,17 +59,19 @@ public class DiscordVoiceWS extends WebSocketClient {
 
 	private DiscordClientImpl client;
 
-	private static int ssrc;
-	private static VoiceUpdateResponse event;
-	private static DatagramSocket udpSocket;
+	private int ssrc;
+	private VoiceUpdateResponse event;
+	private DatagramSocket udpSocket;
 
 	private InetSocketAddress addressPort;
 	private boolean isSpeaking;
 
+	private byte[] secret;
+
 	public DiscordVoiceWS(VoiceUpdateResponse event, DiscordClientImpl client) throws URISyntaxException {
 		super(new URI("wss://"+event.endpoint), new Draft_10(), headers, 0);
 		this.client = client;
-		DiscordVoiceWS.event = event;
+		this.event = event;
 		try {
 			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault()));
 			this.connect();
@@ -132,6 +135,11 @@ public class DiscordVoiceWS extends WebSocketClient {
 			case OP_CONNECTING_COMPLETED: {
 				isConnected.set(true);
 
+				JsonArray array = object.get("d").getAsJsonObject().get("secret_key").getAsJsonArray();
+				secret = new byte[array.size()];
+				for (int i = 0; i < array.size(); i++)
+					secret[i] = (byte) array.get(i).getAsInt();
+
 				setupSendThread();
 				setupReceiveThread();
 				break;
@@ -169,7 +177,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 						byte[] rawAudio = client.audioChannel.getAudioData(OPUS_FRAME_SIZE);
 						if (rawAudio != null) {
 							client.timer = System.currentTimeMillis();
-							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, rawAudio);
+							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, rawAudio, secret);
 							if (!isSpeaking)
 								setSpeaking(true);
 							udpSocket.send(packet.asUdpPacket(addressPort));
