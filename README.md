@@ -132,7 +132,7 @@ The Discord API is still in development. Functions may break at any time.
 In such an event, please contact me or submit a pull request.
 
 ## Pull requests
-No one is perfect at programming and I am no exception. If you see something that can be improved, please feel free to submit a pull request! 
+No one is perfect at programming and I am no exception. If you see something that can be improved, please read the [contributing guildelines](https://github.com/austinv11/Discord4J/blob/master/.github/CONTRIBUTING.md) and feel free to submit a pull request! 
 
 ## Other info
 More information can be found in the [docs](http://austinv11.github.io/Discord4J/docs.html). 
