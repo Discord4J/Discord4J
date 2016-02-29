@@ -17,16 +17,6 @@ In your `pom.xml` add:
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
   </repository>
-  
-  <!-- Include the following repository if you wish to use SNAPSHOT versions -->
-  <repository>
-  	<snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-    <id>snapshots</id>
-    <name>oss-jfrog-artifactory-snapshots</name>
-    <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
-  </repository>
 </repositories>
 ...
 <dependencies>
@@ -48,11 +38,6 @@ repositories {
   ...
   maven {
     url  "https://jitpack.io"
-  }
-  
-  //Include the following repository if you wish to use SNAPSHOT versions
-  maven {
-  	url "https://oss.jfrog.org/artifactory/oss-snapshot-local"
   }
 }
 ...
