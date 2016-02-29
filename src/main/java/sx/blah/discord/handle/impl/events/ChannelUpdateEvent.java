@@ -7,14 +7,14 @@ import sx.blah.discord.handle.obj.IChannel;
  * This event is dispatched when a channel's information is updated.
  */
 public class ChannelUpdateEvent extends Event {
-	
+
 	private final IChannel oldChannel, newChannel;
-	
+
 	public ChannelUpdateEvent(IChannel oldChannel, IChannel newChannel) {
 		this.oldChannel = oldChannel;
 		this.newChannel = newChannel;
 	}
-	
+
 	/**
 	 * Gets the original channel.
 	 *
@@ -23,7 +23,7 @@ public class ChannelUpdateEvent extends Event {
 	public IChannel getOldChannel() {
 		return oldChannel;
 	}
-	
+
 	/**
 	 * Gets the new channel.
 	 *

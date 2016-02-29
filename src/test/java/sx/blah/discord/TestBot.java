@@ -1,36 +1,15 @@
-/*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2015
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 package sx.blah.discord;
 
 import org.junit.Test;
 import sx.blah.discord.api.*;
 import sx.blah.discord.handle.IListener;
-import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
-import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.util.*;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,7 +35,13 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
+			Configuration.LOAD_EXTERNAL_MODULES = false; //temp
 			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
+
+			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
+				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
+			});
+
 			if (args.length > 2) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
 				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
@@ -81,6 +66,12 @@ public class TestBot {
 							final IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
 							String buildNumber = System.getenv("BUILD_ID");
 
+							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
+							if (channel != null) {
+								channel.join();
+								client.getAudioChannel().queueFile(new File("./test.mp3"));
+							}
+
 							//Start testing
 							new MessageBuilder(client).withChannel(testChannel).withContent("Initiating Discord4J Unit Tests for Build #"+
 									buildNumber, MessageBuilder.Styles.BOLD).build();
@@ -96,7 +87,7 @@ public class TestBot {
 							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
 
 							final long now = System.currentTimeMillis();
-							new Thread(()->{
+							new Thread(() -> {
 								while (!didTest.get()) {
 									if (now+MAX_TEST_TIME <= System.currentTimeMillis()) {
 										//Test timer up!
@@ -139,8 +130,8 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".clear")) {
 							IChannel c = client.getChannelByID(m.getChannel().getID());
 							if (null != c) {
-								c.getMessages().stream().filter(message->message.getAuthor().getID()
-										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message->{
+								c.getMessages().stream().filter(message -> message.getAuthor().getID()
+										.equalsIgnoreCase(client.getOurUser().getID())).forEach(message -> {
 									try {
 										Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
 										message.delete();
@@ -152,7 +143,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".name ")) {
 							String s = m.getContent().split(" ", 2)[1];
 							try {
-								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUser(client.getOurUser())));
+								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(Image.forUser(client.getOurUser())));
 								m.reply("is this better?");
 							} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
 								e.printStackTrace();
@@ -183,9 +174,9 @@ public class TestBot {
 							try {
 								if (m.getContent().split(" ").length > 1) {
 									String url = m.getContent().split(" ")[1];
-									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.forUrl(url.substring(url.lastIndexOf('.')), url)));
+									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(Image.forUrl(url.substring(url.lastIndexOf('.')), url)));
 								} else {
-									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(IDiscordClient.Image.defaultAvatar()));
+									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(Image.defaultAvatar()));
 								}
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -209,12 +200,22 @@ public class TestBot {
 							} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 								e.printStackTrace();
 							}
-						} else if (m.getContent().startsWith(".test")) {
-							try {
-								client.logout();
-							} catch (HTTP429Exception | DiscordException e) {
-								e.printStackTrace();
+						} else if (m.getContent().startsWith(".play")) {
+							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
+							if (channel != null) {
+								channel.join();
+								client.getAudioChannel().queueFile(new File("./test.mp3"));
 							}
+						} else if (m.getContent().startsWith(".pause")) {
+							client.getAudioChannel().pause();
+						} else if (m.getContent().startsWith(".resume")) {
+							client.getAudioChannel().resume();
+						} else if (m.getContent().startsWith(".queue")) {
+							client.getAudioChannel().queueFile(new File("./test2.mp3"));
+						} else if (m.getContent().startsWith(".volume")) {
+							client.getAudioChannel().setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
+						} else if (m.getContent().startsWith(".stop")) {
+							client.getConnectedVoiceChannel().ifPresent(IVoiceChannel::leave);
 						}
 					}
 				});

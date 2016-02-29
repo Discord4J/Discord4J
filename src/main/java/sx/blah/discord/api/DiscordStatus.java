@@ -1,5 +1,6 @@
 package sx.blah.discord.api;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.json.responses.MetricResponse;
 import sx.blah.discord.json.responses.StatusResponse;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
  * This class is used to get general information about the status regarding discord servers
  */
 public class DiscordStatus {
-	
+
 	/**
 	 * Fetches the mean discord api response time for today.
 	 *
@@ -24,12 +25,12 @@ public class DiscordStatus {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "day")), MetricResponse.class);
 		} catch (HTTP429Exception | DiscordException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			return -1;
 		}
 		return response.summary.mean;
 	}
-	
+
 	/**
 	 * Fetches the mean discord api response time for this week.
 	 *
@@ -41,12 +42,12 @@ public class DiscordStatus {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "week")), MetricResponse.class);
 		} catch (DiscordException | HTTP429Exception e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			return -1;
 		}
 		return response.summary.mean;
 	}
-	
+
 	/**
 	 * Fetches the mean discord api response time for this month.
 	 *
@@ -58,12 +59,12 @@ public class DiscordStatus {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "month")), MetricResponse.class);
 		} catch (HTTP429Exception | DiscordException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			return -1;
 		}
 		return response.summary.mean;
 	}
-	
+
 	/**
 	 * Gets the active maintenance statuses.
 	 *
@@ -76,7 +77,7 @@ public class DiscordStatus {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "active")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
-		
+
 		for (int i = 0; i < maintenances.length; i++) {
 			StatusResponse.MaintenanceResponse maintenanceResponse = response.scheduled_maintenances[i];
 			maintenances[i] = new Maintenance(maintenanceResponse.name, maintenanceResponse.incident_updates[0].body,
@@ -85,7 +86,7 @@ public class DiscordStatus {
 		}
 		return maintenances;
 	}
-	
+
 	/**
 	 * Gets the upcoming maintenance statuses.
 	 *
@@ -98,7 +99,7 @@ public class DiscordStatus {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "upcoming")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
-		
+
 		for (int i = 0; i < maintenances.length; i++) {
 			StatusResponse.MaintenanceResponse maintenanceResponse = response.scheduled_maintenances[i];
 			maintenances[i] = new Maintenance(maintenanceResponse.name, maintenanceResponse.incident_updates[0].body,
@@ -107,15 +108,15 @@ public class DiscordStatus {
 		}
 		return maintenances;
 	}
-	
+
 	/**
 	 * This object represents a scheduled maintenance
 	 */
 	public static class Maintenance {
-		
+
 		private final String name, description, id;
 		private final LocalDateTime start, stop;
-		
+
 		protected Maintenance(String name, String description, String id, LocalDateTime start, LocalDateTime stop) {
 			this.name = name;
 			this.description = description;
@@ -123,7 +124,7 @@ public class DiscordStatus {
 			this.start = start;
 			this.stop = stop;
 		}
-		
+
 		/**
 		 * Gets the name of the maintenance.
 		 *
@@ -132,7 +133,7 @@ public class DiscordStatus {
 		public String getName() {
 			return name;
 		}
-		
+
 		/**
 		 * Gets the maintenance description.
 		 *
@@ -141,7 +142,7 @@ public class DiscordStatus {
 		public String getDescription() {
 			return description;
 		}
-		
+
 		/**
 		 * Gets the maintenance id.
 		 *
@@ -150,7 +151,7 @@ public class DiscordStatus {
 		public String getID() {
 			return id;
 		}
-		
+
 		/**
 		 * Gets when the maintenance is scheduled to start.
 		 *
@@ -159,7 +160,7 @@ public class DiscordStatus {
 		public LocalDateTime getStart() {
 			return start;
 		}
-		
+
 		/**
 		 * Gets when the maintenance is scheduled to end.
 		 *

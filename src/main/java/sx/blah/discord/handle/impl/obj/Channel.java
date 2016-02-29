@@ -39,7 +39,7 @@ import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.MessageComparator;
+import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.Requests;
 
 import java.io.File;
@@ -49,6 +49,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
 
@@ -65,7 +66,7 @@ public class Channel implements IChannel {
 	/**
 	 * Messages that have been sent into this channel
 	 */
-	protected final List<IMessage> messages;
+	protected final MessageList messages;
 
 	/**
 	 * Indicates whether or not this channel is a PM channel.
@@ -123,20 +124,23 @@ public class Channel implements IChannel {
 	protected final IDiscordClient client;
 
 	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-		this(client, name, id, parent, topic, position, new ArrayList<>(), new HashMap<>(), new HashMap<>());
+		this(client, name, id, parent, topic, position, new HashMap<>(), new HashMap<>());
 	}
 
-	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
-		this.messages = messages;
 		this.parent = parent;
 		this.isPrivate = false;
 		this.topic = topic;
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
+		if (!(this instanceof IVoiceChannel))
+			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
+		else
+			this.messages = null;
 	}
 
 	@Override
@@ -159,38 +163,16 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public List<IMessage> getMessages() {
+	public MessageList getMessages() {
 		return messages;
 	}
 
 	@Override
-	public synchronized IMessage getMessageByID(String messageID) {
-		for (IMessage message : messages) {
-			if (message.getID().equalsIgnoreCase(messageID))
-				return message;
-		}
+	public IMessage getMessageByID(String messageID) {
+		if (messages == null)
+			return null;
 
-		return null;
-	}
-
-	/**
-	 * CACHES a message to the channel.
-	 *
-	 * @param message The message.
-	 */
-	public synchronized void addMessage(IMessage message) {
-		if (message.getChannel().getID().equalsIgnoreCase(this.getID())) {
-			messages.add(message);
-			Collections.sort(messages, MessageComparator.INSTANCE);
-			if (lastReadMessageID == null)
-				lastReadMessageID = message.getID();
-		}
-	}
-
-	@Override
-	@Deprecated
-	public IGuild getParent() {
-		return parent;
+		return messages.get(messageID);
 	}
 
 	@Override
@@ -239,10 +221,7 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
-			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
-			addMessage(message); //Had to be moved here so that if a message is edited before the MESSAGE_CREATE event, it doesn't error
-			client.getDispatcher().dispatch(new MessageSendEvent(message));
-			return message;
+			return DiscordUtils.getMessageFromJSON(client, this, response);
 
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
@@ -262,7 +241,6 @@ public class Channel implements IChannel {
 					DiscordEndpoints.CHANNELS+id+"/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
 			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
-			addMessage(message);
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
 		} else {
@@ -288,7 +266,7 @@ public class Channel implements IChannel {
 
 			return DiscordUtils.getInviteFromJSON(client, response);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 
 		return null;
@@ -300,7 +278,7 @@ public class Channel implements IChannel {
 
 		if (isTyping.get()) {
 			typingTimer.set(System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
-			new Thread(()->{
+			new Thread(() -> {
 				while (isTyping.get()) {
 					if (typingTimer.get() <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
 						typingTimer.set(System.currentTimeMillis());
@@ -308,7 +286,7 @@ public class Channel implements IChannel {
 							Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
 									new BasicNameValuePair("authorization", client.getToken()));
 						} catch (HTTP429Exception | DiscordException e) {
-							e.printStackTrace();
+							Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 						}
 					}
 				}
@@ -331,7 +309,7 @@ public class Channel implements IChannel {
 		return getMessageByID(lastReadMessageID);
 	}
 
-	@Override
+	@Override//TODO: make private
 	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
@@ -348,8 +326,23 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
+	}
+
+	@Override
+	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.of(name), Optional.empty(), Optional.empty());
+	}
+
+	@Override
+	public void changePosition(int position) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.of(position), Optional.empty());
+	}
+
+	@Override
+	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.of(topic));
 	}
 
 	@Override
@@ -395,28 +388,25 @@ public class Channel implements IChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
+		if (isPrivate || getGuild().getOwnerID().equals(user.getID()))
+			return EnumSet.allOf(Permissions.class);
+
 		List<IRole> roles = user.getRolesForGuild(parent.getID());
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 
-		for (IRole role : roles) { //Gets permissions granted from roles
-			for (Permissions permission : getModifiedPermissions(role))
-				if (!permissions.contains(permission))
-					permissions.add(permission);
-		}
+		roles.stream()
+				.map(this::getModifiedPermissions)
+				.flatMap(EnumSet::stream)
+				.filter(p -> !permissions.contains(p))
+				.forEach(permissions::add);
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		if (override == null)
 			return permissions;
 
-		for (Permissions permission : override.allow()) {
-			if (!permissions.contains(permission))
-				permissions.add(permission);
-		}
-		for (Permissions permission : override.deny()) {
-			if (permissions.contains(permission)) {
-				permissions.remove(permission);
-			}
-		}
+		permissions.addAll(override.allow().stream().collect(Collectors.toList()));
+		override.deny().forEach(permissions::remove);
+
 		return permissions;
 	}
 
@@ -425,18 +415,14 @@ public class Channel implements IChannel {
 		EnumSet<Permissions> base = role.getPermissions();
 		PermissionOverride override = getRoleOverrides().get(role.getID());
 
-		if (override == null)
-			return base;
+		if (override == null) {
+			if ((override = getRoleOverrides().get(parent.getEveryoneRole().getID())) == null)
+				return base;
+		}
 
-		for (Permissions permission : override.allow()) {
-			if (!base.contains(permission))
-				base.add(permission);
-		}
-		for (Permissions permission : override.deny()) {
-			if (base.contains(permission)) {
-				base.remove(permission);
-			}
-		}
+		base.addAll(override.allow().stream().collect(Collectors.toList()));
+		override.deny().forEach(base::remove);
+
 		return base;
 	}
 
@@ -474,13 +460,43 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID(),
+				new BasicNameValuePair("authorization", client.getToken()));
+
+		userOverrides.remove(user.getID());
+	}
+
+	@Override
+	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID(),
+				new BasicNameValuePair("authorization", client.getToken()));
+
+		roleOverrides.remove(role.getID());
+	}
+
+	@Override
 	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		overridePermissions("role", roleID, toAdd, toRemove);
 	}
 
 	@Override
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		overridePermissions("role", role.getID(), toAdd, toRemove);
+	}
+
+	@Override
 	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		overridePermissions("member", userID, toAdd, toRemove);
+	}
+
+	@Override
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+		overridePermissions("member", user.getID(), toAdd, toRemove);
 	}
 
 	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
@@ -490,16 +506,35 @@ public class Channel implements IChannel {
 			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id,
 							Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)))),
-							new BasicNameValuePair("authorization", client.getToken()),
-							new BasicNameValuePair("content-type", "application/json"));
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
+	}
+
+	@Override
+	public List<IInvite> getInvites() throws DiscordException, HTTP429Exception {
+		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
+				Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
+
+		List<IInvite> invites = new ArrayList<>();
+		for (ExtendedInviteResponse inviteResponse : response)
+			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
+
+		return invites;
 	}
 
 	@Override
 	public String toString() {
 		return mention();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
 	}
 
 	@Override

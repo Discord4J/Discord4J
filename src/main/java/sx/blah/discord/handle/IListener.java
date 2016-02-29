@@ -5,6 +5,7 @@ package sx.blah.discord.handle;
  *
  * @param <T> The event type to handle.
  */
+@FunctionalInterface
 public interface IListener <T extends Event> {
 	
 	/**

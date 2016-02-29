@@ -23,7 +23,7 @@ import java.util.Random;
  * Used to simulate a server.
  */
 public class SpoofBot {
-	
+
 	private static final Random rng = new Random();
 	private IChannel channel;
 	private Spoofs lastSpoof;
@@ -33,12 +33,12 @@ public class SpoofBot {
 	private volatile long timer;
 	private final IDiscordClient other;
 	private final IDiscordClient client;
-	
+
 	public SpoofBot(IDiscordClient other, String email, String password, String invite) throws Exception {
 		this.other = other;
 		client = new ClientBuilder().withLogin(email, password).login();
 		client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
-			
+
 			@Override
 			public void handle(ReadyEvent event) {
 				try {
@@ -49,7 +49,7 @@ public class SpoofBot {
 				}
 				timer = 1;
 				lastTime = System.currentTimeMillis()-timer;
-				new Thread(()->{
+				new Thread(() -> {
 					while (true) {
 						if (lastTime <= System.currentTimeMillis()-timer) {
 							//Time for the next spoof
@@ -70,7 +70,7 @@ public class SpoofBot {
 													e.printStackTrace();
 												}
 												break;
-											
+
 											case MESSAGE_EDIT:
 												try {
 													((IMessage) lastSpoofData).edit(getRandMessage());
@@ -78,20 +78,20 @@ public class SpoofBot {
 													e.printStackTrace();
 												}
 												break;
-											
+
 											case TYPING_TOGGLE:
 												channel.toggleTypingStatus();
 												break;
-											
+
 											case GAME:
 												client.updatePresence(client.getOurUser().getPresence() == Presences.IDLE,
 														Optional.ofNullable(rng.nextBoolean() ? getRandString() : null));
 												break;
-											
+
 											case PRESENCE:
 												client.updatePresence(rng.nextBoolean(), client.getOurUser().getGame());
 												break;
-											
+
 											case MESSAGE_DELETE:
 												try {
 													((IMessage) lastSpoofData).delete();
@@ -99,7 +99,7 @@ public class SpoofBot {
 													e.printStackTrace();
 												}
 												break;
-											
+
 											case INVITE:
 												IInvite invite = null;
 												try {
@@ -118,13 +118,14 @@ public class SpoofBot {
 												}
 												lastSpoofData = invite;
 												break;
-											
+
 											case CHANNEL_CREATE_AND_DELETE:
 												try {
 													final IChannel newChannel = channel.getGuild().createChannel(getRandString());
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
-													new Thread(()->{
-														while (deletionTimer > System.currentTimeMillis()) {}
+													new Thread(() -> {
+														while (deletionTimer > System.currentTimeMillis()) {
+														}
 														try {
 															newChannel.delete();
 														} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
@@ -135,24 +136,25 @@ public class SpoofBot {
 													e.printStackTrace();
 												}
 												break;
-											
+
 											case CHANNEL_EDIT:
 												try {
 													channel.edit(Optional.of(getRandString()), Optional.of(channel.getPosition()), Optional.of(getRandSentence()));
-												} catch (DiscordException  | MissingPermissionsException | HTTP429Exception e) {
+												} catch (DiscordException | MissingPermissionsException | HTTP429Exception e) {
 													e.printStackTrace();
 												}
 												break;
-											
+
 											case ROLE_CREATE_EDIT_AND_DELETE:
 												try {
 													final IRole role = channel.getGuild().createRole();
 													role.edit(Optional.of(new Color(rng.nextInt(255), rng.nextInt(255), rng.nextInt(255))),
-															Optional.of(getRandBoolean()), Optional.of(getRandString()), 
+															Optional.of(getRandBoolean()), Optional.of(getRandString()),
 															Optional.of(EnumSet.allOf(Permissions.class)));
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
-													new Thread(()->{
-														while (deletionTimer > System.currentTimeMillis()) {}
+													new Thread(() -> {
+														while (deletionTimer > System.currentTimeMillis()) {
+														}
 														try {
 															role.delete();
 														} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
@@ -183,7 +185,7 @@ public class SpoofBot {
 			}
 		});
 	}
-	
+
 	/**
 	 * Generates a random message.
 	 *
@@ -195,14 +197,14 @@ public class SpoofBot {
 		for (int i = 0; i < sentences.length; i++) {
 			sentences[i] = getRandSentence();
 		}
-		
+
 		String message = "";
 		for (String sentence : sentences) {
 			message += sentence+getRandEndingPunctuation()+" ";
 		}
 		return message;
 	}
-	
+
 	/**
 	 * Generates a random sentence.
 	 *
@@ -213,7 +215,7 @@ public class SpoofBot {
 		String[] words = new String[wordCount];
 		for (int i = 0; i < wordCount; i++)
 			words[i] = rng.nextInt(9) == 8 ? String.valueOf(rng.nextInt(100)) : getRandString(); //Gets either a random number or a random string
-		
+
 		String message = "";
 		for (String word : words) {
 			message += word+getRandCharacter("      :,;".toCharArray()); //randomizes inline punctuation, weighs spaces more heavily
@@ -221,13 +223,13 @@ public class SpoofBot {
 				message += " ";
 		}
 		message = message.substring(0, message.length()-2);
-		
+
 		if (!isNumber(String.valueOf(message.charAt(0)))) {
 			message = Character.toUpperCase(message.charAt(0))+message.substring(1);
 		}
 		return message;
 	}
-	
+
 	/**
 	 * Checks whether a string is a number.
 	 *
@@ -242,7 +244,7 @@ public class SpoofBot {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Gets a random ending punctuation.
 	 *
@@ -251,7 +253,7 @@ public class SpoofBot {
 	public static Character getRandEndingPunctuation() {
 		return getRandCharacter("?!....".toCharArray()); //Weighted towards periods
 	}
-	
+
 	/**
 	 * Randomizes the time to wait until the next spoof action.
 	 *
@@ -260,7 +262,7 @@ public class SpoofBot {
 	public static long getRandTimer() {
 		return 1000L+(long) (rng.nextDouble()*(3000L-1000L)); //Timer between 1 to 3 seconds
 	}
-	
+
 	/**
 	 * Gets a random number based on the number type provided.
 	 *
@@ -277,7 +279,7 @@ public class SpoofBot {
 		}
 		return rng.nextDouble()*bound;
 	}
-	
+
 	/**
 	 * Gets a random boolean.
 	 *
@@ -286,7 +288,7 @@ public class SpoofBot {
 	public static Boolean getRandBoolean() {
 		return rng.nextBoolean();
 	}
-	
+
 	/**
 	 * Gets a randomized character from the specificed charset.
 	 *
@@ -296,7 +298,7 @@ public class SpoofBot {
 	public static Character getRandCharacter(char[] charSet) {
 		return charSet[rng.nextInt(charSet.length)];
 	}
-	
+
 	/**
 	 * Gets a random alphabetical character.
 	 *
@@ -305,7 +307,7 @@ public class SpoofBot {
 	public static Character getRandCharacter() {
 		return getRandCharacter("abcdefghijklmnopqrstuvwxyz".toCharArray());
 	}
-	
+
 	/**
 	 * Randomizes a string.
 	 *
@@ -318,7 +320,7 @@ public class SpoofBot {
 		}
 		return new String(characters);
 	}
-	
+
 	/**
 	 * Checks if the class is supported to be randomized without recursion.
 	 *
@@ -328,7 +330,7 @@ public class SpoofBot {
 	public static boolean canBeRandomized(Class clazz) {
 		return ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.equals(String.class) || clazz.equals(IDiscordClient.class);
 	}
-	
+
 	/**
 	 * Randomly constructs an object.
 	 *
@@ -355,7 +357,7 @@ public class SpoofBot {
 				return null;
 			else if (IDiscordClient.class.isAssignableFrom(clazz))
 				return (T) client;
-			
+
 		} else {
 			outer:
 			for (Constructor constructor : clazz.getConstructors()) {
@@ -376,7 +378,7 @@ public class SpoofBot {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Adds specific spoofs
 	 *
@@ -385,21 +387,21 @@ public class SpoofBot {
 	public void spoof(Spoofs toSpoof) {
 		enqueued.addLast(toSpoof);
 	}
-	
+
 	/**
 	 * Represents the kind of spoofing this bot is capable of.
 	 */
 	public enum Spoofs {
 		MESSAGE("TYPING_TOGGLE"), MESSAGE_EDIT("MESSAGE"), TYPING_TOGGLE(null), GAME(null), PRESENCE(null),
-		MESSAGE_DELETE("MESSAGE"), INVITE(null), CHANNEL_CREATE_AND_DELETE(null), CHANNEL_EDIT(null), 
+		MESSAGE_DELETE("MESSAGE"), INVITE(null), CHANNEL_CREATE_AND_DELETE(null), CHANNEL_EDIT(null),
 		ROLE_CREATE_EDIT_AND_DELETE(null);
-		
+
 		String dependsOn;
-		
+
 		Spoofs(String dependsOn) {
 			this.dependsOn = dependsOn;
 		}
-		
+
 		/**
 		 * Gets the spoof required for this spoof to run.
 		 *

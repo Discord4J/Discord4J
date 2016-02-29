@@ -9,9 +9,11 @@ import java.util.EnumSet;
  * Use this as a factory to create {@link IDiscordClient} instances
  */
 public class ClientBuilder {
-	
+
 	private String[] loginInfo = new String[0];
-	
+	private long timeoutTime = -1L;
+	private int maxMissedPingCount = -1;
+
 	/**
 	 * Sets the login info for the client. This is a REQUIRED step
 	 *
@@ -23,7 +25,29 @@ public class ClientBuilder {
 		loginInfo = new String[]{email, password};
 		return this;
 	}
-	
+
+	/**
+	 * Makes the client have a timeout.
+	 *
+	 * @param timeoutDelay The timeout delay (in ms).
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withTimeout(long timeoutDelay) {
+		this.timeoutTime = timeoutDelay;
+		return this;
+	}
+
+	/**
+	 * Makes the client have a ping timeout.
+	 *
+	 * @param maxMissedPings The maximum amount of pings that discord can not respond to before disconnecting.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withPingTimeout(int maxMissedPings) {
+		this.maxMissedPingCount = maxMissedPings;
+		return this;
+	}
+
 	/**
 	 * Creates the discord instance with the desired features
 	 *
@@ -34,7 +58,7 @@ public class ClientBuilder {
 	public IDiscordClient build() throws DiscordException {
 		if (loginInfo.length < 2)
 			throw new DiscordException("No login info present!");
-		
+
 		//Warnings for the current version of this api.
 		for (Features feature : EnumSet.allOf(Features.class)) {
 			switch (feature.status) {
@@ -54,9 +78,9 @@ public class ClientBuilder {
 				case SUPPORTED:
 			}
 		}
-		return new DiscordClientImpl(loginInfo[0], loginInfo[1]);
+		return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount);
 	}
-	
+
 	/**
 	 * Performs {@link #build()} and logs in automatically
 	 *

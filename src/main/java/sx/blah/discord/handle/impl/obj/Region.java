@@ -2,6 +2,8 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.handle.obj.IRegion;
 
+import java.util.Objects;
+
 public class Region implements IRegion {
 
 	private final String id, name;
@@ -31,6 +33,11 @@ public class Region implements IRegion {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
 	}
 
 	@Override

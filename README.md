@@ -1,4 +1,4 @@
-# Discord4J  [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [ ![Download](https://api.bintray.com/packages/austinv11/maven/Discord4J/images/download.svg) ](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)
+# Discord4J  [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j)
 
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
@@ -6,7 +6,7 @@ Java interface for the unofficial [Discord](https://discordapp.com/) API, writte
 For the latest dev builds, [download it from my ci server.](https://drone.io/github.com/austinv11/Discord4J/files)
 
 ## Adding Discord4J as a dependency for a project
-Given that `@VERSION@` = the latest version of Discord4J.
+Given that `@VERSION@` = the a version of Discord4J (this can either be a release version, the short commit hash or `dev-SNAPSHOT`).
 ### With maven
 In your `pom.xml` add:
 ```xml
@@ -14,12 +14,8 @@ In your `pom.xml` add:
 <repositories>
   ...
   <repository>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-    <id>bintray-austinv11-maven</id>
-    <name>bintray</name>
-    <url>http://dl.bintray.com/austinv11/maven</url>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
   </repository>
   
   <!-- Include the following repository if you wish to use SNAPSHOT versions -->
@@ -36,8 +32,8 @@ In your `pom.xml` add:
 <dependencies>
   ...
   <dependency>
-    <groupId>sx.blah</groupId>
-    <artifactId>Discord4J</artifactId>
+    <groupId>com.github.austinv11</groupId>
+    <artifactId>Discord4j</artifactId>
     <version>@VERSION@</version>
    <!-- <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
   </dependency>
@@ -51,7 +47,7 @@ In your `build.gradle` add:
 repositories {
   ...
   maven {
-    url  "http://dl.bintray.com/austinv11/maven" 
+    url  "https://jitpack.io"
   }
   
   //Include the following repository if you wish to use SNAPSHOT versions
@@ -62,8 +58,8 @@ repositories {
 ...
 dependencies {
   ...
-  compile "sx.blah:Discord4J:@VERSION@"
-  //compile "sx.blah:Discord4J:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)
+  compile "com.github.austinv11:Discord4j:@VERSION@"
+  //compile "com.github.austinv11:Discord4j:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)
 }
 ...
 ```
@@ -97,7 +93,7 @@ public class InterfaceListener implements IListener<ReadyEvent> { //The event ty
   }
 }
 ```
-.2 Using the `@EventSubscriber` annotation:
+2. Using the `@EventSubscriber` annotation:
 ```java
 public class AnnotationListener {
   
@@ -124,6 +120,9 @@ public class Main {
   }
 }
 ```
+
+### More examples
+See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
 
 ## Deprecation policy
 Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.

@@ -29,16 +29,16 @@ import sx.blah.discord.handle.obj.IMessage;
  * Utility class designed to make message sending easier.
  */
 public class MessageBuilder {
-	
+
 	private String content = "";
 	private IChannel channel;
 	private IDiscordClient client;
 	private boolean tts = false;
-	
+
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
 	}
-	
+
 	/**
 	 * Sets the content of the message.
 	 *
@@ -46,10 +46,10 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withContent(String content) {
-		this.content = content;
-		return this;
+		this.content = "";
+		return appendContent(content);
 	}
-	
+
 	/**
 	 * Sets the content of the message with a given style.
 	 *
@@ -58,10 +58,10 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withContent(String content, Styles styles) {
-		this.content = styles.getMarkdown()+content+styles.getReverseMarkdown();
-		return this;
+		this.content = "";
+		return appendContent(content, styles);
 	}
-	
+
 	/**
 	 * Appends extra text to the current content.
 	 *
@@ -72,7 +72,7 @@ public class MessageBuilder {
 		this.content += content;
 		return this;
 	}
-	
+
 	/**
 	 * Appends extra text to the current content with given style.
 	 *
@@ -84,7 +84,7 @@ public class MessageBuilder {
 		this.content += (styles.getMarkdown()+content+styles.getReverseMarkdown());
 		return this;
 	}
-	
+
 	/**
 	 * Sets the channel that the message should go to.
 	 *
@@ -95,7 +95,7 @@ public class MessageBuilder {
 		this.channel = client.getChannelByID(channelID);
 		return this;
 	}
-	
+
 	/**
 	 * Sets the channel that the message should go to.
 	 *
@@ -106,24 +106,47 @@ public class MessageBuilder {
 		this.channel = channel;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the message to have tts enabled.
-	 * 
+	 *
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withTTS() {
 		tts = true;
 		return this;
 	}
-	
+
+	/**
+	 * Sets the content to a multiline code block with specific language syntax highlighting.
+	 *
+	 * @param language The language to do syntax highlighting for.
+	 * @param content The content of the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withCode(String language, String content) {
+		this.content = "";
+		return appendCode(language, content);
+	}
+
+	/**
+	 * Adds a multiline code block with specific language syntax highlighting.
+	 *
+	 * @param language The language to do syntax highlighting for.
+	 * @param content The content of the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder appendCode(String language, String content) {
+		return appendContent(language+" "+content, Styles.CODE_WITH_LANG);
+	}
+
 	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
 	 * Sends and creates the message object.
 	 *
 	 * @return The message object representing the sent message.
-	 * 
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
@@ -135,12 +158,12 @@ public class MessageBuilder {
 			return channel.sendMessage(content, tts);
 		}
 	}
-	
+
 	/**
 	 * Sends the message, does the same thing as {@link #build()}.
 	 *
 	 * @return The message object representing the sent message.
-	 * 
+	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
@@ -148,7 +171,7 @@ public class MessageBuilder {
 	public IMessage send() throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		return build();
 	}
-	
+
 	/**
 	 * Enum describing Markdown formatting that can be used in chat.
 	 */
@@ -157,20 +180,21 @@ public class MessageBuilder {
 		BOLD("**"),
 		BOLD_ITALICS("***"),
 		STRIKEOUT("~~"),
-		CODE("```"),
+		CODE("``` "),
 		INLINE_CODE("`"),
 		UNDERLINE("__"),
 		UNDERLINE_ITALICS("__*"),
 		UNDERLINE_BOLD("__**"),
-		UNDERLINE_BOLD_ITALICS("__***");
-		
+		UNDERLINE_BOLD_ITALICS("__***"),
+		CODE_WITH_LANG("```");
+
 		final String markdown, reverseMarkdown;
-		
+
 		Styles(String markdown) {
 			this.markdown = markdown;
 			this.reverseMarkdown = new StringBuilder(markdown).reverse().toString();
 		}
-		
+
 		/**
 		 * Gets the markdown formatting for the style.
 		 *
@@ -179,7 +203,7 @@ public class MessageBuilder {
 		public String getMarkdown() {
 			return markdown;
 		}
-		
+
 		/**
 		 * Reverses the markdown formatting to be appended to the end of a formatted string.
 		 *
@@ -187,6 +211,11 @@ public class MessageBuilder {
 		 */
 		public String getReverseMarkdown() {
 			return reverseMarkdown;
+		}
+
+		@Override
+		public String toString() {
+			return markdown;
 		}
 	}
 }

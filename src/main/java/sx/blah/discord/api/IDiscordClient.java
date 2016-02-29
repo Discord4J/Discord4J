@@ -1,16 +1,14 @@
 package sx.blah.discord.api;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.modules.ModuleLoader;
+import sx.blah.discord.util.AudioChannel;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Image;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +23,20 @@ public interface IDiscordClient {
 	 * @return The event dispatcher instance.
 	 */
 	EventDispatcher getDispatcher();
+
+	/**
+	 * Gets the {@link ModuleLoader} instance for this client.
+	 *
+	 * @return The module loader instance.
+	 */
+	ModuleLoader getModuleLoader();
+
+	/**
+	 * Gets the audio channel instance for this client.
+	 *
+	 * @return The audio channel.
+	 */
+	AudioChannel getAudioChannel();
 
 	/**
 	 * Gets the authorization token for this client.
@@ -54,11 +66,48 @@ public interface IDiscordClient {
 	 * @param email Email (if you want to change it)
 	 * @param password Password (if you want to change it).
 	 * @param avatar Image data for the bot's avatar, {@link Image}
-	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * @deprecated Use the split methods instead: {@link #changeUsername(String)}, {@link #changeEmail(String)}, {@link #changePassword(String)}, {@link #changeAvatar(Image)}.
 	 */
+	@Deprecated
 	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException;
+
+	/**
+	 * Changes this client's account's username.
+	 *
+	 * @param username The new username.
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changeUsername(String username) throws DiscordException, HTTP429Exception;
+
+	/**
+	 * Changes this client's account's email.
+	 *
+	 * @param email The new email.
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changeEmail(String email) throws DiscordException, HTTP429Exception;
+
+	/**
+	 * Changes this client's account's password.
+	 *
+	 * @param password The new password.
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changePassword(String password) throws DiscordException, HTTP429Exception;
+
+	/**
+	 * Changes this client's account's avatar.
+	 *
+	 * @param avatar The new avatar.
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception;
 
 	/**
 	 * Updates the bot's presence.
@@ -82,6 +131,15 @@ public interface IDiscordClient {
 	 */
 	IUser getOurUser();
 
+
+	/**
+	 * Gets a set of all channels visible to the bot user.
+	 *
+	 * @param includePrivate Whether to include private channels in the set.
+	 * @return A {@link Collection} of all {@link Channel} objects.
+	 */
+	Collection<IChannel> getChannels(boolean includePrivate);
+
 	/**
 	 * Gets a channel by its unique id.
 	 *
@@ -89,6 +147,13 @@ public interface IDiscordClient {
 	 * @return The {@link Channel} object with the provided id.
 	 */
 	IChannel getChannelByID(String channelID);
+
+	/**
+	 * Gets a set of all voice channels visible to the bot user.
+	 *
+	 * @return A {@link Collection} of all {@link VoiceChannel} objects.
+	 */
+	Collection<IVoiceChannel> getVoiceChannels();
 
 	/**
 	 * Gets a voice channel from a given id.
@@ -127,9 +192,10 @@ public interface IDiscordClient {
 	 * @param user The user who will be the recipient of the private channel.
 	 * @return The {@link PrivateChannel} object.
 	 *
-	 * @throws Exception
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
 	 */
-	IPrivateChannel getOrCreatePMChannel(IUser user) throws Exception;
+	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception;
 
 	/**
 	 * Gets the invite for a code.
@@ -154,8 +220,18 @@ public interface IDiscordClient {
 	 *
 	 * @param regionID The region id.
 	 * @return The region (or null if not found).
+	 * @deprecated Use {@link #getRegionByID(String)}
 	 */
+	@Deprecated
 	IRegion getRegionForID(String regionID);
+
+	/**
+	 * Gets the corresponding region for a given id.
+	 *
+	 * @param regionID The region id.
+	 * @return The region (or null if not found).
+	 */
+	IRegion getRegionByID(String regionID);
 
 	/**
 	 * Creates a new guild.
@@ -167,108 +243,35 @@ public interface IDiscordClient {
 	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * @deprecated Use {@link #createGuild(String, IRegion, Optional)}
 	 */
+	@Deprecated
 	IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
 
 	/**
-	 * Represents an avatar image.
+	 * Creates a new guild.
+	 *
+	 * @param name The name of the guild.
+	 * @param region The region for the guild.
+	 * @param icon The icon for the guild.
+	 * @return The new guild's id.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
 	 */
-	@FunctionalInterface
-	interface Image {
+	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException;
 
-		/**
-		 * Gets the data to send to discord.
-		 *
-		 * @return The data to send to discord, can be null.
-		 */
-		String getData();
+	/**
+	 * Gets the latest response time by the discord websocket to a ping.
+	 *
+	 * @return The response time (in ms).
+	 */
+	long getResponseTime();
 
-		/**
-		 * Gets the image data (avatar id) for for a user's avatar.
-		 *
-		 * @param user The user to get the avatar id for.
-		 * @return The user's avatar image.
-		 */
-		static Image forUser(IUser user) {
-			return user::getAvatar;
-		}
-
-		/**
-		 * Gets the data (null) for the default discord avatar.
-		 *
-		 * @return The default avatar image.
-		 */
-		static Image defaultAvatar() {
-			return ()->null;
-		}
-
-		/**
-		 * Generates an avatar image from bytes representing an image.
-		 *
-		 * @param imageType The image type, ex. jpeg, png, etc.
-		 * @param data The image's bytes.
-		 * @return The avatar image.
-		 */
-		static Image forData(String imageType, byte[] data) {
-			return ()->String.format("data:image/%s;base64,%s", imageType, Base64.encodeBase64String(data));
-		}
-
-		/**
-		 * Generates an avatar image from an input stream representing an image.
-		 *
-		 * @param imageType The image type, ex. jpeg, png, etc.
-		 * @param stream The image's input stream.
-		 * @return The avatar image.
-		 */
-		static Image forStream(String imageType, InputStream stream) {
-			return ()->{
-				try {
-					Image image = forData(imageType, IOUtils.toByteArray(stream));
-					stream.close();
-					return image.getData();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return defaultAvatar().getData();
-			};
-		}
-
-		/**
-		 * Generates an avatar image from a direct link to an image.
-		 *
-		 * @param imageType The image type, ex. jpeg, png, etc.
-		 * @param url The direct link to an image.
-		 * @return The avatar image.
-		 */
-		static Image forUrl(String imageType, String url) {
-			return ()->{
-				try {
-					URLConnection urlConnection = new URL(url).openConnection();
-					InputStream stream = urlConnection.getInputStream();
-					return forStream(imageType, stream).getData();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return defaultAvatar().getData();
-			};
-		}
-
-		/**
-		 * Generates an avatar image from a file.
-		 *
-		 * @param file The image file.
-		 * @return The avatar image.
-		 */
-		static Image forFile(File file) {
-			return ()->{
-				String imageType = FilenameUtils.getExtension(file.getName());
-				try {
-					return forStream(imageType, new FileInputStream(file)).getData();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-				return defaultAvatar().getData();
-			};
-		}
-	}
+	/**
+	 * This returns the voice channel the bot is currently connected to (if connected to one)
+	 *
+	 * @return The optional voice channel.
+	 */
+	Optional<IVoiceChannel> getConnectedVoiceChannel();
 }

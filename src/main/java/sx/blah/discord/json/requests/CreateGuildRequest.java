@@ -1,6 +1,6 @@
 package sx.blah.discord.json.requests;
 
-import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.util.Image;
 
 /**
  * This is sent to create a new guild.
@@ -22,7 +22,7 @@ public class CreateGuildRequest {
 	 */
 	public String icon;
 	
-	public CreateGuildRequest(String name, String region, IDiscordClient.Image icon) {
+	public CreateGuildRequest(String name, String region, Image icon) {
 		this.name = name;
 		this.region = region;
 		this.icon = icon == null ? null : icon.getData();
