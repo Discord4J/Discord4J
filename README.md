@@ -68,6 +68,7 @@ public class Example {
 ```
 ### Events
 The Discord4J library is very event driven. Your bot can detect these events through the use of an event listener. There are two ways of creating an event listener:
+
 1. Using `IListener`:
 ```java
 public class InterfaceListener implements IListener<ReadyEvent> { //The event type in IListener<> can be any class which extends Event
@@ -78,6 +79,7 @@ public class InterfaceListener implements IListener<ReadyEvent> { //The event ty
   }
 }
 ```
+
 2. Using the `@EventSubscriber` annotation:
 ```java
 public class AnnotationListener {
@@ -107,7 +109,7 @@ public class Main {
 ```
 
 ### Modules
-Discord4J has an api for creating modular Discord Bots! See [Martacus's same repo](https://github.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
+Discord4J has an api for creating modular Discord Bots! See [Martacus's sample repo](https://github.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
 
 ### More examples
 See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
