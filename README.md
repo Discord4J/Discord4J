@@ -106,6 +106,9 @@ public class Main {
 }
 ```
 
+### Modules
+Discord4J has an api for creating modular Discord Bots! See [Martacus's same repo](https://github.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
+
 ### More examples
 See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
 
