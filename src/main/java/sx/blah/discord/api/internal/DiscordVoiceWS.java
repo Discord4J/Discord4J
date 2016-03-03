@@ -191,7 +191,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 						} else if (isSpeaking)
 							setSpeaking(false);
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					Discord4J.LOGGER.error("Discord Internal Exception", e);
 				}
 			}

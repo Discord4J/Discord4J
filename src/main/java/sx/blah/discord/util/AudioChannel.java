@@ -213,8 +213,9 @@ public class AudioChannel {
 	public byte[] getAudioData(int length) {
 		if (isPaused)
 			return null;
-		AmplitudeAudioInputStream data = audioQueue.get(0);
-		if (data != null) {
+
+		if (audioQueue.size() > 0) {
+			AmplitudeAudioInputStream data = audioQueue.get(0);
 			AudioMetaData metaData = metaDataQueue.get(0);
 			try {
 				int amountRead;

@@ -216,6 +216,8 @@ public class TestBot {
 							client.getAudioChannel().setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
 						} else if (m.getContent().startsWith(".stop")) {
 							client.getConnectedVoiceChannel().ifPresent(IVoiceChannel::leave);
+						} else if (m.getContent().startsWith(".skip")) {
+							client.getAudioChannel().skip();
 						}
 					}
 				});
