@@ -28,24 +28,19 @@
     <script type="text/javascript">
             //alert("test");
             var rawFile = new XMLHttpRequest();
-            rawFile.open("GET", "http://austinv11.github.io/Discord4J/versions.txt", true);
+            rawFile.open("GET", "https://api.github.com/repos/austinv11/Discord4j/releases", true);
             rawFile.onreadystatechange = function () {
                 var list = document.createElement("ul");
                 document.getElementById("list").appendChild(list);
                 if(rawFile.readyState === 4) {
                     if(rawFile.status === 200 || rawFile.status == 0) {
-                        var allText = rawFile.responseText.split(";").reverse();
-                        for (i = 0; i < allText.length; i++) {
-                            if (allText[i] !== null && allText[i].trim().length > 1) {
-                                var btn = document.createElement("li");
-                                //btn.setAttribute("href", "http://austinv11.github.io/Discord4J/docs/"+allText[i].replace(".", "-")+"/");
-                                //btn.setAttribute("class", "btn");
-                                //alert(allText[i]);
-                                btn.innerHTML = "<a href=http://austinv11.github.io/Discord4J/docs/"+allText[i].trim().split(".").join("-")+"/>"+allText[i].trim()+"</a>"
-                                //btn.appendChild(document.createTextNode(allText[i]));
-                                list.appendChild(btn);
-                                //alert("test");
-                            }
+                        var releases = JSON.parse(rawFile.responseText)
+                        for (i = 0; i < releases.length; i++) {
+                            var release = releases[i]
+                            var version = release.tag_name
+                             var btn = document.createElement("li");
+                             btn.innerHTML = "<a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/javadoc/>"+version+"</a>"
+                             list.appendChild(btn);
                         }
                     }
                 }

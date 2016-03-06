@@ -6,12 +6,12 @@
     <!--<meta http-equiv="refresh" content="1;url=http://example.com">-->
     <script type="text/javascript">
         var rawFile = new XMLHttpRequest();
-        rawFile.open("GET", "http://austinv11.github.io/Discord4J/latest.txt", false);
+        rawFile.open("GET", "https://api.github.com/repos/austinv11/Discord4j/releases", false);
         rawFile.onreadystatechange = function () {
             if(rawFile.readyState === 4) {
                 if(rawFile.status === 200 || rawFile.status == 0) {
-                    var allText = rawFile.responseText;
-                    window.location.href = "http://austinv11.github.io/Discord4J/docs/"+allText+"/";
+                    var releases = JSON.parse(rawFile.responseText)
+                    window.location.href = "https://jitpack.io/com/github/austinv11/Discord4j/"+releases[0].tag_name+"/javadoc/";
                 }
             }
         }
