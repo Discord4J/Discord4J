@@ -20,6 +20,7 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.Requests;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class Guild implements IGuild {
@@ -572,6 +573,12 @@ public class Guild implements IGuild {
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
+	}
+
+
+	@Override
+	public LocalDateTime getCreationDate() {
+		return DiscordUtils.getSnowflakeTimeFromID(id);
 	}
 
 	@Override

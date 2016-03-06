@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,4 +82,11 @@ public interface IUser {
 	 * @return The roles.
 	 */
 	List<IRole> getRolesForGuild(IGuild guild);
+
+	/**
+	 * This calculates the time at which this object has been created by analyzing its Discord ID.
+	 *
+	 * @return The time at which this object was created.
+	 */
+	LocalDateTime getCreationDate();
 }

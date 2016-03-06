@@ -5,6 +5,7 @@ import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -459,4 +460,11 @@ public interface IGuild {
 	 * @throws MissingPermissionsException
 	 */
 	void reorderRoles(IRole... rolesInOrder) throws DiscordException, HTTP429Exception, MissingPermissionsException;
+
+	/**
+	 * This calculates the time at which this object has been created by analyzing its Discord ID.
+	 *
+	 * @return The time at which this object was created.
+	 */
+	LocalDateTime getCreationDate();
 }

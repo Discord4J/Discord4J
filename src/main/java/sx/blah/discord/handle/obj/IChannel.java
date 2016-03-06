@@ -8,6 +8,7 @@ import sx.blah.discord.util.MessageList;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -344,6 +345,13 @@ public interface IChannel {
 	 * @throws HTTP429Exception
 	 */
 	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
+
+	/**
+	 * This calculates the time at which this object has been created by analyzing its Discord ID.
+	 *
+	 * @return The time at which this object was created.
+	 */
+	LocalDateTime getCreationDate();
 
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.

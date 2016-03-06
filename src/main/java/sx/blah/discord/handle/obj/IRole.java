@@ -5,6 +5,7 @@ import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.Optional;
 
@@ -137,4 +138,11 @@ public interface IRole {
 	 * @throws DiscordException
 	 */
 	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
+	 * This calculates the time at which this object has been created by analyzing its Discord ID.
+	 *
+	 * @return The time at which this object was created.
+	 */
+	LocalDateTime getCreationDate();
 }

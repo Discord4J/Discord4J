@@ -30,7 +30,7 @@ public class Message implements IMessage {
 	/**
 	 * The ID of the message. Used for message updating.
 	 */
-	protected final String messageID;
+	protected final String id;
 
 	/**
 	 * The actual message (what you see
@@ -78,11 +78,11 @@ public class Message implements IMessage {
 	 */
 	protected final IDiscordClient client;
 
-	public Message(IDiscordClient client, String messageID, String content, IUser user, IChannel channel,
+	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, Optional<LocalDateTime> editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<Attachment> attachments) {
 		this.client = client;
-		this.messageID = messageID;
+		this.id = id;
 		this.content = content;
 		this.author = (User) user;
 		this.channel = (Channel) channel;
@@ -137,7 +137,7 @@ public class Message implements IMessage {
 
 	@Override
 	public String getID() {
-		return messageID;
+		return id;
 	}
 
 	/**
@@ -180,12 +180,12 @@ public class Message implements IMessage {
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 
-			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
+			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false)), "UTF-8"),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
-			IMessage oldMessage = new Message(client, this.messageID, this.content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, attachments);
+			IMessage oldMessage = new Message(client, this.id, this.content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, attachments);
 			DiscordUtils.getMessageFromJSON(client, channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
@@ -227,7 +227,7 @@ public class Message implements IMessage {
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (client.isReady()) {
-			Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+messageID,
+			Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
 					new BasicNameValuePair("authorization", client.getToken()));
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
@@ -266,13 +266,18 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public LocalDateTime getCreationDate() {
+		return DiscordUtils.getSnowflakeTimeFromID(id);
+	}
+
+	@Override
 	public String toString() {
 		return content;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(messageID);
+		return Objects.hash(id);
 	}
 
 	@Override

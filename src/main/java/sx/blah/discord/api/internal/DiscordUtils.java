@@ -13,6 +13,8 @@ import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
 
+import java.math.BigInteger;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -41,6 +43,11 @@ public class DiscordUtils {
 					+"(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
 					+"[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+
+	/**
+	 * Used to determine age based on discord ids
+	 */
+	public static final BigInteger DISCORD_EPOCH = new BigInteger("1420070400000");
 
 	/**
 	 * Converts a String timestamp into a java object timestamp.
@@ -494,5 +501,16 @@ public class DiscordUtils {
 		}
 		if (missing.size() > 0)
 			throw new MissingPermissionsException(missing);
+	}
+
+	/**
+	 * Gets the time at which a discord id was created.
+	 *
+	 * @param id The id.
+	 * @return The time the id was created.
+	 */
+	public static LocalDateTime getSnowflakeTimeFromID(String id) {
+		long milliseconds = DISCORD_EPOCH.add(new BigInteger(id).shiftRight(22)).longValue();
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.of("UTC+00:00"));
 	}
 }

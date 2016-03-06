@@ -17,6 +17,7 @@ import sx.blah.discord.util.Requests;
 
 import java.awt.*;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -201,6 +202,11 @@ public class Role implements IRole {
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
+	}
+
+	@Override
+	public LocalDateTime getCreationDate() {
+		return DiscordUtils.getSnowflakeTimeFromID(id);
 	}
 
 	@Override

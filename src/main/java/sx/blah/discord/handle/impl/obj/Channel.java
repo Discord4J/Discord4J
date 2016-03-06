@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -525,6 +526,11 @@ public class Channel implements IChannel {
 			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
 
 		return invites;
+	}
+
+	@Override
+	public LocalDateTime getCreationDate() {
+		return DiscordUtils.getSnowflakeTimeFromID(id);
 	}
 
 	@Override

@@ -123,6 +123,13 @@ public interface IMessage {
 	Optional<LocalDateTime> getEditedTimestamp();
 
 	/**
+	 * This calculates the time at which this object has been created by analyzing its Discord ID.
+	 *
+	 * @return The time at which this object was created.
+	 */
+	LocalDateTime getCreationDate();
+
+	/**
 	 * Represents an attachment included in the message.
 	 */
 	class Attachment {

@@ -2,11 +2,13 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Presences;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class User implements IUser {
@@ -169,6 +171,11 @@ public class User implements IUser {
 		}
 
 		roles.get(guildID).add(role);
+	}
+
+	@Override
+	public LocalDateTime getCreationDate() {
+		return DiscordUtils.getSnowflakeTimeFromID(id);
 	}
 
 	@Override
