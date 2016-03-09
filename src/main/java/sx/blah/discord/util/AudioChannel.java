@@ -224,7 +224,7 @@ public class AudioChannel {
 				data.setAmplitudeLinear(volume);
 				amountRead = data.read(audio, 0, audio.length);
 
-				if (amountRead > 0) {
+				if (amountRead > -1) {
 
 					if (!metaData.startedReading) {
 						metaData.startedReading = true;
