@@ -31,7 +31,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
 	 */
-	public static final int MESSAGE_CHUNK_COUNT = 50;
+	public static final int MESSAGE_CHUNK_COUNT = 100;
 
 	/**
 	 * The client that this list is respecting.
@@ -78,7 +78,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
-		load(initialContents);
+		try {
+			load(initialContents);
+		} catch (HTTP429Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
 	}
 
 	/**
@@ -120,6 +124,10 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			return false;
 
 		MessageResponse[] messages = DiscordUtils.GSON.fromJson(response, MessageResponse[].class);
+
+		if (messages.length == 0) {
+			return false;
+		}
 
 		for (MessageResponse messageResponse : messages)
 			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse)))
@@ -261,11 +269,12 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 *
 	 * @param messageCount The amount of messages to load.
 	 * @return True if this action was successful, false if otherwise.
+	 * @throws HTTP429Exception
 	 */
-	public boolean load(int messageCount) {
+	public boolean load(int messageCount) throws HTTP429Exception {
 		try {
 			return queryMessages(messageCount);
-		} catch (DiscordException | HTTP429Exception e) {
+		} catch (DiscordException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return false;
