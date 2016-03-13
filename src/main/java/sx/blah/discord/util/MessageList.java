@@ -31,7 +31,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
 	 */
-	public static final int MESSAGE_CHUNK_COUNT = 50;
+	public static final int MESSAGE_CHUNK_COUNT = 100;
 
 	/**
 	 * The client that this list is respecting.
