@@ -497,8 +497,9 @@ public class DiscordWS extends WebSocketClient {
 					Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
 				if (!user.getGame().equals(Optional.ofNullable(gameName))) {
+					Optional<String> oldGame = user.getGame();
 					user.setGame(Optional.ofNullable(gameName));
-					client.dispatcher.dispatch(new GameChangeEvent(guild, user, user.getGame(), Optional.ofNullable(gameName)));
+					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldGame, Optional.ofNullable(gameName)));
 					Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
 				}
 			}
