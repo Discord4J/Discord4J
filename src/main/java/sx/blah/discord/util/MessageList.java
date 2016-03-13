@@ -125,6 +125,10 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		MessageResponse[] messages = DiscordUtils.GSON.fromJson(response, MessageResponse[].class);
 
+		if (messages.length == 0) {
+			return false;
+		}
+
 		for (MessageResponse messageResponse : messages)
 			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse)))
 				return false;
