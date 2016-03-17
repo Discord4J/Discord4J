@@ -36,9 +36,8 @@ public class User implements IUser {
 	/**
 	 * User discriminator.
 	 * Distinguishes users with the same name.
-	 * This is here in case it becomes necessary.
 	 */
-	protected final String discriminator;
+	protected String discriminator;
 
 	/**
 	 * This user's presence.
@@ -147,6 +146,15 @@ public class User implements IUser {
 	@Override
 	public String getDiscriminator() {
 		return discriminator;
+	}
+
+	/**
+	 * Sets the CACHED discriminator for the user.
+	 *
+	 * @param discriminator The user's new discriminator.
+	 */
+	public void setDiscriminator(String discriminator) {
+		this.discriminator = discriminator;
 	}
 
 	@Override
