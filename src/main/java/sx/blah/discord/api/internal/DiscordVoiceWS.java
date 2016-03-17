@@ -19,6 +19,7 @@ import sx.blah.discord.json.requests.VoiceConnectRequest;
 import sx.blah.discord.json.requests.VoiceSpeakingRequest;
 import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
+import sx.blah.discord.util.AudioChannel;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
@@ -41,7 +42,8 @@ public class DiscordVoiceWS extends WebSocketClient {
 	public static final int OPUS_SAMPLE_RATE = 48000;   //(Hz) We want to use the highest of qualities! All the bandwidth!
 	public static final int OPUS_FRAME_SIZE = 960;
 	public static final int OPUS_FRAME_TIME_AMOUNT = OPUS_FRAME_SIZE*1000/OPUS_SAMPLE_RATE;
-	public static final int OPUS_CHANNEL_COUNT = 2;     //Stereo audio channel
+	public static final int OPUS_MONO_CHANNEL_COUNT = 1;
+	public static final int OPUS_STEREO_CHANNEL_COUNT = 2;
 
 	public static final int OP_INITIAL_CONNECTION = 2;
 	public static final int OP_HEARTBEAT_RETURN = 3;
@@ -174,10 +176,10 @@ public class DiscordVoiceWS extends WebSocketClient {
 			public void run() {
 				try {
 					if (isConnected.get()) {
-						byte[] rawAudio = client.audioChannel.getAudioData(OPUS_FRAME_SIZE);
-						if (rawAudio != null) {
+						AudioChannel.AudioData data = client.audioChannel.getAudioData(OPUS_FRAME_SIZE);
+						if (data != null) {
 							client.timer = System.currentTimeMillis();
-							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, rawAudio, secret);
+							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data.rawData, data.metaData.channels, secret);
 							if (!isSpeaking)
 								setSpeaking(true);
 							udpSocket.send(packet.asUdpPacket(addressPort));

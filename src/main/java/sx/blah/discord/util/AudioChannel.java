@@ -120,9 +120,10 @@ public class AudioChannel {
 	 */
 	public void queueUrl(URL url) {
 		try {
-			metaDataQueue.add(new AudioMetaData(null, url, AudioSystem.getAudioFileFormat(url)));
 			BufferedInputStream bis = new BufferedInputStream(url.openStream());
-			queue(AudioSystem.getAudioInputStream(bis));
+			AudioInputStream stream = AudioSystem.getAudioInputStream(bis);
+			metaDataQueue.add(new AudioMetaData(null, url, AudioSystem.getAudioFileFormat(url), stream.getFormat().getChannels()));
+			queue(stream);
 		} catch (IOException | UnsupportedAudioFileException e) {
 			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
@@ -144,8 +145,9 @@ public class AudioChannel {
 	 */
 	public void queueFile(File file) {
 		try {
-			metaDataQueue.add(new AudioMetaData(file, null, AudioSystem.getAudioFileFormat(file)));
-			queue(AudioSystem.getAudioInputStream(file));
+			AudioInputStream stream = AudioSystem.getAudioInputStream(file);
+			metaDataQueue.add(new AudioMetaData(file, null, AudioSystem.getAudioFileFormat(file), stream.getFormat().getChannels()));
+			queue(stream);
 		} catch (UnsupportedAudioFileException | IOException e) {
 			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
@@ -188,7 +190,7 @@ public class AudioChannel {
 
 		if (metaDataQueue.size() == audioQueue.size()) { //Meta data wasn't added, user directly queued an audio inputstream
 			try {
-				metaDataQueue.add(new AudioMetaData(null, null, AudioSystem.getAudioFileFormat(inSource)));
+				metaDataQueue.add(new AudioMetaData(null, null, AudioSystem.getAudioFileFormat(inSource), audioFormat.getChannels()));
 				return;
 			} catch (UnsupportedAudioFileException | IOException e) {
 				Discord4J.LOGGER.error("Discord Internal Exception", e);
@@ -210,7 +212,7 @@ public class AudioChannel {
 	 * @param length : How many MS of data needed to be sent.
 	 * @return : The PCM data
 	 */
-	public byte[] getAudioData(int length) {
+	public AudioData getAudioData(int length) {
 		if (isPaused)
 			return null;
 
@@ -231,7 +233,7 @@ public class AudioChannel {
 						client.getDispatcher().dispatch(new AudioPlayEvent(data, metaData.fileSource,
 								metaData.urlSource, metaData.format));
 					}
-					return audio;
+					return new AudioData(audio, metaData);
 				} else {
 					audioQueue.remove(0);
 					metaDataQueue.remove(0);
@@ -250,16 +252,52 @@ public class AudioChannel {
 	/**
 	 * Provides a small amount of information regarding the audio being played.
 	 */
-	private class AudioMetaData {
-		protected final File fileSource;
-		protected final URL urlSource;
-		protected final AudioFileFormat format;
-		protected volatile boolean startedReading = false;
+	public class AudioMetaData {
+		/**
+		 * The file source (if present).
+		 */
+		public final File fileSource;
+		/**
+		 * The url source (if present).
+		 */
+		public final URL urlSource;
+		/**
+		 * The file format.
+		 */
+		public final AudioFileFormat format;
+		/**
+		 * Whether the audio has been started reading.
+		 */
+		public volatile boolean startedReading = false;
+		/**
+		 * The amount of channels in the audio.
+		 */
+		public final int channels;
 
-		public AudioMetaData(File fileSource, URL urlSource, AudioFileFormat format) {
+		public AudioMetaData(File fileSource, URL urlSource, AudioFileFormat format, int channels) {
 			this.fileSource = fileSource;
 			this.urlSource = urlSource;
 			this.format = format;
+			this.channels = channels;
+		}
+	}
+
+	/**
+	 * Provides the raw audio data and other things including metadata and channel count.
+	 */
+	public static class AudioData {
+		/**
+		 * The raw audio data.
+		 */
+		public final byte[] rawData;
+		/**
+		 * The metadata for the audio.
+		 */
+		public final AudioMetaData metaData;
+
+		public AudioData(byte[] rawData, AudioMetaData metaData) {
+			this.rawData = rawData;
+			this.metaData = metaData;
 		}
 	}
 }

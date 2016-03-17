@@ -204,7 +204,8 @@ public class TestBot {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.join();
-								client.getAudioChannel().queueFile(new File("./test.mp3"));
+								client.getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
+								client.getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
 							}
 						} else if (m.getContent().startsWith(".pause")) {
 							client.getAudioChannel().pause();

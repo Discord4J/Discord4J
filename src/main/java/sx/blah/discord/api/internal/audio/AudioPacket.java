@@ -33,20 +33,30 @@ import java.util.Arrays;
  */
 public class AudioPacket {
 
-	private static PointerByReference opusEncoder;
-	private static PointerByReference opusDecoder;
+	private static PointerByReference stereoOpusEncoder;
+	private static PointerByReference monoOpusEncoder;
+	private static PointerByReference stereoOpusDecoder;
+	private static PointerByReference monoOpusDecoder;
 
 	static {
 		try {
 			IntBuffer error = IntBuffer.allocate(4);
-			opusEncoder = Opus.INSTANCE.opus_encoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_CHANNEL_COUNT, Opus.OPUS_APPLICATION_AUDIO, error);
+			stereoOpusEncoder = Opus.INSTANCE.opus_encoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_STEREO_CHANNEL_COUNT, Opus.OPUS_APPLICATION_AUDIO, error);
 
 			error = IntBuffer.allocate(4);
-			opusDecoder = Opus.INSTANCE.opus_decoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_CHANNEL_COUNT, error);
+			monoOpusEncoder = Opus.INSTANCE.opus_encoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_MONO_CHANNEL_COUNT, Opus.OPUS_APPLICATION_AUDIO, error);
+
+			error = IntBuffer.allocate(4);
+			stereoOpusDecoder = Opus.INSTANCE.opus_decoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_STEREO_CHANNEL_COUNT, error);
+
+			error = IntBuffer.allocate(4);
+			monoOpusDecoder = Opus.INSTANCE.opus_decoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_MONO_CHANNEL_COUNT, error);
 		} catch (UnsatisfiedLinkError e) {
 			e.printStackTrace();
-			opusEncoder = null;
-			opusDecoder = null;
+			stereoOpusEncoder = null;
+			stereoOpusDecoder = null;
+			monoOpusEncoder = null;
+			monoOpusDecoder = null;
 		}
 	}
 
@@ -61,7 +71,7 @@ public class AudioPacket {
 		this(Arrays.copyOf(packet.getData(), packet.getLength()));
 	}
 
-	public AudioPacket(byte[] rawPacket) {
+	public AudioPacket(byte[] rawPacket) { //FIXME: Support mono & decryption
 		this.rawPacket = rawPacket;
 
 		ByteBuffer buffer = ByteBuffer.wrap(rawPacket);
@@ -75,12 +85,11 @@ public class AudioPacket {
 		this.rawAudio = decodeToPCM(encodedAudio);
 	}
 
-	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, byte[] secret) {
+	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, int channels, byte[] secret) {
 		this.seq = seq;
 		this.ssrc = ssrc;
 		this.timestamp = timestamp;
 		this.rawAudio = rawAudio;
-
 
 		ByteBuffer nonceBuffer = ByteBuffer.allocate(12);
 		nonceBuffer.put(0, (byte) 0x80);
@@ -88,7 +97,7 @@ public class AudioPacket {
 		nonceBuffer.putChar(2, seq);
 		nonceBuffer.putInt(4, timestamp);
 		nonceBuffer.putInt(8, ssrc);
-		this.encodedAudio = TweetNaCl.secretbox(AudioPacket.encodeToOpus(rawAudio),
+		this.encodedAudio = TweetNaCl.secretbox(encodeToOpus(rawAudio, channels),
 				Arrays.copyOf(nonceBuffer.array(), 24), //encryption nonce is 24 bytes long while discord's is 12 bytes long
 				secret);
 
@@ -107,7 +116,7 @@ public class AudioPacket {
 		return new DatagramPacket(getRawPacket(), rawPacket.length, address);
 	}
 
-	public static byte[] encodeToOpus(byte[] rawAudio) {
+	public static byte[] encodeToOpus(byte[] rawAudio, int channels) {
 		ShortBuffer nonEncodedBuffer = ShortBuffer.allocate(rawAudio.length/2);
 		ByteBuffer encoded = ByteBuffer.allocate(4096);
 		for (int i = 0; i < rawAudio.length; i += 2) {
@@ -122,7 +131,12 @@ public class AudioPacket {
 		nonEncodedBuffer.flip();
 
 		//TODO: check for 0 / negative value for error.
-		int result = Opus.INSTANCE.opus_encode(opusEncoder, nonEncodedBuffer, DiscordVoiceWS.OPUS_FRAME_SIZE, encoded, encoded.capacity());
+		int result;
+		if (channels == 1) {
+			result = Opus.INSTANCE.opus_encode(monoOpusEncoder, nonEncodedBuffer, DiscordVoiceWS.OPUS_FRAME_SIZE, encoded, encoded.capacity());
+		} else {
+			result = Opus.INSTANCE.opus_encode(stereoOpusEncoder, nonEncodedBuffer, DiscordVoiceWS.OPUS_FRAME_SIZE, encoded, encoded.capacity());
+		}
 
 		byte[] audio = new byte[result];
 		encoded.get(audio);
@@ -134,7 +148,7 @@ public class AudioPacket {
 
 		ShortBuffer shortBuffer = nonEncodedBuffer.asShortBuffer();
 
-		int result = Opus.INSTANCE.opus_decode(opusDecoder, opusAudio, opusAudio.length, shortBuffer, shortBuffer.capacity(), 0);
+		int result = Opus.INSTANCE.opus_decode(stereoOpusDecoder, opusAudio, opusAudio.length, shortBuffer, shortBuffer.capacity(), 0);
 
 		nonEncodedBuffer.flip();
 
