@@ -220,6 +220,20 @@ public class TestBot {
 							client.getConnectedVoiceChannel().ifPresent(IVoiceChannel::leave);
 						} else if (m.getContent().startsWith(".skip")) {
 							client.getAudioChannel().skip();
+						} else if (m.getContent().startsWith(".test")) {
+							MessageList list = m.getChannel().getMessages();
+							list.setCacheCapacity(200);
+							try {
+								m.getChannel().sendMessage("Initial size: "+list.size()+". Loading 500 messages.");
+								list.load(500);
+								m.getChannel().sendMessage("Final size: "+list.size());
+							} catch (MissingPermissionsException e) {
+								e.printStackTrace();
+							} catch (HTTP429Exception e) {
+								e.printStackTrace();
+							} catch (DiscordException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				});

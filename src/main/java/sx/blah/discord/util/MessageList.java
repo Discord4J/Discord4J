@@ -34,6 +34,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public static final int MESSAGE_CHUNK_COUNT = 100;
 
 	/**
+	 * Represents a maximum message capacity which will be unlimited (-1). Yay, no magic numbers!
+	 */
+	public static final int UNLIMITED_CAPACITY = -1;
+
+	/**
 	 * The client that this list is respecting.
 	 */
 	private final IDiscordClient client;
@@ -52,6 +57,12 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * This is true if the client object has permission to read this channel's messages.
 	 */
 	private volatile boolean hasPermission;
+
+	/**
+	 * This is the maximum amount of messages that will be cached by this list. If negative, it'll store unlimited
+	 * messages.
+	 */
+	private volatile int capacity = UNLIMITED_CAPACITY;
 
 	/**
 	 * @param client The client for this list to respect.
@@ -97,14 +108,38 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public IMessage get(int index) {
 		while (size() <= index) {
 			try {
-				if (!queryMessages(MESSAGE_CHUNK_COUNT))
+				if (!load(MESSAGE_CHUNK_COUNT))
 					throw new ArrayIndexOutOfBoundsException();
-			} catch (DiscordException | HTTP429Exception e) {
+			} catch (Exception e) {
 				throw new ArrayIndexOutOfBoundsException("Error querying for additional messages. (Cause: "+e.getClass().getSimpleName()+")");
 			}
 		}
 
-		return (IMessage) messageCache.toArray()[index];
+		IMessage message = (IMessage) messageCache.toArray()[index];
+
+		purge();
+
+		return message;
+	}
+
+	/**
+	 * This purges the list's internal message cache so that the oldest messages are removed until the list's capacity
+	 * requirements are met.
+	 *
+	 * @return The amount of messages cleared.
+	 */
+	public int purge() {
+		if (capacity >= 0) {
+			int start = size();
+
+			for (int i = start-1; i >= capacity; i--) {
+				messageCache.remove(messageCache.toArray()[i]);
+			}
+
+			return start-size();
+
+		}
+		return 0;
 	}
 
 	private boolean queryMessages(int messageCount) throws DiscordException, HTTP429Exception {
@@ -130,7 +165,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		}
 
 		for (MessageResponse messageResponse : messages)
-			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse)))
+			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse), true))
 				return false;
 
 		return size() - initialSize <= messageCount;
@@ -144,6 +179,18 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	@Override
 	public boolean add(IMessage message) {
+		return add(message, false);
+	}
+
+	/**
+	 * This method was delegated so that the {@link #get(int)} method won't be broken if queried messages exceed the
+	 * list's capacity.
+	 *
+	 * @param message The message to cache.
+	 * @param skipPurge Whether to skip purging the cache, true to skip, false to purge.
+	 * @return True if the object was successfully cached, false if otherwise.
+	 */
+	private boolean add(IMessage message, boolean skipPurge) {
 		if (messageCache.contains(message))
 			return false;
 
@@ -158,7 +205,12 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 				messageCache.addFirst(message);
 		}
 
-		return initialSize != size();
+		boolean cacheChanged = initialSize != size();
+
+		if (!skipPurge)
+			purge();
+
+		return cacheChanged;
 	}
 
 	/**
@@ -265,19 +317,45 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	}
 
 	/**
-	 * This attempts to load the specified number of messages into the list's cache.
+	 * This attempts to load the specified number of messages into the list's cache. NOTE: this calls {@link #purge()}
+	 * after loading.
 	 *
 	 * @param messageCount The amount of messages to load.
 	 * @return True if this action was successful, false if otherwise.
+	 *
 	 * @throws HTTP429Exception
 	 */
 	public boolean load(int messageCount) throws HTTP429Exception {
 		try {
-			return queryMessages(messageCount);
+			boolean success = queryMessages(messageCount);
+
+			purge();
+
+			return success;
 		} catch (DiscordException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return false;
+	}
+
+	/**
+	 * Sets the maximum amount of messages to be cached by this list. NOTE: This purges immediately after changing the
+	 * capacity.
+	 *
+	 * @param capacity The capacity, if negative the capacity will be unlimited.
+	 */
+	public void setCacheCapacity(int capacity) {
+		this.capacity = capacity;
+		purge();
+	}
+
+	/**
+	 * Gets the maximum amount of messages to be cached by this list.
+	 *
+	 * @return The capacity, if negative the capacity will be unlimited.
+	 */
+	public int getCacheCapacity() {
+		return capacity;
 	}
 
 	private void updatePermissions() {
