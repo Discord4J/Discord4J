@@ -137,8 +137,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			}
 
 			return start-size();
-
 		}
+
 		return 0;
 	}
 

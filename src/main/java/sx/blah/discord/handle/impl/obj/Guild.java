@@ -11,10 +11,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.*;
-import sx.blah.discord.json.responses.ChannelResponse;
-import sx.blah.discord.json.responses.ExtendedInviteResponse;
-import sx.blah.discord.json.responses.GuildResponse;
-import sx.blah.discord.json.responses.UserResponse;
+import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.Requests;
@@ -575,6 +572,23 @@ public class Guild implements IGuild {
 		}
 	}
 
+	@Override
+	public int getUsersToBePruned(int days) throws DiscordException, HTTP429Exception {
+		PruneResponse response = DiscordUtils.GSON.fromJson(
+				Requests.GET.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), PruneResponse.class);
+		return response.pruned;
+	}
+
+	@Override
+	public int pruneUsers(int days) throws DiscordException, HTTP429Exception {
+		PruneResponse response = DiscordUtils.GSON.fromJson(
+				Requests.POST.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), PruneResponse.class);
+		return response.pruned;
+	}
 
 	@Override
 	public LocalDateTime getCreationDate() {

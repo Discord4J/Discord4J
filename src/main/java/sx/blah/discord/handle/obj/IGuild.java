@@ -462,6 +462,28 @@ public interface IGuild {
 	void reorderRoles(IRole... rolesInOrder) throws DiscordException, HTTP429Exception, MissingPermissionsException;
 
 	/**
+	 * Gets the amount of users that would be pruned for the given amount of days.
+	 *
+	 * @param days The amount of days of inactivity to lead to a prune.
+	 * @return The amount of users.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	int getUsersToBePruned(int days) throws DiscordException, HTTP429Exception;
+
+	/**
+	 * Prunes guild users for the given amount of days.
+	 *
+	 * @param days The amount of days of inactivity to lead to a prune.
+	 * @return The amount of users.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	int pruneUsers(int days) throws DiscordException, HTTP429Exception;
+
+	/**
 	 * This calculates the time at which this object has been created by analyzing its Discord ID.
 	 *
 	 * @return The time at which this object was created.
