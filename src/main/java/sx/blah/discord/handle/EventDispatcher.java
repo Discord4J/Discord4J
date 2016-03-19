@@ -6,7 +6,6 @@ import sx.blah.discord.api.IDiscordClient;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -31,8 +30,8 @@ public class EventDispatcher {
 	public void registerListener(Object listener) {
 		for (Method method : listener.getClass().getMethods()) {
 			if (method.getParameterCount() == 1
-					&& Modifier.isPublic(method.getModifiers())
 					&& method.isAnnotationPresent(EventSubscriber.class)) {
+				method.setAccessible(true);
 				Class<?> eventClass = method.getParameterTypes()[0];
 				if (Event.class.isAssignableFrom(eventClass)) {
 					if (!methodListeners.containsKey(eventClass))
