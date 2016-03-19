@@ -575,7 +575,7 @@ public class DiscordWS extends WebSocketClient {
 		UserUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, UserUpdateEventResponse.class);
 		User newUser = (User) client.getUserByID(event.id);
 		if (newUser != null) {
-			IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar(), newUser.getPresence());
+			IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar(), newUser.getPresence(), newUser.isBot());
 			newUser = DiscordUtils.getUserFromJSON(client, event);
 			client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
 		}
@@ -759,13 +759,14 @@ public class DiscordWS extends WebSocketClient {
 	}
 
 	@Override
-	public void onClose(int i, String s, boolean b) {
-
+	public void onClose(int code, String reason, boolean remote) {
+		Discord4J.LOGGER.debug("Websocket disconnected. Exit Code: {}. Reason {}. Remote: {}.", code, reason, remote);
 	}
 
 	@Override
 	public void onError(Exception e) {
-		Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		Discord4J.LOGGER.error("Websocket error, disconnecting...", e);
+		disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
 	}
 
 	@Override

@@ -258,13 +258,14 @@ public class DiscordVoiceWS extends WebSocketClient {
 	}
 
 	@Override
-	public void onClose(int i, String s, boolean b) {
-//		System.out.println(s);
+	public void onClose(int code, String reason, boolean remote) {
+		Discord4J.LOGGER.debug("Voice Websocket disconnected. Exit Code: {}. Reason {}. Remote: {}.", code, reason, remote);
 	}
 
 	@Override
 	public void onError(Exception e) {
-		Discord4J.LOGGER.error("Discord Internal Exception", e);
+		Discord4J.LOGGER.error("Voice Websocket error, disconnecting...", e);
+		disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
 	}
 
 	@Override
