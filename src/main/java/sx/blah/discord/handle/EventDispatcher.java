@@ -31,7 +31,7 @@ public class EventDispatcher {
 	public void registerListener(Object listener) {
 		for (Method method : listener.getClass().getMethods()) {
 			if (method.getParameterCount() == 1
-					&& Modifier.isPublic(method.getDeclaringClass().getModifiers())
+					&& Modifier.isPublic(method.getModifiers())
 					&& method.isAnnotationPresent(EventSubscriber.class)) {
 				Class<?> eventClass = method.getParameterTypes()[0];
 				if (Event.class.isAssignableFrom(eventClass)) {
