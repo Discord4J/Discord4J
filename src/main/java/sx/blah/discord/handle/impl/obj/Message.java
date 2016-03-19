@@ -9,10 +9,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.HTTP429Exception;
@@ -268,6 +265,11 @@ public class Message implements IMessage {
 	@Override
 	public LocalDateTime getCreationDate() {
 		return DiscordUtils.getSnowflakeTimeFromID(id);
+	}
+
+	@Override
+	public IGuild getGuild() {
+		return getChannel().getGuild();
 	}
 
 	@Override

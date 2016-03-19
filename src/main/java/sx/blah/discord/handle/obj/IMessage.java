@@ -130,6 +130,13 @@ public interface IMessage {
 	LocalDateTime getCreationDate();
 
 	/**
+	 * Gets the guild this message is from.
+	 *
+	 * @return The guild.
+	 */
+	IGuild getGuild();
+
+	/**
 	 * Represents an attachment included in the message.
 	 */
 	class Attachment {
