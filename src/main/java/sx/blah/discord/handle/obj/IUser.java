@@ -89,4 +89,11 @@ public interface IUser {
 	 * @return The time at which this object was created.
 	 */
 	LocalDateTime getCreationDate();
+
+	/**
+	 * Gets whether or not this user is a bot.
+	 *
+	 * @return True if a bot, false if otherwise.
+	 */
+	boolean isBot();
 }

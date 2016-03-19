@@ -72,7 +72,7 @@ public class DiscordUtils {
 			user.setName(response.username);
 			user.setDiscriminator(response.discriminator);
 		} else {
-			user = new User(client, response.username, response.id, response.discriminator, response.avatar, Presences.OFFLINE);
+			user = new User(client, response.username, response.id, response.discriminator, response.avatar, Presences.OFFLINE, response.bot);
 		}
 		return user;
 	}

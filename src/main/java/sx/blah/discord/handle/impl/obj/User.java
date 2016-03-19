@@ -40,6 +40,11 @@ public class User implements IUser {
 	protected String discriminator;
 
 	/**
+	 * Whether this user is a bot or not.
+	 */
+	protected boolean isBot;
+
+	/**
 	 * This user's presence.
 	 * One of [online/idle/offline].
 	 */
@@ -60,7 +65,7 @@ public class User implements IUser {
 	 */
 	protected final IDiscordClient client;
 
-	public User(IDiscordClient client, String name, String id, String discriminator, String avatar, Presences presence) {
+	public User(IDiscordClient client, String name, String id, String discriminator, String avatar, Presences presence, boolean isBot) {
 		this.client = client;
 		this.id = id;
 		this.name = name;
@@ -69,6 +74,7 @@ public class User implements IUser {
 		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
 		this.presence = presence;
 		this.roles = new HashMap<>();
+		this.isBot = isBot;
 	}
 
 	@Override
@@ -184,6 +190,11 @@ public class User implements IUser {
 	@Override
 	public LocalDateTime getCreationDate() {
 		return DiscordUtils.getSnowflakeTimeFromID(id);
+	}
+
+	@Override
+	public boolean isBot() {
+		return isBot;
 	}
 
 	@Override
