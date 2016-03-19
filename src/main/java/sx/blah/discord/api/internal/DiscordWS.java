@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_10;
+import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.framing.Framedata;
 import org.java_websocket.framing.FramedataImpl1;
@@ -64,7 +64,7 @@ public class DiscordWS extends WebSocketClient {
 	}
 
 	public DiscordWS(DiscordClientImpl client, URI serverURI, long timeoutTime, int maxMissedPingCount) {
-		super(serverURI, new Draft_10(), headers, 0); //Same as super(serverURI) but I added custom headers
+		super(serverURI, new Draft_17(), headers, 0); //Same as super(serverURI) but I added custom headers
 //		super(serverURI);
 		this.client = client;
 		this.timeoutTime = timeoutTime;

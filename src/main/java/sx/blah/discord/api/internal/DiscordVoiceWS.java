@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_10;
+import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
@@ -71,7 +71,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 	private byte[] secret;
 
 	public DiscordVoiceWS(VoiceUpdateResponse event, DiscordClientImpl client) throws URISyntaxException {
-		super(new URI("wss://"+event.endpoint), new Draft_10(), headers, 0);
+		super(new URI("wss://"+event.endpoint), new Draft_17(), headers, 0);
 		this.client = client;
 		this.event = event;
 		try {
