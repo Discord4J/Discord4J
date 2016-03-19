@@ -6,6 +6,7 @@ import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -489,4 +490,16 @@ public interface IGuild {
 	 * @return The time at which this object was created.
 	 */
 	LocalDateTime getCreationDate();
+
+	/**
+	 * Attempts to add a bot to this guild.
+	 *
+	 * @param applicationID The OAuth2 application id for the application owning the bot.
+	 * @param permissions The (optional) permissions for this bot to have when entering the guild.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception;
 }

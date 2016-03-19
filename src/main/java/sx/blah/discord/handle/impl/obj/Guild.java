@@ -596,6 +596,20 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
+
+		try {
+			Requests.POST.makeRequest(DiscordEndpoints.AUTHORIZE+"?client_id="+applicationID+"&scope=bot",
+					new StringEntity(DiscordUtils.GSON.toJson(new BotAddRequest(id,
+							Permissions.generatePermissionsNumber(permissions.orElse(EnumSet.noneOf(Permissions.class)))))),
+					new BasicNameValuePair("authorization", client.getToken()));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(id);
 	}
