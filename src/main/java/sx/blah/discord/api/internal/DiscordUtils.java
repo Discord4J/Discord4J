@@ -66,11 +66,16 @@ public class DiscordUtils {
 	 * Returns a user from the java form of the raw JSON data.
 	 */
 	public static User getUserFromJSON(IDiscordClient client, UserResponse response) {
+		if (response == null)
+			return null;
+
 		User user;
 		if ((user = (User) client.getUserByID(response.id)) != null) {
 			user.setAvatar(response.avatar);
 			user.setName(response.username);
 			user.setDiscriminator(response.discriminator);
+			if (response.bot && !user.isBot())
+				user.convertToBot();
 		} else {
 			user = new User(client, response.username, response.id, response.discriminator, response.avatar, Presences.OFFLINE, response.bot);
 		}
@@ -381,11 +386,10 @@ public class DiscordUtils {
 	/**
 	 * Creates a region object from a json response.
 	 *
-	 * @param client The discord client.
 	 * @param json The json response.
 	 * @return The region object.
 	 */
-	public static IRegion getRegionFromJSON(IDiscordClient client, RegionResponse json) {
+	public static IRegion getRegionFromJSON(RegionResponse json) {
 		return new Region(json.id, json.name, json.vip);
 	}
 
@@ -456,6 +460,7 @@ public class DiscordUtils {
 	 * @param client The client.
 	 * @param channel The channel.
 	 * @param required The permissions required.
+	 *
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(IDiscordClient client, IChannel channel, EnumSet<Permissions> required) throws MissingPermissionsException {
@@ -472,6 +477,7 @@ public class DiscordUtils {
 	 * @param client The client.
 	 * @param guild The guild.
 	 * @param required The permissions required.
+	 *
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(IDiscordClient client, IGuild guild, EnumSet<Permissions> required) throws MissingPermissionsException {
@@ -491,6 +497,7 @@ public class DiscordUtils {
 	 *
 	 * @param contained The permissions contained.
 	 * @param required The permissions required.
+	 *
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(EnumSet<Permissions> contained, EnumSet<Permissions> required) throws MissingPermissionsException {
@@ -513,5 +520,18 @@ public class DiscordUtils {
 	public static LocalDateTime getSnowflakeTimeFromID(String id) {
 		long milliseconds = DISCORD_EPOCH.add(new BigInteger(id).shiftRight(22)).longValue();
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.of("UTC+00:00"));
+	}
+
+	/**
+	 * Gets an application from a json response.
+	 *
+	 * @param client The discord client owner.
+	 * @param response The json representation of an application.
+	 * @return The application object.
+	 */
+	public static IApplication getApplicationFromJSON(IDiscordClient client, ApplicationResponse response) {
+		return new Application(client, response.secret, response.redirect_uris, response.description, response.name,
+				response.id, response.icon, DiscordUtils.getUserFromJSON(client, response.bot),
+				response.bot == null ? null : response.bot.token);
 	}
 }

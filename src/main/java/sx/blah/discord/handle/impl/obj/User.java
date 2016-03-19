@@ -197,6 +197,13 @@ public class User implements IUser {
 		return isBot;
 	}
 
+	/**
+	 * Sets the CACHED isBot status to true.
+	 */
+	public void convertToBot() {
+		isBot = true;
+	}
+
 	@Override
 	public String toString() {
 		return mention();

@@ -95,8 +95,9 @@ public class DiscordWS extends WebSocketClient {
 		if (client.sessionId != null) {
 			send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence)));
 			Discord4J.LOGGER.debug("Reconnected to the Discord websocket.");
-		} else if (!client.token.isEmpty()) {
-			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.token, "Java", Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
+		} else if (!client.getToken().isEmpty()) {
+			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken().replace("Bot ", ""), "Java",  //FIXME: Currently, discord requires that "Bot " be removed from the auth token, I need to make sure that this gets updated if they change that behavior
+					Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
 			Discord4J.LOGGER.debug("Connected to the Discord websocket.");
 		} else {
 			Discord4J.LOGGER.error("Use the login() method to set your token first!");

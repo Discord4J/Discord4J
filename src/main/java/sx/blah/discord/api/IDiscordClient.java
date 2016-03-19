@@ -274,4 +274,32 @@ public interface IDiscordClient {
 	 * @return The optional voice channel.
 	 */
 	Optional<IVoiceChannel> getConnectedVoiceChannel();
+
+	/**
+	 * Gets whether or not this client represents a bot account.
+	 *
+	 * @return True if a bot, false if otherwise.
+	 */
+	boolean isBot();
+
+	/**
+	 * Gets the applications owned by this user.
+	 *
+	 * @return The list of owned applications.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 */
+	List<IApplication> getApplications() throws HTTP429Exception, DiscordException;
+
+	/**
+	 * Creates a new application for this user.
+	 *
+	 * @param name The name of the application.
+	 * @return The application object.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	IApplication createApplication(String name) throws DiscordException, HTTP429Exception;
 }

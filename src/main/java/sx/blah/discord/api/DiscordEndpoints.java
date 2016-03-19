@@ -80,4 +80,24 @@ public final class DiscordEndpoints {
 	 * Voice url.
 	 */
 	public static final String VOICE = APIBASE+"/voice/";
+
+	/**
+	 * The OAuth2 url.
+	 */
+	public static final String OAUTH = APIBASE+"/oauth2/";
+
+	/**
+	 * The applications url.
+	 */
+	public static final String APPLICATIONS = OAUTH+"applications";
+
+	/**
+	 * Application icon url.
+	 */
+	public static final String APPLICATION_ICON = "https://cdn.discordapp.com/app-icons/%s/%s.jpg";
+
+	/**
+	 * The OAuth2 authorization url.
+	 */
+	public static final String AUTHORIZE = "https://discordapp.com/oauth2/authorize";
 }

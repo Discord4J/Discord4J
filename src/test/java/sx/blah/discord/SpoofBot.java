@@ -34,9 +34,9 @@ public class SpoofBot {
 	private final IDiscordClient other;
 	private final IDiscordClient client;
 
-	public SpoofBot(IDiscordClient other, String email, String password, String invite) throws Exception {
+	public SpoofBot(IDiscordClient other, String token, String invite) throws Exception {
 		this.other = other;
-		client = new ClientBuilder().withLogin(email, password).login();
+		client = new ClientBuilder().withToken(token).login();
 		client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 
 			@Override

@@ -136,14 +136,30 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	protected final int maxMissedPingCount;
 
-	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount) {
+	/**
+	 * Whether this client represents a bot.
+	 */
+	protected boolean isBot;
+
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isBot) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
+		this.isBot = isBot;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 		this.audioChannel = new AudioChannel(this);
+	}
+
+	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount) {
+		this(timeoutTime, maxMissedPingCount, false);
 		this.email = email;
 		this.password = password;
+
+	}
+
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount) {
+		this(timeoutTime, maxMissedPingCount, true);
+		this.token = token;
 	}
 
 	@Override
@@ -163,7 +179,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public String getToken() {
-		return token;
+		if (isBot) {
+			return "Bot "+token;
+		} else {
+			return token;
+		}
 	}
 
 	@Override
@@ -173,14 +193,29 @@ public final class DiscordClientImpl implements IDiscordClient {
 				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			}
 
-			LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
-					new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
-					new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
-			this.token = response.token;
+			if (!isBot) {
+				LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
+						new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
+						new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
+				this.token = response.token;
+			} else {
+				if (!validateToken())
+					throw new DiscordException("Invalid token!");
+			}
 
-			this.ws = new DiscordWS(this, new URI(obtainGateway(this.token)), timeoutTime, maxMissedPingCount);
+			this.ws = new DiscordWS(this, new URI(obtainGateway(getToken())), timeoutTime, maxMissedPingCount);
 		} catch (Exception e) {
 			throw new DiscordException("Login error occurred! Are your login details correct?");
+		}
+	}
+
+	private boolean validateToken() {
+		try {
+			Requests.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
+					new BasicNameValuePair("authorization", getToken()));
+			return true;
+		} catch (HTTP429Exception | DiscordException e) {
+			return false;
 		}
 	}
 
@@ -403,8 +438,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 					RegionResponse[].class);
 
 			Arrays.stream(regions)
-					.map(r -> DiscordUtils.getRegionFromJSON(this, r))
-					.forEach(r -> REGIONS.add(r));
+					.map(DiscordUtils::getRegionFromJSON)
+					.forEach(REGIONS::add);
 		}
 
 		return REGIONS;
@@ -457,5 +492,57 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public Optional<IVoiceChannel> getConnectedVoiceChannel() {
 		return Optional.ofNullable(connectedVoiceChannel);
+	}
+
+	@Override
+	public boolean isBot() {
+		return isBot;
+	}
+
+	/**
+	 * FOR INTERNAL USE ONLY: Converts this user client to a bot client.
+	 *
+	 * @param token The bot's new token.
+	 */
+	public void convert(String token) {
+		isBot = true;
+		email = null;
+		password = null;
+		this.token = token;
+
+		if (isReady()) {
+			((User) getOurUser()).convertToBot();
+		}
+	}
+
+	@Override
+	public List<IApplication> getApplications() throws HTTP429Exception, DiscordException {
+		List<IApplication> applications = new ArrayList<>();
+
+		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
+				new BasicNameValuePair("authorization", getToken()),
+				new BasicNameValuePair("content-type", "application/json")), ApplicationResponse[].class);
+
+		for (ApplicationResponse response : responses)
+			applications.add(DiscordUtils.getApplicationFromJSON(this, response));
+
+		return applications;
+	}
+
+	@Override
+	public IApplication createApplication(String name) throws DiscordException, HTTP429Exception {
+		ApplicationResponse response = null;
+		try {
+			response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
+					new StringEntity(DiscordUtils.GSON.toJson(new ApplicationCreateRequest(name))),
+					new BasicNameValuePair("authorization", getToken()),
+					new BasicNameValuePair("content-type", "application/json")), ApplicationResponse.class);
+			return DiscordUtils.getApplicationFromJSON(this, response);
+
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+
+		return null;
 	}
 }

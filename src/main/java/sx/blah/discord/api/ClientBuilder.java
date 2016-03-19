@@ -1,9 +1,6 @@
 package sx.blah.discord.api;
 
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordClientImpl;
-
-import java.util.EnumSet;
 
 /**
  * Use this as a factory to create {@link IDiscordClient} instances
@@ -13,17 +10,44 @@ public class ClientBuilder {
 	private String[] loginInfo = new String[0];
 	private long timeoutTime = -1L;
 	private int maxMissedPingCount = -1;
+	private boolean isBot = false;
+	private String botToken;
 
 	/**
-	 * Sets the login info for the client. This is a REQUIRED step
+	 * Sets the login info for the client. This is a REQUIRED step.
 	 *
-	 * @param email The user's email
-	 * @param password The user's password
-	 * @return The instance of the builder
+	 * @param email The user's email.
+	 * @param password The user's password.
+	 * @return The instance of the builder.
+	 *
+	 * @deprecated The Discord Developers discourage using a user account! This library still supports its usage, but
+	 * it is discouraged.
 	 */
+	@Deprecated
 	public ClientBuilder withLogin(String email, String password) {
 		loginInfo = new String[]{email, password};
 		return this;
+	}
+
+	/**
+	 * Sets the client to be a bot, replacement for {@link #withLogin(String, String)} for bot accounts.
+	 *
+	 * @param token The bot's token.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withToken(String token) {
+		this.botToken = token;
+		isBot = true;
+		return this;
+	}
+
+	/**
+	 * Gets the provided token.
+	 *
+	 * @return The provided token.
+	 */
+	public String getToken() {
+		return botToken;
 	}
 
 	/**
@@ -56,29 +80,14 @@ public class ClientBuilder {
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
 	public IDiscordClient build() throws DiscordException {
-		if (loginInfo.length < 2)
+		if ((loginInfo.length < 2 && !isBot) && botToken == null)
 			throw new DiscordException("No login info present!");
 
-		//Warnings for the current version of this api.
-		for (Features feature : EnumSet.allOf(Features.class)) {
-			switch (feature.status) {
-				case UNSUPPORTED:
-					Discord4J.LOGGER.warn("Feature '{}' is unsupported by Discord4J!", feature.name());
-					break;
-				case DEPRECATED:
-					Discord4J.LOGGER.warn("Feature '{}' has been deprecated by Discord4J! It may not work as intended and may be changed in the future.", feature.name());
-					break;
-				case EXPERIMENTAL:
-					Discord4J.LOGGER.warn("Feature '{}' is experimental! It is still WIP and is incomplete.", feature.name());
-					break;
-				case READ_ONLY:
-				case WRITE_ONLY:
-					Discord4J.LOGGER.warn("Feature '{}' is {}!", feature.name(), feature.status.name());
-					break;
-				case SUPPORTED:
-			}
+		if (isBot) {
+			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount);
+		} else {
+			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount);
 		}
-		return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount);
 	}
 
 	/**

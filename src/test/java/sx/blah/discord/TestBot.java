@@ -7,7 +7,9 @@ import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MessageBuilder;
 
 import java.io.File;
 import java.util.Optional;
@@ -24,7 +26,7 @@ public class TestBot {
 
 	@Test(timeout = 300000L)
 	public void testBot() {
-		main(System.getenv("USER"), System.getenv("PSW"), "CITest");
+		main(System.getenv("USER"), "CITest");
 	}
 
 	/**
@@ -36,13 +38,21 @@ public class TestBot {
 	public static void main(String... args) {
 		try {
 			Configuration.LOAD_EXTERNAL_MODULES = false; //temp
-			IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
+
+			boolean isTesting = args[args.length-1].equals("CITest");
+
+			IDiscordClient client;
+
+			if ((isTesting && args.length > 2) || (!isTesting && args.length > 1))
+				client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
+			else
+				client = new ClientBuilder().withToken(args[0]).build();
 
 			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
 			});
 
-			if (args.length > 2) { //CI Testing
+			if (isTesting) { //CI Testing
 				Discord4J.LOGGER.debug("CI Test Initiated");
 				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
 
@@ -85,7 +95,7 @@ public class TestBot {
 							}
 
 							//Time to unleash the ai
-							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("PSW"), System.getenv("SPOOF_INVITE"));
+							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("SPOOF_INVITE"));
 
 							final long now = System.currentTimeMillis();
 							new Thread(() -> {
@@ -220,16 +230,6 @@ public class TestBot {
 							client.getConnectedVoiceChannel().ifPresent(IVoiceChannel::leave);
 						} else if (m.getContent().startsWith(".skip")) {
 							client.getAudioChannel().skip();
-						} else if (m.getContent().startsWith(".test")) {
-							try {
-								m.getChannel().sendMessage("Users to be pruned for 1 day: "+m.getChannel().getGuild().getUsersToBePruned(1));
-							} catch (MissingPermissionsException e) {
-								e.printStackTrace();
-							} catch (HTTP429Exception e) {
-								e.printStackTrace();
-							} catch (DiscordException e) {
-								e.printStackTrace();
-							}
 						}
 					}
 				});

@@ -99,6 +99,8 @@ public enum Requests {
 					return null;
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
+				} else if (responseCode < 200 || responseCode > 299) {
+					throw new DiscordException("Received response code "+responseCode+". With response text: "+message);
 				}
 
 				JsonParser parser = new JsonParser();
@@ -163,6 +165,8 @@ public enum Requests {
 						return null;
 					} else if (responseCode == 204) { //There is a no content response when deleting messages
 						return null;
+					} else if (responseCode < 200 || responseCode > 299) {
+						throw new DiscordException("Received response code "+responseCode+". With response text: "+message);
 					}
 
 					JsonParser parser = new JsonParser();
