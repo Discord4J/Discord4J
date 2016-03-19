@@ -68,12 +68,8 @@ public class TestBot {
 					public void handle(ReadyEvent readyEvent) {
 						try {
 							//Initialize required data
-							IInvite testInvite = client.getInviteForCode(System.getenv("INVITE").replace("https://discord.gg/", ""));
-							Invite.InviteResponse response = testInvite.accept();
-							IInvite spoofInvite = client.getInviteForCode(System.getenv("SPOOF_INVITE").replace("https://discord.gg/", ""));
-							Invite.InviteResponse spoofResponse = spoofInvite.accept();
-							final IChannel testChannel = client.getChannelByID(response.getChannelID());
-							final IChannel spoofChannel = client.getChannelByID(spoofResponse.getChannelID());
+							final IChannel testChannel = client.getChannelByID(System.getenv("CHANNEL"));
+							final IChannel spoofChannel = client.getChannelByID(System.getenv("SPOOF_CHANNEL"));
 							String buildNumber = System.getenv("BUILD_ID");
 
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
@@ -95,7 +91,7 @@ public class TestBot {
 							}
 
 							//Time to unleash the ai
-							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("SPOOF_INVITE"));
+							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("SPOOF_CHANNEL"));
 
 							final long now = System.currentTimeMillis();
 							new Thread(() -> {

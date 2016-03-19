@@ -34,7 +34,7 @@ public class SpoofBot {
 	private final IDiscordClient other;
 	private final IDiscordClient client;
 
-	public SpoofBot(IDiscordClient other, String token, String invite) throws Exception {
+	public SpoofBot(IDiscordClient other, String token, String channelID) throws Exception {
 		this.other = other;
 		client = new ClientBuilder().withToken(token).login();
 		client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
@@ -42,7 +42,7 @@ public class SpoofBot {
 			@Override
 			public void handle(ReadyEvent event) {
 				try {
-					channel = client.getChannelByID(client.getInviteForCode(invite.replace("https://discord.gg/", "")).accept().getChannelID());
+					channel = client.getChannelByID(channelID);
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new RuntimeException("Spoofing failed!");
