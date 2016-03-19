@@ -42,6 +42,7 @@ public class EventDispatcher {
 						methodListeners.get(eventClass).put(method, new CopyOnWriteArrayList<>());
 
 					methodListeners.get(eventClass).get(method).add(listener);
+					Discord4J.LOGGER.trace("Registered method listener {}", listener.getClass().getSimpleName(), method.toString());
 				}
 			}
 		}
@@ -58,6 +59,7 @@ public class EventDispatcher {
 			if (!classListeners.containsKey(rawType))
 				classListeners.put(rawType, new CopyOnWriteArrayList<>());
 
+			Discord4J.LOGGER.trace("Registered IListener {}", listener.getClass().getSimpleName());
 			classListeners.get(rawType).add(listener);
 		}
 	}
@@ -73,8 +75,10 @@ public class EventDispatcher {
 				Class<?> eventClass = method.getParameterTypes()[0];
 				if (Event.class.isAssignableFrom(eventClass)) {
 					if (methodListeners.containsKey(eventClass))
-						if (methodListeners.get(eventClass).containsKey(method))
+						if (methodListeners.get(eventClass).containsKey(method)) {
 							methodListeners.get(eventClass).get(method).remove(listener);
+							Discord4J.LOGGER.trace("Unregistered method listener {}", listener.getClass().getSimpleName(), method.toString());
+						}
 				}
 			}
 		}
@@ -88,8 +92,10 @@ public class EventDispatcher {
 	public void unregisterListener(IListener listener) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (Event.class.isAssignableFrom(rawType)) {
-			if (classListeners.containsKey(rawType))
+			if (classListeners.containsKey(rawType)) {
 				classListeners.get(rawType).remove(listener);
+				Discord4J.LOGGER.trace("Unregistered IListener {}", listener.getClass().getSimpleName());
+			}
 		}
 	}
 
