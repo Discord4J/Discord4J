@@ -81,12 +81,14 @@ public class DiscordWS extends WebSocketClient {
 	 * Disconnects the client WS.
 	 */
 	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
-		client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
-		isConnected.set(false);
-		close();
-		executorService.shutdownNow();
-		client.ws = null;
-		Thread.currentThread().interrupt();
+		if (isConnected.get()) {
+			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
+			isConnected.set(false);
+			close();
+			executorService.shutdownNow();
+			client.ws = null;
+			Thread.currentThread().interrupt();
+		}
 	}
 
 
