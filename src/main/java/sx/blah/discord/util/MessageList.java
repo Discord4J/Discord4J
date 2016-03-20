@@ -31,7 +31,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
 	 */
-	public static final int MESSAGE_CHUNK_COUNT = 100;
+	public static final int MESSAGE_CHUNK_COUNT = 100; //100 is the max amount discord lets you retrieve at one time
 
 	/**
 	 * Represents a maximum message capacity which will be unlimited (-1). Yay, no magic numbers!
@@ -62,7 +62,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * This is the maximum amount of messages that will be cached by this list. If negative, it'll store unlimited
 	 * messages.
 	 */
-	private volatile int capacity = UNLIMITED_CAPACITY;
+	private volatile int capacity = 256;
 
 	/**
 	 * @param client The client for this list to respect.

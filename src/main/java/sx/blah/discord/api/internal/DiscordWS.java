@@ -64,7 +64,7 @@ public class DiscordWS extends WebSocketClient {
 	}
 
 	public DiscordWS(DiscordClientImpl client, URI serverURI, long timeoutTime, int maxMissedPingCount) {
-		super(serverURI, new Draft_17(), headers, 0); //Same as super(serverURI) but I added custom headers
+		super(serverURI, new Draft_17(), headers, (int) timeoutTime); //Same as super(serverURI) but I added custom headers
 //		super(serverURI);
 		this.client = client;
 		this.timeoutTime = timeoutTime;

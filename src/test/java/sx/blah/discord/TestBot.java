@@ -10,10 +10,13 @@ import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.RequestBuffer;
 
 import java.io.File;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -226,6 +229,21 @@ public class TestBot {
 							client.getConnectedVoiceChannel().ifPresent(IVoiceChannel::leave);
 						} else if (m.getContent().startsWith(".skip")) {
 							client.getAudioChannel().skip();
+						} else if (m.getContent().startsWith(".spam")) {
+							m.getChannel().getMessages().setCacheCapacity(100);
+							new Timer().scheduleAtFixedRate(new TimerTask() {
+								@Override
+								public void run() {
+									RequestBuffer.request(() -> {
+										try {
+											return m.getChannel().sendMessage("spam");
+										} catch (MissingPermissionsException | DiscordException e) {
+											e.printStackTrace();
+										}
+										return null;
+									});
+								}
+							}, 0, 5000);
 						}
 					}
 				});
