@@ -101,6 +101,14 @@ public class AudioChannel {
 	}
 
 	/**
+	 * Clears the entire queue for the audio channel.
+	 */
+	public void clearQueue() {
+		metaDataQueue.clear();
+		audioQueue.clear();
+	}
+
+	/**
 	 * Queues a url to be streamed.
 	 *
 	 * @param url The url to stream.
