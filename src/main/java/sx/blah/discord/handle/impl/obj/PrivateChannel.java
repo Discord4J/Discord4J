@@ -52,11 +52,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void removePermissionsOverride(String id) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		throw new UnsupportedOperationException();
 	}
@@ -67,17 +62,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -103,11 +88,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public int getPosition() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException {
 		throw new UnsupportedOperationException();
 	}
 

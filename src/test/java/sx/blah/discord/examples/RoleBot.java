@@ -12,7 +12,6 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class RoleBot extends BaseBot implements IListener<ReadyEvent> {
@@ -42,7 +41,7 @@ public class RoleBot extends BaseBot implements IListener<ReadyEvent> {
 			role.changePermissions(permissions); // Changes the permissions of the role to our set of permissions.
 
 			IUser ourUser = event.getClient().getOurUser(); // Gets the user of the bot
-			guild.editUserRoles(ourUser.getID(), new String[]{role.getID()}); // Assigns our new role to the bot. NOTE: This will make the bot's ONLY role our role.
+			guild.editUserRoles(ourUser, new IRole[]{role}); // Assigns our new role to the bot. NOTE: This will make the bot's ONLY role our role.
 		} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) { // Error occurred
 			e.printStackTrace();
 		}

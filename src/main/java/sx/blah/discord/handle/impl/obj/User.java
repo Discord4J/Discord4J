@@ -174,11 +174,6 @@ public class User implements IUser {
 	}
 
 	@Override
-	public List<IRole> getRolesForGuild(String guildID) {
-		return roles.getOrDefault(guildID, new ArrayList<>());
-	}
-
-	@Override
 	public List<IRole> getRolesForGuild(IGuild guild) {
 		return roles.getOrDefault(guild.getID(), new ArrayList<>());
 	}

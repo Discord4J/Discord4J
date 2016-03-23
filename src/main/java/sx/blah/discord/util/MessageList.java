@@ -421,7 +421,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		@EventSubscriber
 		public void onRoleUpdate(RoleUpdateEvent event) {
 			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild()) &&
-					list.client.getOurUser().getRolesForGuild(list.channel.getGuild().getID()).contains(event.getNewRole()))
+					list.client.getOurUser().getRolesForGuild(list.channel.getGuild()).contains(event.getNewRole()))
 				list.updatePermissions();
 		}
 

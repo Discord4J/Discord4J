@@ -227,11 +227,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IRole getRoleForID(String id) {
-		return getRoleByID(id);
-	}
-
-	@Override
 	public IRole getRoleByID(String id) {
 		return roles.stream()
 				.filter(r -> r.getID().equalsIgnoreCase(id))
@@ -244,11 +239,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IVoiceChannel getVoiceChannelForID(String id) {
-		return getVoiceChannelByID(id);
-	}
-
-	@Override
 	public IVoiceChannel getVoiceChannelByID(String id) {
 		return voiceChannels.stream()
 				.filter(c -> c.getID().equals(id))
@@ -257,7 +247,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IVoiceChannel getAFKChannel() {
-		return getVoiceChannelForID(afkChannel);
+		return getVoiceChannelByID(afkChannel);
 	}
 
 	@Override
@@ -300,18 +290,8 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void banUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		banUser(userID, 0);
-	}
-
-	@Override
 	public void banUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		banUser(user, 0);
-	}
-
-	@Override
-	public void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		banUser(getUserByID(userID), deleteMessagesForDays);
 	}
 
 	@Override
@@ -331,30 +311,11 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void kickUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		kickUser(getUserByID(userID));
-	}
-
-	@Override
 	public void kickUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.KICK));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
-	}
-
-	@Override
-	public void editUserRoles(String userID, String[] roleIDs) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
-
-		try {
-			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+userID,
-					new StringEntity(DiscordUtils.GSON.toJson(new MemberEditRequest(roleIDs))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json"));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-		}
 	}
 
 	@Override
@@ -371,8 +332,7 @@ public class Guild implements IGuild {
 		}
 	}
 
-	@Override//TODO: make private
-	public void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	private void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
@@ -411,15 +371,6 @@ public class Guild implements IGuild {
 	@Override
 	public void changeAFKTimeout(int timeout) throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), null, null, Optional.of(timeout));
-	}
-
-	@Override
-	public void deleteOrLeaveGuild() throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		if (ownerID.equals(client.getOurUser().getID())) {
-			deleteGuild();
-		} else {
-			leaveGuild();
-		}
 	}
 
 	@Override
@@ -508,11 +459,6 @@ public class Guild implements IGuild {
 	 */
 	public void setRegion(String regionID) {
 		this.regionID = regionID;
-	}
-
-	@Override
-	public void transferOwnership(String newOwnerID) throws HTTP429Exception, MissingPermissionsException, DiscordException {
-		transferOwnership(getUserByID(newOwnerID));
 	}
 
 	@Override

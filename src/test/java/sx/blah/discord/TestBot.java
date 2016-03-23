@@ -153,7 +153,7 @@ public class TestBot {
 						} else if (m.getContent().startsWith(".name ")) {
 							String s = m.getContent().split(" ", 2)[1];
 							try {
-								client.changeAccountInfo(Optional.of(s), Optional.empty(), Optional.empty(), Optional.of(Image.forUser(client.getOurUser())));
+								client.changeUsername(s);
 								m.reply("is this better?");
 							} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
 								e.printStackTrace();
@@ -184,9 +184,9 @@ public class TestBot {
 							try {
 								if (m.getContent().split(" ").length > 1) {
 									String url = m.getContent().split(" ")[1];
-									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(Image.forUrl(url.substring(url.lastIndexOf('.')), url)));
+									client.changeAvatar(Image.forUrl(url.substring(url.lastIndexOf('.')), url));
 								} else {
-									client.changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(Image.defaultAvatar()));
+									client.changeAvatar(Image.defaultAvatar());
 								}
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -196,7 +196,7 @@ public class TestBot {
 								return;
 							StringJoiner roleJoiner = new StringJoiner(", ");
 							StringJoiner permissionsJoiner = new StringJoiner(", ");
-							for (IRole role : m.getMentions().get(0).getRolesForGuild(m.getChannel().getGuild().getID())) {
+							for (IRole role : m.getMentions().get(0).getRolesForGuild(m.getChannel().getGuild())) {
 								Discord4J.LOGGER.info("{}", role.getID());
 								for (Permissions permissions : role.getPermissions()) {
 									permissionsJoiner.add(permissions.toString());

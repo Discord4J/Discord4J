@@ -436,14 +436,14 @@ public class DiscordWS extends WebSocketClient {
 		User user = (User) client.getUserByID(event.user.id);
 
 		if (guild != null && user != null) {
-			List<IRole> oldRoles = new ArrayList<>(user.getRolesForGuild(guild.getID()));
-			user.getRolesForGuild(guild.getID()).clear();
+			List<IRole> oldRoles = new ArrayList<>(user.getRolesForGuild(guild));
+			user.getRolesForGuild(guild).clear();
 			for (String role : event.roles)
-				user.addRole(guild.getID(), guild.getRoleForID(role));
+				user.addRole(guild.getID(), guild.getRoleByID(role));
 
-			user.addRole(guild.getID(), guild.getRoleForID(guild.getID())); //@everyone role
+			user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
 
-			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild.getID()), user, guild));
+			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
 		}
 	}
 
@@ -669,7 +669,7 @@ public class DiscordWS extends WebSocketClient {
 		GuildRoleEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
-			IRole toUpdate = guild.getRoleForID(event.role.id);
+			IRole toUpdate = guild.getRoleByID(event.role.id);
 			if (toUpdate != null) {
 				IRole oldRole = new Role(toUpdate.getPosition(),
 						Permissions.generatePermissionsNumber(toUpdate.getPermissions()), toUpdate.getName(),
@@ -684,7 +684,7 @@ public class DiscordWS extends WebSocketClient {
 		GuildRoleDeleteEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildRoleDeleteEventResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
-			IRole role = guild.getRoleForID(event.role_id);
+			IRole role = guild.getRoleByID(event.role_id);
 			if (role != null) {
 				guild.getRoles().remove(role);
 				client.dispatcher.dispatch(new RoleDeleteEvent(role, guild));

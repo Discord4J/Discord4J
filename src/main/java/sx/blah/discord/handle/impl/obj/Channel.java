@@ -310,8 +310,7 @@ public class Channel implements IChannel {
 		return getMessageByID(lastReadMessageID);
 	}
 
-	@Override//TODO: make private
-	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception {
+	private void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
 		String newName = name.orElse(this.name);
@@ -392,7 +391,7 @@ public class Channel implements IChannel {
 		if (isPrivate || getGuild().getOwnerID().equals(user.getID()))
 			return EnumSet.allOf(Permissions.class);
 
-		List<IRole> roles = user.getRolesForGuild(parent.getID());
+		List<IRole> roles = user.getRolesForGuild(parent);
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 
 		roles.stream()
@@ -448,19 +447,6 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
-
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
-				new BasicNameValuePair("authorization", client.getToken()));
-		if (roleOverrides.containsKey(id)) {
-			roleOverrides.remove(id);
-		} else {
-			userOverrides.remove(id);
-		}
-	}
-
-	@Override
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
@@ -481,18 +467,8 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		overridePermissions("role", roleID, toAdd, toRemove);
-	}
-
-	@Override
 	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		overridePermissions("role", role.getID(), toAdd, toRemove);
-	}
-
-	@Override
-	public void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		overridePermissions("member", userID, toAdd, toRemove);
 	}
 
 	@Override

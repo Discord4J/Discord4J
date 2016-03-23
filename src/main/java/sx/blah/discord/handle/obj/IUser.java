@@ -71,16 +71,6 @@ public interface IUser {
 	/**
 	 * Gets the roles the user is a part of.
 	 *
-	 * @param guildID The guild id to check the roles for.
-	 * @return The roles.
-	 * @deprecated Use {@link #getRolesForGuild(IGuild)}
-	 */
-	@Deprecated
-	List<IRole> getRolesForGuild(String guildID);
-
-	/**
-	 * Gets the roles the user is a part of.
-	 *
 	 * @param guild The guild to check the roles for.
 	 * @return The roles.
 	 */

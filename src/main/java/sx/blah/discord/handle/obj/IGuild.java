@@ -99,16 +99,6 @@ public interface IGuild {
 	 *
 	 * @param id The role id of the desired role.
 	 * @return The role, or null if not found.
-	 * @deprecated Use {@link #getRoleByID(String)}
-	 */
-	@Deprecated
-	IRole getRoleForID(String id);
-
-	/**
-	 * Gets a role object for its unique id.
-	 *
-	 * @param id The role id of the desired role.
-	 * @return The role, or null if not found.
 	 */
 	IRole getRoleByID(String id);
 
@@ -118,16 +108,6 @@ public interface IGuild {
 	 * @return The voice channels.
 	 */
 	List<IVoiceChannel> getVoiceChannels();
-
-	/**
-	 * Gets a voice channel for a give id.
-	 *
-	 * @param id The channel id.
-	 * @return The voice channel (or null if not found).
-	 * @deprecated Use {@link #getVoiceChannelByID(String)}
-	 */
-	@Deprecated
-	IVoiceChannel getVoiceChannelForID(String id);
 
 	/**
 	 * Gets a voice channel for a give id.
@@ -175,19 +155,6 @@ public interface IGuild {
 	/**
 	 * Bans a user from this guild.
 	 *
-	 * @param userID The user to ban.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use {@link #banUser(IUser)}
-	 */
-	@Deprecated
-	void banUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Bans a user from this guild.
-	 *
 	 * @param user The user to ban.
 	 *
 	 * @throws MissingPermissionsException
@@ -195,20 +162,6 @@ public interface IGuild {
 	 * @throws DiscordException
 	 */
 	void banUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Bans a user from this guild.
-	 *
-	 * @param userID The user to ban.
-	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use {@link #banUser(IUser, int)}
-	 */
-	@Deprecated
-	void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Bans a user from this guild.
@@ -236,19 +189,6 @@ public interface IGuild {
 	/**
 	 * Kicks a user from the guild.
 	 *
-	 * @param userID The user to kick.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use {@link #kickUser(IUser)}
-	 */
-	@Deprecated
-	void kickUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Kicks a user from the guild.
-	 *
 	 * @param user The user to kick.
 	 *
 	 * @throws MissingPermissionsException
@@ -256,20 +196,6 @@ public interface IGuild {
 	 * @throws DiscordException
 	 */
 	void kickUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Edits the roles a user is a part of.
-	 *
-	 * @param userID The user to edit the roles for.
-	 * @param roleIDs The roles for the user to have.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use {@link #editUserRoles(IUser, IRole[])}
-	 */
-	@Deprecated
-	void editUserRoles(String userID, String[] roleIDs) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Edits the roles a user is a part of.
@@ -282,23 +208,6 @@ public interface IGuild {
 	 * @throws DiscordException
 	 */
 	void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Edits the guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param regionID The region id for the guild.
-	 * @param icon The icon for the guild.
-	 * @param afkChannelID The afk channel for the guild. NOTE: if not present there will be no afk channel.
-	 * @param afkTimeout The afk timeout for the guild.
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated See {@link #changeName(String)}, {@link #changeRegion(IRegion)}, {@link #changeIcon(Optional)},
-	 * {@link #changeAFKChannel(Optional)}, {@link #changeAFKTimeout(int)}
-	 */
-	@Deprecated
-	void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Changes the name of the guild.
@@ -351,17 +260,6 @@ public interface IGuild {
 	void changeAFKTimeout(int timeout) throws HTTP429Exception, DiscordException, MissingPermissionsException;
 
 	/**
-	 * Deletes the channel if you are its owner or leaves it if not.
-	 *
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
-	 * @deprecated See {@link #deleteGuild()} and {@link #leaveGuild()}.
-	 */
-	@Deprecated
-	void deleteOrLeaveGuild() throws HTTP429Exception, DiscordException, MissingPermissionsException;
-
-	/**
 	 * This deletes this guild if and only if you are its owner, otherwise it throws a {@link MissingPermissionsException}.
 	 *
 	 * @throws DiscordException
@@ -409,19 +307,6 @@ public interface IGuild {
 	 * @return The region.
 	 */
 	IRegion getRegion();
-
-	/**
-	 * Transfers the ownership of this guild to another user.
-	 *
-	 * @param newOwnerID The new owner's user id.
-	 *
-	 * @throws HTTP429Exception
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 * @deprecated Use {@link #transferOwnership(IUser)}
-	 */
-	@Deprecated
-	void transferOwnership(String newOwnerID) throws HTTP429Exception, MissingPermissionsException, DiscordException;
 
 	/**
 	 * Transfers the ownership of this guild to another user.

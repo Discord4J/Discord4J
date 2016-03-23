@@ -66,7 +66,7 @@ public class Role implements IRole {
 
 	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, IGuild guild) {
 		this.position = position;
-		this.permissions = Permissions.getAllPermissionsForNumber(permissions);
+		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
 		this.name = name;
 		this.managed = managed;
 		this.id = id;
@@ -100,7 +100,7 @@ public class Role implements IRole {
 	 * @param permissions The permissions number.
 	 */
 	public void setPermissions(int permissions) {
-		this.permissions = Permissions.getAllPermissionsForNumber(permissions);
+		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
 	}
 
 	@Override
@@ -160,8 +160,7 @@ public class Role implements IRole {
 		return guild;
 	}
 
-	@Override //TODO make private
-	public void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {

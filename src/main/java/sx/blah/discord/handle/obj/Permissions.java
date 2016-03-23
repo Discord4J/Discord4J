@@ -6,7 +6,7 @@ import java.util.EnumSet;
  * This represents Discord permissions.
  */
 public enum Permissions {
-	
+
 	/**
 	 * Allows the user to create invites.
 	 */
@@ -96,16 +96,16 @@ public enum Permissions {
 	 * Allows the user to use "voice activation detection".
 	 */
 	VOICE_USE_VAD(25);
-	
+
 	/**
 	 * The bit offset in the permissions number
 	 */
 	public int offset;
-	
+
 	Permissions(int offset) {
 		this.offset = offset;
 	}
-	
+
 	/**
 	 * Checks whether a provided "permissions number" contains this permission.
 	 *
@@ -120,7 +120,7 @@ public enum Permissions {
 			return MANAGE_ROLES.hasPermission(permissionsNumber);
 		return false;
 	}
-	
+
 	/**
 	 * Checks whether a provided "permissions number" contains this permission. Same as calling #hasPermission(number, true).
 	 *
@@ -130,20 +130,7 @@ public enum Permissions {
 	public boolean hasPermission(int permissionsNumber) {
 		return hasPermission(permissionsNumber, true);
 	}
-	
-	/**
-	 * Generates a set of permissions represented by the given raw permissions number.
-	 *
-	 * @param permissionsNumber The raw permissions number.
-	 * @return The set of permissions represented by the number.
-	 *
-	 * @deprecated See {@link #getAllowedPermissionsForNumber(int)} or {@link #getDeniedPermissionsForNumber(int)}.
-	 */
-	@Deprecated
-	public static EnumSet<Permissions> getAllPermissionsForNumber(int permissionsNumber) {
-		return getAllowedPermissionsForNumber(permissionsNumber);
-	}
-	
+
 	/**
 	 * Generates a set of allowed permissions represented by the given raw permissions number.
 	 *
@@ -152,15 +139,15 @@ public enum Permissions {
 	 */
 	public static EnumSet<Permissions> getAllowedPermissionsForNumber(int permissionsNumber) {
 		EnumSet<Permissions> permissionsSet = EnumSet.noneOf(Permissions.class);
-		
+
 		for (Permissions permission : EnumSet.allOf(Permissions.class)) {
 			if (permission.hasPermission(permissionsNumber))
 				permissionsSet.add(permission);
 		}
-		
+
 		return permissionsSet;
 	}
-	
+
 	/**
 	 * Generates a set of denied permissions represented by the given raw permissions number.
 	 *
@@ -169,15 +156,15 @@ public enum Permissions {
 	 */
 	public static EnumSet<Permissions> getDeniedPermissionsForNumber(int permissionsNumber) {
 		EnumSet<Permissions> permissionsSet = EnumSet.noneOf(Permissions.class);
-		
+
 		for (Permissions permission : EnumSet.allOf(Permissions.class)) {
 			if (permission.hasPermission(permissionsNumber, false))
 				permissionsSet.add(permission);
 		}
-		
+
 		return permissionsSet;
 	}
-	
+
 	/**
 	 * Generates a raw permissions number for the provided set of permissions.
 	 *

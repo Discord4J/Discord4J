@@ -60,20 +60,6 @@ public interface IDiscordClient {
 	void logout() throws HTTP429Exception, DiscordException;
 
 	/**
-	 * Allows you to change the info on your bot.
-	 *
-	 * @param username Username (if you want to change it).
-	 * @param email Email (if you want to change it)
-	 * @param password Password (if you want to change it).
-	 * @param avatar Image data for the bot's avatar, {@link Image}
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use the split methods instead: {@link #changeUsername(String)}, {@link #changeEmail(String)}, {@link #changePassword(String)}, {@link #changeAvatar(Image)}.
-	 */
-	@Deprecated
-	void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException;
-
-	/**
 	 * Changes this client's account's username.
 	 *
 	 * @param username The new username.
@@ -220,33 +206,8 @@ public interface IDiscordClient {
 	 *
 	 * @param regionID The region id.
 	 * @return The region (or null if not found).
-	 * @deprecated Use {@link #getRegionByID(String)}
-	 */
-	@Deprecated
-	IRegion getRegionForID(String regionID);
-
-	/**
-	 * Gets the corresponding region for a given id.
-	 *
-	 * @param regionID The region id.
-	 * @return The region (or null if not found).
 	 */
 	IRegion getRegionByID(String regionID);
-
-	/**
-	 * Creates a new guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param regionID The region id for the guild.
-	 * @param icon The icon for the guild.
-	 * @return The new guild's id.
-	 *
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use {@link #createGuild(String, IRegion, Optional)}
-	 */
-	@Deprecated
-	IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException;
 
 	/**
 	 * Creates a new guild.

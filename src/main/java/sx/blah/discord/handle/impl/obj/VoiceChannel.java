@@ -104,11 +104,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
@@ -116,10 +111,5 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void setLastReadMessageID(String lastReadMessageID) {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void edit(Optional<String> name, Optional<Integer> position) throws DiscordException, MissingPermissionsException, HTTP429Exception {
-		super.edit(name, position, Optional.empty());
 	}
 }

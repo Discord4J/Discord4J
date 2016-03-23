@@ -251,8 +251,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return gateway;
 	}
 
-	@Override //TODO: Make private
-	public void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException {
+	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException {
 		Discord4J.LOGGER.debug("Changing account info.");
 
 		if (!isReady()) {
@@ -446,11 +445,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IRegion getRegionForID(String regionID) {
-		return getRegionByID(regionID);
-	}
-
-	@Override
 	public IRegion getRegionByID(String regionID) {
 		try {
 			return getRegions().stream()
@@ -460,11 +454,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 		return null;
-	}
-
-	@Override
-	public IGuild createGuild(String name, String regionID, Optional<Image> icon) throws HTTP429Exception, DiscordException {
-		return createGuild(name, getRegionByID(regionID), icon);
 	}
 
 	@Override

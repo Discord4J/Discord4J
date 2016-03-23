@@ -139,7 +139,8 @@ public class SpoofBot {
 
 											case CHANNEL_EDIT:
 												try {
-													channel.edit(Optional.of(getRandString()), Optional.of(channel.getPosition()), Optional.of(getRandSentence()));
+													channel.changeName(getRandString());
+													channel.changeTopic(getRandSentence());
 												} catch (DiscordException | MissingPermissionsException | HTTP429Exception e) {
 													e.printStackTrace();
 												}
@@ -148,9 +149,9 @@ public class SpoofBot {
 											case ROLE_CREATE_EDIT_AND_DELETE:
 												try {
 													final IRole role = channel.getGuild().createRole();
-													role.edit(Optional.of(new Color(rng.nextInt(255), rng.nextInt(255), rng.nextInt(255))),
-															Optional.of(getRandBoolean()), Optional.of(getRandString()),
-															Optional.of(EnumSet.allOf(Permissions.class)));
+													role.changeColor(new Color(rng.nextInt(255), rng.nextInt(255), rng.nextInt(255)));
+													role.changeName(getRandString());
+													role.changePermissions(EnumSet.allOf(Permissions.class));
 													final long deletionTimer = getRandTimer()+System.currentTimeMillis();
 													new Thread(() -> {
 														while (deletionTimer > System.currentTimeMillis()) {

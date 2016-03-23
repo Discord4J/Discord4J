@@ -181,9 +181,9 @@ public class DiscordUtils {
 			guild.getRoles().addAll(newRoles);
 
 			for (IUser user : guild.getUsers()) { //Removes all deprecated roles
-				for (IRole role : user.getRolesForGuild(guild.getID())) {
-					if (guild.getRoleForID(role.getID()) == null) {
-						user.getRolesForGuild(guild.getID()).remove(role);
+				for (IRole role : user.getRolesForGuild(guild)) {
+					if (guild.getRoleByID(role.getID()) == null) {
+						user.getRolesForGuild(guild).remove(role);
 					}
 				}
 			}
@@ -242,11 +242,11 @@ public class DiscordUtils {
 	public static IUser getUserFromGuildMemberResponse(IDiscordClient client, IGuild guild, GuildResponse.MemberResponse json) {
 		User user = getUserFromJSON(client, json.user);
 		for (String role : json.roles) {
-			Role roleObj = (Role) guild.getRoleForID(role);
-			if (roleObj != null && !user.getRolesForGuild(guild.getID()).contains(roleObj))
+			Role roleObj = (Role) guild.getRoleByID(role);
+			if (roleObj != null && !user.getRolesForGuild(guild).contains(roleObj))
 				user.addRole(guild.getID(), roleObj);
 		}
-		user.addRole(guild.getID(), guild.getRoleForID(guild.getID())); //@everyone role
+		user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
 		return user;
 	}
 
@@ -377,7 +377,7 @@ public class DiscordUtils {
 	 */
 	public static IRole getRoleFromJSON(IGuild guild, RoleResponse json) {
 		Role role;
-		if ((role = (Role) guild.getRoleForID(json.id)) != null) {
+		if ((role = (Role) guild.getRoleByID(json.id)) != null) {
 			role.setColor(json.color);
 			role.setHoist(json.hoist);
 			role.setName(json.name);
@@ -410,7 +410,7 @@ public class DiscordUtils {
 	public static IVoiceChannel getVoiceChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) { //FIXME
 		VoiceChannel channel;
 
-		if ((channel = (VoiceChannel) guild.getVoiceChannelForID(json.id)) != null) {
+		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(json.id)) != null) {
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
@@ -489,7 +489,7 @@ public class DiscordUtils {
 	public static void checkPermissions(IDiscordClient client, IGuild guild, EnumSet<Permissions> required) throws MissingPermissionsException {
 		try {
 			EnumSet<Permissions> contained = EnumSet.noneOf(Permissions.class);
-			List<IRole> roles = client.getOurUser().getRolesForGuild(guild.getID());
+			List<IRole> roles = client.getOurUser().getRolesForGuild(guild);
 			for (IRole role : roles) {
 				contained.addAll(role.getPermissions());
 			}

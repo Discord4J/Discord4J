@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Defines a text channel in a guild/server.
@@ -156,20 +155,6 @@ public interface IChannel {
 	IMessage getLastReadMessage();
 
 	/**
-	 * Edits the channel.
-	 *
-	 * @param name The new name of the channel.
-	 * @param position The new position of the channel.
-	 * @param topic The new topic of the channel.
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @deprecated See {@link #changeName(String)}, {@link #changePosition(int)}, {@link #changeTopic(String)}
-	 */
-	@Deprecated
-	void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception;
-
-	/**
 	 * Changes the name of the channel
 	 *
 	 * @param name The new name of the channel.
@@ -248,19 +233,6 @@ public interface IChannel {
 	/**
 	 * Removes a permissions override on this channel.
 	 *
-	 * @param id The id of the override to remove, this is either a user id or role id.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use either {@link #removePermissionsOverride(IUser)} or {@link #removePermissionsOverride(IRole)}
-	 */
-	@Deprecated
-	void removePermissionsOverride(String id) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Removes a permissions override on this channel.
-	 *
 	 * @param user The user whose override should be removed.
 	 *
 	 * @throws MissingPermissionsException
@@ -283,21 +255,6 @@ public interface IChannel {
 	/**
 	 * Creates/edits permission overrides for this channel.
 	 *
-	 * @param roleID The role id of the role to create/edit the permission overrides for.
-	 * @param toAdd The permissions to add.
-	 * @param toRemove The permissions to remove.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use {@link #overrideRolePermissions(IRole, EnumSet, EnumSet)}
-	 */
-	@Deprecated
-	void overrideRolePermissions(String roleID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Creates/edits permission overrides for this channel.
-	 *
 	 * @param role The role to create/edit the permission overrides for.
 	 * @param toAdd The permissions to add.
 	 * @param toRemove The permissions to remove.
@@ -307,21 +264,6 @@ public interface IChannel {
 	 * @throws DiscordException
 	 */
 	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
-
-	/**
-	 * Creates/edits permission overrides for this channel.
-	 *
-	 * @param userID The user id of the user to create/edit the permission overrides for.
-	 * @param toAdd The permissions to add.
-	 * @param toRemove The permissions to remove.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated Use {@link #overrideUserPermissions(IUser, EnumSet, EnumSet)}
-	 */
-	@Deprecated
-	void overrideUserPermissions(String userID, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Creates/edits permission overrides for this channel.

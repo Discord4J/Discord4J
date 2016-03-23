@@ -7,7 +7,6 @@ import sx.blah.discord.util.HTTP429Exception;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
-import java.util.Optional;
 
 /**
  * Represents a role.
@@ -69,22 +68,6 @@ public interface IRole {
 	 * @return The guild.
 	 */
 	IGuild getGuild();
-
-	/**
-	 * Edits this role.
-	 *
-	 * @param color The new color for the role.
-	 * @param hoist Whether the role should now be hoisted.
-	 * @param name The new name for the role.
-	 * @param permissions The new permissions for the role.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 * @deprecated See {@link #changeColor(Color)}, {@link #changeHoist(boolean)}, {@link #changeName(String)}, {@link #changePermissions(EnumSet)}
-	 */
-	@Deprecated
-	void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
 	 * Changes the color of the role.
