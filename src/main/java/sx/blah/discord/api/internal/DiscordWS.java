@@ -715,14 +715,25 @@ public class DiscordWS extends WebSocketClient {
 	}
 
 	private void voiceStateUpdate(JsonElement eventObject) {
-		GuildResponse.VoiceStateResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.VoiceStateResponse.class);
+		VoiceStateResponse event = DiscordUtils.GSON.fromJson(eventObject, VoiceStateResponse.class);
 		IGuild guild = client.getGuildByID(event.guild_id);
 
 		if (guild != null) {
-			IVoiceChannel channel = guild.getVoiceChannelForID(event.channel_id);
+			IVoiceChannel channel = guild.getVoiceChannelByID(event.channel_id);
 			IUser user = guild.getUserByID(event.user_id);
-
-			client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
+			IVoiceChannel oldChannel = user.getVoiceChannel().orElse(null);
+			((User) user).setVoiceChannel(channel);
+			if (channel != oldChannel) {
+				if (channel == null) {
+					client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(oldChannel));
+				} else if (oldChannel == null) {
+					client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(channel));
+				} else {
+					client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(oldChannel, channel));
+				}
+			} else {
+				client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
+			}
 		}
 	}
 

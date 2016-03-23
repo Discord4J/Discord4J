@@ -1,13 +1,18 @@
 package sx.blah.discord.handle.impl.obj;
 
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
+import sx.blah.discord.api.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Presences;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.requests.MoveMemberRequest;
+import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Requests;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -59,6 +64,11 @@ public class User implements IUser {
 	 * The roles the user is a part of. (Key = guild id).
 	 */
 	protected HashMap<String, List<IRole>> roles;
+
+	/**
+	 * The voice channel this user is in.
+	 */
+	protected IVoiceChannel channel;
 
 	/**
 	 * The client that created this object.
@@ -202,6 +212,32 @@ public class User implements IUser {
 	 */
 	public void convertToBot() {
 		isBot = true;
+	}
+
+	@Override
+	public void moveVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception {
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
+					new StringEntity(DiscordUtils.GSON.toJson(new MoveMemberRequest(newChannel.getID()))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		}catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public Optional<IVoiceChannel> getVoiceChannel() {
+		return Optional.ofNullable(channel);
+	}
+
+	/**
+	 * Sets the CACHED voice channel this user is in.
+	 *
+	 * @param channel The new channel.
+	 */
+	public void setVoiceChannel(IVoiceChannel channel) {
+		this.channel = channel;
 	}
 
 	@Override

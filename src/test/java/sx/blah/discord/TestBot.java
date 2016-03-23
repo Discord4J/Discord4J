@@ -244,6 +244,14 @@ public class TestBot {
 									});
 								}
 							}, 0, 5000);
+						} else if (m.getContent().startsWith(".move ")) {
+							String target = m.getContent().split(" ")[1];
+							try {
+								client.getOurUser().moveVoiceChannel(m.getGuild().getVoiceChannels().stream()
+										.filter((IVoiceChannel channel)->channel.getName().equals(target)).findFirst().orElseGet(null));
+							} catch (DiscordException | HTTP429Exception e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				});

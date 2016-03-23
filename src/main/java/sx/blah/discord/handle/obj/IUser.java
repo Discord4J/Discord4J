@@ -1,5 +1,8 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.util.HTTP429Exception;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -96,4 +99,21 @@ public interface IUser {
 	 * @return True if a bot, false if otherwise.
 	 */
 	boolean isBot();
+
+	/**
+	 * Moves this user to a different voice channel.
+	 *
+	 * @param newChannel The new channel the user should move to.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void moveVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception;
+
+	/**
+	 * Gets the voice channel this user is in (if in one).
+	 *
+	 * @return The (optional) voice channel.
+	 */
+	Optional<IVoiceChannel> getVoiceChannel();
 }

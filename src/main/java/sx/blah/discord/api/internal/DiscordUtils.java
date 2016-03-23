@@ -220,6 +220,12 @@ public class DiscordUtils {
 						guild.addVoiceChannel(getVoiceChannelFromJSON(client, guild, channelResponse));
 					}
 				}
+
+			if (json.voice_states != null) {
+				for (VoiceStateResponse voiceState : json.voice_states) {
+					((User) guild.getUserByID(voiceState.user_id)).setVoiceChannel(guild.getVoiceChannelByID(voiceState.channel_id));
+				}
+			}
 		}
 
 		return guild;
