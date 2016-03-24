@@ -772,7 +772,7 @@ public class DiscordWS extends WebSocketClient {
 
 	@Override
 	public void onClose(int code, String reason, boolean remote) {
-		Discord4J.LOGGER.debug("Websocket disconnected. Exit Code: {}. Reason {}. Remote: {}.", code, reason, remote);
+		Discord4J.LOGGER.debug("Websocket disconnected. Exit Code: {}. Reason: {}. Remote: {}.", code, reason, remote);
 		disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
 	}
 

@@ -191,6 +191,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			if (ws != null) {
 				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
+				if (voiceWS != null)
+					voiceWS.disconnect(VoiceDisconnectedEvent.Reason.RECONNECTING);
+				lastSequence = 0;
+				sessionId = null; //Prevents the websocket from sending a resume request.
 			}
 
 			if (!isBot) {
@@ -225,6 +229,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 			if (voiceWS != null)
 				voiceWS.disconnect(VoiceDisconnectedEvent.Reason.LOGGED_OUT);
+
+			lastSequence = 0;
+			sessionId = null; //Prevents the websocket from sending a resume request.
 
 			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));

@@ -257,15 +257,13 @@ public class TestBot {
 						}
 					}
 
-					//Used for convienence in testing
+					//Used for convenience in testing
 					private void test(IMessage message) {
-						System.out.println(message.getChannel().getPosition());
 						try {
-							message.getChannel().changeTopic(message.getContent().split(" ")[1]);
-						} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
+							client.login();
+						} catch (DiscordException e) {
 							e.printStackTrace();
 						}
-						System.out.println(message.getChannel().getPosition());
 					}
 				});
 
