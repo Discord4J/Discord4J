@@ -12,16 +12,7 @@ import java.util.concurrent.*;
  */
 public class RequestBuffer {
 
-	static {
-		Runtime.getRuntime().addShutdownHook(new Thread() { //Handles closing the request timer
-			@Override
-			public void run() {
-				requestTimer.cancel();
-			}
-		});
-	}
-
-	private static final Timer requestTimer = new Timer("Request Buffer Timer");
+	private static final Timer requestTimer = new Timer("Request Buffer Timer", true);
 
 	/**
 	 * Here it is, the magical method that does it all.

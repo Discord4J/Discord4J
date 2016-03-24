@@ -49,7 +49,6 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
@@ -95,27 +94,27 @@ public class Channel implements IChannel {
 	protected AtomicBoolean isTyping = new AtomicBoolean(false);
 
 	/**
-	 * Keeps track of the time to handle repeated typing status broadcasts
+	 * Manages all TimerTasks which send typing statuses.
 	 */
-	protected AtomicLong typingTimer = new AtomicLong(0);
+	protected static Timer typingTimer = new Timer("Typing Status Timer", true);
 
 	/**
-	 * 5 seconds, the time it takes for one typing status to "wear off"
+	 * 5 seconds, the time it takes for one typing status to "wear off".
 	 */
 	protected static final long TIME_FOR_TYPE_STATUS = 5000;
 
 	/**
-	 * The position of this channel in the channel list
+	 * The position of this channel in the channel list.
 	 */
 	protected int position;
 
 	/**
-	 * The permission overrides for users (key = user id)
+	 * The permission overrides for users (key = user id).
 	 */
 	protected Map<String, PermissionOverride> userOverrides;
 
 	/**
-	 * The permission overrides for roles (key = user id)
+	 * The permission overrides for roles (key = user id).
 	 */
 	protected Map<String, PermissionOverride> roleOverrides;
 
@@ -274,25 +273,22 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public synchronized void toggleTypingStatus() { //TODO: Use an alternative to a direct thread
+	public synchronized void toggleTypingStatus() {
 		isTyping.set(!isTyping.get());
 
-		if (isTyping.get()) {
-			typingTimer.set(System.currentTimeMillis()-TIME_FOR_TYPE_STATUS);
-			new Thread(() -> {
-				while (isTyping.get()) {
-					if (typingTimer.get() <= System.currentTimeMillis()-TIME_FOR_TYPE_STATUS) {
-						typingTimer.set(System.currentTimeMillis());
-						try {
-							Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
-									new BasicNameValuePair("authorization", client.getToken()));
-						} catch (HTTP429Exception | DiscordException e) {
-							Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-						}
-					}
+		typingTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				if (!isTyping.get())
+					this.cancel();
+				try {
+					Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
+							new BasicNameValuePair("authorization", client.getToken()));
+				} catch (HTTP429Exception | DiscordException e) {
+					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 				}
-			}).start();
-		}
+			}
+		}, 0, TIME_FOR_TYPE_STATUS);
 	}
 
 	@Override
