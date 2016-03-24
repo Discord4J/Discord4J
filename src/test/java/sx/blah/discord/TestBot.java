@@ -252,7 +252,20 @@ public class TestBot {
 							} catch (DiscordException | HTTP429Exception e) {
 								e.printStackTrace();
 							}
+						} else if (m.getContent().startsWith(".test")) {
+							test(m);
 						}
+					}
+
+					//Used for convienence in testing
+					private void test(IMessage message) {
+						System.out.println(message.getChannel().getPosition());
+						try {
+							message.getChannel().changeTopic(message.getContent().split(" ")[1]);
+						} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
+							e.printStackTrace();
+						}
+						System.out.println(message.getChannel().getPosition());
 					}
 				});
 
