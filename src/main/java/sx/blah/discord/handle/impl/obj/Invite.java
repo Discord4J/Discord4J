@@ -3,13 +3,13 @@ package sx.blah.discord.handle.impl.obj;
 import com.google.gson.Gson;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.DiscordEndpoints;
-import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.json.responses.InviteJSONResponse;
 import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.Requests;
+import sx.blah.discord.api.internal.Requests;
 
 import java.util.Objects;
 

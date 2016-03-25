@@ -1,11 +1,13 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.json.responses.MetricResponse;
 import sx.blah.discord.json.responses.StatusResponse;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.Requests;
+import sx.blah.discord.api.internal.Requests;
 
 import java.time.LocalDateTime;
 

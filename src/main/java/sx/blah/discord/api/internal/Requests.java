@@ -1,4 +1,4 @@
-package sx.blah.discord.util;
+package sx.blah.discord.api.internal;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
@@ -10,9 +10,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.DiscordException;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.json.responses.RateLimitResponse;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.HTTP429Exception;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

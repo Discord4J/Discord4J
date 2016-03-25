@@ -1,4 +1,4 @@
-package sx.blah.discord.util;
+package sx.blah.discord.api.internal;
 
 import com.sun.jna.*;
 import com.sun.jna.ptr.FloatByReference;

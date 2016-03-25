@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.Event;
+import sx.blah.discord.api.Event;
 
 /**
  * This event is dispatched when a voice heartbeat is received.

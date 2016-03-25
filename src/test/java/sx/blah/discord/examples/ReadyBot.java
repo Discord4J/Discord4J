@@ -1,8 +1,8 @@
 package sx.blah.discord.examples;
 
-import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.IListener;
+import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.util.HTTP429Exception;
 

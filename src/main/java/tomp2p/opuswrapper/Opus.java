@@ -5,7 +5,7 @@ import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.ptr.ShortByReference;
-import sx.blah.discord.util.NativeUtils;
+import sx.blah.discord.api.internal.NativeUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

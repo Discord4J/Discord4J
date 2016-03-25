@@ -1,8 +1,7 @@
-package sx.blah.discord.handle;
+package sx.blah.discord.api;
 
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.IDiscordClient;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

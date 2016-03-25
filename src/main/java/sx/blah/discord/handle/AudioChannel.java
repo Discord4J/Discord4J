@@ -1,4 +1,4 @@
-package sx.blah.discord.util;
+package sx.blah.discord.handle;
 
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;

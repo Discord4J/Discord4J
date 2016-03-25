@@ -1,4 +1,4 @@
-package sx.blah.discord.api;
+package sx.blah.discord.util;
 
 /**
  * This represents an exception thrown when there is a miscellaneous error doing a discord operation.

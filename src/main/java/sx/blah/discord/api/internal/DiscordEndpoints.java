@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package sx.blah.discord.api;
+package sx.blah.discord.api.internal;
 
 /**
  * Static class that contains

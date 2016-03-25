@@ -1,9 +1,9 @@
-package sx.blah.discord.api;
+package sx.blah.discord.util;
+
+import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.EnumSet;
 import java.util.StringJoiner;
-
-import sx.blah.discord.handle.obj.Permissions;
 
 /**
  * This exception is thrown when a user is missing the required permissions to perform an action.

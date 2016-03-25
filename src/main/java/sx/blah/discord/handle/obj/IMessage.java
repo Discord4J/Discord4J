@@ -1,8 +1,8 @@
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.MissingPermissionsException;
+import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.time.LocalDateTime;

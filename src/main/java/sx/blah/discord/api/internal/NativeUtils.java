@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sx.blah.discord.util;
+package sx.blah.discord.api.internal;
 
 import java.io.*;
 

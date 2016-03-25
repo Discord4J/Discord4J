@@ -1,4 +1,4 @@
-package sx.blah.discord.handle;
+package sx.blah.discord.api;
 
 /**
  * Used to represent a class that handles only one event.
@@ -7,7 +7,7 @@ package sx.blah.discord.handle;
  */
 @FunctionalInterface
 public interface IListener <T extends Event> {
-	
+
 	/**
 	 * Called when the event is sent.
 	 *

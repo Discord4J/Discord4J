@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.MissingPermissionsException;
+import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.PermissionOverwrite;

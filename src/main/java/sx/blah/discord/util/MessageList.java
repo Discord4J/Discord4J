@@ -2,12 +2,11 @@ package sx.blah.discord.util;
 
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.DiscordEndpoints;
-import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.EventSubscriber;
+import sx.blah.discord.api.EventSubscriber;
+import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.responses.MessageResponse;

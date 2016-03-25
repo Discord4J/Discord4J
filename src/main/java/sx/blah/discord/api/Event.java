@@ -1,14 +1,12 @@
-package sx.blah.discord.handle;
-
-import sx.blah.discord.api.IDiscordClient;
+package sx.blah.discord.api;
 
 /**
  * Used to represent an event.
  */
 public abstract class Event {
-	
+
 	protected IDiscordClient client;
-	
+
 	/**
 	 * Gets the client instance this event was fired from.
 	 *

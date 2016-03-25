@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.internal.audio.AudioPacket;
-import sx.blah.discord.handle.Event;
+import sx.blah.discord.api.internal.AudioPacket;
+import sx.blah.discord.api.Event;
 
 /**
  * This event is dispatched when audio is received.

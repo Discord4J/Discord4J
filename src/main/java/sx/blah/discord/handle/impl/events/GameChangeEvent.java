@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.Event;
+import sx.blah.discord.api.Event;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -10,18 +10,18 @@ import java.util.Optional;
  * This event is dispatched when the game a user is playing is changed.
  */
 public class GameChangeEvent extends Event {
-	
+
 	private final IGuild guild;
 	private final IUser user;
 	private final Optional<String> oldGame, newGame;
-	
+
 	public GameChangeEvent(IGuild guild, IUser user, Optional<String> oldGame, Optional<String> newGame) {
 		this.guild = guild;
 		this.user = user;
 		this.oldGame = oldGame;
 		this.newGame = newGame;
 	}
-	
+
 	/**
 	 * Gets the new game played.
 	 *
@@ -30,7 +30,7 @@ public class GameChangeEvent extends Event {
 	public Optional<String> getNewGame() {
 		return newGame;
 	}
-	
+
 	/**
 	 * Gets the user involved.
 	 *
@@ -39,7 +39,7 @@ public class GameChangeEvent extends Event {
 	public IUser getUser() {
 		return user;
 	}
-	
+
 	/**
 	 * Gets the old game played.
 	 *
@@ -48,7 +48,7 @@ public class GameChangeEvent extends Event {
 	public Optional<String> getOldGame() {
 		return oldGame;
 	}
-	
+
 	/**
 	 * Gets the guild involved.
 	 *
@@ -57,6 +57,6 @@ public class GameChangeEvent extends Event {
 	public IGuild getGuild() {
 		return guild;
 	}
-	
-	
+
+
 }

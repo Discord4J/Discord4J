@@ -9,7 +9,6 @@ import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ServerHandshake;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.audio.AudioPacket;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
@@ -19,7 +18,7 @@ import sx.blah.discord.json.requests.VoiceConnectRequest;
 import sx.blah.discord.json.requests.VoiceSpeakingRequest;
 import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
-import sx.blah.discord.util.AudioChannel;
+import sx.blah.discord.handle.AudioChannel;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;

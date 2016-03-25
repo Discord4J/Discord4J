@@ -1,6 +1,7 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.util.DiscordException;
 
 /**
  * Use this as a factory to create {@link IDiscordClient} instances

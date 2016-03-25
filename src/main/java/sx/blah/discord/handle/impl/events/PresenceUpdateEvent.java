@@ -19,7 +19,7 @@
 
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.Event;
+import sx.blah.discord.api.Event;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Presences;
@@ -28,18 +28,18 @@ import sx.blah.discord.handle.obj.Presences;
  * This event is dispatched when a user changes his/her presence.
  */
 public class PresenceUpdateEvent extends Event {
-	
+
 	private final IGuild guild;
 	private final IUser user;
 	private final Presences oldPresence, newPresence;
-	
+
 	public PresenceUpdateEvent(IGuild guild, IUser user, Presences oldPresence, Presences newPresence) {
 		this.guild = guild;
 		this.user = user;
 		this.oldPresence = oldPresence;
 		this.newPresence = newPresence;
 	}
-	
+
 	/**
 	 * Gets the user's new presence.
 	 *
@@ -48,7 +48,7 @@ public class PresenceUpdateEvent extends Event {
 	public Presences getNewPresence() {
 		return newPresence;
 	}
-	
+
 	/**
 	 * Gets the user's old presence.
 	 *
@@ -57,7 +57,7 @@ public class PresenceUpdateEvent extends Event {
 	public Presences getOldPresence() {
 		return oldPresence;
 	}
-	
+
 	/**
 	 * Gets the user involved.
 	 *
@@ -66,7 +66,7 @@ public class PresenceUpdateEvent extends Event {
 	public IUser getUser() {
 		return user;
 	}
-	
+
 	/**
 	 * Gets the guild involved.
 	 *

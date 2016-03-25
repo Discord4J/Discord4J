@@ -1,11 +1,13 @@
 package sx.blah.discord.modules;
 
+import sx.blah.discord.api.EventSubscriber;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IListener;
 
 /**
  * This class represents a Discord4J "module", implement it to create a new Module. When enabled, modules are registered
- * as event listeners, so your module can use {@link sx.blah.discord.handle.EventSubscriber} or
- * {@link sx.blah.discord.handle.IListener} to listen for events.
+ * as event listeners, so your module can use {@link EventSubscriber} or
+ * {@link IListener} to listen for events.
  * NOTE: This module must respect the enable() and disable() methods. And it <b>MUST</b> have a default constructor.
  */
 public interface IModule {

@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sx.blah.discord.api.internal.audio;
+package sx.blah.discord.api.internal;
 
 import com.sun.jna.ptr.PointerByReference;
 import org.peergos.crypto.TweetNaCl;
-import sx.blah.discord.api.internal.DiscordVoiceWS;
-import sx.blah.discord.util.Opus;
 
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sx.blah.discord.util;
+package sx.blah.discord.api.internal;
 
 import sun.net.spi.nameservice.dns.DNSNameService;
 

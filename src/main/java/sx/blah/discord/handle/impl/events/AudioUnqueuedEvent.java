@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.handle.Event;
+import sx.blah.discord.api.Event;
+import sx.blah.discord.handle.AudioChannel;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -9,7 +10,7 @@ import java.net.URL;
 import java.util.Optional;
 
 /**
- * This event is fired when audio is unqueued from the {@link sx.blah.discord.util.AudioChannel}
+ * This event is fired when audio is unqueued from the {@link AudioChannel}
  */
 public class AudioUnqueuedEvent extends Event {
 
