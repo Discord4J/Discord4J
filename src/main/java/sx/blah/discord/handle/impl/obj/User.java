@@ -236,6 +236,11 @@ public class User implements IUser {
 	}
 
 	@Override
+	public IDiscordClient getClient() {
+		return client;
+	}
+
+	@Override
 	public String toString() {
 		return mention();
 	}

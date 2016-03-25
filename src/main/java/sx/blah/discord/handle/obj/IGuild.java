@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
@@ -387,4 +388,11 @@ public interface IGuild {
 	 * @throws HTTP429Exception
 	 */
 	void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+
+	/**
+	 * This gets the client that this object is tied to.
+	 *
+	 * @return The client.
+	 */
+	IDiscordClient getClient();
 }

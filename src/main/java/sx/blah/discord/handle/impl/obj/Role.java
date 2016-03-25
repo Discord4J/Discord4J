@@ -5,6 +5,7 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.DiscordEndpoints;
 import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IGuild;
@@ -206,6 +207,11 @@ public class Role implements IRole {
 	@Override
 	public LocalDateTime getCreationDate() {
 		return DiscordUtils.getSnowflakeTimeFromID(id);
+	}
+
+	@Override
+	public IDiscordClient getClient() {
+		return guild.getClient();
 	}
 
 	@Override

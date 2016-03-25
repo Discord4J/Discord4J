@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.HTTP429Exception;
 
 import java.time.LocalDateTime;
@@ -106,4 +107,11 @@ public interface IUser {
 	 * @return The (optional) voice channel.
 	 */
 	Optional<IVoiceChannel> getVoiceChannel();
+
+	/**
+	 * This gets the client that this object is tied to.
+	 *
+	 * @return The client.
+	 */
+	IDiscordClient getClient();
 }

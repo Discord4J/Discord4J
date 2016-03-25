@@ -556,6 +556,11 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public IDiscordClient getClient() {
+		return client;
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(id);
 	}

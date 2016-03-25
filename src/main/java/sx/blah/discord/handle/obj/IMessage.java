@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.DiscordException;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 
@@ -135,6 +136,13 @@ public interface IMessage {
 	 * @return The guild.
 	 */
 	IGuild getGuild();
+
+	/**
+	 * This gets the client that this object is tied to.
+	 *
+	 * @return The client.
+	 */
+	IDiscordClient getClient();
 
 	/**
 	 * Represents an attachment included in the message.

@@ -84,6 +84,11 @@ public class Invite implements IInvite {
 	}
 
 	@Override
+	public IDiscordClient getClient() {
+		return client;
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(inviteCode);
 	}

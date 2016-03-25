@@ -163,4 +163,11 @@ public interface IApplication {
 	 * @return The token.
 	 */
 	String getBotToken();
+
+	/**
+	 * This gets the client that this object is tied to.
+	 *
+	 * @return The client.
+	 */
+	IDiscordClient getClient();
 }

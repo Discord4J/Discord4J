@@ -273,6 +273,11 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public IDiscordClient getClient() {
+		return client;
+	}
+
+	@Override
 	public String toString() {
 		return content;
 	}

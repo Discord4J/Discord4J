@@ -236,4 +236,9 @@ public class Application implements IApplication {
 	public String getBotToken() {
 		return botToken;
 	}
+
+	@Override
+	public IDiscordClient getClient() {
+		return client;
+	}
 }
