@@ -1,5 +1,6 @@
 package sx.blah.discord.api;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -8,12 +9,13 @@ import sx.blah.discord.util.AudioChannel;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Represents the main discord api
+ * Represents the main discord api.
  */
 public interface IDiscordClient {
 
@@ -263,4 +265,12 @@ public interface IDiscordClient {
 	 * @throws HTTP429Exception
 	 */
 	IApplication createApplication(String name) throws DiscordException, HTTP429Exception;
+
+	/**
+	 * Gets the time when this client was last logged into. Useful for keeping track of uptime.
+	 * Note: See {@link Discord4J#getLaunchTime()} for uptime of the bot application as a whole.
+	 *
+	 * @return The launch time.
+	 */
+	LocalDateTime getLaunchTime();
 }

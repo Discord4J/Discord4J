@@ -18,6 +18,7 @@ import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -141,6 +142,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	protected boolean isBot;
 
+	/**
+	 * When this client was logged into. Useful for determining uptime.
+	 */
+	protected LocalDateTime launchTime;
+
 	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isBot) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
@@ -208,6 +214,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 			}
 
 			this.ws = new DiscordWS(this, new URI(obtainGateway(getToken())), timeoutTime, maxMissedPingCount);
+
+			launchTime = LocalDateTime.now();
 		} catch (Exception e) {
 			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
@@ -540,5 +548,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		return null;
+	}
+
+	@Override
+	public LocalDateTime getLaunchTime() {
+		return launchTime;
 	}
 }

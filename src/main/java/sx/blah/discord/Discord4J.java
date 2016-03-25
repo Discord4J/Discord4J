@@ -29,6 +29,7 @@ import sx.blah.discord.modules.Configuration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 /**
@@ -57,6 +58,11 @@ public class Discord4J {
 	 * SLF4J Instance
 	 */
 	public static final Logger LOGGER = LoggerFactory.getLogger(Discord4J.class);
+
+	/**
+	 * When this class was loaded.
+	 */
+	protected static final LocalDateTime launchTime = LocalDateTime.now();
 
 	//Dynamically getting various information from maven
 	static {
@@ -100,5 +106,15 @@ public class Discord4J {
 		} catch (DiscordException e) {
 			LOGGER.error("There was an error initializing the client", e);
 		}
+	}
+
+	/**
+	 * Gets the time when this class was loaded. Useful for keeping track of application uptime.
+	 * Note: See {@link IDiscordClient#getLaunchTime()} for uptime of a specific client instance.
+	 *
+	 * @return The launch time.
+	 */
+	public static LocalDateTime getLaunchTime() {
+		return launchTime;
 	}
 }
