@@ -3,6 +3,7 @@ package sx.blah.discord.handle.obj;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,8 +99,9 @@ public interface IUser {
 	 *
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
+	 * @throws MissingPermissionsException
 	 */
-	void moveVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception;
+	void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception, MissingPermissionsException;
 
 	/**
 	 * Gets the voice channel this user is in (if in one).

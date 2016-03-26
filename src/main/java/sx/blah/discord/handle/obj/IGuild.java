@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -388,6 +389,15 @@ public interface IGuild {
 	 * @throws HTTP429Exception
 	 */
 	void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+
+	/**
+	 * Gets the audio channel of this guild. This throws an exception if the bot isn't in a channel yet.
+	 *
+	 * @return The audio channel.
+	 *
+	 * @throws DiscordException
+	 */
+	AudioChannel getAudioChannel() throws DiscordException;
 
 	/**
 	 * This gets the client that this object is tied to.

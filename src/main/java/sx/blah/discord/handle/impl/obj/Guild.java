@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -81,6 +82,11 @@ public class Guild implements IGuild {
 	protected String regionID;
 
 	/**
+	 * This guild's audio channel.
+	 */
+	protected AudioChannel audioChannel;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
@@ -103,6 +109,7 @@ public class Guild implements IGuild {
 		this.afkChannel = afkChannel;
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
+		this.audioChannel = new AudioChannel(client);
 	}
 
 	@Override
@@ -553,6 +560,11 @@ public class Guild implements IGuild {
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
+	}
+
+	@Override
+	public AudioChannel getAudioChannel() throws DiscordException {
+		return audioChannel;
 	}
 
 	@Override

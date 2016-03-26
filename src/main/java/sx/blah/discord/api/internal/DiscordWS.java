@@ -741,7 +741,7 @@ public class DiscordWS extends WebSocketClient {
 		VoiceUpdateResponse event = DiscordUtils.GSON.fromJson(eventObject, VoiceUpdateResponse.class);
 		try {
 			event.endpoint = event.endpoint.substring(0, event.endpoint.indexOf(":"));
-			client.voiceWS = new DiscordVoiceWS(event, client);
+			client.voiceConnections.put(client.getGuildByID(event.guild_id), new DiscordVoiceWS(event, client));
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}

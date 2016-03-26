@@ -24,10 +24,10 @@ public class VoiceChannelRequest {
      */
     public class EventObject {
 
-        private final String guild_id;
-        private final String channel_id;
-        private final boolean self_mute;
-        private final boolean self_deaf;
+        public final String guild_id;
+		public final String channel_id;
+		public final boolean self_mute;
+		public final boolean self_deaf;
 
         public EventObject(String guild_id, String channel_id, boolean self_mute, boolean self_deaf) {
             this.guild_id = guild_id;

@@ -11,6 +11,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MoveMemberRequest;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -210,7 +211,10 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void moveVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception {
+	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception, MissingPermissionsException {
+		if (!client.getOurUser().equals(this))
+			DiscordUtils.checkPermissions(client, newChannel.getGuild(), EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
+
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
 					new StringEntity(DiscordUtils.GSON.toJson(new MoveMemberRequest(newChannel.getID()))),

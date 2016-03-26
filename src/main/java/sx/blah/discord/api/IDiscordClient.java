@@ -37,7 +37,9 @@ public interface IDiscordClient {
 	 * Gets the audio channel instance for this client.
 	 *
 	 * @return The audio channel.
+	 * @deprecated See {@link IVoiceChannel#getAudioChannel()} or {@link IGuild#getAudioChannel()}
 	 */
+	@Deprecated
 	AudioChannel getAudioChannel();
 
 	/**
@@ -232,11 +234,20 @@ public interface IDiscordClient {
 	long getResponseTime();
 
 	/**
-	 * This returns the voice channel the bot is currently connected to (if connected to one)
+	 * This returns the voice channel the bot is currently connected to (if connected to one).
 	 *
 	 * @return The optional voice channel.
+	 * @deprecated See {@link #getConnectedVoiceChannels()}
 	 */
+	@Deprecated
 	Optional<IVoiceChannel> getConnectedVoiceChannel();
+
+	/**
+	 * Gets the connected voice channels.
+	 *
+	 * @return The voice channels.
+	 */
+	List<IVoiceChannel> getConnectedVoiceChannels();
 
 	/**
 	 * Gets whether or not this client represents a bot account.

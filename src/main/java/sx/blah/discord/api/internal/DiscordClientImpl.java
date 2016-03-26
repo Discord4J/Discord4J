@@ -78,9 +78,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public DiscordWS ws;
 
 	/**
-	 * Voice WebSocket over which to communicate with Discord.
+	 * Holds the active connections to voice sockets.
 	 */
-	public DiscordVoiceWS voiceWS;
+	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new HashMap<>();
 
 	/**
 	 * Event dispatcher.
@@ -93,9 +93,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final List<IPrivateChannel> privateChannels = new ArrayList<>();
 
 	/**
-	 * The voice channel the bot is currently in.
+	 * The voice channels the bot is currently in.
 	 */
-	public IVoiceChannel connectedVoiceChannel = null;
+	public List<IVoiceChannel> connectedVoiceChannels = new ArrayList<>();
 
 	/**
 	 * Whether the api is logged in.
@@ -123,11 +123,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected ModuleLoader loader;
 
 	/**
-	 * The audio channel for this client.
-	 */
-	protected AudioChannel audioChannel;
-
-	/**
 	 * The time for the client to timeout.
 	 */
 	protected final long timeoutTime;
@@ -153,7 +148,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.isBot = isBot;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
-		this.audioChannel = new AudioChannel(this);
 	}
 
 	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount) {
@@ -180,7 +174,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public AudioChannel getAudioChannel() {
-		return audioChannel;
+		if (isBot)
+			throw new UnsupportedOperationException("This method is for non-bot accounts only!");
+
+		if (getConnectedVoiceChannel().isPresent())
+			try {
+				return getConnectedVoiceChannel().get().getAudioChannel();
+			} catch (DiscordException e) {
+				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			}
+		return null;
 	}
 
 	@Override
@@ -197,8 +200,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			if (ws != null) {
 				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
-				if (voiceWS != null)
-					voiceWS.disconnect(VoiceDisconnectedEvent.Reason.RECONNECTING);
+
+				for (DiscordVoiceWS vws : voiceConnections.values())
+					vws.disconnect(VoiceDisconnectedEvent.Reason.RECONNECTING);
+
 				lastSequence = 0;
 				sessionId = null; //Prevents the websocket from sending a resume request.
 			}
@@ -235,8 +240,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public void logout() throws HTTP429Exception, DiscordException {
 		if (isReady()) {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-			if (voiceWS != null)
-				voiceWS.disconnect(VoiceDisconnectedEvent.Reason.LOGGED_OUT);
+
+			for (DiscordVoiceWS vws : voiceConnections.values())
+				vws.disconnect(VoiceDisconnectedEvent.Reason.LOGGED_OUT);
 
 			lastSequence = 0;
 			sessionId = null; //Prevents the websocket from sending a resume request.
@@ -495,7 +501,15 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public Optional<IVoiceChannel> getConnectedVoiceChannel() {
-		return Optional.ofNullable(connectedVoiceChannel);
+		if (isBot)
+			throw new UnsupportedOperationException("This method is for non-bot accounts only!");
+
+		return Optional.ofNullable(connectedVoiceChannels.size() == 0 ? null : connectedVoiceChannels.get(0));
+	}
+
+	@Override
+	public List<IVoiceChannel> getConnectedVoiceChannels() {
+		return connectedVoiceChannels;
 	}
 
 	@Override

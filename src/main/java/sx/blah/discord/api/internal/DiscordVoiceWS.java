@@ -12,6 +12,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.VoiceConnectRequest;
@@ -60,6 +61,8 @@ public class DiscordVoiceWS extends WebSocketClient {
 
 	private DiscordClientImpl client;
 
+	private IGuild guild;
+
 	private int ssrc;
 	private VoiceUpdateResponse event;
 	private DatagramSocket udpSocket;
@@ -73,6 +76,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 		super(new URI("wss://"+event.endpoint), new Draft_17(), headers, 0);
 		this.client = client;
 		this.event = event;
+		this.guild = client.getGuildByID(event.guild_id);
 		try {
 			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault()));
 			this.connect();
@@ -175,7 +179,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			public void run() {
 				try {
 					if (isConnected.get()) {
-						AudioChannel.AudioData data = client.audioChannel.getAudioData(OPUS_FRAME_SIZE);
+						AudioChannel.AudioData data = guild.getAudioChannel().getAudioData(OPUS_FRAME_SIZE);
 						if (data != null) {
 							client.timer = System.currentTimeMillis();
 							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data.rawData, data.metaData.channels, secret);
@@ -287,7 +291,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			isConnected.set(false);
 			udpSocket.close();
 			close();
-			client.voiceWS = null;
+			client.voiceConnections.remove(guild);
 			executorService.shutdownNow();
 //			Thread.currentThread().interrupt();
 		}

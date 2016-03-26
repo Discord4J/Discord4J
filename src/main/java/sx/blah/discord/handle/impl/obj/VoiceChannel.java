@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -31,7 +32,19 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void join() {
 		if (client.isReady()) {
-			((DiscordClientImpl) client).connectedVoiceChannel = this;
+
+			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
+				Discord4J.LOGGER.info("Attempting to join a multiple channels in the same guild! Moving channels instead...");
+				try {
+					client.getOurUser().moveToVoiceChannel(this);
+				} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
+					Discord4J.LOGGER.error("Unable to switch voice channels! Aborting join request...", e);
+					return;
+				}
+			} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
+				throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
+
+			((DiscordClientImpl) client).connectedVoiceChannels.add(this);
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
 		} else {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
@@ -40,12 +53,26 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public void leave(){
-		if(((DiscordClientImpl) client).voiceWS != null && ((DiscordClientImpl) client).voiceWS.isConnected.get()
-				&& client.getConnectedVoiceChannel().isPresent() && client.getConnectedVoiceChannel().get().equals(this)) {
-			((DiscordClientImpl) client).connectedVoiceChannel = null;
+		if (client.getConnectedVoiceChannels().contains(this)) {
+			((DiscordClientImpl) client).connectedVoiceChannels.remove(this);
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
-			((DiscordClientImpl) client).voiceWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
+			((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
+		} else {
+			Discord4J.LOGGER.warn("Attempted to leave an not joined voice channel! Ignoring the method call...");
 		}
+	}
+
+	@Override
+	public AudioChannel getAudioChannel() throws DiscordException {
+		if (!isConnected())
+			throw new DiscordException("User isn't connected to this channel!");
+
+		return parent.getAudioChannel();
+	}
+
+	@Override
+	public boolean isConnected() {
+		return client.getConnectedVoiceChannels().contains(this);
 	}
 
 	@Override
