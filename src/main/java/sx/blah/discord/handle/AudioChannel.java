@@ -41,7 +41,7 @@ public class AudioChannel {
 	 * Pauses the audio.
 	 */
 	public void pause() {
-		if (!isPaused) {
+		if (!isPaused && metaDataQueue.size() > 0) {
 			AudioMetaData data = metaDataQueue.get(0);
 			client.getDispatcher().dispatch(new AudioStopEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format));
 		}
@@ -52,7 +52,7 @@ public class AudioChannel {
 	 * Resumes the audio if was paused.
 	 */
 	public void resume() {
-		if (isPaused) {
+		if (isPaused && metaDataQueue.size() > 0) {
 			AudioMetaData data = metaDataQueue.get(0);
 			client.getDispatcher().dispatch(new AudioPlayEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format));
 		}
