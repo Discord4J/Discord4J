@@ -124,8 +124,8 @@
 			<version>0.3.7-2</version>
 		</dependency>
 
-		<dependency>
-			<groupId>tritonus</groupId>
+		<dependency> <!--Thanks DV8!-->
+			<groupId>org.tritonus</groupId>
 			<artifactId>tritonus-dsp</artifactId>
 			<version>0.3.6</version>
 		</dependency>
@@ -218,14 +218,10 @@
 	</build>
 
 	<repositories>
-		<repository>
-			<id>tritonous-rehost</id>
-			<url>http://lutece.paris.fr/nexus/content/repositories/lutece_third_party/</url>
-		</repository>
-		<repository>
-			<id>jcenter</id>
-			<url>http://jcenter.bintray.com/</url>
-		</repository>
+		<!--<repository>-->
+			<!--<id>jcenter</id>-->
+			<!--<url>http://jcenter.bintray.com/</url>-->
+		<!--</repository>-->
 	</repositories>
 
 	<distributionManagement>
