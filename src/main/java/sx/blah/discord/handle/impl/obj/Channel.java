@@ -524,4 +524,13 @@ public class Channel implements IChannel {
 	public boolean equals(Object other) {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
 	}
+
+	/**
+	 * Sets the CACHED typing status.
+	 *
+	 * @param typingStatus The new typing status.
+	 */
+	public void setTypingStatus(boolean typingStatus) {
+		this.isTyping.set(typingStatus);
+	}
 }
