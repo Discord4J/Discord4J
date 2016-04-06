@@ -84,8 +84,8 @@ public class DiscordWS {
 		if (isConnected.get()) {
 			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			isConnected.set(false);
-			session.close();
 			executorService.shutdownNow();
+			session.close();
 			client.ws = null;
 			Thread.currentThread().interrupt();
 		}
@@ -101,10 +101,12 @@ public class DiscordWS {
 			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
 			return;
 		}
-		try {
-			session.getRemote().sendString(message);
-		} catch (IOException e) {
-			Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+		if (isConnected.get()) {
+			try {
+				session.getRemote().sendString(message);
+			} catch (IOException e) {
+				Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+			}
 		}
 	}
 
@@ -133,24 +135,26 @@ public class DiscordWS {
 		}
 
 		Runnable pingPong = () -> { //TODO: Remove when HEARTBEAT_ACK is implemented
-			if (sentPing) {
-				if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
-					Discord4J.LOGGER.warn("Missed {} ping responses in a row, disconnecting...", missedPingCount);
-					disconnect(DiscordDisconnectedEvent.Reason.MISSED_PINGS);
-				} else if ((System.currentTimeMillis()-lastPingSent) > timeoutTime && timeoutTime > 0) {
-					Discord4J.LOGGER.warn("Connection timed out at {}ms", System.currentTimeMillis()-lastPingSent);
-					disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
-				}
-				Discord4J.LOGGER.debug("Last ping was not responded to, skipping ping");
-				missedPingCount++;
-			} else {
-				Discord4J.LOGGER.trace("Sending ping...");
-				sentPing = true;
-				lastPingSent = System.currentTimeMillis();
-				try {
-					session.getRemote().sendPing(ByteBuffer.wrap(DiscordUtils.GSON.toJson(new KeepAliveRequest(1)).getBytes()));
-				} catch (Exception e) {
-					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			if (isConnected.get()) {
+				if (sentPing) {
+					if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
+						Discord4J.LOGGER.warn("Missed {} ping responses in a row, disconnecting...", missedPingCount);
+						disconnect(DiscordDisconnectedEvent.Reason.MISSED_PINGS);
+					} else if ((System.currentTimeMillis()-lastPingSent) > timeoutTime && timeoutTime > 0) {
+						Discord4J.LOGGER.warn("Connection timed out at {}ms", System.currentTimeMillis()-lastPingSent);
+						disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
+					}
+					Discord4J.LOGGER.debug("Last ping was not responded to, skipping ping");
+					missedPingCount++;
+				} else {
+					Discord4J.LOGGER.trace("Sending ping...");
+					sentPing = true;
+					lastPingSent = System.currentTimeMillis();
+					try {
+						session.getRemote().sendPing(ByteBuffer.wrap(DiscordUtils.GSON.toJson(new KeepAliveRequest(1)).getBytes()));
+					} catch (Exception e) {
+						Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+					}
 				}
 			}
 		};

@@ -282,10 +282,12 @@ public class DiscordVoiceWS {
 			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
 			return;
 		}
-		try {
-			session.getRemote().sendString(message);
-		} catch (IOException e) {
-			Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+		if (isConnected.get()) {
+			try {
+				session.getRemote().sendString(message);
+			} catch (IOException e) {
+				Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+			}
 		}
 	}
 
