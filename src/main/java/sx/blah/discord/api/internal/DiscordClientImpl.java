@@ -3,10 +3,9 @@ package sx.blah.discord.api.internal;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.AudioChannel;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.EventDispatcher;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.User;
@@ -14,10 +13,11 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.Image;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -218,10 +218,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = new DiscordWS(this, new URI(obtainGateway(getToken())), timeoutTime, maxMissedPingCount);
+			this.ws = DiscordWS.connect(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {
+			Discord4J.LOGGER.error("Exception caught, logging in!", e);
 			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
 	}

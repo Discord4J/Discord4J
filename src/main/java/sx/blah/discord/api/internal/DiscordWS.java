@@ -3,15 +3,14 @@ package sx.blah.discord.api.internal;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.java_websocket.WebSocket;
-import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_17;
-import org.java_websocket.exceptions.WebsocketNotConnectedException;
-import org.java_websocket.framing.Framedata;
-import org.java_websocket.framing.FramedataImpl1;
-import org.java_websocket.handshake.ServerHandshake;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import org.eclipse.jetty.websocket.api.extensions.Frame;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -21,18 +20,13 @@ import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
 
-import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.channels.NotYetConnectedException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -41,10 +35,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
 
-public class DiscordWS extends WebSocketClient {
+//This is what Hlaaftana uses so it must be good :shrug:
+@WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
+public class DiscordWS {
 
 	private DiscordClientImpl client;
-	private static final HashMap<String, String> headers = new HashMap<>();
+	private Session session;
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
 	private volatile boolean sentPing = false;
@@ -59,22 +55,26 @@ public class DiscordWS extends WebSocketClient {
 	 */
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
-	static {
-		headers.put("Accept-Encoding", "gzip");
+	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount) throws Exception {
+		SslContextFactory sslFactory = new SslContextFactory();
+		WebSocketClient wsClient = new WebSocketClient(sslFactory);
+//		wsClient.setDaemon(true);
+		if (timeout != -1) {
+			wsClient.setConnectTimeout(timeout);
+			wsClient.setAsyncWriteTimeout(timeout);
+		}
+		DiscordWS socket = new DiscordWS((DiscordClientImpl) client, wsClient, timeout, maxMissedPingCount);
+		wsClient.start();
+		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
+		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
+		wsClient.connect(socket, new URI(gateway), upgradeRequest);
+		return socket;
 	}
 
-	public DiscordWS(DiscordClientImpl client, URI serverURI, long timeoutTime, int maxMissedPingCount) {
-		super(serverURI, new Draft_17(), headers, (int) timeoutTime); //Same as super(serverURI) but I added custom headers
-//		super(serverURI);
+	public DiscordWS(DiscordClientImpl client, WebSocketClient wsClient, long timeout, int maxMissedPingCount) {
 		this.client = client;
-		this.timeoutTime = timeoutTime;
+		this.timeoutTime = timeout;
 		this.maxMissedPingCount = maxMissedPingCount;
-		try {
-			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault(), executorService));
-			this.connect();
-		} catch (NoSuchAlgorithmException e) {
-			Discord4J.LOGGER.error("Error setting up SSL connection!");
-		}
 	}
 
 	/**
@@ -84,16 +84,42 @@ public class DiscordWS extends WebSocketClient {
 		if (isConnected.get()) {
 			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			isConnected.set(false);
-			close();
+			session.close();
 			executorService.shutdownNow();
 			client.ws = null;
 			Thread.currentThread().interrupt();
 		}
 	}
 
+	/**
+	 * Sends a message through the websocket.
+	 *
+	 * @param message The json message to send.
+	 */
+	public void send(String message) {
+		if (session == null) {
+			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
+			return;
+		}
+		try {
+			session.getRemote().sendString(message);
+		} catch (IOException e) {
+			Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+		}
+	}
 
-	@Override
-	public void onOpen(ServerHandshake serverHandshake) {
+	/**
+	 * Sends a message through the websocket.
+	 *
+	 * @param object This object is converted to json and sent to the websocket.
+	 */
+	public void send(Object object) {
+		send(DiscordUtils.GSON.toJson(object));
+	}
+
+	@OnWebSocketConnect
+	public void onOpen(Session session) {
+		this.session = session;
 		if (client.sessionId != null) {
 			send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence)));
 			Discord4J.LOGGER.debug("Reconnected to the Discord websocket.");
@@ -106,7 +132,7 @@ public class DiscordWS extends WebSocketClient {
 			return;
 		}
 
-		Runnable pingPong = () -> {
+		Runnable pingPong = () -> { //TODO: Remove when HEARTBEAT_ACK is implemented
 			if (sentPing) {
 				if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
 					Discord4J.LOGGER.warn("Missed {} ping responses in a row, disconnecting...", missedPingCount);
@@ -121,7 +147,11 @@ public class DiscordWS extends WebSocketClient {
 				Discord4J.LOGGER.trace("Sending ping...");
 				sentPing = true;
 				lastPingSent = System.currentTimeMillis();
-				sendPing();
+				try {
+					session.getRemote().sendPing(ByteBuffer.wrap(DiscordUtils.GSON.toJson(new KeepAliveRequest(1)).getBytes()));
+				} catch (Exception e) {
+					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+				}
 			}
 		};
 		executorService.scheduleAtFixedRate(pingPong, 5, 5, TimeUnit.SECONDS);
@@ -146,18 +176,18 @@ public class DiscordWS extends WebSocketClient {
 	 * This method is parses from raw JSON to objects,
 	 * then dispatches them in the form of events.
 	 *
-	 * @param frame raw JSON data from Discord servers
+	 * @param message raw JSON data from Discord servers
 	 */
-	@Override
-	public final void onMessage(String frame) {
+	@OnWebSocketMessage
+	public final void onMessage(Session session, String message) {
 		JsonParser parser = new JsonParser();
-		JsonObject object = parser.parse(frame).getAsJsonObject();
+		JsonObject object = parser.parse(message).getAsJsonObject();
 		if (object.has("message")) {
-			String message = object.get("message").getAsString();
-			if (message == null || message.isEmpty()) {
-				Discord4J.LOGGER.error("Received unknown error from Discord. Frame: {}", frame);
+			String msg = object.get("message").getAsString();
+			if (msg == null || msg.isEmpty()) {
+				Discord4J.LOGGER.error("Received unknown error from Discord. Frame: {}", message);
 			} else
-				Discord4J.LOGGER.error("Received error from Discord: {}. Frame: {}", message, frame);
+				Discord4J.LOGGER.error("Received error from Discord: {}. Frame: {}", msg, message);
 		}
 		int op = object.get("op").getAsInt();
 
@@ -274,15 +304,15 @@ public class DiscordWS extends WebSocketClient {
 					break;
 
 				default:
-					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, frame);
+					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, message);
 			}
 		} else if (op == 7) { //Gateway is redirecting us
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info("Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = new DiscordWS(client, new URI(redirectResponse.url), timeoutTime, maxMissedPingCount);
+				client.ws = DiscordWS.connect(client, redirectResponse.url, timeoutTime, maxMissedPingCount);
 				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
-			} catch (URISyntaxException e) {
+			} catch (Exception e) {
 				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			}
 		} else {
@@ -742,17 +772,17 @@ public class DiscordWS extends WebSocketClient {
 		VoiceUpdateResponse event = DiscordUtils.GSON.fromJson(eventObject, VoiceUpdateResponse.class);
 		try {
 			event.endpoint = event.endpoint.substring(0, event.endpoint.indexOf(":"));
-			client.voiceConnections.put(client.getGuildByID(event.guild_id), new DiscordVoiceWS(event, client));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			client.voiceConnections.put(client.getGuildByID(event.guild_id), DiscordVoiceWS.connect(event, client));
+		} catch (Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}
 
-	@Override
-	public void onMessage(ByteBuffer bytes) {
+	@OnWebSocketMessage
+	public void onMessage(Session session, byte[] buf, int offset, int length) {
 		//Converts binary data to readable string data
 		try {
-			InflaterInputStream inputStream = new InflaterInputStream(new ByteArrayInputStream(bytes.array()));
+			InflaterInputStream inputStream = new InflaterInputStream(new ByteArrayInputStream(buf));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
 			StringBuilder sb = new StringBuilder();
@@ -765,58 +795,41 @@ public class DiscordWS extends WebSocketClient {
 			reader.close();
 			inputStream.close();
 
-			onMessage(data);
+			onMessage(session, data);
 		} catch (IOException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}
 
-	@Override
-	public void onClose(int code, String reason, boolean remote) {
-		Discord4J.LOGGER.debug("Websocket disconnected. Exit Code: {}. Reason: {}. Remote: {}.", code, reason, remote);
+	@OnWebSocketClose
+	public void onClose(Session session, int code, String reason) {
+		Discord4J.LOGGER.debug("Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
 		disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
 	}
 
-	@Override
-	public void onError(Exception e) {
-		Discord4J.LOGGER.error("Websocket error, disconnecting...", e);
+	@OnWebSocketError
+	public void onError(Session session, Throwable error) {
+		Discord4J.LOGGER.error("Websocket error, disconnecting...", error);
 		disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
 	}
 
-	@Override
-	public void onWebsocketPing(WebSocket conn, Framedata f) {
-		Discord4J.LOGGER.trace("Received ping, sending pong...");
-		super.onWebsocketPing(conn, f);
-	}
-
-	@Override
-	public void onWebsocketPong(WebSocket conn, Framedata f) {
-		super.onWebsocketPong(conn, f);
-		if (!sentPing) {
-			Discord4J.LOGGER.warn("Received pong without sending ping! Is the websocket out of sync?");
-		} else {
-			Discord4J.LOGGER.trace("Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-lastPingSent);
-			sentPing = false;
-			missedPingCount = 0;
-		}
-	}
-
-	/**
-	 * Sends a PING frame to the receiving websocket.
-	 */
-	public synchronized void sendPing() {
-		FramedataImpl1 frame = new FramedataImpl1(Framedata.Opcode.PING);
-		frame.setFin(true);
-		getConnection().sendFrame(frame);
-	}
-
-	@Override
-	public void send(String text) throws NotYetConnectedException {
-		try {
-			super.send(text);
-		} catch (WebsocketNotConnectedException e) {
-			Discord4J.LOGGER.warn("Websocket unexpectedly lost connection!");
-			disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
+	@OnWebSocketFrame
+	public void onFrame(Session session, Frame frame) {
+		if (frame.getType() == Frame.Type.PING) {
+			Discord4J.LOGGER.trace("Received ping, sending pong...");
+			try {
+				session.getRemote().sendPong(ByteBuffer.allocate(0));
+			} catch (IOException e) {
+				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			}
+		} else if (frame.getType() == Frame.Type.PONG) {
+			if (!sentPing) {
+				Discord4J.LOGGER.warn("Received pong without sending ping! Is the websocket out of sync?");
+			} else {
+				Discord4J.LOGGER.trace("Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-lastPingSent);
+				sentPing = false;
+				missedPingCount = 0;
+			}
 		}
 	}
 

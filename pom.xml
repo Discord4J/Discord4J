@@ -65,9 +65,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.java-websocket</groupId>
-			<artifactId>Java-WebSocket</artifactId>
-			<version>1.3.0</version>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-client</artifactId>
+			<version>9.3.8.v20160314</version>
 		</dependency>
 
 		<dependency>
