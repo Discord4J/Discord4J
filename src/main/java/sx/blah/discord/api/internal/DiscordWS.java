@@ -87,7 +87,7 @@ public class DiscordWS {
 			executorService.shutdownNow();
 			session.close();
 			client.ws = null;
-			Thread.currentThread().interrupt();
+//			Thread.currentThread().interrupt();
 		}
 	}
 

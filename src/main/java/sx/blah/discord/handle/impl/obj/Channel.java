@@ -99,9 +99,9 @@ public class Channel implements IChannel {
 	protected static Timer typingTimer = new Timer("Typing Status Timer", true);
 
 	/**
-	 * 5 seconds, the time it takes for one typing status to "wear off".
+	 * 10 seconds, the time it takes for one typing status to "wear off".
 	 */
-	protected static final long TIME_FOR_TYPE_STATUS = 5000;
+	protected static final long TIME_FOR_TYPE_STATUS = 10000;
 
 	/**
 	 * The position of this channel in the channel list.
