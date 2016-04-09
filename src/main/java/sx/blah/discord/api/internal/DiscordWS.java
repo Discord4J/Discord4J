@@ -569,8 +569,9 @@ public class DiscordWS {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
 				if (!user.getPresence().equals(presences)) {
+					Presences oldPresence = user.getPresence();
 					user.setPresence(presences);
-					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, user.getPresence(), presences));
+					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, oldPresence, presences));
 					Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
 				if (!user.getGame().equals(Optional.ofNullable(gameName))) {
