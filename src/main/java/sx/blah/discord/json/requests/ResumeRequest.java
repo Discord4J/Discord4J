@@ -15,8 +15,8 @@ public class ResumeRequest {
 	 */
 	public int op = 6;
 
-	public ResumeRequest(String session_id, long seq) {
-		d = new ResumeObject(session_id, seq);
+	public ResumeRequest(String session_id, long seq, String token) {
+		d = new ResumeObject(session_id, seq, token);
 	}
 
 	/**
@@ -34,9 +34,15 @@ public class ResumeRequest {
 		 */
 		public long seq;
 
-		public ResumeObject(String session_id, long seq) {
+		/**
+		 * The session token
+		 */
+		public String token;
+
+		public ResumeObject(String session_id, long seq, String token) {
 			this.session_id = session_id;
 			this.seq = seq;
+			this.token = token;
 		}
 	}
 }

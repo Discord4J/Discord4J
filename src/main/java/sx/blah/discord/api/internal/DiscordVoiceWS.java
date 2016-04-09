@@ -16,10 +16,7 @@ import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.json.requests.KeepAliveRequest;
-import sx.blah.discord.json.requests.VoiceConnectRequest;
-import sx.blah.discord.json.requests.VoiceSpeakingRequest;
-import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
+import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
 
 import java.io.BufferedReader;
@@ -48,7 +45,7 @@ public class DiscordVoiceWS {
 	public static final int OP_CONNECTING_COMPLETED = 4;
 	public static final int OP_USER_SPEAKING_UPDATE = 5;
 
-	public AtomicBoolean isConnected = new AtomicBoolean(false);
+	public AtomicBoolean isConnected = new AtomicBoolean(true);
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
 
 	private DiscordClientImpl client;
@@ -227,7 +224,7 @@ public class DiscordVoiceWS {
 			if (this.isConnected.get()) {
 				long l = System.currentTimeMillis()-client.timer;
 				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(3)));
+				send(DiscordUtils.GSON.toJson(new VoiceKeepAliveRequest(System.currentTimeMillis())));
 				client.timer = System.currentTimeMillis();
 			}
 		};

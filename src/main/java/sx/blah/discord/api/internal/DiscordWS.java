@@ -49,6 +49,7 @@ public class DiscordWS {
 	private final long timeoutTime;
 	private final int maxMissedPingCount;
 	private volatile int missedPingCount = 0;
+	private static final String GATEWAY_VERSION = "4";
 
 	/**
 	 * The amount of users a guild must have to be considered "large"
@@ -56,6 +57,11 @@ public class DiscordWS {
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
 	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount) throws Exception {
+		//Ensuring gateway is v4 ready
+		if (!gateway.endsWith("/"))
+			gateway += "/";
+		gateway += "?encoding=json&v="+GATEWAY_VERSION;
+
 		SslContextFactory sslFactory = new SslContextFactory();
 		WebSocketClient wsClient = new WebSocketClient(sslFactory);
 //		wsClient.setDaemon(true);
@@ -87,8 +93,24 @@ public class DiscordWS {
 			executorService.shutdownNow();
 			session.close();
 			client.ws = null;
+			clearCache();
 //			Thread.currentThread().interrupt();
 		}
+	}
+
+	/**
+	 * Clears the api's cache
+	 */
+	private void clearCache() {
+		client.sessionId = null;
+		client.connectedVoiceChannels.clear();
+		client.voiceConnections.clear();
+		client.guildList.clear();
+		client.heartbeat = 0;
+		client.lastSequence = 0;
+		client.ourUser = null;
+		client.privateChannels.clear();
+		client.REGIONS.clear();
 	}
 
 	/**
@@ -123,7 +145,7 @@ public class DiscordWS {
 	public void onOpen(Session session) {
 		this.session = session;
 		if (client.sessionId != null) {
-			send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence)));
+			send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
 			Discord4J.LOGGER.debug("Reconnected to the Discord websocket.");
 		} else if (!client.getToken().isEmpty()) {
 			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
@@ -151,7 +173,7 @@ public class DiscordWS {
 					sentPing = true;
 					lastPingSent = System.currentTimeMillis();
 					try {
-						session.getRemote().sendPing(ByteBuffer.wrap(DiscordUtils.GSON.toJson(new KeepAliveRequest(1)).getBytes()));
+						session.getRemote().sendPing(ByteBuffer.wrap(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)).getBytes()));
 					} catch (Exception e) {
 						Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 					}
@@ -166,7 +188,7 @@ public class DiscordWS {
 			if (this.isConnected.get()) {
 				long l = System.currentTimeMillis()-client.timer;
 				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(1)));
+				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
 				client.timer = System.currentTimeMillis();
 			}
 		};
@@ -195,10 +217,10 @@ public class DiscordWS {
 		}
 		int op = object.get("op").getAsInt();
 
-		if (op != 7) //Not a redirect op, so cache the last sequence value
+		if (op != GatewayOps.RECONNECT.ordinal()) //Not a redirect op, so cache the last sequence value
 			client.lastSequence = object.get("s").getAsLong();
 
-		if (op == 0) { //Event dispatched
+		if (op == GatewayOps.DISPATCH.ordinal()) { //Event dispatched
 			String type = object.get("t").getAsString();
 			JsonElement eventObject = object.get("d");
 
@@ -310,7 +332,7 @@ public class DiscordWS {
 				default:
 					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, message);
 			}
-		} else if (op == 7) { //Gateway is redirecting us
+		} else if (op == GatewayOps.RECONNECT.ordinal()) { //Gateway is redirecting us
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info("Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
@@ -319,6 +341,9 @@ public class DiscordWS {
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 			}
+		} else if (op == GatewayOps.INVALID_SESSION.ordinal()) { //Invalid session ABANDON EVERYTHING!!!
+			Discord4J.LOGGER.warn("Invalid session! Attempting to clear caches and reconnect...");
+			disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 		} else {
 			Discord4J.LOGGER.warn("Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
@@ -332,6 +357,8 @@ public class DiscordWS {
 
 	private void ready(JsonElement eventObject) {
 		ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
+
+		Discord4J.LOGGER.info("Connected to the Discord Websocket v"+event.v);
 
 		client.sessionId = event.session_id;
 
