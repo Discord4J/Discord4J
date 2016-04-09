@@ -29,14 +29,14 @@ public class PresenceUpdateRequest {
 		/**
 		 * The time (in epoch milliseconds) since the user became idle or null if not idle
 		 */
-		public long idle_since;
+		public Long idle_since;
 
 		/**
 		 * The game the user is playing, or null if no game
 		 */
 		public GameObject game;
 
-		public EventObject(long idle_since, String game) {
+		public EventObject(Long idle_since, String game) {
 			this.idle_since = idle_since;
 			this.game = new GameObject(game);
 		}
