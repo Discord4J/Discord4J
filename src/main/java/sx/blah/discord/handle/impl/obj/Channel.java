@@ -211,13 +211,18 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException {
+	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		if (client.isReady()) {
 			//These next two lines of code took WAAAAAY too long to figure out than I care to admit
-			HttpEntity fileEntity = MultipartEntityBuilder.create().addBinaryBody("file", file,
-					ContentType.create(Files.probeContentType(file.toPath())), file.getName()).build();
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+					.addBinaryBody("file", file, ContentType.create(Files.probeContentType(file.toPath())), file.getName());
+
+			if (content != null)
+				builder.addTextBody("content", content);
+
+			HttpEntity fileEntity = builder.build();
 			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
 					DiscordEndpoints.CHANNELS+id+"/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
@@ -228,6 +233,11 @@ public class Channel implements IChannel {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return null;
 		}
+	}
+
+	@Override
+	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException {
+		return sendFile(file, null);
 	}
 
 	@Override
