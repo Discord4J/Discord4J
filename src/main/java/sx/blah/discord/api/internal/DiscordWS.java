@@ -50,6 +50,18 @@ public class DiscordWS {
 	private final int maxMissedPingCount;
 	private volatile int missedPingCount = 0;
 	private static final String GATEWAY_VERSION = "4";
+	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
+		@Override
+		public void run() {
+			isConnected.set(false);
+			try {
+				if (session != null)
+					session.disconnect(); //Harsh disconnect to close the process ASAP
+			} catch (IOException e) {
+				Discord4J.LOGGER.error("Error disconnecting the websocket on jvm shutdown!", e);
+			}
+		}
+	};
 
 	/**
 	 * The amount of users a guild must have to be considered "large"
@@ -81,6 +93,7 @@ public class DiscordWS {
 		this.client = client;
 		this.timeoutTime = timeout;
 		this.maxMissedPingCount = maxMissedPingCount;
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
 	/**
@@ -94,6 +107,7 @@ public class DiscordWS {
 			session.close();
 			client.ws = null;
 			clearCache();
+			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 //			Thread.currentThread().interrupt();
 		}
 	}
