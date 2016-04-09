@@ -16,7 +16,6 @@ public class VoiceKeepAliveRequest {
 	public long d;
 
 	public VoiceKeepAliveRequest(long seq) {
-		this.op = op;
 		this.d = seq;
 	}
 }
