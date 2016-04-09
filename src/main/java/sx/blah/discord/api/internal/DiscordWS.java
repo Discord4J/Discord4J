@@ -386,9 +386,9 @@ public class DiscordWS {
 		client.isReady = true;
 
 		// I hope you like loops.
+		Discord4J.LOGGER.info("Connected to {} guilds.", event.guilds.length);
 		for (GuildResponse guildResponse : event.guilds) {
 			if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
-				Discord4J.LOGGER.warn("Guild with id {} is unavailable, ignoring it. Is there an outage?", guildResponse.id);
 				continue;
 			}
 
