@@ -3,41 +3,36 @@ package sx.blah.discord.api.internal;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_17;
-import org.java_websocket.exceptions.WebsocketNotConnectedException;
-import org.java_websocket.handshake.ServerHandshake;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.json.requests.KeepAliveRequest;
-import sx.blah.discord.json.requests.VoiceConnectRequest;
-import sx.blah.discord.json.requests.VoiceSpeakingRequest;
-import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
+import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
-import sx.blah.discord.handle.AudioChannel;
 
-import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.nio.channels.NotYetConnectedException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
 
-public class DiscordVoiceWS extends WebSocketClient {
+@WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
+public class DiscordVoiceWS {
 
 	public static final int OPUS_SAMPLE_RATE = 48000;   //(Hz) We want to use the highest of qualities! All the bandwidth!
 	public static final int OPUS_FRAME_SIZE = 960;
@@ -50,13 +45,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 	public static final int OP_CONNECTING_COMPLETED = 4;
 	public static final int OP_USER_SPEAKING_UPDATE = 5;
 
-	private static final HashMap<String, String> headers = new HashMap<>();
-
-	static {
-		headers.put("Accept-Encoding", "gzip");
-	}
-
-	public AtomicBoolean isConnected = new AtomicBoolean(false);
+	public AtomicBoolean isConnected = new AtomicBoolean(true);
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
 
 	private DiscordClientImpl client;
@@ -72,29 +61,37 @@ public class DiscordVoiceWS extends WebSocketClient {
 
 	private byte[] secret;
 
+	private Session session;
+
+	public static DiscordVoiceWS connect(VoiceUpdateResponse response, IDiscordClient client) throws Exception {
+		SslContextFactory sslFactory = new SslContextFactory();
+		WebSocketClient wsClient = new WebSocketClient(sslFactory);
+		wsClient.setDaemon(true);
+		DiscordVoiceWS socket = new DiscordVoiceWS(response, (DiscordClientImpl) client);
+		wsClient.start();
+		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
+		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
+		wsClient.connect(socket, new URI("wss://"+response.endpoint), upgradeRequest);
+		return socket;
+	}
+
 	public DiscordVoiceWS(VoiceUpdateResponse event, DiscordClientImpl client) throws URISyntaxException {
-		super(new URI("wss://"+event.endpoint), new Draft_17(), headers, 0);
 		this.client = client;
 		this.event = event;
 		this.guild = client.getGuildByID(event.guild_id);
-		try {
-			super.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext.getDefault()));
-			this.connect();
-		} catch (NoSuchAlgorithmException e) {
-			Discord4J.LOGGER.error("Error setting up SSL connection!", e);
-		}
 	}
 
-	@Override
-	public void onOpen(ServerHandshake serverHandshake) {
+	@OnWebSocketConnect
+	public void onOpen(Session session) {
+		this.session = session;
 		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(event.guild_id, client.ourUser.getID(), client.sessionId, event.token)));
 		Discord4J.LOGGER.info("Connected to the Discord Voice websocket.");
 	}
 
-	@Override
-	public final void onMessage(String frame) {
+	@OnWebSocketMessage
+	public final void onMessage(Session session, String message) {
 		JsonParser parser = new JsonParser();
-		JsonObject object = parser.parse(frame).getAsJsonObject();
+		JsonObject object = parser.parse(message).getAsJsonObject();
 
 		int op = object.get("op").getAsInt();
 
@@ -227,7 +224,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			if (this.isConnected.get()) {
 				long l = System.currentTimeMillis()-client.timer;
 				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(3)));
+				send(DiscordUtils.GSON.toJson(new VoiceKeepAliveRequest(System.currentTimeMillis())));
 				client.timer = System.currentTimeMillis();
 			}
 		};
@@ -236,12 +233,12 @@ public class DiscordVoiceWS extends WebSocketClient {
 				hearbeat_interval, TimeUnit.MILLISECONDS);
 	}
 
-	@Override
-	public void onMessage(ByteBuffer bytes) {
+	@OnWebSocketMessage
+	public void onMessage(Session session, byte[] buf, int offset, int length) {
 
 		//Converts binary data to readable string data
 		try {
-			InflaterInputStream inputStream = new InflaterInputStream(new ByteArrayInputStream(bytes.array()));
+			InflaterInputStream inputStream = new InflaterInputStream(new ByteArrayInputStream(buf));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
 			StringBuilder sb = new StringBuilder();
@@ -254,32 +251,50 @@ public class DiscordVoiceWS extends WebSocketClient {
 			reader.close();
 			inputStream.close();
 
-			onMessage(data);
+			onMessage(session, data);
 		} catch (IOException e) {
 			Discord4J.LOGGER.error("Discord Internal Exception", e);
 		}
 	}
 
-	@Override
-	public void onClose(int code, String reason, boolean remote) {
-		Discord4J.LOGGER.debug("Voice Websocket disconnected. Exit Code: {}. Reason: {}. Remote: {}.", code, reason, remote);
+	@OnWebSocketClose
+	public void onClose(Session session, int code, String reason){
+		Discord4J.LOGGER.debug("Voice Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
 		disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
 	}
 
-	@Override
-	public void onError(Exception e) {
+	@OnWebSocketError
+	public void onError(Session session, Throwable e) {
 		Discord4J.LOGGER.error("Voice Websocket error, disconnecting...", e);
 		disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
 	}
 
-	@Override
-	public void send(String text) throws NotYetConnectedException {
-		try {
-			super.send(text);
-		} catch (WebsocketNotConnectedException e) {
-			Discord4J.LOGGER.warn("Voice Websocket unexpectedly lost connection!");
-			disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
+	/**
+	 * Sends a message through the websocket.
+	 *
+	 * @param message The json message to send.
+	 */
+	public void send(String message) {
+		if (session == null) {
+			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
+			return;
 		}
+		if (isConnected.get()) {
+			try {
+				session.getRemote().sendString(message);
+			} catch (IOException e) {
+				Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+			}
+		}
+	}
+
+	/**
+	 * Sends a message through the websocket.
+	 *
+	 * @param object This object is converted to json and sent to the websocket.
+	 */
+	public void send(Object object) {
+		send(DiscordUtils.GSON.toJson(object));
 	}
 
 	/**
@@ -290,7 +305,7 @@ public class DiscordVoiceWS extends WebSocketClient {
 			client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
 			isConnected.set(false);
 			udpSocket.close();
-			close();
+			session.close();
 			client.voiceConnections.remove(guild);
 			executorService.shutdownNow();
 //			Thread.currentThread().interrupt();

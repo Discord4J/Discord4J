@@ -102,6 +102,20 @@ public interface IChannel {
 	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
+	 * Sends a file to the channel with a message attached.
+	 *
+	 * @param file The file to send.
+	 * @param content The message to be sent with the file.
+	 * @return The message sent.
+	 *
+	 * @throws IOException
+	 * @throws MissingPermissionsException
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 */
+	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException;
+
+	/**
 	 * Sends a file to the channel.
 	 *
 	 * @param file The file to send.

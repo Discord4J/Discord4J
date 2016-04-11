@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.api.Event;
+import sx.blah.discord.handle.AudioChannel;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -29,12 +30,17 @@ public class AudioPlayEvent extends Event {
 	 * The audio file format
 	 */
 	private final AudioFileFormat format;
+	/**
+	 * The Audio Channel
+	 */
+	private final AudioChannel audioChannel;
 
-	public AudioPlayEvent(AudioInputStream stream, File fileSource, URL urlSource, AudioFileFormat format) {
+	public AudioPlayEvent(AudioInputStream stream, File fileSource, URL urlSource, AudioFileFormat format, AudioChannel audioChannel) {
 		this.stream = stream;
 		this.format = format;
 		this.fileSource = Optional.ofNullable(fileSource);
 		this.urlSource = Optional.ofNullable(urlSource);
+		this.audioChannel = audioChannel;
 	}
 
 	/**
@@ -69,7 +75,12 @@ public class AudioPlayEvent extends Event {
 	 *
 	 * @return The file format.
 	 */
-	public AudioFileFormat getFormat() {
-		return format;
-	}
+	public AudioFileFormat getFormat() { return format; }
+
+	/**
+	 * Gets the audio channel for the queued audio.
+	 *
+	 * @return The audio channel.
+	 */
+	public AudioChannel getAudioChannel() { return audioChannel; }
 }

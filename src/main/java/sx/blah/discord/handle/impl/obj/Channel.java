@@ -1,22 +1,3 @@
-/*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2015
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.HttpEntity;
@@ -99,9 +80,9 @@ public class Channel implements IChannel {
 	protected static Timer typingTimer = new Timer("Typing Status Timer", true);
 
 	/**
-	 * 5 seconds, the time it takes for one typing status to "wear off".
+	 * 10 seconds, the time it takes for one typing status to "wear off".
 	 */
-	protected static final long TIME_FOR_TYPE_STATUS = 5000;
+	protected static final long TIME_FOR_TYPE_STATUS = 10000;
 
 	/**
 	 * The position of this channel in the channel list.
@@ -230,13 +211,18 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException {
+	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		if (client.isReady()) {
 			//These next two lines of code took WAAAAAY too long to figure out than I care to admit
-			HttpEntity fileEntity = MultipartEntityBuilder.create().addBinaryBody("file", file,
-					ContentType.create(Files.probeContentType(file.toPath())), file.getName()).build();
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+					.addBinaryBody("file", file, ContentType.create(Files.probeContentType(file.toPath())), file.getName());
+
+			if (content != null)
+				builder.addTextBody("content", content);
+
+			HttpEntity fileEntity = builder.build();
 			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
 					DiscordEndpoints.CHANNELS+id+"/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
@@ -247,6 +233,11 @@ public class Channel implements IChannel {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return null;
 		}
+	}
+
+	@Override
+	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException {
+		return sendFile(file, null);
 	}
 
 	@Override
@@ -523,5 +514,14 @@ public class Channel implements IChannel {
 	@Override
 	public boolean equals(Object other) {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
+	}
+
+	/**
+	 * Sets the CACHED typing status.
+	 *
+	 * @param typingStatus The new typing status.
+	 */
+	public void setTypingStatus(boolean typingStatus) {
+		this.isTyping.set(typingStatus);
 	}
 }

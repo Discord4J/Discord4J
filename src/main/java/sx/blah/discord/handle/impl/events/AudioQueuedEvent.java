@@ -30,12 +30,17 @@ public class AudioQueuedEvent extends Event {
 	 * The audio file format
 	 */
 	private final AudioFileFormat format;
+	/**
+	 * The Audio Channel
+	 */
+	private final AudioChannel audioChannel;
 
-	public AudioQueuedEvent(AudioInputStream stream, File fileSource, URL urlSource, AudioFileFormat format) {
+	public AudioQueuedEvent(AudioInputStream stream, File fileSource, URL urlSource, AudioFileFormat format, AudioChannel audioChannel) {
 		this.stream = stream;
 		this.format = format;
 		this.fileSource = Optional.ofNullable(fileSource);
 		this.urlSource = Optional.ofNullable(urlSource);
+		this.audioChannel = audioChannel;
 	}
 
 	/**
@@ -73,4 +78,11 @@ public class AudioQueuedEvent extends Event {
 	public AudioFileFormat getFormat() {
 		return format;
 	}
+
+	/**
+	 * Gets the audio channel for the queued audio.
+	 *
+	 * @return The audio channel.
+	 */
+	public AudioChannel getAudioChannel() { return audioChannel; }
 }

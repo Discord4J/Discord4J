@@ -3,19 +3,19 @@ package sx.blah.discord.json.requests;
 /**
  * This is sent to request that the connection between the client and the Discord Servers stay alive.
  */
-public class KeepAliveRequest {
+public class VoiceKeepAliveRequest {
 
 	/**
-	 * The opcode, 1.
+	 * The opcode, 3.
 	 */
-	public int op = 1;
+	public int op = 3;
 
 	/**
-	 * The last received sequence id.
+	 * The time the keep-alive request was sent (in epoch milliseconds).
 	 */
 	public long d;
 
-	public KeepAliveRequest(long seq) {
+	public VoiceKeepAliveRequest(long seq) {
 		this.d = seq;
 	}
 }

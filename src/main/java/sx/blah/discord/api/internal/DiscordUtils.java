@@ -407,7 +407,7 @@ public class DiscordUtils {
 	 * @param json The json response.
 	 * @return The channel object.
 	 */
-	public static IVoiceChannel getVoiceChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) { //FIXME
+	public static IVoiceChannel getVoiceChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) {
 		VoiceChannel channel;
 
 		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(json.id)) != null) {

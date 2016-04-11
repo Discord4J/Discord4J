@@ -41,9 +41,9 @@ public class AudioChannel {
 	 * Pauses the audio.
 	 */
 	public void pause() {
-		if (!isPaused) {
+		if (!isPaused && metaDataQueue.size() > 0) {
 			AudioMetaData data = metaDataQueue.get(0);
-			client.getDispatcher().dispatch(new AudioStopEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format));
+			client.getDispatcher().dispatch(new AudioStopEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format, this));
 		}
 		isPaused = true;
 	}
@@ -52,9 +52,9 @@ public class AudioChannel {
 	 * Resumes the audio if was paused.
 	 */
 	public void resume() {
-		if (isPaused) {
+		if (isPaused && metaDataQueue.size() > 0) {
 			AudioMetaData data = metaDataQueue.get(0);
-			client.getDispatcher().dispatch(new AudioPlayEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format));
+			client.getDispatcher().dispatch(new AudioPlayEvent(audioQueue.get(0), data.fileSource, data.urlSource, data.format, this));
 		}
 		isPaused = false;
 	}
@@ -86,7 +86,7 @@ public class AudioChannel {
 	 */
 	public void unqueue(int index) throws ArrayIndexOutOfBoundsException {
 		AudioMetaData data = metaDataQueue.get(index);
-		client.getDispatcher().dispatch(new AudioUnqueuedEvent(audioQueue.get(index), data.fileSource, data.urlSource, data.format));
+		client.getDispatcher().dispatch(new AudioUnqueuedEvent(audioQueue.get(index), data.fileSource, data.urlSource, data.format, this));
 		audioQueue.remove(index);
 		metaDataQueue.remove(index);
 	}
@@ -208,7 +208,7 @@ public class AudioChannel {
 		if (outputAudio != null) {
 			audioQueue.add(new AmplitudeAudioInputStream(outputAudio));
 			AudioMetaData data = metaDataQueue.get(metaDataQueue.size()-1);
-			client.getDispatcher().dispatch(new AudioQueuedEvent(outputAudio, data.fileSource, data.urlSource, data.format));
+			client.getDispatcher().dispatch(new AudioQueuedEvent(outputAudio, data.fileSource, data.urlSource, data.format, this));
 		} else
 			metaDataQueue.remove(metaDataQueue.size()-1);
 	}
@@ -239,14 +239,14 @@ public class AudioChannel {
 					if (!metaData.startedReading) {
 						metaData.startedReading = true;
 						client.getDispatcher().dispatch(new AudioPlayEvent(data, metaData.fileSource,
-								metaData.urlSource, metaData.format));
+								metaData.urlSource, metaData.format, this));
 					}
 					return new AudioData(audio, metaData);
 				} else {
 					audioQueue.remove(0);
 					metaDataQueue.remove(0);
 					client.getDispatcher().dispatch(new AudioStopEvent(data, metaData.fileSource,
-							metaData.urlSource, metaData.format));
+							metaData.urlSource, metaData.format, this));
 					return getAudioData(length);
 				}
 

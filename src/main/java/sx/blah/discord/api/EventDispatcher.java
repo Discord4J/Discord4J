@@ -104,7 +104,7 @@ public class EventDispatcher {
 	 */
 	public void dispatch(Event event) {
 		if (client.isReady()) {
-			Discord4J.LOGGER.debug("Dispatching event of type {}", event.getClass().getSimpleName());
+			Discord4J.LOGGER.trace("Dispatching event of type {}", event.getClass().getSimpleName());
 			event.client = client;
 
 			methodListeners.entrySet().stream()
