@@ -13,6 +13,10 @@ In your `pom.xml` add:
 ...
 <repositories>
   ...
+  <repository> <!-- This repo fixes issues with transitive dependencies -->
+    <id>jcenter</id>
+    <url>http://jcenter.bintray.com</url>
+  </repository>
   <repository>
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
@@ -36,7 +40,7 @@ In your `build.gradle` add:
 ...
 repositories {
   ...
-  jcenter()
+  jcenter() //This prevents issues with transitive dependencies
   maven {
     url  "https://jitpack.io"
   }
