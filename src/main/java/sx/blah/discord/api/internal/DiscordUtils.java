@@ -207,8 +207,10 @@ public class DiscordUtils {
 			if (json.presences != null)
 				for (PresenceResponse presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
-					user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
-					user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
+					if (user != null) {
+						user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
+						user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
+					}
 				}
 
 			if (json.channels != null)

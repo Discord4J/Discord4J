@@ -204,7 +204,7 @@ public class Guild implements IGuild {
 	 * @param user The user.
 	 */
 	public void addUser(IUser user) {
-		if (!this.users.contains(user))
+		if (!this.users.contains(user) && user != null)
 			this.users.add(user);
 	}
 
