@@ -104,11 +104,12 @@ public class DiscordWS {
 			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			isConnected.set(false);
 			executorService.shutdownNow();
-			session.close();
 			client.ws = null;
 			clearCache();
 			Runtime.getRuntime().removeShutdownHook(shutdownHook);
-//			Thread.currentThread().interrupt();
+			if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
+				session.close();
+			}
 		}
 	}
 
@@ -133,7 +134,7 @@ public class DiscordWS {
 	 * @param message The json message to send.
 	 */
 	public void send(String message) {
-		if (session == null) {
+		if (session == null || !session.isOpen()) {
 			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
 			return;
 		}
@@ -171,7 +172,7 @@ public class DiscordWS {
 		}
 
 		Runnable pingPong = () -> { //TODO: Remove when HEARTBEAT_ACK is implemented
-			if (isConnected.get()) {
+			if (isConnected.get() && session != null && session.isOpen()) {
 				if (sentPing) {
 					if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
 						Discord4J.LOGGER.warn("Missed {} ping responses in a row, disconnecting...", missedPingCount);
@@ -856,7 +857,11 @@ public class DiscordWS {
 	@OnWebSocketError
 	public void onError(Session session, Throwable error) {
 		Discord4J.LOGGER.error("Websocket error, disconnecting...", error);
-		disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
+		if (session == null || !session.isOpen()) {
+			disconnect(DiscordDisconnectedEvent.Reason.INIT_ERROR);
+		} else {
+			disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
+		}
 	}
 
 	@OnWebSocketFrame

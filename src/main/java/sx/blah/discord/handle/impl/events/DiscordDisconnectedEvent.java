@@ -45,6 +45,10 @@ public class DiscordDisconnectedEvent extends Event {
 		/**
 		 * The websocket attempting to reconnect.
 		 */
-		RECONNECTING
+		RECONNECTING,
+		/**
+		 * The websocket encountered an error while initializing
+		 */
+		INIT_ERROR
 	}
 }

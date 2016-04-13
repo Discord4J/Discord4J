@@ -49,7 +49,11 @@ public class VoiceDisconnectedEvent extends Event {
 		/**
 		 * The user left the voice channel.
 		 */
-		LEFT_CHANNEL
+		LEFT_CHANNEL,
+		/**
+		 * The websocket encountered an error while initializing
+		 */
+		INIT_ERROR
 	}
 }
 

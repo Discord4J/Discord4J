@@ -10,9 +10,7 @@ import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
-import sx.blah.discord.util.Image;
 
-import java.awt.*;
 import java.io.File;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -264,12 +262,11 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						IRole role = message.getGuild().createRole();
-						role.changeName("Test");
-						role.changeColor(Color.lightGray);
-						IRole role2 = message.getGuild().createRole();
-						role2.changeName("Test2");
-						role2.changeColor(Color.pink);
+						IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel -> voiceChannel.getName().equalsIgnoreCase("General") && !voiceChannel.isConnected()).findFirst().orElse(null);
+						if (channel != null) {
+							channel.join();
+							channel.getAudioChannel().queueFile(new File("./kinda.wav"));
+						}
 					}
 				});
 

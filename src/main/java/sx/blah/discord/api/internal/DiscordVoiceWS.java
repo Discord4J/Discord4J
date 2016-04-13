@@ -266,7 +266,11 @@ public class DiscordVoiceWS {
 	@OnWebSocketError
 	public void onError(Session session, Throwable e) {
 		Discord4J.LOGGER.error("Voice Websocket error, disconnecting...", e);
-		disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
+		if (session == null || !session.isOpen()) {
+			disconnect(VoiceDisconnectedEvent.Reason.INIT_ERROR);
+		} else {
+			disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
+		}
 	}
 
 	/**
@@ -275,7 +279,7 @@ public class DiscordVoiceWS {
 	 * @param message The json message to send.
 	 */
 	public void send(String message) {
-		if (session == null) {
+		if (session == null || !session.isOpen()) {
 			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
 			return;
 		}
@@ -304,11 +308,13 @@ public class DiscordVoiceWS {
 		if (isConnected.get()) {
 			client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
 			isConnected.set(false);
-			udpSocket.close();
-			session.close();
 			client.voiceConnections.remove(guild);
 			executorService.shutdownNow();
-//			Thread.currentThread().interrupt();
+			if (udpSocket != null)
+				udpSocket.close();
+			if (reason != VoiceDisconnectedEvent.Reason.INIT_ERROR) {
+				session.close();
+			}
 		}
 	}
 
