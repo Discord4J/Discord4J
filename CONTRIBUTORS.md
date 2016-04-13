@@ -4,6 +4,8 @@
 * @phantamanta44 -Added some java 8 goodness
 * @lclc98 -Added audio support
 * @sedmelluq -Realized how utf-8 was ruining audio
+* @TheFjonG -Created the awesome Discord4J ReadTheDocs page
+* @Martacus -Created an example repo for Discord4J modules
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
@@ -12,5 +14,5 @@
 * @matias49 -Updated README and added a .gitignore file
 
 ## Misc. Credits
-* All the other devs on the [Unofficial Discord API Server](https://discord.gg/0SBTUU1wZTU7PCok) -You guys helped so 
+* All the other library devs on the [Unofficial Discord API Server](https://discord.gg/0SBTUU1wZTU7PCok) -You guys helped so 
 much with demystifying the discord "api"
