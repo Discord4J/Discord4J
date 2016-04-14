@@ -56,7 +56,7 @@ dependencies {
 ## So, how do I use this?
 ### Tutorials/Resources
 * The [Discord4J Read The Docs](https://discord4j.readthedocs.org/en/latest/index.html) maintained by @TheFjong.
-* A Discord Bot [quick start example(https://gist.github.com/iabarca/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @iabarca
+* A Discord Bot [quick start example](https://gist.github.com/iabarca/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @iabarca
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
 
 ### Starting with the API
