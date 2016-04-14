@@ -270,8 +270,10 @@ public class Channel implements IChannel {
 		typingTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				if (!isTyping.get())
+				if (!isTyping.get()) {
 					this.cancel();
+					return;
+				}
 				try {
 					Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
 							new BasicNameValuePair("authorization", client.getToken()));
