@@ -26,9 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +41,7 @@ public class DiscordWS {
 	private Session session;
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+	private final boolean isDaemon;
 	private volatile boolean sentPing = false;
 	private volatile long lastPingSent = -1L;
 	private volatile long pingResponseTime = -1L;
@@ -68,7 +67,7 @@ public class DiscordWS {
 	 */
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
-	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount) throws Exception {
+	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon) throws Exception {
 		//Ensuring gateway is v4 ready
 		if (!gateway.endsWith("/"))
 			gateway += "/";
@@ -76,12 +75,12 @@ public class DiscordWS {
 
 		SslContextFactory sslFactory = new SslContextFactory();
 		WebSocketClient wsClient = new WebSocketClient(sslFactory);
-//		wsClient.setDaemon(true);
+		wsClient.setDaemon(true);
 		if (timeout != -1) {
 			wsClient.setConnectTimeout(timeout);
 			wsClient.setAsyncWriteTimeout(timeout);
 		}
-		DiscordWS socket = new DiscordWS((DiscordClientImpl) client, wsClient, timeout, maxMissedPingCount);
+		DiscordWS socket = new DiscordWS((DiscordClientImpl) client, wsClient, timeout, maxMissedPingCount, isDaemon);
 		wsClient.start();
 		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
 		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
@@ -89,11 +88,22 @@ public class DiscordWS {
 		return socket;
 	}
 
-	public DiscordWS(DiscordClientImpl client, WebSocketClient wsClient, long timeout, int maxMissedPingCount) {
+	public DiscordWS(DiscordClientImpl client, WebSocketClient wsClient, long timeout, int maxMissedPingCount, boolean isDaemon) {
 		this.client = client;
 		this.timeoutTime = timeout;
 		this.maxMissedPingCount = maxMissedPingCount;
+		this.isDaemon = isDaemon;
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
+		if (!isDaemon) {
+			new Timer("WebSocketClient Keep-Alive").scheduleAtFixedRate(new TimerTask() { //Required b/c the ws client doesn't close correctly unless it is a daemon
+				@Override
+				public void run() { //Prevents the WebSocketClient from closing until the websocket is disconnected
+					if (!isConnected.get()) {
+						this.cancel();
+					}
+				}
+			}, 0, 1000);
+		}
 	}
 
 	/**
@@ -351,7 +361,7 @@ public class DiscordWS {
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info("Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = DiscordWS.connect(client, redirectResponse.url, timeoutTime, maxMissedPingCount);
+				client.ws = DiscordWS.connect(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon);
 				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error("Discord4J Internal Exception", e);

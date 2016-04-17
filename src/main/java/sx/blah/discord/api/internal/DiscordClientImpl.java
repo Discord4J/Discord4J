@@ -133,6 +133,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final int maxMissedPingCount;
 
 	/**
+	 * Whether the websocket should act as a daemon.
+	 */
+	protected final boolean isDaemon;
+
+	/**
 	 * Whether this client represents a bot.
 	 */
 	protected boolean isBot;
@@ -142,23 +147,23 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	protected LocalDateTime launchTime;
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isBot) {
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
+		this.isDaemon = isDaemon;
 		this.isBot = isBot;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
 
-	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount) {
-		this(timeoutTime, maxMissedPingCount, false);
+	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, false);
 		this.email = email;
 		this.password = password;
-
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount) {
-		this(timeoutTime, maxMissedPingCount, true);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, true);
 		this.token = token;
 	}
 
@@ -218,7 +223,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = DiscordWS.connect(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount);
+			this.ws = DiscordWS.connect(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {

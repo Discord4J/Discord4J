@@ -262,11 +262,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel -> voiceChannel.getName().equalsIgnoreCase("General") && !voiceChannel.isConnected()).findFirst().orElse(null);
-						if (channel != null) {
-							channel.join();
-							channel.getAudioChannel().queueFile(new File("./kinda.wav"));
-						}
+						client.logout();
 					}
 				});
 

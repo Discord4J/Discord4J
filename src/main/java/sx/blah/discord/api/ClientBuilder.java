@@ -13,6 +13,7 @@ public class ClientBuilder {
 	private int maxMissedPingCount = -1;
 	private boolean isBot = false;
 	private String botToken;
+	private boolean isDaemon = false;
 
 	/**
 	 * Sets the login info for the client. This is a REQUIRED step.
@@ -74,6 +75,18 @@ public class ClientBuilder {
 	}
 
 	/**
+	 * Sets whether the client should act as a daemon (it is NOT a daemon by default)
+	 *
+	 * @param isDaemon If true, the client will not stop the JVM from closing until the client is logged out from. If false
+	 * the client will stop the JVM from closing until logged out from.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder setDaemon(boolean isDaemon) {
+		this.isDaemon = isDaemon;
+		return this;
+	}
+
+	/**
 	 * Creates the discord instance with the desired features
 	 *
 	 * @return The discord instance
@@ -85,9 +98,9 @@ public class ClientBuilder {
 			throw new DiscordException("No login info present!");
 
 		if (isBot) {
-			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount);
+			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon);
 		} else {
-			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount);
+			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon);
 		}
 	}
 
