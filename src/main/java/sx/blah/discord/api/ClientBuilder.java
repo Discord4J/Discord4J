@@ -75,7 +75,7 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets whether the client should act as a daemon (it is NOT a daemon by default)
+	 * Sets whether the client should act as a daemon (it is NOT a daemon by default).
 	 *
 	 * @param isDaemon If true, the client will not stop the JVM from closing until the client is logged out from. If false
 	 * the client will stop the JVM from closing until logged out from.

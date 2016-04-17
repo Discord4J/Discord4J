@@ -104,7 +104,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return The message object for this index.
 	 */
 	@Override
-	public IMessage get(int index) {
+	public synchronized IMessage get(int index) {
 		while (size() <= index) {
 			try {
 				if (!load(MESSAGE_CHUNK_COUNT))
@@ -189,7 +189,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param skipPurge Whether to skip purging the cache, true to skip, false to purge.
 	 * @return True if the object was successfully cached, false if otherwise.
 	 */
-	private boolean add(IMessage message, boolean skipPurge) {
+	private synchronized boolean add(IMessage message, boolean skipPurge) {
 		if (messageCache.contains(message))
 			return false;
 
@@ -237,7 +237,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	}
 
 	@Override
-	public boolean remove(Object o) {
+	public synchronized boolean remove(Object o) {
 		if (!(o instanceof IMessage) || !((IMessage) o).getChannel().equals(channel))
 			return false;
 
@@ -248,7 +248,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * {@inheritDoc}
 	 */
 	@Override
-	public IMessage remove(int index) {
+	public synchronized IMessage remove(int index) {
 		if (index >= size())
 			throw new ArrayIndexOutOfBoundsException();
 
