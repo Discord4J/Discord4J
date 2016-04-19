@@ -86,19 +86,20 @@ public class Discord4J {
 	/**
 	 * This is used to run Discord4J independent of any bot, making it module dependent.
 	 *
-	 * @param args The args should be email, password IN THAT ORDER
+	 * @param args The args should be either email/password or just the bot token
 	 */
 	public static void main(String[] args) {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
 			throw new RuntimeException("Invalid configuration!");
 
-		//There needs to be at least 2 args
-		if (args.length < 2)
-			throw new IllegalArgumentException("At least 2 arguments are required!");
+		// There needs to be at least 1 arg
+		if (args.length < 1)
+			throw new IllegalArgumentException("At least 1 argument required!");
 
 		try {
-			IDiscordClient client = new ClientBuilder().withLogin(args[0], args[1]).login();
+			ClientBuilder builder = new ClientBuilder();
+			IDiscordClient client = (args.length == 1 ? builder.withToken(args[0]) : builder.withLogin(args[0], args[1])).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info("Logged in as {}", e.getClient().getOurUser().getName());
 			});
