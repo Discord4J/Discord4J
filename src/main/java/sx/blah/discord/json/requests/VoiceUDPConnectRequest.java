@@ -29,7 +29,7 @@ public class VoiceUDPConnectRequest {
         }
     }
 
-    private class EventData {
+    private static class EventData {
         private final String address;
         private final int port;
         private final String mode = "xsalsa20_poly1305";

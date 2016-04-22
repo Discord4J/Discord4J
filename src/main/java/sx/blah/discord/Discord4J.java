@@ -40,19 +40,19 @@ public class Discord4J {
 	/**
 	 * The name of the project
 	 */
-	public static String NAME;
+	public static final String NAME;
 	/**
 	 * The version of the api
 	 */
-	public static String VERSION;
+	public static final String VERSION;
 	/**
 	 * The api's description
 	 */
-	public static String DESCRIPTION;
+	public static final String DESCRIPTION;
 	/**
 	 * The github repo for the api
 	 */
-	public static String URL;
+	public static final String URL;
 
 	/**
 	 * SLF4J Instance

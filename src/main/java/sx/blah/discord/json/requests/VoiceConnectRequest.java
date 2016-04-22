@@ -22,7 +22,7 @@ public class VoiceConnectRequest {
     /**
      * The event object for this operation
      */
-    public class EventObject {
+    public static class EventObject {
 
         private final String server_id;
         private final String user_id;

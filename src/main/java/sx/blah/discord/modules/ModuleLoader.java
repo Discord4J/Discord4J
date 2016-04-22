@@ -48,7 +48,7 @@ public class ModuleLoader {
 			}
 
 			File[] files = modulesDir.listFiles((FilenameFilter) FileFilterUtils.suffixFileFilter("jar"));
-			if (files.length > 0) {
+			if (files != null && files.length > 0) {
 				Discord4J.LOGGER.info("Attempting to load {} external module(s)...", files.length);
 				loadExternalModules(new ArrayList<>(Arrays.asList(files)));
 			}
@@ -189,13 +189,14 @@ public class ModuleLoader {
 
 				//Scans the jar file for classes which have IModule as a super class
 				List<String> classes = new ArrayList<>();
-				JarFile jar = new JarFile(file);
-				jar.stream().forEach(jarEntry -> {
-					if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")) {
-						String className = jarEntry.getName().replace('/', '.');
-						classes.add(className.substring(0, className.length()-".class".length()));
-					}
-				});
+				try (JarFile jar = new JarFile(file)) {
+					jar.stream().forEach(jarEntry -> {
+						if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")) {
+							String className = jarEntry.getName().replace('/', '.');
+							classes.add(className.substring(0, className.length()-".class".length()));
+						}
+					});
+				}
 				for (String clazz : classes) {
 					Class classInstance = Class.forName(clazz);
 					if (IModule.class.isAssignableFrom(classInstance)) {

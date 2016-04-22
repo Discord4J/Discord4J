@@ -22,7 +22,7 @@ public class VoiceChannelRequest {
     /**
      * The event object for this operation
      */
-    public class EventObject {
+    public static class EventObject {
 
         public final String guild_id;
 		public final String channel_id;

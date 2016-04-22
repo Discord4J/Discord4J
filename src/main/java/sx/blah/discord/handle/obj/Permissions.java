@@ -100,7 +100,7 @@ public enum Permissions {
 	/**
 	 * The bit offset in the permissions number
 	 */
-	public int offset;
+	private final int offset;
 
 	Permissions(int offset) {
 		this.offset = offset;

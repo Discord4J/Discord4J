@@ -24,7 +24,7 @@ public class PresenceUpdateRequest {
 	/**
 	 * Represents the event
 	 */
-	public class EventObject {
+	public static class EventObject {
 
 		/**
 		 * The time (in epoch milliseconds) since the user became idle or null if not idle

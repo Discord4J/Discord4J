@@ -12,7 +12,7 @@ public class VoiceSpeakingRequest {
         d = new EventObject(speaking);
     }
 
-    public class EventObject {
+    public static class EventObject {
 
         public int delay = 0;
         public boolean speaking;

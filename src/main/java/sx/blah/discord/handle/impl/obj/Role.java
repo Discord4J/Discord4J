@@ -165,7 +165,7 @@ public class Role implements IRole {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
-			RoleResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
+			DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
 							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions())))),

@@ -89,7 +89,7 @@ public class Application implements IApplication {
 
 	@Override
 	public String[] getRedirectUris() {
-		return redirectUris;
+		return redirectUris.clone();
 	}
 
 	@Override

@@ -343,7 +343,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
-			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
+			DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
 							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
 							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout)))),
@@ -473,7 +473,7 @@ public class Guild implements IGuild {
 		if (!getOwnerID().equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("Cannot transfer ownership when you aren't the current owner!");
 		try {
-			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
+			DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new TransferOwnershipRequest(newOwner.getID()))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);

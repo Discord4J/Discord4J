@@ -4,23 +4,23 @@ package sx.blah.discord.json.responses;
  * This is returned by discord when requesting API metrics.
  */
 public class MetricResponse {
-	
+
 	/**
 	 * The metrics
 	 */
 	public MetricsOuterResponse[] metrics;
-	
+
 	/**
 	 * The period the metrics is for
 	 */
 	public PeriodResponse period;
-	
+
 	/**
 	 * The summary of the metrics
 	 */
 	public SummaryResponse summary;
-	
-	public class PeriodResponse {
+
+	public static class PeriodResponse {
 		/**
 		 * The amount of data collected
 		 */
@@ -32,8 +32,8 @@ public class MetricResponse {
 		//FIXME: ??
 		public int interval;
 	}
-	
-	public class SummaryResponse {
+
+	public static class SummaryResponse {
 		/**
 		 * The mean response time in ms.
 		 */
@@ -43,43 +43,43 @@ public class MetricResponse {
 		 */
 		public double sum;
 	}
-	
-	public class MetricsOuterResponse {
-		
+
+	public static class MetricsOuterResponse {
+
 		/**
 		 * The actual data
 		 */
 		public DataResponse[] data;
-		
+
 		/**
 		 * The information about the metric
 		 */
 		public MetricInnerResponse metric;
-		
+
 		/**
 		 * THe metric summary
 		 */
 		public SummaryResponse summary;
 	}
-	
-	public class DataResponse {
-		
+
+	public static class DataResponse {
+
 		/**
 		 * The time (in epoch milliseconds) the metric was taken
 		 */
 		public long timestamp;
-		
+
 		/**
 		 * The time (in milliseconds) the api took to respond
 		 */
 		public long value;
 	}
-	
+
 	/**
 	 * statuspage.io information
 	 */
-	public class MetricInnerResponse {
-		
+	public static class MetricInnerResponse {
+
 		public String application_id;
 		public String application_name;
 		public int backfill_percentage;

@@ -72,7 +72,7 @@ public class Channel implements IChannel {
 	/**
 	 * Manages all TimerTasks which send typing statuses.
 	 */
-	protected static Timer typingTimer = new Timer("Typing Status Timer", true);
+	protected static final Timer typingTimer = new Timer("Typing Status Timer", true);
 
 	/**
 	 * 10 seconds, the time it takes for one typing status to "wear off".

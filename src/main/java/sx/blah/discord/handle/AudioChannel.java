@@ -260,7 +260,7 @@ public class AudioChannel {
 	/**
 	 * Provides a small amount of information regarding the audio being played.
 	 */
-	public class AudioMetaData {
+	public static class AudioMetaData {
 		/**
 		 * The file source (if present).
 		 */

@@ -49,7 +49,7 @@ public class ReadyEventResponse {
 	/**
 	 * Represents a user's client settings
 	 */
-	public class UserSettingsResponse {
+	public static class UserSettingsResponse {
 
 		/**
 		 * Currently either "light" or "dark"
@@ -105,7 +105,7 @@ public class ReadyEventResponse {
 	/**
 	 * Represents a user's settings for a guild
 	 */
-	public class UserGuildSettingsResponse {
+	public static class UserGuildSettingsResponse {
 
 		/**
 		 * Whether to suppress @everyone notifications

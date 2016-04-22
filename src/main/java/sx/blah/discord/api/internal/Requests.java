@@ -99,7 +99,7 @@ public enum Requests {
 					return null;
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
-				} else if (responseCode < 200 || responseCode > 299) {
+				} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
 					throw new DiscordException("Error on request to "+url+". Received response code "+responseCode+". With response text: "+message);
 				}
 
@@ -165,7 +165,7 @@ public enum Requests {
 						return null;
 					} else if (responseCode == 204) { //There is a no content response when deleting messages
 						return null;
-					} else if (responseCode < 200 || responseCode > 299) {
+					} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
 						throw new DiscordException("Error on request to "+url+". Received response code "+responseCode+". With response text: "+message);
 					}
 
