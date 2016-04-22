@@ -16,14 +16,15 @@ public class ClientBuilder {
 	private boolean isDaemon = false;
 
 	/**
-	 * Sets the login info for the client. This is a REQUIRED step.
+	 * Sets the login info for the client.
 	 *
 	 * @param email The user's email.
 	 * @param password The user's password.
 	 * @return The instance of the builder.
 	 *
 	 * @deprecated The Discord Developers discourage using a user account! This library still supports its usage, but
-	 * it is discouraged.
+	 * it is discouraged. Since it is not supported, there may be bugs associated with it which will NOT be fixed as
+	 * again, this is discouraged. Use a bot account and {@link #withToken(String)} instead.
 	 */
 	@Deprecated
 	public ClientBuilder withLogin(String email, String password) {
