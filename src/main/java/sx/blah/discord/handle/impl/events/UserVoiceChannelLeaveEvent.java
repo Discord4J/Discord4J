@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.api.Event;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
@@ -9,14 +10,29 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class UserVoiceChannelLeaveEvent extends Event {
 
 	/**
+	 * The channel that has left.
+	 */
+	private final IUser user;
+	
+	/**
 	 * The channel the user left.
 	 */
 	private final IVoiceChannel oldChannel;
 
-	public UserVoiceChannelLeaveEvent(IVoiceChannel oldChannel) {
+	public UserVoiceChannelLeaveEvent(IUser user, IVoiceChannel oldChannel) {
+		this.user = user;
 		this.oldChannel = oldChannel;
 	}
 
+	/**
+	 * Retrieves the user that has left the channel.
+	 *
+	 * @return The user that has left the channel.
+	 */
+	public IUser getUser() {
+		return user;
+	}
+	
 	/**
 	 * Gets the voice channel this user left.
 	 *

@@ -813,11 +813,11 @@ public class DiscordWS {
 			((User) user).setVoiceChannel(channel);
 			if (channel != oldChannel) {
 				if (channel == null) {
-					client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(oldChannel));
+					client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
 				} else if (oldChannel == null) {
-					client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(channel));
+					client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
 				} else {
-					client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(oldChannel, channel));
+					client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
 				}
 			} else {
 				client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
