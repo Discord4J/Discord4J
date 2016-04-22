@@ -156,20 +156,6 @@ public interface IChannel {
 	boolean getTypingStatus();
 
 	/**
-	 * Gets the last read message id.
-	 *
-	 * @return The message id.
-	 */
-	String getLastReadMessageID();
-
-	/**
-	 * Gets the last read message.
-	 *
-	 * @return The message.
-	 */
-	IMessage getLastReadMessage();
-
-	/**
 	 * Changes the name of the channel
 	 *
 	 * @param name The new name of the channel.

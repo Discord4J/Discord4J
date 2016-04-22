@@ -65,11 +65,6 @@ public class Channel implements IChannel {
 	protected String topic;
 
 	/**
-	 * The last read message.
-	 */
-	protected String lastReadMessageID = null;
-
-	/**
 	 * Whether the bot should send out a typing status
 	 */
 	protected AtomicBoolean isTyping = new AtomicBoolean(false);
@@ -289,16 +284,6 @@ public class Channel implements IChannel {
 		return isTyping.get();
 	}
 
-	@Override
-	public String getLastReadMessageID() {
-		return lastReadMessageID;
-	}
-
-	@Override
-	public IMessage getLastReadMessage() {
-		return getMessageByID(lastReadMessageID);
-	}
-
 	private void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
@@ -354,15 +339,6 @@ public class Channel implements IChannel {
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
 				new BasicNameValuePair("authorization", client.getToken()));
-	}
-
-	/**
-	 * Sets the CACHED last read message id.
-	 *
-	 * @param lastReadMessageID The message id.
-	 */
-	public void setLastReadMessageID(String lastReadMessageID) {
-		this.lastReadMessageID = lastReadMessageID;
 	}
 
 	@Override

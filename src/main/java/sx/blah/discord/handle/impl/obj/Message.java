@@ -232,23 +232,6 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void acknowledge() throws HTTP429Exception, DiscordException {
-		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getChannel().getID()+"/messages/"+getID()+"/ack",
-				new BasicNameValuePair("authorization", client.getToken()));
-		channel.setLastReadMessageID(getID());
-	}
-
-	@Override
-	public boolean isAcknowledged() {
-		if (channel.getLastReadMessageID().equals(getID()))
-			return true;
-
-		IMessage lastRead = channel.getLastReadMessage();
-		LocalDateTime timeStamp = lastRead.getTimestamp();
-		return timeStamp.compareTo(getTimestamp()) >= 0;
-	}
-
-	@Override
 	public Optional<LocalDateTime> getEditedTimestamp() {
 		return editedTimestamp;
 	}

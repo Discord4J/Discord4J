@@ -6,6 +6,7 @@
 * @sedmelluq -Realized how utf-8 was ruining audio
 * @TheFjonG -Created the awesome Discord4J ReadTheDocs page
 * @Martacus -Created an example repo for Discord4J modules
+* @davue -Added user fields to VoiceUser events
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer

@@ -121,22 +121,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public String getLastReadMessageID() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IMessage getLastReadMessage() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setLastReadMessageID(String lastReadMessageID) {
 		throw new UnsupportedOperationException();
 	}
 }

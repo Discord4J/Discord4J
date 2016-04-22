@@ -323,10 +323,6 @@ public class DiscordWS {
 					channelUpdate(eventObject);
 					break;
 
-				case "MESSAGE_ACK":
-					messageAck(eventObject);
-					break;
-
 				case "GUILD_MEMBERS_CHUNK":
 					guildMembersChunk(eventObject);
 					break;
@@ -420,12 +416,6 @@ public class DiscordWS {
 		for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
 			PrivateChannel channel = (PrivateChannel) DiscordUtils.getPrivateChannelFromJSON(client, privateChannelResponse);
 			client.privateChannels.add(channel);
-		}
-
-		for (ReadyEventResponse.ReadStateResponse readState : event.read_state) {
-			Channel channel = (Channel) client.getChannelByID(readState.id);
-			if (channel != null)
-				channel.setLastReadMessageID(readState.last_message_id);
 		}
 
 		Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
@@ -688,7 +678,6 @@ public class DiscordWS {
 					Channel oldChannel = new Channel(client, toUpdate.getName(),
 							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
 							toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
-					oldChannel.setLastReadMessageID(toUpdate.getLastReadMessageID());
 
 					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), event);
 
@@ -706,16 +695,6 @@ public class DiscordWS {
 					client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 				}
 			}
-		}
-	}
-
-	private void messageAck(JsonElement eventObject) {
-		MessageAcknowledgedEventResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageAcknowledgedEventResponse.class);
-		IChannel channelAck = client.getChannelByID(event.channel_id);
-		if (channelAck != null) {
-			IMessage messageAck = channelAck.getMessageByID(event.message_id);
-			if (messageAck != null)
-				client.getDispatcher().dispatch(new MessageAcknowledgedEvent(messageAck));
 		}
 	}
 

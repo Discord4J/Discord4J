@@ -102,21 +102,6 @@ public interface IMessage {
 	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
-	 * Acknowledges a message and all others before it (marks it as "read").
-	 *
-	 * @throws HTTP429Exception
-	 * @throws DiscordException
-	 */
-	void acknowledge() throws HTTP429Exception, DiscordException;
-
-	/**
-	 * Checks if the message has been read by this account.
-	 *
-	 * @return True if the message has been read, false if otherwise.
-	 */
-	boolean isAcknowledged();
-
-	/**
 	 * Gets the time that this message was last edited.
 	 *
 	 * @return The edited timestamp.

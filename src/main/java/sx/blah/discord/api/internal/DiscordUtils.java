@@ -276,8 +276,6 @@ public class DiscordUtils {
 			channel = new PrivateChannel(client, recipient, id);
 		}
 
-		channel.setLastReadMessageID(json.last_message_id);
-
 		return channel;
 	}
 
@@ -364,8 +362,6 @@ public class DiscordUtils {
 				}
 			}
 		}
-
-		channel.setLastReadMessageID(json.last_message_id);
 
 		return channel;
 	}
