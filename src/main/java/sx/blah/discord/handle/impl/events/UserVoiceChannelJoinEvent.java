@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class UserVoiceChannelJoinEvent extends Event {
 	
 	/**
-	 * The channel that has joined.
+	 * The user that has joined.
 	 */
 	private final IUser user;
 	

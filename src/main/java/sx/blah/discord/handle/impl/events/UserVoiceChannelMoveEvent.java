@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class UserVoiceChannelMoveEvent extends Event {
 
 	/**
-	 * The channel that has moved.
+	 * The user that has moved.
 	 */
 	private final IUser user;
 	

@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class UserVoiceChannelLeaveEvent extends Event {
 
 	/**
-	 * The channel that has left.
+	 * The user that has left.
 	 */
 	private final IUser user;
 	
