@@ -272,6 +272,9 @@ public class Message implements IMessage {
 
 	@Override
 	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IMessage) other).getID().equals(getID());
 	}
 }

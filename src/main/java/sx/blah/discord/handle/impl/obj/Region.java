@@ -42,6 +42,9 @@ public class Region implements IRegion {
 
 	@Override
 	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IRegion) other).getID().equals(getID());
 	}
 }

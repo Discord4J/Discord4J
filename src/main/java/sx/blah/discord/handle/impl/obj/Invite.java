@@ -95,6 +95,9 @@ public class Invite implements IInvite {
 
 	@Override
 	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IInvite) other).getInviteCode().equals(getInviteCode());
 	}
 

@@ -256,6 +256,9 @@ public class User implements IUser {
 
 	@Override
 	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+		
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
 	}
 }

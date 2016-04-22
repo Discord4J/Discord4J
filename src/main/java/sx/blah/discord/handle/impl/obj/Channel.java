@@ -491,6 +491,9 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
 	}
 

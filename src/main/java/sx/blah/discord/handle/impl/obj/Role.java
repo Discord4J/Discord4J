@@ -226,6 +226,9 @@ public class Role implements IRole {
 
 	@Override
 	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IRole) other).getID().equals(getID());
 	}
 }
