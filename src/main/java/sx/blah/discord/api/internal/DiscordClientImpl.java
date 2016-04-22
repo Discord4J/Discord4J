@@ -206,9 +206,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 			if (ws != null) {
 				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 
-				for (DiscordVoiceWS vws : voiceConnections.values())
-					vws.disconnect(VoiceDisconnectedEvent.Reason.RECONNECTING);
-
 				lastSequence = 0;
 				sessionId = null; //Prevents the websocket from sending a resume request.
 			}

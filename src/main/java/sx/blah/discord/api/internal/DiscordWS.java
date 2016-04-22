@@ -115,6 +115,8 @@ public class DiscordWS {
 			isConnected.set(false);
 			executorService.shutdownNow();
 			client.ws = null;
+			for (DiscordVoiceWS vws : client.voiceConnections.values()) //Ensures that voice connections are closed.
+				vws.disconnect(VoiceDisconnectedEvent.Reason.RECONNECTING);
 			clearCache();
 			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 			if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
