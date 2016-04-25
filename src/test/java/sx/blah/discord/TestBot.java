@@ -1,7 +1,10 @@
 package sx.blah.discord;
 
 import org.junit.Test;
-import sx.blah.discord.api.*;
+import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.DiscordStatus;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
@@ -259,9 +262,9 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						client.getDispatcher().registerTemporaryListener((MessageReceivedEvent event) -> {
+						client.getDispatcher().waitFor(MessageReceivedEvent.class, (MessageReceivedEvent event) -> {
 							try {
-								event.getMessage().reply("test2");
+								event.getMessage().reply("test1");
 							} catch (MissingPermissionsException e) {
 								e.printStackTrace();
 							} catch (HTTP429Exception e) {
@@ -270,6 +273,7 @@ public class TestBot {
 								e.printStackTrace();
 							}
 						});
+						message.reply("test2");
 					}
 				});
 

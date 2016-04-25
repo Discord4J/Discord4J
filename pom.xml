@@ -73,7 +73,7 @@
 		<dependency>
 			<groupId>net.jodah</groupId>
 			<artifactId>typetools</artifactId>
-			<version>0.4.3</version>
+			<version>0.4.6</version>
 		</dependency>
 
 		<dependency>
