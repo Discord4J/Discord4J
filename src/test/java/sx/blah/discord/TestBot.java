@@ -262,7 +262,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						client.getDispatcher().waitFor(MessageReceivedEvent.class, (MessageReceivedEvent event) -> {
+						client.getDispatcher().waitFor((MessageReceivedEvent event) -> {
 							try {
 								event.getMessage().reply("test1");
 							} catch (MissingPermissionsException e) {
@@ -272,6 +272,7 @@ public class TestBot {
 							} catch (DiscordException e) {
 								e.printStackTrace();
 							}
+							return true;
 						});
 						message.reply("test2");
 					}
