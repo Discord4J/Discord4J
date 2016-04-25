@@ -262,19 +262,24 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						client.getDispatcher().waitFor((MessageReceivedEvent event) -> {
-							try {
-								event.getMessage().reply("test1");
-							} catch (MissingPermissionsException e) {
-								e.printStackTrace();
-							} catch (HTTP429Exception e) {
-								e.printStackTrace();
-							} catch (DiscordException e) {
-								e.printStackTrace();
-							}
-							return true;
-						});
-						message.reply("test2");
+						new RequestBuilder(client)
+								.shouldFailOnException(false)
+								.shouldBufferRequests(true)
+								.setAsync(true)
+								.doAction(() -> {message.reply("Action 1");return true;})
+								.doActionAfter((MessageReceivedEvent event) -> {return true;})
+								.andThen(() -> {message.reply("Action 2");return true;})
+								.andThen(() -> {message.reply("Action 3");return true;})
+								.andThen(() -> {message.reply("Action 4");return true;})
+								.andThen(() -> {message.reply("Action 5");return true;})
+								.elseDo(() -> {message.reply("Action 5 failed");return true;})
+								.andThen(() -> {message.reply("Action 6");return true;})
+								.andThen(() -> {message.reply("Action 7");return true;})
+								.andThen(() -> {message.reply("Action 8");return true;})
+								.andThen(() -> {message.reply("Action 9");return true;})
+								.andThen(() -> {message.reply("Action 10");return true;})
+								.elseDo(() -> {message.reply("Action 10 failed");return true;})
+								.execute();
 					}
 				});
 
