@@ -284,4 +284,40 @@ public interface IDiscordClient {
 	 * @return The launch time.
 	 */
 	LocalDateTime getLaunchTime();
+
+	/**
+	 * Gets the application description for this bot.
+	 *
+	 * @return The application's description.
+	 *
+	 * @throws DiscordException
+	 */
+	String getDescription() throws DiscordException;
+
+	/**
+	 * Gets the url leading to this bot's application's icon.
+	 *
+	 * @return The application's icon url.
+	 *
+	 * @throws DiscordException
+	 */
+	String getApplicationIconURL() throws DiscordException;
+
+	/**
+	 * Gets the bot's application's client id.
+	 *
+	 * @return The application's client id.
+	 *
+	 * @throws DiscordException
+	 */
+	String getApplicationClientID() throws DiscordException;
+
+	/**
+	 * Gets the bot's application's name.
+	 *
+	 * @return The application's name.
+	 *
+	 * @throws DiscordException
+	 */
+	String getApplicationName() throws DiscordException;
 }

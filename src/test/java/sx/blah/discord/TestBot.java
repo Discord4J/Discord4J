@@ -12,10 +12,7 @@ import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
 
 import java.io.File;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -262,24 +259,9 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						new RequestBuilder(client)
-								.shouldFailOnException(false)
-								.shouldBufferRequests(true)
-								.setAsync(true)
-								.doAction(() -> {message.reply("Action 1");return true;})
-								.doActionAfter((MessageReceivedEvent event) -> {return true;})
-								.andThen(() -> {message.reply("Action 2");return true;})
-								.andThen(() -> {message.reply("Action 3");return true;})
-								.andThen(() -> {message.reply("Action 4");return true;})
-								.andThen(() -> {message.reply("Action 5");return true;})
-								.elseDo(() -> {message.reply("Action 5 failed");return true;})
-								.andThen(() -> {message.reply("Action 6");return true;})
-								.andThen(() -> {message.reply("Action 7");return true;})
-								.andThen(() -> {message.reply("Action 8");return true;})
-								.andThen(() -> {message.reply("Action 9");return true;})
-								.andThen(() -> {message.reply("Action 10");return true;})
-								.elseDo(() -> {message.reply("Action 10 failed");return true;})
-								.execute();
+						message.reply(new BotInviteBuilder(client).build());
+						message.reply(new BotInviteBuilder(client).withGuild(message.getGuild()).build());
+						message.reply(new BotInviteBuilder(client).withPermissions(EnumSet.allOf(Permissions.class)).build());
 					}
 				});
 

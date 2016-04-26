@@ -573,4 +573,51 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public LocalDateTime getLaunchTime() {
 		return launchTime;
 	}
+
+	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, HTTP429Exception {
+		return DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me",
+				new BasicNameValuePair("authorization", getToken()),
+				new BasicNameValuePair("content-type", "application/json")), ApplicationInfoResponse.class);
+	}
+
+	@Override
+	public String getDescription() throws DiscordException {
+		try {
+			return getApplicationInfo().description;
+		} catch (HTTP429Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	@Override
+	public String getApplicationIconURL() throws DiscordException {
+		try {
+			ApplicationInfoResponse info = getApplicationInfo();
+			return String.format(DiscordEndpoints.APPLICATION_ICON, info.id, info.icon);
+		} catch (HTTP429Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	@Override
+	public String getApplicationClientID() throws DiscordException {
+		try {
+			return getApplicationInfo().id;
+		} catch (HTTP429Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	@Override
+	public String getApplicationName() throws DiscordException {
+		try {
+			return getApplicationInfo().name;
+		} catch (HTTP429Exception e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+		return null;
+	}
 }
