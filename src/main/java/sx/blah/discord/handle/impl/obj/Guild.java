@@ -369,9 +369,19 @@ public class Guild implements IGuild {
 		edit(Optional.empty(), Optional.empty(), icon, null, Optional.empty());
 	}
 
+	public void changeIcon(Image icon) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), null, Optional.empty());
+	}
+
 	@Override
 	public void changeAFKChannel(Optional<IVoiceChannel> channel) throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		String id = channel.isPresent() ? channel.get().getID() : null;
+		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
+	}
+
+	@Override
+	public void changeAFKChannel(IVoiceChannel channel) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		String id = channel != null ? channel.getID() : null;
 		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
 	}
 
@@ -550,12 +560,17 @@ public class Guild implements IGuild {
 
 	@Override
 	public void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception {
+		addBot(applicationID, permissions.orElse(EnumSet.noneOf(Permissions.class)));
+	}
+
+	@Override
+	public void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
 			Requests.POST.makeRequest(DiscordEndpoints.AUTHORIZE+"?client_id="+applicationID+"&scope=bot",
 					new StringEntity(DiscordUtils.GSON.toJson(new BotAddRequest(id,
-							Permissions.generatePermissionsNumber(permissions.orElse(EnumSet.noneOf(Permissions.class)))))),
+							Permissions.generatePermissionsNumber(permissions)))),
 					new BasicNameValuePair("authorization", client.getToken()));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);

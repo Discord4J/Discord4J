@@ -152,6 +152,11 @@ public class Application implements IApplication {
 	}
 
 	@Override
+	public void changeIcon(Image icon) throws HTTP429Exception, DiscordException {
+		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), Optional.empty());
+	}
+
+	@Override
 	public void changeRedirectUris(String[] redirectUris) throws HTTP429Exception, DiscordException {
 		edit(Optional.empty(), Optional.empty(), null, Optional.of(redirectUris));
 	}

@@ -322,7 +322,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void updatePresence(boolean isIdle, Optional<String> game) {
+	public void updatePresence(boolean isIdle, Optional<String> game) { //TODO: make private
 		if (!isReady()) {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return;
@@ -331,7 +331,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
 
 		((User) getOurUser()).setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
-		((User) getOurUser()).setGame(game);
+		((User) getOurUser()).setGame(game.orElse(null));
+	}
+
+	@Override
+	public void changePresence(boolean isIdle) {
+		updatePresence(isIdle, getOurUser().getGame());
+	}
+
+	@Override
+	public void changeGameStatus(String game) {
+		updatePresence(getOurUser().getPresence() == Presences.IDLE, Optional.ofNullable(game));
 	}
 
 	@Override

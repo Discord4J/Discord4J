@@ -104,8 +104,24 @@ public interface IDiscordClient {
 	 *
 	 * @param isIdle If true, the bot will be "idle", otherwise the bot will be "online".
 	 * @param game The optional name of the game the bot is playing. If empty, the bot simply won't be playing a game.
+	 * @deprecated Use {@link #changePresence(boolean)} or {@link #changeGameStatus(String)}
 	 */
+	@Deprecated
 	void updatePresence(boolean isIdle, Optional<String> game);
+
+	/**
+	 * Changes this user's presence.
+	 *
+	 * @param isIdle If true, this user becomes idle, or online if false.
+	 */
+	void changePresence(boolean isIdle);
+
+	/**
+	 * Changes the game status message for this bot's user.
+	 *
+	 * @param game The game, or if null then no message will be shown.
+	 */
+	void changeGameStatus(String game);
 
 	/**
 	 * Checks if the api is ready to be interacted with (if it is logged in).

@@ -13,9 +13,9 @@ public class GameChangeEvent extends Event {
 
 	private final IGuild guild;
 	private final IUser user;
-	private final Optional<String> oldGame, newGame;
+	private final String oldGame, newGame;
 
-	public GameChangeEvent(IGuild guild, IUser user, Optional<String> oldGame, Optional<String> newGame) {
+	public GameChangeEvent(IGuild guild, IUser user, String oldGame, String newGame) {
 		this.guild = guild;
 		this.user = user;
 		this.oldGame = oldGame;
@@ -28,7 +28,7 @@ public class GameChangeEvent extends Event {
 	 * @return The new game, or no value if the user isn't play a game.
 	 */
 	public Optional<String> getNewGame() {
-		return newGame;
+		return Optional.ofNullable(newGame);
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class GameChangeEvent extends Event {
 	 * @return The old game, or no value if the user wasn't plaing a game.
 	 */
 	public Optional<String> getOldGame() {
-		return oldGame;
+		return Optional.ofNullable(oldGame);
 	}
 
 	/**

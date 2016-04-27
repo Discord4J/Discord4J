@@ -90,8 +90,20 @@ public interface IApplication {
 	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * @deprecated Use {@link #changeIcon(Image)} instead.
 	 */
+	@Deprecated
 	void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException;
+
+	/**
+	 * Changes the application's icon.
+	 *
+	 * @param icon The new icon, or deletes the icon if null.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 */
+	void changeIcon(Image icon) throws HTTP429Exception, DiscordException;
 
 	/**
 	 * Changes the application's redirectUris.
@@ -147,7 +159,9 @@ public interface IApplication {
 	 * @param requestedPermissions The (optional) requested permissions for the bot.
 	 * @param guildID The (optional) specific guild for the bot to be added to.
 	 * @return The url.
+	 * @deprecated Use {@link sx.blah.discord.util.BotInviteBuilder} instead.
 	 */
+	@Deprecated
 	String createBotInvite(Optional<EnumSet<Permissions>> requestedPermissions, Optional<String> guildID);
 
 	/**

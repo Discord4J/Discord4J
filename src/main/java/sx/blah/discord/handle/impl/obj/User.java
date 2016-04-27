@@ -32,7 +32,7 @@ public class User implements IUser {
 	/**
 	 * The game the user is playing.
 	 */
-	protected Optional<String> game;
+	protected String game;
 
 	/**
 	 * User ID.
@@ -100,7 +100,7 @@ public class User implements IUser {
 
 	@Override
 	public Optional<String> getGame() {
-		return game == null ? Optional.empty() : game;
+		return Optional.ofNullable(game);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class User implements IUser {
 	 *
 	 * @param game The game.
 	 */
-	public void setGame(Optional<String> game) {
+	public void setGame(String game) {
 		this.game = game;
 	}
 
@@ -258,7 +258,7 @@ public class User implements IUser {
 	public boolean equals(Object other) {
 		if (other == null)
 			return false;
-		
+
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
 	}
 }

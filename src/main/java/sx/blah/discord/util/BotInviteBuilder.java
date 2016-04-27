@@ -16,6 +16,7 @@ public class BotInviteBuilder {
 	private final IDiscordClient client;
 	private IGuild guild;
 	private EnumSet<Permissions> permissions;
+	private String clientIDOverride;
 
 	public BotInviteBuilder(IDiscordClient client) {
 		this.client = client;
@@ -29,6 +30,17 @@ public class BotInviteBuilder {
 	 */
 	public BotInviteBuilder withGuild(IGuild guild) {
 		this.guild = guild;
+		return this;
+	}
+
+	/**
+	 * This replaces the client id provided by your {@link IDiscordClient} instance.
+	 *
+	 * @param id The client id to override with.
+	 * @return The builder instance.
+	 */
+	public BotInviteBuilder withClientID(String id) {
+		this.clientIDOverride = id;
 		return this;
 	}
 
@@ -58,7 +70,7 @@ public class BotInviteBuilder {
 			url += "&guild_id="+guild.getID();
 
 		try {
-			return String.format(url, client.getApplicationClientID());
+			return String.format(url, clientIDOverride == null ? client.getApplicationClientID() : clientIDOverride);
 		} catch (DiscordException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}

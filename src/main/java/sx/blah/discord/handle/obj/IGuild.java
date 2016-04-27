@@ -238,8 +238,20 @@ public interface IGuild {
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
+	 * @deprecated Use {@link #changeIcon(Image)} instead.
 	 */
+	@Deprecated
 	void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+
+	/**
+	 * Changes the name of the guild.
+	 *
+	 * @param icon The new icon of the guild (or null to remove it).
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeIcon(Image icon) throws HTTP429Exception, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK voice channel of the guild.
@@ -248,8 +260,20 @@ public interface IGuild {
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
+	 * @deprecated Use {{@link #changeAFKChannel(IVoiceChannel)}} instead.
 	 */
+	@Deprecated
 	void changeAFKChannel(Optional<IVoiceChannel> channel) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+
+	/**
+	 * Changes the AFK voice channel of the guild.
+	 *
+	 * @param channel The new AFK voice channel of the guild (or null to remove it).
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeAFKChannel(IVoiceChannel channel) throws HTTP429Exception, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK timeout for the guild.
@@ -387,8 +411,22 @@ public interface IGuild {
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 * @throws HTTP429Exception
+	 * @deprecated Use {@link #addBot(String, EnumSet)}
 	 */
+	@Deprecated
 	void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+
+	/**
+	 * Attempts to add a bot to this guild.
+	 *
+	 * @param applicationID The OAuth2 application id for the application owning the bot.
+	 * @param permissions The permissions for this bot to have when entering the guild.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception;
 
 	/**
 	 * Gets the audio channel of this guild. This throws an exception if the bot isn't in a channel yet.

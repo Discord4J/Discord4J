@@ -209,7 +209,7 @@ public class DiscordUtils {
 					User user = (User) guild.getUserByID(presence.user.id);
 					if (user != null) {
 						user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
-						user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
+						user.setGame(presence.game == null ? null : presence.game.name);
 					}
 				}
 
@@ -295,12 +295,12 @@ public class DiscordUtils {
 			message.setMentionsEveryone(json.mention_everyone);
 			message.setMentions(getMentionsFromJSON(client, json));
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
-			message.setEditedTimestamp(json.edited_timestamp == null ? Optional.empty() : Optional.of(convertFromTimestamp(json.edited_timestamp)));
+			message.setEditedTimestamp(json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
 			return message;
 		} else
 			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),
 					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ?
-					Optional.empty() : Optional.of(convertFromTimestamp(json.edited_timestamp)), json.mention_everyone,
+					null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
 					getMentionsFromJSON(client, json), getAttachmentsFromJSON(json));
 	}
 

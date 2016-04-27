@@ -21,11 +21,11 @@ public class AudioPlayEvent extends Event {
 	/**
 	 * The file source (if present)
 	 */
-	private final Optional<File> fileSource;
+	private final File fileSource;
 	/**
 	 * The url source (if present)
 	 */
-	private final Optional<URL> urlSource;
+	private final URL urlSource;
 	/**
 	 * The audio file format
 	 */
@@ -38,8 +38,8 @@ public class AudioPlayEvent extends Event {
 	public AudioPlayEvent(AudioInputStream stream, File fileSource, URL urlSource, AudioFileFormat format, AudioChannel audioChannel) {
 		this.stream = stream;
 		this.format = format;
-		this.fileSource = Optional.ofNullable(fileSource);
-		this.urlSource = Optional.ofNullable(urlSource);
+		this.fileSource = fileSource;
+		this.urlSource = urlSource;
 		this.audioChannel = audioChannel;
 	}
 
@@ -58,7 +58,7 @@ public class AudioPlayEvent extends Event {
 	 * @return The source file (or none if it doesn't exist)
 	 */
 	public Optional<File> getFileSource() {
-		return fileSource;
+		return Optional.ofNullable(fileSource);
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class AudioPlayEvent extends Event {
 	 * @return The source url (or none if it doesn't exist)
 	 */
 	public Optional<URL> getUrlSource() {
-		return urlSource;
+		return Optional.ofNullable(urlSource);
 	}
 
 	/**

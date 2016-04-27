@@ -546,7 +546,7 @@ public class DiscordWS {
 		Message toUpdate = (Message) channel.getMessageByID(id);
 		if (toUpdate != null) {
 			IMessage oldMessage = new Message(client, toUpdate.getID(), toUpdate.getContent(), toUpdate.getAuthor(),
-					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp(),
+					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp().orElse(null),
 					toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getAttachments());
 
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
@@ -585,9 +585,9 @@ public class DiscordWS {
 					Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
 				if (!user.getGame().equals(Optional.ofNullable(gameName))) {
-					Optional<String> oldGame = user.getGame();
-					user.setGame(Optional.ofNullable(gameName));
-					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldGame, Optional.ofNullable(gameName)));
+					String oldGame = user.getGame().orElse(null);
+					user.setGame(gameName);
+					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldGame, gameName));
 					Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
 				}
 			}

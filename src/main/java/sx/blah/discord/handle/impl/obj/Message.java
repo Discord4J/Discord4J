@@ -53,7 +53,7 @@ public class Message implements IMessage {
 	/**
 	 * The time (if it exists) that the message was edited.
 	 */
-	protected Optional<LocalDateTime> editedTimestamp;
+	protected LocalDateTime editedTimestamp;
 
 	/**
 	 * The list of users mentioned by this message.
@@ -76,7 +76,7 @@ public class Message implements IMessage {
 	protected final IDiscordClient client;
 
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
-				   LocalDateTime timestamp, Optional<LocalDateTime> editedTimestamp, boolean mentionsEveryone,
+				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<Attachment> attachments) {
 		this.client = client;
 		this.id = id;
@@ -233,7 +233,7 @@ public class Message implements IMessage {
 
 	@Override
 	public Optional<LocalDateTime> getEditedTimestamp() {
-		return editedTimestamp;
+		return Optional.ofNullable(editedTimestamp);
 	}
 
 	/**
@@ -241,7 +241,7 @@ public class Message implements IMessage {
 	 *
 	 * @param editedTimestamp The new timestamp.
 	 */
-	public void setEditedTimestamp(Optional<LocalDateTime> editedTimestamp) {
+	public void setEditedTimestamp(LocalDateTime editedTimestamp) {
 		this.editedTimestamp = editedTimestamp;
 	}
 
