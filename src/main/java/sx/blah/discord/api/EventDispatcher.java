@@ -5,10 +5,7 @@ import sx.blah.discord.Discord4J;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Predicate;
 
 /**
@@ -112,6 +109,35 @@ public class EventDispatcher {
 	}
 
 	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched.
+	 *
+	 * @param eventClass The class of the event to wait for.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
+	 * of whether the event fired.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Class<T> eventClass, long time) throws InterruptedException {
+		waitFor((T event) -> true, time);
+	}
+
+	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched.
+	 *
+	 * @param eventClass The class of the event to wait for.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
+	 * event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit) throws InterruptedException {
+		waitFor((T event) -> true, time, unit);
+	}
+
+	/**
 	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
 	 * {@link Predicate} returns true.
 	 *
@@ -121,6 +147,37 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Predicate<T> filter) throws InterruptedException {
+		waitFor(filter, 0);
+	}
+
+	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
+	 * {@link Predicate} returns true.
+	 *
+	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
+	 * of whether the event fired.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Predicate<T> filter, long time) throws InterruptedException {
+		waitFor(filter, time, TimeUnit.MILLISECONDS);
+	}
+
+	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
+	 * {@link Predicate} returns true.
+	 *
+	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
+	 * of whether the event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Predicate<T> filter, long time, TimeUnit unit) throws InterruptedException {
 		final Thread currentThread = Thread.currentThread();
 		synchronized (currentThread) {
 			registerListener(new IListener<T>() {
@@ -134,7 +191,7 @@ public class EventDispatcher {
 					}
 				}
 			});
-			currentThread.wait();
+			currentThread.wait(unit.toMillis(time));
 		}
 	}
 
