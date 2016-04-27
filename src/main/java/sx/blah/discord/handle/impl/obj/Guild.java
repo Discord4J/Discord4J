@@ -223,6 +223,11 @@ public class Guild implements IGuild {
 		return roles;
 	}
 
+	@Override
+	public List<IRole> getRolesForUser(IUser user) {
+		return user.getRolesForGuild(this);
+	}
+
 	/**
 	 * CACHES a role to the guild.
 	 *

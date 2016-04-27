@@ -97,6 +97,14 @@ public interface IGuild {
 	List<IRole> getRoles();
 
 	/**
+	 * Gets the roles a user is a part of.
+	 *
+	 * @param user The user to check the roles for.
+	 * @return The roles.
+	 */
+	List<IRole> getRolesForUser(IUser user);
+
+	/**
 	 * Gets a role object for its unique id.
 	 *
 	 * @param id The role id of the desired role.
