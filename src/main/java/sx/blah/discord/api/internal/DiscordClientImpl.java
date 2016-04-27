@@ -5,7 +5,6 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.EventDispatcher;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.User;
@@ -175,20 +174,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public ModuleLoader getModuleLoader() {
 		return loader;
-	}
-
-	@Override
-	public AudioChannel getAudioChannel() {
-		if (isBot)
-			throw new UnsupportedOperationException("This method is for non-bot accounts only!");
-
-		if (getConnectedVoiceChannel().isPresent())
-			try {
-				return getConnectedVoiceChannel().get().getAudioChannel();
-			} catch (DiscordException e) {
-				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-			}
-		return null;
 	}
 
 	@Override
@@ -510,16 +495,30 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public long getResponseTime() {
-		return ws.getResponseTime();
+	public IGuild createGuild(String name, IRegion region) throws HTTP429Exception, DiscordException {
+		return createGuild(name, region, (Image) null);
 	}
 
 	@Override
-	public Optional<IVoiceChannel> getConnectedVoiceChannel() {
-		if (isBot)
-			throw new UnsupportedOperationException("This method is for non-bot accounts only!");
+	public IGuild createGuild(String name, IRegion region, Image icon) throws HTTP429Exception, DiscordException {
+		try {
+			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
+							new CreateGuildRequest(name, region.getID(), icon))),
+					new BasicNameValuePair("authorization", this.token),
+					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
+			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);
+			guildList.add(guild);
+			return guild;
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+		return null;
+	}
 
-		return Optional.ofNullable(connectedVoiceChannels.size() == 0 ? null : connectedVoiceChannels.get(0));
+	@Override
+	public long getResponseTime() {
+		return ws.getResponseTime();
 	}
 
 	@Override

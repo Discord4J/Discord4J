@@ -4,7 +4,6 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
@@ -32,15 +31,6 @@ public interface IDiscordClient {
 	 * @return The module loader instance.
 	 */
 	ModuleLoader getModuleLoader();
-
-	/**
-	 * Gets the audio channel instance for this client.
-	 *
-	 * @return The audio channel.
-	 * @deprecated See {@link IVoiceChannel#getAudioChannel()} or {@link IGuild#getAudioChannel()}
-	 */
-	@Deprecated
-	AudioChannel getAudioChannel();
 
 	/**
 	 * Gets the authorization token for this client.
@@ -239,8 +229,35 @@ public interface IDiscordClient {
 	 *
 	 * @throws HTTP429Exception
 	 * @throws DiscordException
+	 * @deprecated Use {@link #createGuild(String, IRegion, Image)} or {@link #createGuild(String, IRegion)} instead.
 	 */
+	@Deprecated
 	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException;
+
+	/**
+	 * Creates a new guild.
+	 *
+	 * @param name The name of the guild.
+	 * @param region The region for the guild.
+	 * @return The new guild's id.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 */
+	IGuild createGuild(String name, IRegion region) throws HTTP429Exception, DiscordException;
+
+	/**
+	 * Creates a new guild.
+	 *
+	 * @param name The name of the guild.
+	 * @param region The region for the guild.
+	 * @param icon The icon for the guild.
+	 * @return The new guild's id.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 */
+	IGuild createGuild(String name, IRegion region, Image icon) throws HTTP429Exception, DiscordException;
 
 	/**
 	 * Gets the latest response time by the discord websocket to a ping.
@@ -248,15 +265,6 @@ public interface IDiscordClient {
 	 * @return The response time (in ms).
 	 */
 	long getResponseTime();
-
-	/**
-	 * This returns the voice channel the bot is currently connected to (if connected to one).
-	 *
-	 * @return The optional voice channel.
-	 * @deprecated See {@link #getConnectedVoiceChannels()}
-	 */
-	@Deprecated
-	Optional<IVoiceChannel> getConnectedVoiceChannel();
 
 	/**
 	 * Gets the connected voice channels.
