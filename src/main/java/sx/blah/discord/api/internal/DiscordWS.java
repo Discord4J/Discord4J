@@ -19,6 +19,7 @@ import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
+import sx.blah.discord.util.RequestBuilder;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -31,16 +32,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.InflaterInputStream;
 
 //This is what Hlaaftana uses so it must be good :shrug:
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordWS {
 
-	private DiscordClientImpl client;
-	private Session session;
+	private volatile DiscordClientImpl client;
+	private volatile Session session;
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
 	private final boolean isDaemon;
 	private volatile boolean sentPing = false;
 	private volatile long lastPingSent = -1L;
@@ -49,6 +51,7 @@ public class DiscordWS {
 	private final int maxMissedPingCount;
 	private volatile int missedPingCount = 0;
 	private static final String GATEWAY_VERSION = "4";
+	private static final int READY_TIMEOUT = 5; //Time in seconds where the ready event will timeout from wait for guilds
 	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
 		@Override
 		public void run() {
@@ -386,41 +389,54 @@ public class DiscordWS {
 	}
 
 	private void ready(JsonElement eventObject) {
-		ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
-
+		final ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
 		Discord4J.LOGGER.info("Connected to the Discord Websocket v"+event.v);
+		final AtomicInteger guildsToWaitFor = new AtomicInteger(0);
 
-		client.sessionId = event.session_id;
+		new RequestBuilder(client).setAsync(true).doAction(() -> { //Ready event handling 1/2
+			client.sessionId = event.session_id;
 
-		client.ourUser = DiscordUtils.getUserFromJSON(client, event.user);
+			client.ourUser = DiscordUtils.getUserFromJSON(client, event.user);
 
-		client.heartbeat = event.heartbeat_interval;
-		Discord4J.LOGGER.debug("Received heartbeat interval of {}.", client.heartbeat);
+			client.heartbeat = event.heartbeat_interval;
+			Discord4J.LOGGER.debug("Received heartbeat interval of {}.", client.heartbeat);
 
-		startKeepalive();
+			startKeepalive();
 
-		client.isReady = true;
+			client.isReady = true;
 
-		// I hope you like loops.
-		Discord4J.LOGGER.info("Connected to {} guilds.", event.guilds.length);
-		for (GuildResponse guildResponse : event.guilds) {
-			if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
-				continue;
+			// I hope you like loops.
+			Discord4J.LOGGER.info("Connected to {} guilds.", event.guilds.length);
+			for (GuildResponse guildResponse : event.guilds) {
+				if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
+					continue;
+				}
+
+				IGuild guild = DiscordUtils.getGuildFromJSON(client, guildResponse);
+				if (guild != null)
+					client.guildList.add(guild);
 			}
 
-			IGuild guild = DiscordUtils.getGuildFromJSON(client, guildResponse);
-			if (guild != null)
-				client.guildList.add(guild);
-		}
+			guildsToWaitFor.set(event.guilds.length - client.getGuilds().size());
+			Discord4J.LOGGER.trace("Initially loaded {}/{} guilds.", client.getGuilds().size(), event.guilds.length);
 
-		for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
-			PrivateChannel channel = (PrivateChannel) DiscordUtils.getPrivateChannelFromJSON(client, privateChannelResponse);
-			client.privateChannels.add(channel);
-		}
+			client.dispatcher.waitFor((GuildCreateEvent createEvent) -> { //Wait for guilds
+				guildsToWaitFor.set(guildsToWaitFor.get()-1);
+				Discord4J.LOGGER.trace("Loaded {}/{} guilds.", event.guilds.length - guildsToWaitFor.get(), event.guilds.length);
+				return guildsToWaitFor.get() <= 0;
+			}, READY_TIMEOUT, TimeUnit.SECONDS);
+			return true;
+		}).andThen(() -> { //Ready event handling 2/2
+			for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
+				PrivateChannel channel = (PrivateChannel) DiscordUtils.getPrivateChannelFromJSON(client, privateChannelResponse);
+				client.privateChannels.add(channel);
+			}
 
-		Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
+			Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
 
-		client.dispatcher.dispatch(new ReadyEvent());
+			client.dispatcher.dispatch(new ReadyEvent());
+			return true;
+		}).execute();
 	}
 
 	private void messageCreate(JsonElement eventObject) {

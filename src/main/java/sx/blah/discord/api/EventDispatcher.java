@@ -257,7 +257,7 @@ public class EventDispatcher {
 	 *
 	 * @param event The event.
 	 */
-	public void dispatch(Event event) {
+	public synchronized void dispatch(Event event) {
 		if (client.isReady()) {
 			eventExecutor.submit(() -> {
 				Discord4J.LOGGER.trace("Dispatching event of type {}", event.getClass().getSimpleName());

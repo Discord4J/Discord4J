@@ -19,6 +19,8 @@ import sx.blah.discord.util.Image;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -43,12 +45,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * User we are logged in as
 	 */
-	protected User ourUser;
+	protected volatile User ourUser;
 
 	/**
 	 * Our token, so we can send XHR to Discord.
 	 */
-	protected String token;
+	protected volatile String token;
 
 	/**
 	 * Time (in ms) between keep alive
@@ -59,67 +61,67 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Local copy of all guilds/servers.
 	 */
-	protected final List<IGuild> guildList = new ArrayList<>();
+	protected final List<IGuild> guildList = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Private copy of the email you logged in with.
 	 */
-	protected String email;
+	protected volatile String email;
 
 	/**
 	 * Private copy of the password you used to log in.
 	 */
-	protected String password;
+	protected volatile String password;
 
 	/**
 	 * WebSocket over which to communicate with Discord.
 	 */
-	public DiscordWS ws;
+	public volatile DiscordWS ws;
 
 	/**
 	 * Holds the active connections to voice sockets.
 	 */
-	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new HashMap<>();
+	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
 
 	/**
 	 * Event dispatcher.
 	 */
-	protected EventDispatcher dispatcher;
+	protected volatile EventDispatcher dispatcher;
 
 	/**
 	 * All of the private message channels that the bot is connected to.
 	 */
-	protected final List<IPrivateChannel> privateChannels = new ArrayList<>();
+	protected final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
 	/**
 	 * The voice channels the bot is currently in.
 	 */
-	public List<IVoiceChannel> connectedVoiceChannels = new ArrayList<>();
+	public final List<IVoiceChannel> connectedVoiceChannels = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Whether the api is logged in.
 	 */
-	protected boolean isReady = false;
+	protected volatile boolean isReady = false;
 
 	/**
 	 * The websocket session id.
 	 */
-	protected String sessionId;
+	protected volatile String sessionId;
 
 	/**
 	 * Caches the last operation done by the websocket, required for handling redirects.
 	 */
-	protected long lastSequence = 0;
+	protected volatile long lastSequence = 0;
 
 	/**
 	 * Caches the available regions for discord.
 	 */
-	protected final List<IRegion> REGIONS = new ArrayList<>();
+	protected final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
 	 * The module loader for this client.
 	 */
-	protected ModuleLoader loader;
+	protected volatile ModuleLoader loader;
 
 	/**
 	 * The time for the client to timeout.
@@ -139,12 +141,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Whether this client represents a bot.
 	 */
-	protected boolean isBot;
+	protected volatile boolean isBot;
 
 	/**
 	 * When this client was logged into. Useful for determining uptime.
 	 */
-	protected LocalDateTime launchTime;
+	protected volatile LocalDateTime launchTime;
 
 	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot) {
 		this.timeoutTime = timeoutTime;

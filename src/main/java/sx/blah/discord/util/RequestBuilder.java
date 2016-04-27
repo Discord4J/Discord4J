@@ -104,7 +104,35 @@ public class RequestBuilder {
 	 * @return The builder instance.
 	 */
 	public <T extends Event> RequestBuilder doActionAfter(Predicate<T> eventFilter) {
+		return doActionAfter(eventFilter, 0);
+	}
+
+	/**
+	 * This makes the currently active action execute AFTER the specified event filter is passed.
+	 *
+	 * @param eventFilter The event filter, it should return true when the action should proceed.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
+	 * of whether the event fired.
+	 * @param <T> The type of event to wait for.
+	 * @return The builder instance.
+	 */
+	public <T extends Event> RequestBuilder doActionAfter(Predicate<T> eventFilter, long time) {
+		return doActionAfter(eventFilter, time, TimeUnit.MILLISECONDS);
+	}
+
+	/**
+	 * This makes the currently active action execute AFTER the specified event filter is passed.
+	 *
+	 * @param eventFilter The event filter, it should return true when the action should proceed.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
+	 * event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param <T> The type of event to wait for.
+	 * @return The builder instance.
+	 */
+	public <T extends Event> RequestBuilder doActionAfter(Predicate<T> eventFilter, long time, TimeUnit unit) {
 		activeAction.waitBefore = eventFilter;
+		activeAction.waitBeforeTimeout = unit.toMillis(time);
 		return this;
 	}
 
@@ -116,7 +144,35 @@ public class RequestBuilder {
 	 * @return The builder instance.
 	 */
 	public <T extends Event> RequestBuilder doActionBefore(Predicate<T> eventFilter) {
+		return doActionBefore(eventFilter, 0);
+	}
+
+	/**
+	 * This makes the currently active action execute BEFORE the specified event filter is passed.
+	 *
+	 * @param eventFilter The event filter, it should return true when the action should proceed.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
+	 * of whether the event fired.
+	 * @param <T> The type of event to wait for.
+	 * @return The builder instance.
+	 */
+	public <T extends Event> RequestBuilder doActionBefore(Predicate<T> eventFilter, long time) {
+		return doActionBefore(eventFilter, time, TimeUnit.MILLISECONDS);
+	}
+
+	/**
+	 * This makes the currently active action execute BEFORE the specified event filter is passed.
+	 *
+	 * @param eventFilter The event filter, it should return true when the action should proceed.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
+	 * event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param <T> The type of event to wait for.
+	 * @return The builder instance.
+	 */
+	public <T extends Event> RequestBuilder doActionBefore(Predicate<T> eventFilter, long time, TimeUnit unit) {
 		activeAction.waitAfter = eventFilter;
+		activeAction.waitAfterTimeout = unit.toMillis(time);
 		return this;
 	}
 
@@ -260,7 +316,9 @@ public class RequestBuilder {
 
 		private volatile IRequestAction action;
 		private volatile Predicate<? extends Event> waitBefore;
+		private volatile long waitBeforeTimeout = 0;
 		private volatile Predicate<? extends Event> waitAfter;
+		private volatile long waitAfterTimeout = 0;
 		private volatile Consumer<Exception> generalExceptionHandler = (Exception e) -> Discord4J.LOGGER.error("Exception caught executing action!", e);
 		private volatile Consumer<HTTP429Exception> rateLimitHandler = (HTTP429Exception e) -> Discord4J.LOGGER.error("Exception caught executing action!", e);
 		private volatile Consumer<MissingPermissionsException> missingPermissionHandler = (MissingPermissionsException e) -> Discord4J.LOGGER.error("Exception caught executing action!", e);
@@ -280,7 +338,7 @@ public class RequestBuilder {
 
 			try {
 				if (waitBefore != null)
-					client.getDispatcher().waitFor(waitBefore);
+					client.getDispatcher().waitFor(waitBefore, waitBeforeTimeout);
 
 				if (bufferRequests) {
 					Future<Boolean> futureResult = RequestBuffer.request(() -> {
@@ -304,7 +362,7 @@ public class RequestBuilder {
 				}
 
 				if (waitAfter != null)
-					client.getDispatcher().waitFor(waitAfter);
+					client.getDispatcher().waitFor(waitAfter, waitAfterTimeout);
 
 			} catch (HTTP429Exception e) {
 				rateLimitHandler.accept(e);
