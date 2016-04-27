@@ -5,6 +5,7 @@ import sx.blah.discord.Discord4J;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
 
@@ -33,7 +34,16 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void registerListener(Object listener) {
-		registerListener(listener, false);
+		registerListener(listener.getClass(), listener, false);
+	}
+
+	/**
+	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * @param listener The listener.
+	 */
+	public void registerListener(Class<?> listener) {
+		registerListener(listener, null, false);
 	}
 
 	/**
@@ -45,21 +55,23 @@ public class EventDispatcher {
 		registerListener(listener, false);
 	}
 
-	private void registerListener(Object listener, boolean isTemporary) {
-		for (Method method : listener.getClass().getMethods()) {
+	private void registerListener(Class<?> listenerClass, Object listener, boolean isTemporary) {
+		for (Method method : listenerClass.getMethods()) {
 			if (method.getParameterCount() == 1
 					&& method.isAnnotationPresent(EventSubscriber.class)) {
-				method.setAccessible(true);
-				Class<?> eventClass = method.getParameterTypes()[0];
-				if (Event.class.isAssignableFrom(eventClass)) {
-					if (!methodListeners.containsKey(eventClass))
-						methodListeners.put(eventClass, new ConcurrentHashMap<>());
+				if ((Modifier.isStatic(method.getModifiers()) && listener == null) || listener != null) {
+					method.setAccessible(true);
+					Class<?> eventClass = method.getParameterTypes()[0];
+					if (Event.class.isAssignableFrom(eventClass)) {
+						if (!methodListeners.containsKey(eventClass))
+							methodListeners.put(eventClass, new ConcurrentHashMap<>());
 
-					if (!methodListeners.get(eventClass).containsKey(method))
-						methodListeners.get(eventClass).put(method, new CopyOnWriteArrayList<>());
+						if (!methodListeners.get(eventClass).containsKey(method))
+							methodListeners.get(eventClass).put(method, new CopyOnWriteArrayList<>());
 
-					methodListeners.get(eventClass).get(method).add(new ListenerPair<>(isTemporary, listener));
-					Discord4J.LOGGER.trace("Registered method listener {}", listener.getClass().getSimpleName(), method.toString());
+						methodListeners.get(eventClass).get(method).add(new ListenerPair<>(isTemporary, listener));
+						Discord4J.LOGGER.trace("Registered method listener {}", listenerClass.getSimpleName(), method.toString());
+					}
 				}
 			}
 		}
@@ -83,7 +95,17 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void registerTemporaryListener(Object listener) {
-		registerListener(listener, true);
+		registerListener(listener.getClass(), listener, true);
+	}
+
+	/**
+	 * This registers a temporary event listener using {@link EventSubscriber} method annotations.
+	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 *
+	 * @param listener The listener.
+	 */
+	public void registerTemporaryListener(Class<?> listener) {
+		registerListener(listener, null, true);
 	}
 
 	/**
@@ -170,8 +192,8 @@ public class EventDispatcher {
 	 * {@link Predicate} returns true.
 	 *
 	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
-	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
-	 * of whether the event fired.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
+	 * event fired.
 	 * @param unit The unit for the time parameter.
 	 * @param <T> The event type to wait for.
 	 *
