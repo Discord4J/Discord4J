@@ -606,6 +606,12 @@ public class DiscordWS {
 					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldGame, gameName));
 					Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
 				}
+				User newUser = (User) client.getUserByID(event.user.id);
+				if (newUser != null) {
+					IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar(), newUser.getPresence(), newUser.isBot());
+					newUser = DiscordUtils.getUserFromJSON(client, event.user);
+					client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
+				}
 			}
 		}
 	}

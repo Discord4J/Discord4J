@@ -199,7 +199,6 @@ public class AudioChannel {
 		if (metaDataQueue.size() == audioQueue.size()) { //Meta data wasn't added, user directly queued an audio inputstream
 			try {
 				metaDataQueue.add(new AudioMetaData(null, null, AudioSystem.getAudioFileFormat(inSource), audioFormat.getChannels()));
-				return;
 			} catch (UnsupportedAudioFileException | IOException e) {
 				Discord4J.LOGGER.error("Discord Internal Exception", e);
 			}
