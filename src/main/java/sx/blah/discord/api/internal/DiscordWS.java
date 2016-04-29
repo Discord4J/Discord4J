@@ -251,7 +251,7 @@ public class DiscordWS {
 		}
 		int op = object.get("op").getAsInt();
 
-		if (op != GatewayOps.RECONNECT.ordinal()) //Not a redirect op, so cache the last sequence value
+		if (object.has("s"))
 			client.lastSequence = object.get("s").getAsLong();
 
 		if (op == GatewayOps.DISPATCH.ordinal()) { //Event dispatched
@@ -803,18 +803,20 @@ public class DiscordWS {
 		if (guild != null) {
 			IVoiceChannel channel = guild.getVoiceChannelByID(event.channel_id);
 			IUser user = guild.getUserByID(event.user_id);
-			IVoiceChannel oldChannel = user.getVoiceChannel().orElse(null);
-			((User) user).setVoiceChannel(channel);
-			if (channel != oldChannel) {
-				if (channel == null) {
-					client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
-				} else if (oldChannel == null) {
-					client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
+			if (user != null) {
+				IVoiceChannel oldChannel = user.getVoiceChannel().orElse(null);
+				((User) user).setVoiceChannel(channel);
+				if (channel != oldChannel) {
+					if (channel == null) {
+						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
+					} else if (oldChannel == null) {
+						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
+					} else {
+						client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
+					}
 				} else {
-					client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
+					client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
 				}
-			} else {
-				client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
 			}
 		}
 	}
