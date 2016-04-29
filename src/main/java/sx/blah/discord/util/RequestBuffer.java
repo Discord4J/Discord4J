@@ -32,6 +32,16 @@ public class RequestBuffer {
 	}
 
 	/**
+	 * This is a version of {@link #request(IRequest)} without a return value. No functional difference, only more
+	 * continence.
+	 *
+	 * @param request The request to be carried out.
+	 */
+	public static void request(IVoidRequest request) {
+		request((IRequest) request);
+	}
+
+	/**
 	 * This kills all currently queued requests.
 	 *
 	 * @return The number of requests killed.
