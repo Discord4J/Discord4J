@@ -220,6 +220,42 @@ public interface IGuild {
 	void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, HTTP429Exception, DiscordException;
 
 	/**
+	 * Sets whether a user should be deafened.
+	 *
+	 * @param user The user affected.
+	 * @param deafen True to deafen the user, false to undeafen the user.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+
+	/**
+	 * Sets whether a user should be muted.
+	 *
+	 * @param user The user affected.
+	 * @param mute True to mute the user, false to unmute the user.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void setMuteUser(IUser user, boolean mute) throws DiscordException, HTTP429Exception, MissingPermissionsException;
+
+	/**
+	 * Sets a user's nickname in this guild.
+	 *
+	 * @param user The user affected.
+	 * @param nick The user's new nickname or null to remove the nickname.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 */
+	void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+
+	/**
 	 * Changes the name of the guild.
 	 *
 	 * @param name The new name of the guild.

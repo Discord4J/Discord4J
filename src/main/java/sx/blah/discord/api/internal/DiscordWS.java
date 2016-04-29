@@ -563,7 +563,8 @@ public class DiscordWS {
 		if (toUpdate != null) {
 			IMessage oldMessage = new Message(client, toUpdate.getID(), toUpdate.getContent(), toUpdate.getAuthor(),
 					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp().orElse(null),
-					toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getAttachments());
+					toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getRawRoleMentions(),
+					toUpdate.getAttachments());
 
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
 

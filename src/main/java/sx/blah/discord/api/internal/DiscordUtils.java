@@ -140,6 +140,22 @@ public class DiscordUtils {
 	}
 
 	/**
+	 * Gets the roles mentioned from a message json object.
+	 *
+	 * @param client The discord client to use.
+	 * @param json The json response to use.
+	 * @return The list of mentioned roles.
+	 */
+	public static List<String> getRoleMentionsFromJSON(IDiscordClient client, MessageResponse json) {
+		List<String> mentions = new ArrayList<>();
+		if (json.mention_roles != null)
+			for (RoleResponse response : json.mention_roles)
+				mentions.add(response.id);
+
+		return mentions;
+	}
+
+	/**
 	 * Gets the attachments on a message.
 	 *
 	 * @param json The json response to use.
@@ -249,6 +265,8 @@ public class DiscordUtils {
 				user.addRole(guild.getID(), roleObj);
 		}
 		user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
+
+		user.addNick(guild.getID(), json.nick);
 		return user;
 	}
 
@@ -293,7 +311,7 @@ public class DiscordUtils {
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
-			message.setMentions(getMentionsFromJSON(client, json));
+			message.setMentions(getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json));
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
 			message.setEditedTimestamp(json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
 			return message;
@@ -301,7 +319,8 @@ public class DiscordUtils {
 			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),
 					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ?
 					null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
-					getMentionsFromJSON(client, json), getAttachmentsFromJSON(json));
+					getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json),
+					getAttachmentsFromJSON(json));
 	}
 
 	/**

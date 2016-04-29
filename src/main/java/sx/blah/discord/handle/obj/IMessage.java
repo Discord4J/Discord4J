@@ -57,6 +57,13 @@ public interface IMessage {
 	List<IUser> getMentions();
 
 	/**
+	 * Gets the roles mentioned in this message.
+	 *
+	 * @return The roles mentioned.
+	 */
+	List<IRole> getRoleMentions();
+
+	/**
 	 * Gets the attachments in this message.
 	 *
 	 * @return The attachments.

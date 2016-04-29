@@ -336,7 +336,53 @@ public class Guild implements IGuild {
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					new StringEntity(DiscordUtils.GSON.toJson(new MemberEditRequest(roles))),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(roles))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, HTTP429Exception {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
+
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(deafen))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void setMuteUser(IUser user, boolean mute) throws DiscordException, HTTP429Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
+
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(mute, true))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, HTTP429Exception {
+		if (user.equals(client.getOurUser())) {
+			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CHANGE_NICKNAME));
+		} else {
+			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_NICKNAMES));
+		}
+
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(nick == null ? "" : nick, true))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {

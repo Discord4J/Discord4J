@@ -215,8 +215,13 @@ public class Role implements IRole {
 	}
 
 	@Override
+	public String mention() {
+		return "<@&"+id+">";
+	}
+
+	@Override
 	public String toString() {
-		return name;
+		return mention();
 	}
 
 	@Override

@@ -95,7 +95,15 @@ public enum Permissions {
 	/**
 	 * Allows the user to use "voice activation detection".
 	 */
-	VOICE_USE_VAD(25);
+	VOICE_USE_VAD(25),
+	/**
+	 * Allows the user to change his/her own nicknames.
+	 */
+	CHANGE_NICKNAME(26),
+	/**
+	 * Allows the user to manage nicknames.
+	 */
+	MANAGE_NICKNAMES(27);
 
 	/**
 	 * The bit offset in the permissions number

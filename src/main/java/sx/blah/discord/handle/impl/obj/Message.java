@@ -61,12 +61,17 @@ public class Message implements IMessage {
 	protected List<String> mentions;
 
 	/**
+	 * The list of roles mentioned by this message.
+	 */
+	protected List<String> roleMentions;
+
+	/**
 	 * The attachments, if any, on the message.
 	 */
 	protected List<Attachment> attachments;
 
 	/**
-	 * Whether the
+	 * Whether the message mentions everyone.
 	 */
 	protected boolean mentionsEveryone;
 
@@ -77,7 +82,7 @@ public class Message implements IMessage {
 
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
-				   List<String> mentions, List<Attachment> attachments) {
+				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments) {
 		this.client = client;
 		this.id = id;
 		this.content = content;
@@ -86,6 +91,7 @@ public class Message implements IMessage {
 		this.timestamp = timestamp;
 		this.editedTimestamp = editedTimestamp;
 		this.mentions = mentions;
+		this.roleMentions = roleMentions;
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
 	}
@@ -107,10 +113,12 @@ public class Message implements IMessage {
 	/**
 	 * Sets the CACHED mentions in this message.
 	 *
-	 * @param mentions The new mentions.
+	 * @param mentions The new user mentions.
+	 * @param roleMentions The new role mentions.
 	 */
-	public void setMentions(List<String> mentions) {
+	public void setMentions(List<String> mentions, List<String> roleMentions) {
 		this.mentions = mentions;
+		this.roleMentions = roleMentions;
 	}
 
 	/**
@@ -161,6 +169,13 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public List<IRole> getRoleMentions() {
+		return roleMentions.stream()
+				.map(m -> getGuild().getRoleByID(m))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public List<Attachment> getAttachments() {
 		return attachments;
 	}
@@ -182,7 +197,8 @@ public class Message implements IMessage {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
-			IMessage oldMessage = new Message(client, this.id, this.content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, attachments);
+			IMessage oldMessage = new Message(client, this.id, this.content, author, channel, timestamp, editedTimestamp,
+					mentionsEveryone, mentions, roleMentions, attachments);
 			DiscordUtils.getMessageFromJSON(client, channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
@@ -202,6 +218,15 @@ public class Message implements IMessage {
 	 */
 	public List<String> getRawMentions() {
 		return mentions;
+	}
+
+	/**
+	 * Gets the raw list of mentioned role ids.
+	 *
+	 * @return Mentioned role list.
+	 */
+	public List<String> getRawRoleMentions() {
+		return roleMentions;
 	}
 
 	@Override

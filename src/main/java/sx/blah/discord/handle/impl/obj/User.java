@@ -3,14 +3,14 @@ package sx.blah.discord.handle.impl.obj;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.MoveMemberRequest;
-import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.requests.MemberEditRequest;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.UnsupportedEncodingException;
@@ -67,6 +67,11 @@ public class User implements IUser {
 	protected HashMap<String, List<IRole>> roles;
 
 	/**
+	 * The nicknames this user has. (Key = guild id).
+	 */
+	protected HashMap<String, String> nicks;
+
+	/**
 	 * The voice channel this user is in.
 	 */
 	protected IVoiceChannel channel;
@@ -85,6 +90,7 @@ public class User implements IUser {
 		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
 		this.presence = presence;
 		this.roles = new HashMap<>();
+		this.nicks = new HashMap<>();
 		this.isBot = isBot;
 	}
 
@@ -156,8 +162,18 @@ public class User implements IUser {
 	}
 
 	@Override
+	public String getDisplayName(IGuild guild) {
+		return getNicknameForGuild(guild).isPresent() ? getNicknameForGuild(guild).get() : getName();
+	}
+
+	@Override
 	public String mention() {
-		return "<@"+id+">";
+		return mention(true);
+	}
+
+	@Override
+	public String mention(boolean mentionWithNickname) {
+		return "<@"+(mentionWithNickname ? "!" : "")+id+">";
 	}
 
 	@Override
@@ -177,6 +193,26 @@ public class User implements IUser {
 	@Override
 	public List<IRole> getRolesForGuild(IGuild guild) {
 		return roles.getOrDefault(guild.getID(), new ArrayList<>());
+	}
+
+	@Override
+	public Optional<String> getNicknameForGuild(IGuild guild) {
+		return Optional.ofNullable(nicks.containsKey(guild.getID()) ? nicks.get(guild.getID()) : null);
+	}
+
+	/**
+	 * CACHES a nickname to the user.
+	 *
+	 * @param guildID The guild the nickname is for.
+	 * @param nick The nickname, or null to remove it.
+	 */
+	public void addNick(String guildID, String nick) {
+		if (nick == null) {
+			if (nicks.containsKey(guildID))
+				nicks.remove(guildID);
+		} else {
+			nicks.put(guildID, nick);
+		}
 	}
 
 	/**
@@ -217,10 +253,10 @@ public class User implements IUser {
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MoveMemberRequest(newChannel.getID()))),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
-		}catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
 	}

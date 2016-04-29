@@ -57,11 +57,29 @@ public interface IUser {
 	Presences getPresence();
 
 	/**
+	 * Gets the name displayed to a guild for this user.
+	 *
+	 * @param guild The guild to check the display name for.
+	 * @return The display name. This is the user's nickname if it exists, otherwise the user's standard name.
+	 */
+	String getDisplayName(IGuild guild);
+
+	/**
 	 * Formats a string to @mention the user.
+	 * NOTE: This is equivalent to mention(true).
 	 *
 	 * @return The formatted string.
 	 */
 	String mention();
+
+	/**
+	 * Formats a string to @mention the user.
+	 *
+	 * @param mentionWithNickname If true, the mention will display the user's nickname instead of the user's "real"
+	 * name if it exists.
+	 * @return The formatted string.
+	 */
+	String mention(boolean mentionWithNickname);
 
 	/**
 	 * Gets the discriminator for the user. This is used by Discord to differentiate between two users with the same name.
@@ -77,6 +95,14 @@ public interface IUser {
 	 * @return The roles.
 	 */
 	List<IRole> getRolesForGuild(IGuild guild);
+
+	/**
+	 * Gets the nickname for this user in this guild.
+	 *
+	 * @param guild The guild to get the nickname for.
+	 * @return The nickname (if it exists in this guild).
+	 */
+	Optional<String> getNicknameForGuild(IGuild guild);
 
 	/**
 	 * This calculates the time at which this object has been created by analyzing its Discord ID.

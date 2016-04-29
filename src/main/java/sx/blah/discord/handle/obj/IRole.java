@@ -136,4 +136,11 @@ public interface IRole {
 	 * @return The client.
 	 */
 	IDiscordClient getClient();
+
+	/**
+	 * Formats a string to @mention the role.
+	 *
+	 * @return The formatted string.
+	 */
+	String mention();
 }

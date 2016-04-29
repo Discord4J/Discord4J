@@ -6,7 +6,6 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.EventDispatcher;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
@@ -230,9 +229,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public void logout() throws HTTP429Exception, DiscordException {
 		if (isReady()) {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-
-			for (DiscordVoiceWS vws : voiceConnections.values())
-				vws.disconnect(VoiceDisconnectedEvent.Reason.LOGGED_OUT);
 
 			lastSequence = 0;
 			sessionId = null; //Prevents the websocket from sending a resume request.
