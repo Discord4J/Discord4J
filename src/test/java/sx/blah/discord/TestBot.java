@@ -10,7 +10,9 @@ import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
 
+import java.awt.*;
 import java.io.File;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -262,7 +264,10 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						client.logout();
+						IRole role = message.getGuild().createRole();
+						role.changeColor(Color.red);
+						role.changeName("Test");
+						role.changeHoist(true);
 					}
 				});
 

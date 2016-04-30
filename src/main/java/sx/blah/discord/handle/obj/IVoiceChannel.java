@@ -32,4 +32,9 @@ public interface IVoiceChannel extends IChannel {
 	 * @return True if connected, false if otherwise.
 	 */
 	boolean isConnected();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	IVoiceChannel copy();
 }

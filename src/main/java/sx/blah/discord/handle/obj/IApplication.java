@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * This represents a Discord application.
  */
-public interface IApplication {
+public interface IApplication extends IDiscordObject<IApplication> {
 
 	/**
 	 * Gets the application's OAuth client secret key.
@@ -41,13 +41,6 @@ public interface IApplication {
 	 * @return The name.
 	 */
 	String getName();
-
-	/**
-	 * Gets the OAuth client id of the application.
-	 *
-	 * @return The id.
-	 */
-	String getID();
 
 	/**
 	 * The application icon.
@@ -163,11 +156,4 @@ public interface IApplication {
 	 * @return The token.
 	 */
 	String getBotToken();
-
-	/**
-	 * This gets the client that this object is tied to.
-	 *
-	 * @return The client.
-	 */
-	IDiscordClient getClient();
 }

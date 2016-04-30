@@ -2,12 +2,10 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MissingPermissionsException;
 
-import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +13,7 @@ import java.util.Optional;
 /**
  * This class defines a guild/server/clan/whatever it's called.
  */
-public interface IGuild {
+public interface IGuild extends IDiscordObject<IGuild> {
 
 	/**
 	 * Gets the user id for the owner of this guild.
@@ -81,13 +79,6 @@ public interface IGuild {
 	 * @return The name of the guild
 	 */
 	String getName();
-
-	/**
-	 * Gets the id of the guild.
-	 *
-	 * @return The ID of this guild.
-	 */
-	String getID();
 
 	/**
 	 * Gets the roles contained in this guild.
@@ -372,13 +363,6 @@ public interface IGuild {
 	int pruneUsers(int days) throws DiscordException, HTTP429Exception;
 
 	/**
-	 * This calculates the time at which this object has been created by analyzing its Discord ID.
-	 *
-	 * @return The time at which this object was created.
-	 */
-	LocalDateTime getCreationDate();
-
-	/**
 	 * Attempts to add a bot to this guild.
 	 *
 	 * @param applicationID The OAuth2 application id for the application owning the bot.
@@ -398,11 +382,4 @@ public interface IGuild {
 	 * @throws DiscordException
 	 */
 	AudioChannel getAudioChannel() throws DiscordException;
-
-	/**
-	 * This gets the client that this object is tied to.
-	 *
-	 * @return The client.
-	 */
-	IDiscordClient getClient();
 }

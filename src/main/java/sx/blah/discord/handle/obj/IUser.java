@@ -1,25 +1,16 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MissingPermissionsException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * This class defines the Discord user.
  */
-public interface IUser {
-
-	/**
-	 * Gets the user's unique id.
-	 *
-	 * @return The user's id.
-	 */
-	String getID();
+public interface IUser extends IDiscordObject<IUser> {
 
 	/**
 	 * Gets the user's username.
@@ -79,13 +70,6 @@ public interface IUser {
 	List<IRole> getRolesForGuild(IGuild guild);
 
 	/**
-	 * This calculates the time at which this object has been created by analyzing its Discord ID.
-	 *
-	 * @return The time at which this object was created.
-	 */
-	LocalDateTime getCreationDate();
-
-	/**
 	 * Gets whether or not this user is a bot.
 	 *
 	 * @return True if a bot, false if otherwise.
@@ -109,11 +93,4 @@ public interface IUser {
 	 * @return The (optional) voice channel.
 	 */
 	Optional<IVoiceChannel> getVoiceChannel();
-
-	/**
-	 * This gets the client that this object is tied to.
-	 *
-	 * @return The client.
-	 */
-	IDiscordClient getClient();
 }

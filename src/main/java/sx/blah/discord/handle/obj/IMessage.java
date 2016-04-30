@@ -1,9 +1,8 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.Optional;
 /**
  * Represents a discord message.
  */
-public interface IMessage {
+public interface IMessage extends IDiscordObject<IMessage> {
 
 	/**
 	 * Gets the string content of the message.
@@ -34,13 +33,6 @@ public interface IMessage {
 	 * @return The author.
 	 */
 	IUser getAuthor();
-
-	/**
-	 * Gets the message id.
-	 *
-	 * @return The id.
-	 */
-	String getID();
 
 	/**
 	 * Gets the timestamp for when this message was sent/edited.
@@ -109,25 +101,11 @@ public interface IMessage {
 	Optional<LocalDateTime> getEditedTimestamp();
 
 	/**
-	 * This calculates the time at which this object has been created by analyzing its Discord ID.
-	 *
-	 * @return The time at which this object was created.
-	 */
-	LocalDateTime getCreationDate();
-
-	/**
 	 * Gets the guild this message is from.
 	 *
 	 * @return The guild.
 	 */
 	IGuild getGuild();
-
-	/**
-	 * This gets the client that this object is tied to.
-	 *
-	 * @return The client.
-	 */
-	IDiscordClient getClient();
 
 	/**
 	 * Represents an attachment included in the message.

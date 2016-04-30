@@ -150,4 +150,9 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	public String toString() {
 		return recipient.toString();
 	}
+
+	@Override
+	public IPrivateChannel copy() {
+		return new PrivateChannel(client, recipient, id);
+	}
 }

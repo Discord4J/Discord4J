@@ -3,18 +3,17 @@ package sx.blah.discord.handle.impl.obj;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MoveMemberRequest;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class User implements IUser {
@@ -22,17 +21,17 @@ public class User implements IUser {
 	/**
 	 * Display name of the user.
 	 */
-	protected String name;
+	protected volatile String name;
 
 	/**
 	 * The user's avatar location.
 	 */
-	protected String avatar;
+	protected volatile String avatar;
 
 	/**
 	 * The game the user is playing.
 	 */
-	protected Optional<String> game;
+	protected volatile Optional<String> game;
 
 	/**
 	 * User ID.
@@ -43,33 +42,33 @@ public class User implements IUser {
 	 * User discriminator.
 	 * Distinguishes users with the same name.
 	 */
-	protected String discriminator;
+	protected volatile String discriminator;
 
 	/**
 	 * Whether this user is a bot or not.
 	 */
-	protected boolean isBot;
+	protected volatile boolean isBot;
 
 	/**
 	 * This user's presence.
 	 * One of [online/idle/offline].
 	 */
-	protected Presences presence;
+	protected volatile Presences presence;
 
 	/**
 	 * The user's avatar in URL form.
 	 */
-	protected String avatarURL;
+	protected volatile String avatarURL;
 
 	/**
 	 * The roles the user is a part of. (Key = guild id).
 	 */
-	protected HashMap<String, List<IRole>> roles;
+	protected volatile HashMap<String, List<IRole>> roles;
 
 	/**
 	 * The voice channel this user is in.
 	 */
-	protected IVoiceChannel channel;
+	protected volatile IVoiceChannel channel;
 
 	/**
 	 * The client that created this object.
@@ -194,8 +193,8 @@ public class User implements IUser {
 	}
 
 	@Override
-	public LocalDateTime getCreationDate() {
-		return DiscordUtils.getSnowflakeTimeFromID(id);
+	public IUser copy() {
+		return new User(client, name, id, discriminator, avatar, presence, isBot);
 	}
 
 	@Override
@@ -258,7 +257,7 @@ public class User implements IUser {
 	public boolean equals(Object other) {
 		if (other == null)
 			return false;
-		
+
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
 	}
 }

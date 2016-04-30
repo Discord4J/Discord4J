@@ -3,22 +3,22 @@ package sx.blah.discord.handle.impl.obj;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.handle.impl.events.RoleUpdateEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.RoleEditRequest;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.awt.*;
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,42 +28,42 @@ public class Role implements IRole {
 	/**
 	 * Where the role should be displayed. -1 is @everyone, it is always last
 	 */
-	protected int position;
+	protected volatile int position;
 
 	/**
 	 * The permissions the role has.
 	 */
-	protected EnumSet<Permissions> permissions;
+	protected volatile EnumSet<Permissions> permissions;
 
 	/**
 	 * The role name
 	 */
-	protected String name;
+	protected volatile String name;
 
 	/**
 	 * Whether this role is managed via plugins like twitch
 	 */
-	protected boolean managed;
+	protected volatile boolean managed;
 
 	/**
 	 * The role id
 	 */
-	protected String id;
+	protected volatile String id;
 
 	/**
 	 * Whether to display this role separately from others
 	 */
-	protected boolean hoist;
+	protected volatile boolean hoist;
 
 	/**
 	 * The DECIMAL format for the color
 	 */
-	protected Color color;
+	protected volatile Color color;
 
 	/**
 	 * The guild this role belongs to
 	 */
-	protected IGuild guild;
+	protected volatile IGuild guild;
 
 	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, IGuild guild) {
 		this.position = position;
@@ -165,12 +165,17 @@ public class Role implements IRole {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
-			DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
+			RoleResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
 							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions())))),
 					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), RoleResponse.class);
+
+			IRole oldRole = copy();
+			IRole newRole = DiscordUtils.getRoleFromJSON(guild, response);
+
+			getClient().getDispatcher().dispatch(new RoleUpdateEvent(oldRole, newRole, guild));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
@@ -205,8 +210,9 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public LocalDateTime getCreationDate() {
-		return DiscordUtils.getSnowflakeTimeFromID(id);
+	public IRole copy() {
+		return new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
+				color.getRGB(), guild);
 	}
 
 	@Override

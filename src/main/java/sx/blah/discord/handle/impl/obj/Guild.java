@@ -3,22 +3,22 @@ package sx.blah.discord.handle.impl.obj;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.handle.AudioChannel;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class Guild implements IGuild {
@@ -40,7 +40,7 @@ public class Guild implements IGuild {
 	/**
 	 * The name of the guild.
 	 */
-	protected String name;
+	protected volatile String name;
 
 	/**
 	 * The ID of this guild.
@@ -50,17 +50,17 @@ public class Guild implements IGuild {
 	/**
 	 * The location of the guild icon
 	 */
-	protected String icon;
+	protected volatile String icon;
 
 	/**
 	 * The url pointing to the guild icon
 	 */
-	protected String iconURL;
+	protected volatile String iconURL;
 
 	/**
 	 * The user id for the owner of the guild
 	 */
-	protected String ownerID;
+	protected volatile String ownerID;
 
 	/**
 	 * The roles the guild contains.
@@ -70,21 +70,21 @@ public class Guild implements IGuild {
 	/**
 	 * The channel where those who are afk are moved to.
 	 */
-	protected String afkChannel;
+	protected volatile String afkChannel;
 	/**
 	 * The time in seconds for a user to be idle to be determined as "afk".
 	 */
-	protected int afkTimeout;
+	protected volatile int afkTimeout;
 
 	/**
 	 * The region this guild is located in.
 	 */
-	protected String regionID;
+	protected volatile String regionID;
 
 	/**
 	 * This guild's audio channel.
 	 */
-	protected AudioChannel audioChannel;
+	protected volatile AudioChannel audioChannel;
 
 	/**
 	 * The client that created this object.
@@ -343,12 +343,17 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
-			DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
+			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
 							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
 							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout)))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
+
+			IGuild oldGuild = copy();
+			IGuild newGuild = DiscordUtils.getGuildFromJSON(client, response);
+
+			client.getDispatcher().dispatch(new GuildUpdateEvent(oldGuild, newGuild));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
@@ -544,11 +549,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public LocalDateTime getCreationDate() {
-		return DiscordUtils.getSnowflakeTimeFromID(id);
-	}
-
-	@Override
 	public void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
@@ -570,6 +570,12 @@ public class Guild implements IGuild {
 	@Override
 	public IDiscordClient getClient() {
 		return client;
+	}
+
+	@Override
+	public IGuild copy() {
+		return new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
+				voiceChannels, users);
 	}
 
 	@Override

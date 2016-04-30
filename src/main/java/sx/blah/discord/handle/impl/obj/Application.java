@@ -4,20 +4,20 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.IApplication;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.requests.BotConversionRequest;
 import sx.blah.discord.json.responses.ApplicationResponse;
 import sx.blah.discord.json.responses.BotResponse;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.api.internal.Requests;
 
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
@@ -33,17 +33,17 @@ public class Application implements IApplication {
 	/**
 	 * The application's oauth redirect uris.
 	 */
-	protected String[] redirectUris;
+	protected volatile String[] redirectUris;
 
 	/**
 	 * The application's description.
 	 */
-	protected String description;
+	protected volatile String description;
 
 	/**
 	 * The application name.
 	 */
-	protected String name;
+	protected volatile String name;
 
 	/**
 	 * The application id.
@@ -53,17 +53,17 @@ public class Application implements IApplication {
 	/**
 	 * The application icon.
 	 */
-	protected String icon;
+	protected volatile String icon;
 
 	/**
 	 * The bot tied to this application.
 	 */
-	protected IUser bot;
+	protected volatile IUser bot;
 
 	/**
 	 * The auth token for the bot tied to this application.
 	 */
-	protected String botToken;
+	protected volatile String botToken;
 
 	/**
 	 * The discord client instance.
@@ -240,5 +240,10 @@ public class Application implements IApplication {
 	@Override
 	public IDiscordClient getClient() {
 		return client;
+	}
+
+	@Override
+	public IApplication copy() {
+		return new Application(client, secret, redirectUris, description, name, id, icon, bot, botToken);
 	}
 }
