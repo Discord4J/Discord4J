@@ -441,11 +441,29 @@ public class DiscordWS {
 
 	private void messageCreate(JsonElement eventObject) {
 		MessageResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageResponse.class);
-		boolean mentioned = event.mention_everyone || event.content.contains("<@"+client.ourUser.getID()+">");
+		boolean mentioned = event.mention_everyone;
 
 		Channel channel = (Channel) client.getChannelByID(event.channel_id);
 
 		if (null != channel) {
+			if (!mentioned) { //Not worth checking if already mentioned
+				for (UserResponse user : event.mentions) { //Check mention array for a mention
+					if (client.getOurUser().getID().equals(user.id)) {
+						mentioned = true;
+						break;
+					}
+				}
+			}
+
+			if (!mentioned) { //Not worth checking if already mentioned
+				for (String role : event.mention_roles) { //Check roles for a mention
+					if (client.getOurUser().getRolesForGuild(channel.getGuild()).contains(channel.getGuild().getRoleByID(role))) {
+						mentioned = true;
+						break;
+					}
+				}
+			}
+
 			IMessage message = DiscordUtils.getMessageFromJSON(client, channel, event);
 			if (!channel.getMessages().contains(message)) {
 				Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
@@ -772,7 +790,8 @@ public class DiscordWS {
 			if (toUpdate != null) {
 				IRole oldRole = new Role(toUpdate.getPosition(),
 						Permissions.generatePermissionsNumber(toUpdate.getPermissions()), toUpdate.getName(),
-						toUpdate.isManaged(), toUpdate.getID(), toUpdate.isHoisted(), toUpdate.getColor().getRGB(), guild);
+						toUpdate.isManaged(), toUpdate.getID(), toUpdate.isHoisted(), toUpdate.getColor().getRGB(),
+						toUpdate.isMentionable(), guild);
 				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
 				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
 			}

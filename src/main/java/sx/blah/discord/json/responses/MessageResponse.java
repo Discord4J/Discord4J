@@ -1,7 +1,5 @@
 package sx.blah.discord.json.responses;
 
-import sx.blah.discord.json.generic.RoleResponse;
-
 /**
  * The generic response when either receiving, sending or editing messages.
  */
@@ -70,7 +68,7 @@ public class MessageResponse {
 	/**
 	 * The roles mentioned in the message;
 	 */
-	public RoleResponse[] mention_roles;
+	public String[] mention_roles;
 
 	/**
 	 * Represents embeded data

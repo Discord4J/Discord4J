@@ -64,6 +64,13 @@ public interface IRole {
 	Color getColor();
 
 	/**
+	 * Gets whether this role is mentionable or not.
+	 *
+	 * @return True if mentionable, false if otherwise.
+	 */
+	boolean isMentionable();
+
+	/**
 	 * Gets the guild this role belongs to.
 	 *
 	 * @return The guild.
@@ -115,6 +122,17 @@ public interface IRole {
 	void changePermissions(EnumSet<Permissions> permissions) throws HTTP429Exception, DiscordException, MissingPermissionsException;
 
 	/**
+	 * Changes whether this role is mentionable.
+	 *
+	 * @param isMentionable Whether this role should be mentionable or not.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeMentionable(boolean isMentionable) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+
+	/**
 	 * Attempts to delete this role.
 	 *
 	 * @throws MissingPermissionsException
@@ -140,7 +158,8 @@ public interface IRole {
 	/**
 	 * Formats a string to @mention the role.
 	 *
-	 * @return The formatted string.
+	 * @return The formatted string. Note: if {@link #isMentionable()} returns false, this just returns the result of
+	 * {@link #getName()}.
 	 */
 	String mention();
 }

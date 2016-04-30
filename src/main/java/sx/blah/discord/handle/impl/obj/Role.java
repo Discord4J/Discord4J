@@ -61,11 +61,16 @@ public class Role implements IRole {
 	protected Color color;
 
 	/**
+	 * Whether you can @mention this role.
+	 */
+	protected boolean mentionable;
+
+	/**
 	 * The guild this role belongs to
 	 */
 	protected IGuild guild;
 
-	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, IGuild guild) {
+	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, boolean mentionable, IGuild guild) {
 		this.position = position;
 		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
 		this.name = name;
@@ -73,6 +78,7 @@ public class Role implements IRole {
 		this.id = id;
 		this.hoist = hoist;
 		this.color = new Color(color);
+		this.mentionable = mentionable;
 		this.guild = guild;
 	}
 
@@ -157,18 +163,33 @@ public class Role implements IRole {
 	}
 
 	@Override
+	public boolean isMentionable() {
+		return mentionable;
+	}
+
+	/**
+	 * Sets whether this role is mentionable in the CACHE.
+	 *
+	 * @param mentionable True if mentionable, false if otherwise.
+	 */
+	public void setMentionable(boolean mentionable) {
+		this.mentionable = mentionable;
+	}
+
+	@Override
 	public IGuild getGuild() {
 		return guild;
 	}
 
-	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, HTTP429Exception, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
 			DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
-							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions())))),
+							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions()),
+							isMentionable.orElse(isMentionable())))),
 					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), RoleResponse.class);
 		} catch (UnsupportedEncodingException e) {
@@ -178,22 +199,27 @@ public class Role implements IRole {
 
 	@Override
 	public void changeColor(Color color) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty());
+		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 
 	@Override
 	public void changeHoist(boolean hoist) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty());
+		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 
 	@Override
 	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty());
+		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty(), Optional.empty());
 	}
 
 	@Override
 	public void changePermissions(EnumSet<Permissions> permissions) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions));
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions), Optional.empty());
+	}
+
+	@Override
+	public void changeMentionable(boolean isMentionable) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(isMentionable));
 	}
 
 	@Override
@@ -216,7 +242,7 @@ public class Role implements IRole {
 
 	@Override
 	public String mention() {
-		return "<@&"+id+">";
+		return isMentionable() ? "<@&"+id+">" : name;
 	}
 
 	@Override

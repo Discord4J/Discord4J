@@ -149,8 +149,8 @@ public class DiscordUtils {
 	public static List<String> getRoleMentionsFromJSON(IDiscordClient client, MessageResponse json) {
 		List<String> mentions = new ArrayList<>();
 		if (json.mention_roles != null)
-			for (RoleResponse response : json.mention_roles)
-				mentions.add(response.id);
+			for (String role : json.mention_roles)
+				mentions.add(role);
 
 		return mentions;
 	}
@@ -400,8 +400,9 @@ public class DiscordUtils {
 			role.setName(json.name);
 			role.setPermissions(json.permissions);
 			role.setPosition(json.position);
+			role.setMentionable(json.mentionable);
 		} else {
-			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color, guild);
+			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color, json.mentionable, guild);
 		}
 		return role;
 	}
