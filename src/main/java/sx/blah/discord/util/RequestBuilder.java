@@ -249,6 +249,13 @@ public class RequestBuilder {
 	}
 
 	/**
+	 * Same as {@link #execute()} since apparently there's supposed to be a build method in every builder class.
+	 */
+	public void build() {
+		execute();
+	}
+
+	/**
 	 * Executes the built request.
 	 */
 	public void execute() {
