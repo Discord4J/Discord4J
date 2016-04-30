@@ -272,7 +272,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions,
-				attachments);
+				roleMentions, attachments);
 	}
 
 	@Override

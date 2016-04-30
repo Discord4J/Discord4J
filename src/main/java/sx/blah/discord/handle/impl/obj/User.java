@@ -63,12 +63,12 @@ public class User implements IUser {
 	/**
 	 * The roles the user is a part of. (Key = guild id).
 	 */
-	protected volatile HashMap<String, List<IRole>> roles;
+	protected final HashMap<String, List<IRole>> roles;
 
 	/**
 	 * The nicknames this user has. (Key = guild id).
 	 */
-	protected HashMap<String, String> nicks;
+	protected final HashMap<String, String> nicks;
 
 	/**
 	 * The voice channel this user is in.

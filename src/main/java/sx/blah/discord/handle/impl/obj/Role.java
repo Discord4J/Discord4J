@@ -63,7 +63,7 @@ public class Role implements IRole {
 	/**
 	 * Whether you can @mention this role.
 	 */
-	protected boolean mentionable;
+	protected volatile boolean mentionable;
 
 	/**
 	 * The guild this role belongs to
@@ -238,7 +238,7 @@ public class Role implements IRole {
 	@Override
 	public IRole copy() {
 		return new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
-				color.getRGB(), guild);
+				color.getRGB(), mentionable, guild);
 	}
 
 	@Override
