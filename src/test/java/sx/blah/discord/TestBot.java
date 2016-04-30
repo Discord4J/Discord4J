@@ -256,9 +256,16 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.reply(new BotInviteBuilder(client).build());
-						message.reply(new BotInviteBuilder(client).withGuild(message.getGuild()).build());
-						message.reply(new BotInviteBuilder(client).withPermissions(EnumSet.allOf(Permissions.class)).build());
+						for (int i = 0; i < 10; i++) {
+							final int j = i;
+							RequestBuffer.request(() -> {
+								try {
+									message.getChannel().sendMessage(""+j);
+								} catch (MissingPermissionsException | DiscordException e) {
+									e.printStackTrace();
+								}
+							});
+						}
 					}
 				});
 

@@ -2,6 +2,8 @@ package sx.blah.discord.util;
 
 import sx.blah.discord.Discord4J;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
@@ -13,6 +15,7 @@ import java.util.concurrent.*;
 public class RequestBuffer {
 
 	private static final Timer requestTimer = new Timer("Request Buffer Timer", true);
+	private static final Map<String, List<RequestFuture>> requests = new ConcurrentHashMap<>();
 
 	/**
 	 * Here it is, the magical method that does it all.
@@ -26,7 +29,13 @@ public class RequestBuffer {
 		if (!future.isDone()) {
 			Discord4J.LOGGER.debug("Attempted request rate-limited, queueing retry in {}ms",
 					future.getDelay(TimeUnit.MILLISECONDS));
-			requestTimer.schedule(new RequestTimerTask<>(future), future.getDelay(TimeUnit.MILLISECONDS));
+
+			if (!requests.containsKey(future.getBucket())) {
+				requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
+				requestTimer.schedule(new RequestTimerTask(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS));
+			}
+
+			requests.get(future.getBucket()).add(future);
 		}
 		return future;
 	}
@@ -99,6 +108,7 @@ public class RequestBuffer {
 		private volatile boolean cancelled = false;
 		private volatile T value = null;
 		private volatile long timeForNextRequest;
+		private volatile String bucket;
 		private final IRequest<T> request;
 
 		public RequestFuture(IRequest<T> request) {
@@ -170,6 +180,15 @@ public class RequestBuffer {
 		}
 
 		/**
+		 * Gets the bucket this request was ratelimited for.
+		 *
+		 * @return The bucket.
+		 */
+		public String getBucket() {
+			return bucket;
+		}
+
+		/**
 		 * Compares this to another delayed object.
 		 *
 		 * @param o The other object.
@@ -194,6 +213,7 @@ public class RequestBuffer {
 					isDone = true;
 				} catch (HTTP429Exception e) {
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
+					bucket = e.getBucket();
 				}
 			}
 			return isDone() || isCancelled();
@@ -201,21 +221,34 @@ public class RequestBuffer {
 	}
 
 	/**
-	 * Manages the request future to ensure it executes the request eventually.
+	 * Manages request futures to ensure it executes the request eventually.
 	 */
-	private static class RequestTimerTask<T> extends TimerTask {
+	private static class RequestTimerTask extends TimerTask {
 
-		private final RequestFuture<T> future;
+		private final String bucket;
 
-		private RequestTimerTask(RequestFuture<T> future) {
-			this.future = future;
+		private RequestTimerTask(String bucket) {
+			this.bucket = bucket;
 		}
 
 		@Override
 		public void run() {
-			if (!future.tryAgain()) {
-				synchronized (requestTimer) {
-					requestTimer.schedule(new RequestTimerTask<T>(future), future.getDelay(TimeUnit.MILLISECONDS));
+			synchronized (requests) {
+				List<RequestFuture> futures = requests.get(bucket);
+				requests.remove(bucket);
+				List<RequestFuture> futuresToRetry = new CopyOnWriteArrayList<>();
+
+				futures.forEach((RequestFuture future) -> {
+					if (!future.tryAgain()) {
+						futuresToRetry.add(future);
+					}
+				});
+
+				if (futuresToRetry.size() > 0) {
+					requests.put(bucket, futuresToRetry);
+					synchronized (requestTimer) {
+						requestTimer.schedule(new RequestTimerTask(bucket), futures.get(0).getDelay(TimeUnit.MILLISECONDS));
+					}
 				}
 			}
 		}
