@@ -33,7 +33,7 @@ public class Message implements IMessage {
 	 * The actual message (what you see
 	 * on your screen, the content).
 	 */
-	protected String content;
+	protected volatile String content;
 
 	/**
 	 * The User who sent the message.
@@ -48,32 +48,32 @@ public class Message implements IMessage {
 	/**
 	 * The time the message was received.
 	 */
-	protected LocalDateTime timestamp;
+	protected volatile LocalDateTime timestamp;
 
 	/**
 	 * The time (if it exists) that the message was edited.
 	 */
-	protected LocalDateTime editedTimestamp;
+	protected volatile LocalDateTime editedTimestamp;
 
 	/**
 	 * The list of users mentioned by this message.
 	 */
-	protected List<String> mentions;
+	protected volatile List<String> mentions;
 
 	/**
 	 * The list of roles mentioned by this message.
 	 */
-	protected List<String> roleMentions;
+	protected volatile List<String> roleMentions;
 
 	/**
 	 * The attachments, if any, on the message.
 	 */
-	protected List<Attachment> attachments;
+	protected volatile List<Attachment> attachments;
 
 	/**
 	 * Whether the message mentions everyone.
 	 */
-	protected boolean mentionsEveryone;
+	protected volatile boolean mentionsEveryone;
 
 	/**
 	 * The client that created this object.
@@ -197,8 +197,7 @@ public class Message implements IMessage {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
-			IMessage oldMessage = new Message(client, this.id, this.content, author, channel, timestamp, editedTimestamp,
-					mentionsEveryone, mentions, roleMentions, attachments);
+			IMessage oldMessage = copy();
 			DiscordUtils.getMessageFromJSON(client, channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
@@ -271,8 +270,9 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public LocalDateTime getCreationDate() {
-		return DiscordUtils.getSnowflakeTimeFromID(id);
+	public IMessage copy() {
+		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions,
+				attachments);
 	}
 
 	@Override

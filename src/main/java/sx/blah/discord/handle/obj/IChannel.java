@@ -1,15 +1,13 @@
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,7 @@ import java.util.Map;
 /**
  * Defines a text channel in a guild/server.
  */
-public interface IChannel {
+public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the name of this channel.
@@ -25,13 +23,6 @@ public interface IChannel {
 	 * @return The channel name.
 	 */
 	String getName();
-
-	/**
-	 * Gets the id of this channel.
-	 *
-	 * @return The channel id.
-	 */
-	String getID();
 
 	/**
 	 * Gets the messages in this channel.
@@ -288,20 +279,6 @@ public interface IChannel {
 	 * @throws HTTP429Exception
 	 */
 	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
-
-	/**
-	 * This calculates the time at which this object has been created by analyzing its Discord ID.
-	 *
-	 * @return The time at which this object was created.
-	 */
-	LocalDateTime getCreationDate();
-
-	/**
-	 * This gets the client that this object is tied to.
-	 *
-	 * @return The client.
-	 */
-	IDiscordClient getClient();
 
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.

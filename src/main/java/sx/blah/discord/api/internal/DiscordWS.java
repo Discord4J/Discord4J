@@ -571,7 +571,6 @@ public class DiscordWS {
 		MessageResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageResponse.class);
 		String id = event.id;
 		String channelID = event.channel_id;
-		String content = event.content;
 
 		Channel channel = (Channel) client.getChannelByID(channelID);
 		if (channel == null)
@@ -579,10 +578,7 @@ public class DiscordWS {
 
 		Message toUpdate = (Message) channel.getMessageByID(id);
 		if (toUpdate != null) {
-			IMessage oldMessage = new Message(client, toUpdate.getID(), toUpdate.getContent(), toUpdate.getAuthor(),
-					toUpdate.getChannel(), toUpdate.getTimestamp(), toUpdate.getEditedTimestamp().orElse(null),
-					toUpdate.mentionsEveryone(), toUpdate.getRawMentions(), toUpdate.getRawRoleMentions(),
-					toUpdate.getAttachments());
+			IMessage oldMessage = toUpdate.copy();
 
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
 
@@ -627,7 +623,7 @@ public class DiscordWS {
 				}
 				User newUser = (User) client.getUserByID(event.user.id);
 				if (newUser != null) {
-					IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar(), newUser.getPresence(), newUser.isBot());
+					IUser oldUser = newUser.copy();
 					newUser = DiscordUtils.getUserFromJSON(client, event.user);
 					client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
 				}
@@ -704,7 +700,7 @@ public class DiscordWS {
 		UserUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, UserUpdateEventResponse.class);
 		User newUser = (User) client.getUserByID(event.id);
 		if (newUser != null) {
-			IUser oldUser = new User(client, newUser.getName(), newUser.getID(), newUser.getDiscriminator(), newUser.getAvatar(), newUser.getPresence(), newUser.isBot());
+			IUser oldUser = newUser.copy();
 			newUser = DiscordUtils.getUserFromJSON(client, event);
 			client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
 		}
@@ -716,9 +712,7 @@ public class DiscordWS {
 			if (event.type.equalsIgnoreCase("text")) {
 				Channel toUpdate = (Channel) client.getChannelByID(event.id);
 				if (toUpdate != null) {
-					Channel oldChannel = new Channel(client, toUpdate.getName(),
-							toUpdate.getID(), toUpdate.getGuild(), toUpdate.getTopic(), toUpdate.getPosition(),
-							toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
+					IChannel oldChannel = toUpdate.copy();
 
 					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), event);
 
@@ -757,10 +751,7 @@ public class DiscordWS {
 		Guild toUpdate = (Guild) client.getGuildByID(guildResponse.id);
 
 		if (toUpdate != null) {
-			Guild oldGuild = new Guild(client, toUpdate.getName(), toUpdate.getID(), toUpdate.getIcon(),
-					toUpdate.getOwnerID(), toUpdate.getAFKChannel() == null ? null : toUpdate.getAFKChannel().getID(),
-					toUpdate.getAFKTimeout(), toUpdate.getRegion().getID(), toUpdate.getRoles(), toUpdate.getChannels(), toUpdate.getVoiceChannels(),
-					toUpdate.getUsers());
+			IGuild oldGuild = toUpdate.copy();
 
 			toUpdate = (Guild) DiscordUtils.getGuildFromJSON(client, guildResponse);
 
@@ -777,7 +768,6 @@ public class DiscordWS {
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			IRole role = DiscordUtils.getRoleFromJSON(guild, event.role);
-			((Guild) guild).addRole(role);
 			client.dispatcher.dispatch(new RoleCreateEvent(role, guild));
 		}
 	}
@@ -788,11 +778,7 @@ public class DiscordWS {
 		if (guild != null) {
 			IRole toUpdate = guild.getRoleByID(event.role.id);
 			if (toUpdate != null) {
-				IRole oldRole = new Role(toUpdate.getPosition(),
-						Permissions.generatePermissionsNumber(toUpdate.getPermissions()), toUpdate.getName(),
-						toUpdate.isManaged(), toUpdate.getID(), toUpdate.isHoisted(), toUpdate.getColor().getRGB(),
-						toUpdate.isMentionable(), guild);
-				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
+				IRole oldRole = toUpdate.copy();
 				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
 			}
 		}

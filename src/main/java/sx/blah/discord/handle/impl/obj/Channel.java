@@ -6,28 +6,29 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.requests.ChannelEditRequest;
 import sx.blah.discord.json.requests.InviteRequest;
 import sx.blah.discord.json.requests.MessageRequest;
+import sx.blah.discord.json.responses.ChannelResponse;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MessageList;
-import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class Channel implements IChannel {
 	/**
 	 * User-friendly channel name (e.g. "general")
 	 */
-	protected String name;
+	protected volatile String name;
 
 	/**
 	 * Channel ID.
@@ -52,7 +53,7 @@ public class Channel implements IChannel {
 	/**
 	 * Indicates whether or not this channel is a PM channel.
 	 */
-	protected boolean isPrivate;
+	protected volatile boolean isPrivate;
 
 	/**
 	 * The guild this channel belongs to.
@@ -62,7 +63,7 @@ public class Channel implements IChannel {
 	/**
 	 * The channel's topic message.
 	 */
-	protected String topic;
+	protected volatile String topic;
 
 	/**
 	 * Whether the bot should send out a typing status
@@ -82,17 +83,17 @@ public class Channel implements IChannel {
 	/**
 	 * The position of this channel in the channel list.
 	 */
-	protected int position;
+	protected volatile int position;
 
 	/**
 	 * The permission overrides for users (key = user id).
 	 */
-	protected Map<String, PermissionOverride> userOverrides;
+	protected volatile Map<String, PermissionOverride> userOverrides;
 
 	/**
 	 * The permission overrides for roles (key = user id).
 	 */
-	protected Map<String, PermissionOverride> roleOverrides;
+	protected volatile Map<String, PermissionOverride> roleOverrides;
 
 	/**
 	 * The client that created this object.
@@ -295,10 +296,15 @@ public class Channel implements IChannel {
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
 		try {
-			Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic))),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json"));
+					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);
+
+			IChannel oldChannel = copy();
+			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
+
+			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 		}
@@ -470,8 +476,8 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public LocalDateTime getCreationDate() {
-		return DiscordUtils.getSnowflakeTimeFromID(id);
+	public IChannel copy() {
+		return new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 	}
 
 	@Override

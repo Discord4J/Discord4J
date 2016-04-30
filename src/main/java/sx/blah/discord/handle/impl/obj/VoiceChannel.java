@@ -124,4 +124,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public IVoiceChannel copy() {
+		return new VoiceChannel(client, name, id, parent, topic, position);
+	}
 }

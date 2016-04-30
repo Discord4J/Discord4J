@@ -208,7 +208,7 @@ public class DiscordUtils {
 
 			if (json.roles != null)
 				for (RoleResponse roleResponse : json.roles) {
-					guild.addRole(getRoleFromJSON(guild, roleResponse));
+					getRoleFromJSON(guild, roleResponse); //Implicitly adds the role to the guild.
 				}
 
 			if (json.members != null)
@@ -403,6 +403,7 @@ public class DiscordUtils {
 			role.setMentionable(json.mentionable);
 		} else {
 			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color, json.mentionable, guild);
+			((Guild) guild).addRole(role);
 		}
 		return role;
 	}

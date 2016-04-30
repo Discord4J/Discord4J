@@ -7,7 +7,9 @@ import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
 
+import java.awt.*;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
