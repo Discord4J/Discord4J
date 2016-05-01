@@ -5,14 +5,12 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.IApplication;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.json.requests.BotConversionRequest;
 import sx.blah.discord.json.responses.ApplicationResponse;
 import sx.blah.discord.json.responses.BotResponse;
 import sx.blah.discord.util.DiscordException;
@@ -159,37 +157,6 @@ public class Application implements IApplication {
 	@Override
 	public void changeRedirectUris(String[] redirectUris) throws HTTP429Exception, DiscordException {
 		edit(Optional.empty(), Optional.empty(), null, Optional.of(redirectUris));
-	}
-
-	@Override
-	public String convertUserToBot(String token) throws DiscordException {
-		try {
-			System.out.println(DiscordUtils.GSON.toJson(new BotConversionRequest(token)));
-			BotResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
-					DiscordEndpoints.APPLICATIONS+"/"+id+"/bot",
-					new StringEntity(DiscordUtils.GSON.toJson(new BotConversionRequest(token))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), BotResponse.class);
-
-			this.bot = DiscordUtils.getUserFromJSON(client, response);
-			this.botToken = response.token;
-			return botToken;
-		} catch (HTTP429Exception | UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-		}
-		return null;
-	}
-
-	@Override
-	public String convertUserToBot(IDiscordClient client) throws DiscordException {
-		if (client.isBot())
-			throw new DiscordException("Client is already a bot!");
-		if (client.isReady() && client.getToken().equals(this.client.getToken()))
-			throw new DiscordException("Cannot convert application owner to a bot!");
-
-		String token = convertUserToBot(client.getToken());
-		((DiscordClientImpl) client).convert(token);
-		return token;
 	}
 
 	@Override
