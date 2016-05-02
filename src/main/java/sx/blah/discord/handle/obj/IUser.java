@@ -119,4 +119,20 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return The (optional) voice channel.
 	 */
 	Optional<IVoiceChannel> getVoiceChannel();
+
+	/**
+	 * Gets whether this user is deafened in the given guild.
+	 *
+	 * @param guild The guild to check the status for.
+	 * @return True if deafened, false if otherwise.
+	 */
+	boolean isDeaf(IGuild guild);
+
+	/**
+	 * Gets whether this user is muted in the given guild.
+	 *
+	 * @param guild The guild to check the status for.
+	 * @return True if muted, false if otherwise.
+	 */
+	boolean isMuted(IGuild guild);
 }

@@ -267,6 +267,9 @@ public class DiscordUtils {
 		user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
 
 		user.addNick(guild.getID(), json.nick);
+
+		user.setIsDeaf(guild.getID(), json.deaf);
+		user.setIsMute(guild.getID(), json.mute);
 		return user;
 	}
 

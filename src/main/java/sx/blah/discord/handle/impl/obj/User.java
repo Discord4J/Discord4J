@@ -71,6 +71,16 @@ public class User implements IUser {
 	protected final HashMap<String, String> nicks;
 
 	/**
+	 * The muted status of this user. (Key = guild id).
+	 */
+	private volatile Map<String, Boolean> isMuted = new HashMap<>();
+
+	/**
+	 * The deafened status of this user. (Key = guild id).
+	 */
+	private volatile Map<String, Boolean> isDeaf = new HashMap<>();
+
+	/**
 	 * The voice channel this user is in.
 	 */
 	protected volatile IVoiceChannel channel;
@@ -272,6 +282,36 @@ public class User implements IUser {
 	 */
 	public void setVoiceChannel(IVoiceChannel channel) {
 		this.channel = channel;
+	}
+
+	/**
+	 * Sets whether the user is muted or not. This value is CACHED.
+	 *
+	 * @param guildID The guild in which this is the case.
+	 * @param isMuted Whether the user is muted or not.
+	 */
+	public void setIsMute(String guildID, boolean isMuted) {
+		this.isMuted.put(guildID, isMuted);
+	}
+
+	/**
+	 * Sets whether the user is deafened or not. This value is CACHED.
+	 *
+	 * @param guildID The guild in which this is the case.
+	 * @param isDeaf Whether the user is deafened or not.
+	*/
+	public void setIsDeaf(String guildID, boolean isDeaf) {
+		this.isDeaf.put(guildID, isDeaf);
+	}
+
+	@Override
+	public boolean isDeaf(IGuild guild) {
+		return isDeaf.getOrDefault(guild.getID(), false);
+	}
+
+	@Override
+	public boolean isMuted(IGuild guild) {
+		return isMuted.getOrDefault(guild.getID(), false);
 	}
 
 	@Override
