@@ -6,7 +6,7 @@
 
 	<groupId>sx.blah</groupId>
 	<artifactId>Discord4J</artifactId>
-	<version>2.4.7</version>
+	<version>2.4.8-SNAPSHOT</version>
 	<description>A Java binding for the unofficial Discord API, forked from https://github.com/nerd/Discord4J. Copyright (c) 2016, Licensed under GNU GPLv2</description>
 	<url>https://github.com/austinv11/Discord4J</url>
 	<licenses>

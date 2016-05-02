@@ -45,6 +45,12 @@ public class DiscordUtils {
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
 	/**
+	 * Used in order to find the invite code from a passed message.
+	 */
+	public static final Pattern INVITE_PATTERN = Pattern.compile("(?:https://discordapp.com/invite/|https://discord.gg/)"
+			+"(\\w+-\\w+-\\w+|[a-zA-Z0-9]+)");
+
+	/**
 	 * Used to determine age based on discord ids
 	 */
 	public static final BigInteger DISCORD_EPOCH = new BigInteger("1420070400000");
@@ -538,5 +544,22 @@ public class DiscordUtils {
 		return new Application(client, response.secret, response.redirect_uris, response.description, response.name,
 				response.id, response.icon, DiscordUtils.getUserFromJSON(client, response.bot),
 				response.bot == null ? null : response.bot.token);
+	}
+
+	/**
+	 * Gets invite codes from a message if it exists.
+	 *
+	 * @param message The message to parse.
+	 * @return The codes or empty if none are found.
+	 */
+	public static Optional<List<String>> getInviteCodesFromMessage(String message) {
+		Matcher matcher = INVITE_PATTERN.matcher(message);
+		List<String> strings = new ArrayList<>();
+		while (matcher.find()) {
+			strings.add(matcher.group(1));
+			matcher = INVITE_PATTERN.matcher(matcher.replaceFirst(""));
+		}
+
+		return strings.size() > 0 ? Optional.of(strings) : Optional.empty();
 	}
 }

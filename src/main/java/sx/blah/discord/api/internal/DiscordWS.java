@@ -435,14 +435,17 @@ public class DiscordWS {
 				Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						event.author.id, event.channel_id, event.content);
 
-				if (event.content.contains("discord.gg/")) {
-					String inviteCode = event.content.split("discord\\.gg/")[1].split(" ")[0];
-					Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
-					client.dispatcher.dispatch(new InviteReceivedEvent(client.getInviteForCode(inviteCode), message));
-				} else if (event.content.contains("discordapp.com/invite/")) {
-					String inviteCode = event.content.split("discordapp\\.com/invite/")[1].split(" ")[0];
-					Discord4J.LOGGER.debug("Received invite code \"{}\"", inviteCode);
-					client.dispatcher.dispatch(new InviteReceivedEvent(client.getInviteForCode(inviteCode), message));
+				Optional<List<String>> invites = DiscordUtils.getInviteCodesFromMessage(event.content);
+				if (invites.isPresent()) {
+					String[] inviteCodes = invites.get().toArray(new String[invites.get().size()]);
+					Discord4J.LOGGER.debug("Received invite codes \"{}\"", (Object) inviteCodes);
+					List<IInvite> inviteObjects = new ArrayList<>();
+					for (int i = 0; i < inviteCodes.length; i++) {
+						IInvite invite = client.getInviteForCode(inviteCodes[i]);
+						if (invite != null)
+							inviteObjects.add(invite);
+					}
+					client.dispatcher.dispatch(new InviteReceivedEvent(inviteObjects.toArray(new IInvite[inviteObjects.size()]), message));
 				}
 
 				if (mentioned) {

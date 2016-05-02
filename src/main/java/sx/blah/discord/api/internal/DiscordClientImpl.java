@@ -448,10 +448,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
 
 			return DiscordUtils.getInviteFromJSON(this, response);
-		} catch (HTTP429Exception | DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		} catch (Exception e) {
+			return null;
 		}
-		return null;
 	}
 
 	@Override

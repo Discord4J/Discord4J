@@ -28,11 +28,11 @@ import sx.blah.discord.handle.obj.IMessage;
  */
 public class InviteReceivedEvent extends Event {
 
-	private final IInvite invite;
+	private final IInvite[] invites;
 	private final IMessage message;
 
-	public InviteReceivedEvent(IInvite invite, IMessage message) {
-		this.invite = invite;
+	public InviteReceivedEvent(IInvite[] invites, IMessage message) {
+		this.invites = invites;
 		this.message = message;
 	}
 
@@ -40,9 +40,20 @@ public class InviteReceivedEvent extends Event {
 	 * Gets the invite received.
 	 *
 	 * @return The invite.
+	 * @deprecated Use {@link #getInvites()} instead.
 	 */
+	@Deprecated
 	public IInvite getInvite() {
-		return invite;
+		return invites[0];
+	}
+
+	/**
+	 * Gets the invites received.
+	 *
+	 * @return The invites received.
+	 */
+	public IInvite[] getInvites() {
+		return invites;
 	}
 
 	/**
