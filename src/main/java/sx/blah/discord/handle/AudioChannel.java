@@ -33,8 +33,22 @@ public class AudioChannel {
 		this.client = client;
 	}
 
+	/**
+	 * Sets the volume of this AudioChannel
+	 *
+	 * @param The volume as float between 0.0f (mute) and 1.0f (full volume)
+	 */
 	public void setVolume(float volume) {
 		this.volume = volume;
+	}
+
+	/**
+	 * Returns the current volume setting of this AudioChannel
+	 *
+	 * @return The current volume as float between 0.0f and 1.0f
+	 */
+	public float getVolume() {
+		return this.volume;
 	}
 
 	/**
