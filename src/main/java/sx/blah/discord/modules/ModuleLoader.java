@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -223,7 +224,7 @@ public class ModuleLoader {
 				JarFile jarFile = new JarFile(file);
 				Manifest manifest = jarFile.getManifest();
 				if (manifest != null && manifest.getMainAttributes() != null
-						&& manifest.getMainAttributes().containsKey("module-requires")) {
+						&& manifest.getMainAttributes().containsKey(new Attributes.Name("module-requires"))) {
 					dependents.add(file);
 				} else {
 					independents.add(file);
