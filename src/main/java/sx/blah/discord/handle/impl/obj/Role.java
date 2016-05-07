@@ -19,6 +19,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 
 import java.awt.*;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -182,7 +183,7 @@ public class Role implements IRole {
 	}
 
 	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
+		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
 			RoleResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
@@ -229,7 +230,7 @@ public class Role implements IRole {
 
 	@Override
 	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
+		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));

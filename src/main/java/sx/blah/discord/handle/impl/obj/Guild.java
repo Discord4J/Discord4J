@@ -308,7 +308,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.BAN));
 
 		Requests.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays,
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -324,7 +324,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void kickUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.KICK));
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -332,7 +332,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
+		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
@@ -346,7 +346,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, HTTP429Exception {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
@@ -360,7 +360,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void setMuteUser(IUser user, boolean mute) throws DiscordException, HTTP429Exception, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
@@ -377,7 +377,7 @@ public class Guild implements IGuild {
 		if (user.equals(client.getOurUser())) {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CHANGE_NICKNAME));
 		} else {
-			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_NICKNAMES));
+			DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.MANAGE_NICKNAMES));
 		}
 
 		try {

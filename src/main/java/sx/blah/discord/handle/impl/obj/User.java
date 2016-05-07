@@ -258,7 +258,7 @@ public class User implements IUser {
 	@Override
 	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception, MissingPermissionsException {
 		if (!client.getOurUser().equals(this))
-			DiscordUtils.checkPermissions(client, newChannel.getGuild(), EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
+			DiscordUtils.checkPermissions(client, newChannel.getGuild(), this.getRolesForGuild(newChannel.getGuild()), EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,

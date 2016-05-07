@@ -419,7 +419,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -429,7 +429,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		DiscordUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
