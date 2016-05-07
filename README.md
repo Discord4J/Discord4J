@@ -125,6 +125,9 @@ Discord4J has an api for creating modular Discord Bots! See [Martacus's sample r
 ### More examples
 See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
 
+## Projects using Discord4J
+* Instructability by @Kaioru: A simple command API (https://github.com/Kaioru/Instructability)
+
 ## Deprecation policy
 Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
 

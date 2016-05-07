@@ -834,10 +834,18 @@ public class DiscordWS {
 				if (channel != oldChannel) {
 					if (channel == null) {
 						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
+						if (client.getOurUser().equals(user))
+							client.connectedVoiceChannels.remove(oldChannel);
 					} else if (oldChannel == null) {
 						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
+						if (client.getOurUser().equals(user))
+							client.connectedVoiceChannels.add(channel);
 					} else {
 						client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
+						if (client.getOurUser().equals(user)) {
+							client.connectedVoiceChannels.remove(oldChannel);
+							client.connectedVoiceChannels.add(channel);
+						}
 					}
 				} else {
 					client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
