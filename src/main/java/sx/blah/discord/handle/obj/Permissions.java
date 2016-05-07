@@ -122,13 +122,13 @@ public enum Permissions {
 	 * Checks whether a provided "permissions number" contains this permission.
 	 *
 	 * @param permissionsNumber The raw permissions number.
-	 * @param checkManageRoles Set to true in order to have the ADMINISTRATOR permission supersede the provided permissions.
+	 * @param checkAdmin Set to true in order to have the ADMINISTRATOR permission supersede the provided permissions.
 	 * @return True if the user has this permission, false if otherwise.
 	 */
-	public boolean hasPermission(int permissionsNumber, boolean checkManageRoles) {
+	public boolean hasPermission(int permissionsNumber, boolean checkAdmin) {
 		if ((1 << offset & permissionsNumber) > 0)
 			return true;
-		else if (!this.equals(ADMINISTRATOR) && checkManageRoles)
+		else if (!this.equals(ADMINISTRATOR) && checkAdmin)
 			return ADMINISTRATOR.hasPermission(permissionsNumber);
 		return false;
 	}

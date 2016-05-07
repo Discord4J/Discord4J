@@ -476,6 +476,14 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public List<IUser> getUsersHere() {
+		return parent.getUsers().stream().filter((user) -> {
+			EnumSet<Permissions> permissions = getModifiedPermissions(user);
+			return Permissions.READ_MESSAGES.hasPermission(Permissions.generatePermissionsNumber(permissions), true);
+		}).collect(Collectors.toList());
+	}
+
+	@Override
 	public IChannel copy() {
 		return new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 	}

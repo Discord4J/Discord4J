@@ -2,6 +2,7 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -18,6 +19,7 @@ import sx.blah.discord.util.MessageList;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {
 
@@ -126,5 +128,15 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public IVoiceChannel copy() {
 		return new VoiceChannel(client, name, id, parent, topic, position);
+	}
+
+	@Override
+	public List<IUser> getUsersHere() {
+		return getConnectedUsers();
+	}
+
+	@Override
+	public List<IUser> getConnectedUsers() {
+		return parent.getUsers().stream().filter((user) -> user.getConnectedVoiceChannels().contains(this)).collect(Collectors.toList());
 	}
 }

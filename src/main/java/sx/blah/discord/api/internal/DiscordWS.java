@@ -189,7 +189,6 @@ public class DiscordWS {
 		} else if (!client.getToken().isEmpty()) {
 			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
 					Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
-			Discord4J.LOGGER.debug("Connected to the Discord websocket.");
 		} else {
 			Discord4J.LOGGER.error("Use the login() method to set your token first!");
 			return;

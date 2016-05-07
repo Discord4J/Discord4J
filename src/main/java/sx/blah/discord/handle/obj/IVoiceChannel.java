@@ -3,6 +3,8 @@ package sx.blah.discord.handle.obj;
 import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.util.DiscordException;
 
+import java.util.List;
+
 /**
  * Represents a voice channel.
  */
@@ -37,4 +39,11 @@ public interface IVoiceChannel extends IChannel {
 	 * {@inheritDoc}
 	 */
 	IVoiceChannel copy();
+
+	/**
+	 * This collects all users connected to this voice channel and returns them in a list.
+	 *
+	 * @return The connected users.
+	 */
+	List<IUser> getConnectedUsers();
 }

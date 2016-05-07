@@ -281,6 +281,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
 
 	/**
+	 * This gets the users with the ability to read this channel.
+	 *
+	 * @return The users in this channel.
+	 */
+	List<IUser> getUsersHere();
+
+	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
 	class PermissionOverride {
