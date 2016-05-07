@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.json.generic.StatusObject;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -230,8 +231,13 @@ public class DiscordUtils {
 				for (PresenceResponse presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
 					if (user != null) {
-						user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
-						user.setGame(presence.game == null ? null : presence.game.name);
+						Status status = getStatusFromJSON(presence.game);
+						if (status.getType() == Status.StatusType.STREAM) {
+							user.setPresence(Presences.STREAMING);
+						} else {
+							user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
+						}
+						user.setStatus(status);
 					}
 				}
 
@@ -253,6 +259,24 @@ public class DiscordUtils {
 		}
 
 		return guild;
+	}
+
+	/**
+	 * Creates a {@link Status} object from a json response.
+	 *
+	 * @param json The json status object.
+	 * @return The Status instance.
+	 */
+	public static Status getStatusFromJSON(StatusObject json) {
+		if (json == null) {
+			return Status.empty();
+		} else if (json.type == 0) {
+			return Status.game(json.name);
+		} else if (json.type == 1) {
+			return Status.stream(json.name, json.url);
+		} else {
+			return Status.empty();
+		}
 	}
 
 	/**

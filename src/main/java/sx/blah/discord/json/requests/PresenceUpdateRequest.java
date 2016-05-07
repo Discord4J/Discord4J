@@ -1,6 +1,7 @@
 package sx.blah.discord.json.requests;
 
-import sx.blah.discord.json.generic.GameObject;
+import sx.blah.discord.handle.obj.Status;
+import sx.blah.discord.json.generic.StatusObject;
 
 /**
  * This request is sent when the user updates his/her presence
@@ -17,8 +18,8 @@ public class PresenceUpdateRequest {
 	 */
 	public EventObject d;
 
-	public PresenceUpdateRequest(Long idle_since, String game) {
-		d = new EventObject(idle_since, game);
+	public PresenceUpdateRequest(Long idle_since, Status status) {
+		d = new EventObject(idle_since, status);
 	}
 
 	/**
@@ -34,11 +35,11 @@ public class PresenceUpdateRequest {
 		/**
 		 * The game the user is playing, or null if no game
 		 */
-		public GameObject game;
+		public StatusObject game;
 
-		public EventObject(Long idle_since, String game) {
+		public EventObject(Long idle_since, Status status) {
 			this.idle_since = idle_since;
-			this.game = new GameObject(game);
+			this.game = new StatusObject(status);
 		}
 	}
 }

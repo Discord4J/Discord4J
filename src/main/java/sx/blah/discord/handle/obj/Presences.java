@@ -24,15 +24,19 @@ package sx.blah.discord.handle.obj;
  */
 public enum Presences {
 	/**
-	 * Represents that the user is online
+	 * Represents that the user is online.
 	 */
 	ONLINE,
 	/**
-	 * Represents that the user is idle
+	 * Represents that the user is idle.
 	 */
 	IDLE,
 	/**
-	 * Represents that the user is offline
+	 * Represents that the user is offline.
 	 */
-	OFFLINE
+	OFFLINE,
+	/**
+	 * Represents that the user is streaming.
+	 */
+	STREAMING
 }

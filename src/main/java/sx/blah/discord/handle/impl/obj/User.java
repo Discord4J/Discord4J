@@ -31,9 +31,9 @@ public class User implements IUser {
 	protected volatile String avatar;
 
 	/**
-	 * The game the user is playing.
+	 * The user's status.
 	 */
-	protected volatile String game;
+	protected volatile Status status = Status.empty();
 
 	/**
 	 * User ID.
@@ -117,16 +117,21 @@ public class User implements IUser {
 
 	@Override
 	public Optional<String> getGame() {
-		return Optional.ofNullable(game);
+		return Optional.ofNullable(status.getStatusMessage());
+	}
+
+	@Override
+	public Status getStatus() {
+		return status;
 	}
 
 	/**
-	 * Sets the user's CACHED game.
+	 * Sets the user's CACHED status.
 	 *
-	 * @param game The game.
+	 * @param status The status.
 	 */
-	public void setGame(String game) {
-		this.game = game;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	/**

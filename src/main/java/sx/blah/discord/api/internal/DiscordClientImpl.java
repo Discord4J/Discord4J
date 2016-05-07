@@ -301,15 +301,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public void updatePresence(boolean isIdle, Optional<String> game) { //TODO: make private
+		updatePresence(isIdle, Status.game(game.orElse(null)));
+	}
+
+	private void updatePresence(boolean isIdle, Status status) {
 		if (!isReady()) {
 			Discord4J.LOGGER.error("Bot has not signed in yet!");
 			return;
 		}
 
-		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
-
-		((User) getOurUser()).setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
-		((User) getOurUser()).setGame(game.orElse(null));
+		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));
 	}
 
 	@Override
@@ -320,6 +321,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void changeGameStatus(String game) {
 		updatePresence(getOurUser().getPresence() == Presences.IDLE, Optional.ofNullable(game));
+	}
+
+	@Override
+	public void changeStatus(Status status) {
+		updatePresence(getOurUser().getPresence() == Presences.IDLE, status);
 	}
 
 	@Override

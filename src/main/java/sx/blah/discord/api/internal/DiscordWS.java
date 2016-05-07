@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -604,24 +607,26 @@ public class DiscordWS {
 
 	private void presenceUpdate(JsonElement eventObject) {
 		PresenceUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, PresenceUpdateEventResponse.class);
-		Presences presences = Presences.valueOf(event.status.toUpperCase());
-		String gameName = event.game == null ? null : event.game.name;
+		Status status = DiscordUtils.getStatusFromJSON(event.game);
+		Presences presence = status.getType() == Status.StatusType.STREAM ?
+				Presences.STREAMING : Presences.valueOf(event.status.toUpperCase());
 		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		if (guild != null
-				&& presences != null) {
+				&& presence != null) {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
-				if (!user.getPresence().equals(presences)) {
+				if (!user.getPresence().equals(presence)) {
 					Presences oldPresence = user.getPresence();
-					user.setPresence(presences);
-					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, oldPresence, presences));
+					user.setPresence(presence);
+					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, oldPresence, presence));
 					Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
-				if (!user.getGame().equals(Optional.ofNullable(gameName))) {
-					String oldGame = user.getGame().orElse(null);
-					user.setGame(gameName);
-					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldGame, gameName));
-					Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
+				if (!user.getStatus().equals(status)) {
+					Status oldStatus = user.getStatus();
+					user.setStatus(status);
+					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldStatus.getStatusMessage(), status.getStatusMessage()));
+					client.dispatcher.dispatch(new StatusChangeEvent(guild, user, oldStatus, status));
+					Discord4J.LOGGER.debug("User \"{}\" changed status to {}.", user.getName(), status);
 				}
 				User newUser = (User) client.getUserByID(event.user.id);
 				if (newUser != null) {

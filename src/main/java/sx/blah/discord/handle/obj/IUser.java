@@ -23,8 +23,17 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * Gets the game the user is playing, no value if the user isn't playing a game.
 	 *
 	 * @return The game.
+	 * @deprecated Use {@link #getStatus()} instead.
 	 */
+	@Deprecated
 	Optional<String> getGame();
+
+	/**
+	 * Gets the status for this user.
+	 *
+	 * @return The user's status.
+	 */
+	Status getStatus();
 
 	/**
 	 * Gets the user's avatar id.

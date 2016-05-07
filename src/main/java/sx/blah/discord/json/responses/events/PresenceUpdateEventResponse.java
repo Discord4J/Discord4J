@@ -1,6 +1,6 @@
 package sx.blah.discord.json.responses.events;
 
-import sx.blah.discord.json.generic.GameObject;
+import sx.blah.discord.json.generic.StatusObject;
 import sx.blah.discord.json.responses.UserResponse;
 
 /**
@@ -21,7 +21,7 @@ public class PresenceUpdateEventResponse {
 	/**
 	 * The game the user is playing (or null if no game being played)
 	 */
-	public GameObject game;
+	public StatusObject game;
 
 	/**
 	 * The roles the user is a part of

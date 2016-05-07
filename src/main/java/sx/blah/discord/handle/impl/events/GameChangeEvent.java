@@ -8,7 +8,9 @@ import java.util.Optional;
 
 /**
  * This event is dispatched when the game a user is playing is changed.
+ * @deprecated Use {@link StatusChangeEvent} instead.
  */
+@Deprecated
 public class GameChangeEvent extends Event {
 
 	private final IGuild guild;
@@ -57,6 +59,4 @@ public class GameChangeEvent extends Event {
 	public IGuild getGuild() {
 		return guild;
 	}
-
-
 }
