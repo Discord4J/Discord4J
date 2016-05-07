@@ -247,7 +247,7 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateResponse voiceState : json.voice_states) {
-					((User) guild.getUserByID(voiceState.user_id)).setVoiceChannel(guild.getVoiceChannelByID(voiceState.channel_id));
+					((User) guild.getUserByID(voiceState.user_id)).getConnectedVoiceChannels().add(guild.getVoiceChannelByID(voiceState.channel_id));
 				}
 			}
 		}

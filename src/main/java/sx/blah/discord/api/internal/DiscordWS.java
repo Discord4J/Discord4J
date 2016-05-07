@@ -140,7 +140,6 @@ public class DiscordWS {
 	 */
 	private void clearCache() {
 		client.sessionId = null;
-		client.connectedVoiceChannels.clear();
 		client.voiceConnections.clear();
 		client.guildList.clear();
 		client.heartbeat = 0;
@@ -827,24 +826,23 @@ public class DiscordWS {
 
 		if (guild != null) {
 			IVoiceChannel channel = guild.getVoiceChannelByID(event.channel_id);
-			IUser user = guild.getUserByID(event.user_id);
+			User user = (User) guild.getUserByID(event.user_id);
 			if (user != null) {
 				IVoiceChannel oldChannel = user.getVoiceChannel().orElse(null);
-				((User) user).setVoiceChannel(channel);
 				if (channel != oldChannel) {
 					if (channel == null) {
 						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
 						if (client.getOurUser().equals(user))
-							client.connectedVoiceChannels.remove(oldChannel);
+							user.getConnectedVoiceChannels().remove(oldChannel);
 					} else if (oldChannel == null) {
 						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
 						if (client.getOurUser().equals(user))
-							client.connectedVoiceChannels.add(channel);
+							user.getConnectedVoiceChannels().add(channel);
 					} else {
 						client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
 						if (client.getOurUser().equals(user)) {
-							client.connectedVoiceChannels.remove(oldChannel);
-							client.connectedVoiceChannels.add(channel);
+							user.getConnectedVoiceChannels().remove(oldChannel);
+							user.getConnectedVoiceChannels().add(channel);
 						}
 					}
 				} else {

@@ -117,8 +117,17 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * Gets the voice channel this user is in (if in one).
 	 *
 	 * @return The (optional) voice channel.
+	 * @deprecated Use {@link #getConnectedVoiceChannels()} instead.
 	 */
+	@Deprecated
 	Optional<IVoiceChannel> getVoiceChannel();
+
+	/**
+	 * Gets the voice channels this user is connected to.
+	 *
+	 * @return The voice channels.
+	 */
+	List<IVoiceChannel> getConnectedVoiceChannels();
 
 	/**
 	 * Gets whether this user is deafened in the given guild.

@@ -93,11 +93,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
 	/**
-	 * The voice channels the bot is currently in.
-	 */
-	public final List<IVoiceChannel> connectedVoiceChannels = new CopyOnWriteArrayList<>();
-
-	/**
 	 * Whether the api is logged in.
 	 */
 	protected volatile boolean isReady = false;
@@ -520,7 +515,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return connectedVoiceChannels;
+		return ourUser.getConnectedVoiceChannels();
 	}
 
 	@Override

@@ -15,6 +15,8 @@ import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class User implements IUser {
 
@@ -63,27 +65,27 @@ public class User implements IUser {
 	/**
 	 * The roles the user is a part of. (Key = guild id).
 	 */
-	protected final HashMap<String, List<IRole>> roles;
+	protected final Map<String, List<IRole>> roles;
 
 	/**
 	 * The nicknames this user has. (Key = guild id).
 	 */
-	protected final HashMap<String, String> nicks;
+	protected final Map<String, String> nicks;
 
 	/**
 	 * The muted status of this user. (Key = guild id).
 	 */
-	private volatile Map<String, Boolean> isMuted = new HashMap<>();
+	private final Map<String, Boolean> isMuted = new ConcurrentHashMap<>();
 
 	/**
 	 * The deafened status of this user. (Key = guild id).
 	 */
-	private volatile Map<String, Boolean> isDeaf = new HashMap<>();
+	private final Map<String, Boolean> isDeaf = new ConcurrentHashMap<>();
 
 	/**
-	 * The voice channel this user is in.
+	 * The voice channels this user is in.
 	 */
-	protected volatile IVoiceChannel channel;
+	protected final List<IVoiceChannel> channels = new CopyOnWriteArrayList<>();
 
 	/**
 	 * The client that created this object.
@@ -98,8 +100,8 @@ public class User implements IUser {
 		this.avatar = avatar;
 		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
 		this.presence = presence;
-		this.roles = new HashMap<>();
-		this.nicks = new HashMap<>();
+		this.roles = new ConcurrentHashMap<>();
+		this.nicks = new ConcurrentHashMap<>();
 		this.isBot = isBot;
 	}
 
@@ -272,16 +274,12 @@ public class User implements IUser {
 
 	@Override
 	public Optional<IVoiceChannel> getVoiceChannel() {
-		return Optional.ofNullable(channel);
+		return channels.stream().findFirst();
 	}
 
-	/**
-	 * Sets the CACHED voice channel this user is in.
-	 *
-	 * @param channel The new channel.
-	 */
-	public void setVoiceChannel(IVoiceChannel channel) {
-		this.channel = channel;
+	@Override
+	public List<IVoiceChannel> getConnectedVoiceChannels() {
+		return channels;
 	}
 
 	/**
