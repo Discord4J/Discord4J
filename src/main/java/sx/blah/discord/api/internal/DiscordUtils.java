@@ -577,7 +577,7 @@ public class DiscordUtils {
 	 * @param message The message to parse.
 	 * @return The codes or empty if none are found.
 	 */
-	public static Optional<List<String>> getInviteCodesFromMessage(String message) {
+	public static List<String> getInviteCodesFromMessage(String message) {
 		Matcher matcher = INVITE_PATTERN.matcher(message);
 		List<String> strings = new ArrayList<>();
 		while (matcher.find()) {
@@ -585,6 +585,6 @@ public class DiscordUtils {
 			matcher = INVITE_PATTERN.matcher(matcher.replaceFirst(""));
 		}
 
-		return strings.size() > 0 ? Optional.of(strings) : Optional.empty();
+		return strings;
 	}
 }
