@@ -1,17 +1,21 @@
 package sx.blah.discord;
 
 import org.junit.Test;
-import sx.blah.discord.api.*;
+import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.DiscordStatus;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
-import sx.blah.discord.util.Image;
 
-import java.awt.*;
 import java.io.File;
-import java.util.*;
+import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -84,7 +88,13 @@ public class TestBot {
 							//Clearing spoofbot's mess from before
 							synchronized (client) {
 								for (IMessage message : spoofChannel.getMessages()) {
-									message.delete();
+									RequestBuffer.request(() -> {
+										try {
+											message.delete();
+										} catch (MissingPermissionsException | DiscordException e) {
+											e.printStackTrace();
+										}
+									});
 								}
 							}
 

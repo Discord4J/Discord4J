@@ -7,6 +7,8 @@
 * @TheFjonG -Created the awesome Discord4J ReadTheDocs page
 * @Martacus -Created an example repo for Discord4J modules
 * @davue -Added user fields to VoiceUser events
+* @langerhans -Helped with the AudioChannel object
+* @Kaioru -Created a cool command API and fixed the module-requires manifest key
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
