@@ -23,7 +23,7 @@ public enum Permissions {
 	 * Allows the user to manage roles.
 	 * NOTE: This supercedes any other permissions if true.
 	 */
-	MANAGE_ROLES(3),
+	ADMINISTRATOR(3),
 	/**
 	 * Allows the user to manage permissions.
 	 */
@@ -103,7 +103,11 @@ public enum Permissions {
 	/**
 	 * Allows the user to manage nicknames.
 	 */
-	MANAGE_NICKNAMES(27);
+	MANAGE_NICKNAMES(27),
+	/**
+	 * Allows the user to manage roles below yours.
+	 */
+	MANAGE_ROLES(28);
 
 	/**
 	 * The bit offset in the permissions number
@@ -118,14 +122,14 @@ public enum Permissions {
 	 * Checks whether a provided "permissions number" contains this permission.
 	 *
 	 * @param permissionsNumber The raw permissions number.
-	 * @param checkManageRoles Set to true in order to have the MANAGE_ROLES permission supersede the provided permissions.
+	 * @param checkManageRoles Set to true in order to have the ADMINISTRATOR permission supersede the provided permissions.
 	 * @return True if the user has this permission, false if otherwise.
 	 */
 	public boolean hasPermission(int permissionsNumber, boolean checkManageRoles) {
 		if ((1 << offset & permissionsNumber) > 0)
 			return true;
-		else if (!this.equals(MANAGE_ROLES) && checkManageRoles)
-			return MANAGE_ROLES.hasPermission(permissionsNumber);
+		else if (!this.equals(ADMINISTRATOR) && checkManageRoles)
+			return ADMINISTRATOR.hasPermission(permissionsNumber);
 		return false;
 	}
 

@@ -522,8 +522,7 @@ public class DiscordUtils {
 				contained.addAll(role.getPermissions());
 			}
 			checkPermissions(contained, required);
-		} catch (UnsupportedOperationException e) {
-		}
+		} catch (UnsupportedOperationException e) {}
 	}
 
 	/**
@@ -535,6 +534,9 @@ public class DiscordUtils {
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(EnumSet<Permissions> contained, EnumSet<Permissions> required) throws MissingPermissionsException {
+		if (contained.contains(Permissions.ADMINISTRATOR))
+			return;
+
 		EnumSet<Permissions> missing = EnumSet.noneOf(Permissions.class);
 
 		for (Permissions requiredPermission : required) {
