@@ -242,7 +242,7 @@ public class AudioChannel {
 					}
 					return new AudioData(audio, metaData);
 				} else {
-					audioQueue.remove(0);
+					audioQueue.remove(0).close();
 					metaDataQueue.remove(0);
 					client.getDispatcher().dispatch(new AudioStopEvent(data, metaData.fileSource,
 							metaData.urlSource, metaData.format, this));
