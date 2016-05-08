@@ -26,6 +26,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,15 +73,15 @@ public class Discord4J {
 			properties.load(stream);
 			stream.close();
 		} catch (IOException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.MAIN, "Discord4J Internal Exception", e);
 		}
 		NAME = properties.getProperty("application.name");
 		VERSION = properties.getProperty("application.version");
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
 
-		LOGGER.info("{} v{}", NAME, VERSION);
-		LOGGER.info("{}", DESCRIPTION);
+		LOGGER.info(LogMarkers.MAIN, "{} v{}", NAME, VERSION);
+		LOGGER.info(LogMarkers.MAIN, "{}", DESCRIPTION);
 	}
 
 	/**
@@ -101,11 +102,11 @@ public class Discord4J {
 			ClientBuilder builder = new ClientBuilder();
 			IDiscordClient client = (args.length == 1 ? builder.withToken(args[0]) : builder.withLogin(args[0], args[1])).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
-				LOGGER.info("Logged in as {}", e.getClient().getOurUser().getName());
+				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
 			});
 			//The modules should handle the rest
 		} catch (DiscordException e) {
-			LOGGER.error("There was an error initializing the client", e);
+			LOGGER.error(LogMarkers.MAIN, "There was an error initializing the client", e);
 		}
 	}
 

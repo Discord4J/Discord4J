@@ -10,6 +10,7 @@ import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.json.responses.InviteJSONResponse;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.util.LogMarkers;
 
 import java.util.Objects;
 
@@ -56,7 +57,7 @@ public class Invite implements IInvite {
 			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
 					inviteResponse.channel.id, inviteResponse.channel.name);
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 	}
@@ -72,7 +73,7 @@ public class Invite implements IInvite {
 			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
 					inviteResponse.channel.id, inviteResponse.channel.name);
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 	}

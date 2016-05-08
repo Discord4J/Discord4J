@@ -3,9 +3,8 @@ package sx.blah.discord.handle.impl.obj;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.*;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
@@ -13,8 +12,6 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.json.requests.VoiceChannelRequest;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.MessageList;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,11 +33,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		if (client.isReady()) {
 
 			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
-				Discord4J.LOGGER.info("Attempting to join a multiple channels in the same guild! Moving channels instead...");
+				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Attempting to join a multiple channels in the same guild! Moving channels instead...");
 				try {
 					client.getOurUser().moveToVoiceChannel(this);
 				} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
-					Discord4J.LOGGER.error("Unable to switch voice channels! Aborting join request...", e);
+					Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
 					return;
 				}
 			} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
@@ -48,7 +45,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 		}
 	}
 
@@ -58,7 +55,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
 			((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		} else {
-			Discord4J.LOGGER.warn("Attempted to leave an not joined voice channel! Ignoring the method call...");
+			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave an not joined voice channel! Ignoring the method call...");
 		}
 	}
 

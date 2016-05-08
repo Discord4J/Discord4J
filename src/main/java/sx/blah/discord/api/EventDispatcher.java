@@ -2,6 +2,7 @@ package sx.blah.discord.api;
 
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.util.LogMarkers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,15 +15,15 @@ import java.util.function.Predicate;
  */
 public class EventDispatcher {
 
-	private ConcurrentHashMap<Class<?>, ConcurrentHashMap<Method, CopyOnWriteArrayList<ListenerPair<Object>>>> methodListeners = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<Class<?>, CopyOnWriteArrayList<ListenerPair<IListener>>> classListeners = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<Class<?>, ConcurrentHashMap<Method, CopyOnWriteArrayList<ListenerPair<Object>>>> methodListeners = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<Class<?>, CopyOnWriteArrayList<ListenerPair<IListener>>> classListeners = new ConcurrentHashMap<>();
 	private final ExecutorService eventExecutor = Executors.newCachedThreadPool(runnable -> { //Ensures all threads are daemons
 		Thread thread = Executors.defaultThreadFactory().newThread(runnable);
 		thread.setName("Event Dispatch Thread");
 		thread.setDaemon(true);
 		return thread;
 	});
-	private IDiscordClient client;
+	private final IDiscordClient client;
 
 	public EventDispatcher(IDiscordClient client) {
 		this.client = client;
@@ -70,7 +71,7 @@ public class EventDispatcher {
 							methodListeners.get(eventClass).put(method, new CopyOnWriteArrayList<>());
 
 						methodListeners.get(eventClass).get(method).add(new ListenerPair<>(isTemporary, listener));
-						Discord4J.LOGGER.trace("Registered method listener {}", listenerClass.getSimpleName(), method.toString());
+						Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered method listener {}#{}", listenerClass.getSimpleName(), method.getName());
 					}
 				}
 			}
@@ -83,7 +84,7 @@ public class EventDispatcher {
 			if (!classListeners.containsKey(rawType))
 				classListeners.put(rawType, new CopyOnWriteArrayList<>());
 
-			Discord4J.LOGGER.trace("Registered IListener {}", listener.getClass().getSimpleName());
+			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered IListener {}", listener.getClass().getSimpleName());
 			classListeners.get(rawType).add(new ListenerPair<>(isTemporary, listener));
 		}
 	}
@@ -230,7 +231,7 @@ public class EventDispatcher {
 					if (methodListeners.containsKey(eventClass))
 						if (methodListeners.get(eventClass).containsKey(method)) {
 							methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == listener); //Yes, the == is intentional. We want the exact same instance.
-							Discord4J.LOGGER.trace("Unregistered method listener {}", listener.getClass().getSimpleName(), method.toString());
+							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered method listener {}", listener.getClass().getSimpleName(), method.toString());
 						}
 				}
 			}
@@ -247,7 +248,7 @@ public class EventDispatcher {
 		if (Event.class.isAssignableFrom(rawType)) {
 			if (classListeners.containsKey(rawType)) {
 				classListeners.get(rawType).removeIf((ListenerPair pair) -> pair.listener == listener); //Yes, the == is intentional. We want the exact same instance.
-				Discord4J.LOGGER.trace("Unregistered IListener {}", listener.getClass().getSimpleName());
+				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered IListener {}", listener.getClass().getSimpleName());
 			}
 		}
 	}
@@ -260,7 +261,7 @@ public class EventDispatcher {
 	public synchronized void dispatch(Event event) {
 		if (client.isReady()) {
 			eventExecutor.submit(() -> {
-				Discord4J.LOGGER.trace("Dispatching event of type {}", event.getClass().getSimpleName());
+				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 				event.client = client;
 
 				methodListeners.entrySet().stream()
@@ -274,9 +275,9 @@ public class EventDispatcher {
 												if (o.isTemporary)
 													unregisterListener(o.listener);
 											} catch (IllegalAccessException | InvocationTargetException e) {
-												Discord4J.LOGGER.error("Error dispatching event "+event.getClass().getSimpleName(), e);
+												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event "+event.getClass().getSimpleName(), e);
 											} catch (Exception e) {
-												Discord4J.LOGGER.error("Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
+												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
 											}
 										})));
 
@@ -292,7 +293,7 @@ public class EventDispatcher {
 							} catch (ClassCastException e) {
 								//FIXME: This occurs when a lambda expression is used to create an IListener leading it to be registered under the type 'Event'. This is due to a bug in TypeTools: https://github.com/jhalterman/typetools/issues/14
 						 	} catch (Exception e) {
-								Discord4J.LOGGER.error("Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
+								Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
 							}
 						}));
 			});

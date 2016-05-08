@@ -13,6 +13,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.json.responses.RateLimitResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -92,10 +93,10 @@ public enum Requests {
 					message = EntityUtils.toString(response.getEntity());
 
 				if (responseCode == 404) {
-					LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+					LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", url);
 					return null;
 				} else if (responseCode == 403) {
-					LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
+					LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
 					return null;
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
@@ -120,11 +121,11 @@ public enum Requests {
 
 				return message;
 			} catch (IOException e) {
-				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+				Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 				return null;
 			}
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return null;
 		}
 	}
@@ -158,10 +159,10 @@ public enum Requests {
 						message = EntityUtils.toString(response.getEntity());
 
 					if (responseCode == 404) {
-						LOGGER.error("Received 404 error, please notify the developer and include the URL ({})", url);
+						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", url);
 						return null;
 					} else if (responseCode == 403) {
-						LOGGER.error("Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
+						LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
 						return null;
 					} else if (responseCode == 204) { //There is a no content response when deleting messages
 						return null;
@@ -186,15 +187,15 @@ public enum Requests {
 
 					return message;
 				} catch (IOException e) {
-					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+					Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 					return null;
 				}
 			} else {
-				LOGGER.error("Tried to attach HTTP entity to invalid type! ({})",
+				LOGGER.error(LogMarkers.API, "Tried to attach HTTP entity to invalid type! ({})",
 						this.requestClass.getSimpleName());
 			}
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}

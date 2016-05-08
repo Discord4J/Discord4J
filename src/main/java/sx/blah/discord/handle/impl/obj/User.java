@@ -11,6 +11,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MemberEditRequest;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.UnsupportedEncodingException;
@@ -273,7 +274,7 @@ public class User implements IUser {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 

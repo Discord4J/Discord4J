@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.json.generic.StatusObject;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -391,7 +392,7 @@ public class DiscordUtils {
 								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 			channel.getUserOverrides().clear();
@@ -410,7 +411,7 @@ public class DiscordUtils {
 				} else if (overrides.type.equalsIgnoreCase("member")) {
 					channel.addUserOverride(overrides.id, override);
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 		}
@@ -485,7 +486,7 @@ public class DiscordUtils {
 								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 			channel.getUserOverrides().clear();
@@ -504,7 +505,7 @@ public class DiscordUtils {
 				} else if (overrides.type.equalsIgnoreCase("member")) {
 					channel.addUserOverride(overrides.id, override);
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 		}

@@ -14,6 +14,7 @@ import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -205,7 +206,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {
-			Discord4J.LOGGER.error("Exception caught, logging in!", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Exception caught, logging in!", e);
 			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
 	}
@@ -231,7 +232,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
 		} else
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 	}
 
 	/**
@@ -247,17 +248,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url;//.replaceAll("wss", "ws");
 		} catch (HTTP429Exception | DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
-		Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
+		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
 		return gateway;
 	}
 
 	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException {
-		Discord4J.LOGGER.debug("Changing account info.");
+		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return;
 		}
 
@@ -271,11 +272,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
 
 			if (!this.token.equals(response.token)) {
-				Discord4J.LOGGER.debug("Token changed, updating it.");
+				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
 				this.token = response.token;
 			}
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -306,7 +307,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	private void updatePresence(boolean isIdle, Status status) {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return;
 		}
 
@@ -336,7 +337,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IUser getOurUser() {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
 		}
 		return ourUser;
@@ -403,7 +404,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -424,7 +425,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			privateChannels.add(channel);
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Error creating creating a private channel!", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Error creating creating a private channel!", e);
 		}
 
 		return null;
@@ -433,7 +434,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IInvite getInviteForCode(String code) {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -470,7 +471,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					.filter(r -> r.getID().equals(regionID))
 					.findAny().orElse(null);
 		} catch (HTTP429Exception | DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -487,7 +488,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			guildList.add(guild);
 			return guild;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -509,7 +510,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			guildList.add(guild);
 			return guild;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -570,7 +571,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return DiscordUtils.getApplicationFromJSON(this, response);
 
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 
 		return null;
@@ -592,7 +593,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			return getApplicationInfo().description;
 		} catch (HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -603,7 +604,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			ApplicationInfoResponse info = getApplicationInfo();
 			return String.format(DiscordEndpoints.APPLICATION_ICON, info.id, info.icon);
 		} catch (HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -613,7 +614,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			return getApplicationInfo().id;
 		} catch (HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -623,7 +624,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			return getApplicationInfo().name;
 		} catch (HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}

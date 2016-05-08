@@ -8,6 +8,7 @@ import sx.blah.discord.handle.impl.events.AudioPlayEvent;
 import sx.blah.discord.handle.impl.events.AudioQueuedEvent;
 import sx.blah.discord.handle.impl.events.AudioStopEvent;
 import sx.blah.discord.handle.impl.events.AudioUnqueuedEvent;
+import sx.blah.discord.util.LogMarkers;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
@@ -36,7 +37,7 @@ public class AudioChannel {
 	/**
 	 * Sets the volume of this AudioChannel
 	 *
-	 * @param The volume as float between 0.0f (mute) and 1.0f (full volume)
+	 * @param volume The volume as float between 0.0f (mute) and 1.0f (full volume)
 	 */
 	public void setVolume(float volume) {
 		this.volume = volume;
@@ -131,7 +132,7 @@ public class AudioChannel {
 		try {
 			queueUrl(new URL(url));
 		} catch (MalformedURLException e) {
-			Discord4J.LOGGER.error("Discord Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord Internal Exception", e);
 		}
 	}
 
@@ -147,7 +148,7 @@ public class AudioChannel {
 			metaDataQueue.add(new AudioMetaData(null, url, AudioSystem.getAudioFileFormat(url), stream.getFormat().getChannels()));
 			queue(stream);
 		} catch (IOException | UnsupportedAudioFileException e) {
-			Discord4J.LOGGER.error("Discord Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord Internal Exception", e);
 		}
 	}
 
@@ -171,7 +172,7 @@ public class AudioChannel {
 			metaDataQueue.add(new AudioMetaData(file, null, AudioSystem.getAudioFileFormat(file), stream.getFormat().getChannels()));
 			queue(stream);
 		} catch (UnsupportedAudioFileException | IOException e) {
-			Discord4J.LOGGER.error("Discord Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord Internal Exception", e);
 		}
 	}
 
@@ -214,7 +215,7 @@ public class AudioChannel {
 			try {
 				metaDataQueue.add(new AudioMetaData(null, null, AudioSystem.getAudioFileFormat(inSource), audioFormat.getChannels()));
 			} catch (UnsupportedAudioFileException | IOException e) {
-				Discord4J.LOGGER.error("Discord Internal Exception", e);
+				Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord Internal Exception", e);
 			}
 		}
 
@@ -264,7 +265,7 @@ public class AudioChannel {
 				}
 
 			} catch (IOException e) {
-				Discord4J.LOGGER.error("Discord Internal Exception", e);
+				Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord Internal Exception", e);
 			}
 		}
 		return null;

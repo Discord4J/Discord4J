@@ -6,6 +6,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
@@ -205,7 +206,7 @@ public class Message implements IMessage {
 			client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
 
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 		}
 		return this;
 	}
@@ -251,7 +252,7 @@ public class Message implements IMessage {
 			Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
 					new BasicNameValuePair("authorization", client.getToken()));
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 		}
 	}
 

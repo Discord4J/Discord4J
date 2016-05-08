@@ -15,6 +15,7 @@ import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.RoleEditRequest;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.awt.*;
@@ -199,7 +200,7 @@ public class Role implements IRole {
 
 			getClient().getDispatcher().dispatch(new RoleUpdateEvent(oldRole, newRole, guild));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 

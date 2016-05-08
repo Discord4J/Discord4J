@@ -20,10 +20,7 @@ import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.ChannelResponse;
 import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -201,7 +198,7 @@ public class Channel implements IChannel {
 			return DiscordUtils.getMessageFromJSON(client, this, response);
 
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 	}
@@ -226,7 +223,7 @@ public class Channel implements IChannel {
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 	}
@@ -241,7 +238,7 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -253,7 +250,7 @@ public class Channel implements IChannel {
 
 			return DiscordUtils.getInviteFromJSON(client, response);
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 
 		return null;
@@ -274,7 +271,7 @@ public class Channel implements IChannel {
 					Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
 							new BasicNameValuePair("authorization", client.getToken()));
 				} catch (HTTP429Exception | DiscordException e) {
-					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+					Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 				}
 			}
 		}, 0, TIME_FOR_TYPE_STATUS);
@@ -306,7 +303,7 @@ public class Channel implements IChannel {
 
 			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -457,7 +454,7 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 

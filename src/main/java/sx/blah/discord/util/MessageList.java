@@ -91,7 +91,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		try {
 			load(initialContents);
 		} catch (HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -332,7 +332,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 			return success;
 		} catch (DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}
 		return false;
 	}
@@ -362,7 +362,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 			hasPermission = true;
 		} catch (MissingPermissionsException e) {
-			Discord4J.LOGGER.warn("Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
+			Discord4J.LOGGER.warn(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
 			hasPermission = false;
 		}
 	}

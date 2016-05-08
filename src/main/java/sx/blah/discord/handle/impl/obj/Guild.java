@@ -13,10 +13,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -340,7 +337,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -354,7 +351,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -368,7 +365,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -386,7 +383,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -406,7 +403,7 @@ public class Guild implements IGuild {
 
 			client.getDispatcher().dispatch(new GuildUpdateEvent(oldGuild, newGuild));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -469,7 +466,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -487,7 +484,7 @@ public class Guild implements IGuild {
 
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -497,7 +494,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -515,7 +512,7 @@ public class Guild implements IGuild {
 
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -544,7 +541,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -587,7 +584,7 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), RoleResponse[].class);
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -624,7 +621,7 @@ public class Guild implements IGuild {
 							Permissions.generatePermissionsNumber(permissions)))),
 					new BasicNameValuePair("authorization", client.getToken()));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 

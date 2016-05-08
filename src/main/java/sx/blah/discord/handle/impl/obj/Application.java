@@ -16,6 +16,7 @@ import sx.blah.discord.json.responses.BotResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
@@ -130,7 +131,7 @@ public class Application implements IApplication {
 			this.icon = response.icon;
 			this.redirectUris = response.redirect_uris;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -171,7 +172,7 @@ public class Application implements IApplication {
 			this.botToken = response.token;
 			return new ClientBuilder().withToken(botToken);
 		} catch (HTTP429Exception | UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -182,7 +183,7 @@ public class Application implements IApplication {
 			Requests.DELETE.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
 					new BasicNameValuePair("authorization", client.getToken()));
 		} catch (HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 

@@ -72,7 +72,7 @@ public class BotInviteBuilder {
 		try {
 			return String.format(url, clientIDOverride == null ? client.getApplicationClientID() : clientIDOverride);
 		} catch (DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}

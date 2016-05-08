@@ -27,7 +27,7 @@ public class RequestBuffer {
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
 		final RequestFuture<T> future = new RequestFuture<>(request);
 		if (!future.isDone()) {
-			Discord4J.LOGGER.debug("Attempted request rate-limited, queueing retry in {}ms",
+			Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
 					future.getDelay(TimeUnit.MILLISECONDS));
 
 			if (!requests.containsKey(future.getBucket())) {

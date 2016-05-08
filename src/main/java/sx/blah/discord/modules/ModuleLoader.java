@@ -4,6 +4,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.ModuleEnabledEvent;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -50,7 +51,7 @@ public class ModuleLoader {
 
 			File[] files = modulesDir.listFiles((FilenameFilter) FileFilterUtils.suffixFileFilter("jar"));
 			if (files != null && files.length > 0) {
-				Discord4J.LOGGER.info("Attempting to load {} external module(s)...", files.length);
+				Discord4J.LOGGER.info(LogMarkers.MODULES, "Attempting to load {} external module(s)...", files.length);
 				loadExternalModules(new ArrayList<>(Arrays.asList(files)));
 			}
 		}
@@ -62,14 +63,14 @@ public class ModuleLoader {
 		for (Class<? extends IModule> clazz : modules) {
 			try {
 				IModule module = clazz.newInstance();
-				Discord4J.LOGGER.info("Loading module {} v{} by {}", module.getName(), module.getVersion(), module.getAuthor());
+				Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading module {} v{} by {}", module.getName(), module.getVersion(), module.getAuthor());
 				if (canModuleLoad(module)) {
 					loadedModules.add(module);
 				} else {
-					Discord4J.LOGGER.warn("Skipped loading of module {} (expected Discord4J v{} instead of v{})", module.getName(), module.getMinimumDiscord4JVersion(), Discord4J.VERSION);
+					Discord4J.LOGGER.warn(LogMarkers.MODULES, "Skipped loading of module {} (expected Discord4J v{} instead of v{})", module.getName(), module.getMinimumDiscord4JVersion(), Discord4J.VERSION);
 				}
 			} catch (InstantiationException | IllegalAccessException e) {
-				Discord4J.LOGGER.error("Unable to load module "+clazz.getName()+"!", e);
+				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module "+clazz.getName()+"!", e);
 			}
 		}
 
@@ -158,7 +159,7 @@ public class ModuleLoader {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
 		} catch (NumberFormatException e) {
-			Discord4J.LOGGER.error("Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
+			Discord4J.LOGGER.error(LogMarkers.MODULES, "Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
 			return false;
 		}
 		for (int i = 0; i < Math.min(versions.length, 3); i++) {
@@ -205,7 +206,7 @@ public class ModuleLoader {
 					}
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
-				Discord4J.LOGGER.error("Unable to load module "+file.getName()+"!", e);
+				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module "+file.getName()+"!", e);
 			}
 		}
 	}
@@ -230,7 +231,7 @@ public class ModuleLoader {
 					independents.add(file);
 				}
 			} catch (IOException e) {
-				Discord4J.LOGGER.error("Discord4J Internal Exception");
+				Discord4J.LOGGER.error(LogMarkers.MODULES, "Discord4J Internal Exception");
 			}
 		});
 
@@ -255,7 +256,7 @@ public class ModuleLoader {
 			} catch (IOException ignored) {}
 
 			if (cannotBeLoaded)
-				Discord4J.LOGGER.warn("Unable to load module file {}. Its dependencies cannot be resolved!", file.getName());
+				Discord4J.LOGGER.warn(LogMarkers.MODULES, "Unable to load module file {}. Its dependencies cannot be resolved!", file.getName());
 
 			return cannotBeLoaded;
 		}));

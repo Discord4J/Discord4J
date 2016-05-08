@@ -326,10 +326,10 @@ public class RequestBuilder {
 		private volatile long waitBeforeTimeout = 0;
 		private volatile Predicate<? extends Event> waitAfter;
 		private volatile long waitAfterTimeout = 0;
-		private volatile Consumer<Exception> generalExceptionHandler = (Exception e) -> Discord4J.LOGGER.error("Exception caught executing action!", e);
-		private volatile Consumer<HTTP429Exception> rateLimitHandler = (HTTP429Exception e) -> Discord4J.LOGGER.error("Exception caught executing action!", e);
-		private volatile Consumer<MissingPermissionsException> missingPermissionHandler = (MissingPermissionsException e) -> Discord4J.LOGGER.error("Exception caught executing action!", e);
-		private volatile Consumer<DiscordException> discordExceptionHandler = (DiscordException e) -> Discord4J.LOGGER.error("Exception caught executing action!", e);
+		private volatile Consumer<Exception> generalExceptionHandler = (Exception e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
+		private volatile Consumer<HTTP429Exception> rateLimitHandler = (HTTP429Exception e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
+		private volatile Consumer<MissingPermissionsException> missingPermissionHandler = (MissingPermissionsException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
+		private volatile Consumer<DiscordException> discordExceptionHandler = (DiscordException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
 		private volatile ActionMode mode = ActionMode.ALWAYS;
 
 		/**

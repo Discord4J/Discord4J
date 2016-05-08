@@ -8,6 +8,7 @@ import sx.blah.discord.json.responses.StatusResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.util.LogMarkers;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +28,7 @@ public class DiscordStatus {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "day")), MetricResponse.class);
 		} catch (HTTP429Exception | DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
 		}
 		return response.summary.mean;
@@ -44,7 +45,7 @@ public class DiscordStatus {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "week")), MetricResponse.class);
 		} catch (DiscordException | HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
 		}
 		return response.summary.mean;
@@ -61,7 +62,7 @@ public class DiscordStatus {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "month")), MetricResponse.class);
 		} catch (HTTP429Exception | DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
 		}
 		return response.summary.mean;
