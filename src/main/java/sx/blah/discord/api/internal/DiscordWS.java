@@ -578,6 +578,12 @@ public class DiscordWS {
 				&& presences != null) {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
+				if (event.user.username != null) { //Full object was sent so there is a user change, otherwise all user fields but id would be null
+					IUser oldUser = user.copy();
+					user = DiscordUtils.getUserFromJSON(client, event.user);
+					client.dispatcher.dispatch(new UserUpdateEvent(oldUser, user));
+				}
+
 				if (!user.getPresence().equals(presences)) {
 					Presences oldPresence = user.getPresence();
 					user.setPresence(presences);
@@ -589,12 +595,6 @@ public class DiscordWS {
 					user.setGame(Optional.ofNullable(gameName));
 					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldGame, Optional.ofNullable(gameName)));
 					Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
-				}
-				User newUser = (User) client.getUserByID(event.user.id);
-				if (newUser != null) {
-					IUser oldUser = newUser.copy();
-					newUser = DiscordUtils.getUserFromJSON(client, event.user);
-					client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
 				}
 			}
 		}
