@@ -6,7 +6,9 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
  * This is dispatched when the voice state of a user is updated.
+ * @deprecated
  */
+@Deprecated
 public class UserVoiceStateUpdateEvent extends Event {
 
 	/**
