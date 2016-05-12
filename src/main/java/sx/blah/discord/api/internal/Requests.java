@@ -85,45 +85,7 @@ public enum Requests {
 				request.addHeader(header.getName(), header.getValue());
 			}
 
-			try (CloseableHttpResponse response = CLIENT.execute(request)) {
-				int responseCode = response.getStatusLine().getStatusCode();
-
-				String message = "";
-				if (response.getEntity() != null)
-					message = EntityUtils.toString(response.getEntity());
-
-				if (responseCode == 404) {
-					LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", url);
-					return null;
-				} else if (responseCode == 403) {
-					LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
-					return null;
-				} else if (responseCode == 204) { //There is a no content response when deleting messages
-					return null;
-				} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
-					throw new DiscordException("Error on request to "+url+". Received response code "+responseCode+". With response text: "+message);
-				}
-
-				JsonParser parser = new JsonParser();
-				JsonElement element;
-				try {
-					element = parser.parse(message);
-				} catch (JsonParseException e) {
-					return null;
-				}
-
-				if (responseCode == 429) {
-					throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
-				}
-
-				if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
-					throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
-
-				return message;
-			} catch (IOException e) {
-				Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-				return null;
-			}
+			return request(request);
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return null;
@@ -150,46 +112,7 @@ public enum Requests {
 					request.addHeader(header.getName(), header.getValue());
 				}
 				request.setEntity(entity);
-
-				try (CloseableHttpResponse response = CLIENT.execute(request)){
-					int responseCode = response.getStatusLine().getStatusCode();
-
-					String message = "";
-					if (response.getEntity() != null)
-						message = EntityUtils.toString(response.getEntity());
-
-					if (responseCode == 404) {
-						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", url);
-						return null;
-					} else if (responseCode == 403) {
-						LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", url);
-						return null;
-					} else if (responseCode == 204) { //There is a no content response when deleting messages
-						return null;
-					} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
-						throw new DiscordException("Error on request to "+url+". Received response code "+responseCode+". With response text: "+message);
-					}
-
-					JsonParser parser = new JsonParser();
-					JsonElement element;
-					try {
-						element = parser.parse(message);
-					} catch (JsonParseException e) {
-						return null;
-					}
-
-					if (responseCode == 429) {
-						throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
-					}
-
-					if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
-						throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
-
-					return message;
-				} catch (IOException e) {
-					Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-					return null;
-				}
+				return request(request);
 			} else {
 				LOGGER.error(LogMarkers.API, "Tried to attach HTTP entity to invalid type! ({})",
 						this.requestClass.getSimpleName());
@@ -198,5 +121,50 @@ public enum Requests {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
+	}
+
+	private String request(HttpUriRequest request) throws DiscordException, HTTP429Exception {
+		try (CloseableHttpResponse response = CLIENT.execute(request)){
+			int responseCode = response.getStatusLine().getStatusCode();
+
+			String message = "";
+			if (response.getEntity() != null)
+				message = EntityUtils.toString(response.getEntity());
+
+			if (responseCode == 404) {
+				LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
+				return null;
+			} else if (responseCode == 403) {
+				LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", request.getURI());
+				return null;
+			} else if (responseCode == 204) { //There is a no content response when deleting messages
+				return null;
+			} else if (responseCode == 502) {
+				LOGGER.trace(LogMarkers.API, "502 response on request to {}, response text: {}", request.getURI(), message); //This can be used to verify if it was cloudflare causing the 502.
+				throw new DiscordException("502 error on request to "+request.getURI()+". This is probably due to cloudflare, in which case you can ignore this.");
+			} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
+				throw new DiscordException("Error on request to "+request.getURI()+". Received response code "+responseCode+". With response text: "+message);
+			}
+
+			JsonParser parser = new JsonParser();
+			JsonElement element;
+			try {
+				element = parser.parse(message);
+			} catch (JsonParseException e) {
+				return null;
+			}
+
+			if (responseCode == 429) {
+				throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
+			}
+
+			if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
+				throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
+
+			return message;
+		} catch (IOException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+			return null;
+		}
 	}
 }
