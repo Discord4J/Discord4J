@@ -12,6 +12,7 @@ import java.util.Optional;
 /**
  * This event is fired when audio is queued on the {@link AudioChannel}
  */
+@Deprecated
 public class AudioQueuedEvent extends Event {
 
 	/**

@@ -12,6 +12,7 @@ import java.util.Optional;
 /**
  * This event is fired when an audio stream stops to playing from the bot.
  */
+@Deprecated
 public class AudioStopEvent extends Event {
 
 	/**

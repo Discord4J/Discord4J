@@ -77,8 +77,8 @@ public class TestBot {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.join();
-								channel.getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
-								channel.getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
+								channel.getGuild().getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
+								channel.getGuild().getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
 							}
 
 							//Start testing
@@ -220,8 +220,8 @@ public class TestBot {
 								IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel -> voiceChannel.getName().equalsIgnoreCase("General") && !voiceChannel.isConnected()).findFirst().orElse(null);
 								if (channel != null) {
 									channel.join();
-									channel.getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
-									channel.getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
+									channel.getGuild().getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
+									channel.getGuild().getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
 								}
 							} else if (m.getContent().startsWith(".pause")) {
 								m.getGuild().getAudioChannel().pause();

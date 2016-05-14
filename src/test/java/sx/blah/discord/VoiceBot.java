@@ -13,7 +13,7 @@ public class VoiceBot {
     public static void main(String... args) {
         try {
             IDiscordClient client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).login();
-            client.getConnectedVoiceChannels().get(0).getAudioChannel().queueFile(args[3]);
+            client.getConnectedVoiceChannels().get(0).getGuild().getAudioChannel().queueFile(args[3]);
 
             client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
 

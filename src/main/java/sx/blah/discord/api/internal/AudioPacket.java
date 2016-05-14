@@ -17,6 +17,7 @@ package sx.blah.discord.api.internal;
 
 import com.sun.jna.ptr.PointerByReference;
 import org.peergos.crypto.TweetNaCl;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
@@ -39,16 +40,10 @@ public class AudioPacket {
 	static {
 		try {
 			IntBuffer error = IntBuffer.allocate(4);
-			stereoOpusEncoder = Opus.INSTANCE.opus_encoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_STEREO_CHANNEL_COUNT, Opus.OPUS_APPLICATION_AUDIO, error);
+			stereoOpusDecoder = Opus.INSTANCE.opus_decoder_create(AudioManager.OPUS_SAMPLE_RATE, AudioManager.OPUS_STEREO_CHANNEL_COUNT, error);
 
 			error = IntBuffer.allocate(4);
-			monoOpusEncoder = Opus.INSTANCE.opus_encoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_MONO_CHANNEL_COUNT, Opus.OPUS_APPLICATION_AUDIO, error);
-
-			error = IntBuffer.allocate(4);
-			stereoOpusDecoder = Opus.INSTANCE.opus_decoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_STEREO_CHANNEL_COUNT, error);
-
-			error = IntBuffer.allocate(4);
-			monoOpusDecoder = Opus.INSTANCE.opus_decoder_create(DiscordVoiceWS.OPUS_SAMPLE_RATE, DiscordVoiceWS.OPUS_MONO_CHANNEL_COUNT, error);
+			monoOpusDecoder = Opus.INSTANCE.opus_decoder_create(AudioManager.OPUS_SAMPLE_RATE, AudioManager.OPUS_MONO_CHANNEL_COUNT, error);
 		} catch (UnsatisfiedLinkError e) {
 			e.printStackTrace();
 			stereoOpusEncoder = null;
@@ -83,7 +78,7 @@ public class AudioPacket {
 		this.rawAudio = decodeToPCM(encodedAudio);
 	}
 
-	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, int channels, byte[] secret) {
+	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, byte[] secret) {
 		this.seq = seq;
 		this.ssrc = ssrc;
 		this.timestamp = timestamp;
@@ -95,7 +90,7 @@ public class AudioPacket {
 		nonceBuffer.putChar(2, seq);
 		nonceBuffer.putInt(4, timestamp);
 		nonceBuffer.putInt(8, ssrc);
-		this.encodedAudio = TweetNaCl.secretbox(encodeToOpus(rawAudio, channels),
+		this.encodedAudio = TweetNaCl.secretbox(rawAudio,
 				Arrays.copyOf(nonceBuffer.array(), 24), //encryption nonce is 24 bytes long while discord's is 12 bytes long
 				secret);
 
@@ -112,33 +107,6 @@ public class AudioPacket {
 
 	public DatagramPacket asUdpPacket(InetSocketAddress address) {
 		return new DatagramPacket(getRawPacket(), rawPacket.length, address);
-	}
-
-	public static byte[] encodeToOpus(byte[] rawAudio, int channels) {
-		ShortBuffer nonEncodedBuffer = ShortBuffer.allocate(rawAudio.length/2);
-		ByteBuffer encoded = ByteBuffer.allocate(4096);
-		for (int i = 0; i < rawAudio.length; i += 2) {
-			int firstByte = (0x000000FF & rawAudio[i]);      //Promotes to int and handles the fact that it was unsigned.
-			int secondByte = (0x000000FF & rawAudio[i+1]);  //
-
-			//Combines the 2 bytes into a short. Opus deals with unsigned shorts, not bytes.
-			short toShort = (short) ((firstByte << 8) | secondByte);
-
-			nonEncodedBuffer.put(toShort);
-		}
-		nonEncodedBuffer.flip();
-
-		//TODO: check for 0 / negative value for error.
-		int result;
-		if (channels == 1) {
-			result = Opus.INSTANCE.opus_encode(monoOpusEncoder, nonEncodedBuffer, DiscordVoiceWS.OPUS_FRAME_SIZE, encoded, encoded.capacity());
-		} else {
-			result = Opus.INSTANCE.opus_encode(stereoOpusEncoder, nonEncodedBuffer, DiscordVoiceWS.OPUS_FRAME_SIZE, encoded, encoded.capacity());
-		}
-
-		byte[] audio = new byte[result];
-		encoded.get(audio);
-		return audio;
 	}
 
 	public byte[] decodeToPCM(byte[] opusAudio) {

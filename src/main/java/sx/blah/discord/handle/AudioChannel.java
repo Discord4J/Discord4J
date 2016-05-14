@@ -3,11 +3,13 @@ package sx.blah.discord.handle;
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordVoiceWS;
+import sx.blah.discord.handle.audio.IAudioProvider;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.AudioPlayEvent;
 import sx.blah.discord.handle.impl.events.AudioQueuedEvent;
 import sx.blah.discord.handle.impl.events.AudioStopEvent;
 import sx.blah.discord.handle.impl.events.AudioUnqueuedEvent;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.LogMarkers;
 
 import javax.sound.sampled.*;
@@ -21,8 +23,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This is used to interface with voice channels.
+ * @deprecated See {@link AudioManager}
  */
-public class AudioChannel {
+@Deprecated
+public class AudioChannel implements IAudioProvider {
 
 	private final List<AudioMetaData> metaDataQueue = new CopyOnWriteArrayList<>();
 	private final List<AmplitudeAudioInputStream> audioQueue = new CopyOnWriteArrayList<>();
@@ -30,8 +34,9 @@ public class AudioChannel {
 	private volatile float volume = 1.0F;
 	private final IDiscordClient client;
 
-	public AudioChannel(IDiscordClient client) {
-		this.client = client;
+	public AudioChannel(IGuild guild) {
+		this.client = guild.getClient();
+		guild.getAudioManager().setAudioProvider(this);
 	}
 
 	/**
@@ -202,7 +207,7 @@ public class AudioChannel {
 		//Then resamples to a sample rate of 48000hz and ensures that data is Big Endian.
 		AudioFormat audioFormat = new AudioFormat(
 				toPCM.getEncoding(),
-				DiscordVoiceWS.OPUS_SAMPLE_RATE,
+				AudioManager.OPUS_SAMPLE_RATE,
 				toPCM.getSampleSizeInBits(),
 				toPCM.getChannels(),
 				toPCM.getFrameSize(),
@@ -269,6 +274,27 @@ public class AudioChannel {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public boolean isReady() {
+		return audioQueue.size() > 0;
+	}
+
+	@Override
+	public byte[] provide() {
+		AudioData data = getAudioData(AudioManager.OPUS_FRAME_SIZE);
+		return data == null ? new byte[0] : data.rawData;
+	}
+
+	@Override
+	public int getChannels() {
+		return metaDataQueue.get(0).channels;
+	}
+
+	@Override
+	public AudioEncodingType getAudioEncodingType() {
+		return AudioEncodingType.PCM;
 	}
 
 	/**

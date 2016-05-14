@@ -1,21 +1,23 @@
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.AudioChannel;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.*;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.json.requests.VoiceChannelRequest;
+import sx.blah.discord.util.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {
@@ -32,19 +34,23 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void join() {
 		if (client.isReady()) {
 
-			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
-				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Attempting to join a multiple channels in the same guild! Moving channels instead...");
-				try {
-					client.getOurUser().moveToVoiceChannel(this);
-				} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
-					Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
-					return;
-				}
-			} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
-				throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
+			if (!client.getOurUser().getConnectedVoiceChannels().contains(this)) {
+				if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
+					Discord4J.LOGGER.info(LogMarkers.HANDLE, "Attempting to join multiple channels in the same guild! Moving channels instead...");
+					try {
+						client.getOurUser().moveToVoiceChannel(this);
+					} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
+						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
+						return;
+					}
+				} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
+					throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
 
-			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
-			client.getOurUser().getConnectedVoiceChannels().add(this);
+				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
+				client.getOurUser().getConnectedVoiceChannels().add(this);
+			} else {
+				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
+			}
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 		}
@@ -56,16 +62,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
 			((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		} else {
-			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave an not joined voice channel! Ignoring the method call...");
+			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave and not joined voice channel! Ignoring the method call...");
 		}
-	}
-
-	@Override
-	public AudioChannel getAudioChannel() throws DiscordException {
-		if (!isConnected())
-			throw new DiscordException("User isn't connected to this channel!");
-
-		return parent.getAudioChannel();
 	}
 
 	@Override

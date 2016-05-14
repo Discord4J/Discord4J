@@ -566,7 +566,7 @@ public class DiscordWS {
 			for (String role : event.roles)
 				user.addRole(guild.getID(), guild.getRoleByID(role));
 
-			user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
+			user.addRole(guild.getID(), guild.getEveryoneRole());
 
 			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
 		}

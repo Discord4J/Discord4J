@@ -12,6 +12,7 @@ import java.util.Optional;
 /**
  * This event is fired when an audio stream starts to play from the bot.
  */
+@Deprecated
 public class AudioPlayEvent extends Event {
 
 	/**

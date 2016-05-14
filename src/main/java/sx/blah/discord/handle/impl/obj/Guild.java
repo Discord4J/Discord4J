@@ -8,6 +8,7 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.RoleResponse;
@@ -84,6 +85,11 @@ public class Guild implements IGuild {
 	protected volatile AudioChannel audioChannel;
 
 	/**
+	 * This guild's audio manager.
+	 */
+	protected volatile AudioManager audioManager;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
@@ -106,7 +112,7 @@ public class Guild implements IGuild {
 		this.afkChannel = afkChannel;
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
-		this.audioChannel = new AudioChannel(client);
+		this.audioManager = new AudioManager(this);
 	}
 
 	@Override
@@ -547,7 +553,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IRole getEveryoneRole() {
-		return getRoles().stream().filter(r -> r.getName().equals("@everyone")).findFirst().orElse(null);
+		return getRoles().stream().filter(r -> r.getID().equals(this.id)).findFirst().orElse(null);
 	}
 
 	@Override
@@ -627,7 +633,12 @@ public class Guild implements IGuild {
 
 	@Override
 	public AudioChannel getAudioChannel() throws DiscordException {
-		return audioChannel;
+		return audioChannel == null ? audioChannel = new AudioChannel(this) : audioChannel;
+	}
+
+	@Override
+	public AudioManager getAudioManager() {
+		return audioManager;
 	}
 
 	@Override

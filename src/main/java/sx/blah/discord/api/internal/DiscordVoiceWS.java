@@ -10,13 +10,16 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.json.requests.*;
+import sx.blah.discord.json.requests.VoiceConnectRequest;
+import sx.blah.discord.json.requests.VoiceKeepAliveRequest;
+import sx.blah.discord.json.requests.VoiceSpeakingRequest;
+import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
 import sx.blah.discord.util.LogMarkers;
 
@@ -34,12 +37,6 @@ import java.util.zip.InflaterInputStream;
 
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordVoiceWS {
-
-	public static final int OPUS_SAMPLE_RATE = 48000;   //(Hz) We want to use the highest of qualities! All the bandwidth!
-	public static final int OPUS_FRAME_SIZE = 960;
-	public static final int OPUS_FRAME_TIME_AMOUNT = OPUS_FRAME_SIZE*1000/OPUS_SAMPLE_RATE;
-	public static final int OPUS_MONO_CHANNEL_COUNT = 1;
-	public static final int OPUS_STEREO_CHANNEL_COUNT = 2;
 
 	public static final int OP_INITIAL_CONNECTION = 2;
 	public static final int OP_HEARTBEAT_RETURN = 3;
@@ -177,10 +174,10 @@ public class DiscordVoiceWS {
 			public void run() {
 				try {
 					if (isConnected.get()) {
-						AudioChannel.AudioData data = guild.getAudioChannel().getAudioData(OPUS_FRAME_SIZE);
-						if (data != null) {
+						byte[] data = guild.getAudioManager().getAudio();
+						if (data != null && data.length > 0) {
 							client.timer = System.currentTimeMillis();
-							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data.rawData, data.metaData.channels, secret);
+							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
 							if (!isSpeaking)
 								setSpeaking(true);
 							udpSocket.send(packet.asUdpPacket(addressPort));
@@ -190,7 +187,7 @@ public class DiscordVoiceWS {
 							else
 								seq++;
 
-							timestamp += OPUS_FRAME_SIZE;
+							timestamp += AudioManager.OPUS_FRAME_SIZE;
 						} else if (isSpeaking)
 							setSpeaking(false);
 					}
@@ -199,7 +196,7 @@ public class DiscordVoiceWS {
 				}
 			}
 		};
-		executorService.scheduleAtFixedRate(sendThread, 0, OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
+		executorService.scheduleAtFixedRate(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
 	}
 
 	private void setupReceiveThread() {

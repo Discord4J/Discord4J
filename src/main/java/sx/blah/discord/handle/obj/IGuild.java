@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
@@ -462,6 +463,15 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The audio channel.
 	 *
 	 * @throws DiscordException
+	 * @deprecated Use {@link #getAudioManager()} instead.
 	 */
+	@Deprecated
 	AudioChannel getAudioChannel() throws DiscordException;
+
+	/**
+	 * Gets the {@link AudioManager} instance for this guild.
+	 *
+	 * @return The audio manager for this guild.
+	 */
+	AudioManager getAudioManager();
 }

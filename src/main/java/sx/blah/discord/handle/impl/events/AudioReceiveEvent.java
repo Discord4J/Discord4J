@@ -6,6 +6,7 @@ import sx.blah.discord.api.Event;
 /**
  * This event is dispatched when audio is received.
  */
+@Deprecated
 public class AudioReceiveEvent extends Event {
 
     private final AudioPacket packet;
