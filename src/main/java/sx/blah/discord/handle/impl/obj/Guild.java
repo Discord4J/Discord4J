@@ -18,6 +18,7 @@ import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Guild implements IGuild {
 	/**
@@ -183,6 +184,28 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public List<IChannel> getChannelsByName(String name) {
+		return channels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IChannel> getVoiceChannelsByName(String name) {
+		return voiceChannels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IUser> getUsersByName(String name) {
+		return getUsersByName(name, true);
+	}
+
+	@Override
+	public List<IUser> getUsersByName(String name, boolean includeNicknames) {
+		return users.stream().filter((user) -> user.getName().equals(name)
+				|| (includeNicknames && user.getNicknameForGuild(this).orElse("").equals(name)))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -246,6 +269,11 @@ public class Guild implements IGuild {
 		return roles.stream()
 				.filter(r -> r.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IRole> getRolesByName(String name) {
+		return roles.stream().filter((role) -> role.getName().equals(name)).collect(Collectors.toList());
 	}
 
 	@Override

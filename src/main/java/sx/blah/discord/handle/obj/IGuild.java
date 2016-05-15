@@ -75,6 +75,41 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IUser getUserByID(String id);
 
 	/**
+	 * Gets all the channels which has a name matching the provided one.
+	 *
+	 * @param name The name to search for.
+	 * @return The list of matching channels.
+	 */
+	List<IChannel> getChannelsByName(String name);
+
+	/**
+	 * Gets all the voice channels which has a name matching the provided one.
+	 *
+	 * @param name The name to search for.
+	 * @return The list of matching channels.
+	 */
+	List<IChannel> getVoiceChannelsByName(String name);
+
+	/**
+	 * Gets all the users which have a display name (i.e. nickname if present else discord name) which matches the
+	 * provided name. This is effectively the same as #getUsersByName(name, true).
+	 *
+	 * @param name The name to search for.
+	 * @return The list of matching users.
+	 */
+	List<IUser> getUsersByName(String name);
+
+	/**
+	 * Gets all the users which have a name which matches the.
+	 * provided name.
+	 *
+	 * @param name The name to search for.
+	 * @param includeNicknames Whether to check nicknames in addition to normal names.
+	 * @return The list of matching users.
+	 */
+	List<IUser> getUsersByName(String name, boolean includeNicknames);
+
+	/**
 	 * Gets the name of the guild.
 	 *
 	 * @return The name of the guild
@@ -103,6 +138,14 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The role, or null if not found.
 	 */
 	IRole getRoleByID(String id);
+
+	/**
+	 * This finds all the roles which has the same name as the provided one.
+	 *
+	 * @param name The name to search for.
+	 * @return The roles with a matching name.
+	 */
+	List<IRole> getRolesByName(String name);
 
 	/**
 	 * Gets the voice channels in this guild.
