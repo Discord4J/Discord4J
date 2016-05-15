@@ -453,7 +453,7 @@ public class Channel implements IChannel {
 		try {
 			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id,
-							Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)))),
+							Permissions.generatePermissionsNumber(toRemove), Permissions.generatePermissionsNumber(toAdd)))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
