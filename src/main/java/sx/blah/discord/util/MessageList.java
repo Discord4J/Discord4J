@@ -1,16 +1,19 @@
 package sx.blah.discord.util;
 
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.EventSubscriber;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.json.requests.BulkDeleteRequest;
 import sx.blah.discord.json.responses.MessageResponse;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -355,6 +358,195 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public int getCacheCapacity() {
 		return capacity;
+	}
+
+	/**
+	 * This deletes the message at the specified index.
+	 *
+	 * @param index The index to delete the message at.
+	 * @return The message deleted and removed form the cache.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public IMessage delete(int index) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		IMessage message = get(index);
+		if (message != null) {
+			message.delete();
+			remove(message);
+		}
+		return message;
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the start and end indexes. (Note: Only 100 messages can be
+	 * deleted at a time).
+	 *
+	 * @param startIndex The start index (inclusive).
+	 * @param endIndex The end index (exclusive).
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteFromRange(int startIndex, int endIndex) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		List<IMessage> messages = subList(startIndex, endIndex);
+		bulkDelete(messages);
+		return messages;
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided index to the amount of messages requested. (Note:
+	 * Only 100 messages can be deleted at a time).
+	 *
+	 * @param index The start index (inclusive).
+	 * @param amount The amount of messages to attempt to delete.
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteAfter(int index, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteFromRange(index, index+amount);
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided index to the end of the list. (Note: Only 100
+	 * messages can be deleted at a time).
+	 *
+	 * @param index The start index (inclusive).
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteAfter(int index) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteAfter(index, size()-index);
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided message to the end of the list. (Note: Only 100
+	 * messages can be deleted at a time).
+	 *
+	 * @param message The start message (inclusive).
+	 * @param amount The amount of messages to attempt to delete.
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteAfter(IMessage message, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteAfter(indexOf(message), amount);
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided message to the end of the list. (Note: Only 100
+	 * messages can be deleted at a time).
+	 *
+	 * @param message The start message (inclusive).
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteAfter(IMessage message) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteAfter(indexOf(message));
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided index to the beginning of the list. (Note: Only 100
+	 * messages can be deleted at a time).
+	 *
+	 * @param index The end index (inclusive).
+	 * @param amount The amount of messages to attempt to delete.
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteBefore(int index, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteFromRange(Math.max(0, index-amount), index+1);
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided index to the beginning of the list. (Note: Only 100
+	 * messages can be deleted at a time).
+	 *
+	 * @param index The end index (inclusive).
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteBefore(int index) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteFromRange(0, index+1);
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided message to the beginning of the list. (Note: Only
+	 * 100 messages can be deleted at a time).
+	 *
+	 * @param message The end message (inclusive).
+	 * @param amount The amount of messages to attempt to delete.
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteBefore(IMessage message, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteBefore(indexOf(message), amount);
+	}
+
+	/**
+	 * Bulk deletes messages in a sub list created from the provided message to the beginning of the list. (Note: Only
+	 * 100 messages can be deleted at a time).
+	 *
+	 * @param message The end message (inclusive).
+	 * @return The messages deleted.
+	 *
+	 * @throws HTTP429Exception
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	public List<IMessage> deleteBefore(IMessage message) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+		return deleteBefore(indexOf(message));
+	}
+
+	/**
+	 * This "bulk deletes" a list of messages.(Note: Only 100 messages can be deleted at a time).
+	 *
+	 * @param messages The messages to delete.
+	 *
+	 * @throws DiscordException
+	 * @throws HTTP429Exception
+	 * @throws MissingPermissionsException
+	 */
+	public void bulkDelete(List<IMessage> messages) throws DiscordException, HTTP429Exception, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
+
+		if (!client.isBot())
+			throw new DiscordException("You must be a bot to bulk delete!");
+
+		if (messages.size() > 100)
+			throw new DiscordException("You can only delete 100 messages at a time!");
+
+		try {
+			Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
+					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))),
+					new BasicNameValuePair("content-type", "application/json"),
+					new BasicNameValuePair("authorization", client.getToken()));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
+		}
 	}
 
 	private void updatePermissions() {

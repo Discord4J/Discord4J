@@ -268,7 +268,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						for (int i = 0; i < 10; i++) {
+						for (int i = 0; i < 5; i++) {
 							final int j = i;
 							RequestBuffer.request(() -> {
 								try {
@@ -278,6 +278,7 @@ public class TestBot {
 								}
 							});
 						}
+						message.getChannel().getMessages().deleteAfter(0, 5);
 					}
 				});
 
