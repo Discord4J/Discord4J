@@ -34,6 +34,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,7 +47,16 @@ public class DiscordWS {
 	private volatile DiscordClientImpl client;
 	private volatile Session session;
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
-	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2, new ThreadFactory() {
+		private volatile int executorCount = 0;
+
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread thread = Executors.defaultThreadFactory().newThread(r);
+			thread.setName("Discord4J WebSocket Client Executor "+(executorCount++));
+			return thread;
+		}
+	});
 	private final boolean isDaemon;
 	private volatile boolean sentPing = false;
 	private volatile long lastPingSent = -1L;

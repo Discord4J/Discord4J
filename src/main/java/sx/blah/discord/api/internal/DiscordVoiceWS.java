@@ -31,6 +31,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
@@ -44,7 +45,16 @@ public class DiscordVoiceWS {
 	public static final int OP_USER_SPEAKING_UPDATE = 5;
 
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+		private volatile int executorCount = 0;
+
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread thread = Executors.defaultThreadFactory().newThread(r);
+			thread.setName("Discord4J Voice WebSocket Client Executor "+(executorCount++));
+			return thread;
+		}
+	});
 
 	private DiscordClientImpl client;
 
