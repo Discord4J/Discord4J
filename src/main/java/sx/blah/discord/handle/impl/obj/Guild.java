@@ -8,6 +8,7 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
@@ -189,7 +190,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public List<IChannel> getVoiceChannelsByName(String name) {
+	public List<IVoiceChannel> getVoiceChannelsByName(String name) {
 		return voiceChannels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
 	}
 
@@ -665,7 +666,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public AudioManager getAudioManager() {
+	public IAudioManager getAudioManager() {
 		return audioManager;
 	}
 

@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
@@ -88,7 +89,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param name The name to search for.
 	 * @return The list of matching channels.
 	 */
-	List<IChannel> getVoiceChannelsByName(String name);
+	List<IVoiceChannel> getVoiceChannelsByName(String name);
 
 	/**
 	 * Gets all the users which have a display name (i.e. nickname if present else discord name) which matches the
@@ -516,5 +517,5 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @return The audio manager for this guild.
 	 */
-	AudioManager getAudioManager();
+	IAudioManager getAudioManager();
 }

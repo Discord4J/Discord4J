@@ -60,7 +60,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void leave(){
 		if (client.getConnectedVoiceChannels().contains(this)) {
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
-			((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
+			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent))
+				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		} else {
 			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave and not joined voice channel! Ignoring the method call...");
 		}

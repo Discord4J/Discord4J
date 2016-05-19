@@ -5,11 +5,14 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IListener;
+import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.audio.AudioPlayer;
+import sx.blah.discord.util.audio.providers.FileProvider;
 
 import java.io.File;
 import java.util.Optional;
@@ -216,25 +219,39 @@ public class TestBot {
 								} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 									e.printStackTrace();
 								}
+							} else if (m.getContent().startsWith(".join")) {
+								IVoiceChannel channel = m.getGuild().getVoiceChannelsByName(m.getContent().split(" ")[1]).get(0);
+								channel.join();
 							} else if (m.getContent().startsWith(".play")) {
-								IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel -> voiceChannel.getName().equalsIgnoreCase("General") && !voiceChannel.isConnected()).findFirst().orElse(null);
-								if (channel != null) {
-									channel.join();
-									channel.getGuild().getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
-									channel.getGuild().getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
-								}
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.queue(new File("./test.mp3"));
+								player.queue(new File("./test2.mp3"));
 							} else if (m.getContent().startsWith(".pause")) {
-								m.getGuild().getAudioChannel().pause();
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setPaused(true);
 							} else if (m.getContent().startsWith(".resume")) {
-								m.getGuild().getAudioChannel().resume();
-							} else if (m.getContent().startsWith(".queue")) {
-								m.getGuild().getAudioChannel().queueFile(new File("./test2.mp3"));
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setPaused(false);
 							} else if (m.getContent().startsWith(".volume")) {
-								m.getGuild().getAudioChannel().setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
 							} else if (m.getContent().startsWith(".stop")) {
 								client.getConnectedVoiceChannels().stream().filter((IVoiceChannel channel)->channel.getGuild().equals(m.getGuild())).findFirst().ifPresent(IVoiceChannel::leave);
 							} else if (m.getContent().startsWith(".skip")) {
-								m.getGuild().getAudioChannel().skip();
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.skip();
+							} else if (m.getContent().startsWith(".toggleloop")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setLoop(!player.isLooping());
+							} else if (m.getContent().startsWith(".rewind")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.getCurrentTrack().rewind(Long.parseLong(m.getContent().split(" ")[1]));
+							} else if (m.getContent().startsWith(".forward")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.getCurrentTrack().fastForward(Long.parseLong(m.getContent().split(" ")[1]));
+							} else if (m.getContent().startsWith(".shuffle")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.shuffle();
 							} else if (m.getContent().startsWith(".spam")) {
 								m.getChannel().getMessages().setCacheCapacity(100);
 								new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -258,6 +275,8 @@ public class TestBot {
 								} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
 									e.printStackTrace();
 								}
+							} else if (m.getContent().startsWith(".logout")) {
+								client.logout();
 							} else if (m.getContent().startsWith(".test")) {
 								test(m);
 							}
@@ -268,17 +287,8 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						for (int i = 0; i < 5; i++) {
-							final int j = i;
-							RequestBuffer.request(() -> {
-								try {
-									message.getChannel().sendMessage(""+j);
-								} catch (MissingPermissionsException | DiscordException e) {
-									e.printStackTrace();
-								}
-							});
-						}
-						message.getChannel().getMessages().deleteAfter(0, 5);
+						IAudioManager manager = message.getGuild().getAudioManager();
+						manager.setAudioProvider(new FileProvider(new File("./test2.mp3")));
 					}
 				});
 

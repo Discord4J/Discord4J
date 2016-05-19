@@ -33,6 +33,7 @@ public class AudioManager implements IAudioManager {
 	private final IDiscordClient client;
 	private volatile IAudioProvider provider = new DefaultProvider();
 	private volatile IAudioProcessor processor = new DefaultProcessor();
+	private volatile boolean useProcessor = true;
 
 	public AudioManager(IGuild guild) {
 		this.guild = guild;
@@ -45,7 +46,7 @@ public class AudioManager implements IAudioManager {
 			provider = new DefaultProvider();
 
 		this.provider = provider;
-		getAudioProcessor().setProvider(provider);
+		useProcessor = getAudioProcessor().setProvider(provider);
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class AudioManager implements IAudioManager {
 			processor = new DefaultProcessor();
 
 		this.processor = processor;
-		processor.setProvider(getAudioProvider());
+		useProcessor = processor.setProvider(getAudioProvider());
 	}
 
 	@Override
@@ -70,9 +71,14 @@ public class AudioManager implements IAudioManager {
 	@Override
 	public byte[] getAudio() { //TODO: Audio padding
 		IAudioProcessor processor = getAudioProcessor();
-		IAudioProvider provider = processor.isReady() ? processor : getAudioProvider();
+		IAudioProvider provider = useProcessor ? processor : getAudioProvider();
 
 		return getAudioDataForProvider(provider);
+	}
+
+	@Override
+	public IGuild getGuild() {
+		return guild;
 	}
 
 	private byte[] getAudioDataForProvider(IAudioProvider provider) {

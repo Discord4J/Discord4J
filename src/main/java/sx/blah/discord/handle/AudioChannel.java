@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This is used to interface with voice channels.
- * @deprecated See {@link AudioManager}
+ * @deprecated See {@link AudioManager} and {@link sx.blah.discord.util.audio.AudioPlayer}
  */
 @Deprecated
 public class AudioChannel implements IAudioProvider {

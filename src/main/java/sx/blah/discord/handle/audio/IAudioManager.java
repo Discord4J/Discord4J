@@ -1,5 +1,7 @@
 package sx.blah.discord.handle.audio;
 
+import sx.blah.discord.handle.obj.IGuild;
+
 /**
  * This class centralizes all audio handling.
  */
@@ -39,4 +41,11 @@ public interface IAudioManager {
 	 * @return The raw, opus-encoded bytes.
 	 */
 	byte[] getAudio();
+
+	/**
+	 * Gets the guild this AudioManager instance belongs to.
+	 *
+	 * @return The guild.
+	 */
+	IGuild getGuild();
 }
