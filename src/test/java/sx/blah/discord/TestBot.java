@@ -5,14 +5,12 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IListener;
-import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
-import sx.blah.discord.util.audio.providers.FileProvider;
 
 import java.io.File;
 import java.util.Optional;
@@ -131,6 +129,13 @@ public class TestBot {
 
 			} else { //Dev testing
 				client.login();
+
+				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
+					@Override
+					public void handle(ReadyEvent event) {
+						Discord4J.LOGGER.info("Connected to {} guilds.", event.getClient().getGuilds().size());
+					}
+				});
 
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
@@ -287,8 +292,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						IAudioManager manager = message.getGuild().getAudioManager();
-						manager.setAudioProvider(new FileProvider(new File("./test2.mp3")));
+						Discord4J.LOGGER.info("{}", client.getOurUser().getConnectedVoiceChannels().size());
 					}
 				});
 

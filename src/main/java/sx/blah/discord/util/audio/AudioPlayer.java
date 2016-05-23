@@ -475,13 +475,13 @@ public class AudioPlayer implements IAudioProvider {
 
 		@Override
 		public synchronized boolean isReady() {
-			return provider.isReady() || audioCache.size() > ((int) (currentTrackTime/20))/*Arrays are 0-based*/;
+			return provider.isReady() || audioCache.size() > ((int) (currentTrackTime/20));
 		}
 
 		@Override
 		public synchronized byte[] provide() {
 			currentTrackTime += 20; //provide() *should* be providing 20 ms of data
-			if (currentTrackTime > totalTrackTime) { //When streaming or using a direct IAudioProvider, the total track time cannot be deduced. So lazily calculate instead.
+			if (currentTrackTime > totalTrackTime) { //When streaming, using a direct IAudioProvider, or using some file formats (like mp3), the total track time cannot be deduced. So lazily calculate instead.
 				totalTrackTime = currentTrackTime;
 			}
 

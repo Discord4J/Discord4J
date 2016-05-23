@@ -248,7 +248,16 @@ public class User implements IUser {
 
 	@Override
 	public IUser copy() {
-		return new User(client, name, id, discriminator, avatar, presence, isBot);
+		User newUser = new User(client, name, id, discriminator, avatar, presence, isBot);
+		newUser.setStatus(this.status);
+		for (String key : isMuted.keySet())
+			newUser.setIsMute(key, isMuted.get(key));
+		for (String key : isDeaf.keySet())
+			newUser.setIsDeaf(key, isDeaf.get(key));
+		newUser.nicks.putAll(nicks);
+		newUser.roles.putAll(roles);
+		newUser.channels.addAll(channels);
+		return newUser;
 	}
 
 	@Override

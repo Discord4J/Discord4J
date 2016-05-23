@@ -482,7 +482,11 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		return new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
+		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
+		channel.setTypingStatus(isTyping.get());
+		channel.roleOverrides.putAll(roleOverrides);
+		channel.userOverrides.putAll(userOverrides);
+		return channel;
 	}
 
 	@Override

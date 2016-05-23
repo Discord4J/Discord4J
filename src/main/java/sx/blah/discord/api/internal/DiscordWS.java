@@ -843,7 +843,7 @@ public class DiscordWS {
 			IVoiceChannel channel = guild.getVoiceChannelByID(event.channel_id);
 			User user = (User) guild.getUserByID(event.user_id);
 			if (user != null) {
-				IVoiceChannel oldChannel = user.getVoiceChannel().orElse(null);
+				IVoiceChannel oldChannel = user.getConnectedVoiceChannels().stream().findFirst().orElse(null);
 				if (channel != oldChannel) {
 					if (channel == null) {
 						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));

@@ -272,8 +272,9 @@ public class Message implements IMessage {
 
 	@Override
 	public IMessage copy() {
-		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions,
-				roleMentions, attachments);
+		Message message = new Message(client, id, content, author, channel, timestamp, editedTimestamp,
+				mentionsEveryone, mentions, roleMentions, attachments);
+		return message;
 	}
 
 	@Override

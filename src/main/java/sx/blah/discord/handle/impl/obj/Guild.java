@@ -677,8 +677,9 @@ public class Guild implements IGuild {
 
 	@Override
 	public IGuild copy() {
-		return new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
+		Guild guild =  new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
 				voiceChannels, users);
+		return guild;
 	}
 
 	@Override

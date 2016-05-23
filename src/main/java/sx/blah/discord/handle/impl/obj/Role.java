@@ -239,8 +239,9 @@ public class Role implements IRole {
 
 	@Override
 	public IRole copy() {
-		return new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
+		Role role = new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
 				color.getRGB(), mentionable, guild);
+		return role;
 	}
 
 	@Override
