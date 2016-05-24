@@ -1,10 +1,12 @@
 package sx.blah.discord.util.audio;
 
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.audio.processors.MultiProcessor;
 import sx.blah.discord.util.audio.processors.PauseableProcessor;
 import sx.blah.discord.util.audio.providers.AudioInputStreamProvider;
@@ -122,6 +124,9 @@ public class AudioPlayer implements IAudioProvider {
 		manager.setAudioProcessor(backupProcessor);
 
 		playerInstances.remove(manager.getGuild(), this);
+
+		trackQueue.forEach(Track::close);
+		trackQueue.clear();
 	}
 
 	/**
@@ -261,6 +266,8 @@ public class AudioPlayer implements IAudioProvider {
 			if (isLooping()) {
 				track.rewindTo(0); //Have to reset the audio
 				trackQueue.add(track);
+			} else {
+				track.close();
 			}
 		}
 	}
@@ -384,8 +391,15 @@ public class AudioPlayer implements IAudioProvider {
 			totalTrackTime = (stream.getFrameLength() / (long)this.stream.getFormat().getFrameRate())*1000;
 			if (totalTrackTime == 0)
 				totalTrackTime = -1;
+		}
 
-			System.out.println(totalTrackTime);
+		protected void close() {
+			if (stream != null && provider.isReady())
+				try {
+					stream.close();
+				} catch (IOException e) {
+					Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Internal Exception", e);
+				}
 		}
 
 		/**
