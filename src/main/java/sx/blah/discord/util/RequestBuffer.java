@@ -244,7 +244,7 @@ public class RequestBuffer {
 					}
 				});
 
-				if (futuresToRetry.size() > 0) {
+				if (futuresToRetry.size() > 0 && futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS) > 0) {
 					requests.put(bucket, futuresToRetry);
 					synchronized (requestTimer) {
 						requestTimer.schedule(new RequestTimerTask(bucket), futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
