@@ -292,7 +292,8 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						Discord4J.LOGGER.info("{}", client.getOurUser().getConnectedVoiceChannels().size());
+						System.out.println(client.getRegions().get(1).getID());
+						message.getGuild().changeRegion(client.getRegions().get(1));
 					}
 				});
 
