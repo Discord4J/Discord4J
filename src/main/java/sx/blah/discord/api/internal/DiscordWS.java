@@ -847,7 +847,7 @@ public class DiscordWS {
 			if (user != null) {
 				IVoiceChannel oldChannel = user.getConnectedVoiceChannels()
 						.stream()
-						.filter(vChannel -> channel != null && vChannel.getGuild().equals(channel.getGuild()))
+						.filter(vChannel -> vChannel.getGuild().getID().equals(event.guild_id))
 						.findFirst()
 						.orElse(null);
 				if (channel != oldChannel) {
