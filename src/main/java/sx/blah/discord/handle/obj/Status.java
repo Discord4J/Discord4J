@@ -110,7 +110,7 @@ public class Status {
 		return statusObj.getType().equals(getType())
 				&& ((statusObj.getStatusMessage() == null && getStatusMessage() == null)
 					|| (statusObj.getStatusMessage() != null && statusObj.getStatusMessage().equals(getStatusMessage())))
-				&& statusObj.getUrl().equals(getUrl());
+				&& (statusObj.getUrl() != null && statusObj.getUrl().equals(getUrl()));
 	}
 
 	/**

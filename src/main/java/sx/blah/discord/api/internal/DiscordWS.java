@@ -377,6 +377,8 @@ public class DiscordWS {
 				default:
 					Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, message);
 			}
+		} else if (op == GatewayOps.HEARTBEAT.ordinal()) { //We received a heartbeat, time to send one back
+			send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
 		} else if (op == GatewayOps.RECONNECT.ordinal()) { //Gateway is redirecting us
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
