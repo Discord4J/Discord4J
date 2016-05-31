@@ -172,6 +172,7 @@ public class AudioPlayer implements IAudioProvider {
 	 */
 	public Track queue(File file) throws IOException, UnsupportedAudioFileException {
 		Track track = new Track(new FileProvider(file));
+		track.getMetadata().put("file", file);
 		queue(track);
 		return track;
 	}
@@ -187,6 +188,7 @@ public class AudioPlayer implements IAudioProvider {
 	 */
 	public Track queue(URL url) throws IOException, UnsupportedAudioFileException {
 		Track track = new Track(new URLProvider(url));
+		track.getMetadata().put("url", url);
 		queue(track);
 		return track;
 	}
@@ -373,6 +375,7 @@ public class AudioPlayer implements IAudioProvider {
 		private final IAudioProvider provider;
 		private final AmplitudeAudioInputStream stream;
 		private final List<byte[]> audioCache = new CopyOnWriteArrayList<>(); //key = ms timestamp / 20 ms
+		private final Map<String, Object> metadata = new ConcurrentHashMap<>();
 
 		public Track(IAudioProvider provider) {
 			this.provider = provider;
@@ -400,6 +403,19 @@ public class AudioPlayer implements IAudioProvider {
 				} catch (IOException e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Internal Exception", e);
 				}
+		}
+
+		/**
+		 * This returns a mutable map representing arbitrary metadata attached to this track.
+		 * If the track was created through a File, a key of "file" will have a {@link File} object which represents the
+		 * source of the audio.
+		 * If the track was created through a URL, a key of "url" will have a {@link URL} object which represents the
+		 * source of the audio.
+		 *
+		 * @return The metadata.
+		 */
+		public Map<String, Object> getMetadata() {
+			return metadata;
 		}
 
 		/**
