@@ -850,6 +850,11 @@ public class DiscordWS {
 						.filter(vChannel -> vChannel.getGuild().getID().equals(event.guild_id))
 						.findFirst()
 						.orElse(null);
+				if (oldChannel == null)
+					oldChannel = user.getConnectedVoiceChannels()
+							.stream()
+							.findFirst()
+							.orElse(null);
 				if (channel != oldChannel) {
 					if (channel == null) {
 						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
@@ -858,9 +863,13 @@ public class DiscordWS {
 						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
 						if (!user.getConnectedVoiceChannels().contains(channel))
 							user.getConnectedVoiceChannels().add(channel);
-					} else {
+					} else if (oldChannel.getGuild().equals(channel.getGuild())) {
 						client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
 						user.getConnectedVoiceChannels().remove(oldChannel);
+						if (!user.getConnectedVoiceChannels().contains(channel))
+							user.getConnectedVoiceChannels().add(channel);
+					} else {
+						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
 						if (!user.getConnectedVoiceChannels().contains(channel))
 							user.getConnectedVoiceChannels().add(channel);
 					}

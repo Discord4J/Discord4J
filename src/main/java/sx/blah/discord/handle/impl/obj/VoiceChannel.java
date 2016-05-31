@@ -47,7 +47,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 					throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
 
 				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
-				client.getOurUser().getConnectedVoiceChannels().add(this);
+				if (!client.getOurUser().getConnectedVoiceChannels().contains(this))
+					client.getOurUser().getConnectedVoiceChannels().add(this);
 			} else {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
