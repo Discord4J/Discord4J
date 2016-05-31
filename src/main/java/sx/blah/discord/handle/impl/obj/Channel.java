@@ -195,6 +195,9 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
+			if (response.id == null) //Message didn't send
+				throw new DiscordException("Message was unable to be sent.");
+
 			return DiscordUtils.getMessageFromJSON(client, this, response);
 
 		} else {
@@ -219,6 +222,10 @@ public class Channel implements IChannel {
 			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
 					DiscordEndpoints.CHANNELS+id+"/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
+
+			if (response.id == null) //Message didn't send
+				throw new DiscordException("Message was unable to be sent.");
+
 			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
