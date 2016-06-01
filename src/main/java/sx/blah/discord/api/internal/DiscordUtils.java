@@ -464,6 +464,7 @@ public class DiscordUtils {
 		VoiceChannel channel;
 
 		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(json.id)) != null) {
+			channel.setUserLimit(json.user_limit);
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
@@ -494,7 +495,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position);
+			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position, json.user_limit);
 
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(

@@ -740,9 +740,7 @@ public class DiscordWS {
 			} else if (event.type.equalsIgnoreCase("voice")) {
 				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(event.id);
 				if (toUpdate != null) {
-					VoiceChannel oldChannel = new VoiceChannel(client, toUpdate.getName(),
-							toUpdate.getID(), toUpdate.getGuild(), "", toUpdate.getPosition(),
-							null, toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
+					VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
 
 					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), event);
 

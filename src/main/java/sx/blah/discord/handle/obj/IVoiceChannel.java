@@ -7,6 +7,13 @@ import java.util.List;
  */
 public interface IVoiceChannel extends IChannel {
 	/**
+	 * This gets the maximum amount of users allowed in this voice channel.
+	 *
+	 * @return The maximum amount of users allowed (or 0 if there is not set limit)
+	 */
+	int getUserLimit();
+
+	/**
 	 * Makes the bot user join this voice channel.
 	 */
 	void join();

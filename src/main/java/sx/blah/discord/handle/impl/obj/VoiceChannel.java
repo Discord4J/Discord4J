@@ -22,12 +22,29 @@ import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {
 
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
+	protected int userLimit = 0;
+
+	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit) {
 		this(client, name, id, parent, topic, position, new ArrayList<>(), new HashMap<>(), new HashMap<>());
+		this.userLimit = userLimit;
 	}
 
 	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> messages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
+	}
+
+	@Override
+	public int getUserLimit() {
+		return userLimit;
+	}
+
+	/**
+	 * Sets the CACHED user limit.
+	 *
+	 * @param limit The new user limit.
+	 */
+	public void setUserLimit(int limit) {
+		this.userLimit = limit;
 	}
 
 	@Override
@@ -58,7 +75,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void leave(){
+	public void leave() {
 		if (client.getConnectedVoiceChannels().contains(this)) {
 			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
 			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent))
@@ -125,7 +142,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, parent, topic, position);
+		return new VoiceChannel(client, name, id, parent, topic, position, userLimit);
 	}
 
 	@Override
