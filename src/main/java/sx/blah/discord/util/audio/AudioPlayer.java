@@ -2,6 +2,7 @@ package sx.blah.discord.util.audio;
 
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
@@ -387,7 +388,7 @@ public class AudioPlayer implements IAudioProvider {
 		}
 
 		public Track(AudioInputStream stream) throws IOException {
-			this.stream = new AmplitudeAudioInputStream(stream);
+			this.stream = new AmplitudeAudioInputStream(DiscordUtils.getPCMStream(stream));
 			this.provider = new AudioInputStreamProvider(this.stream);
 
 			//Available Frames / frames per second = Available seconds. Available seconds * 1000 = available milliseconds.
