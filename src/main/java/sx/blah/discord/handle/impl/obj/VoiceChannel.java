@@ -60,6 +60,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
 						return;
 					}
+					((User)client.getOurUser()).channels.add(this)
 				} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
 					throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
 

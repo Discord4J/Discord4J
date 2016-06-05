@@ -35,6 +35,8 @@ public interface Opus extends Library {
 				lib += "-32";
 			lib += "/opus.dll";
         } else if (lib.contains("linux")) {
+			if (lib.endsWith("x86"))
+				lib += "-32";
             lib += "/libopus.so";
         } else {
             throw new RuntimeException("We don't support audio for this operating system. Sorry!");
