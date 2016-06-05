@@ -2,12 +2,14 @@ package sx.blah.discord.util.audio;
 
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.audio.events.*;
 import sx.blah.discord.util.audio.processors.MultiProcessor;
 import sx.blah.discord.util.audio.processors.PauseableProcessor;
 import sx.blah.discord.util.audio.providers.AudioInputStreamProvider;
@@ -30,6 +32,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * So if you are using this, it is recommended (all though not necessary) to not interact with the audio manager after
  * an AudioPlayer instance is created.
  *
+ * AudioPlayer also dispatches events. These events are located in the {@link sx.blah.discord.util.audio.events} package.
+ *
  * NOTE: The goal of this class is to provide a wide variety of tools which works on a wide variety of use-cases. As
  * such, the feature set has a wide breadth but not depth.
  */
@@ -38,6 +42,7 @@ public class AudioPlayer implements IAudioProvider {
 	private final static Map<IGuild, AudioPlayer> playerInstances = new ConcurrentHashMap<>();
 
 	private final IAudioManager manager;
+	private final IDiscordClient client;
 
 	private volatile IAudioProvider backupProvider;
 	private volatile IAudioProcessor backupProcessor;
@@ -51,6 +56,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	private volatile boolean loop = false;
 	private volatile boolean wasReadyLast = false;
+	private volatile Track lastTrack;
 
 	private volatile float volume = 1.0F;
 
@@ -82,6 +88,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	public AudioPlayer(IAudioManager manager) {
 		this.manager = manager;
+		this.client = manager.getGuild().getClient();
 		inject();
 	}
 
@@ -107,6 +114,8 @@ public class AudioPlayer implements IAudioProvider {
 		manager.setAudioProcessor(playerProcessor);
 
 		playerInstances.put(manager.getGuild(), this);
+
+		client.getDispatcher().dispatch(new AudioPlayerInitEvent(this));
 	}
 
 	private void setupControls() {
@@ -128,6 +137,8 @@ public class AudioPlayer implements IAudioProvider {
 
 		trackQueue.forEach(Track::close);
 		trackQueue.clear();
+
+		client.getDispatcher().dispatch(new AudioPlayerCleanEvent(this));
 	}
 
 	/**
@@ -136,7 +147,10 @@ public class AudioPlayer implements IAudioProvider {
 	 * @param isPaused True to pause, false to resume.
 	 */
 	public void setPaused(boolean isPaused) {
-		pauseController.setPaused(isPaused);
+		if (isPaused != this.isPaused()) {
+			pauseController.setPaused(isPaused);
+			client.getDispatcher().dispatch(new PauseStateChangeEvent(this, isPaused));
+		}
 	}
 
 	/**
@@ -213,6 +227,8 @@ public class AudioPlayer implements IAudioProvider {
 	 */
 	public void queue(Track track) {
 		trackQueue.add(track);
+
+		client.getDispatcher().dispatch(new TrackQueueEvent(this, track));
 	}
 
 	/**
@@ -222,6 +238,8 @@ public class AudioPlayer implements IAudioProvider {
 	 */
 	public void addProcessor(IAudioProcessor processor) {
 		playerProcessor.add(processor);
+
+		client.getDispatcher().dispatch(new ProcessorAddEvent(this, processor));
 	}
 
 	/**
@@ -231,6 +249,8 @@ public class AudioPlayer implements IAudioProvider {
 	 */
 	public void removeProcessor(IAudioProcessor processor) {
 		playerProcessor.remove(processor);
+
+		client.getDispatcher().dispatch(new ProcessorRemoveEvent(this, processor));
 	}
 
 	/**
@@ -239,7 +259,11 @@ public class AudioPlayer implements IAudioProvider {
 	 * @param loop True to loop, false to not.
 	 */
 	public void setLoop(boolean loop) {
-		this.loop = loop;
+		if (this.loop != loop) {
+			this.loop = loop;
+
+			client.getDispatcher().dispatch(new LoopStateChangeEvent(this, loop));
+		}
 	}
 
 	/**
@@ -257,6 +281,8 @@ public class AudioPlayer implements IAudioProvider {
 	public synchronized void shuffle() {
 		getCurrentTrack().rewindTo(0);
 		Collections.shuffle(trackQueue);
+
+		client.getDispatcher().dispatch(new ShuffleEvent(this));
 	}
 
 	/**
@@ -265,6 +291,10 @@ public class AudioPlayer implements IAudioProvider {
 	public void skip() {
 		if (trackQueue.size() > 0) {
 			Track track = trackQueue.remove(0);
+
+			if (track.isReady() && track.getCurrentTrackTime() == track.getTotalTrackTime()) { //The track was actually skipped, not skipped due to the way my logic works
+				client.getDispatcher().dispatch(new SkipEvent(this, track));
+			}
 
 			if (isLooping()) {
 				track.rewindTo(0); //Have to reset the audio
@@ -329,17 +359,33 @@ public class AudioPlayer implements IAudioProvider {
 	 * @param volume The volume (1.0 is the default value).
 	 */
 	public void setVolume(float volume) { //Volume here rather than a processor due to how the volume mechanism works
-		this.volume = volume;
+		if (volume != this.volume) {
+			float oldVolume = this.volume;
+			this.volume = volume;
+			client.getDispatcher().dispatch(new VolumeChangeEvent(this, oldVolume, volume));
+		}
 	}
 
 	@Override
 	public boolean isReady() {
 		boolean ready = calculateReady();
 		if (!ready && wasReadyLast) {
+			Track original = getCurrentTrack();
 			skip();
+			Track next = getCurrentTrack();
 
 			ready = calculateReady(); //Check again to allow for continuous playback
+
+			client.getDispatcher().dispatch(new TrackFinishEvent(this, original, next));
+
+			if (next != null)
+				client.getDispatcher().dispatch(new TrackStartEvent(this, next)); //New track is now playing.
+		} else if (!wasReadyLast && ready || (lastTrack != getCurrentTrack() && getCurrentTrack() != null)) { //Track started playing for the first time
+			client.getDispatcher().dispatch(new TrackStartEvent(this, getCurrentTrack()));
 		}
+
+		lastTrack = getCurrentTrack();
+
 		return wasReadyLast = ready;
 	}
 
@@ -369,7 +415,7 @@ public class AudioPlayer implements IAudioProvider {
 	/**
 	 * This object represents the audio being played by this player.
 	 */
-	public static class Track implements IAudioProvider {
+	public static class Track implements IAudioProvider { //TODO: Figure out a way to dispatch events on track scrubbing
 
 		private volatile long totalTrackTime = -1;
 		private volatile long currentTrackTime = 0;
