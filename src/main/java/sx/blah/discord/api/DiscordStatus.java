@@ -6,7 +6,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.json.responses.MetricResponse;
 import sx.blah.discord.json.responses.StatusResponse;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.util.LogMarkers;
 
@@ -27,7 +27,7 @@ public class DiscordStatus {
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "day")), MetricResponse.class);
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
 		}
@@ -44,7 +44,7 @@ public class DiscordStatus {
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "week")), MetricResponse.class);
-		} catch (DiscordException | HTTP429Exception e) {
+		} catch (DiscordException | RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
 		}
@@ -61,7 +61,7 @@ public class DiscordStatus {
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "month")), MetricResponse.class);
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
 		}
@@ -73,10 +73,10 @@ public class DiscordStatus {
 	 *
 	 * @return The maintenance statuses.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public static Maintenance[] getActiveMaintenances() throws HTTP429Exception, DiscordException {
+	public static Maintenance[] getActiveMaintenances() throws RateLimitException, DiscordException {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "active")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
@@ -95,10 +95,10 @@ public class DiscordStatus {
 	 *
 	 * @return The maintenance statuses.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public static Maintenance[] getUpcomingMaintenances() throws HTTP429Exception, DiscordException {
+	public static Maintenance[] getUpcomingMaintenances() throws RateLimitException, DiscordException {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "upcoming")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];

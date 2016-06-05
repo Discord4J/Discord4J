@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.util.List;
@@ -117,10 +117,10 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @param newChannel The new channel the user should move to.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception, MissingPermissionsException;
+	void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Gets the voice channel this user is in (if in one).

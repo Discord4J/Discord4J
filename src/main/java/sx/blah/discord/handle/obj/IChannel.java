@@ -2,7 +2,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.MissingPermissionsException;
 
@@ -74,10 +74,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The message object representing the sent message
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	IMessage sendMessage(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Sends a message to the desired channel.
@@ -87,10 +87,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The message object representing the sent message
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Sends a file to the channel with a message attached.
@@ -101,10 +101,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @throws IOException
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException;
+	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Sends a file to the channel.
@@ -114,10 +114,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @throws IOException
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendFile(File file) throws IOException, MissingPermissionsException, HTTP429Exception, DiscordException;
+	IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Generates an invite for this channel.
@@ -129,10 +129,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The newly generated invite.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Toggles whether the bot is "typing".
@@ -150,31 +150,31 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Changes the name of the channel
 	 *
 	 * @param name The new name of the channel.
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the position of the channel
 	 *
 	 * @param position The new position of the channel.
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changePosition(int position) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the topic of the channel
 	 *
 	 * @param topic The new topic of the channel.
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Gets the position of the channel on the channel list.
@@ -187,10 +187,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Deletes this channel.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Gets the permissions overrides for users. (Key = User id).
@@ -228,10 +228,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param user The user whose override should be removed.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Removes a permissions override on this channel.
@@ -239,10 +239,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param role The role whose override should be removed.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(IRole role) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -252,10 +252,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param toRemove The permissions to remove.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -265,10 +265,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param toRemove The permissions to remove.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * This gets all the currently available invites for this channel.
@@ -276,9 +276,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The list of all available invites.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
+	List<IInvite> getInvites() throws DiscordException, RateLimitException;
 
 	/**
 	 * This gets the users with the ability to read this channel.

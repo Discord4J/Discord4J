@@ -12,7 +12,7 @@ import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.LogMarkers;
 
@@ -216,13 +216,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 			Requests.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
 					new BasicNameValuePair("authorization", getToken()));
 			return true;
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			return false;
 		}
 	}
 
 	@Override
-	public void logout() throws HTTP429Exception, DiscordException {
+	public void logout() throws RateLimitException, DiscordException {
 		if (isReady()) {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 
@@ -247,14 +247,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 			GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url;//.replaceAll("wss", "ws");
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
 		return gateway;
 	}
 
-	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException {
+	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws RateLimitException, DiscordException {
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
 		if (!isReady()) {
@@ -281,22 +281,22 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void changeUsername(String username) throws DiscordException, HTTP429Exception {
+	public void changeUsername(String username) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.of(username), Optional.empty(), Optional.empty(), null);
 	}
 
 	@Override
-	public void changeEmail(String email) throws DiscordException, HTTP429Exception {
+	public void changeEmail(String email) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.empty(), Optional.of(email), Optional.empty(), null);
 	}
 
 	@Override
-	public void changePassword(String password) throws DiscordException, HTTP429Exception {
+	public void changePassword(String password) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.of(password), null);
 	}
 
 	@Override
-	public void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception {
+	public void changeAvatar(Image avatar) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(avatar));
 	}
 
@@ -402,7 +402,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception {
+	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
 		if (!isReady()) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
@@ -449,7 +449,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IRegion> getRegions() throws HTTP429Exception, DiscordException {
+	public List<IRegion> getRegions() throws RateLimitException, DiscordException {
 		if (REGIONS.isEmpty()) {
 			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					DiscordEndpoints.VOICE+"regions",
@@ -470,14 +470,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return getRegions().stream()
 					.filter(r -> r.getID().equals(regionID))
 					.findAny().orElse(null);
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
 
 	@Override
-	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException {
+	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
@@ -494,12 +494,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IGuild createGuild(String name, IRegion region) throws HTTP429Exception, DiscordException {
+	public IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException {
 		return createGuild(name, region, (Image) null);
 	}
 
 	@Override
-	public IGuild createGuild(String name, IRegion region, Image icon) throws HTTP429Exception, DiscordException {
+	public IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
@@ -547,7 +547,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IApplication> getApplications() throws HTTP429Exception, DiscordException {
+	public List<IApplication> getApplications() throws RateLimitException, DiscordException {
 		List<IApplication> applications = new ArrayList<>();
 
 		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
@@ -561,7 +561,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IApplication createApplication(String name) throws DiscordException, HTTP429Exception {
+	public IApplication createApplication(String name) throws DiscordException, RateLimitException {
 		ApplicationResponse response = null;
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
@@ -582,7 +582,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return launchTime;
 	}
 
-	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, HTTP429Exception {
+	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
 		return DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me",
 				new BasicNameValuePair("authorization", getToken()),
 				new BasicNameValuePair("content-type", "application/json")), ApplicationInfoResponse.class);
@@ -592,7 +592,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public String getDescription() throws DiscordException {
 		try {
 			return getApplicationInfo().description;
-		} catch (HTTP429Exception e) {
+		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
@@ -603,7 +603,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			ApplicationInfoResponse info = getApplicationInfo();
 			return String.format(DiscordEndpoints.APPLICATION_ICON, info.id, info.icon);
-		} catch (HTTP429Exception e) {
+		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
@@ -613,7 +613,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public String getApplicationClientID() throws DiscordException {
 		try {
 			return getApplicationInfo().id;
-		} catch (HTTP429Exception e) {
+		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
@@ -623,7 +623,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public String getApplicationName() throws DiscordException {
 		try {
 			return getApplicationInfo().name;
-		} catch (HTTP429Exception e) {
+		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;

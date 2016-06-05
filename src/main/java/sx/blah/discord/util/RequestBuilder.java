@@ -47,7 +47,7 @@ public class RequestBuilder {
 	 * Determines whether this request should be buffered for rate limits.
 	 * This is false by default.
 	 *
-	 * @param shouldBuffer If true, rate limits will be handled automatically, if false, {@link HTTP429Exception}s have
+	 * @param shouldBuffer If true, rate limits will be handled automatically, if false, {@link RateLimitException}s have
 	 * to be handled manually.
 	 * @return The builder instance.
 	 *
@@ -188,12 +188,12 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a handler for when {@link HTTP429Exception}s occur. By default the handler just logs the exception.
+	 * This creates a handler for when {@link RateLimitException}s occur. By default the handler just logs the exception.
 	 *
 	 * @param exceptionConsumer The exception handler.
 	 * @return The builder instance.
 	 */
-	public RequestBuilder onRatelimitError(Consumer<HTTP429Exception> exceptionConsumer) {
+	public RequestBuilder onRatelimitError(Consumer<RateLimitException> exceptionConsumer) {
 		activeAction.rateLimitHandler = exceptionConsumer;
 		return this;
 	}
@@ -327,7 +327,7 @@ public class RequestBuilder {
 		private volatile Predicate<? extends Event> waitAfter;
 		private volatile long waitAfterTimeout = 0;
 		private volatile Consumer<Exception> generalExceptionHandler = (Exception e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
-		private volatile Consumer<HTTP429Exception> rateLimitHandler = (HTTP429Exception e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
+		private volatile Consumer<RateLimitException> rateLimitHandler = (RateLimitException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
 		private volatile Consumer<MissingPermissionsException> missingPermissionHandler = (MissingPermissionsException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
 		private volatile Consumer<DiscordException> discordExceptionHandler = (DiscordException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
 		private volatile ActionMode mode = ActionMode.ALWAYS;
@@ -351,7 +351,7 @@ public class RequestBuilder {
 					Future<Boolean> futureResult = RequestBuffer.request(() -> {
 						try {
 							return action.execute();
-						} catch (HTTP429Exception e) {
+						} catch (RateLimitException e) {
 							throw e;
 						} catch (MissingPermissionsException e) {
 							missingPermissionHandler.accept(e);
@@ -371,7 +371,7 @@ public class RequestBuilder {
 				if (waitAfter != null)
 					client.getDispatcher().waitFor(waitAfter, waitAfterTimeout);
 
-			} catch (HTTP429Exception e) {
+			} catch (RateLimitException e) {
 				rateLimitHandler.accept(e);
 				result = !failOnException;
 			} catch (MissingPermissionsException e) {
@@ -417,11 +417,11 @@ public class RequestBuilder {
 		 *
 		 * @return True if the request was a success, false if otherwise.
 		 *
-		 * @throws HTTP429Exception
+		 * @throws RateLimitException
 		 * @throws MissingPermissionsException
 		 * @throws DiscordException
 		 * @throws Exception
 		 */
-		boolean execute() throws HTTP429Exception, MissingPermissionsException, DiscordException, Exception;
+		boolean execute() throws RateLimitException, MissingPermissionsException, DiscordException, Exception;
 	}
 }

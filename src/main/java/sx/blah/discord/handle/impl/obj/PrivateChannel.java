@@ -4,7 +4,7 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 
 import java.util.*;
 
@@ -52,27 +52,27 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public List<IInvite> getInvites() throws DiscordException, HTTP429Exception {
+	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -92,17 +92,17 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void changePosition(int position) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -112,7 +112,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 

@@ -4,7 +4,7 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 
 import java.io.File;
@@ -28,7 +28,7 @@ public class AccountBot extends BaseBot implements IListener<ReadyEvent> {
 			this.client.changeEmail("newEmail@domain.com"); // Changes the bot's account email
 			this.client.changePassword("12345"); // Changes the bot's account password
 			this.client.changeAvatar(Image.forFile(new File("picture.png"))); // Changes the bots' profile picture
-		} catch (HTTP429Exception | DiscordException e) { // An error occurred
+		} catch (RateLimitException | DiscordException e) { // An error occurred
 			e.printStackTrace();
 		}
 	}

@@ -10,7 +10,7 @@ import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MemberEditRequest;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 
@@ -273,7 +273,7 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception, MissingPermissionsException {
+	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (!client.getOurUser().equals(this))
 			DiscordUtils.checkPermissions(client, newChannel.getGuild(), this.getRolesForGuild(newChannel.getGuild()), EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 

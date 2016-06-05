@@ -5,7 +5,7 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 
 import java.time.LocalDateTime;
@@ -49,45 +49,45 @@ public interface IDiscordClient {
 	/**
 	 * Logs out the client.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void logout() throws HTTP429Exception, DiscordException;
+	void logout() throws RateLimitException, DiscordException;
 
 	/**
 	 * Changes this client's account's username.
 	 *
 	 * @param username The new username.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changeUsername(String username) throws DiscordException, HTTP429Exception;
+	void changeUsername(String username) throws DiscordException, RateLimitException;
 
 	/**
 	 * Changes this client's account's email.
 	 *
 	 * @param email The new email.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changeEmail(String email) throws DiscordException, HTTP429Exception;
+	void changeEmail(String email) throws DiscordException, RateLimitException;
 
 	/**
 	 * Changes this client's account's password.
 	 *
 	 * @param password The new password.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changePassword(String password) throws DiscordException, HTTP429Exception;
+	void changePassword(String password) throws DiscordException, RateLimitException;
 
 	/**
 	 * Changes this client's account's avatar.
 	 *
 	 * @param avatar The new avatar.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception;
+	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
 
 	/**
 	 * Updates the bot's presence.
@@ -198,9 +198,9 @@ public interface IDiscordClient {
 	 * @return The {@link PrivateChannel} object.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception;
+	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets the invite for a code.
@@ -215,10 +215,10 @@ public interface IDiscordClient {
 	 *
 	 * @return The list of available regions.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IRegion> getRegions() throws HTTP429Exception, DiscordException;
+	List<IRegion> getRegions() throws RateLimitException, DiscordException;
 
 	/**
 	 * Gets the corresponding region for a given id.
@@ -236,12 +236,12 @@ public interface IDiscordClient {
 	 * @param icon The icon for the guild.
 	 * @return The new guild's id.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @deprecated Use {@link #createGuild(String, IRegion, Image)} or {@link #createGuild(String, IRegion)} instead.
 	 */
 	@Deprecated
-	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException;
+	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException;
 
 	/**
 	 * Creates a new guild.
@@ -250,10 +250,10 @@ public interface IDiscordClient {
 	 * @param region The region for the guild.
 	 * @return The new guild's id.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IGuild createGuild(String name, IRegion region) throws HTTP429Exception, DiscordException;
+	IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException;
 
 	/**
 	 * Creates a new guild.
@@ -263,10 +263,10 @@ public interface IDiscordClient {
 	 * @param icon The icon for the guild.
 	 * @return The new guild's id.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IGuild createGuild(String name, IRegion region, Image icon) throws HTTP429Exception, DiscordException;
+	IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException;
 
 	/**
 	 * Gets the latest response time by the discord websocket to a ping.
@@ -294,10 +294,10 @@ public interface IDiscordClient {
 	 *
 	 * @return The list of owned applications.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IApplication> getApplications() throws HTTP429Exception, DiscordException;
+	List<IApplication> getApplications() throws RateLimitException, DiscordException;
 
 	/**
 	 * Creates a new application for this user.
@@ -306,9 +306,9 @@ public interface IDiscordClient {
 	 * @return The application object.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	IApplication createApplication(String name) throws DiscordException, HTTP429Exception;
+	IApplication createApplication(String name) throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets the time when this client was last logged into. Useful for keeping track of uptime.

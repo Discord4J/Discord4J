@@ -8,7 +8,6 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.HTTP429Exception;
 
 import java.awt.*;
 import java.lang.reflect.Constructor;

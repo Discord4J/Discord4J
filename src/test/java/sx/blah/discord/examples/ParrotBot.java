@@ -8,7 +8,7 @@ import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MessageBuilder;
 
 /**
@@ -30,7 +30,7 @@ public class ParrotBot extends BaseBot implements IListener<MessageReceivedEvent
 		try {
 			//Builds (sends) and new message in the channel that the original message was sent with the content of the original message.
 			new MessageBuilder(this.client).withChannel(channel).withContent(message.getContent()).build();
-		} catch (HTTP429Exception e) { //HTTP429Exception thrown. The bot is sending messages too quickly!
+		} catch (RateLimitException e) { //RateLimitException thrown. The bot is sending messages too quickly!
 			System.err.print("Sending messages too quickly!");
 			e.printStackTrace();
 		} catch (DiscordException e) { //DiscordException thrown. Many possibilities.

@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
 import java.util.EnumSet;
@@ -42,7 +42,7 @@ public class RoleBot extends BaseBot implements IListener<ReadyEvent> {
 
 			IUser ourUser = event.getClient().getOurUser(); // Gets the user of the bot
 			guild.editUserRoles(ourUser, new IRole[]{role}); // Assigns our new role to the bot. NOTE: This will make the bot's ONLY role our role.
-		} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) { // Error occurred
+		} catch (MissingPermissionsException | RateLimitException | DiscordException e) { // Error occurred
 			e.printStackTrace();
 		}
 	}

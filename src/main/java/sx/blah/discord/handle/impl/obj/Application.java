@@ -14,7 +14,7 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.responses.ApplicationResponse;
 import sx.blah.discord.json.responses.BotResponse;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.LogMarkers;
 
@@ -116,7 +116,7 @@ public class Application implements IApplication {
 		return String.format(DiscordEndpoints.APPLICATION_ICON, id, icon);
 	}
 
-	private void edit(Optional<String> name, Optional<String> description, Optional<Image> icon, Optional<String[]> redirectUris) throws DiscordException, HTTP429Exception {
+	private void edit(Optional<String> name, Optional<String> description, Optional<Image> icon, Optional<String[]> redirectUris) throws DiscordException, RateLimitException {
 		try {
 			ApplicationResponse response = DiscordUtils.GSON.fromJson(Requests.PUT.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new ApplicationResponse(redirectUris.orElse(this.redirectUris),
@@ -136,27 +136,27 @@ public class Application implements IApplication {
 	}
 
 	@Override
-	public void changeName(String name) throws HTTP429Exception, DiscordException {
+	public void changeName(String name) throws RateLimitException, DiscordException {
 		edit(Optional.of(name), Optional.empty(), null, Optional.empty());
 	}
 
 	@Override
-	public void changeDescription(String description) throws HTTP429Exception, DiscordException {
+	public void changeDescription(String description) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.of(description), null, Optional.empty());
 	}
 
 	@Override
-	public void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException {
+	public void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.empty(), icon, Optional.empty());
 	}
 
 	@Override
-	public void changeIcon(Image icon) throws HTTP429Exception, DiscordException {
+	public void changeIcon(Image icon) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), Optional.empty());
 	}
 
 	@Override
-	public void changeRedirectUris(String[] redirectUris) throws HTTP429Exception, DiscordException {
+	public void changeRedirectUris(String[] redirectUris) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.empty(), null, Optional.of(redirectUris));
 	}
 
@@ -171,7 +171,7 @@ public class Application implements IApplication {
 			this.bot = DiscordUtils.getUserFromJSON(client, response);
 			this.botToken = response.token;
 			return new ClientBuilder().withToken(botToken);
-		} catch (HTTP429Exception | UnsupportedEncodingException e) {
+		} catch (RateLimitException | UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 		return null;
@@ -182,7 +182,7 @@ public class Application implements IApplication {
 		try {
 			Requests.DELETE.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
 					new BasicNameValuePair("authorization", client.getToken()));
-		} catch (HTTP429Exception e) {
+		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}

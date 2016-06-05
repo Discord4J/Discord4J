@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.time.LocalDateTime;
@@ -68,10 +68,10 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @param content Message to send.
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void reply(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -82,7 +82,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
-	IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Returns whether this message mentions everyone.
@@ -95,10 +95,10 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Deletes the message.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Gets the time that this message was last edited.

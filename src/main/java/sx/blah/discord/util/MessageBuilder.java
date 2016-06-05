@@ -145,11 +145,11 @@ public class MessageBuilder {
 	 *
 	 * @return The message object representing the sent message.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage build() throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public IMessage build() throws RateLimitException, DiscordException, MissingPermissionsException {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
@@ -162,11 +162,11 @@ public class MessageBuilder {
 	 *
 	 * @return The message object representing the sent message.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage send() throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public IMessage send() throws RateLimitException, DiscordException, MissingPermissionsException {
 		return build();
 	}
 

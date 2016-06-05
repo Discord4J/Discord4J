@@ -13,7 +13,7 @@ import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.api.internal.Requests;
 
 import java.time.LocalDateTime;
@@ -182,12 +182,12 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void reply(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
 
 	@Override
-	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
 		if (client.isReady()) {
@@ -244,7 +244,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!getAuthor().equals(client.getOurUser()))
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 

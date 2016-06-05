@@ -12,7 +12,7 @@ import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.json.responses.RateLimitResponse;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
@@ -75,10 +75,10 @@ public enum Requests {
 	 * @param headers The headers to include in the request.
 	 * @return The result (if any) returned by the request.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public String makeRequest(String url, BasicNameValuePair... headers) throws HTTP429Exception, DiscordException {
+	public String makeRequest(String url, BasicNameValuePair... headers) throws RateLimitException, DiscordException {
 		try {
 			HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 			for (BasicNameValuePair header : headers) {
@@ -100,10 +100,10 @@ public enum Requests {
 	 * @param headers The headers to include in the request.
 	 * @return The result (if any) returned by the request.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws HTTP429Exception, DiscordException {
+	public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws RateLimitException, DiscordException {
 		try {
 			if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 				HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -123,7 +123,7 @@ public enum Requests {
 		return null;
 	}
 
-	private String request(HttpUriRequest request) throws DiscordException, HTTP429Exception {
+	private String request(HttpUriRequest request) throws DiscordException, RateLimitException {
 		try (CloseableHttpResponse response = CLIENT.execute(request)){
 			int responseCode = response.getStatusLine().getStatusCode();
 
@@ -155,7 +155,7 @@ public enum Requests {
 			}
 
 			if (responseCode == 429) {
-				throw new HTTP429Exception(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
+				throw new RateLimitException(DiscordUtils.GSON.fromJson(element, RateLimitResponse.class));
 			}
 
 			if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))

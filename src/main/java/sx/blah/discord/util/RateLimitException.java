@@ -4,22 +4,20 @@ import sx.blah.discord.json.responses.RateLimitResponse;
 
 /**
  * Represents a 429 TOO MANY REQUESTS return code from a url connection.
- * This happens if your bot exceeds the Discord api message rate limit.
- * @deprecated Use {@link RateLimitException}.
+ * This happens if your bot exceeds a Discord api rate limit.
  */
-@Deprecated
-public class HTTP429Exception extends Exception {
+public class RateLimitException extends HTTP429Exception {
 
 	private long retryAfter;
 	private String bucket;
 
-	public HTTP429Exception(String message, long retryAfter, String bucket) {
-		super(message);
+	public RateLimitException(String message, long retryAfter, String bucket) {
+		super(message, retryAfter, bucket);
 		this.retryAfter = retryAfter;
 		this.bucket = bucket;
 	}
 
-	public HTTP429Exception(RateLimitResponse json) {
+	public RateLimitException(RateLimitResponse json) {
 		this(json.message, json.retry_after, json.bucket);
 	}
 

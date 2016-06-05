@@ -8,7 +8,7 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.json.responses.InviteJSONResponse;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.util.LogMarkers;
 
@@ -47,7 +47,7 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public InviteResponse accept() throws DiscordException, HTTP429Exception {
+	public InviteResponse accept() throws DiscordException, RateLimitException {
 		if (client.isReady()) {
 			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
@@ -63,7 +63,7 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public InviteResponse details() throws DiscordException, HTTP429Exception {
+	public InviteResponse details() throws DiscordException, RateLimitException {
 		if (client.isReady()) {
 			String response = Requests.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
@@ -79,7 +79,7 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public void delete() throws HTTP429Exception, DiscordException {
+	public void delete() throws RateLimitException, DiscordException {
 		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}

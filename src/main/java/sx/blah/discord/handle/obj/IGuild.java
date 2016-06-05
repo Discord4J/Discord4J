@@ -4,7 +4,7 @@ import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
 
@@ -183,20 +183,20 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The new role.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IRole createRole() throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	IRole createRole() throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Retrieves the list of banned users from this guild.
 	 *
 	 * @return The list of banned users.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IUser> getBannedUsers() throws HTTP429Exception, DiscordException;
+	List<IUser> getBannedUsers() throws RateLimitException, DiscordException;
 
 	/**
 	 * Bans a user from this guild.
@@ -204,10 +204,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param user The user to ban.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void banUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void banUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Bans a user from this guild.
@@ -216,10 +216,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * This removes a ban on a user.
@@ -227,10 +227,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param userID The user to unban.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void pardonUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void pardonUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Kicks a user from the guild.
@@ -238,10 +238,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param user The user to kick.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void kickUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void kickUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Edits the roles a user is a part of.
@@ -250,10 +250,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param roles The roles for the user to have.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Sets whether a user should be deafened.
@@ -263,9 +263,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+	void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
 	 * Sets whether a user should be muted.
@@ -275,9 +275,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void setMuteUser(IUser user, boolean mute) throws DiscordException, HTTP429Exception, MissingPermissionsException;
+	void setMuteUser(IUser user, boolean mute) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Sets a user's nickname in this guild.
@@ -287,101 +287,101 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+	void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
 	 * Changes the name of the guild.
 	 *
 	 * @param name The new name of the guild.
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the region of the guild.
 	 *
 	 * @param region The new region of the guild.
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeRegion(IRegion region) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeRegion(IRegion region) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the guild.
 	 *
 	 * @param icon The new icon of the guild (or empty to remove it).
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @deprecated Use {@link #changeIcon(Image)} instead.
 	 */
 	@Deprecated
-	void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the guild.
 	 *
 	 * @param icon The new icon of the guild (or null to remove it).
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeIcon(Image icon) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK voice channel of the guild.
 	 *
 	 * @param channel The new AFK voice channel of the guild (or empty to remove it).
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @deprecated Use {{@link #changeAFKChannel(IVoiceChannel)}} instead.
 	 */
 	@Deprecated
-	void changeAFKChannel(Optional<IVoiceChannel> channel) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeAFKChannel(Optional<IVoiceChannel> channel) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK voice channel of the guild.
 	 *
 	 * @param channel The new AFK voice channel of the guild (or null to remove it).
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeAFKChannel(IVoiceChannel channel) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeAFKChannel(IVoiceChannel channel) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK timeout for the guild.
 	 *
 	 * @param timeout The new AFK timeout for the guild.
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeAFKTimeout(int timeout) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeAFKTimeout(int timeout) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * This deletes this guild if and only if you are its owner, otherwise it throws a {@link MissingPermissionsException}.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void deleteGuild() throws DiscordException, HTTP429Exception, MissingPermissionsException;
+	void deleteGuild() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This leaves the guild, NOTE: it throws a {@link DiscordException} if you are the guilds owner, use
 	 * {@link #deleteGuild()} instead!
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void leaveGuild() throws DiscordException, HTTP429Exception;
+	void leaveGuild() throws DiscordException, RateLimitException;
 
 	/**
 	 * Creates a new channel.
@@ -391,9 +391,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	IChannel createChannel(String name) throws DiscordException, MissingPermissionsException, HTTP429Exception;
+	IChannel createChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException;
 
 	/**
 	 * Creates a new voice channel.
@@ -403,9 +403,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	IVoiceChannel createVoiceChannel(String name) throws DiscordException, MissingPermissionsException, HTTP429Exception;
+	IVoiceChannel createVoiceChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException;
 
 	/**
 	 * Gets the region this guild is located in.
@@ -419,11 +419,11 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param newOwner The new owner.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
-	void transferOwnership(IUser newOwner) throws HTTP429Exception, MissingPermissionsException, DiscordException;
+	void transferOwnership(IUser newOwner) throws RateLimitException, MissingPermissionsException, DiscordException;
 
 	/**
 	 * This retrieves the @everyone role which exists on all guilds.
@@ -438,9 +438,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The list of all available invites.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	List<IInvite> getInvites() throws DiscordException, HTTP429Exception;
+	List<IInvite> getInvites() throws DiscordException, RateLimitException;
 
 	/**
 	 * This reorders the position of the roles in this guild.
@@ -448,10 +448,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param rolesInOrder ALL the roles in the server, in the order of desired position. The first role gets position 1, second position 2, etc.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void reorderRoles(IRole... rolesInOrder) throws DiscordException, HTTP429Exception, MissingPermissionsException;
+	void reorderRoles(IRole... rolesInOrder) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Gets the amount of users that would be pruned for the given amount of days.
@@ -460,9 +460,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The amount of users.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	int getUsersToBePruned(int days) throws DiscordException, HTTP429Exception;
+	int getUsersToBePruned(int days) throws DiscordException, RateLimitException;
 
 	/**
 	 * Prunes guild users for the given amount of days.
@@ -471,9 +471,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The amount of users.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	int pruneUsers(int days) throws DiscordException, HTTP429Exception;
+	int pruneUsers(int days) throws DiscordException, RateLimitException;
 
 	/**
 	 * Attempts to add a bot to this guild.
@@ -483,11 +483,11 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @deprecated Use {@link #addBot(String, EnumSet)}
 	 */
 	@Deprecated
-	void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+	void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
 	 * Attempts to add a bot to this guild.
@@ -497,9 +497,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception;
+	void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
 	 * Gets the audio channel of this guild. This throws an exception if the bot isn't in a channel yet.

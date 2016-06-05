@@ -77,10 +77,10 @@ public class RoleBuilder {
 	 * Creates the role in the specified guild.
 	 * @return The {@link IRole} object representing the new role.
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public IRole build() throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public IRole build() throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (guild == null)
 			throw new RuntimeException("A guild must be set to create a role.");
 

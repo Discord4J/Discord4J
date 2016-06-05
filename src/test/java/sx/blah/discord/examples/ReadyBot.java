@@ -4,7 +4,7 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 
 /**
  * This is a simple example to demonstrate the need to wait for the ReadyEvent before attempting to do things in Discord.
@@ -18,7 +18,7 @@ public class ReadyBot extends BaseBot implements IListener<ReadyEvent> {
 		try {
 			// This will NOT work. The bot is not ready to interact with Discord because the ReadyEvent has not yet been fired.
 			discordClient.changeUsername("Loser Bot");
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			e.printStackTrace();
 		}
 	}
@@ -34,7 +34,7 @@ public class ReadyBot extends BaseBot implements IListener<ReadyEvent> {
 		try {
 			// This WILL work. The ReadyEvent has been fired and the bot is ready to interact with Discord.
 			event.getClient().changeUsername("Awesome Bot");
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			e.printStackTrace();
 		}
 	}

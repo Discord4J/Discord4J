@@ -14,7 +14,7 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.RoleEditRequest;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 
@@ -183,7 +183,7 @@ public class Role implements IRole {
 		return guild;
 	}
 
-	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
@@ -205,32 +205,32 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void changeColor(Color color) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public void changeHoist(boolean hoist) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public void changePermissions(EnumSet<Permissions> permissions) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions), Optional.empty());
 	}
 
 	@Override
-	public void changeMentionable(boolean isMentionable) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeMentionable(boolean isMentionable) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(isMentionable));
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,

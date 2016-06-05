@@ -93,7 +93,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		try {
 			load(initialContents);
-		} catch (HTTP429Exception e) {
+		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}
 	}
@@ -144,7 +144,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		return 0;
 	}
 
-	private boolean queryMessages(int messageCount) throws DiscordException, HTTP429Exception {
+	private boolean queryMessages(int messageCount) throws DiscordException, RateLimitException {
 		if (!hasPermission)
 			return false;
 
@@ -325,9 +325,9 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param messageCount The amount of messages to load.
 	 * @return True if this action was successful, false if otherwise.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	public boolean load(int messageCount) throws HTTP429Exception {
+	public boolean load(int messageCount) throws RateLimitException {
 		try {
 			boolean success = queryMessages(messageCount);
 
@@ -366,11 +366,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param index The index to delete the message at.
 	 * @return The message deleted and removed form the cache.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage delete(int index) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public IMessage delete(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
 		IMessage message = get(index);
 		if (message != null) {
 			message.delete();
@@ -387,11 +387,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param endIndex The end index (exclusive).
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteFromRange(int startIndex, int endIndex) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteFromRange(int startIndex, int endIndex) throws RateLimitException, DiscordException, MissingPermissionsException {
 		List<IMessage> messages = subList(startIndex, endIndex);
 		bulkDelete(messages);
 		return messages;
@@ -405,11 +405,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param amount The amount of messages to attempt to delete.
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteFromRange(index, index+amount);
 	}
 
@@ -420,11 +420,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param index The start index (inclusive).
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteAfter(index, size()-index);
 	}
 
@@ -436,11 +436,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param amount The amount of messages to attempt to delete.
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteAfter(indexOf(message), amount);
 	}
 
@@ -451,11 +451,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param message The start message (inclusive).
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteAfter(indexOf(message));
 	}
 
@@ -467,11 +467,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param amount The amount of messages to attempt to delete.
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteFromRange(Math.max(0, index-amount), index+1);
 	}
 
@@ -482,11 +482,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param index The end index (inclusive).
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteFromRange(0, index+1);
 	}
 
@@ -498,11 +498,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param amount The amount of messages to attempt to delete.
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message, int amount) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteBefore(indexOf(message), amount);
 	}
 
@@ -513,11 +513,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param message The end message (inclusive).
 	 * @return The messages deleted.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
 		return deleteBefore(indexOf(message));
 	}
 
@@ -527,10 +527,10 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @param messages The messages to delete.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	public void bulkDelete(List<IMessage> messages) throws DiscordException, HTTP429Exception, MissingPermissionsException {
+	public void bulkDelete(List<IMessage> messages) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (!client.isBot())

@@ -9,7 +9,7 @@ import java.util.TimerTask;
 import java.util.concurrent.*;
 
 /**
- * This is utility class intended to help with dealing with {@link HTTP429Exception}s by queueing rate-limited
+ * This is utility class intended to help with dealing with {@link RateLimitException}s by queueing rate-limited
  * operations until they can be sent.
  */
 public class RequestBuffer {
@@ -72,9 +72,9 @@ public class RequestBuffer {
 		 *
 		 * @return The result of this request, if any.
 		 *
-		 * @throws HTTP429Exception
+		 * @throws RateLimitException
 		 */
-		T request() throws HTTP429Exception;
+		T request() throws RateLimitException;
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class RequestBuffer {
 	@FunctionalInterface
 	public interface IVoidRequest extends IRequest<Object> {
 
-		default Object request() throws HTTP429Exception {
+		default Object request() throws RateLimitException {
 			doRequest();
 			return null;
 		}
@@ -92,9 +92,9 @@ public class RequestBuffer {
 		/**
 		 * This is called when the request is attempted.
 		 *
-		 * @throws HTTP429Exception
+		 * @throws RateLimitException
 		 */
-		void doRequest() throws HTTP429Exception;
+		void doRequest() throws RateLimitException;
 	}
 
 	/**
@@ -211,7 +211,7 @@ public class RequestBuffer {
 					value = request.request();
 					timeForNextRequest = -1;
 					isDone = true;
-				} catch (HTTP429Exception e) {
+				} catch (RateLimitException e) {
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
 					bucket = e.getBucket();
 				}

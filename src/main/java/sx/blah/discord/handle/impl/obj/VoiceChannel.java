@@ -56,7 +56,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 					Discord4J.LOGGER.info(LogMarkers.HANDLE, "Attempting to join multiple channels in the same guild! Moving channels instead...");
 					try {
 						client.getOurUser().moveToVoiceChannel(this);
-					} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
+					} catch (DiscordException | RateLimitException | MissingPermissionsException e) {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
 						return;
 					}
@@ -136,7 +136,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void changeTopic(String topic) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
