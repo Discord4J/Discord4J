@@ -1,6 +1,7 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;

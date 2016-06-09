@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.Event;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.AudioChannel;
 
 import javax.sound.sampled.AudioFileFormat;

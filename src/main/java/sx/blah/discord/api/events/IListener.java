@@ -1,4 +1,4 @@
-package sx.blah.discord.api;
+package sx.blah.discord.api.events;
 
 /**
  * Used to represent a class that handles only one event.

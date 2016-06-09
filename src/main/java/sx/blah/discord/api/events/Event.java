@@ -1,4 +1,6 @@
-package sx.blah.discord.api;
+package sx.blah.discord.api.events;
+
+import sx.blah.discord.api.IDiscordClient;
 
 /**
  * Used to represent an event.

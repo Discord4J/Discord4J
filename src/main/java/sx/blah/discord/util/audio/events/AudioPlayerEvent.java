@@ -1,6 +1,6 @@
 package sx.blah.discord.util.audio.events;
 
-import sx.blah.discord.api.Event;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**

@@ -4,7 +4,7 @@ import org.junit.Test;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.IListener;
+import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;

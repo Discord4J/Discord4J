@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.Event;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
@@ -8,12 +8,12 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
  * This event is dispatched when a user connects to a voice channel.
  */
 public class UserVoiceChannelJoinEvent extends Event {
-	
+
 	/**
 	 * The user that has joined.
 	 */
 	private final IUser user;
-	
+
 	/**
 	 * The channel the user joined.
 	 */
@@ -23,7 +23,7 @@ public class UserVoiceChannelJoinEvent extends Event {
 		this.user = user;
 		this.newChannel = newChannel;
 	}
-	
+
 	/**
 	 * Retrieves the user that has joined the channel.
 	 *
@@ -32,7 +32,7 @@ public class UserVoiceChannelJoinEvent extends Event {
 	public IUser getUser() {
 		return user;
 	}
-	
+
 	/**
 	 * Gets the voice channel this user joined.
 	 *

@@ -2,7 +2,7 @@ package sx.blah.discord.examples;
 
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.IListener;
+import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
