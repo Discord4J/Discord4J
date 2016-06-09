@@ -46,7 +46,7 @@ public class DiscordWS {
 
 	private volatile DiscordClientImpl client;
 	private volatile Session session;
-	public AtomicBoolean isConnected = new AtomicBoolean(true);
+	public AtomicBoolean isConnected = new AtomicBoolean(false);
 	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2, new ThreadFactory() {
 		private volatile int executorCount = 0;
 
@@ -57,14 +57,19 @@ public class DiscordWS {
 			return thread;
 		}
 	});
+	private volatile boolean startingUp = false;
 	private final boolean isDaemon;
+	private final boolean withReconnects;
 	private volatile boolean sentPing = false;
-	private volatile long lastPingSent = -1L;
 	private volatile long pingResponseTime = -1L;
 	private final long timeoutTime;
 	private final int maxMissedPingCount;
 	private volatile int missedPingCount = 0;
-	private static final String GATEWAY_VERSION = "4";
+	private volatile int reconnectAttempts = 0;
+	//TODO: Expose the next two variables:
+	private static final int MAX_RECONNECT_ATTEMPTS = 3;
+	private static final int MAX_RECONNECT_TIME = 5; //Time in seconds before the reconnect is considered a failure.
+	private static final String GATEWAY_VERSION = "5";
 	private static final int READY_TIMEOUT = 5; //Time in seconds where the ready event will timeout from wait for guilds
 	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
 		@Override
@@ -84,8 +89,8 @@ public class DiscordWS {
 	 */
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
-	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon) throws Exception {
-		//Ensuring gateway is v4 ready
+	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) throws Exception {
+		//Ensuring gateway is ready
 		if (!gateway.endsWith("/"))
 			gateway += "/";
 		gateway += "?encoding=json&v="+GATEWAY_VERSION;
@@ -97,7 +102,7 @@ public class DiscordWS {
 			wsClient.setConnectTimeout(timeout);
 			wsClient.setAsyncWriteTimeout(timeout);
 		}
-		DiscordWS socket = new DiscordWS((DiscordClientImpl) client, wsClient, timeout, maxMissedPingCount, isDaemon);
+		DiscordWS socket = new DiscordWS((DiscordClientImpl) client, wsClient, timeout, maxMissedPingCount, isDaemon, withReconnects);
 		wsClient.start();
 		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
 		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
@@ -105,17 +110,19 @@ public class DiscordWS {
 		return socket;
 	}
 
-	public DiscordWS(DiscordClientImpl client, WebSocketClient wsClient, long timeout, int maxMissedPingCount, boolean isDaemon) {
+	public DiscordWS(DiscordClientImpl client, WebSocketClient wsClient, long timeout, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) {
 		this.client = client;
 		this.timeoutTime = timeout;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
+		this.withReconnects = withReconnects;
+		this.startingUp = true;
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (!isDaemon) {
 			new Timer("WebSocketClient Keep-Alive").scheduleAtFixedRate(new TimerTask() { //Required b/c the ws client doesn't close correctly unless it is a daemon
 				@Override
 				public void run() { //Prevents the WebSocketClient from closing until the websocket is disconnected
-					if (!isConnected.get()) {
+					if (!isConnected.get() && !startingUp) {
 						this.cancel();
 					}
 				}
@@ -128,23 +135,52 @@ public class DiscordWS {
 	 */
 	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
 		if (isConnected.get()) {
-			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			isConnected.set(false);
-			executorService.shutdownNow();
-			client.ws = null;
-			for (DiscordVoiceWS vws : client.voiceConnections.values()) { //Ensures that voice connections are closed.
-				VoiceDisconnectedEvent.Reason voiceReason;
-				try {
-					voiceReason = VoiceDisconnectedEvent.Reason.valueOf(reason.toString());
-				} catch (IllegalArgumentException e) {
-					voiceReason = VoiceDisconnectedEvent.Reason.UNKNOWN;
+			if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
+				reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
+			startingUp = false;
+			sentPing = false;
+			missedPingCount = 0;
+
+			if (reason == DiscordDisconnectedEvent.Reason.UNKNOWN
+					|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
+					|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT) {
+				reconnectAttempts++;
+
+				if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
+							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 				}
-				vws.disconnect(voiceReason);
-			}
-			clearCache();
-			Runtime.getRuntime().removeShutdownHook(shutdownHook);
-			if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
-				session.close();
+
+				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
+				new Timer("Websocket Reconnect Timer", true).schedule(new TimerTask() {
+					@Override
+					public void run() {
+						if (!isConnected.get()) {
+							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnect attempt timed out after {} seconds", MAX_RECONNECT_TIME);
+							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+						}
+						this.cancel();
+					}
+				}, TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
+
+			} else {
+				client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
+				executorService.shutdownNow();
+				client.ws = null;
+				for (DiscordVoiceWS vws : client.voiceConnections.values()) { //Ensures that voice connections are closed.
+					VoiceDisconnectedEvent.Reason voiceReason;
+					try {
+						voiceReason = VoiceDisconnectedEvent.Reason.valueOf(reason.toString());
+					} catch (IllegalArgumentException e) {
+						voiceReason = VoiceDisconnectedEvent.Reason.UNKNOWN;
+					}
+					vws.disconnect(voiceReason);
+				}
+				Runtime.getRuntime().removeShutdownHook(shutdownHook);
+				if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
+					session.close();
+				}
 			}
 		}
 	}
@@ -194,51 +230,28 @@ public class DiscordWS {
 	@OnWebSocketConnect
 	public void onOpen(Session session) {
 		this.session = session;
-		if (client.sessionId != null) {
-			send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
-			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Reconnected to the Discord websocket.");
-		} else if (!client.getToken().isEmpty()) {
-			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
-					Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Use the login() method to set your token first!");
-			return;
-		}
-
-		Runnable pingPong = () -> { //TODO: Remove when HEARTBEAT_ACK is implemented
-			if (isConnected.get() && session != null && session.isOpen()) {
-				if (sentPing) {
-					if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
-						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Missed {} ping responses in a row, disconnecting...", missedPingCount);
-						disconnect(DiscordDisconnectedEvent.Reason.MISSED_PINGS);
-					} else if ((System.currentTimeMillis()-lastPingSent) > timeoutTime && timeoutTime > 0) {
-						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Connection timed out at {}ms", System.currentTimeMillis()-lastPingSent);
-						disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
-					}
-					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Last ping was not responded to, skipping ping");
-					missedPingCount++;
-				} else {
-					Discord4J.LOGGER.trace(LogMarkers.KEEPALIVE, "Sending ping...");
-					sentPing = true;
-					lastPingSent = System.currentTimeMillis();
-					try {
-						session.getRemote().sendPing(ByteBuffer.wrap(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)).getBytes()));
-					} catch (Exception e) {
-						Discord4J.LOGGER.error(LogMarkers.KEEPALIVE, "Discord4J Internal Exception", e);
-					}
-				}
-			}
-		};
-		executorService.scheduleAtFixedRate(pingPong, 5, 5, TimeUnit.SECONDS);
 	}
 
 	private void startKeepalive() {
 		Runnable keepAlive = () -> {
 			if (this.isConnected.get()) {
-				long l = System.currentTimeMillis()-client.timer;
-				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
-				client.timer = System.currentTimeMillis();
+				if (sentPing) {
+					if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
+						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Missed {} heartbeat responses in a row, disconnecting...", missedPingCount);
+						disconnect(DiscordDisconnectedEvent.Reason.MISSED_PINGS);
+					} else if ((System.currentTimeMillis()-client.timer) > timeoutTime && timeoutTime > 0) {
+						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Connection timed out at {}ms", System.currentTimeMillis()-client.timer);
+						disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
+					}
+					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Last ping was not responded to, skipping ping");
+					missedPingCount++;
+				} else {
+					long l = System.currentTimeMillis()-client.timer;
+					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+					send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
+					client.timer = System.currentTimeMillis();
+					sentPing = true;
+				}
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,
@@ -266,7 +279,7 @@ public class DiscordWS {
 		}
 		int op = object.get("op").getAsInt();
 
-		if (object.has("s"))
+		if (object.has("s") && !object.get("s").isJsonNull())
 			client.lastSequence = object.get("s").getAsLong();
 
 		if (op == GatewayOps.DISPATCH.ordinal()) { //Event dispatched
@@ -312,6 +325,10 @@ public class DiscordWS {
 
 				case "MESSAGE_DELETE":
 					messageDelete(eventObject);
+					break;
+
+				case "MESSAGE_DELETE_BULK":
+					messageDeleteBulk(eventObject);
 					break;
 
 				case "PRESENCE_UPDATE":
@@ -383,23 +400,56 @@ public class DiscordWS {
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = DiscordWS.connect(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon);
+				client.ws = DiscordWS.connect(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
 			}
 		} else if (op == GatewayOps.INVALID_SESSION.ordinal()) { //Invalid session ABANDON EVERYTHING!!!
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Invalid session! Attempting to clear caches and reconnect...");
-			disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
+			clearCache();
+			if (withReconnects) {
+				onOpen(session); //Starts a new connection
+			} else {
+				disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION);
+			}
+		} else if (op == GatewayOps.HELLO.ordinal()) {
+			isConnected.set(true);
+			startingUp = false;
+
+			HelloResponse helloResponse = DiscordUtils.GSON.fromJson(object.get("d"), HelloResponse.class);
+
+			client.heartbeat = helloResponse.heartbeat_interval;
+			startKeepalive();
+
+			if (client.sessionId != null) {
+				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
+				Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Reconnected to the Discord websocket.");
+			} else if (!client.getToken().isEmpty()) {
+				send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
+						Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
+			} else {
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Use the login() method to set your token first!");
+				return;
+			}
+
+		} else if (op == GatewayOps.HEARTBEAT_ACK.ordinal()) {
+			if (!sentPing) {
+				Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Received pong without sending ping! Is the websocket out of sync?");
+			} else {
+				Discord4J.LOGGER.trace(LogMarkers.KEEPALIVE, "Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-client.timer);
+				sentPing = false;
+				missedPingCount = 0;
+			}
 		} else {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
 	}
 
 	private void resumed(JsonElement eventObject) {
-		ResumedEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ResumedEventResponse.class);
-		client.heartbeat = event.heartbeat_interval;
-		startKeepalive();
+//		ResumedEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ResumedEventResponse.class);
+//		client.heartbeat = event.heartbeat_interval;
+//		startKeepalive();
 	}
 
 	private void ready(JsonElement eventObject) {
@@ -412,10 +462,7 @@ public class DiscordWS {
 
 			client.ourUser = DiscordUtils.getUserFromJSON(client, event.user);
 
-			client.heartbeat = event.heartbeat_interval;
 			Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Received heartbeat interval of {}.", client.heartbeat);
-
-			startKeepalive();
 
 			client.isReady = true;
 
@@ -614,6 +661,13 @@ public class DiscordWS {
 			if (message != null) {
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
+		}
+	}
+
+	private void messageDeleteBulk(JsonElement eventObject) { //TODO: maybe add a separate event for this?
+		MessageDeleteBulkEventResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageDeleteBulkEventResponse.class);
+		for (String id : event.ids) {
+			messageDelete(DiscordUtils.GSON.toJsonTree(new MessageDeleteEventResponse(id, event.channel_id)));
 		}
 	}
 
@@ -929,14 +983,6 @@ public class DiscordWS {
 				session.getRemote().sendPong(ByteBuffer.allocate(0));
 			} catch (IOException e) {
 				Discord4J.LOGGER.error(LogMarkers.KEEPALIVE, "Discord4J Internal Exception", e);
-			}
-		} else if (frame.getType() == Frame.Type.PONG) {
-			if (!sentPing) {
-				Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Received pong without sending ping! Is the websocket out of sync?");
-			} else {
-				Discord4J.LOGGER.trace(LogMarkers.KEEPALIVE, "Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-lastPingSent);
-				sentPing = false;
-				missedPingCount = 0;
 			}
 		}
 	}

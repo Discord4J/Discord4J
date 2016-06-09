@@ -14,6 +14,7 @@ public class ClientBuilder {
 	private boolean isBot = false;
 	private String botToken;
 	private boolean isDaemon = false;
+	private boolean withReconnects = false;
 
 	/**
 	 * Sets the login info for the client.
@@ -33,7 +34,7 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the client to be a bot, replacement for {@link #withLogin(String, String)} for bot accounts.
+	 * Provides the login info for the client.
 	 *
 	 * @param token The bot's token.
 	 * @return The instance of the builder.
@@ -88,6 +89,16 @@ public class ClientBuilder {
 	}
 
 	/**
+	 * This makes the client's websocket connection attempt to automatically reconnect when a connection is lost.
+	 *
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withReconnects() {
+		this.withReconnects = true;
+		return this;
+	}
+
+	/**
 	 * Creates the discord instance with the desired features
 	 *
 	 * @return The discord instance
@@ -99,9 +110,9 @@ public class ClientBuilder {
 			throw new DiscordException("No login info present!");
 
 		if (isBot) {
-			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon);
+			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 		} else {
-			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon);
+			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 		}
 	}
 

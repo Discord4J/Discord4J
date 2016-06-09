@@ -13,10 +13,7 @@ import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -292,8 +289,8 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						System.out.println(client.getRegions().get(1).getID());
-						message.getGuild().changeRegion(client.getRegions().get(1));
+						for (int i = 0; i < 10; i ++)
+							client.changeStatus(Status.game("blah"+i));
 					}
 				});
 
