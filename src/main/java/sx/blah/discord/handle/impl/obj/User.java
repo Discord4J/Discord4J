@@ -338,7 +338,7 @@ public class User implements IUser {
 	}
 
 	/**
-	 * Sets whether the user is muted locally or not. This value is CACHED.
+	 * Sets whether the user is muted locally or not (meaning they muted themselves). This value is CACHED.
 	 *
 	 * @param isMuted Whether the user is muted or not.
 	 */
@@ -347,7 +347,7 @@ public class User implements IUser {
 	}
 
 	/**
-	 * Sets whether the user is deafened locally or not. This value is CACHED.
+	 * Sets whether the user is deafened locally or not (meaning they deafened themselves). This value is CACHED.
 	 *
 	 * @param isDeaf Whether the user is deafened or not.
 	 */

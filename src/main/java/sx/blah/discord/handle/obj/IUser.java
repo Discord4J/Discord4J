@@ -155,14 +155,15 @@ public interface IUser extends IDiscordObject<IUser> {
 	boolean isMuted(IGuild guild);
 
 	/**
-	 * Gets whether this user is deafened locally.
+	 * Gets whether this user is deafened locally (meaning they deafened themselves).
 	 *
 	 * @return True if deafened, false if otherwise.
      */
 	boolean isDeafLocally();
 
 	/**
-	 * Gets whether this user is muted locally.
+	 * Gets whether this user is muted locally (meaning they muted themselves).
+	 *
 	 * @return True if muted, false if otherwise.
      */
 	boolean isMutedLocally();
