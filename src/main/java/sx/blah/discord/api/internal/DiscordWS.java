@@ -899,6 +899,11 @@ public class DiscordWS {
 			IVoiceChannel channel = guild.getVoiceChannelByID(event.channel_id);
 			User user = (User) guild.getUserByID(event.user_id);
 			if (user != null) {
+				user.setIsDeaf(guild.getID(), event.deaf);
+				user.setIsMute(guild.getID(), event.mute);
+				user.setIsDeafLocally(event.self_deaf);
+				user.setIsMutedLocally(event.self_mute);
+
 				IVoiceChannel oldChannel = user.getConnectedVoiceChannels()
 						.stream()
 						.filter(vChannel -> vChannel.getGuild().getID().equals(event.guild_id))

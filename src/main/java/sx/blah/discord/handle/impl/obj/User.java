@@ -64,6 +64,16 @@ public class User implements IUser {
 	protected volatile String avatarURL;
 
 	/**
+	 * The local muted status of this user.
+	 */
+	private volatile boolean isMutedLocally;
+
+	/**
+	 * The local deafened status of this user.
+	 */
+	private volatile boolean isDeafLocally;
+
+	/**
 	 * The roles the user is a part of. (Key = guild id).
 	 */
 	protected final Map<String, List<IRole>> roles;
@@ -326,6 +336,30 @@ public class User implements IUser {
 	public boolean isMuted(IGuild guild) {
 		return isMuted.getOrDefault(guild.getID(), false);
 	}
+
+	/**
+	 * Sets whether the user is muted locally or not (meaning they muted themselves). This value is CACHED.
+	 *
+	 * @param isMuted Whether the user is muted or not.
+	 */
+	public void setIsMutedLocally(boolean isMuted) {
+		this.isMutedLocally = isMuted;
+	}
+
+	/**
+	 * Sets whether the user is deafened locally or not (meaning they deafened themselves). This value is CACHED.
+	 *
+	 * @param isDeaf Whether the user is deafened or not.
+	 */
+	public void setIsDeafLocally(boolean isDeaf) {
+		this.isDeafLocally = isDeaf;
+	}
+
+	@Override
+	public boolean isDeafLocally() { return isDeafLocally; }
+
+	@Override
+	public boolean isMutedLocally() { return isMutedLocally; }
 
 	@Override
 	public IDiscordClient getClient() {
