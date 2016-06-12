@@ -5,6 +5,7 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
@@ -13,7 +14,10 @@ import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
-import java.util.*;
+import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -44,9 +48,9 @@ public class TestBot {
 			IDiscordClient client;
 
 			if ((isTesting && args.length > 2) || (!isTesting && args.length > 1))
-				client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
+				client = new ClientBuilder().withReconnects().withLogin(args[0] /* username */, args[1] /* password */).build();
 			else
-				client = new ClientBuilder().withToken(args[0]).build();
+				client = new ClientBuilder().withReconnects().withToken(args[0]).build();
 
 			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
@@ -289,8 +293,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						for (int i = 0; i < 10; i ++)
-							client.changeStatus(Status.game("blah"+i));
+						((DiscordClientImpl)client).ws.disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
 					}
 				});
 

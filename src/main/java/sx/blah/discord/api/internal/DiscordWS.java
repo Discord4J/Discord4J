@@ -152,6 +152,7 @@ public class DiscordWS {
 							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 				}
 
+				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
 				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
 				new Timer("Websocket Reconnect Timer", true).schedule(new TimerTask() {
 					@Override
@@ -850,6 +851,7 @@ public class DiscordWS {
 			IRole toUpdate = guild.getRoleByID(event.role.id);
 			if (toUpdate != null) {
 				IRole oldRole = toUpdate.copy();
+				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
 				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
 			}
 		}
