@@ -208,7 +208,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = DiscordWS.connect(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {

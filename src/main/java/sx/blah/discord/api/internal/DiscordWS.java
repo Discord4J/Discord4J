@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,8 @@ import java.util.zip.InflaterInputStream;
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordWS {
 
+	private final WebSocketClient wsClient;
+	private final String gateway;
 	private volatile DiscordClientImpl client;
 	private volatile Session session;
 	public AtomicBoolean isConnected = new AtomicBoolean(false);
@@ -90,34 +93,28 @@ public class DiscordWS {
 	 */
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
-	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) throws Exception {
-		//Ensuring gateway is ready
-		if (!gateway.endsWith("/"))
-			gateway += "/";
-		gateway += "?encoding=json&v="+GATEWAY_VERSION;
-
-		SslContextFactory sslFactory = new SslContextFactory();
-		WebSocketClient wsClient = new WebSocketClient(sslFactory);
-		wsClient.setDaemon(true);
-		if (timeout != -1) {
-			wsClient.setConnectTimeout(timeout);
-			wsClient.setAsyncWriteTimeout(timeout);
-		}
-		DiscordWS socket = new DiscordWS((DiscordClientImpl) client, wsClient, timeout, maxMissedPingCount, isDaemon, withReconnects);
-		wsClient.start();
-		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
-		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
-		wsClient.connect(socket, new URI(gateway), upgradeRequest);
-		return socket;
-	}
-
-	public DiscordWS(DiscordClientImpl client, WebSocketClient wsClient, long timeout, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) {
-		this.client = client;
+	public DiscordWS(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) throws Exception {
+		this.client = (DiscordClientImpl)client;
 		this.timeoutTime = timeout;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.withReconnects = withReconnects;
 		this.startingUp = true;
+		//Ensuring gateway is ready
+		if (!gateway.endsWith("/"))
+			gateway += "/";
+		gateway += "?encoding=json&v="+GATEWAY_VERSION;
+		this.gateway = gateway;
+
+		SslContextFactory sslFactory = new SslContextFactory();
+		wsClient = new WebSocketClient(sslFactory);
+		wsClient.setDaemon(true);
+		if (timeout != -1) {
+			wsClient.setConnectTimeout(timeout);
+			wsClient.setAsyncWriteTimeout(timeout);
+		}
+		wsClient.start();
+		connect();
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (!isDaemon) {
 			new Timer("WebSocketClient Keep-Alive").scheduleAtFixedRate(new TimerTask() { //Required b/c the ws client doesn't close correctly unless it is a daemon
@@ -129,6 +126,12 @@ public class DiscordWS {
 				}
 			}, 0, 1000);
 		}
+	}
+
+	private void connect() throws URISyntaxException, IOException {
+		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
+		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
+		wsClient.connect(this, new URI(gateway), upgradeRequest);
 	}
 
 	/**
@@ -144,18 +147,25 @@ public class DiscordWS {
 					|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
 					|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT
 					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
-						&& reconnectAttempts <= MAX_RECONNECT_ATTEMPTS))
-					&& session != null
-					&& session.isOpen()) {
+						&& reconnectAttempts <= MAX_RECONNECT_ATTEMPTS))) {
 				reconnectAttempts++;
 
 				if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
 					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
 					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+					return;
 				} else {
+					if (session == null || !session.isOpen())
+						try {
+							connect();
+						} catch (URISyntaxException | IOException e) {
+							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught while attempting to reconnect.", e);
+							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+							return;
+						}
+
 					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
 					isReconnecting = true;
-					send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
 					new Timer("Websocket Reconnect Timer", true).schedule(new TimerTask() {
 						@Override
 						public void run() {
@@ -408,7 +418,7 @@ public class DiscordWS {
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = DiscordWS.connect(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+				client.ws = new DiscordWS(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
