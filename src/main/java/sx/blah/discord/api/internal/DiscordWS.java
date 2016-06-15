@@ -134,24 +134,20 @@ public class DiscordWS {
 	 * Disconnects the client WS.
 	 */
 	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
-		if (isConnected.get()) {
-			isConnected.set(false);
-			if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
-				reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
-			startingUp = false;
-			sentPing = false;
-			missedPingCount = 0;
+		if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
+			reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
 
-			if (reason == DiscordDisconnectedEvent.Reason.UNKNOWN
-					|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
-					|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT) {
-				reconnectAttempts++;
+		if ((reason == DiscordDisconnectedEvent.Reason.UNKNOWN
+				|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
+				|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT)
+				&& session != null
+				&& session.isOpen()) {
+			reconnectAttempts++;
 
-				if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
-					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
-							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
-				}
-
+			if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
+				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+			} else {
 				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
 				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
 				new Timer("Websocket Reconnect Timer", true).schedule(new TimerTask() {
@@ -164,24 +160,30 @@ public class DiscordWS {
 						this.cancel();
 					}
 				}, TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
+				return;
+			}
+		}
 
-			} else {
-				client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
-				executorService.shutdownNow();
-				client.ws = null;
-				for (DiscordVoiceWS vws : client.voiceConnections.values()) { //Ensures that voice connections are closed.
-					VoiceDisconnectedEvent.Reason voiceReason;
-					try {
-						voiceReason = VoiceDisconnectedEvent.Reason.valueOf(reason.toString());
-					} catch (IllegalArgumentException e) {
-						voiceReason = VoiceDisconnectedEvent.Reason.UNKNOWN;
-					}
-					vws.disconnect(voiceReason);
+		if (isConnected.get()) {
+			isConnected.set(false);
+			startingUp = false;
+			sentPing = false;
+			missedPingCount = 0;
+			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
+			executorService.shutdownNow();
+			client.ws = null;
+			for (DiscordVoiceWS vws : client.voiceConnections.values()) { //Ensures that voice connections are closed.
+				VoiceDisconnectedEvent.Reason voiceReason;
+				try {
+					voiceReason = VoiceDisconnectedEvent.Reason.valueOf(reason.toString());
+				} catch (IllegalArgumentException e) {
+					voiceReason = VoiceDisconnectedEvent.Reason.UNKNOWN;
 				}
-				Runtime.getRuntime().removeShutdownHook(shutdownHook);
-				if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
-					session.close();
-				}
+				vws.disconnect(voiceReason);
+			}
+			Runtime.getRuntime().removeShutdownHook(shutdownHook);
+			if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
+				session.close();
 			}
 		}
 	}
