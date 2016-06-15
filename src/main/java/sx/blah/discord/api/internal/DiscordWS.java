@@ -58,6 +58,7 @@ public class DiscordWS {
 		}
 	});
 	private volatile boolean startingUp = false;
+	private volatile boolean isReconnecting = false;
 	private final boolean isDaemon;
 	private final boolean withReconnects;
 	private volatile boolean sentPing = false;
@@ -68,7 +69,7 @@ public class DiscordWS {
 	private volatile int reconnectAttempts = 0;
 	//TODO: Expose the next two variables:
 	private static final int MAX_RECONNECT_ATTEMPTS = 3;
-	private static final int MAX_RECONNECT_TIME = 5; //Time in seconds before the reconnect is considered a failure.
+	private static final int MAX_RECONNECT_TIME = 10; //Time in seconds before the reconnect is considered a failure.
 	private static final String GATEWAY_VERSION = "5";
 	private static final int READY_TIMEOUT = 5; //Time in seconds where the ready event will timeout from wait for guilds
 	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
@@ -137,37 +138,41 @@ public class DiscordWS {
 		if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
 			reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
 
-		if ((reason == DiscordDisconnectedEvent.Reason.UNKNOWN
-				|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
-				|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT)
-				&& session != null
-				&& session.isOpen()) {
-			reconnectAttempts++;
-
-			if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
-				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
-				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
-			} else {
-				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
-				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
-				new Timer("Websocket Reconnect Timer", true).schedule(new TimerTask() {
-					@Override
-					public void run() {
-						if (!isConnected.get()) {
-							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnect attempt timed out after {} seconds", MAX_RECONNECT_TIME);
-							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
-						}
-						this.cancel();
-					}
-				}, TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
-				return;
-			}
-		}
-
 		if (isConnected.get()) {
 			isConnected.set(false);
+			if ((reason == DiscordDisconnectedEvent.Reason.UNKNOWN
+					|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
+					|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT
+					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
+						&& reconnectAttempts <= MAX_RECONNECT_ATTEMPTS))
+					&& session != null
+					&& session.isOpen()) {
+				reconnectAttempts++;
+
+				if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
+					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+				} else {
+					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
+					isReconnecting = true;
+					send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
+					new Timer("Websocket Reconnect Timer", true).schedule(new TimerTask() {
+						@Override
+						public void run() {
+							if (isReconnecting) {
+								Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnect attempt timed out after {} seconds", MAX_RECONNECT_TIME);
+								disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+							}
+							this.cancel();
+						}
+					}, TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
+					return;
+				}
+			}
+
 			startingUp = false;
 			sentPing = false;
+			isReconnecting = false;
 			missedPingCount = 0;
 			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			executorService.shutdownNow();
@@ -459,6 +464,8 @@ public class DiscordWS {
 		final ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to the Discord Websocket v"+event.v);
 		final AtomicInteger guildsToWaitFor = new AtomicInteger(0);
+		isReconnecting = false;
+		reconnectAttempts = 0;
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> { //Ready event handling 1/2
 			client.sessionId = event.session_id;
