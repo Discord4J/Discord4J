@@ -522,7 +522,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	}
 
 	/**
-	 * This "bulk deletes" a list of messages.(Note: Only 100 messages can be deleted at a time).
+	 * This "bulk deletes" a list of messages. (Note: Only 100 messages can be deleted at a time).
 	 *
 	 * @param messages The messages to delete.
 	 *
