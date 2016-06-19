@@ -127,6 +127,7 @@ See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/
 
 ## Projects using Discord4J
 * Instructability by @Kaioru: A simple command API (https://github.com/Kaioru/Instructability)
+* Discordinator.java by @alpha;helix: A modularized command API (https://github.com/alphahelix00/Discordinator.java)
 
 ## Deprecation policy
 Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
