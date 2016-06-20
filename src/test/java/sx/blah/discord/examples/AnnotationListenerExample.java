@@ -33,7 +33,7 @@ public class AnnotationListenerExample extends BaseBot {
 		}
 
 		@EventSubscriber
-		public void logout(DiscordDisconnectedEvent event) { //This is called when DiscordDisconnectedEvent is dispatched
+		public void logout(DiscordDisconnectedEvent event) { // This is called when DiscordDisconnectedEvent is dispatched
 			System.out.println("Logged out for reason " + event.getReason() + "!");
 		}
 	}
