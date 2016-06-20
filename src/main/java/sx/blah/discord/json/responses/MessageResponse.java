@@ -71,6 +71,11 @@ public class MessageResponse {
 	public String[] mention_roles;
 
 	/**
+	 * Whether this message has been pinned in the channel.
+	 */
+	public boolean pinned;
+
+	/**
 	 * Represents embeded data
 	 */
 	public static class EmbedResponse {

@@ -288,6 +288,35 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	List<IUser> getUsersHere();
 
 	/**
+	 * Gets the pinned messages in this channel.
+	 *
+	 * @return The pinned messages.
+	 */
+	List<IMessage> getPinnedMessages();
+
+	/**
+	 * This pins the provided message to this channel.
+	 *
+	 * @param message The message to pin.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void pin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
+	 * This unpins the provided message from this channel.
+	 *
+	 * @param message The message to unpin.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
 	class PermissionOverride {

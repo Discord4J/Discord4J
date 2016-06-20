@@ -271,6 +271,11 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public boolean isPinned() {
+		return channel.getPinnedMessages().contains(this);
+	}
+
+	@Override
 	public IMessage copy() {
 		Message message = new Message(client, id, content, author, channel, timestamp, editedTimestamp,
 				mentionsEveryone, mentions, roleMentions, attachments);

@@ -3,18 +3,21 @@ package sx.blah.discord.api.internal;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.audio.impl.AudioManager;
-import sx.blah.discord.json.generic.StatusObject;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.generic.RoleResponse;
+import sx.blah.discord.json.generic.StatusObject;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -23,7 +26,10 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -404,7 +410,19 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
+
 			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position);
+
+			try {
+				MessageResponse[] pinnedMessages = GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + json.id + "/pins",
+						new BasicNameValuePair("authorization", client.getToken()),
+						new BasicNameValuePair("content-type", "application/json")), MessageResponse[].class);
+
+				for (MessageResponse message : pinnedMessages)
+					channel.getPinnedMessages().add(getMessageFromJSON(client, channel, message));
+			} catch (RateLimitException | DiscordException e) {
+				Discord4J.LOGGER.error(LogMarkers.API, "Unable to fetch pinned messages for channel "+json.id+"!", e);
+			}
 
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(

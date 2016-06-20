@@ -108,6 +108,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	Optional<LocalDateTime> getEditedTimestamp();
 
 	/**
+	 * Returns whether this message has been pinned on its channel or not.
+	 *
+	 * @return True if pinned, false is otherwise.
+	 */
+	boolean isPinned();
+
+	/**
 	 * Gets the guild this message is from.
 	 *
 	 * @return The guild.

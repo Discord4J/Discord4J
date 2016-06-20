@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -85,12 +87,17 @@ public class Channel implements IChannel {
 	/**
 	 * The permission overrides for users (key = user id).
 	 */
-	protected volatile Map<String, PermissionOverride> userOverrides;
+	protected final Map<String, PermissionOverride> userOverrides;
 
 	/**
 	 * The permission overrides for roles (key = user id).
 	 */
-	protected volatile Map<String, PermissionOverride> roleOverrides;
+	protected final Map<String, PermissionOverride> roleOverrides;
+
+	/**
+	 * The pinned messages in the channel.
+	 */
+	protected final List<IMessage> pinnedMessages;
 
 	/**
 	 * The client that created this object.
@@ -98,10 +105,10 @@ public class Channel implements IChannel {
 	protected final IDiscordClient client;
 
 	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-		this(client, name, id, parent, topic, position, new HashMap<>(), new HashMap<>());
+		this(client, name, id, parent, topic, position, new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
 	}
 
-	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> pinnedMessages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -111,6 +118,7 @@ public class Channel implements IChannel {
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
+		this.pinnedMessages = pinnedMessages;
 		if (!(this instanceof IVoiceChannel))
 			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
 		else
@@ -488,8 +496,41 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public List<IMessage> getPinnedMessages() {
+		return pinnedMessages;
+	}
+
+	@Override
+	public void pin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
+
+		if (!message.getChannel().equals(this))
+			throw new DiscordException("Message channel doesn't match current channel!");
+
+		if (message.isPinned())
+			throw new DiscordException("Message already pinned!");
+
+		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
+				new BasicNameValuePair("authorization", client.getToken()));
+	}
+
+	@Override
+	public void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
+
+		if (!message.getChannel().equals(this))
+			throw new DiscordException("Message channel doesn't match current channel!");
+
+		if (!message.isPinned())
+			throw new DiscordException("Message already unpinned!");
+
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
+				new BasicNameValuePair("authorization", client.getToken()));
+	}
+
+	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
+		Channel channel = new Channel(client, name, id, parent, topic, position, pinnedMessages, roleOverrides, userOverrides);
 		channel.setTypingStatus(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
