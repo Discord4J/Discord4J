@@ -31,7 +31,7 @@ public class BaseBot {
 		BaseBot bot = null; // Initializing the bot variable
 
 		ClientBuilder builder = new ClientBuilder(); // Creates a new client builder instance
-		builder.withToken(token); // Sets the email and password for the client
+		builder.withToken(token); // Sets the bot token for the client
 		try {
 			IDiscordClient client = builder.login(); // Builds the IDiscordClient instance and logs it in
 			bot = new BaseBot(client); // Creating the bot instance
