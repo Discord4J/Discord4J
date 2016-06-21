@@ -1,5 +1,7 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.util.MissingPermissionsException;
+
 import java.util.List;
 
 /**
@@ -15,8 +17,10 @@ public interface IVoiceChannel extends IChannel {
 
 	/**
 	 * Makes the bot user join this voice channel.
+	 *
+	 * @throws MissingPermissionsException
 	 */
-	void join();
+	void join() throws MissingPermissionsException;
 
 	/**
 	 * Makes the bot user leave this voice channel.
