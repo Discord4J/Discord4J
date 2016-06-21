@@ -8,6 +8,7 @@ import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.util.MissingPermissionsException;
 
 public class VoiceBot {
     public static void main(String... args) {
@@ -16,14 +17,16 @@ public class VoiceBot {
             client.getConnectedVoiceChannels().get(0).getGuild().getAudioChannel().queueFile(args[3]);
 
             client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
-
-
 				@Override
                 public void handle(ReadyEvent event) {
-                    IGuild guild = client.getGuilds().get(1);
-                    IVoiceChannel voiceChannel = guild.getVoiceChannels().get(0);
-                    voiceChannel.join();
-                }
+					try {
+						IGuild guild = client.getGuilds().get(1);
+						IVoiceChannel voiceChannel = guild.getVoiceChannels().get(0);
+						voiceChannel.join();
+					} catch (MissingPermissionsException e) {
+						e.printStackTrace();
+					}
+				}
             });
 
             client.getDispatcher().registerListener(new IListener<VoiceUserSpeakingEvent>() {
