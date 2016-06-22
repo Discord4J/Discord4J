@@ -97,6 +97,26 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * This sets the content to a multiline code block with no language highlighting.
+	 *
+	 * @param content The content inside the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withQuote(String content) {
+		return withCode("", content);
+	}
+
+	/**
+	 * Adds a multiline code block with no language highlighting.
+	 *
+	 * @param content The content inside the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder appendQuote(String content) {
+		return appendCode("", content);
+	}
+
+	/**
 	 * Sets the content to a multiline code block with specific language syntax highlighting.
 	 *
 	 * @param language The language to do syntax highlighting for.
@@ -116,7 +136,7 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder appendCode(String language, String content) {
-		return appendContent(language+" "+content, Styles.CODE_WITH_LANG);
+		return appendContent(language+"\n"+content, Styles.CODE_WITH_LANG);
 	}
 
 	/**
