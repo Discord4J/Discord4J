@@ -23,11 +23,7 @@ public class AudioManager implements IAudioManager {
 	public static final int OPUS_MONO_CHANNEL_COUNT = 1;
 	public static final int OPUS_STEREO_CHANNEL_COUNT = 2;
 
-	private static final ConcurrentHashMap<Integer, PointerByReference> encoders = new ConcurrentHashMap<>();
-	static { //Creates encoders for the 2 most common channel counts. The rest are uncommon enough that it's better to use lazy initialization for them.
-		getEncoderForChannels(1);
-		getEncoderForChannels(2);
-	}
+	private final ConcurrentHashMap<Integer, PointerByReference> encoders = new ConcurrentHashMap<>();
 
 	private final IGuild guild;
 	private final IDiscordClient client;
@@ -38,6 +34,9 @@ public class AudioManager implements IAudioManager {
 	public AudioManager(IGuild guild) {
 		this.guild = guild;
 		client = guild.getClient();
+		//Creates encoders for the 2 most common channel counts. The rest are uncommon enough that it's better to use lazy initialization for them.
+		getEncoderForChannels(1);
+		getEncoderForChannels(2);
 	}
 
 	@Override
@@ -124,7 +123,7 @@ public class AudioManager implements IAudioManager {
 	}
 
 	//Caching encoder objects is more efficient than dynamically creating/destroying them.
-	private static PointerByReference getEncoderForChannels(int channels) {
+	private PointerByReference getEncoderForChannels(int channels) {
 		if (!encoders.containsKey(channels)) {
 			try {
 				IntBuffer error = IntBuffer.allocate(4);
