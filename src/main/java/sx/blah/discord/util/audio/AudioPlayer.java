@@ -142,6 +142,15 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
+	 * This gets the guild this AudioPlayer instance is associated to.
+	 *
+	 * @return The guild.
+	 */
+	public IGuild getGuild() {
+		return manager.getGuild();
+	}
+
+	/**
 	 * Sets whether this player is paused or not.
 	 *
 	 * @param isPaused True to pause, false to resume.
