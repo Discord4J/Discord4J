@@ -3,7 +3,6 @@ package sx.blah.discord.api.internal;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -14,10 +13,8 @@ import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.generic.StatusObject;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -358,13 +355,14 @@ public class DiscordUtils {
 			message.setMentions(getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json));
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
 			message.setEditedTimestamp(json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
+			message.setPinned(json.pinned);
 			return message;
 		} else
 			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),
 					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ?
 					null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
 					getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json),
-					getAttachmentsFromJSON(json));
+					getAttachmentsFromJSON(json), json.pinned);
 	}
 
 	/**
@@ -412,17 +410,6 @@ public class DiscordUtils {
 		} else {
 
 			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position);
-
-			try {
-				MessageResponse[] pinnedMessages = GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + json.id + "/pins",
-						new BasicNameValuePair("authorization", client.getToken()),
-						new BasicNameValuePair("content-type", "application/json")), MessageResponse[].class);
-
-				for (MessageResponse message : pinnedMessages)
-					channel.getPinnedMessages().add(getMessageFromJSON(client, channel, message));
-			} catch (RateLimitException | DiscordException e) {
-				Discord4J.LOGGER.error(LogMarkers.API, "Unable to fetch pinned messages for channel "+json.id+"!", e);
-			}
 
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(

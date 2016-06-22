@@ -136,8 +136,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 			Object[] cache = messageCache.toArray();
 			for (int i = start-1; i >= capacity; i--) {
-				if (!((IMessage) cache[i]).isPinned())
-					messageCache.remove((IMessage) cache[i]);
+				messageCache.remove((IMessage) cache[i]);
 			}
 
 			return start-size();
@@ -169,13 +168,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		}
 
 		for (MessageResponse messageResponse : messages) {
-			if (messageResponse.pinned) { //Pinned messages were already stored
-				channel.getPinnedMessages()
-						.stream()
-						.filter(message -> message.getID().equals(messageResponse.id))
-						.findFirst()
-						.ifPresent(this::add);
-			} else if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse), true))
+			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse), true))
 				return false;
 		}
 
@@ -250,7 +243,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 	@Override
 	public synchronized boolean remove(Object o) {
-		if (!(o instanceof IMessage) || !((IMessage) o).getChannel().equals(channel) && ((IMessage) o).isPinned())
+		if (!(o instanceof IMessage) || !((IMessage) o).getChannel().equals(channel))
 			return false;
 
 		return messageCache.remove(o);

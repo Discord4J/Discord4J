@@ -19,12 +19,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected int userLimit = 0;
 
 	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit) {
-		this(client, name, id, parent, topic, position, new ArrayList<>(), new HashMap<>(), new HashMap<>());
+		this(client, name, id, parent, topic, position, new HashMap<>(), new HashMap<>());
 		this.userLimit = userLimit;
 	}
 
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> pinned, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
-		super(client, name, id, parent, topic, position, pinned, roleOverrides, userOverrides);
+	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 	}
 
 	@Override

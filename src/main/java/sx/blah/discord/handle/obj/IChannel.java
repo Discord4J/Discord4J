@@ -291,8 +291,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Gets the pinned messages in this channel.
 	 *
 	 * @return The pinned messages.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
 	 */
-	List<IMessage> getPinnedMessages();
+	List<IMessage> getPinnedMessages() throws RateLimitException, DiscordException;
 
 	/**
 	 * This pins the provided message to this channel.

@@ -553,9 +553,6 @@ public class DiscordWS {
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						event.author.id, event.channel_id, event.content);
 
-				if (message.isPinned())
-					channel.getPinnedMessages().add(message);
-
 				List<String> invites = DiscordUtils.getInviteCodesFromMessage(event.content);
 				if (invites.size() > 0) {
 					String[] inviteCodes = invites.toArray(new String[invites.size()]);
@@ -673,10 +670,8 @@ public class DiscordWS {
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
 
 			if (toUpdate.isPinned() && !event.pinned) {
-				channel.getPinnedMessages().remove(toUpdate);
 				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
 			} else if (!toUpdate.isPinned() && event.pinned) {
-				channel.getPinnedMessages().add(toUpdate);
 				client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
 			} else {
 				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
@@ -694,7 +689,7 @@ public class DiscordWS {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
 				if (message.isPinned()) {
-					channel.getPinnedMessages().remove(message);
+					((Message) message).setPinned(false); //For consistency with the event
 					client.dispatcher.dispatch(new MessageUnpinEvent(message));
 				}
 

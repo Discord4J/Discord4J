@@ -28,7 +28,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -95,20 +94,15 @@ public class Channel implements IChannel {
 	protected final Map<String, PermissionOverride> roleOverrides;
 
 	/**
-	 * The pinned messages in the channel.
-	 */
-	protected final List<IMessage> pinnedMessages;
-
-	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
 
 	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-		this(client, name, id, parent, topic, position, new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+		this(client, name, id, parent, topic, position, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
 	}
 
-	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, List<IMessage> pinnedMessages, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -118,7 +112,6 @@ public class Channel implements IChannel {
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
-		this.pinnedMessages = pinnedMessages;
 		if (!(this instanceof IVoiceChannel))
 			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
 		else
@@ -496,8 +489,16 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public List<IMessage> getPinnedMessages() {
-		return pinnedMessages;
+	public List<IMessage> getPinnedMessages() throws RateLimitException, DiscordException {
+		List<IMessage> messages = new ArrayList<>();
+		MessageResponse[] pinnedMessages = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins",
+				new BasicNameValuePair("authorization", client.getToken()),
+				new BasicNameValuePair("content-type", "application/json")), MessageResponse[].class);
+
+		for (MessageResponse message : pinnedMessages)
+			messages.add(DiscordUtils.getMessageFromJSON(client, this, message));
+
+		return messages;
 	}
 
 	@Override
@@ -530,7 +531,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, parent, topic, position, pinnedMessages, roleOverrides, userOverrides);
+		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 		channel.setTypingStatus(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);

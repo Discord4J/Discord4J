@@ -77,13 +77,19 @@ public class Message implements IMessage {
 	protected volatile boolean mentionsEveryone;
 
 	/**
+	 * Whether the message has been pinned to its channel or not.
+	 */
+	protected volatile boolean isPinned;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
 
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
-				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments) {
+				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
+				   boolean pinned) {
 		this.client = client;
 		this.id = id;
 		this.content = content;
@@ -95,6 +101,7 @@ public class Message implements IMessage {
 		this.roleMentions = roleMentions;
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
+		this.isPinned = pinned;
 	}
 
 	@Override
@@ -272,13 +279,22 @@ public class Message implements IMessage {
 
 	@Override
 	public boolean isPinned() {
-		return channel.getPinnedMessages().contains(this);
+		return isPinned;
+	}
+
+	/**
+	 * This sets the CACHED isPinned value.
+	 *
+	 * @param pinned Whether the message is pinned.
+	 */
+	public void setPinned(boolean pinned) {
+		isPinned = pinned;
 	}
 
 	@Override
 	public IMessage copy() {
 		Message message = new Message(client, id, content, author, channel, timestamp, editedTimestamp,
-				mentionsEveryone, mentions, roleMentions, attachments);
+				mentionsEveryone, mentions, roleMentions, attachments, isPinned);
 		return message;
 	}
 
