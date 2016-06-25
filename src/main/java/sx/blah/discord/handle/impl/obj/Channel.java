@@ -511,7 +511,7 @@ public class Channel implements IChannel {
 		if (message.isPinned())
 			throw new DiscordException("Message already pinned!");
 
-		Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
+		Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
