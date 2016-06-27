@@ -35,7 +35,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,18 +49,9 @@ public class DiscordWS {
 	private volatile DiscordClientImpl client;
 	private volatile Session session;
 	protected final AtomicBoolean isConnected = new AtomicBoolean(false);
-	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2, new ThreadFactory() {
-		private volatile int executorCount = 0;
-
-		@Override
-		public Thread newThread(Runnable r) {
-			Thread thread = Executors.defaultThreadFactory().newThread(r);
-			thread.setName("Discord4J WebSocket Client Executor "+(executorCount++));
-			return thread;
-		}
-	});
+	private volatile ScheduledExecutorService executorService;
 	private volatile boolean startingUp = false;
-	private final AtomicBoolean isReconnecting = new AtomicBoolean(false);
+	protected final AtomicBoolean isReconnecting = new AtomicBoolean(false);
 	private final boolean isDaemon;
 	private final boolean withReconnects;
 	private volatile boolean sentPing = false;
@@ -138,14 +128,17 @@ public class DiscordWS {
 	 * Disconnects the client WS.
 	 */
 	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
+		executorService.shutdownNow();
+
 		if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
 			reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
 
 		if (isConnected.get()) {
 			isConnected.set(false);
-			if ((reason == DiscordDisconnectedEvent.Reason.UNKNOWN
+			if (withReconnects && (reason == DiscordDisconnectedEvent.Reason.UNKNOWN
 					|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
 					|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT
+					|| reason == DiscordDisconnectedEvent.Reason.INIT_ERROR
 					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
 						&& reconnectAttempts <= MAX_RECONNECT_ATTEMPTS))) {
 				reconnectAttempts++;
@@ -155,7 +148,14 @@ public class DiscordWS {
 					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 					return;
 				} else {
-					if (session == null || !session.isOpen())
+					if (reason == DiscordDisconnectedEvent.Reason.INIT_ERROR) {
+						try {
+							client.ws = new DiscordWS(client, gateway, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
+						} catch (Exception e) {
+							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught while attempting to reconnect.", e);
+						}
+					} else if (session == null || !session.isOpen()) {
 						try {
 							connect();
 						} catch (URISyntaxException | IOException e) {
@@ -163,6 +163,7 @@ public class DiscordWS {
 							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 							return;
 						}
+					}
 
 					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
 					isReconnecting.set(true);
@@ -185,7 +186,6 @@ public class DiscordWS {
 			isReconnecting.set(false);
 			missedPingCount = 0;
 			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
-			executorService.shutdownNow();
 			client.ws = null;
 			for (DiscordVoiceWS vws : client.voiceConnections.values()) { //Ensures that voice connections are closed.
 				VoiceDisconnectedEvent.Reason voiceReason;
@@ -206,7 +206,7 @@ public class DiscordWS {
 	/**
 	 * Clears the api's cache
 	 */
-	private void clearCache() {
+	protected void clearCache() {
 		client.sessionId = null;
 		client.voiceConnections.clear();
 		client.guildList.clear();
@@ -251,8 +251,16 @@ public class DiscordWS {
 	}
 
 	private void startKeepalive() {
+		if (executorService == null || executorService.isShutdown() || executorService.isTerminated()) {
+			executorService = Executors.newScheduledThreadPool(1, r -> {
+				Thread thread = Executors.defaultThreadFactory().newThread(r);
+				thread.setName("Discord4J WebSocket Heartbeat Executor");
+				return thread;
+			});
+		}
+
 		Runnable keepAlive = () -> {
-			if (this.isConnected.get()) {
+			if (this.isConnected.get() && !this.isReconnecting.get()) {
 				if (sentPing) {
 					if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
 						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Missed {} heartbeat responses in a row, disconnecting...", missedPingCount);

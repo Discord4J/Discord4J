@@ -232,8 +232,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		if (isReady()) {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 
-			lastSequence = 0;
-			sessionId = null; //Prevents the websocket from sending a resume request.
+			ws.clearCache();
 
 			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
@@ -337,7 +336,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isReady() {
-		return isReady && ws != null && ws.isConnected.get();
+		return isReady && ws != null && ws.isConnected.get() && !ws.isReconnecting.get();
 	}
 
 	@Override
