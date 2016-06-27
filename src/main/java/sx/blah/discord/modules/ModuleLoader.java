@@ -37,6 +37,13 @@ public class ModuleLoader {
 	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
 
 	static {
+		//Yay! Proprietary hooks. This is used for ModuleLoader+ (https://github.com/Discord4J-Addons/Module-Loader-Plus)
+		// to be able to load internal modules automagically. This is not in Discord4J by default due to the massive
+		// overhead it provides.
+		try {
+			Class.forName("com.austinv11.modules.ModuleLoaderPlus"); //Loads the class' static initializer block
+		} catch (ClassNotFoundException ignored) {}
+
 		if (Configuration.LOAD_EXTERNAL_MODULES) {
 			File modulesDir = new File(MODULE_DIR);
 			if (modulesDir.exists()) {
@@ -92,6 +99,17 @@ public class ModuleLoader {
 	 */
 	public List<IModule> getLoadedModules() {
 		return loadedModules;
+	}
+
+	/**
+	 * Gets the module classes which will/has been loaded and may or may not be enabled in a given module instance.
+	 *
+	 * @return The module classes.
+	 *
+	 * @see #getLoadedModules()
+	 */
+	public List<Class<? extends IModule>> getModules() {
+		return modules;
 	}
 
 	/**
