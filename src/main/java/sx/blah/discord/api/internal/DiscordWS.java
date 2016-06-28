@@ -133,12 +133,19 @@ public class DiscordWS {
 		if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
 			reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
 
+		if (reason == DiscordDisconnectedEvent.Reason.LOGGED_OUT
+				|| reason == DiscordDisconnectedEvent.Reason.INIT_ERROR
+				|| reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION) {
+			clearCache();
+		}
+
 		if (isConnected.get()) {
 			isConnected.set(false);
 			if (withReconnects && (reason == DiscordDisconnectedEvent.Reason.UNKNOWN
 					|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
 					|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT
 					|| reason == DiscordDisconnectedEvent.Reason.INIT_ERROR
+					|| reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION
 					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
 						&& reconnectAttempts <= MAX_RECONNECT_ATTEMPTS))) {
 				reconnectAttempts++;
@@ -148,7 +155,7 @@ public class DiscordWS {
 					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 					return;
 				} else {
-					if (reason == DiscordDisconnectedEvent.Reason.INIT_ERROR) {
+					if (reason == DiscordDisconnectedEvent.Reason.INIT_ERROR || reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION) {
 						try {
 							client.ws = new DiscordWS(client, gateway, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
@@ -433,12 +440,7 @@ public class DiscordWS {
 			}
 		} else if (op == GatewayOps.INVALID_SESSION.ordinal()) { //Invalid session ABANDON EVERYTHING!!!
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Invalid session! Attempting to clear caches and reconnect...");
-			clearCache();
-			if (withReconnects) {
-				onOpen(session); //Starts a new connection
-			} else {
-				disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION);
-			}
+			disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION);
 		} else if (op == GatewayOps.HELLO.ordinal()) {
 			isConnected.set(true);
 			startingUp = false;

@@ -232,8 +232,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 		if (isReady()) {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 
-			ws.clearCache();
-
 			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
 		} else
