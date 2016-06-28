@@ -7,6 +7,7 @@
 * @TheFjonG -Created the awesome Discord4J ReadTheDocs page
 * @Martacus -Created an example repo for Discord4J modules
 * @davue -Added user fields to VoiceUser events
+* @dec -Wrote the regex for invite parsing
 * @langerhans -Helped with the AudioChannel object
 * @Kaioru -Fixed the module-requires manifest key
 * @theIgloo -Fixed voice state logic, added self mute and deaf support and made IVoiceChannel#join() check the user's 
