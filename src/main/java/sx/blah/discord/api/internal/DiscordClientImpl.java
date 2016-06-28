@@ -230,10 +230,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void logout() throws RateLimitException, DiscordException {
 		if (isReady()) {
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-
 			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
+
+			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 	}
