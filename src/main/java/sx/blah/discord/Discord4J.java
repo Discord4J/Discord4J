@@ -18,6 +18,7 @@
  */
 package sx.blah.discord;
 
+import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
@@ -65,6 +66,66 @@ public class Discord4J {
 	 */
 	protected static final LocalDateTime launchTime = LocalDateTime.now();
 
+	/**
+	 * Cached jetty logger instance.
+	 */
+	private static final org.eclipse.jetty.util.log.Logger jettyLogger;
+	/**
+	 * No-op jetty logger implementation.
+	 */
+	private static final org.eclipse.jetty.util.log.Logger ignoredJettyLogger = new org.eclipse.jetty.util.log.Logger() {
+		@Override
+		public String getName() {
+			return "Jetty (Ignored)";
+		}
+
+		@Override
+		public void warn(String msg, Object... args) {}
+
+		@Override
+		public void warn(Throwable thrown) {}
+
+		@Override
+		public void warn(String msg, Throwable thrown) {}
+
+		@Override
+		public void info(String msg, Object... args) {}
+
+		@Override
+		public void info(Throwable thrown) {}
+
+		@Override
+		public void info(String msg, Throwable thrown) {}
+
+		@Override
+		public boolean isDebugEnabled() {
+			return false;
+		}
+
+		@Override
+		public void setDebugEnabled(boolean enabled) {}
+
+		@Override
+		public void debug(String msg, Object... args) {}
+
+		@Override
+		public void debug(String msg, long value) {}
+
+		@Override
+		public void debug(Throwable thrown) {}
+
+		@Override
+		public void debug(String msg, Throwable thrown) {}
+
+		@Override
+		public org.eclipse.jetty.util.log.Logger getLogger(String name) {
+			return this;
+		}
+
+		@Override
+		public void ignore(Throwable ignored) {}
+	};
+
 	//Dynamically getting various information from maven
 	static {
 		InputStream stream = Discord4J.class.getClassLoader().getResourceAsStream("app.properties");
@@ -79,6 +140,9 @@ public class Discord4J {
 		VERSION = properties.getProperty("application.version");
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
+
+		jettyLogger = Log.getLog();
+		Log.setLog(ignoredJettyLogger);
 
 		LOGGER.info(LogMarkers.MAIN, "{} v{}", NAME, VERSION);
 		LOGGER.info(LogMarkers.MAIN, "{}", DESCRIPTION);
@@ -118,5 +182,12 @@ public class Discord4J {
 	 */
 	public static LocalDateTime getLaunchTime() {
 		return launchTime;
+	}
+
+	/**
+	 * This enables Jetty Websocket logging. WARNING: This spams the console a ton.
+	 */
+	public static void enableJettyLogging() {
+		Log.setLog(jettyLogger);
 	}
 }

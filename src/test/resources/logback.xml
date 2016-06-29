@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
-	<logger name="org.eclipse.jetty" level="INFO"/>
+	<!--<logger name="org.eclipse.jetty" level="INFO"/>-->
 	<logger name="sx.blah.discord.Discord4J" level="TRACE"/>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
