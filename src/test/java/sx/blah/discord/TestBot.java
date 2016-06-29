@@ -228,6 +228,9 @@ public class TestBot {
 							} else if (m.getContent().startsWith(".join")) {
 								IVoiceChannel channel = m.getGuild().getVoiceChannelsByName(m.getContent().split(" ")[1]).get(0);
 								channel.join();
+							} else if (m.getContent().startsWith(".leave")) {
+								IVoiceChannel channel = m.getGuild().getVoiceChannelsByName(m.getContent().split(" ")[1]).get(0);
+								channel.leave();
 							} else if (m.getContent().startsWith(".play")) {
 								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
 								player.queue(new File("./test.mp3"));

@@ -164,6 +164,7 @@ public class Discord4J {
 
 		try {
 			ClientBuilder builder = new ClientBuilder();
+			builder.withReconnects();
 			IDiscordClient client = (args.length == 1 ? builder.withToken(args[0]) : builder.withLogin(args[0], args[1])).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());

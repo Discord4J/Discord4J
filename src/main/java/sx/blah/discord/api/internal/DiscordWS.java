@@ -380,6 +380,15 @@ public class DiscordWS {
 					channelDelete(eventObject);
 					break;
 
+				case "CHANNEL_PINS_UPDATE"://Fired when a pins are changed, this is mostly intended for clients so I'm ignoring it
+					//Payload for future reference is:
+					// {
+					// 		"last_pin_timestamp": "TIMESTAMP",
+					// 		"channel_id": "CHANNEL ID"
+					// }
+					//Ignored
+					break;
+
 				case "USER_UPDATE":
 					userUpdate(eventObject);
 					break;
