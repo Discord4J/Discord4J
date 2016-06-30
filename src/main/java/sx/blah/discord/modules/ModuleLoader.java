@@ -240,10 +240,7 @@ public class ModuleLoader {
 
 		files.forEach((file) -> {
 			try {
-				JarFile jarFile = new JarFile(file);
-				Manifest manifest = jarFile.getManifest();
-				if (manifest != null && manifest.getMainAttributes() != null
-						&& manifest.getMainAttributes().containsKey(new Attributes.Name("module-requires"))) {
+				if (getModuleRequires(file).length > 0) {
 					dependents.add(file);
 				} else {
 					independents.add(file);
@@ -257,8 +254,12 @@ public class ModuleLoader {
 
 		List<File> noLongerDependents = dependents.stream().filter(jarFile -> { //loads all dependents whose requirements have been met already
 			try {
-				Class clazz = Class.forName(new JarFile(jarFile).getManifest().getMainAttributes().getValue("module-requires"));
-				return clazz != null;
+				String[] moduleRequires = getModuleRequires(jarFile);
+				List<Class> classes = new ArrayList<>();
+				for (String clazz : moduleRequires) {
+					classes.add(Class.forName(clazz));
+				}
+				return classes.size() == moduleRequires.length;
 			} catch (Exception e) {
 				return false;
 			}
@@ -269,8 +270,13 @@ public class ModuleLoader {
 		dependents.removeIf((file -> { //Filters out all unusable files
 			boolean cannotBeLoaded = true;
 			try {
-				cannotBeLoaded = findFileForClass(dependents,
-						new JarFile(file).getManifest().getMainAttributes().getValue("module-requires")) == null;
+				String[] required = getModuleRequires(file);
+				for (String clazz : required) {
+					cannotBeLoaded = findFileForClass(dependents, clazz) == null;
+
+					if (cannotBeLoaded)
+						break;
+				}
 			} catch (IOException ignored) {}
 
 			if (cannotBeLoaded)
@@ -280,6 +286,19 @@ public class ModuleLoader {
 		}));
 
 		dependents.forEach(ModuleLoader::loadExternalModules);
+	}
+
+	private static String[] getModuleRequires(File file) throws IOException {
+		JarFile jarFile = new JarFile(file);
+		Manifest manifest = jarFile.getManifest();
+		Attributes.Name moduleRequires = new Attributes.Name("module-requires");
+		if (manifest != null && manifest.getMainAttributes() != null
+				&& manifest.getMainAttributes().containsKey(moduleRequires)) {
+			String value = manifest.getMainAttributes().getValue(moduleRequires);
+			return value.contains(";") ? value.split(";") : new String[]{value};
+		} else {
+			return new String[0];
+		}
 	}
 
 	private static File findFileForClass(List<File> files, String clazz) {
