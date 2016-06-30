@@ -5,14 +5,15 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
 import sx.blah.discord.util.audio.AudioPlayer;
 
+import java.awt.*;
 import java.io.File;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -296,7 +297,12 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						((DiscordClientImpl)client).ws.disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
+						RoleBuilder rb = new RoleBuilder(message.getGuild());
+						rb.setHoist(true);
+						rb.setMentionable(false);
+						rb.withColor(new Color(217, 0, 90));
+						rb.withName("new role name");
+						System.out.println(rb.build().getPosition());
 					}
 				});
 
