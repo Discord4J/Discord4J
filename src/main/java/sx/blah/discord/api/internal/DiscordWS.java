@@ -64,7 +64,7 @@ public class DiscordWS {
 	private static final int MAX_RECONNECT_ATTEMPTS = 3;
 	private static final int MAX_RECONNECT_TIME = 10; //Time in seconds before the reconnect is considered a failure.
 	private static final String GATEWAY_VERSION = "5";
-	private static final int READY_TIMEOUT = 5; //Time in seconds where the ready event will timeout from wait for guilds
+	private static final int READY_TIMEOUT = 10; //Time in seconds where the ready event will timeout from wait for guilds
 	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
 		@Override
 		public void run() {
@@ -522,11 +522,20 @@ public class DiscordWS {
 			guildsToWaitFor.set(event.guilds.length - client.getGuilds().size());
 			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Initially loaded {}/{} guilds.", client.getGuilds().size(), event.guilds.length);
 
-			client.dispatcher.waitFor((GuildCreateEvent createEvent) -> { //Wait for guilds
-				guildsToWaitFor.set(guildsToWaitFor.get()-1);
-				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Loaded {}/{} guilds.", event.guilds.length - guildsToWaitFor.get(), event.guilds.length);
-				return guildsToWaitFor.get() <= 0;
-			}, READY_TIMEOUT, TimeUnit.SECONDS);
+			final int initialCount = guildsToWaitFor.get();
+			for (int i = 0; i < initialCount; i++) {
+				client.dispatcher.waitFor((GuildCreateEvent createEvent) -> { //Wait for guilds
+					guildsToWaitFor.set(guildsToWaitFor.get()-1);
+					Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Loaded {}/{} guilds.", event.guilds.length-guildsToWaitFor.get(), event.guilds.length);
+					return true;
+				}, READY_TIMEOUT, TimeUnit.SECONDS);
+			}
+
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "{} guilds determined unavailable!", guildsToWaitFor.get());
+			for (GuildResponse response : event.guilds) {
+				if (client.getGuildByID(response.id) == null)
+					client.dispatcher.dispatch(new GuildUnavailableEvent(response.id));
+			}
 			return true;
 		}).andThen(() -> { //Ready event handling 2/2
 			for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
