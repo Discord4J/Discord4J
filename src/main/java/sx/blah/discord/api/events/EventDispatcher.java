@@ -58,6 +58,12 @@ public class EventDispatcher {
 	}
 
 	private void registerListener(Class<?> listenerClass, Object listener, boolean isTemporary) {
+		if (IListener.class.isAssignableFrom(listenerClass)) {
+			Discord4J.LOGGER.warn(LogMarkers.EVENTS, "IListener was attempted to be registered as an annotation listener. The listener in question will now be registered as an IListener.");
+			registerListener((IListener) listener, isTemporary);
+			return;
+		}
+
 		for (Method method : listenerClass.getMethods()) {
 			if (method.getParameterCount() == 1
 					&& method.isAnnotationPresent(EventSubscriber.class)) {
