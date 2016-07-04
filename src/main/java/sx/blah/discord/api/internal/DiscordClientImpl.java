@@ -3,18 +3,20 @@ package sx.blah.discord.api.internal;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
+import sx.blah.discord.handle.impl.events.StatusChangeEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.RateLimitException;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -312,6 +314,22 @@ public final class DiscordClientImpl implements IDiscordClient {
 		if (!isReady()) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return;
+		}
+
+		if (!status.equals(getOurUser().getStatus())) {
+			Status oldStatus = getOurUser().getStatus();
+			((User) getOurUser()).setStatus(status);
+			dispatcher.dispatch(new StatusChangeEvent(getOurUser(), oldStatus, status));
+		}
+
+		if ((getOurUser().getPresence() != Presences.IDLE && isIdle)
+				|| (getOurUser().getPresence() == Presences.IDLE && !isIdle)
+				|| (getOurUser().getPresence() != Presences.STREAMING && status.getType() == Status.StatusType.STREAM)) {
+			Presences oldPresence = getOurUser().getPresence();
+			Presences newPresence = isIdle ? Presences.IDLE :
+					(status.getType() == Status.StatusType.STREAM ? Presences.STREAMING : Presences.ONLINE);
+			((User) getOurUser()).setPresence(newPresence);
+			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
 		}
 
 		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));

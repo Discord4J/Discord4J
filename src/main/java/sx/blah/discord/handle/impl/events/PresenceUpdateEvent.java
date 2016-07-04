@@ -21,6 +21,10 @@ public class PresenceUpdateEvent extends Event {
 		this.newPresence = newPresence;
 	}
 
+	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence) {
+		this(null, user, oldPresence, newPresence);
+	}
+
 	/**
 	 * Gets the user's new presence.
 	 *
@@ -52,7 +56,9 @@ public class PresenceUpdateEvent extends Event {
 	 * Gets the guild involved.
 	 *
 	 * @return The guild.
+	 * @deprecated This is unreliable.
 	 */
+	@Deprecated
 	public IGuild getGuild() {
 		return guild;
 	}

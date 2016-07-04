@@ -10,15 +10,10 @@ import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
-import sx.blah.discord.util.Image;
 import sx.blah.discord.util.audio.AudioPlayer;
 
-import java.awt.*;
 import java.io.File;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -297,12 +292,8 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						RoleBuilder rb = new RoleBuilder(message.getGuild());
-						rb.setHoist(true);
-						rb.setMentionable(false);
-						rb.withColor(new Color(217, 0, 90));
-						rb.withName("new role name");
-						System.out.println(rb.build().getPosition());
+						message.reply(client.getOurUser().getStatus().getStatusMessage());
+						client.changeStatus(Status.game("Blah"+new Random().nextInt()));
 					}
 				});
 

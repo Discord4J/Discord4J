@@ -20,6 +20,9 @@ public class StatusChangeEvent extends Event {
 		this.oldStatus = oldStatus;
 		this.newStatus = newStatus;
 	}
+	public StatusChangeEvent(IUser user, Status oldStatus, Status newStatus) {
+		this(null, user, oldStatus, newStatus);
+	}
 
 	/**
 	 * Gets the new status.
@@ -52,7 +55,9 @@ public class StatusChangeEvent extends Event {
 	 * Gets the guild involved.
 	 *
 	 * @return The guild.
+	 * @deprecated This is unreliable and unnecessary.
 	 */
+	@Deprecated
 	public IGuild getGuild() {
 		return guild;
 	}
