@@ -178,9 +178,8 @@ public class Guild implements IGuild {
 		if (users == null)
 			return null;
 		return users.stream()
-				.filter(u -> u != null
-						&& u.getID() != null
-						&& u.getID().equalsIgnoreCase(id))
+				.distinct()
+				.filter(u -> u != null && u.getID() != null && u.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
 	}
 
