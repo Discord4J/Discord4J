@@ -37,6 +37,10 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
+			if (Discord4J.LOGGER instanceof Discord4J.Discord4JLogger) {
+				((Discord4J.Discord4JLogger) Discord4J.LOGGER).setLevel(Discord4J.Discord4JLogger.Level.TRACE);
+			}
+
 			Configuration.LOAD_EXTERNAL_MODULES = false; //temp
 
 			boolean isTesting = args[args.length-1].equals("CITest");
