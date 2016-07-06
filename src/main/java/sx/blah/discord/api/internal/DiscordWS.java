@@ -558,10 +558,12 @@ public class DiscordWS {
 				}, READY_TIMEOUT, TimeUnit.SECONDS);
 			}
 
-			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "{} guilds determined unavailable!", guildsToWaitFor.get());
-			for (GuildResponse response : event.guilds) {
-				if (client.getGuildByID(response.id) == null)
-					client.dispatcher.dispatch(new GuildUnavailableEvent(response.id));
+			if (guildsToWaitFor.get() != 0) {
+				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "{} guilds determined unavailable!", guildsToWaitFor.get());
+				for (GuildResponse response : event.guilds) {
+					if (client.getGuildByID(response.id) == null)
+						client.dispatcher.dispatch(new GuildUnavailableEvent(response.id));
+				}
 			}
 			return true;
 		}).andThen(() -> { //Ready event handling 2/2
