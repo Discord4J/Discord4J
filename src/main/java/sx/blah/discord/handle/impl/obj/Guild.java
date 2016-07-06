@@ -648,6 +648,9 @@ public class Guild implements IGuild {
 
 	@Override
 	public void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
+		if (client.isBot())
+			throw new DiscordException("Bot accounts are not allowed to add other bots!");
+
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {

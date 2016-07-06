@@ -48,6 +48,9 @@ public class Invite implements IInvite {
 
 	@Override
 	public InviteResponse accept() throws DiscordException, RateLimitException {
+		if (client.isBot())
+			throw new DiscordException("This action can only be performed by a user");
+
 		if (client.isReady()) {
 			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));

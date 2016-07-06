@@ -569,6 +569,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IApplication> getApplications() throws RateLimitException, DiscordException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by a user");
+
 		List<IApplication> applications = new ArrayList<>();
 
 		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
@@ -583,6 +586,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IApplication createApplication(String name) throws DiscordException, RateLimitException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by a user");
+
 		ApplicationResponse response = null;
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
