@@ -38,6 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.zip.InflaterInputStream;
 
 //This is what Hlaaftana uses so it must be good :shrug:
@@ -52,6 +53,38 @@ public class DiscordWS {
 	private volatile ScheduledExecutorService executorService;
 	private volatile boolean startingUp = false;
 	protected final AtomicBoolean isReconnecting = new AtomicBoolean(false);
+	private final Supplier<TimerTask> cancelReconnectTaskSupplier = new Supplier<TimerTask>() {
+		private volatile CancelTask task;
+
+		@Override
+		public TimerTask get() {
+			if (task == null || task.ranOrCancelled)
+				task = new CancelTask();
+
+			return task;
+		}
+
+		class CancelTask extends TimerTask {
+
+			volatile boolean ranOrCancelled = false;
+
+			@Override
+			public void run() {
+				if (!ranOrCancelled) {
+					ranOrCancelled = true;
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection attempt timed out after {} seconds", MAX_RECONNECT_TIME);
+					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+				}
+			}
+
+			@Override
+			public boolean cancel() {
+				ranOrCancelled = true;
+				return super.cancel();
+			}
+		}
+	};
+	private final Timer cancelReconnectTimer = new Timer("Reconnection Timer", true);
 	private final boolean isDaemon;
 	private final boolean withReconnects;
 	private volatile boolean sentPing = false;
@@ -127,7 +160,7 @@ public class DiscordWS {
 	/**
 	 * Disconnects the client WS.
 	 */
-	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
+	public synchronized void disconnect(DiscordDisconnectedEvent.Reason reason) {
 		executorService.shutdownNow();
 
 		if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
@@ -174,16 +207,7 @@ public class DiscordWS {
 
 					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
 					isReconnecting.set(true);
-					new Timer("Websocket Reconnect Timer", true).schedule(new TimerTask() {
-						@Override
-						public void run() {
-							if (isReconnecting.get()) {
-								Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnect attempt timed out after {} seconds", MAX_RECONNECT_TIME);
-								disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
-							}
-							this.cancel();
-						}
-					}, TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
+					cancelReconnectTimer.schedule(cancelReconnectTaskSupplier.get(), TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
 					return;
 				}
 			}
@@ -453,7 +477,10 @@ public class DiscordWS {
 		} else if (op == GatewayOps.HELLO.ordinal()) {
 			isConnected.set(true);
 			startingUp = false;
-			isReconnecting.set(false);
+			if (isReconnecting.get()) {
+				isReconnecting.set(false);
+				cancelReconnectTaskSupplier.get().cancel();
+			}
 
 			HelloResponse helloResponse = DiscordUtils.GSON.fromJson(object.get("d"), HelloResponse.class);
 
