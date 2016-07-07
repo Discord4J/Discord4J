@@ -38,6 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.zip.InflaterInputStream;
 
@@ -51,7 +52,7 @@ public class DiscordWS {
 	private volatile Session session;
 	protected final AtomicBoolean isConnected = new AtomicBoolean(false);
 	private volatile ScheduledExecutorService executorService;
-	private volatile boolean startingUp = false;
+	private final AtomicBoolean startingUp = new AtomicBoolean(false);
 	protected final AtomicBoolean isReconnecting = new AtomicBoolean(false);
 	private final Supplier<TimerTask> cancelReconnectTaskSupplier = new Supplier<TimerTask>() {
 		private volatile CancelTask task;
@@ -87,12 +88,12 @@ public class DiscordWS {
 	private final Timer cancelReconnectTimer = new Timer("Reconnection Timer", true);
 	private final boolean isDaemon;
 	private final boolean withReconnects;
-	private volatile boolean sentPing = false;
-	private volatile long pingResponseTime = -1L;
+	private final AtomicBoolean sentPing = new AtomicBoolean(false);
+	private final AtomicLong pingResponseTime = new AtomicLong(-1L);
 	private final long timeoutTime;
 	private final int maxMissedPingCount;
-	private volatile int missedPingCount = 0;
-	private volatile int reconnectAttempts = 0;
+	private final AtomicInteger missedPingCount = new AtomicInteger(0);
+	private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
 	//TODO: Expose the next two variables:
 	private static final int MAX_RECONNECT_ATTEMPTS = 3;
 	private static final int MAX_RECONNECT_TIME = 10; //Time in seconds before the reconnect is considered a failure.
@@ -122,7 +123,7 @@ public class DiscordWS {
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.withReconnects = withReconnects;
-		this.startingUp = true;
+		this.startingUp.set(true);
 		//Ensuring gateway is ready
 		if (!gateway.endsWith("/"))
 			gateway += "/";
@@ -143,7 +144,7 @@ public class DiscordWS {
 			new Timer("WebSocketClient Keep-Alive").scheduleAtFixedRate(new TimerTask() { //Required b/c the ws client doesn't close correctly unless it is a daemon
 				@Override
 				public void run() { //Prevents the WebSocketClient from closing until the websocket is disconnected
-					if (!isConnected.get() && !startingUp) {
+					if (!isConnected.get() && !startingUp.get()) {
 						this.cancel();
 					}
 				}
@@ -163,7 +164,7 @@ public class DiscordWS {
 	public synchronized void disconnect(DiscordDisconnectedEvent.Reason reason) {
 		executorService.shutdownNow();
 
-		if (startingUp && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
+		if (startingUp.get() && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
 			reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
 
 		if (reason == DiscordDisconnectedEvent.Reason.LOGGED_OUT
@@ -180,10 +181,9 @@ public class DiscordWS {
 					|| reason == DiscordDisconnectedEvent.Reason.INIT_ERROR
 					|| reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION
 					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
-						&& reconnectAttempts <= MAX_RECONNECT_ATTEMPTS))) {
-				reconnectAttempts++;
+						&& reconnectAttempts.get() <= MAX_RECONNECT_ATTEMPTS))) {
 
-				if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+				if (reconnectAttempts.incrementAndGet() > MAX_RECONNECT_ATTEMPTS) {
 					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
 					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 					return;
@@ -212,10 +212,10 @@ public class DiscordWS {
 				}
 			}
 
-			startingUp = false;
-			sentPing = false;
+			startingUp.set(false);
+			sentPing.set(false);
 			isReconnecting.set(false);
-			missedPingCount = 0;
+			missedPingCount.set(0);
 			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			client.ws = null;
 			for (DiscordVoiceWS vws : client.voiceConnections.values()) { //Ensures that voice connections are closed.
@@ -292,8 +292,8 @@ public class DiscordWS {
 
 		Runnable keepAlive = () -> {
 			if (this.isConnected.get() && !this.isReconnecting.get()) {
-				if (sentPing) {
-					if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
+				if (sentPing.get()) {
+					if (missedPingCount.get() > maxMissedPingCount && maxMissedPingCount > 0) {
 						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Missed {} heartbeat responses in a row, disconnecting...", missedPingCount);
 						disconnect(DiscordDisconnectedEvent.Reason.MISSED_PINGS);
 					} else if ((System.currentTimeMillis()-client.timer) > timeoutTime && timeoutTime > 0) {
@@ -301,14 +301,14 @@ public class DiscordWS {
 						disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
 					}
 					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Last ping was not responded to!");
-					missedPingCount++;
+					missedPingCount.incrementAndGet();
 				}
 
 				long l = System.currentTimeMillis()-client.timer;
 				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
 				client.timer = System.currentTimeMillis();
-				sentPing = true;
+				sentPing.set(true);
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,
@@ -476,7 +476,7 @@ public class DiscordWS {
 			disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION);
 		} else if (op == GatewayOps.HELLO.ordinal()) {
 			isConnected.set(true);
-			startingUp = false;
+			startingUp.set(false);
 			if (isReconnecting.get()) {
 				isReconnecting.set(false);
 				cancelReconnectTaskSupplier.get().cancel();
@@ -499,12 +499,13 @@ public class DiscordWS {
 			}
 
 		} else if (op == GatewayOps.HEARTBEAT_ACK.ordinal()) {
-			if (!sentPing) {
+			if (!sentPing.get()) {
 				Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Received pong without sending ping! Is the websocket out of sync?");
 			} else {
-				Discord4J.LOGGER.trace(LogMarkers.KEEPALIVE, "Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-client.timer);
-				sentPing = false;
-				missedPingCount = 0;
+				pingResponseTime.set(System.currentTimeMillis()-client.timer);
+				Discord4J.LOGGER.trace(LogMarkers.KEEPALIVE, "Received pong... Response time is {}ms", pingResponseTime.get());
+				sentPing.set(false);
+				missedPingCount.set(0);
 			}
 		} else {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
@@ -523,7 +524,7 @@ public class DiscordWS {
 		final AtomicInteger guildsToWaitFor = new AtomicInteger(0);
 		isReconnecting.set(false);
 		isConnected.set(true); //Redundancy due to how reconnects work
-		reconnectAttempts = 0;
+		reconnectAttempts.set(0);
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> { //Ready event handling 1/2
 			client.sessionId = event.session_id;
@@ -1090,6 +1091,6 @@ public class DiscordWS {
 	 * @return The response time (in ms).
 	 */
 	public long getResponseTime() {
-		return pingResponseTime;
+		return pingResponseTime.get();
 	}
 }

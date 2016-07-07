@@ -302,6 +302,7 @@ public class TestBot {
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
 						Field sessionField = DiscordWS.class.getDeclaredField("session");
+						sessionField.setAccessible(true);
 						Session session = (Session) sessionField.get(((DiscordClientImpl) client).ws);
 						session.close(new CloseStatus(1337, "blah"));
 					}
