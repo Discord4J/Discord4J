@@ -221,7 +221,7 @@ public class Discord4J {
 	public static class Discord4JLogger extends MarkerIgnoringBase {
 
 		private final String name;
-		private volatile int level = Level.DEBUG.ordinal();
+		private volatile int level = Level.INFO.ordinal();
 		private volatile PrintStream standard, error;
 
 		public Discord4JLogger(String name) {
