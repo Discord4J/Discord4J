@@ -144,7 +144,7 @@ public class DiscordWS {
 			new Timer("WebSocketClient Keep-Alive").scheduleAtFixedRate(new TimerTask() { //Required b/c the ws client doesn't close correctly unless it is a daemon
 				@Override
 				public void run() { //Prevents the WebSocketClient from closing until the websocket is disconnected
-					if (!isConnected.get() && !startingUp.get()) {
+					if (!isConnected.get() && !startingUp.get() && !isReconnecting.get()) {
 						this.cancel();
 					}
 				}
@@ -183,6 +183,8 @@ public class DiscordWS {
 					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
 						&& reconnectAttempts.get() <= MAX_RECONNECT_ATTEMPTS))) {
 
+				isReconnecting.set(true);
+
 				if (reconnectAttempts.incrementAndGet() > MAX_RECONNECT_ATTEMPTS) {
 					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
 					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
@@ -206,7 +208,6 @@ public class DiscordWS {
 					}
 
 					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
-					isReconnecting.set(true);
 					cancelReconnectTimer.schedule(cancelReconnectTaskSupplier.get(), TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
 					return;
 				}
