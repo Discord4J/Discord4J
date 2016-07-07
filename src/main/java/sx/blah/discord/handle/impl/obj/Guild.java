@@ -177,8 +177,8 @@ public class Guild implements IGuild {
 	public IUser getUserByID(String id) {
 		if (users == null)
 			return null;
-		return users.parallelStream()
-				.distinct()
+		List<IUser> usersCopy = new ArrayList<>(users);
+		return usersCopy.stream()
 				.filter(u -> u != null && u.getID() != null && u.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
 	}
