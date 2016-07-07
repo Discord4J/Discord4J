@@ -300,15 +300,15 @@ public class DiscordWS {
 						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Connection timed out at {}ms", System.currentTimeMillis()-client.timer);
 						disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
 					}
-					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Last ping was not responded to, skipping ping");
+					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Last ping was not responded to!");
 					missedPingCount++;
-				} else {
-					long l = System.currentTimeMillis()-client.timer;
-					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
-					send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
-					client.timer = System.currentTimeMillis();
-					sentPing = true;
 				}
+
+				long l = System.currentTimeMillis()-client.timer;
+				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
+				client.timer = System.currentTimeMillis();
+				sentPing = true;
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,

@@ -196,7 +196,7 @@ public class Discord4J {
 	}
 
 	private static Logger initLogger() {
-		if (!isSLF4JImplemenationPresent()) {
+		if (!isSLF4JImplementationPresent()) {
 			System.err.println("Discord4J: ERROR INITIALIZING LOGGER!");
 			System.err.println("Discord4J: No SLF4J implementation found, reverting to the internal implementation ("+Discord4JLogger.class.getName()+")");
 			System.err.println("Discord4J: It is *highly* recommended to use an full featured implementation like logback!");
@@ -206,7 +206,7 @@ public class Discord4J {
 		}
 	}
 
-	private static boolean isSLF4JImplemenationPresent() {
+	private static boolean isSLF4JImplementationPresent() {
 		try {
 			Class.forName("org.slf4j.impl.StaticLoggerBinder"); //First try to find the implementation
 			return !(LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory); //Implementation found! Double check the logger factory
