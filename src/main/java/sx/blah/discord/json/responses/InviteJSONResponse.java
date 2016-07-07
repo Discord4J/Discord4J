@@ -16,11 +16,6 @@ public class InviteJSONResponse {
 	public GuildResponse guild;
 
 	/**
-	 * Null unless using the invite is "human readable"
-	 */
-	public String xkcdpass;
-
-	/**
 	 * The channel the invite leads to
 	 */
 	public ChannelResponse channel;

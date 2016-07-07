@@ -21,29 +21,18 @@ public class Invite implements IInvite {
 	protected final String inviteCode;
 
 	/**
-	 * The human-readable version of the invite code, if available.
-	 */
-	protected final String xkcdPass;
-
-	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
 
-	public Invite(IDiscordClient client, String inviteCode, String xkcdPass) {
+	public Invite(IDiscordClient client, String inviteCode) {
 		this.client = client;
 		this.inviteCode = inviteCode;
-		this.xkcdPass = xkcdPass;
 	}
 
 	@Override
 	public String getInviteCode() {
 		return inviteCode;
-	}
-
-	@Override
-	public String getXkcdPass() {
-		return xkcdPass;
 	}
 
 	@Override

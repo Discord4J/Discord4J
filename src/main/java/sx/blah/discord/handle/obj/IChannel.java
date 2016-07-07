@@ -125,14 +125,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxAge How long the invite should be valid, setting it to 0 makes it last forever.
 	 * @param maxUses The maximum uses for the invite, setting it to 0 makes the invite have unlimited uses.
 	 * @param temporary Whether users admitted with this invite are temporary.
-	 * @param useXkcdPass Whether to generate a human-readable code, maxAge cannot be 0 for this to work.
 	 * @return The newly generated invite.
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean useXkcdPass) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Toggles whether the bot is "typing".

@@ -135,7 +135,7 @@ public class DiscordUtils {
 	 * @return The java invite object.
 	 */
 	public static IInvite getInviteFromJSON(IDiscordClient client, InviteJSONResponse json) {
-		return new Invite(client, json.code, json.xkcdpass);
+		return new Invite(client, json.code);
 	}
 
 	/**

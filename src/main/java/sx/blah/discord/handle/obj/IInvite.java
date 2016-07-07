@@ -15,11 +15,6 @@ public interface IInvite {
 	String getInviteCode();
 
 	/**
-	 * @return The xkcd pass, this is null if it doesn't exist!
-	 */
-	String getXkcdPass();
-
-	/**
 	 * Accepts the invite and returns relevant information,
 	 * such as the Guild ID and name, and the channel the invite
 	 * was created from.
