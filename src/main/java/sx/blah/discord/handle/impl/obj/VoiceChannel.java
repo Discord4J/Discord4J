@@ -27,9 +27,10 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected int userLimit = 0;
 	protected int bitrate = 0;
 
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit) {
+	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate) {
 		this(client, name, id, parent, topic, position, new HashMap<>(), new HashMap<>());
 		this.userLimit = userLimit;
+		this.bitrate = bitrate;
 	}
 
 	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
@@ -201,7 +202,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, parent, topic, position, userLimit);
+		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate);
 	}
 
 	@Override
