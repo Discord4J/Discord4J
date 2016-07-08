@@ -505,7 +505,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position, json.user_limit);
+			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position, json.user_limit, json.bitrate);
 
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
