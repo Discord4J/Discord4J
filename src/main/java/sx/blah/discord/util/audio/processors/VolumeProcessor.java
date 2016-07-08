@@ -50,11 +50,11 @@ public class VolumeProcessor implements IAudioProcessor {
 
 		if (provider instanceof AudioInputStreamProvider) {
 			stream = new AmplitudeAudioInputStream(((AudioInputStreamProvider) provider).getStream());
-			provider = new AudioInputStreamProvider(stream);
+			this.provider = new AudioInputStreamProvider(stream);
 			return true;
 		}
 
-		provider = null;
+		this.provider = null;
 		stream = null;
 		return false;
 	}
