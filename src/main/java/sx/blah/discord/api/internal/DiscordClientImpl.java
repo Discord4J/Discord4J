@@ -232,7 +232,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void logout() throws RateLimitException, DiscordException {
 		if (isReady()) {
-			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
+			if (!isBot())
+				Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
 
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);

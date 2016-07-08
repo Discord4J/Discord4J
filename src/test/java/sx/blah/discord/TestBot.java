@@ -1,14 +1,10 @@
 package sx.blah.discord;
 
-import org.eclipse.jetty.websocket.api.CloseStatus;
-import org.eclipse.jetty.websocket.api.Session;
 import org.junit.Test;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.api.internal.DiscordClientImpl;
-import sx.blah.discord.api.internal.DiscordWS;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
@@ -17,8 +13,10 @@ import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -301,10 +299,11 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						Field sessionField = DiscordWS.class.getDeclaredField("session");
-						sessionField.setAccessible(true);
-						Session session = (Session) sessionField.get(((DiscordClientImpl) client).ws);
-						session.close(new CloseStatus(1337, "blah"));
+//						Field sessionField = DiscordWS.class.getDeclaredField("session");
+//						sessionField.setAccessible(true);
+//						Session session = (Session) sessionField.get(((DiscordClientImpl) client).ws);
+//						session.close(new CloseStatus(1337, "blah"));
+						client.logout();
 					}
 				});
 
