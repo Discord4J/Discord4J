@@ -51,4 +51,9 @@ public class ChannelResponse {
 	 * The maximum amount of users in a channel if it is a voice channel.
 	 */
 	public int user_limit;
+
+	/**
+	 * The bitrate if it is a voice channel.
+	 */
+	public int bitrate;
 }
