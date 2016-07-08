@@ -1,6 +1,8 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.util.List;
 
@@ -14,6 +16,33 @@ public interface IVoiceChannel extends IChannel {
 	 * @return The maximum amount of users allowed (or 0 if there is not set limit)
 	 */
 	int getUserLimit();
+
+	/**
+	 * Gets the current bitrate of this voice channel.
+	 *
+	 * @return The bitrate of this voice channel in bits.
+     */
+	int getBitrate();
+
+	/**
+	 * Changes the bitrate of the channel
+	 *
+	 * @param bitrate The new bitrate of the channel (in bits).
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeBitrate(int bitrate) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
+	 * Changes the user limit of the channel
+	 *
+	 * @param limit The new user limit of the channel.
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
 	 * Makes the bot user join this voice channel.

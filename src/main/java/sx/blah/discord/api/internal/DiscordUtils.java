@@ -474,6 +474,7 @@ public class DiscordUtils {
 
 		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(json.id)) != null) {
 			channel.setUserLimit(json.user_limit);
+			channel.setBitrate(json.bitrate);
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
