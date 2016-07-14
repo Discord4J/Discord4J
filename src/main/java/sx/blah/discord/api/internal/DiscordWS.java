@@ -478,6 +478,7 @@ public class DiscordWS {
 		} else if (op == GatewayOps.HELLO.ordinal()) {
 			isConnected.set(true);
 			startingUp.set(false);
+			reconnectAttempts.set(0);
 			if (isReconnecting.get()) {
 				isReconnecting.set(false);
 				cancelReconnectTaskSupplier.get().cancel();
@@ -490,7 +491,7 @@ public class DiscordWS {
 
 			if (client.sessionId != null) {
 				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
-				Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Reconnected to the Discord websocket.");
+				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnected to the Discord websocket.");
 			} else if (!client.getToken().isEmpty()) {
 				send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
 						Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
@@ -525,7 +526,6 @@ public class DiscordWS {
 		final AtomicInteger guildsToWaitFor = new AtomicInteger(0);
 		isReconnecting.set(false);
 		isConnected.set(true); //Redundancy due to how reconnects work
-		reconnectAttempts.set(0);
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> { //Ready event handling 1/2
 			client.sessionId = event.session_id;
