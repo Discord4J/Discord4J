@@ -1,6 +1,6 @@
 package sx.blah.discord.json.responses;
 
-import sx.blah.discord.json.generic.GameObject;
+import sx.blah.discord.json.generic.StatusObject;
 
 /**
  * Represents a user's presence
@@ -20,7 +20,7 @@ public class PresenceResponse {
 	/**
 	 * The game the user is playing (or null if no game being played)
 	 */
-	public GameObject game;
+	public StatusObject game;
 
 	/**
 	 * Represents a user

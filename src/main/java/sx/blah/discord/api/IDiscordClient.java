@@ -1,12 +1,12 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 
 import java.time.LocalDateTime;
@@ -34,15 +34,6 @@ public interface IDiscordClient {
 	ModuleLoader getModuleLoader();
 
 	/**
-	 * Gets the audio channel instance for this client.
-	 *
-	 * @return The audio channel.
-	 * @deprecated See {@link IVoiceChannel#getAudioChannel()} or {@link IGuild#getAudioChannel()}
-	 */
-	@Deprecated
-	AudioChannel getAudioChannel();
-
-	/**
 	 * Gets the authorization token for this client.
 	 *
 	 * @return The authorization token.
@@ -59,53 +50,78 @@ public interface IDiscordClient {
 	/**
 	 * Logs out the client.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void logout() throws HTTP429Exception, DiscordException;
+	void logout() throws RateLimitException, DiscordException;
 
 	/**
 	 * Changes this client's account's username.
 	 *
 	 * @param username The new username.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changeUsername(String username) throws DiscordException, HTTP429Exception;
+	void changeUsername(String username) throws DiscordException, RateLimitException;
 
 	/**
 	 * Changes this client's account's email.
 	 *
 	 * @param email The new email.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changeEmail(String email) throws DiscordException, HTTP429Exception;
+	void changeEmail(String email) throws DiscordException, RateLimitException;
 
 	/**
 	 * Changes this client's account's password.
 	 *
 	 * @param password The new password.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changePassword(String password) throws DiscordException, HTTP429Exception;
+	void changePassword(String password) throws DiscordException, RateLimitException;
 
 	/**
 	 * Changes this client's account's avatar.
 	 *
 	 * @param avatar The new avatar.
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception;
+	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
 
 	/**
 	 * Updates the bot's presence.
 	 *
 	 * @param isIdle If true, the bot will be "idle", otherwise the bot will be "online".
 	 * @param game The optional name of the game the bot is playing. If empty, the bot simply won't be playing a game.
+	 * @deprecated Use {@link #changePresence(boolean)} or {@link #changeStatus(Status)}
 	 */
+	@Deprecated
 	void updatePresence(boolean isIdle, Optional<String> game);
+
+	/**
+	 * Changes this user's presence.
+	 *
+	 * @param isIdle If true, this user becomes idle, or online if false.
+	 */
+	void changePresence(boolean isIdle);
+
+	/**
+	 * Changes the game status message for this bot's user.
+	 *
+	 * @param game The game, or if null then no message will be shown.
+	 * @deprecated Use {@link #changeStatus(Status)} instead.
+	 */
+	@Deprecated
+	void changeGameStatus(String game);
+
+	/**
+	 * Changes the status of the bot user.
+	 *
+	 * @param status The new status to use.
+	 */
+	void changeStatus(Status status);
 
 	/**
 	 * Checks if the api is ready to be interacted with (if it is logged in).
@@ -183,9 +199,9 @@ public interface IDiscordClient {
 	 * @return The {@link PrivateChannel} object.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception;
+	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets the invite for a code.
@@ -200,10 +216,10 @@ public interface IDiscordClient {
 	 *
 	 * @return The list of available regions.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IRegion> getRegions() throws HTTP429Exception, DiscordException;
+	List<IRegion> getRegions() throws RateLimitException, DiscordException;
 
 	/**
 	 * Gets the corresponding region for a given id.
@@ -221,10 +237,37 @@ public interface IDiscordClient {
 	 * @param icon The icon for the guild.
 	 * @return The new guild's id.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @deprecated Use {@link #createGuild(String, IRegion, Image)} or {@link #createGuild(String, IRegion)} instead.
+	 */
+	@Deprecated
+	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException;
+
+	/**
+	 * Creates a new guild.
+	 *
+	 * @param name The name of the guild.
+	 * @param region The region for the guild.
+	 * @return The new guild's id.
+	 *
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException;
+	IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException;
+
+	/**
+	 * Creates a new guild.
+	 *
+	 * @param name The name of the guild.
+	 * @param region The region for the guild.
+	 * @param icon The icon for the guild.
+	 * @return The new guild's id.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException;
 
 	/**
 	 * Gets the latest response time by the discord websocket to a ping.
@@ -232,15 +275,6 @@ public interface IDiscordClient {
 	 * @return The response time (in ms).
 	 */
 	long getResponseTime();
-
-	/**
-	 * This returns the voice channel the bot is currently connected to (if connected to one).
-	 *
-	 * @return The optional voice channel.
-	 * @deprecated See {@link #getConnectedVoiceChannels()}
-	 */
-	@Deprecated
-	Optional<IVoiceChannel> getConnectedVoiceChannel();
 
 	/**
 	 * Gets the connected voice channels.
@@ -261,10 +295,10 @@ public interface IDiscordClient {
 	 *
 	 * @return The list of owned applications.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IApplication> getApplications() throws HTTP429Exception, DiscordException;
+	List<IApplication> getApplications() throws RateLimitException, DiscordException;
 
 	/**
 	 * Creates a new application for this user.
@@ -273,9 +307,9 @@ public interface IDiscordClient {
 	 * @return The application object.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	IApplication createApplication(String name) throws DiscordException, HTTP429Exception;
+	IApplication createApplication(String name) throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets the time when this client was last logged into. Useful for keeping track of uptime.
@@ -284,4 +318,40 @@ public interface IDiscordClient {
 	 * @return The launch time.
 	 */
 	LocalDateTime getLaunchTime();
+
+	/**
+	 * Gets the application description for this bot.
+	 *
+	 * @return The application's description.
+	 *
+	 * @throws DiscordException
+	 */
+	String getDescription() throws DiscordException;
+
+	/**
+	 * Gets the url leading to this bot's application's icon.
+	 *
+	 * @return The application's icon url.
+	 *
+	 * @throws DiscordException
+	 */
+	String getApplicationIconURL() throws DiscordException;
+
+	/**
+	 * Gets the bot's application's client id.
+	 *
+	 * @return The application's client id.
+	 *
+	 * @throws DiscordException
+	 */
+	String getApplicationClientID() throws DiscordException;
+
+	/**
+	 * Gets the bot's application's name.
+	 *
+	 * @return The application's name.
+	 *
+	 * @throws DiscordException
+	 */
+	String getApplicationName() throws DiscordException;
 }

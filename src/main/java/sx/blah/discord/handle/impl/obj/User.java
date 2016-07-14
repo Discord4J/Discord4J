@@ -8,13 +8,16 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.MoveMemberRequest;
+import sx.blah.discord.json.requests.MemberEditRequest;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class User implements IUser {
 
@@ -29,9 +32,9 @@ public class User implements IUser {
 	protected volatile String avatar;
 
 	/**
-	 * The game the user is playing.
+	 * The user's status.
 	 */
-	protected volatile Optional<String> game;
+	protected volatile Status status = Status.empty();
 
 	/**
 	 * User ID.
@@ -61,14 +64,39 @@ public class User implements IUser {
 	protected volatile String avatarURL;
 
 	/**
-	 * The roles the user is a part of. (Key = guild id).
+	 * The local muted status of this user.
 	 */
-	protected volatile HashMap<String, List<IRole>> roles;
+	private volatile boolean isMutedLocally;
 
 	/**
-	 * The voice channel this user is in.
+	 * The local deafened status of this user.
 	 */
-	protected volatile IVoiceChannel channel;
+	private volatile boolean isDeafLocally;
+
+	/**
+	 * The roles the user is a part of. (Key = guild id).
+	 */
+	protected final Map<String, List<IRole>> roles;
+
+	/**
+	 * The nicknames this user has. (Key = guild id).
+	 */
+	protected final Map<String, String> nicks;
+
+	/**
+	 * The muted status of this user. (Key = guild id).
+	 */
+	private final Map<String, Boolean> isMuted = new ConcurrentHashMap<>();
+
+	/**
+	 * The deafened status of this user. (Key = guild id).
+	 */
+	private final Map<String, Boolean> isDeaf = new ConcurrentHashMap<>();
+
+	/**
+	 * The voice channels this user is in.
+	 */
+	protected final List<IVoiceChannel> channels = new CopyOnWriteArrayList<>();
 
 	/**
 	 * The client that created this object.
@@ -83,7 +111,8 @@ public class User implements IUser {
 		this.avatar = avatar;
 		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
 		this.presence = presence;
-		this.roles = new HashMap<>();
+		this.roles = new ConcurrentHashMap<>();
+		this.nicks = new ConcurrentHashMap<>();
 		this.isBot = isBot;
 	}
 
@@ -99,16 +128,21 @@ public class User implements IUser {
 
 	@Override
 	public Optional<String> getGame() {
-		return game == null ? Optional.empty() : game;
+		return Optional.ofNullable(status.getStatusMessage());
+	}
+
+	@Override
+	public Status getStatus() {
+		return status;
 	}
 
 	/**
-	 * Sets the user's CACHED game.
+	 * Sets the user's CACHED status.
 	 *
-	 * @param game The game.
+	 * @param status The status.
 	 */
-	public void setGame(Optional<String> game) {
-		this.game = game;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	/**
@@ -155,8 +189,18 @@ public class User implements IUser {
 	}
 
 	@Override
+	public String getDisplayName(IGuild guild) {
+		return getNicknameForGuild(guild).isPresent() ? getNicknameForGuild(guild).get() : getName();
+	}
+
+	@Override
 	public String mention() {
-		return "<@"+id+">";
+		return mention(true);
+	}
+
+	@Override
+	public String mention(boolean mentionWithNickname) {
+		return "<@"+(mentionWithNickname ? "!" : "")+id+">";
 	}
 
 	@Override
@@ -178,6 +222,26 @@ public class User implements IUser {
 		return roles.getOrDefault(guild.getID(), new ArrayList<>());
 	}
 
+	@Override
+	public Optional<String> getNicknameForGuild(IGuild guild) {
+		return Optional.ofNullable(nicks.containsKey(guild.getID()) ? nicks.get(guild.getID()) : null);
+	}
+
+	/**
+	 * CACHES a nickname to the user.
+	 *
+	 * @param guildID The guild the nickname is for.
+	 * @param nick The nickname, or null to remove it.
+	 */
+	public void addNick(String guildID, String nick) {
+		if (nick == null) {
+			if (nicks.containsKey(guildID))
+				nicks.remove(guildID);
+		} else {
+			nicks.put(guildID, nick);
+		}
+	}
+
 	/**
 	 * CACHES a role to the user.
 	 *
@@ -194,7 +258,16 @@ public class User implements IUser {
 
 	@Override
 	public IUser copy() {
-		return new User(client, name, id, discriminator, avatar, presence, isBot);
+		User newUser = new User(client, name, id, discriminator, avatar, presence, isBot);
+		newUser.setStatus(this.status);
+		for (String key : isMuted.keySet())
+			newUser.setIsMute(key, isMuted.get(key));
+		for (String key : isDeaf.keySet())
+			newUser.setIsDeaf(key, isDeaf.get(key));
+		newUser.nicks.putAll(nicks);
+		newUser.roles.putAll(roles);
+		newUser.channels.addAll(channels);
+		return newUser;
 	}
 
 	@Override
@@ -210,33 +283,83 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, HTTP429Exception, MissingPermissionsException {
+	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (!client.getOurUser().equals(this))
-			DiscordUtils.checkPermissions(client, newChannel.getGuild(), EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
+			DiscordUtils.checkPermissions(client, newChannel.getGuild(), this.getRolesForGuild(newChannel.getGuild()), EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MoveMemberRequest(newChannel.getID()))),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
-		}catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
 	public Optional<IVoiceChannel> getVoiceChannel() {
-		return Optional.ofNullable(channel);
+		return channels.stream().findFirst();
+	}
+
+	@Override
+	public List<IVoiceChannel> getConnectedVoiceChannels() {
+		return channels;
 	}
 
 	/**
-	 * Sets the CACHED voice channel this user is in.
+	 * Sets whether the user is muted or not. This value is CACHED.
 	 *
-	 * @param channel The new channel.
+	 * @param guildID The guild in which this is the case.
+	 * @param isMuted Whether the user is muted or not.
 	 */
-	public void setVoiceChannel(IVoiceChannel channel) {
-		this.channel = channel;
+	public void setIsMute(String guildID, boolean isMuted) {
+		this.isMuted.put(guildID, isMuted);
 	}
+
+	/**
+	 * Sets whether the user is deafened or not. This value is CACHED.
+	 *
+	 * @param guildID The guild in which this is the case.
+	 * @param isDeaf Whether the user is deafened or not.
+	*/
+	public void setIsDeaf(String guildID, boolean isDeaf) {
+		this.isDeaf.put(guildID, isDeaf);
+	}
+
+	@Override
+	public boolean isDeaf(IGuild guild) {
+		return isDeaf.getOrDefault(guild.getID(), false);
+	}
+
+	@Override
+	public boolean isMuted(IGuild guild) {
+		return isMuted.getOrDefault(guild.getID(), false);
+	}
+
+	/**
+	 * Sets whether the user is muted locally or not (meaning they muted themselves). This value is CACHED.
+	 *
+	 * @param isMuted Whether the user is muted or not.
+	 */
+	public void setIsMutedLocally(boolean isMuted) {
+		this.isMutedLocally = isMuted;
+	}
+
+	/**
+	 * Sets whether the user is deafened locally or not (meaning they deafened themselves). This value is CACHED.
+	 *
+	 * @param isDeaf Whether the user is deafened or not.
+	 */
+	public void setIsDeafLocally(boolean isDeaf) {
+		this.isDeafLocally = isDeaf;
+	}
+
+	@Override
+	public boolean isDeafLocally() { return isDeafLocally; }
+
+	@Override
+	public boolean isMutedLocally() { return isMutedLocally; }
 
 	@Override
 	public IDiscordClient getClient() {

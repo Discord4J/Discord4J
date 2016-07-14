@@ -5,19 +5,28 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.PermissionOverwrite;
 import sx.blah.discord.json.generic.RoleResponse;
+import sx.blah.discord.json.generic.StatusObject;
 import sx.blah.discord.json.requests.GuildMembersRequest;
 import sx.blah.discord.json.responses.*;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MissingPermissionsException;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,8 +56,8 @@ public class DiscordUtils {
 	/**
 	 * Used in order to find the invite code from a passed message.
 	 */
-	public static final Pattern INVITE_PATTERN = Pattern.compile("(?:https://discordapp.com/invite/|https://discord.gg/)"
-			+"(\\w+-\\w+-\\w+|[a-zA-Z0-9]+)");
+	public static final Pattern INVITE_PATTERN = Pattern.compile("(?:https://discordapp.com/invite/|https://discord.gg/)" +
+			"(\\w+-\\w+-\\w+|[^\\W1ilo0]{5})"); //Thanks dec!
 
 	/**
 	 * Used to determine age based on discord ids
@@ -126,7 +135,7 @@ public class DiscordUtils {
 	 * @return The java invite object.
 	 */
 	public static IInvite getInviteFromJSON(IDiscordClient client, InviteJSONResponse json) {
-		return new Invite(client, json.code, json.xkcdpass);
+		return new Invite(client, json.code);
 	}
 
 	/**
@@ -141,6 +150,22 @@ public class DiscordUtils {
 		if (json.mentions != null)
 			for (UserResponse response : json.mentions)
 				mentions.add(response.id);
+
+		return mentions;
+	}
+
+	/**
+	 * Gets the roles mentioned from a message json object.
+	 *
+	 * @param client The discord client to use.
+	 * @param json The json response to use.
+	 * @return The list of mentioned roles.
+	 */
+	public static List<String> getRoleMentionsFromJSON(IDiscordClient client, MessageResponse json) {
+		List<String> mentions = new ArrayList<>();
+		if (json.mention_roles != null)
+			for (String role : json.mention_roles)
+				mentions.add(role);
 
 		return mentions;
 	}
@@ -214,8 +239,13 @@ public class DiscordUtils {
 				for (PresenceResponse presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
 					if (user != null) {
-						user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
-						user.setGame(Optional.ofNullable(presence.game == null ? null : presence.game.name));
+						Status status = getStatusFromJSON(presence.game);
+						if (status.getType() == Status.StatusType.STREAM) {
+							user.setPresence(Presences.STREAMING);
+						} else {
+							user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
+						}
+						user.setStatus(status);
 					}
 				}
 
@@ -231,12 +261,30 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateResponse voiceState : json.voice_states) {
-					((User) guild.getUserByID(voiceState.user_id)).setVoiceChannel(guild.getVoiceChannelByID(voiceState.channel_id));
+					((User) guild.getUserByID(voiceState.user_id)).getConnectedVoiceChannels().add(guild.getVoiceChannelByID(voiceState.channel_id));
 				}
 			}
 		}
 
 		return guild;
+	}
+
+	/**
+	 * Creates a {@link Status} object from a json response.
+	 *
+	 * @param json The json status object.
+	 * @return The Status instance.
+	 */
+	public static Status getStatusFromJSON(StatusObject json) {
+		if (json == null) {
+			return Status.empty();
+		} else if (json.type == 0) {
+			return Status.game(json.name);
+		} else if (json.type == 1) {
+			return Status.stream(json.name, json.url);
+		} else {
+			return Status.empty();
+		}
 	}
 
 	/**
@@ -255,6 +303,11 @@ public class DiscordUtils {
 				user.addRole(guild.getID(), roleObj);
 		}
 		user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
+
+		user.addNick(guild.getID(), json.nick);
+
+		user.setIsDeaf(guild.getID(), json.deaf);
+		user.setIsMute(guild.getID(), json.mute);
 		return user;
 	}
 
@@ -299,15 +352,17 @@ public class DiscordUtils {
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
-			message.setMentions(getMentionsFromJSON(client, json));
+			message.setMentions(getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json));
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
-			message.setEditedTimestamp(json.edited_timestamp == null ? Optional.empty() : Optional.of(convertFromTimestamp(json.edited_timestamp)));
+			message.setEditedTimestamp(json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
+			message.setPinned(json.pinned);
 			return message;
 		} else
 			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),
 					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ?
-					Optional.empty() : Optional.of(convertFromTimestamp(json.edited_timestamp)), json.mention_everyone,
-					getMentionsFromJSON(client, json), getAttachmentsFromJSON(json));
+					null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
+					getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json),
+					getAttachmentsFromJSON(json), json.pinned);
 	}
 
 	/**
@@ -345,7 +400,7 @@ public class DiscordUtils {
 								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 			channel.getUserOverrides().clear();
@@ -353,6 +408,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
+
 			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position);
 
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
@@ -364,7 +420,7 @@ public class DiscordUtils {
 				} else if (overrides.type.equalsIgnoreCase("member")) {
 					channel.addUserOverride(overrides.id, override);
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 		}
@@ -387,8 +443,9 @@ public class DiscordUtils {
 			role.setName(json.name);
 			role.setPermissions(json.permissions);
 			role.setPosition(json.position);
+			role.setMentionable(json.mentionable);
 		} else {
-			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color, guild);
+			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color, json.mentionable, guild);
 			((Guild) guild).addRole(role);
 		}
 		return role;
@@ -416,6 +473,8 @@ public class DiscordUtils {
 		VoiceChannel channel;
 
 		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(json.id)) != null) {
+			channel.setUserLimit(json.user_limit);
+			channel.setBitrate(json.bitrate);
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
@@ -438,7 +497,7 @@ public class DiscordUtils {
 								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 					}
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 			channel.getUserOverrides().clear();
@@ -446,7 +505,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position);
+			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position, json.user_limit, json.bitrate);
 
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
@@ -457,12 +516,52 @@ public class DiscordUtils {
 				} else if (overrides.type.equalsIgnoreCase("member")) {
 					channel.addUserOverride(overrides.id, override);
 				} else {
-					Discord4J.LOGGER.warn("Unknown permissions overwrite type \"{}\"!", overrides.type);
+					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
 			}
 		}
 
 		return channel;
+	}
+
+	/**
+	 * Checks a set of permissions provided by a guild against required permissions and a user's role hierarchy position.
+	 *
+	 * @param client The client.
+	 * @param guild The guild.
+	 * @param roles The roles.
+	 * @param required The permissions required.
+	 *
+	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
+	 */
+	public static void checkPermissions(IDiscordClient client, IGuild guild, List<IRole> roles, EnumSet<Permissions> required) throws MissingPermissionsException {
+		try {
+			if (!isUserHigher(guild, client.getOurUser(), roles))
+				throw new MissingPermissionsException("Edited roles hierarchy is too high.");
+
+			checkPermissions(client, guild, required);
+		} catch (UnsupportedOperationException e) {
+		}
+	}
+
+	/**
+	 * Checks a set of permissions provided by a guild against required permissions and a user's role hierarchy position.
+	 *
+	 * @param client The client.
+	 * @param channel The channel.
+	 * @param roles The roles.
+	 * @param required The permissions required.
+	 *
+	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
+	 */
+	public static void checkPermissions(IDiscordClient client, IChannel channel, List<IRole> roles, EnumSet<Permissions> required) throws MissingPermissionsException {
+		try {
+			if (!isUserHigher(channel.getGuild(), client.getOurUser(), roles))
+				throw new MissingPermissionsException("Edited roles hierarchy is too high.");
+
+			checkPermissions(client, channel, required);
+		} catch (UnsupportedOperationException e) {
+		}
 	}
 
 	/**
@@ -499,8 +598,7 @@ public class DiscordUtils {
 				contained.addAll(role.getPermissions());
 			}
 			checkPermissions(contained, required);
-		} catch (UnsupportedOperationException e) {
-		}
+		} catch (UnsupportedOperationException e) {}
 	}
 
 	/**
@@ -512,6 +610,9 @@ public class DiscordUtils {
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
 	public static void checkPermissions(EnumSet<Permissions> contained, EnumSet<Permissions> required) throws MissingPermissionsException {
+		if (contained.contains(Permissions.ADMINISTRATOR))
+			return;
+
 		EnumSet<Permissions> missing = EnumSet.noneOf(Permissions.class);
 
 		for (Permissions requiredPermission : required) {
@@ -552,7 +653,7 @@ public class DiscordUtils {
 	 * @param message The message to parse.
 	 * @return The codes or empty if none are found.
 	 */
-	public static Optional<List<String>> getInviteCodesFromMessage(String message) {
+	public static List<String> getInviteCodesFromMessage(String message) {
 		Matcher matcher = INVITE_PATTERN.matcher(message);
 		List<String> strings = new ArrayList<>();
 		while (matcher.find()) {
@@ -560,6 +661,63 @@ public class DiscordUtils {
 			matcher = INVITE_PATTERN.matcher(matcher.replaceFirst(""));
 		}
 
-		return strings.size() > 0 ? Optional.of(strings) : Optional.empty();
+		return strings;
+	}
+
+	/**
+	 * This checks if user1 can interact with the set of provided roles by checking their role hierarchies.
+	 *
+	 * @param guild The guild to check from.
+	 * @param user1 The first user to check.
+	 * @param roles The roles to check.
+	 * @return True if user1's role hierarchy position > provided roles hierarchy.
+	 */
+	public static boolean isUserHigher(IGuild guild, IUser user1, List<IRole> roles) {
+		List<IRole> user1Roles = guild.getRolesForUser(user1);
+		int user1Position = 0;
+		int rolesPosition = 0;
+		for (IRole role : user1Roles)
+			if (user1Position < role.getPosition())
+				user1Position = role.getPosition();
+
+		for (IRole role : roles)
+			if (rolesPosition < role.getPosition())
+				rolesPosition = role.getPosition();
+
+		return user1Position >= rolesPosition;
+	}
+
+	/**
+	 * This takes in an {@link AudioInputStream} and guarantees that it is PCM encoded.
+	 *
+	 * @param stream The original stream.
+	 * @return The PCM encoded stream.
+	 */
+	public static AudioInputStream getPCMStream(AudioInputStream stream) {
+		AudioFormat baseFormat = stream.getFormat();
+
+		//Converts first to PCM data. If the data is already PCM data, this will not change anything.
+		AudioFormat toPCM = new AudioFormat(
+				AudioFormat.Encoding.PCM_SIGNED,
+				baseFormat.getSampleRate(),//AudioConnection.OPUS_SAMPLE_RATE,
+				baseFormat.getSampleSizeInBits() != -1 ? baseFormat.getSampleSizeInBits() : 16,
+				baseFormat.getChannels(),
+				//If we are given a frame size, use it. Otherwise, assume 16 bits (2 8bit shorts) per channel.
+				baseFormat.getFrameSize() != -1 ? baseFormat.getFrameSize() : 2*baseFormat.getChannels(),
+				baseFormat.getFrameRate() != -1 ? baseFormat.getFrameRate() : baseFormat.getSampleRate(),
+				baseFormat.isBigEndian());
+		AudioInputStream pcmStream = AudioSystem.getAudioInputStream(toPCM, stream);
+
+		//Then resamples to a sample rate of 48000hz and ensures that data is Big Endian.
+		AudioFormat audioFormat = new AudioFormat(
+				toPCM.getEncoding(),
+				AudioManager.OPUS_SAMPLE_RATE,
+				toPCM.getSampleSizeInBits(),
+				toPCM.getChannels(),
+				toPCM.getFrameSize(),
+				toPCM.getFrameRate(),
+				true);
+
+		return AudioSystem.getAudioInputStream(audioFormat, pcmStream);
 	}
 }

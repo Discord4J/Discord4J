@@ -2,7 +2,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 
 /**
  * Represents an invite into a channel.
@@ -15,11 +15,6 @@ public interface IInvite {
 	String getInviteCode();
 
 	/**
-	 * @return The xkcd pass, this is null if it doesn't exist!
-	 */
-	String getXkcdPass();
-
-	/**
 	 * Accepts the invite and returns relevant information,
 	 * such as the Guild ID and name, and the channel the invite
 	 * was created from.
@@ -27,9 +22,9 @@ public interface IInvite {
 	 * @return Information about the invite.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	InviteResponse accept() throws DiscordException, HTTP429Exception;
+	InviteResponse accept() throws DiscordException, RateLimitException;
 
 	/**
 	 * Gains the same information as accepting,
@@ -38,17 +33,17 @@ public interface IInvite {
 	 * @return an InviteResponse containing the invite's details.
 	 *
 	 * @throws DiscordException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 */
-	InviteResponse details() throws DiscordException, HTTP429Exception;
+	InviteResponse details() throws DiscordException, RateLimitException;
 
 	/**
 	 * Attempts to delete the invite this object represents.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws HTTP429Exception, DiscordException;
+	void delete() throws RateLimitException, DiscordException;
 
 	/**
 	 * This gets the client that this object is tied to.

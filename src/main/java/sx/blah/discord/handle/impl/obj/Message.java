@@ -6,13 +6,14 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.api.internal.Requests;
 
 import java.time.LocalDateTime;
@@ -53,7 +54,7 @@ public class Message implements IMessage {
 	/**
 	 * The time (if it exists) that the message was edited.
 	 */
-	protected volatile Optional<LocalDateTime> editedTimestamp;
+	protected volatile LocalDateTime editedTimestamp;
 
 	/**
 	 * The list of users mentioned by this message.
@@ -61,14 +62,24 @@ public class Message implements IMessage {
 	protected volatile List<String> mentions;
 
 	/**
+	 * The list of roles mentioned by this message.
+	 */
+	protected volatile List<String> roleMentions;
+
+	/**
 	 * The attachments, if any, on the message.
 	 */
 	protected volatile List<Attachment> attachments;
 
 	/**
-	 * Whether the
+	 * Whether the message mentions everyone.
 	 */
 	protected volatile boolean mentionsEveryone;
+
+	/**
+	 * Whether the message has been pinned to its channel or not.
+	 */
+	protected volatile boolean isPinned;
 
 	/**
 	 * The client that created this object.
@@ -76,8 +87,9 @@ public class Message implements IMessage {
 	protected final IDiscordClient client;
 
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
-				   LocalDateTime timestamp, Optional<LocalDateTime> editedTimestamp, boolean mentionsEveryone,
-				   List<String> mentions, List<Attachment> attachments) {
+				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
+				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
+				   boolean pinned) {
 		this.client = client;
 		this.id = id;
 		this.content = content;
@@ -86,8 +98,10 @@ public class Message implements IMessage {
 		this.timestamp = timestamp;
 		this.editedTimestamp = editedTimestamp;
 		this.mentions = mentions;
+		this.roleMentions = roleMentions;
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
+		this.isPinned = pinned;
 	}
 
 	@Override
@@ -107,10 +121,12 @@ public class Message implements IMessage {
 	/**
 	 * Sets the CACHED mentions in this message.
 	 *
-	 * @param mentions The new mentions.
+	 * @param mentions The new user mentions.
+	 * @param roleMentions The new role mentions.
 	 */
-	public void setMentions(List<String> mentions) {
+	public void setMentions(List<String> mentions, List<String> roleMentions) {
 		this.mentions = mentions;
+		this.roleMentions = roleMentions;
 	}
 
 	/**
@@ -161,17 +177,24 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public List<IRole> getRoleMentions() {
+		return roleMentions.stream()
+				.map(m -> getGuild().getRoleByID(m))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public List<Attachment> getAttachments() {
 		return attachments;
 	}
 
 	@Override
-	public void reply(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
 
 	@Override
-	public IMessage edit(String content) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
 		if (client.isReady()) {
@@ -190,7 +213,7 @@ public class Message implements IMessage {
 			client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
 
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 		}
 		return this;
 	}
@@ -202,6 +225,15 @@ public class Message implements IMessage {
 	 */
 	public List<String> getRawMentions() {
 		return mentions;
+	}
+
+	/**
+	 * Gets the raw list of mentioned role ids.
+	 *
+	 * @return Mentioned role list.
+	 */
+	public List<String> getRawRoleMentions() {
+		return roleMentions;
 	}
 
 	@Override
@@ -219,7 +251,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!getAuthor().equals(client.getOurUser()))
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 
@@ -227,13 +259,13 @@ public class Message implements IMessage {
 			Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
 					new BasicNameValuePair("authorization", client.getToken()));
 		} else {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 		}
 	}
 
 	@Override
 	public Optional<LocalDateTime> getEditedTimestamp() {
-		return editedTimestamp;
+		return Optional.ofNullable(editedTimestamp);
 	}
 
 	/**
@@ -241,14 +273,29 @@ public class Message implements IMessage {
 	 *
 	 * @param editedTimestamp The new timestamp.
 	 */
-	public void setEditedTimestamp(Optional<LocalDateTime> editedTimestamp) {
+	public void setEditedTimestamp(LocalDateTime editedTimestamp) {
 		this.editedTimestamp = editedTimestamp;
 	}
 
 	@Override
+	public boolean isPinned() {
+		return isPinned;
+	}
+
+	/**
+	 * This sets the CACHED isPinned value.
+	 *
+	 * @param pinned Whether the message is pinned.
+	 */
+	public void setPinned(boolean pinned) {
+		isPinned = pinned;
+	}
+
+	@Override
 	public IMessage copy() {
-		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, mentionsEveryone, mentions,
-				attachments);
+		Message message = new Message(client, id, content, author, channel, timestamp, editedTimestamp,
+				mentionsEveryone, mentions, roleMentions, attachments, isPinned);
+		return message;
 	}
 
 	@Override

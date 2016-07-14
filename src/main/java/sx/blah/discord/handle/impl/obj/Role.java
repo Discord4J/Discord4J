@@ -14,11 +14,13 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.RoleEditRequest;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.awt.*;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,11 +63,16 @@ public class Role implements IRole {
 	protected volatile Color color;
 
 	/**
+	 * Whether you can @mention this role.
+	 */
+	protected volatile boolean mentionable;
+
+	/**
 	 * The guild this role belongs to
 	 */
 	protected volatile IGuild guild;
 
-	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, IGuild guild) {
+	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, boolean mentionable, IGuild guild) {
 		this.position = position;
 		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
 		this.name = name;
@@ -73,6 +80,7 @@ public class Role implements IRole {
 		this.id = id;
 		this.hoist = hoist;
 		this.color = new Color(color);
+		this.mentionable = mentionable;
 		this.guild = guild;
 	}
 
@@ -157,18 +165,33 @@ public class Role implements IRole {
 	}
 
 	@Override
+	public boolean isMentionable() {
+		return mentionable;
+	}
+
+	/**
+	 * Sets whether this role is mentionable in the CACHE.
+	 *
+	 * @param mentionable True if mentionable, false if otherwise.
+	 */
+	public void setMentionable(boolean mentionable) {
+		this.mentionable = mentionable;
+	}
+
+	@Override
 	public IGuild getGuild() {
 		return guild;
 	}
 
-	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
+	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
+		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
 			RoleResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
-							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions())))),
+							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions()),
+							isMentionable.orElse(isMentionable())))),
 					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), RoleResponse.class);
 
@@ -177,33 +200,38 @@ public class Role implements IRole {
 
 			getClient().getDispatcher().dispatch(new RoleUpdateEvent(oldRole, newRole, guild));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
-	public void changeColor(Color color) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty());
+	public void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public void changeHoist(boolean hoist) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty());
+	public void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty());
+	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public void changePermissions(EnumSet<Permissions> permissions) throws HTTP429Exception, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions));
+	public void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions), Optional.empty());
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, EnumSet.of(Permissions.MANAGE_ROLES));
+	public void changeMentionable(boolean isMentionable) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(isMentionable));
+	}
+
+	@Override
+	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
+		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
@@ -211,8 +239,9 @@ public class Role implements IRole {
 
 	@Override
 	public IRole copy() {
-		return new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
-				color.getRGB(), guild);
+		Role role = new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
+				color.getRGB(), mentionable, guild);
+		return role;
 	}
 
 	@Override
@@ -221,8 +250,13 @@ public class Role implements IRole {
 	}
 
 	@Override
+	public String mention() {
+		return isMentionable() ? "<@&"+id+">" : name;
+	}
+
+	@Override
 	public String toString() {
-		return name;
+		return mention();
 	}
 
 	@Override

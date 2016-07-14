@@ -8,18 +8,18 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.audio.IAudioManager;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.RoleResponse;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Guild implements IGuild {
 	/**
@@ -87,6 +87,11 @@ public class Guild implements IGuild {
 	protected volatile AudioChannel audioChannel;
 
 	/**
+	 * This guild's audio manager.
+	 */
+	protected volatile AudioManager audioManager;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
@@ -109,7 +114,7 @@ public class Guild implements IGuild {
 		this.afkChannel = afkChannel;
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
-		this.audioChannel = new AudioChannel(client);
+		this.audioManager = new AudioManager(this);
 	}
 
 	@Override
@@ -172,11 +177,31 @@ public class Guild implements IGuild {
 	public IUser getUserByID(String id) {
 		if (users == null)
 			return null;
-		return users.stream()
-				.filter(u -> u != null
-						&& u.getID() != null
-						&& u.getID().equalsIgnoreCase(id))
+		return Arrays.stream(users.toArray(new IUser[users.size()]))
+				.filter(u -> u != null && u.getID() != null && u.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IChannel> getChannelsByName(String name) {
+		return channels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IVoiceChannel> getVoiceChannelsByName(String name) {
+		return voiceChannels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IUser> getUsersByName(String name) {
+		return getUsersByName(name, true);
+	}
+
+	@Override
+	public List<IUser> getUsersByName(String name, boolean includeNicknames) {
+		return users.stream().filter((user) -> user.getName().equals(name)
+				|| (includeNicknames && user.getNicknameForGuild(this).orElse("").equals(name)))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -223,6 +248,11 @@ public class Guild implements IGuild {
 		return roles;
 	}
 
+	@Override
+	public List<IRole> getRolesForUser(IUser user) {
+		return user.getRolesForGuild(this);
+	}
+
 	/**
 	 * CACHES a role to the guild.
 	 *
@@ -238,6 +268,11 @@ public class Guild implements IGuild {
 		return roles.stream()
 				.filter(r -> r.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IRole> getRolesByName(String name) {
+		return roles.stream().filter((role) -> role.getName().equals(name)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -276,7 +311,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IRole createRole() throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public IRole createRole() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		RoleResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.GUILDS+id+"/roles",
@@ -286,7 +321,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public List<IUser> getBannedUsers() throws HTTP429Exception, DiscordException {
+	public List<IUser> getBannedUsers() throws RateLimitException, DiscordException {
 		UserResponse[] users = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans",
 				new BasicNameValuePair("authorization", client.getToken())), UserResponse[].class);
 		List<IUser> banned = new ArrayList<>();
@@ -297,20 +332,20 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void banUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void banUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		banUser(user, 0);
 	}
 
 	@Override
-	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException {
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.BAN));
 
 		Requests.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
 	@Override
-	public void pardonUser(String userID) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	public void pardonUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID,
@@ -318,28 +353,75 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void kickUser(IUser user) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.KICK));
+	public void kickUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
 
 		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
 	@Override
-	public void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, HTTP429Exception, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
+	public void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, RateLimitException, DiscordException {
+		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
 			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					new StringEntity(DiscordUtils.GSON.toJson(new MemberEditRequest(roles))),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(roles))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
-	private void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, HTTP429Exception, DiscordException {
+	@Override
+	public void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, RateLimitException {
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
+
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(deafen))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void setMuteUser(IUser user, boolean mute) throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
+
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(mute, true))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, RateLimitException {
+		boolean isSelf = user.equals(client.getOurUser());
+		if (isSelf) {
+			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CHANGE_NICKNAME));
+		} else {
+			DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.MANAGE_NICKNAMES));
+		}
+
+		try {
+			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(nick == null ? "" : nick, true))),
+					new BasicNameValuePair("authorization", client.getToken()),
+					new BasicNameValuePair("content-type", "application/json"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	private void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
@@ -355,38 +437,48 @@ public class Guild implements IGuild {
 
 			client.getDispatcher().dispatch(new GuildUpdateEvent(oldGuild, newGuild));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
-	public void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.of(name), Optional.empty(), null, null, Optional.empty());
 	}
 
 	@Override
-	public void changeRegion(IRegion region) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeRegion(IRegion region) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.of(region.getID()), null, null, Optional.empty());
 	}
 
 	@Override
-	public void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), icon, null, Optional.empty());
 	}
 
+	public void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), null, Optional.empty());
+	}
+
 	@Override
-	public void changeAFKChannel(Optional<IVoiceChannel> channel) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeAFKChannel(Optional<IVoiceChannel> channel) throws RateLimitException, DiscordException, MissingPermissionsException {
 		String id = channel.isPresent() ? channel.get().getID() : null;
 		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
 	}
 
 	@Override
-	public void changeAFKTimeout(int timeout) throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public void changeAFKChannel(IVoiceChannel channel) throws RateLimitException, DiscordException, MissingPermissionsException {
+		String id = channel != null ? channel.getID() : null;
+		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
+	}
+
+	@Override
+	public void changeAFKTimeout(int timeout) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), null, null, Optional.of(timeout));
 	}
 
 	@Override
-	public void deleteGuild() throws DiscordException, HTTP429Exception, MissingPermissionsException {
+	public void deleteGuild() throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (!ownerID.equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("You must be the guild owner to delete guilds!");
 
@@ -395,7 +487,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void leaveGuild() throws DiscordException, HTTP429Exception {
+	public void leaveGuild() throws DiscordException, RateLimitException {
 		if (ownerID.equals(client.getOurUser().getID()))
 			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
 
@@ -404,11 +496,11 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IChannel createChannel(String name) throws DiscordException, MissingPermissionsException, HTTP429Exception {
+	public IChannel createChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -426,17 +518,17 @@ public class Guild implements IGuild {
 
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
 
 	@Override
-	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, MissingPermissionsException, HTTP429Exception {
+	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -454,7 +546,7 @@ public class Guild implements IGuild {
 
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -474,7 +566,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void transferOwnership(IUser newOwner) throws HTTP429Exception, MissingPermissionsException, DiscordException {
+	public void transferOwnership(IUser newOwner) throws RateLimitException, MissingPermissionsException, DiscordException {
 		if (!getOwnerID().equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("Cannot transfer ownership when you aren't the current owner!");
 		try {
@@ -483,17 +575,17 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
 	public IRole getEveryoneRole() {
-		return getRoles().stream().filter(r -> r.getName().equals("@everyone")).findFirst().orElse(null);
+		return getRoles().stream().filter(r -> r.getID().equals(this.id)).findFirst().orElse(null);
 	}
 
 	@Override
-	public List<IInvite> getInvites() throws DiscordException, HTTP429Exception {
+	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
 				Requests.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -507,7 +599,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void reorderRoles(IRole... rolesInOrder) throws DiscordException, HTTP429Exception, MissingPermissionsException {
+	public void reorderRoles(IRole... rolesInOrder) throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (rolesInOrder.length != getRoles().size())
 			throw new DiscordException("The number of roles to reorder does not equal the number of available roles!");
 
@@ -526,12 +618,12 @@ public class Guild implements IGuild {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), RoleResponse[].class);
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
-	public int getUsersToBePruned(int days) throws DiscordException, HTTP429Exception {
+	public int getUsersToBePruned(int days) throws DiscordException, RateLimitException {
 		PruneResponse response = DiscordUtils.GSON.fromJson(
 				Requests.GET.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -540,7 +632,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public int pruneUsers(int days) throws DiscordException, HTTP429Exception {
+	public int pruneUsers(int days) throws DiscordException, RateLimitException {
 		PruneResponse response = DiscordUtils.GSON.fromJson(
 				Requests.POST.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -549,22 +641,35 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, HTTP429Exception {
+	public void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
+		addBot(applicationID, permissions.orElse(EnumSet.noneOf(Permissions.class)));
+	}
+
+	@Override
+	public void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
+		if (client.isBot())
+			throw new DiscordException("Bot accounts are not allowed to add other bots!");
+
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
 			Requests.POST.makeRequest(DiscordEndpoints.AUTHORIZE+"?client_id="+applicationID+"&scope=bot",
 					new StringEntity(DiscordUtils.GSON.toJson(new BotAddRequest(id,
-							Permissions.generatePermissionsNumber(permissions.orElse(EnumSet.noneOf(Permissions.class)))))),
+							Permissions.generatePermissionsNumber(permissions)))),
 					new BasicNameValuePair("authorization", client.getToken()));
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
 	public AudioChannel getAudioChannel() throws DiscordException {
-		return audioChannel;
+		return audioChannel == null ? audioChannel = new AudioChannel(this) : audioChannel;
+	}
+
+	@Override
+	public IAudioManager getAudioManager() {
+		return audioManager;
 	}
 
 	@Override
@@ -574,8 +679,9 @@ public class Guild implements IGuild {
 
 	@Override
 	public IGuild copy() {
-		return new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
+		Guild guild =  new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
 				voiceChannels, users);
+		return guild;
 	}
 
 	@Override

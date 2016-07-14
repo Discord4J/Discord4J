@@ -10,14 +10,18 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.json.requests.*;
+import sx.blah.discord.json.requests.VoiceConnectRequest;
+import sx.blah.discord.json.requests.VoiceKeepAliveRequest;
+import sx.blah.discord.json.requests.VoiceSpeakingRequest;
+import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -27,6 +31,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
@@ -34,19 +39,22 @@ import java.util.zip.InflaterInputStream;
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordVoiceWS {
 
-	public static final int OPUS_SAMPLE_RATE = 48000;   //(Hz) We want to use the highest of qualities! All the bandwidth!
-	public static final int OPUS_FRAME_SIZE = 960;
-	public static final int OPUS_FRAME_TIME_AMOUNT = OPUS_FRAME_SIZE*1000/OPUS_SAMPLE_RATE;
-	public static final int OPUS_MONO_CHANNEL_COUNT = 1;
-	public static final int OPUS_STEREO_CHANNEL_COUNT = 2;
-
 	public static final int OP_INITIAL_CONNECTION = 2;
 	public static final int OP_HEARTBEAT_RETURN = 3;
 	public static final int OP_CONNECTING_COMPLETED = 4;
 	public static final int OP_USER_SPEAKING_UPDATE = 5;
 
 	public AtomicBoolean isConnected = new AtomicBoolean(true);
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+		private volatile int executorCount = 0;
+
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread thread = Executors.defaultThreadFactory().newThread(r);
+			thread.setName("Discord4J Voice WebSocket Client Executor "+(executorCount++));
+			return thread;
+		}
+	});
 
 	private DiscordClientImpl client;
 
@@ -85,7 +93,7 @@ public class DiscordVoiceWS {
 	public void onOpen(Session session) {
 		this.session = session;
 		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(event.guild_id, client.ourUser.getID(), client.sessionId, event.token)));
-		Discord4J.LOGGER.info("Connected to the Discord Voice websocket.");
+		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Connected to the Discord Voice websocket.");
 	}
 
 	@OnWebSocketMessage
@@ -125,7 +133,7 @@ public class DiscordVoiceWS {
 
 					startKeepalive(eventObject.get("heartbeat_interval").getAsInt());
 				} catch (IOException e) {
-					Discord4J.LOGGER.error("Discord Internal Exception", e);
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
 				break;
 			}
@@ -154,7 +162,7 @@ public class DiscordVoiceWS {
 
 				IUser user = client.getUserByID(userId);
 				if (user == null) {
-					Discord4J.LOGGER.warn("Got an Audio USER_SPEAKING_UPDATE for a non-existent User. JSON: "+object.toString());
+					Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Got an Audio USER_SPEAKING_UPDATE for a non-existent User. JSON: "+object.toString());
 					return;
 				}
 
@@ -162,7 +170,7 @@ public class DiscordVoiceWS {
 				break;
 			}
 			default: {
-				Discord4J.LOGGER.warn("Uncaught voice packet: "+object);
+				Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Uncaught voice packet: "+object);
 			}
 		}
 	}
@@ -176,10 +184,10 @@ public class DiscordVoiceWS {
 			public void run() {
 				try {
 					if (isConnected.get()) {
-						AudioChannel.AudioData data = guild.getAudioChannel().getAudioData(OPUS_FRAME_SIZE);
-						if (data != null) {
+						byte[] data = guild.getAudioManager().getAudio();
+						if (data != null && data.length > 0) {
 							client.timer = System.currentTimeMillis();
-							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data.rawData, data.metaData.channels, secret);
+							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
 							if (!isSpeaking)
 								setSpeaking(true);
 							udpSocket.send(packet.asUdpPacket(addressPort));
@@ -189,16 +197,16 @@ public class DiscordVoiceWS {
 							else
 								seq++;
 
-							timestamp += OPUS_FRAME_SIZE;
+							timestamp += AudioManager.OPUS_FRAME_SIZE;
 						} else if (isSpeaking)
 							setSpeaking(false);
 					}
 				} catch (Exception e) {
-					Discord4J.LOGGER.error("Discord Internal Exception", e);
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
 			}
 		};
-		executorService.scheduleAtFixedRate(sendThread, 0, OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
+		executorService.scheduleAtFixedRate(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
 	}
 
 	private void setupReceiveThread() {
@@ -223,7 +231,7 @@ public class DiscordVoiceWS {
 		Runnable keepAlive = ()->{
 			if (this.isConnected.get()) {
 				long l = System.currentTimeMillis()-client.timer;
-				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 				send(DiscordUtils.GSON.toJson(new VoiceKeepAliveRequest(System.currentTimeMillis())));
 				client.timer = System.currentTimeMillis();
 			}
@@ -253,19 +261,19 @@ public class DiscordVoiceWS {
 
 			onMessage(session, data);
 		} catch (IOException e) {
-			Discord4J.LOGGER.error("Discord Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 		}
 	}
 
 	@OnWebSocketClose
 	public void onClose(Session session, int code, String reason){
-		Discord4J.LOGGER.debug("Voice Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
+		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
 		disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
 	}
 
 	@OnWebSocketError
 	public void onError(Session session, Throwable e) {
-		Discord4J.LOGGER.error("Voice Websocket error, disconnecting...", e);
+		Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket error, disconnecting...", e);
 		if (session == null || !session.isOpen()) {
 			disconnect(VoiceDisconnectedEvent.Reason.INIT_ERROR);
 		} else {
@@ -280,14 +288,14 @@ public class DiscordVoiceWS {
 	 */
 	public void send(String message) {
 		if (session == null || !session.isOpen()) {
-			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Socket attempting to send a message ({}) without a valid session!", message);
 			return;
 		}
 		if (isConnected.get()) {
 			try {
 				session.getRemote().sendString(message);
 			} catch (IOException e) {
-				Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error caught attempting to send a websocket message", e);
 			}
 		}
 	}

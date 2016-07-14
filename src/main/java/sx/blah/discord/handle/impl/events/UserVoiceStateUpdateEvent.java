@@ -1,12 +1,14 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.Event;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
  * This is dispatched when the voice state of a user is updated.
+ * @deprecated
  */
+@Deprecated
 public class UserVoiceStateUpdateEvent extends Event {
 
 	/**

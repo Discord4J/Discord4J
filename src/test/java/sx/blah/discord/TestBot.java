@@ -4,15 +4,14 @@ import org.junit.Test;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.IListener;
+import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
-import sx.blah.discord.util.Image;
+import sx.blah.discord.util.audio.AudioPlayer;
 
-import java.awt.*;
 import java.io.File;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -41,6 +40,10 @@ public class TestBot {
 	 */
 	public static void main(String... args) {
 		try {
+			if (Discord4J.LOGGER instanceof Discord4J.Discord4JLogger) {
+				((Discord4J.Discord4JLogger) Discord4J.LOGGER).setLevel(Discord4J.Discord4JLogger.Level.TRACE);
+			}
+
 			Configuration.LOAD_EXTERNAL_MODULES = false; //temp
 
 			boolean isTesting = args[args.length-1].equals("CITest");
@@ -48,9 +51,9 @@ public class TestBot {
 			IDiscordClient client;
 
 			if ((isTesting && args.length > 2) || (!isTesting && args.length > 1))
-				client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
+				client = new ClientBuilder().withReconnects().withLogin(args[0] /* username */, args[1] /* password */).build();
 			else
-				client = new ClientBuilder().withToken(args[0]).build();
+				client = new ClientBuilder().withReconnects().withToken(args[0]).build();
 
 			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
@@ -79,8 +82,8 @@ public class TestBot {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.join();
-								channel.getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
-								channel.getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
+								channel.getGuild().getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
+								channel.getGuild().getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
 							}
 
 							//Start testing
@@ -90,7 +93,13 @@ public class TestBot {
 							//Clearing spoofbot's mess from before
 							synchronized (client) {
 								for (IMessage message : spoofChannel.getMessages()) {
-									message.delete();
+									RequestBuffer.request(() -> {
+										try {
+											message.delete();
+										} catch (MissingPermissionsException | DiscordException e) {
+											e.printStackTrace();
+										}
+									});
 								}
 							}
 
@@ -124,6 +133,13 @@ public class TestBot {
 
 			} else { //Dev testing
 				client.login();
+
+				client.getDispatcher().registerListener(new IListener<ReadyEvent>() {
+					@Override
+					public void handle(ReadyEvent event) {
+						Discord4J.LOGGER.info("Connected to {} guilds.", event.getClient().getGuilds().size());
+					}
+				});
 
 				client.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 					@Override
@@ -178,7 +194,7 @@ public class TestBot {
 								m.getChannel().toggleTypingStatus();
 							} else if (m.getContent().startsWith(".invite")) {
 								try {
-									m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
+									m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false).getInviteCode());
 								} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 									e.printStackTrace();
 								}
@@ -212,25 +228,42 @@ public class TestBot {
 								} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 									e.printStackTrace();
 								}
+							} else if (m.getContent().startsWith(".join")) {
+								IVoiceChannel channel = m.getGuild().getVoiceChannelsByName(m.getContent().split(" ")[1]).get(0);
+								channel.join();
+							} else if (m.getContent().startsWith(".leave")) {
+								IVoiceChannel channel = m.getGuild().getVoiceChannelsByName(m.getContent().split(" ")[1]).get(0);
+								channel.leave();
 							} else if (m.getContent().startsWith(".play")) {
-								IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel -> voiceChannel.getName().equalsIgnoreCase("General") && !voiceChannel.isConnected()).findFirst().orElse(null);
-								if (channel != null) {
-									channel.join();
-									channel.getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
-									channel.getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
-								}
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.queue(new File("./test.mp3"));
+								player.queue(new File("./test2.mp3"));
 							} else if (m.getContent().startsWith(".pause")) {
-								m.getGuild().getAudioChannel().pause();
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setPaused(true);
 							} else if (m.getContent().startsWith(".resume")) {
-								m.getGuild().getAudioChannel().resume();
-							} else if (m.getContent().startsWith(".queue")) {
-								m.getGuild().getAudioChannel().queueFile(new File("./test2.mp3"));
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setPaused(false);
 							} else if (m.getContent().startsWith(".volume")) {
-								m.getGuild().getAudioChannel().setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
 							} else if (m.getContent().startsWith(".stop")) {
 								client.getConnectedVoiceChannels().stream().filter((IVoiceChannel channel)->channel.getGuild().equals(m.getGuild())).findFirst().ifPresent(IVoiceChannel::leave);
 							} else if (m.getContent().startsWith(".skip")) {
-								m.getGuild().getAudioChannel().skip();
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.skip();
+							} else if (m.getContent().startsWith(".toggleloop")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.setLoop(!player.isLooping());
+							} else if (m.getContent().startsWith(".rewind")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.getCurrentTrack().rewind(Long.parseLong(m.getContent().split(" ")[1]));
+							} else if (m.getContent().startsWith(".forward")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.getCurrentTrack().fastForward(Long.parseLong(m.getContent().split(" ")[1]));
+							} else if (m.getContent().startsWith(".shuffle")) {
+								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+								player.shuffle();
 							} else if (m.getContent().startsWith(".spam")) {
 								m.getChannel().getMessages().setCacheCapacity(100);
 								new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -254,6 +287,8 @@ public class TestBot {
 								} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
 									e.printStackTrace();
 								}
+							} else if (m.getContent().startsWith(".logout")) {
+								client.logout();
 							} else if (m.getContent().startsWith(".test")) {
 								test(m);
 							}
@@ -264,10 +299,11 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						IRole role = message.getGuild().createRole();
-						role.changeColor(Color.red);
-						role.changeName("Test");
-						role.changeHoist(true);
+//						Field sessionField = DiscordWS.class.getDeclaredField("session");
+//						sessionField.setAccessible(true);
+//						Session session = (Session) sessionField.get(((DiscordClientImpl) client).ws);
+//						session.close(new CloseStatus(1337, "blah"));
+						client.logout();
 					}
 				});
 

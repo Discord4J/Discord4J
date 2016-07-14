@@ -1,22 +1,3 @@
-/*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2015
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 package sx.blah.discord.util;
 
 import sx.blah.discord.api.IDiscordClient;
@@ -116,6 +97,26 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * This sets the content to a multiline code block with no language highlighting.
+	 *
+	 * @param content The content inside the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withQuote(String content) {
+		return withCode("", content);
+	}
+
+	/**
+	 * Adds a multiline code block with no language highlighting.
+	 *
+	 * @param content The content inside the code block.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder appendQuote(String content) {
+		return appendCode("", content);
+	}
+
+	/**
 	 * Sets the content to a multiline code block with specific language syntax highlighting.
 	 *
 	 * @param language The language to do syntax highlighting for.
@@ -135,7 +136,7 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder appendCode(String language, String content) {
-		return appendContent(language+" "+content, Styles.CODE_WITH_LANG);
+		return appendContent(language+"\n"+content, Styles.CODE_WITH_LANG);
 	}
 
 	/**
@@ -145,11 +146,11 @@ public class MessageBuilder {
 	 *
 	 * @return The message object representing the sent message.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage build() throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public IMessage build() throws RateLimitException, DiscordException, MissingPermissionsException {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
@@ -162,11 +163,11 @@ public class MessageBuilder {
 	 *
 	 * @return The message object representing the sent message.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage send() throws HTTP429Exception, DiscordException, MissingPermissionsException {
+	public IMessage send() throws RateLimitException, DiscordException, MissingPermissionsException {
 		return build();
 	}
 

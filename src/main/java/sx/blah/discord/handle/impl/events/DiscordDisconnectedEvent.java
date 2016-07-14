@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.Event;
+import sx.blah.discord.api.events.Event;
 
 /**
  * This event is dispatched when either the client loses connection to discord or is logged out.
@@ -47,8 +47,16 @@ public class DiscordDisconnectedEvent extends Event {
 		 */
 		RECONNECTING,
 		/**
-		 * The websocket encountered an error while initializing
+		 * The websocket encountered an error while initializing. This is unrecoverable.
 		 */
-		INIT_ERROR
+		INIT_ERROR,
+		/**
+		 * The websocket declared the current session to be invalid.
+		 */
+		INVALID_SESSION,
+		/**
+		 * The websocket attempted reconnect to discord but it failed.
+		 */
+		RECONNECTION_FAILED
 	}
 }

@@ -5,19 +5,18 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.IApplication;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.json.requests.BotConversionRequest;
 import sx.blah.discord.json.responses.ApplicationResponse;
 import sx.blah.discord.json.responses.BotResponse;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
@@ -117,7 +116,7 @@ public class Application implements IApplication {
 		return String.format(DiscordEndpoints.APPLICATION_ICON, id, icon);
 	}
 
-	private void edit(Optional<String> name, Optional<String> description, Optional<Image> icon, Optional<String[]> redirectUris) throws DiscordException, HTTP429Exception {
+	private void edit(Optional<String> name, Optional<String> description, Optional<Image> icon, Optional<String[]> redirectUris) throws DiscordException, RateLimitException {
 		try {
 			ApplicationResponse response = DiscordUtils.GSON.fromJson(Requests.PUT.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new ApplicationResponse(redirectUris.orElse(this.redirectUris),
@@ -132,59 +131,33 @@ public class Application implements IApplication {
 			this.icon = response.icon;
 			this.redirectUris = response.redirect_uris;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
-	public void changeName(String name) throws HTTP429Exception, DiscordException {
+	public void changeName(String name) throws RateLimitException, DiscordException {
 		edit(Optional.of(name), Optional.empty(), null, Optional.empty());
 	}
 
 	@Override
-	public void changeDescription(String description) throws HTTP429Exception, DiscordException {
+	public void changeDescription(String description) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.of(description), null, Optional.empty());
 	}
 
 	@Override
-	public void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException {
+	public void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.empty(), icon, Optional.empty());
 	}
 
 	@Override
-	public void changeRedirectUris(String[] redirectUris) throws HTTP429Exception, DiscordException {
+	public void changeIcon(Image icon) throws RateLimitException, DiscordException {
+		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), Optional.empty());
+	}
+
+	@Override
+	public void changeRedirectUris(String[] redirectUris) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.empty(), null, Optional.of(redirectUris));
-	}
-
-	@Override
-	public String convertUserToBot(String token) throws DiscordException {
-		try {
-			System.out.println(DiscordUtils.GSON.toJson(new BotConversionRequest(token)));
-			BotResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
-					DiscordEndpoints.APPLICATIONS+"/"+id+"/bot",
-					new StringEntity(DiscordUtils.GSON.toJson(new BotConversionRequest(token))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), BotResponse.class);
-
-			this.bot = DiscordUtils.getUserFromJSON(client, response);
-			this.botToken = response.token;
-			return botToken;
-		} catch (HTTP429Exception | UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-		}
-		return null;
-	}
-
-	@Override
-	public String convertUserToBot(IDiscordClient client) throws DiscordException {
-		if (client.isBot())
-			throw new DiscordException("Client is already a bot!");
-		if (client.isReady() && client.getToken().equals(this.client.getToken()))
-			throw new DiscordException("Cannot convert application owner to a bot!");
-
-		String token = convertUserToBot(client.getToken());
-		((DiscordClientImpl) client).convert(token);
-		return token;
 	}
 
 	@Override
@@ -198,8 +171,8 @@ public class Application implements IApplication {
 			this.bot = DiscordUtils.getUserFromJSON(client, response);
 			this.botToken = response.token;
 			return new ClientBuilder().withToken(botToken);
-		} catch (HTTP429Exception | UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		} catch (RateLimitException | UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -209,8 +182,8 @@ public class Application implements IApplication {
 		try {
 			Requests.DELETE.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
 					new BasicNameValuePair("authorization", client.getToken()));
-		} catch (HTTP429Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		} catch (RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 

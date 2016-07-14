@@ -43,5 +43,13 @@ enum GatewayOps {
 	/**
 	 * Used to notify client they have an invalid session id.
 	 */
-	INVALID_SESSION
+	INVALID_SESSION,
+	/**
+	 * Received immediately after connecting.
+	 */
+	HELLO,
+	/**
+	 * Sent after a heartbeat was received.
+	 */
+	HEARTBEAT_ACK
 }

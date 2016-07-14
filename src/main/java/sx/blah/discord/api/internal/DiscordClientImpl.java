@@ -3,23 +3,26 @@ package sx.blah.discord.api.internal;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.EventDispatcher;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.AudioChannel;
+import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
+import sx.blah.discord.handle.impl.events.StatusChangeEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.*;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.RateLimitException;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -44,12 +47,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * User we are logged in as
 	 */
-	protected User ourUser;
+	protected volatile User ourUser;
 
 	/**
 	 * Our token, so we can send XHR to Discord.
 	 */
-	protected String token;
+	protected volatile String token;
 
 	/**
 	 * Time (in ms) between keep alive
@@ -60,67 +63,62 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Local copy of all guilds/servers.
 	 */
-	protected final List<IGuild> guildList = new ArrayList<>();
+	protected final List<IGuild> guildList = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Private copy of the email you logged in with.
 	 */
-	protected String email;
+	protected volatile String email;
 
 	/**
 	 * Private copy of the password you used to log in.
 	 */
-	protected String password;
+	protected volatile String password;
 
 	/**
 	 * WebSocket over which to communicate with Discord.
 	 */
-	public DiscordWS ws;
+	public volatile DiscordWS ws;
 
 	/**
 	 * Holds the active connections to voice sockets.
 	 */
-	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new HashMap<>();
+	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
 
 	/**
 	 * Event dispatcher.
 	 */
-	protected EventDispatcher dispatcher;
+	protected volatile EventDispatcher dispatcher;
 
 	/**
 	 * All of the private message channels that the bot is connected to.
 	 */
-	protected final List<IPrivateChannel> privateChannels = new ArrayList<>();
-
-	/**
-	 * The voice channels the bot is currently in.
-	 */
-	public List<IVoiceChannel> connectedVoiceChannels = new ArrayList<>();
+	protected final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Whether the api is logged in.
 	 */
-	protected boolean isReady = false;
+	protected volatile boolean isReady = false;
 
 	/**
 	 * The websocket session id.
 	 */
-	protected String sessionId;
+	protected volatile String sessionId;
 
 	/**
 	 * Caches the last operation done by the websocket, required for handling redirects.
 	 */
-	protected long lastSequence = 0;
+	protected volatile long lastSequence = 0;
 
 	/**
 	 * Caches the available regions for discord.
 	 */
-	protected final List<IRegion> REGIONS = new ArrayList<>();
+	protected final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
 	 * The module loader for this client.
 	 */
-	protected ModuleLoader loader;
+	protected volatile ModuleLoader loader;
 
 	/**
 	 * The time for the client to timeout.
@@ -140,30 +138,36 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Whether this client represents a bot.
 	 */
-	protected boolean isBot;
+	protected volatile boolean isBot;
+
+	/**
+	 * Whether this client should automatically attempt to reconnect on disconnects.
+	 */
+	protected final boolean withReconnects;
 
 	/**
 	 * When this client was logged into. Useful for determining uptime.
 	 */
-	protected LocalDateTime launchTime;
+	protected volatile LocalDateTime launchTime;
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot) {
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, boolean withReconnects) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.isBot = isBot;
+		this.withReconnects = withReconnects;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
 
-	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, false);
+	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, false, withReconnects);
 		this.email = email;
 		this.password = password;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, true);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, true, withReconnects);
 		this.token = token;
 	}
 
@@ -175,20 +179,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public ModuleLoader getModuleLoader() {
 		return loader;
-	}
-
-	@Override
-	public AudioChannel getAudioChannel() {
-		if (isBot)
-			throw new UnsupportedOperationException("This method is for non-bot accounts only!");
-
-		if (getConnectedVoiceChannel().isPresent())
-			try {
-				return getConnectedVoiceChannel().get().getAudioChannel();
-			} catch (DiscordException e) {
-				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-			}
-		return null;
 	}
 
 	@Override
@@ -220,11 +210,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = DiscordWS.connect(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon);
+			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {
-			Discord4J.LOGGER.error("Exception caught, logging in!", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Exception caught, logging in!", e);
 			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
 	}
@@ -234,26 +224,21 @@ public final class DiscordClientImpl implements IDiscordClient {
 			Requests.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
 					new BasicNameValuePair("authorization", getToken()));
 			return true;
-		} catch (HTTP429Exception | DiscordException e) {
+		} catch (RateLimitException | DiscordException e) {
 			return false;
 		}
 	}
 
 	@Override
-	public void logout() throws HTTP429Exception, DiscordException {
+	public void logout() throws RateLimitException, DiscordException {
 		if (isReady()) {
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-
-			for (DiscordVoiceWS vws : voiceConnections.values())
-				vws.disconnect(VoiceDisconnectedEvent.Reason.LOGGED_OUT);
-
-			lastSequence = 0;
-			sessionId = null; //Prevents the websocket from sending a resume request.
-
-			Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
+			if (!isBot())
+				Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
 					new BasicNameValuePair("authorization", token));
+
+			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 	}
 
 	/**
@@ -268,18 +253,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 			GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url;//.replaceAll("wss", "ws");
-		} catch (HTTP429Exception | DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		} catch (RateLimitException | DiscordException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
-		Discord4J.LOGGER.debug("Obtained gateway {}.", gateway);
+		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
 		return gateway;
 	}
 
-	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws HTTP429Exception, DiscordException {
-		Discord4J.LOGGER.debug("Changing account info.");
+	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws RateLimitException, DiscordException {
+		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return;
 		}
 
@@ -293,56 +278,88 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
 
 			if (!this.token.equals(response.token)) {
-				Discord4J.LOGGER.debug("Token changed, updating it.");
+				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
 				this.token = response.token;
 			}
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
-	public void changeUsername(String username) throws DiscordException, HTTP429Exception {
+	public void changeUsername(String username) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.of(username), Optional.empty(), Optional.empty(), null);
 	}
 
 	@Override
-	public void changeEmail(String email) throws DiscordException, HTTP429Exception {
+	public void changeEmail(String email) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.empty(), Optional.of(email), Optional.empty(), null);
 	}
 
 	@Override
-	public void changePassword(String password) throws DiscordException, HTTP429Exception {
+	public void changePassword(String password) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.of(password), null);
 	}
 
 	@Override
-	public void changeAvatar(Image avatar) throws DiscordException, HTTP429Exception {
+	public void changeAvatar(Image avatar) throws DiscordException, RateLimitException {
 		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(avatar));
 	}
 
 	@Override
-	public void updatePresence(boolean isIdle, Optional<String> game) {
+	public void updatePresence(boolean isIdle, Optional<String> game) { //TODO: make private
+		updatePresence(isIdle, Status.game(game.orElse(null)));
+	}
+
+	private void updatePresence(boolean isIdle, Status status) {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return;
 		}
 
-		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game.orElse(null))));
+		if (!status.equals(getOurUser().getStatus())) {
+			Status oldStatus = getOurUser().getStatus();
+			((User) getOurUser()).setStatus(status);
+			dispatcher.dispatch(new StatusChangeEvent(getOurUser(), oldStatus, status));
+		}
 
-		((User) getOurUser()).setPresence(isIdle ? Presences.IDLE : Presences.ONLINE);
-		((User) getOurUser()).setGame(game);
+		if ((getOurUser().getPresence() != Presences.IDLE && isIdle)
+				|| (getOurUser().getPresence() == Presences.IDLE && !isIdle)
+				|| (getOurUser().getPresence() != Presences.STREAMING && status.getType() == Status.StatusType.STREAM)) {
+			Presences oldPresence = getOurUser().getPresence();
+			Presences newPresence = isIdle ? Presences.IDLE :
+					(status.getType() == Status.StatusType.STREAM ? Presences.STREAMING : Presences.ONLINE);
+			((User) getOurUser()).setPresence(newPresence);
+			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
+		}
+
+		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));
+	}
+
+	@Override
+	public void changePresence(boolean isIdle) {
+		updatePresence(isIdle, getOurUser().getGame());
+	}
+
+	@Override
+	public void changeGameStatus(String game) {
+		updatePresence(getOurUser().getPresence() == Presences.IDLE, Optional.ofNullable(game));
+	}
+
+	@Override
+	public void changeStatus(Status status) {
+		updatePresence(getOurUser().getPresence() == Presences.IDLE, status);
 	}
 
 	@Override
 	public boolean isReady() {
-		return isReady && ws != null;
+		return isReady && ws != null && ws.isConnected.get() && !ws.isReconnecting.get();
 	}
 
 	@Override
 	public IUser getOurUser() {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
 		}
 		return ourUser;
@@ -407,9 +424,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, HTTP429Exception {
+	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -430,7 +447,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			privateChannels.add(channel);
 			return channel;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Error creating creating a private channel!", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Error creating creating a private channel!", e);
 		}
 
 		return null;
@@ -439,7 +456,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IInvite getInviteForCode(String code) {
 		if (!isReady()) {
-			Discord4J.LOGGER.error("Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
 		}
 
@@ -454,7 +471,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IRegion> getRegions() throws HTTP429Exception, DiscordException {
+	public List<IRegion> getRegions() throws RateLimitException, DiscordException {
 		if (REGIONS.isEmpty()) {
 			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
 					DiscordEndpoints.VOICE+"regions",
@@ -475,14 +492,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return getRegions().stream()
 					.filter(r -> r.getID().equals(regionID))
 					.findAny().orElse(null);
-		} catch (HTTP429Exception | DiscordException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+		} catch (RateLimitException | DiscordException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
 
 	@Override
-	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws HTTP429Exception, DiscordException {
+	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException {
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
@@ -493,7 +510,29 @@ public final class DiscordClientImpl implements IDiscordClient {
 			guildList.add(guild);
 			return guild;
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	@Override
+	public IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException {
+		return createGuild(name, region, (Image) null);
+	}
+
+	@Override
+	public IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException {
+		try {
+			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
+							new CreateGuildRequest(name, region.getID(), icon))),
+					new BasicNameValuePair("authorization", this.token),
+					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
+			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);
+			guildList.add(guild);
+			return guild;
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
 	}
@@ -504,16 +543,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public Optional<IVoiceChannel> getConnectedVoiceChannel() {
-		if (isBot)
-			throw new UnsupportedOperationException("This method is for non-bot accounts only!");
-
-		return Optional.ofNullable(connectedVoiceChannels.size() == 0 ? null : connectedVoiceChannels.get(0));
-	}
-
-	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return connectedVoiceChannels;
+		return ourUser.getConnectedVoiceChannels();
 	}
 
 	@Override
@@ -538,7 +569,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IApplication> getApplications() throws HTTP429Exception, DiscordException {
+	public List<IApplication> getApplications() throws RateLimitException, DiscordException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by a user");
+
 		List<IApplication> applications = new ArrayList<>();
 
 		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
@@ -552,7 +586,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IApplication createApplication(String name) throws DiscordException, HTTP429Exception {
+	public IApplication createApplication(String name) throws DiscordException, RateLimitException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by a user");
+
 		ApplicationResponse response = null;
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
@@ -562,7 +599,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return DiscordUtils.getApplicationFromJSON(this, response);
 
 		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 
 		return null;
@@ -571,5 +608,52 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public LocalDateTime getLaunchTime() {
 		return launchTime;
+	}
+
+	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
+		return DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me",
+				new BasicNameValuePair("authorization", getToken()),
+				new BasicNameValuePair("content-type", "application/json")), ApplicationInfoResponse.class);
+	}
+
+	@Override
+	public String getDescription() throws DiscordException {
+		try {
+			return getApplicationInfo().description;
+		} catch (RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	@Override
+	public String getApplicationIconURL() throws DiscordException {
+		try {
+			ApplicationInfoResponse info = getApplicationInfo();
+			return String.format(DiscordEndpoints.APPLICATION_ICON, info.id, info.icon);
+		} catch (RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	@Override
+	public String getApplicationClientID() throws DiscordException {
+		try {
+			return getApplicationInfo().id;
+		} catch (RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	@Override
+	public String getApplicationName() throws DiscordException {
+		try {
+			return getApplicationInfo().name;
+		} catch (RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		return null;
 	}
 }

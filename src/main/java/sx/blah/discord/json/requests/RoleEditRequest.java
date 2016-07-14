@@ -30,10 +30,16 @@ public class RoleEditRequest {
 	 */
 	public int permissions;
 
-	public RoleEditRequest(Color color, boolean hoist, String name, EnumSet<Permissions> permissions) {
+	/**
+	 * Whether the role is mentionable.
+	 */
+	public boolean mentionable;
+
+	public RoleEditRequest(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean mentionable) {
 		this.color = color.getRGB() & 0x00ffffff; // & 0x00ffffff eliminates the alpha value
 		this.hoist = hoist;
 		this.name = name;
 		this.permissions = Permissions.generatePermissionsNumber(permissions);
+		this.mentionable = mentionable;
 	}
 }

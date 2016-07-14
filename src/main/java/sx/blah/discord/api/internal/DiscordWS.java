@@ -19,36 +19,86 @@ import sx.blah.discord.json.requests.KeepAliveRequest;
 import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.RequestBuilder;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.zip.InflaterInputStream;
 
 //This is what Hlaaftana uses so it must be good :shrug:
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordWS {
 
-	private DiscordClientImpl client;
-	private Session session;
-	public AtomicBoolean isConnected = new AtomicBoolean(true);
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+	private final WebSocketClient wsClient;
+	private final String gateway;
+	private volatile DiscordClientImpl client;
+	private volatile Session session;
+	protected final AtomicBoolean isConnected = new AtomicBoolean(false);
+	private volatile ScheduledExecutorService executorService;
+	private final AtomicBoolean startingUp = new AtomicBoolean(false);
+	protected final AtomicBoolean isReconnecting = new AtomicBoolean(false);
+	private final Supplier<TimerTask> cancelReconnectTaskSupplier = new Supplier<TimerTask>() {
+		private volatile CancelTask task;
+
+		@Override
+		public TimerTask get() {
+			if (task == null || task.ranOrCancelled)
+				task = new CancelTask();
+
+			return task;
+		}
+
+		class CancelTask extends TimerTask {
+
+			volatile boolean ranOrCancelled = false;
+
+			@Override
+			public void run() {
+				if (!ranOrCancelled) {
+					ranOrCancelled = true;
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection attempt timed out after {} seconds", MAX_RECONNECT_TIME);
+					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+				}
+			}
+
+			@Override
+			public boolean cancel() {
+				ranOrCancelled = true;
+				return super.cancel();
+			}
+		}
+	};
+	private final Timer cancelReconnectTimer = new Timer("Reconnection Timer", true);
 	private final boolean isDaemon;
-	private volatile boolean sentPing = false;
-	private volatile long lastPingSent = -1L;
-	private volatile long pingResponseTime = -1L;
+	private final boolean withReconnects;
+	private final AtomicBoolean sentPing = new AtomicBoolean(false);
+	private final AtomicLong pingResponseTime = new AtomicLong(-1L);
 	private final long timeoutTime;
 	private final int maxMissedPingCount;
-	private volatile int missedPingCount = 0;
-	private static final String GATEWAY_VERSION = "4";
+	private final AtomicInteger missedPingCount = new AtomicInteger(0);
+	private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
+	//TODO: Expose the next two variables:
+	private static final int MAX_RECONNECT_ATTEMPTS = 3;
+	private static final int MAX_RECONNECT_TIME = 10; //Time in seconds before the reconnect is considered a failure.
+	private static final String GATEWAY_VERSION = "5";
+	private static final int READY_TIMEOUT = 10; //Time in seconds where the ready event will timeout from wait for guilds
 	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
 		@Override
 		public void run() {
@@ -57,7 +107,7 @@ public class DiscordWS {
 				if (session != null)
 					session.disconnect(); //Harsh disconnect to close the process ASAP
 			} catch (IOException e) {
-				Discord4J.LOGGER.error("Error disconnecting the websocket on jvm shutdown!", e);
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error disconnecting the websocket on jvm shutdown!", e);
 			}
 		}
 	};
@@ -67,38 +117,34 @@ public class DiscordWS {
 	 */
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
-	public static DiscordWS connect(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon) throws Exception {
-		//Ensuring gateway is v4 ready
+	public DiscordWS(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) throws Exception {
+		this.client = (DiscordClientImpl)client;
+		this.timeoutTime = timeout;
+		this.maxMissedPingCount = maxMissedPingCount;
+		this.isDaemon = isDaemon;
+		this.withReconnects = withReconnects;
+		this.startingUp.set(true);
+		//Ensuring gateway is ready
 		if (!gateway.endsWith("/"))
 			gateway += "/";
 		gateway += "?encoding=json&v="+GATEWAY_VERSION;
+		this.gateway = gateway;
 
 		SslContextFactory sslFactory = new SslContextFactory();
-		WebSocketClient wsClient = new WebSocketClient(sslFactory);
+		wsClient = new WebSocketClient(sslFactory);
 		wsClient.setDaemon(true);
 		if (timeout != -1) {
 			wsClient.setConnectTimeout(timeout);
 			wsClient.setAsyncWriteTimeout(timeout);
 		}
-		DiscordWS socket = new DiscordWS((DiscordClientImpl) client, wsClient, timeout, maxMissedPingCount, isDaemon);
 		wsClient.start();
-		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
-		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
-		wsClient.connect(socket, new URI(gateway), upgradeRequest);
-		return socket;
-	}
-
-	public DiscordWS(DiscordClientImpl client, WebSocketClient wsClient, long timeout, int maxMissedPingCount, boolean isDaemon) {
-		this.client = client;
-		this.timeoutTime = timeout;
-		this.maxMissedPingCount = maxMissedPingCount;
-		this.isDaemon = isDaemon;
+		connect();
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (!isDaemon) {
 			new Timer("WebSocketClient Keep-Alive").scheduleAtFixedRate(new TimerTask() { //Required b/c the ws client doesn't close correctly unless it is a daemon
 				@Override
 				public void run() { //Prevents the WebSocketClient from closing until the websocket is disconnected
-					if (!isConnected.get()) {
+					if (!isConnected.get() && !startingUp.get() && !isReconnecting.get()) {
 						this.cancel();
 					}
 				}
@@ -106,14 +152,72 @@ public class DiscordWS {
 		}
 	}
 
+	private void connect() throws URISyntaxException, IOException {
+		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
+		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
+		wsClient.connect(this, new URI(gateway), upgradeRequest);
+	}
+
 	/**
 	 * Disconnects the client WS.
 	 */
-	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
+	public synchronized void disconnect(DiscordDisconnectedEvent.Reason reason) {
+		executorService.shutdownNow();
+
+		if (startingUp.get() && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
+			reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
+
+		if (reason == DiscordDisconnectedEvent.Reason.LOGGED_OUT
+				|| reason == DiscordDisconnectedEvent.Reason.INIT_ERROR
+				|| reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION) {
+			clearCache();
+		}
+
 		if (isConnected.get()) {
-			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			isConnected.set(false);
-			executorService.shutdownNow();
+			if (withReconnects && (reason == DiscordDisconnectedEvent.Reason.UNKNOWN
+					|| reason == DiscordDisconnectedEvent.Reason.MISSED_PINGS
+					|| reason == DiscordDisconnectedEvent.Reason.TIMEOUT
+					|| reason == DiscordDisconnectedEvent.Reason.INIT_ERROR
+					|| reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION
+					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
+						&& reconnectAttempts.get() <= MAX_RECONNECT_ATTEMPTS))) {
+
+				isReconnecting.set(true);
+
+				if (reconnectAttempts.incrementAndGet() > MAX_RECONNECT_ATTEMPTS) {
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
+					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+					return;
+				} else {
+					if (reason == DiscordDisconnectedEvent.Reason.INIT_ERROR || reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION) {
+						try {
+							client.ws = new DiscordWS(client, gateway, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
+						} catch (Exception e) {
+							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught while attempting to reconnect.", e);
+						}
+					} else if (session == null || !session.isOpen()) {
+						try {
+							connect();
+						} catch (URISyntaxException | IOException e) {
+							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught while attempting to reconnect.", e);
+							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+							return;
+						}
+					}
+
+					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
+					cancelReconnectTimer.schedule(cancelReconnectTaskSupplier.get(), TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
+					return;
+				}
+			}
+
+			startingUp.set(false);
+			sentPing.set(false);
+			isReconnecting.set(false);
+			missedPingCount.set(0);
+			client.dispatcher.dispatch(new DiscordDisconnectedEvent(reason));
 			client.ws = null;
 			for (DiscordVoiceWS vws : client.voiceConnections.values()) { //Ensures that voice connections are closed.
 				VoiceDisconnectedEvent.Reason voiceReason;
@@ -124,7 +228,6 @@ public class DiscordWS {
 				}
 				vws.disconnect(voiceReason);
 			}
-			clearCache();
 			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 			if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
 				session.close();
@@ -135,9 +238,8 @@ public class DiscordWS {
 	/**
 	 * Clears the api's cache
 	 */
-	private void clearCache() {
+	protected void clearCache() {
 		client.sessionId = null;
-		client.connectedVoiceChannels.clear();
 		client.voiceConnections.clear();
 		client.guildList.clear();
 		client.heartbeat = 0;
@@ -154,14 +256,14 @@ public class DiscordWS {
 	 */
 	public void send(String message) {
 		if (session == null || !session.isOpen()) {
-			Discord4J.LOGGER.error("Socket attempting to send a message ({}) without a valid session!", message);
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Socket attempting to send a message ({}) without a valid session!", message);
 			return;
 		}
 		if (isConnected.get()) {
 			try {
 				session.getRemote().sendString(message);
 			} catch (IOException e) {
-				Discord4J.LOGGER.error("Error caught attempting to send a websocket message", e);
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught attempting to send a websocket message", e);
 			}
 		}
 	}
@@ -178,52 +280,36 @@ public class DiscordWS {
 	@OnWebSocketConnect
 	public void onOpen(Session session) {
 		this.session = session;
-		if (client.sessionId != null) {
-			send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
-			Discord4J.LOGGER.debug("Reconnected to the Discord websocket.");
-		} else if (!client.getToken().isEmpty()) {
-			send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
-					Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
-			Discord4J.LOGGER.debug("Connected to the Discord websocket.");
-		} else {
-			Discord4J.LOGGER.error("Use the login() method to set your token first!");
-			return;
-		}
-
-		Runnable pingPong = () -> { //TODO: Remove when HEARTBEAT_ACK is implemented
-			if (isConnected.get() && session != null && session.isOpen()) {
-				if (sentPing) {
-					if (missedPingCount > maxMissedPingCount && maxMissedPingCount > 0) {
-						Discord4J.LOGGER.warn("Missed {} ping responses in a row, disconnecting...", missedPingCount);
-						disconnect(DiscordDisconnectedEvent.Reason.MISSED_PINGS);
-					} else if ((System.currentTimeMillis()-lastPingSent) > timeoutTime && timeoutTime > 0) {
-						Discord4J.LOGGER.warn("Connection timed out at {}ms", System.currentTimeMillis()-lastPingSent);
-						disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
-					}
-					Discord4J.LOGGER.debug("Last ping was not responded to, skipping ping");
-					missedPingCount++;
-				} else {
-					Discord4J.LOGGER.trace("Sending ping...");
-					sentPing = true;
-					lastPingSent = System.currentTimeMillis();
-					try {
-						session.getRemote().sendPing(ByteBuffer.wrap(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)).getBytes()));
-					} catch (Exception e) {
-						Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-					}
-				}
-			}
-		};
-		executorService.scheduleAtFixedRate(pingPong, 5, 5, TimeUnit.SECONDS);
 	}
 
 	private void startKeepalive() {
+		if (executorService == null || executorService.isShutdown() || executorService.isTerminated()) {
+			executorService = Executors.newScheduledThreadPool(1, r -> {
+				Thread thread = Executors.defaultThreadFactory().newThread(r);
+				thread.setName("Discord4J WebSocket Heartbeat Executor");
+				return thread;
+			});
+		}
+
 		Runnable keepAlive = () -> {
-			if (this.isConnected.get()) {
+			if (this.isConnected.get() && !this.isReconnecting.get()) {
+				if (sentPing.get()) {
+					if (missedPingCount.get() > maxMissedPingCount && maxMissedPingCount > 0) {
+						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Missed {} heartbeat responses in a row, disconnecting...", missedPingCount);
+						disconnect(DiscordDisconnectedEvent.Reason.MISSED_PINGS);
+					} else if ((System.currentTimeMillis()-client.timer) > timeoutTime && timeoutTime > 0) {
+						Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Connection timed out at {}ms", System.currentTimeMillis()-client.timer);
+						disconnect(DiscordDisconnectedEvent.Reason.TIMEOUT);
+					}
+					Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Last ping was not responded to!");
+					missedPingCount.incrementAndGet();
+				}
+
 				long l = System.currentTimeMillis()-client.timer;
-				Discord4J.LOGGER.debug("Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 				send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
 				client.timer = System.currentTimeMillis();
+				sentPing.set(true);
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,
@@ -245,13 +331,13 @@ public class DiscordWS {
 		if (object.has("message")) {
 			String msg = object.get("message").getAsString();
 			if (msg == null || msg.isEmpty()) {
-				Discord4J.LOGGER.error("Received unknown error from Discord. Frame: {}", message);
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Received unknown error from Discord. Frame: {}", message);
 			} else
-				Discord4J.LOGGER.error("Received error from Discord: {}. Frame: {}", msg, message);
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Received error from Discord: {}. Frame: {}", msg, message);
 		}
 		int op = object.get("op").getAsInt();
 
-		if (object.has("s"))
+		if (object.has("s") && !object.get("s").isJsonNull())
 			client.lastSequence = object.get("s").getAsLong();
 
 		if (op == GatewayOps.DISPATCH.ordinal()) { //Event dispatched
@@ -299,6 +385,10 @@ public class DiscordWS {
 					messageDelete(eventObject);
 					break;
 
+				case "MESSAGE_DELETE_BULK":
+					messageDeleteBulk(eventObject);
+					break;
+
 				case "PRESENCE_UPDATE":
 					presenceUpdate(eventObject);
 					break;
@@ -313,6 +403,15 @@ public class DiscordWS {
 
 				case "CHANNEL_DELETE":
 					channelDelete(eventObject);
+					break;
+
+				case "CHANNEL_PINS_UPDATE"://Fired when pins are changed, this is mostly intended for clients and I already implemented this functionality on MESSAGE_UPDATE so I'm ignoring it
+					//Payload for future reference is:
+					// {
+					// 		"last_pin_timestamp": "TIMESTAMP",
+					// 		"channel_id": "CHANNEL ID"
+					// }
+					//Ignored
 					break;
 
 				case "USER_UPDATE":
@@ -360,85 +459,163 @@ public class DiscordWS {
 					break;
 
 				default:
-					Discord4J.LOGGER.warn("Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, message);
+					Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, message);
 			}
+		} else if (op == GatewayOps.HEARTBEAT.ordinal()) { //We received a heartbeat, time to send one back
+			send(DiscordUtils.GSON.toJson(new KeepAliveRequest(client.lastSequence)));
 		} else if (op == GatewayOps.RECONNECT.ordinal()) { //Gateway is redirecting us
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
-			Discord4J.LOGGER.info("Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
+			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = DiscordWS.connect(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon);
+				client.ws = new DiscordWS(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			} catch (Exception e) {
-				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
 			}
 		} else if (op == GatewayOps.INVALID_SESSION.ordinal()) { //Invalid session ABANDON EVERYTHING!!!
-			Discord4J.LOGGER.warn("Invalid session! Attempting to clear caches and reconnect...");
-			disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Invalid session! Attempting to clear caches and reconnect...");
+			disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION);
+		} else if (op == GatewayOps.HELLO.ordinal()) {
+			isConnected.set(true);
+			startingUp.set(false);
+			reconnectAttempts.set(0);
+			if (isReconnecting.get()) {
+				isReconnecting.set(false);
+				cancelReconnectTaskSupplier.get().cancel();
+			}
+
+			HelloResponse helloResponse = DiscordUtils.GSON.fromJson(object.get("d"), HelloResponse.class);
+
+			client.heartbeat = helloResponse.heartbeat_interval;
+			startKeepalive();
+
+			if (client.sessionId != null) {
+				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
+				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnected to the Discord websocket.");
+			} else if (!client.getToken().isEmpty()) {
+				send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
+						Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
+			} else {
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Use the login() method to set your token first!");
+				return;
+			}
+
+		} else if (op == GatewayOps.HEARTBEAT_ACK.ordinal()) {
+			if (!sentPing.get()) {
+				Discord4J.LOGGER.warn(LogMarkers.KEEPALIVE, "Received pong without sending ping! Is the websocket out of sync?");
+			} else {
+				pingResponseTime.set(System.currentTimeMillis()-client.timer);
+				Discord4J.LOGGER.trace(LogMarkers.KEEPALIVE, "Received pong... Response time is {}ms", pingResponseTime.get());
+				sentPing.set(false);
+				missedPingCount.set(0);
+			}
 		} else {
-			Discord4J.LOGGER.warn("Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
 	}
 
 	private void resumed(JsonElement eventObject) {
-		ResumedEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ResumedEventResponse.class);
-		client.heartbeat = event.heartbeat_interval;
-		startKeepalive();
+//		ResumedEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ResumedEventResponse.class);
+//		client.heartbeat = event.heartbeat_interval;
+//		startKeepalive();
 	}
 
 	private void ready(JsonElement eventObject) {
-		ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
+		final ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to the Discord Websocket v"+event.v);
+		final AtomicInteger guildsToWaitFor = new AtomicInteger(0);
+		isReconnecting.set(false);
+		isConnected.set(true); //Redundancy due to how reconnects work
 
-		Discord4J.LOGGER.info("Connected to the Discord Websocket v"+event.v);
+		new RequestBuilder(client).setAsync(true).doAction(() -> { //Ready event handling 1/2
+			client.sessionId = event.session_id;
 
-		client.sessionId = event.session_id;
+			client.ourUser = DiscordUtils.getUserFromJSON(client, event.user);
 
-		client.ourUser = DiscordUtils.getUserFromJSON(client, event.user);
+			Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Received heartbeat interval of {}.", client.heartbeat);
 
-		client.heartbeat = event.heartbeat_interval;
-		Discord4J.LOGGER.debug("Received heartbeat interval of {}.", client.heartbeat);
+			client.isReady = true;
 
-		startKeepalive();
+			// I hope you like loops.
+			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to {} guilds.", event.guilds.length);
+			for (GuildResponse guildResponse : event.guilds) {
+				if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
+					continue;
+				}
 
-		client.isReady = true;
-
-		// I hope you like loops.
-		Discord4J.LOGGER.info("Connected to {} guilds.", event.guilds.length);
-		for (GuildResponse guildResponse : event.guilds) {
-			if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
-				continue;
+				IGuild guild = DiscordUtils.getGuildFromJSON(client, guildResponse);
+				if (guild != null)
+					client.guildList.add(guild);
 			}
 
-			IGuild guild = DiscordUtils.getGuildFromJSON(client, guildResponse);
-			if (guild != null)
-				client.guildList.add(guild);
-		}
+			guildsToWaitFor.set(event.guilds.length - client.getGuilds().size());
+			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Initially loaded {}/{} guilds.", client.getGuilds().size(), event.guilds.length);
 
-		for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
-			PrivateChannel channel = (PrivateChannel) DiscordUtils.getPrivateChannelFromJSON(client, privateChannelResponse);
-			client.privateChannels.add(channel);
-		}
+			final int initialCount = guildsToWaitFor.get();
+			for (int i = 0; i < initialCount; i++) {
+				client.dispatcher.waitFor((GuildCreateEvent createEvent) -> { //Wait for guilds
+					guildsToWaitFor.set(guildsToWaitFor.get()-1);
+					Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Loaded {}/{} guilds.", event.guilds.length-guildsToWaitFor.get(), event.guilds.length);
+					return true;
+				}, READY_TIMEOUT, TimeUnit.SECONDS);
+			}
 
-		Discord4J.LOGGER.debug("Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
+			if (guildsToWaitFor.get() != 0) {
+				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "{} guilds determined unavailable!", guildsToWaitFor.get());
+				for (GuildResponse response : event.guilds) {
+					if (client.getGuildByID(response.id) == null)
+						client.dispatcher.dispatch(new GuildUnavailableEvent(response.id));
+				}
+			}
+			return true;
+		}).andThen(() -> { //Ready event handling 2/2
+			for (PrivateChannelResponse privateChannelResponse : event.private_channels) {
+				PrivateChannel channel = (PrivateChannel) DiscordUtils.getPrivateChannelFromJSON(client, privateChannelResponse);
+				client.privateChannels.add(channel);
+			}
 
-		client.dispatcher.dispatch(new ReadyEvent());
+			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
+
+			client.dispatcher.dispatch(new ReadyEvent());
+			return true;
+		}).execute();
 	}
 
 	private void messageCreate(JsonElement eventObject) {
 		MessageResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageResponse.class);
-		boolean mentioned = event.mention_everyone || event.content.contains("<@"+client.ourUser.getID()+">");
+		boolean mentioned = event.mention_everyone;
 
 		Channel channel = (Channel) client.getChannelByID(event.channel_id);
 
 		if (null != channel) {
+			if (!mentioned) { //Not worth checking if already mentioned
+				for (UserResponse user : event.mentions) { //Check mention array for a mention
+					if (client.getOurUser().getID().equals(user.id)) {
+						mentioned = true;
+						break;
+					}
+				}
+			}
+
+			if (!mentioned) { //Not worth checking if already mentioned
+				for (String role : event.mention_roles) { //Check roles for a mention
+					if (client.getOurUser().getRolesForGuild(channel.getGuild()).contains(channel.getGuild().getRoleByID(role))) {
+						mentioned = true;
+						break;
+					}
+				}
+			}
+
 			IMessage message = DiscordUtils.getMessageFromJSON(client, channel, event);
+
 			if (!channel.getMessages().contains(message)) {
-				Discord4J.LOGGER.debug("Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
+				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						event.author.id, event.channel_id, event.content);
 
-				Optional<List<String>> invites = DiscordUtils.getInviteCodesFromMessage(event.content);
-				if (invites.isPresent()) {
-					String[] inviteCodes = invites.get().toArray(new String[invites.get().size()]);
-					Discord4J.LOGGER.debug("Received invite codes \"{}\"", (Object) inviteCodes);
+				List<String> invites = DiscordUtils.getInviteCodesFromMessage(event.content);
+				if (invites.size() > 0) {
+					String[] inviteCodes = invites.toArray(new String[invites.size()]);
+					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Received invite codes \"{}\"", (Object) inviteCodes);
 					List<IInvite> inviteObjects = new ArrayList<>();
 					for (int i = 0; i < inviteCodes.length; i++) {
 						IInvite invite = client.getInviteForCode(inviteCodes[i]);
@@ -483,14 +660,14 @@ public class DiscordWS {
 	private void guildCreate(JsonElement eventObject) {
 		GuildResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildResponse.class);
 		if (event.unavailable) { //Guild can't be reached, so we ignore it
-			Discord4J.LOGGER.warn("Guild with id {} is unavailable, ignoring it. Is there an outage?", event.id);
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Guild with id {} is unavailable, ignoring it. Is there an outage?", event.id);
 			return;
 		}
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(client, event);
 		client.guildList.add(guild);
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
-		Discord4J.LOGGER.debug("New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
+		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
 	}
 
 	private void guildMemberAdd(JsonElement eventObject) {
@@ -500,7 +677,7 @@ public class DiscordWS {
 		if (guild != null) {
 			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(client, guild, new GuildResponse.MemberResponse(event.user, event.roles));
 			guild.addUser(user);
-			Discord4J.LOGGER.debug("User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
+			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
 			client.dispatcher.dispatch(new UserJoinEvent(guild, user, DiscordUtils.convertFromTimestamp(event.joined_at)));
 		}
 	}
@@ -513,7 +690,7 @@ public class DiscordWS {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
 				guild.getUsers().remove(user);
-				Discord4J.LOGGER.debug("User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
+				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
 				client.dispatcher.dispatch(new UserLeaveEvent(guild, user));
 			}
 		}
@@ -530,7 +707,7 @@ public class DiscordWS {
 			for (String role : event.roles)
 				user.addRole(guild.getID(), guild.getRoleByID(role));
 
-			user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
+			user.addRole(guild.getID(), guild.getEveryoneRole());
 
 			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
 		}
@@ -551,7 +728,13 @@ public class DiscordWS {
 
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
 
-			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
+			if (toUpdate.isPinned() && !event.pinned) {
+				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
+			} else if (!toUpdate.isPinned() && event.pinned) {
+				client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
+			} else {
+				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
+			}
 		}
 	}
 
@@ -564,18 +747,31 @@ public class DiscordWS {
 		if (channel != null) {
 			IMessage message = channel.getMessageByID(id);
 			if (message != null) {
+				if (message.isPinned()) {
+					((Message) message).setPinned(false); //For consistency with the event
+					client.dispatcher.dispatch(new MessageUnpinEvent(message));
+				}
+
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}
 	}
 
+	private void messageDeleteBulk(JsonElement eventObject) { //TODO: maybe add a separate event for this?
+		MessageDeleteBulkEventResponse event = DiscordUtils.GSON.fromJson(eventObject, MessageDeleteBulkEventResponse.class);
+		for (String id : event.ids) {
+			messageDelete(DiscordUtils.GSON.toJsonTree(new MessageDeleteEventResponse(id, event.channel_id)));
+		}
+	}
+
 	private void presenceUpdate(JsonElement eventObject) {
 		PresenceUpdateEventResponse event = DiscordUtils.GSON.fromJson(eventObject, PresenceUpdateEventResponse.class);
-		Presences presences = Presences.valueOf(event.status.toUpperCase());
-		String gameName = event.game == null ? null : event.game.name;
+		Status status = DiscordUtils.getStatusFromJSON(event.game);
+		Presences presence = status.getType() == Status.StatusType.STREAM ?
+				Presences.STREAMING : Presences.valueOf(event.status.toUpperCase());
 		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		if (guild != null
-				&& presences != null) {
+				&& presence != null) {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
 				if (event.user.username != null) { //Full object was sent so there is a user change, otherwise all user fields but id would be null
@@ -584,17 +780,18 @@ public class DiscordWS {
 					client.dispatcher.dispatch(new UserUpdateEvent(oldUser, user));
 				}
 
-				if (!user.getPresence().equals(presences)) {
+				if (!user.getPresence().equals(presence)) {
 					Presences oldPresence = user.getPresence();
-					user.setPresence(presences);
-					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, oldPresence, presences));
-					Discord4J.LOGGER.debug("User \"{}\" changed presence to {}", user.getName(), user.getPresence());
+					user.setPresence(presence);
+					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, oldPresence, presence));
+					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
-				if (!user.getGame().equals(Optional.ofNullable(gameName))) {
-					Optional<String> oldGame = user.getGame();
-					user.setGame(Optional.ofNullable(gameName));
-					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldGame, Optional.ofNullable(gameName)));
-					Discord4J.LOGGER.debug("User \"{}\" changed game to {}.", user.getName(), gameName);
+				if (!user.getStatus().equals(status)) {
+					Status oldStatus = user.getStatus();
+					user.setStatus(status);
+					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldStatus.getStatusMessage(), status.getStatusMessage()));
+					client.dispatcher.dispatch(new StatusChangeEvent(guild, user, oldStatus, status));
+					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed status to {}.", user.getName(), status);
 				}
 			}
 		}
@@ -605,10 +802,10 @@ public class DiscordWS {
 		Guild guild = (Guild) client.getGuildByID(event.id);
 		client.getGuilds().remove(guild);
 		if (event.unavailable) { //Guild can't be reached
-			Discord4J.LOGGER.warn("Guild with id {} is unavailable, is there an outage?", event.id);
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Guild with id {} is unavailable, is there an outage?", event.id);
 			client.dispatcher.dispatch(new GuildUnavailableEvent(guild));
 		} else {
-			Discord4J.LOGGER.debug("You have been kicked from or left \"{}\"! :O", guild.getName());
+			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "You have been kicked from or left \"{}\"! :O", guild.getName());
 			client.dispatcher.dispatch(new GuildLeaveEvent(guild));
 		}
 	}
@@ -690,9 +887,7 @@ public class DiscordWS {
 			} else if (event.type.equalsIgnoreCase("voice")) {
 				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(event.id);
 				if (toUpdate != null) {
-					VoiceChannel oldChannel = new VoiceChannel(client, toUpdate.getName(),
-							toUpdate.getID(), toUpdate.getGuild(), "", toUpdate.getPosition(),
-							null, toUpdate.getRoleOverrides(), toUpdate.getUserOverrides());
+					VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
 
 					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), event);
 
@@ -706,7 +901,7 @@ public class DiscordWS {
 		GuildMemberChunkEventResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildMemberChunkEventResponse.class);
 		Guild guildToUpdate = (Guild) client.getGuildByID(event.guild_id);
 		if (guildToUpdate == null) {
-			Discord4J.LOGGER.warn("Can't receive guild members chunk for guild id {}, the guild is null!", event.guild_id);
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Can't receive guild members chunk for guild id {}, the guild is null!", event.guild_id);
 			return;
 		}
 
@@ -748,6 +943,7 @@ public class DiscordWS {
 			IRole toUpdate = guild.getRoleByID(event.role.id);
 			if (toUpdate != null) {
 				IRole oldRole = toUpdate.copy();
+				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
 				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
 			}
 		}
@@ -793,28 +989,37 @@ public class DiscordWS {
 
 		if (guild != null) {
 			IVoiceChannel channel = guild.getVoiceChannelByID(event.channel_id);
-			IUser user = guild.getUserByID(event.user_id);
+			User user = (User) guild.getUserByID(event.user_id);
 			if (user != null) {
-				IVoiceChannel oldChannel = user.getVoiceChannel().orElse(null);
-				((User) user).setVoiceChannel(channel);
+				user.setIsDeaf(guild.getID(), event.deaf);
+				user.setIsMute(guild.getID(), event.mute);
+				user.setIsDeafLocally(event.self_deaf);
+				user.setIsMutedLocally(event.self_mute);
+
+				IVoiceChannel oldChannel = user.getConnectedVoiceChannels()
+						.stream()
+						.filter(vChannel -> vChannel.getGuild().getID().equals(event.guild_id))
+						.findFirst()
+						.orElse(null);
+				if (oldChannel == null)
+					oldChannel = user.getConnectedVoiceChannels()
+							.stream()
+							.findFirst()
+							.orElse(null);
 				if (channel != oldChannel) {
 					if (channel == null) {
 						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
-						if (client.getOurUser().equals(user))
-							client.connectedVoiceChannels.remove(oldChannel);
-					} else if (oldChannel == null) {
-						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
-						if (client.getOurUser().equals(user))
-							client.connectedVoiceChannels.add(channel);
-					} else {
+						user.getConnectedVoiceChannels().remove(oldChannel);
+					} else if (oldChannel != null && oldChannel.getGuild().equals(channel.getGuild())) {
 						client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
-						if (client.getOurUser().equals(user)) {
-							client.connectedVoiceChannels.remove(oldChannel);
-							client.connectedVoiceChannels.add(channel);
-						}
+						user.getConnectedVoiceChannels().remove(oldChannel);
+						if (!user.getConnectedVoiceChannels().contains(channel))
+							user.getConnectedVoiceChannels().add(channel);
+					} else {
+						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
+						if (!user.getConnectedVoiceChannels().contains(channel))
+							user.getConnectedVoiceChannels().add(channel);
 					}
-				} else {
-					client.dispatcher.dispatch(new UserVoiceStateUpdateEvent(user, channel, event.self_mute, event.self_deaf, event.mute, event.deaf, event.suppress));
 				}
 			}
 		}
@@ -826,7 +1031,7 @@ public class DiscordWS {
 			event.endpoint = event.endpoint.substring(0, event.endpoint.indexOf(":"));
 			client.voiceConnections.put(client.getGuildByID(event.guild_id), DiscordVoiceWS.connect(event, client));
 		} catch (Exception e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -849,19 +1054,19 @@ public class DiscordWS {
 
 			onMessage(session, data);
 		} catch (IOException e) {
-			Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@OnWebSocketClose
 	public void onClose(Session session, int code, String reason) {
-		Discord4J.LOGGER.debug("Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
+		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
 		disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
 	}
 
 	@OnWebSocketError
 	public void onError(Session session, Throwable error) {
-		Discord4J.LOGGER.error("Websocket error, disconnecting...", error);
+		Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Websocket error, disconnecting...", error);
 		if (session == null || !session.isOpen()) {
 			disconnect(DiscordDisconnectedEvent.Reason.INIT_ERROR);
 		} else {
@@ -872,19 +1077,11 @@ public class DiscordWS {
 	@OnWebSocketFrame
 	public void onFrame(Session session, Frame frame) {
 		if (frame.getType() == Frame.Type.PING) {
-			Discord4J.LOGGER.trace("Received ping, sending pong...");
+			Discord4J.LOGGER.trace(LogMarkers.KEEPALIVE, "Received ping, sending pong...");
 			try {
 				session.getRemote().sendPong(ByteBuffer.allocate(0));
 			} catch (IOException e) {
-				Discord4J.LOGGER.error("Discord4J Internal Exception", e);
-			}
-		} else if (frame.getType() == Frame.Type.PONG) {
-			if (!sentPing) {
-				Discord4J.LOGGER.warn("Received pong without sending ping! Is the websocket out of sync?");
-			} else {
-				Discord4J.LOGGER.trace("Received pong... Response time is {}ms", pingResponseTime = System.currentTimeMillis()-lastPingSent);
-				sentPing = false;
-				missedPingCount = 0;
+				Discord4J.LOGGER.error(LogMarkers.KEEPALIVE, "Discord4J Internal Exception", e);
 			}
 		}
 	}
@@ -895,6 +1092,6 @@ public class DiscordWS {
 	 * @return The response time (in ms).
 	 */
 	public long getResponseTime() {
-		return pingResponseTime;
+		return pingResponseTime.get();
 	}
 }

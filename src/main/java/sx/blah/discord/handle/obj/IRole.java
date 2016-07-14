@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.awt.*;
@@ -55,6 +55,13 @@ public interface IRole extends IDiscordObject<IRole> {
 	Color getColor();
 
 	/**
+	 * Gets whether this role is mentionable or not.
+	 *
+	 * @return True if mentionable, false if otherwise.
+	 */
+	boolean isMentionable();
+
+	/**
 	 * Gets the guild this role belongs to.
 	 *
 	 * @return The guild.
@@ -66,51 +73,70 @@ public interface IRole extends IDiscordObject<IRole> {
 	 *
 	 * @param color The new color for the role.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeColor(Color color) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes whether to hoist the role.
 	 *
 	 * @param hoist Whether to hoist the role.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeHoist(boolean hoist) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the role.
 	 *
 	 * @param name The new name for the role.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the permissions of the role.
 	 *
 	 * @param permissions The new permissions for the role.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changePermissions(EnumSet<Permissions> permissions) throws HTTP429Exception, DiscordException, MissingPermissionsException;
+	void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
+	 * Changes whether this role is mentionable.
+	 *
+	 * @param isMentionable Whether this role should be mentionable or not.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeMentionable(boolean isMentionable) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Attempts to delete this role.
 	 *
 	 * @throws MissingPermissionsException
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, HTTP429Exception, DiscordException;
+	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Formats a string to @mention the role.
+	 *
+	 * @return The formatted string. Note: if {@link #isMentionable()} returns false, this just returns the result of
+	 * {@link #getName()}.
+	 */
+	String mention();
 }

@@ -132,6 +132,11 @@ public class GuildResponse {
 		 */
 		public String joined_at;
 
+		/**
+		 * The nickname for this user, it is null if non-existent (no such key on the actual json in that case).
+		 */
+		public String nick;
+
 		public MemberResponse(UserResponse user, String[] roles) {
 			this.user = user;
 			this.roles = roles;

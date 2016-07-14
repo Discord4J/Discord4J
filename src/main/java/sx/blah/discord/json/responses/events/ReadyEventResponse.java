@@ -37,11 +37,6 @@ public class ReadyEventResponse {
 	public PrivateChannelResponse[] private_channels;
 
 	/**
-	 * How long to wait before refreshing statuses
-	 */
-	public long heartbeat_interval;
-
-	/**
 	 * The guilds the user is a part of
 	 */
 	public GuildResponse[] guilds;

@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.Event;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
@@ -13,12 +13,12 @@ public class UserVoiceChannelMoveEvent extends Event {
 	 * The user that has moved.
 	 */
 	private final IUser user;
-	
+
 	/**
 	 * The channel the user left.
 	 */
 	private final IVoiceChannel oldChannel;
-	
+
 	/**
 	 * The channel the user joined.
 	 */
@@ -29,7 +29,7 @@ public class UserVoiceChannelMoveEvent extends Event {
 		this.oldChannel = oldChannel;
 		this.newChannel = newChannel;
 	}
-	
+
 	/**
 	 * Retrieves the user that has moved to another channel.
 	 *
@@ -38,7 +38,7 @@ public class UserVoiceChannelMoveEvent extends Event {
 	public IUser getUser() {
 		return user;
 	}
-	
+
 	/**
 	 * Gets the voice channel this user left.
 	 *

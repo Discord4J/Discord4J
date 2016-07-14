@@ -2,13 +2,13 @@ package sx.blah.discord;
 
 import org.apache.commons.lang3.ClassUtils;
 import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.api.IListener;
+import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.awt.*;
 import java.lang.reflect.Constructor;
@@ -105,7 +105,7 @@ public class SpoofBot {
 												try {
 													invite = client.getGuilds().get(0).getChannels().get(
 															rng.nextInt(client.getGuilds().get(0).getChannels().size()))
-															.createInvite(18000, 1, false, false);
+															.createInvite(18000, 1, false);
 												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
 													e.printStackTrace();
 												}

@@ -2,8 +2,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.HTTP429Exception;
+import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 
 import java.util.EnumSet;
@@ -61,62 +60,52 @@ public interface IApplication extends IDiscordObject<IApplication> {
 	 *
 	 * @param name The new name.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void changeName(String name) throws HTTP429Exception, DiscordException;
+	void changeName(String name) throws RateLimitException, DiscordException;
 
 	/**
 	 * Changes the application's description.
 	 *
 	 * @param description The new description.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void changeDescription(String description) throws HTTP429Exception, DiscordException;
+	void changeDescription(String description) throws RateLimitException, DiscordException;
 
 	/**
 	 * Changes the application's icon.
 	 *
 	 * @param icon The new icon.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @deprecated Use {@link #changeIcon(Image)} instead.
+	 */
+	@Deprecated
+	void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException;
+
+	/**
+	 * Changes the application's icon.
+	 *
+	 * @param icon The new icon, or deletes the icon if null.
+	 *
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void changeIcon(Optional<Image> icon) throws HTTP429Exception, DiscordException;
+	void changeIcon(Image icon) throws RateLimitException, DiscordException;
 
 	/**
 	 * Changes the application's redirectUris.
 	 *
 	 * @param redirectUris The new redirectUris.
 	 *
-	 * @throws HTTP429Exception
+	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void changeRedirectUris(String[] redirectUris) throws HTTP429Exception, DiscordException;
-
-	/**
-	 * Converts the provided user into a bot by token.
-	 * WARNING: Converting a user account to a bot account is irreversible.
-	 *
-	 * @param token The user's token.
-	 * @return The (now bot) user's new token.
-	 *
-	 * @throws DiscordException
-	 */
-	String convertUserToBot(String token) throws DiscordException;
-
-	/**
-	 * Converts the provided user into a bot by client. NOTE: The client is automatically converted to a bot client.
-	 * WARNING: Converting a user account to a bot account is irreversible.
-	 *
-	 * @param client The user's client.
-	 * @return The (now bot) user's new token.
-	 *
-	 * @throws DiscordException
-	 */
-	String convertUserToBot(IDiscordClient client) throws DiscordException;
+	void changeRedirectUris(String[] redirectUris) throws RateLimitException, DiscordException;
 
 	/**
 	 * Creates a new Bot account for the application. Your application name will be used as the name of the bot.
@@ -140,7 +129,9 @@ public interface IApplication extends IDiscordObject<IApplication> {
 	 * @param requestedPermissions The (optional) requested permissions for the bot.
 	 * @param guildID The (optional) specific guild for the bot to be added to.
 	 * @return The url.
+	 * @deprecated Use {@link sx.blah.discord.util.BotInviteBuilder} instead.
 	 */
+	@Deprecated
 	String createBotInvite(Optional<EnumSet<Permissions>> requestedPermissions, Optional<String> guildID);
 
 	/**
