@@ -159,6 +159,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public String getTopic() {
 		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+	public String mention(){
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public void setTopic(String topic) {
@@ -213,5 +218,10 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public List<IUser> getConnectedUsers() {
 		return parent.getUsers().stream().filter((user) -> user.getConnectedVoiceChannels().contains(this)).collect(Collectors.toList());
+	}
+	
+	@Override
+	public String toString(){
+		return getName();
 	}
 }
