@@ -170,6 +170,13 @@ public interface IDiscordClient {
 	IVoiceChannel getVoiceChannelByID(String id);
 
 	/**
+	 * Gets all the guilds the user the api represents is connected to.
+	 *
+	 * @return The list of {@link Guild}s the api is connected to.
+	 */
+	List<IGuild> getGuilds();
+
+	/**
 	 * Gets a guild by its unique id.
 	 *
 	 * @param guildID The id of the desired guild.
@@ -178,11 +185,11 @@ public interface IDiscordClient {
 	IGuild getGuildByID(String guildID);
 
 	/**
-	 * Gets all the guilds the user the api represents is connected to.
+	 * Gets a set of all users visible to the bot user.
 	 *
-	 * @return The list of {@link Guild}s the api is connected to.
+	 * @return A {@link Collection} of all {@link User} objects.
 	 */
-	List<IGuild> getGuilds();
+	Collection<IUser> getUsers();
 
 	/**
 	 * Gets a user by its unique id.
@@ -191,6 +198,21 @@ public interface IDiscordClient {
 	 * @return The {@link User} object with the provided id.
 	 */
 	IUser getUserByID(String userID);
+
+	/**
+	 * Gets a set of all roles visible to the bot user.
+	 *
+	 * @return A {@link Collection} of all {@link Role} objects.
+	 */
+	Collection<IRole> getRoles();
+
+	/**
+	 * Gets a role by its unique id.
+	 *
+	 * @param roleID The id of the desired role.
+	 * @return The {@link Role} object
+	 */
+	IRole getRoleByID(String roleID);
 
 	/**
 	 * Gets a {@link PrivateChannel} for the provided recipient.
