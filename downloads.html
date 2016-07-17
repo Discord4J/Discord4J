@@ -25,6 +25,10 @@
             document.getElementById("list").appendChild(list);
             if(rawFile.readyState === 4) {
                 if(rawFile.status === 200 || rawFile.status == 0) {
+                    var snapshotBtn = document.createElement("li");
+                    snapshotBtn.innerHTML = "<a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT.jar>Latest Development (Unstable) Build</a> (<a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-shaded.jar>Shaded</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-javadoc.jar>Javadoc</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-sources.jar>Source</a>)"
+                    list.appendChild(snapshotBtn);
+
                     var releases = JSON.parse(rawFile.responseText)
                     for (i = 0; i < releases.length; i++) {
                         var release = releases[i]
