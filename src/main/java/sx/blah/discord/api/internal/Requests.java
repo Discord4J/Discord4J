@@ -148,7 +148,7 @@ public enum Requests {
 							+ ". This is due to CloudFlare (detected \"cloudflare-nginx\" in message).");
 				}
 				
-				throw new DiscordException("502 error on request to "+request.getURI()+". This is probably due to cloudflare, in which case you can ignore this.");
+				throw new DiscordException("502 error on request to "+request.getURI()+".");
 			} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
 				throw new DiscordException("Error on request to "+request.getURI()+". Received response code "+responseCode+". With response text: "+message);
 			}
