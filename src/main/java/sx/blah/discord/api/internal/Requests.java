@@ -17,6 +17,7 @@ import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
 
 import static sx.blah.discord.Discord4J.*;
 
@@ -141,6 +142,12 @@ public enum Requests {
 				return null;
 			} else if (responseCode == 502) {
 				LOGGER.trace(LogMarkers.API, "502 response on request to {}, response text: {}", request.getURI(), message); //This can be used to verify if it was cloudflare causing the 502.
+				
+				if (message.toLowerCase(Locale.ROOT).contains("cloudflare-nginx")) {
+					throw new DiscordException("502 error on request to " + request.getURI()
+							+ ". This is due to CloudFlare (detected \"cloudflare-nginx\" in message).");
+				}
+				
 				throw new DiscordException("502 error on request to "+request.getURI()+". This is probably due to cloudflare, in which case you can ignore this.");
 			} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
 				throw new DiscordException("Error on request to "+request.getURI()+". Received response code "+responseCode+". With response text: "+message);
