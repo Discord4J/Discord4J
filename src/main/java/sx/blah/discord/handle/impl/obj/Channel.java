@@ -377,11 +377,21 @@ public class Channel implements IChannel {
 				.forEach(permissions::add);
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
-		if (override == null)
-			return permissions;
+		List<PermissionOverride> overrideRoles = roles.stream()
+				.sorted(Collections.reverseOrder())
+				.filter(r -> roleOverrides.containsKey(r.getID()))
+				.map(role -> roleOverrides.get(role.getID()))
+				.collect(Collectors.toList());
 
-		permissions.addAll(override.allow().stream().collect(Collectors.toList()));
-		override.deny().forEach(permissions::remove);
+		for (PermissionOverride roleOverride : overrideRoles) {
+			permissions.addAll(roleOverride.allow());
+			permissions.removeAll(roleOverride.deny());
+		}
+
+		if (override != null) {
+			permissions.addAll(override.allow());
+			permissions.removeAll(override.deny());
+		}
 
 		return permissions;
 	}
