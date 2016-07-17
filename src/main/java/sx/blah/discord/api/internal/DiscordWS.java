@@ -728,9 +728,9 @@ public class DiscordWS {
 
 			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, event);
 
-			if (toUpdate.isPinned() && !event.pinned) {
+			if (oldMessage.isPinned() && !event.pinned) {
 				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
-			} else if (!toUpdate.isPinned() && event.pinned) {
+			} else if (!oldMessage.isPinned() && event.pinned) {
 				client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
 			} else {
 				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
