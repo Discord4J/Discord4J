@@ -520,6 +520,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by as user");
+
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
@@ -542,6 +545,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by as user");
+
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
