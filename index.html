@@ -21,159 +21,29 @@
 
     <section class="main-content">
       <h1>
-<a id="discord4j---" class="anchor" href="#discord4j---" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Discord4J  <a href="https://drone.io/github.com/austinv11/Discord4J/latest"><img src="https://drone.io/github.com/austinv11/Discord4J/status.png" alt="Build Status"></a> <a href="https://jitpack.io/#austinv11/Discord4j"><img src="https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square" alt="Download"></a>
+<a id="discord4j---" class="anchor" href="#discord4j---" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Discord4J  <a href="https://drone.io/github.com/austinv11/Discord4J/latest"><img src="https://drone.io/github.com/austinv11/Discord4J/status.png" alt="Build Status"></a> <a href="https://jitpack.io/#austinv11/Discord4j"><img src="https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square" alt="Download"></a> <a href="https://discord.gg/0SBTUU1wZTU7PCok"><img src="https://img.shields.io/badge/Join-%23java__discord4j-7289DA.svg?style=flat-square" alt="Support Channel Invite"></a>
 </h1>
 
-<p>Java interface for the unofficial <a href="https://discordapp.com/">Discord</a> API, written in Java 8.
-<a href="https://discordapi.com/unofficial/libs.html">The API is also available in a few other languages.</a></p>
-
-<p>For the latest dev builds, <a href="https://drone.io/github.com/austinv11/Discord4J/files">download it from my ci server.</a></p>
-
-<h2>
-<a id="adding-discord4j-as-a-dependency-for-a-project" class="anchor" href="#adding-discord4j-as-a-dependency-for-a-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Adding Discord4J as a dependency for a project</h2>
-
-<p>Given that <code>@VERSION@</code> = the a version of Discord4J (this can either be a release version, the short commit hash or <code>dev-SNAPSHOT</code>).</p>
-
-<h3>
-<a id="with-maven" class="anchor" href="#with-maven" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>With maven</h3>
-
-<p>In your <code>pom.xml</code> add:</p>
-
-<div class="highlight highlight-text-xml"><pre>...
-&lt;<span class="pl-ent">repositories</span>&gt;
-  ...
-  &lt;<span class="pl-ent">repository</span>&gt;
-    &lt;<span class="pl-ent">id</span>&gt;jitpack.io&lt;/<span class="pl-ent">id</span>&gt;
-    &lt;<span class="pl-ent">url</span>&gt;https://jitpack.io&lt;/<span class="pl-ent">url</span>&gt;
-  &lt;/<span class="pl-ent">repository</span>&gt;
-&lt;/<span class="pl-ent">repositories</span>&gt;
-...
-&lt;<span class="pl-ent">dependencies</span>&gt;
-  ...
-  &lt;<span class="pl-ent">dependency</span>&gt;
-    &lt;<span class="pl-ent">groupId</span>&gt;com.github.austinv11&lt;/<span class="pl-ent">groupId</span>&gt;
-    &lt;<span class="pl-ent">artifactId</span>&gt;Discord4j&lt;/<span class="pl-ent">artifactId</span>&gt;
-    &lt;<span class="pl-ent">version</span>&gt;@VERSION@&lt;/<span class="pl-ent">version</span>&gt;
-   <span class="pl-c">&lt;!-- &lt;classifier&gt;shaded&lt;/classifier&gt; &lt;!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)--&gt;</span>
-  &lt;/<span class="pl-ent">dependency</span>&gt;
-&lt;/<span class="pl-ent">dependencies</span>&gt;
-...</pre></div>
-
-<h3>
-<a id="with-gradle" class="anchor" href="#with-gradle" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>With Gradle</h3>
-
-<p>In your <code>build.gradle</code> add:</p>
-
-<div class="highlight highlight-source-groovy"><pre><span class="pl-k">..</span>.
-repositories {
-  <span class="pl-k">..</span>.
-  maven {
-    url  <span class="pl-s"><span class="pl-pds">"</span>https://jitpack.io<span class="pl-pds">"</span></span>
-  }
-}
-<span class="pl-k">..</span>.
-dependencies {
-  <span class="pl-k">..</span>.
-  compile <span class="pl-s"><span class="pl-pds">"</span>com.github.austinv11:Discord4j:@VERSION@<span class="pl-pds">"</span></span>
-  <span class="pl-c">//compile "com.github.austinv11:Discord4j:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)</span>
-}
-<span class="pl-k">..</span>.</pre></div>
-
-<h2>
-<a id="so-how-do-i-use-this" class="anchor" href="#so-how-do-i-use-this" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>So, how do I use this?</h2>
-
-<h3>
-<a id="starting-with-the-api" class="anchor" href="#starting-with-the-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Starting with the API</h3>
-
-<p>The very first thing you need to do is obtain a "DiscordClient" object. This can be done by using the <code>ClientBuilder</code>.
-Example:</p>
-
-<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Example</span> {
-
-  <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-smi">IDiscordClient</span> <span class="pl-en">getClient</span>(<span class="pl-smi">String</span> <span class="pl-v">email</span>, <span class="pl-smi">String</span> <span class="pl-v">password</span>, <span class="pl-k">boolean</span> <span class="pl-v">login</span>) { <span class="pl-c">//Returns an instance of the discord client</span>
-    <span class="pl-smi">ClientBuilder</span> clientBuilder <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-smi">ClientBuilder</span>(); <span class="pl-c">//Creates the ClientBuilder instance</span>
-    clientBuilder<span class="pl-k">.</span>withLogin(email, password); <span class="pl-c">//Adds the login info to the builder</span>
-    <span class="pl-k">if</span> (login) {
-      <span class="pl-k">return</span> clientBuilder<span class="pl-k">.</span>login(); <span class="pl-c">//Creates the client instance and logs the client in</span>
-    } <span class="pl-k">else</span> {
-      <span class="pl-k">return</span> clientBuilder<span class="pl-k">.</span>build(); <span class="pl-c">//Creates the client instance but it doesn't log the client in yet, you would have to call client.login() yourself</span>
-    }
-  }
-}</pre></div>
-
-<h3>
-<a id="events" class="anchor" href="#events" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Events</h3>
-
-<p>The Discord4J library is very event driven. Your bot can detect these events through the use of an event listener. There are two ways of creating an event listener:
-1. Using <code>IListener</code>:</p>
-
-<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">InterfaceListener</span> <span class="pl-k">implements</span> <span class="pl-e">IListener&lt;<span class="pl-smi">ReadyEvent</span>&gt;</span> { <span class="pl-c">//The event type in IListener&lt;&gt; can be any class which extends Event</span>
-
-  <span class="pl-k">@Override</span>
-  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">handle</span>(<span class="pl-smi">ReadyEvent</span> <span class="pl-v">event</span>) { <span class="pl-c">//This is called when the ReadyEvent is dispatched</span>
-    doCoolStuff();
-  }
-}</pre></div>
-
-<ol>
-<li>Using the <code>@EventSubscriber</code> annotation:</li>
-</ol>
-
-<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">AnnotationListener</span> {
-
-  <span class="pl-k">@EventSubscriber</span>
-  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">onReadyEvent</span>(<span class="pl-smi">ReadyEvent</span> <span class="pl-v">event</span>) { <span class="pl-c">//This method is called when the ReadyEvent is dispatched</span>
-    foo();
-  }
-
-  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">onMessageReceivedEvent</span>(<span class="pl-smi">MessageReceivedEvent</span> <span class="pl-v">event</span>) { <span class="pl-c">//This method is NOT called because it doesn't have the @EventSubscriber annotation</span>
-    bar();
-  }
-}</pre></div>
-
-<p>Registering your listener:</p>
-
-<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Main</span> {
-
-  <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">void</span> <span class="pl-en">main</span>(<span class="pl-k">String</span>[] <span class="pl-v">args</span>) {
-    <span class="pl-smi">IDiscordClient</span> client <span class="pl-k">=</span> <span class="pl-smi">Example</span><span class="pl-k">.</span>getClient(args[<span class="pl-c1">0</span>], args[<span class="pl-c1">1</span>], <span class="pl-c1">true</span>); <span class="pl-c">//Gets the client object (from the first example)</span>
-    <span class="pl-smi">EventDispatcher</span> dispatcher <span class="pl-k">=</span> client<span class="pl-k">.</span>getDispatcher(); <span class="pl-c">//Gets the EventDispatcher instance for this client instance</span>
-    dispatcher<span class="pl-k">.</span>registerListener(<span class="pl-k">new</span> <span class="pl-smi">InterfaceListener</span>()); <span class="pl-c">//Registers the IListener example class from above</span>
-    dispatcher<span class="pl-k">.</span>registerListener(<span class="pl-k">new</span> <span class="pl-smi">AnnotationListener</span>()); <span class="pl-c">//Registers the @EventSubscriber example class from above</span>
-  }
-}</pre></div>
-
-<h3>
-<a id="more-examples" class="anchor" href="#more-examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>More examples</h3>
-
-<p>See the <a href="https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples">examples directory</a>.</p>
-
-<h2>
-<a id="deprecation-policy" class="anchor" href="#deprecation-policy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Deprecation policy</h2>
-
-<p>Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.</p>
-
-<h2>
-<a id="development" class="anchor" href="#development" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Development</h2>
-
-<p>The Discord API is still in development. Functions may break at any time.<br>
-In such an event, please contact me or submit a pull request.</p>
-
-<h2>
-<a id="pull-requests" class="anchor" href="#pull-requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pull requests</h2>
-
-<p>No one is perfect at programming and I am no exception. If you see something that can be improved, please read the <a href="https://github.com/austinv11/Discord4J/blob/master/.github/CONTRIBUTING.md">contributing guildelines</a> and feel free to submit a pull request! </p>
-
-<h2>
-<a id="other-info" class="anchor" href="#other-info" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Other info</h2>
-
-<p>More information can be found in the <a href="http://austinv11.github.io/Discord4J/docs.html">docs</a>. 
-You can contact me on the <a href="https://discord.gg/0SBTUU1wZTU7PCok">Discord API server</a> in the #java_discord4j channel.</p>
+<p>Discord4J is a wrapper for <a href="https://discordapp.com/">Discord's</a> <a href="https://discordapp.com/developers/docs/intro">websocket and REST API</a>.
+It provides an easy-to-use implementation which has features suitable for both the most experienced and inexperienced Java programmers.
+<p><h3>Why use Discord4J?</h3>
+<p><ul>
+      <li>Although not officially maintained or associated with Discord or Hammer & Chisel, it is <a href="https://discordapp.com/developers/docs/topics/libraries">officially recommended as a compliant API implementation</a>.</li>
+      <li>Discord's bot api is fairly complicated, requiring the use of websockets in addition to REST calls in order to manage discord-related activities.
+        Discord4J abstracts all of this and keeps an internal cache of data which is updated in real time, allowing for a reduction in REST calls which results in faster code.</li>
+      <li>Discord4J is extensively multithreaded, allowing for operations to be executed quickly.</li>
+      <li>There is an extensive event system. This allows for programs to be reactive to all sorts of situations asynchronously.</li>
+      <li>Discord4J is extremely extensible thanks to its module system.</li>
+      <li>There are many utility classes such as RequestBuffer which allows for automatic handling of ratelimits or RequestBuilder which provides a promise-like structure to logic (a la RxJava)</li>
+      <li>Discord4J is still being actively developed by both its current maintainer, austinv11, and the community who provide invaluable feedback and pull-requests.
+      This means it quickly gets updated to support the latest Discord changes (there are always a lot of them).</li>
+      <li>This api has a very active <a href="https://discord.gg/0SBTUU1wZTU7PCok">support channel</a>.</li>
+    </ul>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/austinv11/Discord4J">Discord4j</a> is maintained by <a href="https://github.com/austinv11">austinv11</a>.</span>
 
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+        <span class="site-footer-credits">This page was basedr on <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
 
     </section>
