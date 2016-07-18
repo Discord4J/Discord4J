@@ -1,26 +1,26 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.internal.AudioPacket;
 import sx.blah.discord.api.events.Event;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  * This event is dispatched when audio is received.
  */
-@Deprecated
 public class AudioReceiveEvent extends Event {
 
-    private final AudioPacket packet;
+	private IUser user;
+	private byte[] decodedAudio;
 
-    public AudioReceiveEvent(AudioPacket packet) {
-        this.packet = packet;
-    }
+	public AudioReceiveEvent(IUser user, byte[] decodedAudio) {
+		this.user = user;
+		this.decodedAudio = decodedAudio;
+	}
 
-	/**
-	 * Gets the audio data received.
-	 *
-	 * @return The audio data.
-	 */
-    public byte[] getAudio(){
-        return packet.getRawAudio();
-    }
+	public byte[] getDecodedAudio() {
+		return this.decodedAudio;
+	}
+
+	public IUser getUser() {
+		return this.user;
+	}
 }
