@@ -259,8 +259,10 @@ public class DiscordVoiceWS {
 					udpSocket.receive(receivedPacket); // This blocks the thread until a packet is received.
 
 					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket).decrypt(secret);
-					byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), 2); // TODO: Can we even receive mono? See OpusUtil
-					client.getDispatcher().dispatch(new AudioReceiveEvent(userSsrcs.get(packet.getSsrc()), decodedAudio)); // TODO: Austin software design magic needed!
+					byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), 2, guild); // TODO: Detect if mono
+
+					// TODO: Austin software design magic needed!
+					client.getDispatcher().dispatch(new AudioReceiveEvent(userSsrcs.get(packet.getSsrc()), decodedAudio));
 				} catch (IOException e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}

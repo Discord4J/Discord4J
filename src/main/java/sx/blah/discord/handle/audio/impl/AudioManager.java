@@ -68,7 +68,7 @@ public class AudioManager implements IAudioManager {
 			byte[] data = provider.provide();
 
 			if (type != IAudioProvider.AudioEncodingType.OPUS) {
-				data = OpusUtil.encodeToOpus(data, channels);
+				data = OpusUtil.encodeToOpus(data, channels, guild);
 			}
 
 			return data;
