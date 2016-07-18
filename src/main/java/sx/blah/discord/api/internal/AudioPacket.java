@@ -28,6 +28,17 @@ import java.util.Arrays;
  * Represents the contents of a audio packet that was either received from Discord or will be sent to discord.
  */
 public class AudioPacket {
+
+	private static final int RTP_HEADER_LENGTH = 12;
+	private static final byte RTP_TYPE = (byte) 0x80;
+	private static final byte RTP_VERSION = (byte) 0x78;
+
+	private static final int RTP_TYPE_LOC = 0;
+	private static final int RTP_VERSION_LOC = 1;
+	private static final int RTP_SEQ_LOC = 2;
+	private static final int RTP_TIMESTAMP_LOC = 4;
+	private static final int RTP_SSRC_LOC = 8;
+
 	private final char seq;
 	private final int timestamp;
 	private final int ssrc; // Unique per user if we're receiving. Constant for sending.
@@ -63,12 +74,12 @@ public class AudioPacket {
 		this.rawPacket = rawPacket;
 
 		ByteBuffer buffer = ByteBuffer.wrap(rawPacket);
-		this.seq = buffer.getChar(2);
-		this.timestamp = buffer.getInt(4);
-		this.ssrc = buffer.getInt(8);
+		this.seq = buffer.getChar(RTP_SEQ_LOC);
+		this.timestamp = buffer.getInt(RTP_TIMESTAMP_LOC);
+		this.ssrc = buffer.getInt(RTP_SSRC_LOC);
 
-		byte[] audio = new byte[buffer.array().length - 12];
-		System.arraycopy(buffer.array(), 12, audio, 0, audio.length);
+		byte[] audio = new byte[buffer.array().length - RTP_HEADER_LENGTH];
+		System.arraycopy(buffer.array(), RTP_HEADER_LENGTH, audio, 0, audio.length);
 		this.encodedAudio = audio;
 	}
 
@@ -79,12 +90,12 @@ public class AudioPacket {
 		this.encodedAudio = encodedAudio;
 
 		ByteBuffer buffer = ByteBuffer.allocate(12 + encodedAudio.length);
-		buffer.put(0, (byte) 0x80);
-		buffer.put(1, (byte) 0x78);
-		buffer.putChar(2, seq);
-		buffer.putInt(4, timestamp);
-		buffer.putInt(8, ssrc);
-		System.arraycopy(encodedAudio, 0, buffer.array(), 12, encodedAudio.length);
+		buffer.put    (RTP_TYPE_LOC,       RTP_TYPE);
+		buffer.put    (RTP_VERSION_LOC,    RTP_VERSION);
+		buffer.putChar(RTP_SEQ_LOC,        seq);
+		buffer.putInt (RTP_TIMESTAMP_LOC,  timestamp);
+		buffer.putInt (RTP_SSRC_LOC,       ssrc);
+		System.arraycopy(encodedAudio, 0, buffer.array(), RTP_HEADER_LENGTH, encodedAudio.length);
 		this.rawPacket = buffer.array();
 	}
 
@@ -117,9 +128,9 @@ public class AudioPacket {
 			Discord4J.LOGGER.error(LogMarkers.VOICE, "Unable to decrypt audio. Please report this to the Discord4J dev!", e);
 		}
 
-		byte[] decryptedPacket = new byte[12 + encodedAudio.length];
-		System.arraycopy(header, 0, decryptedPacket, 0, 12);
-		System.arraycopy(decryptedAudio, 0, decryptedPacket, 12, decryptedAudio.length);
+		byte[] decryptedPacket = new byte[RTP_HEADER_LENGTH + encodedAudio.length];
+		System.arraycopy(header, 0, decryptedPacket, 0, RTP_HEADER_LENGTH);
+		System.arraycopy(decryptedAudio, 0, decryptedPacket, RTP_HEADER_LENGTH, decryptedAudio.length);
 
 		return new AudioPacket(decryptedPacket);
 	}
@@ -141,7 +152,7 @@ public class AudioPacket {
 	private byte[] getEncryptionNonce() {
 		byte[] encryptionNonce = new byte[24]; // Encryption uses 24 byte nonce while Discord uses 12
 		byte[] header = getHeader();
-		System.arraycopy(header, 0, encryptionNonce, 0, 12); // Copy of the header into the extended nonce
+		System.arraycopy(header, 0, encryptionNonce, 0, RTP_HEADER_LENGTH); // Copy of the header into the extended nonce. Leave the remaining bytes 0
 
 		return encryptionNonce;
 	}
@@ -152,7 +163,7 @@ public class AudioPacket {
 	 * @return The header byte array.
 	 */
 	private byte[] getHeader() {
-		return Arrays.copyOf(rawPacket, 12);
+		return Arrays.copyOf(rawPacket, RTP_HEADER_LENGTH);
 	}
 
 	/**
