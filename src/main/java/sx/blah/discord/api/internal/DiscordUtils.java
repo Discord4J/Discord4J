@@ -384,21 +384,13 @@ public class DiscordUtils {
 			HashMap<String, IChannel.PermissionOverride> roleOverrides = new HashMap<>();
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				if (overrides.type.equalsIgnoreCase("role")) {
-					if (channel.getRoleOverrides().containsKey(overrides.id)) {
-						roleOverrides.put(overrides.id, channel.getRoleOverrides().get(overrides.id));
-					} else {
-						roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-					}
+					roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
+							Permissions.getAllowedPermissionsForNumber(overrides.allow),
+							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 				} else if (overrides.type.equalsIgnoreCase("member")) {
-					if (channel.getUserOverrides().containsKey(overrides.id)) {
-						userOverrides.put(overrides.id, channel.getUserOverrides().get(overrides.id));
-					} else {
-						userOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-					}
+					userOverrides.put(overrides.id, new IChannel.PermissionOverride(
+							Permissions.getAllowedPermissionsForNumber(overrides.allow),
+							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 				} else {
 					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
@@ -481,21 +473,13 @@ public class DiscordUtils {
 			HashMap<String, IChannel.PermissionOverride> roleOverrides = new HashMap<>();
 			for (PermissionOverwrite overrides : json.permission_overwrites) {
 				if (overrides.type.equalsIgnoreCase("role")) {
-					if (channel.getRoleOverrides().containsKey(overrides.id)) {
-						roleOverrides.put(overrides.id, channel.getRoleOverrides().get(overrides.id));
-					} else {
-						roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-					}
+					roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
+							Permissions.getAllowedPermissionsForNumber(overrides.allow),
+							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 				} else if (overrides.type.equalsIgnoreCase("member")) {
-					if (channel.getUserOverrides().containsKey(overrides.id)) {
-						userOverrides.put(overrides.id, channel.getUserOverrides().get(overrides.id));
-					} else {
-						userOverrides.put(overrides.id, new IChannel.PermissionOverride(
-								Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-					}
+					userOverrides.put(overrides.id, new IChannel.PermissionOverride(
+							Permissions.getAllowedPermissionsForNumber(overrides.allow),
+							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
 				} else {
 					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 				}
