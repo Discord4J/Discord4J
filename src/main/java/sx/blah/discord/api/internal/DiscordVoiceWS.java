@@ -22,12 +22,10 @@ import sx.blah.discord.json.requests.VoiceSpeakingRequest;
 import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.audio.OpusUtil;
 
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

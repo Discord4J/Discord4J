@@ -1,4 +1,4 @@
-package sx.blah.discord.util.audio;
+package sx.blah.discord.api.internal;
 
 import com.sun.jna.ptr.PointerByReference;
 import sx.blah.discord.Discord4J;

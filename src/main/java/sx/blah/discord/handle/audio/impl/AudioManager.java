@@ -5,7 +5,7 @@ import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.util.audio.OpusUtil;
+import sx.blah.discord.api.internal.OpusUtil;
 
 public class AudioManager implements IAudioManager {
 
