@@ -492,6 +492,7 @@ public class DiscordWS {
 			if (client.sessionId != null) {
 				send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
 				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnected to the Discord websocket.");
+				client.dispatcher.dispatch(new DiscordReconnectedEvent());
 			} else if (!client.getToken().isEmpty()) {
 				send(DiscordUtils.GSON.toJson(new ConnectRequest(client.getToken(), "Java",
 						Discord4J.NAME, Discord4J.NAME, "", "", LARGE_THRESHOLD, true)));
