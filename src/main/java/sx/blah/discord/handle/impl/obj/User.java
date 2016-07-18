@@ -284,6 +284,8 @@ public class User implements IUser {
 
 	@Override
 	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
+		
 		if (!client.getOurUser().equals(this))
 			DiscordUtils.checkPermissions(client, newChannel.getGuild(), this.getRolesForGuild(newChannel.getGuild()), EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 
