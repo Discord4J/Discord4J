@@ -140,6 +140,15 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * This gets the content of the message in its current form.
+	 *
+	 * @return The current content of the message.
+     */
+	public String getContent() {
+		return content;
+	}
+
+	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
 	 * Sends and creates the message object.

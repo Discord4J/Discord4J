@@ -581,7 +581,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IRole getEveryoneRole() {
-		return getRoles().stream().filter(r -> r.getID().equals(this.id)).findFirst().orElse(null);
+		return getRoleByID(this.id);
 	}
 
 	@Override

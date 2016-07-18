@@ -114,13 +114,10 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
 						return;
 					}
-					((User)client.getOurUser()).channels.add(this);
 				} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
 					throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
 
 				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
-				if (!client.getOurUser().getConnectedVoiceChannels().contains(this))
-					client.getOurUser().getConnectedVoiceChannels().add(this);
 			} else {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
@@ -157,6 +154,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public String getTopic() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String mention(){
 		throw new UnsupportedOperationException();
 	}
 
@@ -213,5 +215,10 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public List<IUser> getConnectedUsers() {
 		return parent.getUsers().stream().filter((user) -> user.getConnectedVoiceChannels().contains(this)).collect(Collectors.toList());
+	}
+
+	@Override
+	public String toString(){
+		return getName();
 	}
 }

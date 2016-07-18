@@ -234,7 +234,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		if (isReady()) {
 			if (!isBot())
 				Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
-					new BasicNameValuePair("authorization", token));
+						new BasicNameValuePair("authorization", token));
 
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else
@@ -399,6 +399,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	public List<IGuild> getGuilds() {
+		return guildList;
+	}
+
+	@Override
 	public IGuild getGuildByID(String guildID) {
 		return guildList.stream()
 				.filter(g -> g.getID().equalsIgnoreCase(guildID))
@@ -406,21 +411,36 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IGuild> getGuilds() {
-		return guildList;
+	public Collection<IUser> getUsers() {
+		return guildList.stream()
+				.map(IGuild::getUsers)
+				.flatMap(List::stream)
+				.distinct()
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public IUser getUserByID(String userID) {
-		IUser user = null;
-		for (IGuild guild : guildList) {
-			if (user == null)
-				user = guild.getUserByID(userID);
-			else
-				break;
-		}
+		IUser user = getUsers().stream()
+				.filter(u -> u.getID().equalsIgnoreCase(userID))
+				.findAny().orElse(null);
 
-		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user;
+		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
+	}
+
+	@Override
+	public Collection<IRole> getRoles() {
+		return guildList.stream()
+				.map(IGuild::getRoles)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IRole getRoleByID(String roleID) {
+		return getRoles().stream()
+				.filter(r -> r.getID().equalsIgnoreCase(roleID))
+				.findAny().orElse(null);
 	}
 
 	@Override
@@ -500,6 +520,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by as user");
+
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
@@ -522,6 +545,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException {
+		if (isBot())
+			throw new DiscordException("This action can only be performed by as user");
+
 		try {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
