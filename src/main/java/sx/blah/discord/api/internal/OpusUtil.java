@@ -4,6 +4,7 @@ import com.sun.jna.ptr.PointerByReference;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
 import java.nio.ByteBuffer;
@@ -30,7 +31,7 @@ public class OpusUtil {
 		}
 	};
 
-	private static MappedPool<IGuild, Pair<PointerByReference, PointerByReference>> decoderPool = new MappedPool<IGuild, Pair<PointerByReference, PointerByReference>>() {
+	private static MappedPool<IUser, Pair<PointerByReference, PointerByReference>> decoderPool = new MappedPool<IUser, Pair<PointerByReference, PointerByReference>>() {
 		@Override
 		public Pair<PointerByReference, PointerByReference> newObject() {
 			PointerByReference mono = Opus.INSTANCE.opus_decoder_create(OPUS_SAMPLE_RATE, 1, IntBuffer.allocate(4));
@@ -54,11 +55,11 @@ public class OpusUtil {
 	 * Decodes opus-encoded audio to raw PCM data.
 	 * @param opusAudio The opus-encoded audio.
 	 * @param channels The number of channels this audio should be decoded for.
-	 * @param guild The guild this audio is being decoded from. This is used to decide which decoder instance to use.
+	 * @param user The user from which this audio was received. Used to decide which decoder to use.
 	 * @return The raw PCM data.
 	 */
-	public static byte[] decodeToPCM(byte[] opusAudio, int channels, IGuild guild) {
-		return decodeToPCM(opusAudio, getDecoder(channels, guild));
+	public static byte[] decodeToPCM(byte[] opusAudio, int channels, IUser user) {
+		return decodeToPCM(opusAudio, getDecoder(channels, user));
 	}
 
 	/**
@@ -125,11 +126,11 @@ public class OpusUtil {
 	/**
 	 * Gets the appropriate decoder instance from the number of channels and guild.
 	 * @param channels The number of channels the audio is being decoded for.
-	 * @param guild The guild this audio was received from.
+	 * @param user The user from which this audio was received.
 	 * @return The appropriate decoder.
 	 */
-	private static PointerByReference getDecoder(int channels, IGuild guild) {
-		Pair decoders = decoderPool.get(guild);
+	private static PointerByReference getDecoder(int channels, IUser user) {
+		Pair decoders = decoderPool.get(user);
 		return (PointerByReference) (channels == 1 ? decoders.getLeft() : decoders.getRight());
 	}
 }
