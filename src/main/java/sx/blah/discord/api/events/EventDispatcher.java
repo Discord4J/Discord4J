@@ -281,8 +281,10 @@ public class EventDispatcher {
 												k.invoke(o.listener, event);
 												if (o.isTemporary)
 													unregisterListener(o.listener);
-											} catch (IllegalAccessException | InvocationTargetException e) {
-												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event "+event.getClass().getSimpleName(), e);
+											} catch (IllegalAccessException e) {
+												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event " + event.getClass().getSimpleName(), e);
+											} catch(InvocationTargetException e) {
+												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e.getCause());
 											} catch (Exception e) {
 												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
 											}
