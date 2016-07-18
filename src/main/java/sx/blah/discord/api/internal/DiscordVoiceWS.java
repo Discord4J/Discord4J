@@ -38,10 +38,10 @@ import java.util.zip.InflaterInputStream;
 public class DiscordVoiceWS {
 
 	// OP codes
-	public static final int OP_INITIAL_CONNECTION = 2;
-	public static final int OP_HEARTBEAT_RETURN = 3;
-	public static final int OP_CONNECTING_COMPLETED = 4;
-	public static final int OP_USER_SPEAKING_UPDATE = 5;
+	private static final int OP_INITIAL_CONNECTION = 2;
+	private static final int OP_HEARTBEAT_RETURN = 3;
+	private static final int OP_CONNECTING_COMPLETED = 4;
+	private static final int OP_USER_SPEAKING_UPDATE = 5;
 
 	private AtomicBoolean isConnected = new AtomicBoolean(true);
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3, new ThreadFactory() {
@@ -65,7 +65,10 @@ public class DiscordVoiceWS {
 	 */
 	private IGuild guild;
 
-	private VoiceUpdateResponse event;
+	/**
+	 * The response from the join voice channel request.
+	 */
+	private VoiceUpdateResponse joinResponse;
 
 	/**
 	 * The SSRC that has been assigned to us by Discord.
@@ -116,16 +119,16 @@ public class DiscordVoiceWS {
 		return socket;
 	}
 
-	DiscordVoiceWS(VoiceUpdateResponse event, DiscordClientImpl client) throws URISyntaxException {
+	DiscordVoiceWS(VoiceUpdateResponse response, DiscordClientImpl client) throws URISyntaxException {
 		this.client = client;
-		this.event = event;
-		this.guild = client.getGuildByID(event.guild_id);
+		this.joinResponse = response;
+		this.guild = client.getGuildByID(response.guild_id);
 	}
 
 	@OnWebSocketConnect
 	public void onOpen(Session session) {
 		this.session = session;
-		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(event.guild_id, client.ourUser.getID(), client.sessionId, event.token)));
+		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(joinResponse.guild_id, client.ourUser.getID(), client.sessionId, joinResponse.token)));
 		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Connected to the Discord Voice websocket.");
 	}
 
@@ -134,6 +137,7 @@ public class DiscordVoiceWS {
 		JsonParser parser = new JsonParser();
 		JsonObject object = parser.parse(message).getAsJsonObject();
 
+		System.out.println(message);
 		int op = object.get("op").getAsInt();
 
 		switch (op) {
@@ -143,7 +147,7 @@ public class DiscordVoiceWS {
 					ourSSRC = eventObject.get("ssrc").getAsInt();
 
 					udpSocket = new DatagramSocket();
-					addressPort = new InetSocketAddress(event.endpoint, eventObject.get("port").getAsInt());
+					addressPort = new InetSocketAddress(joinResponse.endpoint, eventObject.get("port").getAsInt());
 
 					ByteBuffer buffer = ByteBuffer.allocate(70);
 					buffer.putInt(ourSSRC);
@@ -189,7 +193,7 @@ public class DiscordVoiceWS {
 			}
 			case OP_USER_SPEAKING_UPDATE: {
 				JsonObject eventObject = (JsonObject) object.get("d");
-				boolean isSpeaking = eventObject.get("speaking").getAsBoolean();
+				boolean isSpeaking = eventObject.get("speaking").getAsBoolean(); // TODO: It might be helpful to store this
 				int ssrc = eventObject.get("ssrc").getAsInt();
 				String userId = eventObject.get("user_id").getAsString();
 
@@ -261,8 +265,14 @@ public class DiscordVoiceWS {
 					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket).decrypt(secret);
 					byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), 2, guild); // TODO: Detect if mono
 
+					// FIXME: If this is the first time a user has spoken since the bot joined the channel, their ssrc hasn't been stored yet.
+					// How should this be handled? There doesn't seem to be a way to get the ssrc before they've already started speaking.
+					// Skip this frame if the user isn't found? What if something has gone wrong and the user should be found?
+					IUser userSpeaking = userSsrcs.get(packet.getSsrc());
+
 					// TODO: Austin software design magic needed!
-					client.getDispatcher().dispatch(new AudioReceiveEvent(userSsrcs.get(packet.getSsrc()), decodedAudio));
+					// TODO: Create combined audio stream of multiple users. I feel this is too dependent on the actual implementation of IAudioReceiver to do right now.
+					client.getDispatcher().dispatch(new AudioReceiveEvent(userSpeaking, decodedAudio));
 				} catch (IOException e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
@@ -372,7 +382,7 @@ public class DiscordVoiceWS {
 	}
 
 	/**
-	 * Updates the speaking status
+	 * Updates the speaking status.
 	 * @param speaking: True if the client should be shown as speaking.
 	 */
 	private void setSpeaking(boolean speaking) {

@@ -73,7 +73,7 @@ public class OpusUtil {
 			ByteBuffer encoded = ByteBuffer.allocate(4096);
 			for (int i = 0; i < pcm.length; i += 2) {
 				int firstByte = (0x000000FF & pcm[i]);      // Promotes to int and handles the fact that it was unsigned.
-				int secondByte = (0x000000FF & pcm[i + 1]);   //
+				int secondByte = (0x000000FF & pcm[i + 1]); //
 
 				// Combines the 2 bytes into a short. Opus deals with unsigned shorts, not bytes.
 				short toShort = (short) ((firstByte << 8) | secondByte);
