@@ -1,6 +1,6 @@
 ## Contributors
 * @iabarca -For too many things to list
-* @grandmind -Added example bots, helped with documentation and added RoleBuilder
+* @grandmind -Added example bots, helped with documentation, added RoleBuilder, made QoL adjustments
 * @phantamanta44 -Added some java 8 goodness
 * @lclc98 -Added audio support
 * @sedmelluq -Realized how utf-8 was ruining audio
@@ -10,8 +10,10 @@
 * @dec -Wrote the regex for invite parsing
 * @langerhans -Helped with the AudioChannel object
 * @Kaioru -Fixed the module-requires manifest key
-* @theIgloo -Fixed voice state logic, added self mute and deaf support and made IVoiceChannel#join() check the user's 
-permissions
+* @theIgloo -Fixed voice state logic, added self mute and deaf support, made IVoiceChannel#join() check the user's 
+permissions, added voice channel bitrate support, and fixed various permission caching problems
+* @Techtony96 -Made IVoiceChannel#mention() throw an UnsupportedOperationException
+* @chrislo27 -Fixed message pin event logic and clarified cloudflare errors
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
