@@ -35,7 +35,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * AudioPlayer also dispatches events. These events are located in the {@link sx.blah.discord.util.audio.events} package.
  *
  * NOTE: The goal of this class is to provide a wide variety of tools which works on a wide variety of use-cases. As
- * such, the feature set has a wide breadth but not depth.
+ * such, the feature set has a wide breadth but not necessarily depth.
  */
 public class AudioPlayer implements IAudioProvider {
 
@@ -134,11 +134,19 @@ public class AudioPlayer implements IAudioProvider {
 		manager.setAudioProcessor(backupProcessor);
 
 		playerInstances.remove(manager.getGuild(), this);
-
-		trackQueue.forEach(Track::close);
-		trackQueue.clear();
+		
+		clear();
 
 		client.getDispatcher().dispatch(new AudioPlayerCleanEvent(this));
+	}
+	
+	/**
+	 * This clears the current playlist. It should be noted that this closes the stream that provides the audio to each
+	 * {@link Track} object (if it exists). Which prevents these objects from being reused reliably.
+	 */
+	public void clear() {
+		trackQueue.forEach(Track::close);
+		trackQueue.clear();
 	}
 
 	/**
@@ -329,8 +337,19 @@ public class AudioPlayer implements IAudioProvider {
 	 * Gets the size of the playlist.
 	 *
 	 * @return The playlist size.
+	 * @deprecated Use {@link #getPlaylistSize()}
 	 */
+	@Deprecated
 	public int playlistSize() {
+		return trackQueue.size();
+	}
+	
+	/**
+	 * Gets the size of the playlist.
+	 *
+	 * @return The playlist size.
+	 */
+	public int getPlaylistSize() {
 		return trackQueue.size();
 	}
 
@@ -536,7 +555,7 @@ public class AudioPlayer implements IAudioProvider {
 		}
 
 		/**
-		 * This fast forwards the strack by the specified amount of time.
+		 * This fast forwards the track by the specified amount of time.
 		 *
 		 * @param fastForwardTime The amount of time (in ms) to fast forward by.
 		 */
