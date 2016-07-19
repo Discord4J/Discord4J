@@ -136,8 +136,6 @@ public class DiscordVoiceWS {
 	public final void onMessage(Session session, String message) {
 		JsonParser parser = new JsonParser();
 		JsonObject object = parser.parse(message).getAsJsonObject();
-
-		System.out.println(message);
 		int op = object.get("op").getAsInt();
 
 		switch (op) {
@@ -202,8 +200,8 @@ public class DiscordVoiceWS {
 					Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Got an Audio USER_SPEAKING_UPDATE for a non-existent User. JSON: "+object.toString());
 					return;
 				}
-				userSsrcs.put(ssrc, user);
 
+				userSsrcs.put(ssrc, user);
 				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(user, ssrc, isSpeaking));
 				break;
 			}
@@ -263,16 +261,15 @@ public class DiscordVoiceWS {
 					udpSocket.receive(receivedPacket); // This blocks the thread until a packet is received.
 					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket).decrypt(secret);
 
-					// FIXME: If this is the first time a user has spoken since the bot joined the channel, their ssrc hasn't been stored yet.
-					// How should this be handled? There doesn't seem to be a way to get the ssrc before they've already started speaking.
-					// Skip this frame if the user isn't found? What if something has gone wrong and the user should be found?
 					IUser userSpeaking = userSsrcs.get(packet.getSsrc());
+					// We don't have a user associated with this user. This is probably the first time they have spoken since the bot/they joined. Ignore for now.
+					if (userSpeaking != null) {
+						byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), 2, userSpeaking); // TODO: Detect if mono
 
-					byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), 2, userSpeaking); // TODO: Detect if mono
-
-					// TODO: Austin software design magic needed!
-					// TODO: Create combined audio stream of multiple users. I feel this is too dependent on the actual implementation of IAudioReceiver to do right now.
-					client.getDispatcher().dispatch(new AudioReceiveEvent(userSpeaking, decodedAudio));
+						// TODO: Austin software design magic needed!
+						// TODO: Create combined audio stream of multiple users. I feel this is too dependent on the actual implementation of IAudioReceiver to do right now.
+						client.getDispatcher().dispatch(new AudioReceiveEvent(userSpeaking, decodedAudio));
+					}
 				} catch (IOException e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
