@@ -15,115 +15,162 @@
  */
 package sx.blah.discord.api.internal;
 
-import com.sun.jna.ptr.PointerByReference;
 import org.peergos.crypto.TweetNaCl;
-import sx.blah.discord.handle.audio.impl.AudioManager;
 
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 import java.util.Arrays;
 
 /**
- * Represents the contents of a audio packet that was either received from Discord or
- * will be sent to discord.
+ * Represents the contents of a audio packet that was either received from Discord or will be sent to discord.
  */
 public class AudioPacket {
 
-	private static PointerByReference stereoOpusEncoder;
-	private static PointerByReference monoOpusEncoder;
-	private static PointerByReference stereoOpusDecoder;
-	private static PointerByReference monoOpusDecoder;
+	private static final int RTP_HEADER_LENGTH = 12;
+	private static final byte RTP_TYPE = (byte) 0x80;
+	private static final byte RTP_VERSION = (byte) 0x78;
 
-	static {
-		try {
-			IntBuffer error = IntBuffer.allocate(4);
-			stereoOpusDecoder = Opus.INSTANCE.opus_decoder_create(AudioManager.OPUS_SAMPLE_RATE, AudioManager.OPUS_STEREO_CHANNEL_COUNT, error);
-
-			error = IntBuffer.allocate(4);
-			monoOpusDecoder = Opus.INSTANCE.opus_decoder_create(AudioManager.OPUS_SAMPLE_RATE, AudioManager.OPUS_MONO_CHANNEL_COUNT, error);
-		} catch (UnsatisfiedLinkError e) {
-			e.printStackTrace();
-			stereoOpusEncoder = null;
-			stereoOpusDecoder = null;
-			monoOpusEncoder = null;
-			monoOpusDecoder = null;
-		}
-	}
+	private static final int RTP_TYPE_LOC = 0;
+	private static final int RTP_VERSION_LOC = 1;
+	private static final int RTP_SEQ_LOC = 2;
+	private static final int RTP_TIMESTAMP_LOC = 4;
+	private static final int RTP_SSRC_LOC = 8;
 
 	private final char seq;
 	private final int timestamp;
-	private final int ssrc;
-	private final byte[] encodedAudio;
+	private final int ssrc; // Unique per user if we're receiving. Constant for sending.
+	private final byte[] encodedAudio; // An AudioPacket will only ever contain opus encoded audio. Result of OpusUtil.decodeToPCM() should be stored elsewhere.
 	private final byte[] rawPacket;
-	private final byte[] rawAudio;
 
-	public AudioPacket(DatagramPacket packet) {
+	/**
+	 * Instantiate a new packet using information received by Discord in a UDP packet. (Receiving)
+	 * @param packet The received packet.
+	 * @return The new AudioPacket.
+	 */
+	static AudioPacket fromUdpPacket(DatagramPacket packet) {
+		return new AudioPacket(packet);
+	}
+
+	/**
+	 * Instantiate a new packet using information provided by us. (Sending)
+	 * @param seq The sequence number of this packet. Kept track of in {@link DiscordVoiceWS#setupSendThread()}.
+	 * @param timestamp The timestamp of this packet.
+	 * @param ssrc The synchronization source identifier. This *should* be the same for every packet sent on the same WS.
+	 * @param encodedAudio The opus-encoded audio being sent in this packet.
+	 * @return The new AudioPacket.
+	 */
+	static AudioPacket fromEncodedAudio(char seq, int timestamp, int ssrc, byte[] encodedAudio) {
+		return new AudioPacket(seq, timestamp, ssrc, encodedAudio);
+	}
+
+	private AudioPacket(DatagramPacket packet) {
 		this(Arrays.copyOf(packet.getData(), packet.getLength()));
 	}
 
-	public AudioPacket(byte[] rawPacket) { //FIXME: Support mono & decryption
+	private AudioPacket(byte[] rawPacket) {
 		this.rawPacket = rawPacket;
 
 		ByteBuffer buffer = ByteBuffer.wrap(rawPacket);
-		this.seq = buffer.getChar(2);
-		this.timestamp = buffer.getInt(4);
-		this.ssrc = buffer.getInt(8);
+		this.seq = buffer.getChar(RTP_SEQ_LOC);
+		this.timestamp = buffer.getInt(RTP_TIMESTAMP_LOC);
+		this.ssrc = buffer.getInt(RTP_SSRC_LOC);
 
-		byte[] audio = new byte[buffer.array().length-12];
-		System.arraycopy(buffer.array(), 12, audio, 0, audio.length);
+		byte[] audio = new byte[buffer.array().length - RTP_HEADER_LENGTH];
+		System.arraycopy(buffer.array(), RTP_HEADER_LENGTH, audio, 0, audio.length);
 		this.encodedAudio = audio;
-		this.rawAudio = decodeToPCM(encodedAudio);
 	}
 
-	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, byte[] secret) {
+	private AudioPacket(char seq, int timestamp, int ssrc, byte[] encodedAudio) {
 		this.seq = seq;
 		this.ssrc = ssrc;
 		this.timestamp = timestamp;
-		this.rawAudio = rawAudio;
+		this.encodedAudio = encodedAudio;
 
-		ByteBuffer nonceBuffer = ByteBuffer.allocate(12);
-		nonceBuffer.put(0, (byte) 0x80);
-		nonceBuffer.put(1, (byte) 0x78);
-		nonceBuffer.putChar(2, seq);
-		nonceBuffer.putInt(4, timestamp);
-		nonceBuffer.putInt(8, ssrc);
-		this.encodedAudio = TweetNaCl.secretbox(rawAudio,
-				Arrays.copyOf(nonceBuffer.array(), 24), //encryption nonce is 24 bytes long while discord's is 12 bytes long
-				secret);
-
-		byte[] packet = new byte[nonceBuffer.capacity()+encodedAudio.length];
-		System.arraycopy(nonceBuffer.array(), 0, packet, 0, 12); //Add nonce
-		System.arraycopy(encodedAudio, 0, packet, 12, encodedAudio.length); //Add audio
-
-		this.rawPacket = packet;
+		ByteBuffer buffer = ByteBuffer.allocate(12 + encodedAudio.length);
+		buffer.put    (RTP_TYPE_LOC,       RTP_TYPE);
+		buffer.put    (RTP_VERSION_LOC,    RTP_VERSION);
+		buffer.putChar(RTP_SEQ_LOC,        seq);
+		buffer.putInt (RTP_TIMESTAMP_LOC,  timestamp);
+		buffer.putInt (RTP_SSRC_LOC,       ssrc);
+		System.arraycopy(encodedAudio, 0, buffer.array(), RTP_HEADER_LENGTH, encodedAudio.length);
+		this.rawPacket = buffer.array();
 	}
 
-	public byte[] getRawPacket() {
-		return Arrays.copyOf(rawPacket, rawPacket.length);
+	/**
+	 * Encrypts the packet using TweetNaCl.
+	 * @param secret The secret key sent by Discord.
+	 * @return The encrypted version of the packet.
+	 */
+	AudioPacket encrypt(byte[] secret) {
+		byte[] encryptionNonce = getEncryptionNonce();
+		byte[] encryptedAudio = TweetNaCl.secretbox(encodedAudio, encryptionNonce, secret);
+
+		return new AudioPacket(seq, timestamp, ssrc, encryptedAudio);
 	}
 
-	public DatagramPacket asUdpPacket(InetSocketAddress address) {
-		return new DatagramPacket(getRawPacket(), rawPacket.length, address);
+	/**
+	 * Decrypts the packet using TweetNaCl.
+	 * @param secret The secret key sent by Discord.
+	 * @return The decrypted version of the packet.
+	 */
+	AudioPacket decrypt(byte[] secret) {
+		byte[] encryptionNonce = getEncryptionNonce();
+		byte[] header = getHeader();
+		byte[] decryptedAudio = TweetNaCl.secretbox_open(encodedAudio, encryptionNonce, secret);
+
+		byte[] decryptedPacket = new byte[RTP_HEADER_LENGTH + encodedAudio.length];
+		System.arraycopy(header, 0, decryptedPacket, 0, RTP_HEADER_LENGTH);
+		System.arraycopy(decryptedAudio, 0, decryptedPacket, RTP_HEADER_LENGTH, decryptedAudio.length);
+
+		return new AudioPacket(decryptedPacket);
 	}
 
-	public byte[] decodeToPCM(byte[] opusAudio) {
-		ByteBuffer nonEncodedBuffer = ByteBuffer.allocate(opusAudio.length);
-
-		ShortBuffer shortBuffer = nonEncodedBuffer.asShortBuffer();
-
-		int result = Opus.INSTANCE.opus_decode(stereoOpusDecoder, opusAudio, opusAudio.length, shortBuffer, shortBuffer.capacity(), 0);
-
-		nonEncodedBuffer.flip();
-
-		byte[] audio = new byte[result];
-		nonEncodedBuffer.get(audio);
-		return audio;
+	/**
+	 * Returns a DatagramPacket suitable for sending through UDP.
+	 * @param address Address to send the packet to.
+	 * @return The packet.
+	 */
+	DatagramPacket asUdpPacket(InetSocketAddress address) {
+		return new DatagramPacket(Arrays.copyOf(rawPacket, rawPacket.length), rawPacket.length, address);
 	}
 
-	public byte[] getRawAudio() {
-		return rawAudio;
+	/**
+	 * Gets the extended nonce byte array used for encryption. This is length 24 while Discord uses length 12.
+	 * The first 12 bytes of the extended array are filled and the rest are left as 0.
+	 * @return The nonce used for encryption.
+	 */
+	private byte[] getEncryptionNonce() {
+		byte[] encryptionNonce = new byte[24]; // Encryption uses 24 byte nonce while Discord uses 12
+		byte[] header = getHeader();
+		System.arraycopy(header, 0, encryptionNonce, 0, RTP_HEADER_LENGTH); // Copy of the header into the extended nonce. Leave the remaining bytes 0
+
+		return encryptionNonce;
+	}
+
+	/**
+	 * Gets the shorter 12 byte header used in RTP.
+	 * This is the first 12 bytes of the raw packet.
+	 * @return The header byte array.
+	 */
+	private byte[] getHeader() {
+		return Arrays.copyOf(rawPacket, RTP_HEADER_LENGTH);
+	}
+
+	/**
+	 * Gets the encoded audio byte array stored in this packet.
+	 * Note: The encoded audio is everything after the first 12 bytes of the raw packet.
+	 * @return The encoded audio
+	 */
+	byte[] getEncodedAudio() {
+		return encodedAudio;
+	}
+
+	/**
+	 * Gets the ssrc of this packet.
+	 * @return The ssrc.
+	 */
+	int getSsrc() {
+		return ssrc;
 	}
 }

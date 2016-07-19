@@ -10,7 +10,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.audio.impl.AudioManager;
+import sx.blah.discord.handle.impl.events.AudioReceiveEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
@@ -23,12 +23,10 @@ import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
 import sx.blah.discord.util.LogMarkers;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -39,12 +37,13 @@ import java.util.zip.InflaterInputStream;
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordVoiceWS {
 
-	public static final int OP_INITIAL_CONNECTION = 2;
-	public static final int OP_HEARTBEAT_RETURN = 3;
-	public static final int OP_CONNECTING_COMPLETED = 4;
-	public static final int OP_USER_SPEAKING_UPDATE = 5;
+	// OP codes
+	private static final int OP_INITIAL_CONNECTION = 2;
+	private static final int OP_HEARTBEAT_RETURN = 3;
+	private static final int OP_CONNECTING_COMPLETED = 4;
+	private static final int OP_USER_SPEAKING_UPDATE = 5;
 
-	public AtomicBoolean isConnected = new AtomicBoolean(true);
+	private AtomicBoolean isConnected = new AtomicBoolean(true);
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 		private volatile int executorCount = 0;
 
@@ -56,22 +55,59 @@ public class DiscordVoiceWS {
 		}
 	});
 
+	/**
+	 * The client associated with this WS.
+	 */
 	private DiscordClientImpl client;
 
+	/**
+	 * The guild associated with this WS.
+	 */
 	private IGuild guild;
 
-	private int ssrc;
-	private VoiceUpdateResponse event;
+	/**
+	 * The response from the join voice channel request.
+	 */
+	private VoiceUpdateResponse joinResponse;
+
+	/**
+	 * The SSRC that has been assigned to us by Discord.
+	 * This is a unique number used in RTP to identify the source of a packet.
+	 */
+	private int ourSSRC;
+
+	/**
+	 * The UDP Socket to send and receive audio data on.
+	 */
 	private DatagramSocket udpSocket;
 
+	/**
+	 * The address to send data to.
+	 */
 	private InetSocketAddress addressPort;
+
+	/**
+	 * If the client associated with this WS should be shown as speaking.
+	 */
 	private boolean isSpeaking;
 
+	/**
+	 * Secret key sent by Discord for use in encryption/decryption of audio packets.
+	 */
 	private byte[] secret;
 
+	/**
+	 * The session used by this WS.
+	 */
 	private Session session;
 
-	public static DiscordVoiceWS connect(VoiceUpdateResponse response, IDiscordClient client) throws Exception {
+	/**
+	 * A map associating IUsers to their respective Ssrcs.
+	 * Each user in a voice channel has a unique Ssrc so we can look up which user is speaking using this map.
+	 */
+	private HashMap<Integer, IUser> userSSRCs = new HashMap<>();
+
+	static DiscordVoiceWS connect(VoiceUpdateResponse response, IDiscordClient client) throws Exception {
 		SslContextFactory sslFactory = new SslContextFactory();
 		WebSocketClient wsClient = new WebSocketClient(sslFactory);
 		wsClient.setDaemon(true);
@@ -83,16 +119,16 @@ public class DiscordVoiceWS {
 		return socket;
 	}
 
-	public DiscordVoiceWS(VoiceUpdateResponse event, DiscordClientImpl client) throws URISyntaxException {
+	DiscordVoiceWS(VoiceUpdateResponse response, DiscordClientImpl client) throws URISyntaxException {
 		this.client = client;
-		this.event = event;
-		this.guild = client.getGuildByID(event.guild_id);
+		this.joinResponse = response;
+		this.guild = client.getGuildByID(response.guild_id);
 	}
 
 	@OnWebSocketConnect
 	public void onOpen(Session session) {
 		this.session = session;
-		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(event.guild_id, client.ourUser.getID(), client.sessionId, event.token)));
+		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(joinResponse.guild_id, client.ourUser.getID(), client.sessionId, joinResponse.token)));
 		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Connected to the Discord Voice websocket.");
 	}
 
@@ -100,26 +136,25 @@ public class DiscordVoiceWS {
 	public final void onMessage(Session session, String message) {
 		JsonParser parser = new JsonParser();
 		JsonObject object = parser.parse(message).getAsJsonObject();
-
 		int op = object.get("op").getAsInt();
 
 		switch (op) {
 			case OP_INITIAL_CONNECTION: {
 				try {
 					JsonObject eventObject = (JsonObject) object.get("d");
-					ssrc = eventObject.get("ssrc").getAsInt();
+					ourSSRC = eventObject.get("ssrc").getAsInt();
 
 					udpSocket = new DatagramSocket();
-					addressPort = new InetSocketAddress(event.endpoint, eventObject.get("port").getAsInt());
+					addressPort = new InetSocketAddress(joinResponse.endpoint, eventObject.get("port").getAsInt());
 
 					ByteBuffer buffer = ByteBuffer.allocate(70);
-					buffer.putInt(ssrc);
+					buffer.putInt(ourSSRC);
 
 					DatagramPacket discoveryPacket = new DatagramPacket(buffer.array(), buffer.array().length, addressPort);
 					udpSocket.send(discoveryPacket);
 
 					DatagramPacket receivedPacket = new DatagramPacket(new byte[70], 70);
-					udpSocket.receive(receivedPacket);
+					udpSocket.receive(receivedPacket); // Wait to receive the response to the discovery packet.
 
 					byte[] data = receivedPacket.getData();
 
@@ -131,7 +166,7 @@ public class DiscordVoiceWS {
 
 					send(DiscordUtils.GSON.toJson(new VoiceUDPConnectRequest(ourIP, ourPort)));
 
-					startKeepalive(eventObject.get("heartbeat_interval").getAsInt());
+					startKeepAlive(eventObject.get("heartbeat_interval").getAsInt()); // Start the keep alive with the interval discord sent us.
 				} catch (IOException e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
@@ -166,84 +201,108 @@ public class DiscordVoiceWS {
 					return;
 				}
 
+				userSSRCs.put(ssrc, user);
 				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(user, ssrc, isSpeaking));
 				break;
 			}
-			default: {
-				Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Uncaught voice packet: "+object);
-			}
+			default: Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Uncaught voice packet: " + object);
 		}
 	}
 
+	/**
+	 * Sets up the thread for sending audio packets on the Discord UDP Socket.
+	 */
 	private void setupSendThread() {
 		Runnable sendThread = new Runnable() {
-			char seq = 0;
-			int timestamp = 0;      //Used to sync up our packets within the same timeframe of other people talking.
+			char seq = 0;      // Incremented by 1 for each packet received. Used to detect packet loss
+			int timestamp = 0; // Used to sync up our packets within the same timeframe of other people talking.
 
 			@Override
 			public void run() {
 				try {
 					if (isConnected.get()) {
-						byte[] data = guild.getAudioManager().getAudio();
-						if (data != null && data.length > 0) {
+						byte[] encodedAudio = guild.getAudioManager().getAudio(); // The audio in the queue that needs to be sent.
+						if (encodedAudio != null && encodedAudio.length > 0) {
 							client.timer = System.currentTimeMillis();
-							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
-							if (!isSpeaking)
-								setSpeaking(true);
-							udpSocket.send(packet.asUdpPacket(addressPort));
+							AudioPacket packet = AudioPacket.fromEncodedAudio(seq, timestamp, ourSSRC, encodedAudio);
 
-							if (seq+1 > Character.MAX_VALUE)
+							if (!isSpeaking) setSpeaking(true);
+
+							udpSocket.send(packet.encrypt(secret).asUdpPacket(addressPort));
+
+							if (seq + 1 > Character.MAX_VALUE) {
 								seq = 0;
-							else
+							} else {
 								seq++;
+							}
 
-							timestamp += AudioManager.OPUS_FRAME_SIZE;
-						} else if (isSpeaking)
+							timestamp += OpusUtil.OPUS_FRAME_SIZE;
+						} else if (isSpeaking) {
+							// There is no audio that needs sending so if we were speaking previously, stop.
 							setSpeaking(false);
+						}
 					}
 				} catch (Exception e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
 			}
 		};
-		executorService.scheduleAtFixedRate(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
+		executorService.scheduleAtFixedRate(sendThread, 0, OpusUtil.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
 	}
 
+	/**
+	 * Sets up the thread for receiving audio packets from the Discord UDP Socket.
+	 */
 	private void setupReceiveThread() {
-//		Runnable receiveThread = ()->{
-//			if (isConnected.get()) {
-//				DatagramPacket receivedPacket = new DatagramPacket(new byte[1920], 1920);
-//				try {
-//					udpSocket.receive(receivedPacket);
-//
-//					AudioPacket packet = new AudioPacket(receivedPacket);
-//					client.getDispatcher().dispatch(new AudioReceiveEvent(packet));
-//				} catch (SocketException e) {
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		};
-//		executorService.scheduleAtFixedRate(receiveThread, 0, OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
+		Runnable receiveThread = () -> {
+			if (isConnected.get()) {
+				DatagramPacket receivedPacket = new DatagramPacket(new byte[1920], 1920);
+				try {
+					udpSocket.receive(receivedPacket); // This blocks the thread until a packet is received.
+					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket);
+					try {
+						packet = packet.decrypt(secret);
+					} catch (IllegalStateException e) {
+						Discord4J.LOGGER.error(LogMarkers.VOICE, "Unable to decrypt audio. Please report this to the Discord4J dev!", e);
+					}
+					IUser userSpeaking = userSSRCs.get(packet.getSsrc());
+
+					// We don't have a user associated with this user. This is probably the first time they have spoken since the bot/they joined. Ignore for now.
+					if (userSpeaking != null) {
+						byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), userSpeaking);
+
+						// TODO: Austin software design magic needed!
+						// TODO: Create combined audio stream of multiple users. I feel this is too dependent on the actual implementation of IAudioReceiver to do right now.
+						client.getDispatcher().dispatch(new AudioReceiveEvent(userSpeaking, decodedAudio));
+					}
+				} catch (IOException e) {
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
+				}
+			}
+		};
+		executorService.scheduleAtFixedRate(receiveThread, 0, OpusUtil.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
 	}
 
-	private void startKeepalive(int hearbeat_interval) {
-		Runnable keepAlive = ()->{
+	/**
+	 * Sets up the keep alive thread.
+	 * @param heartbeat_interval The interval on which to send the request to Discord in milliseconds.
+	 */
+	private void startKeepAlive(int heartbeat_interval) {
+		Runnable keepAlive = () -> {
 			if (this.isConnected.get()) {
-				long l = System.currentTimeMillis()-client.timer;
-				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+				long elapsedTime = System.currentTimeMillis() - client.timer;
+				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), elapsedTime);
 				send(DiscordUtils.GSON.toJson(new VoiceKeepAliveRequest(System.currentTimeMillis())));
 				client.timer = System.currentTimeMillis();
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,
-				client.timer+hearbeat_interval-System.currentTimeMillis(),
-				hearbeat_interval, TimeUnit.MILLISECONDS);
+				client.timer + heartbeat_interval - System.currentTimeMillis(),
+				heartbeat_interval, TimeUnit.MILLISECONDS);
 	}
 
 	@OnWebSocketMessage
 	public void onMessage(Session session, byte[] buf, int offset, int length) {
-
 		//Converts binary data to readable string data
 		try {
 			InflaterInputStream inputStream = new InflaterInputStream(new ByteArrayInputStream(buf));
@@ -283,7 +342,6 @@ public class DiscordVoiceWS {
 
 	/**
 	 * Sends a message through the websocket.
-	 *
 	 * @param message The json message to send.
 	 */
 	public void send(String message) {
@@ -302,7 +360,6 @@ public class DiscordVoiceWS {
 
 	/**
 	 * Sends a message through the websocket.
-	 *
 	 * @param object This object is converted to json and sent to the websocket.
 	 */
 	public void send(Object object) {
@@ -315,25 +372,23 @@ public class DiscordVoiceWS {
 	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
 		if (isConnected.get()) {
 			client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
+
+			// Some clean up
 			isConnected.set(false);
 			client.voiceConnections.remove(guild);
 			executorService.shutdownNow();
-			if (udpSocket != null)
-				udpSocket.close();
-			if (reason != VoiceDisconnectedEvent.Reason.INIT_ERROR) {
-				session.close();
-			}
+
+			if (udpSocket != null) udpSocket.close();
+			if (reason != VoiceDisconnectedEvent.Reason.INIT_ERROR) session.close();
 		}
 	}
 
 	/**
-	 * Updates the speaking status
-	 *
-	 * @param speaking: is voice currently being sent
+	 * Updates the speaking status.
+	 * @param speaking: True if the client should be shown as speaking.
 	 */
-	public void setSpeaking(boolean speaking) {
+	private void setSpeaking(boolean speaking) {
 		this.isSpeaking = speaking;
-
 		send(DiscordUtils.GSON.toJson(new VoiceSpeakingRequest(speaking)));
 	}
 }
