@@ -337,8 +337,19 @@ public class AudioPlayer implements IAudioProvider {
 	 * Gets the size of the playlist.
 	 *
 	 * @return The playlist size.
+	 * @deprecated Use {@link #getPlaylistSize()}
 	 */
+	@Deprecated
 	public int playlistSize() {
+		return trackQueue.size();
+	}
+	
+	/**
+	 * Gets the size of the playlist.
+	 *
+	 * @return The playlist size.
+	 */
+	public int getPlaylistSize() {
 		return trackQueue.size();
 	}
 
