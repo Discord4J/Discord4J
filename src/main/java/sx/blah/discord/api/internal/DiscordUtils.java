@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.generic.PermissionOverwrite;
@@ -695,7 +694,7 @@ public class DiscordUtils {
 		//Then resamples to a sample rate of 48000hz and ensures that data is Big Endian.
 		AudioFormat audioFormat = new AudioFormat(
 				toPCM.getEncoding(),
-				AudioManager.OPUS_SAMPLE_RATE,
+				OpusUtil.OPUS_SAMPLE_RATE,
 				toPCM.getSampleSizeInBits(),
 				toPCM.getChannels(),
 				toPCM.getFrameSize(),

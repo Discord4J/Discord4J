@@ -10,7 +10,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.AudioReceiveEvent;
+import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
@@ -23,7 +23,10 @@ import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
 import sx.blah.discord.json.responses.VoiceUpdateResponse;
 import sx.blah.discord.util.LogMarkers;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -221,7 +224,7 @@ public class DiscordVoiceWS {
 			public void run() {
 				try {
 					if (isConnected.get()) {
-						byte[] encodedAudio = guild.getAudioManager().getAudio(); // The audio in the queue that needs to be sent.
+						byte[] encodedAudio = ((AudioManager) guild.getAudioManager()).sendAudio(); // The audio in the queue that needs to be sent.
 						if (encodedAudio != null && encodedAudio.length > 0) {
 							client.timer = System.currentTimeMillis();
 							AudioPacket packet = AudioPacket.fromEncodedAudio(seq, timestamp, ourSSRC, encodedAudio);
@@ -271,9 +274,7 @@ public class DiscordVoiceWS {
 					if (userSpeaking != null) {
 						byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), userSpeaking);
 
-						// TODO: Austin software design magic needed!
-						// TODO: Create combined audio stream of multiple users. I feel this is too dependent on the actual implementation of IAudioReceiver to do right now.
-						client.getDispatcher().dispatch(new AudioReceiveEvent(userSpeaking, decodedAudio));
+						((AudioManager) guild.getAudioManager()).receiveAudio(packet.getEncodedAudio(), decodedAudio, userSpeaking);
 					}
 				} catch (IOException e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);

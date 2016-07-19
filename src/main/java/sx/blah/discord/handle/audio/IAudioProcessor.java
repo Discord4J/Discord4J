@@ -1,7 +1,8 @@
 package sx.blah.discord.handle.audio;
 
 /**
- * This represents an audio processor (something that manipulates raw audio data before it is sent to discord).
+ * This represents an audio processor (something that manipulates raw audio data before it is sent to discord). Use
+ * {@link IAudioManager#setAudioProcessor(IAudioProcessor)} to utilize this class.
  */
 public interface IAudioProcessor extends IAudioProvider {
 

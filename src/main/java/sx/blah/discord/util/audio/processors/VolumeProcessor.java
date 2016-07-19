@@ -2,6 +2,7 @@ package sx.blah.discord.util.audio.processors;
 
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.util.LogMarkers;

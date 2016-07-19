@@ -1,8 +1,9 @@
 package sx.blah.discord.util.audio.providers;
 
+import sx.blah.discord.api.internal.OpusUtil;
 import sx.blah.discord.api.internal.TimedValue;
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioProvider;
-import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.audio.impl.DefaultProvider;
 
 /**
@@ -13,14 +14,14 @@ public class GlobalProvider implements IAudioProvider {
 
 	private static volatile IAudioProvider provider;
 
-	private static final TimedValue<Boolean> isReady = new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT,
+	private static final TimedValue<Boolean> isReady = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME_AMOUNT,
 			() -> provider.isReady());
-	private static final TimedValue<byte[]> provide = new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT,
+	private static final TimedValue<byte[]> provide = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME_AMOUNT,
 			() -> provider.provide());
-	private static final TimedValue<Integer> channels = new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT,
+	private static final TimedValue<Integer> channels = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME_AMOUNT,
 			() -> provider.getChannels());
 	private static final TimedValue<AudioEncodingType> audioEncodingType
-			= new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT, () -> provider.getAudioEncodingType());
+			= new TimedValue<>(OpusUtil.OPUS_FRAME_TIME_AMOUNT, () -> provider.getAudioEncodingType());
 
 	private static final GlobalProvider instance = new GlobalProvider(); //Singleton instance
 

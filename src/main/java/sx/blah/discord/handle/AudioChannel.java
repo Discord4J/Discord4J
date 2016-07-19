@@ -3,6 +3,8 @@ package sx.blah.discord.handle;
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.OpusUtil;
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.AudioPlayEvent;
@@ -207,7 +209,7 @@ public class AudioChannel implements IAudioProvider {
 		//Then resamples to a sample rate of 48000hz and ensures that data is Big Endian.
 		AudioFormat audioFormat = new AudioFormat(
 				toPCM.getEncoding(),
-				AudioManager.OPUS_SAMPLE_RATE,
+				OpusUtil.OPUS_SAMPLE_RATE,
 				toPCM.getSampleSizeInBits(),
 				toPCM.getChannels(),
 				toPCM.getFrameSize(),
@@ -283,7 +285,7 @@ public class AudioChannel implements IAudioProvider {
 
 	@Override
 	public byte[] provide() {
-		AudioData data = getAudioData(AudioManager.OPUS_FRAME_SIZE);
+		AudioData data = getAudioData(OpusUtil.OPUS_FRAME_SIZE);
 		return data == null ? new byte[0] : data.rawData;
 	}
 
