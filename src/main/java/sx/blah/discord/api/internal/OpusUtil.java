@@ -6,6 +6,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.ValuePool;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -18,11 +19,22 @@ import java.nio.ShortBuffer;
  */
 public class OpusUtil {
 
+	/**
+	 * Measured in Hz, the number of samples of audio per second.
+	 */
 	public static final int OPUS_SAMPLE_RATE = 48000;
-	public static final int OPUS_FRAME_SIZE = 960;
-	public static final int OPUS_FRAME_TIME_AMOUNT = OPUS_FRAME_SIZE * 1000 / OPUS_SAMPLE_RATE;
 
-	private static MappedPool<IGuild, Pair<PointerByReference, PointerByReference>> encoderPool = new MappedPool<IGuild, Pair<PointerByReference, PointerByReference>>() {
+	/**
+	 * The size of each frame of audio.
+	 */
+	public static final int OPUS_FRAME_SIZE = 960;
+
+	/**
+	 * How long, in milliseconds, each frame is.
+	 */
+	public static final int OPUS_FRAME_TIME_AMOUNT = 20; // OPUS_FRAME_SIZE * 1000 / OPUS_SAMPLE_RATE;
+
+	private static ValuePool<IGuild, Pair<PointerByReference, PointerByReference>> encoderPool = new ValuePool<IGuild, Pair<PointerByReference, PointerByReference>>() {
 		@Override
 		public Pair<PointerByReference, PointerByReference> newObject() {
 			PointerByReference mono = Opus.INSTANCE.opus_encoder_create(OPUS_SAMPLE_RATE, 1, Opus.OPUS_APPLICATION_AUDIO, IntBuffer.allocate(4));
@@ -31,12 +43,10 @@ public class OpusUtil {
 		}
 	};
 
-	private static MappedPool<IUser, Pair<PointerByReference, PointerByReference>> decoderPool = new MappedPool<IUser, Pair<PointerByReference, PointerByReference>>() {
+	private static ValuePool<IUser, PointerByReference> decoderPool = new ValuePool<IUser, PointerByReference>() {
 		@Override
-		public Pair<PointerByReference, PointerByReference> newObject() {
-			PointerByReference mono = Opus.INSTANCE.opus_decoder_create(OPUS_SAMPLE_RATE, 1, IntBuffer.allocate(4));
-			PointerByReference stereo = Opus.INSTANCE.opus_decoder_create(OPUS_SAMPLE_RATE, 2, IntBuffer.allocate(4));
-			return Pair.of(mono, stereo);
+		public PointerByReference newObject() {
+			return Opus.INSTANCE.opus_decoder_create(OPUS_SAMPLE_RATE, 2, IntBuffer.allocate(4));
 		}
 	};
 
@@ -54,12 +64,11 @@ public class OpusUtil {
 	/**
 	 * Decodes opus-encoded audio to raw PCM data.
 	 * @param opusAudio The opus-encoded audio.
-	 * @param channels The number of channels this audio should be decoded for.
 	 * @param user The user from which this audio was received. Used to decide which decoder to use.
 	 * @return The raw PCM data.
 	 */
-	public static byte[] decodeToPCM(byte[] opusAudio, int channels, IUser user) {
-		return decodeToPCM(opusAudio, getDecoder(channels, user));
+	public static byte[] decodeToPCM(byte[] opusAudio, IUser user) {
+		return decodeToPCM(opusAudio, getDecoder(user));
 	}
 
 	/**
@@ -83,7 +92,9 @@ public class OpusUtil {
 			}
 			nonEncodedBuffer.flip();
 
-			int result = Opus.INSTANCE.opus_encode(encoder, nonEncodedBuffer, OPUS_FRAME_SIZE, encoded, encoded.capacity()); // TODO: check for 0 / negative value for error.
+			int result = Opus.INSTANCE.opus_encode(encoder, nonEncodedBuffer, OPUS_FRAME_SIZE, encoded, encoded.capacity());
+			if (result < 0) throw new RuntimeException("Failed to encode audio to opus. Error code: " + result);
+
 			byte[] audio = new byte[result];
 			encoded.get(audio);
 			return audio;
@@ -101,13 +112,15 @@ public class OpusUtil {
 	 */
 	private static byte[] decodeToPCM(byte[] opusAudio, PointerByReference decoder) {
 		ShortBuffer decodedBuffer = ShortBuffer.allocate(4096);
-		int result = Opus.INSTANCE.opus_decode(decoder, opusAudio, opusAudio.length, decodedBuffer, OPUS_FRAME_SIZE, 0); // TODO: check for 0 / negative value for error.
+
+		int result = Opus.INSTANCE.opus_decode(decoder, opusAudio, opusAudio.length, decodedBuffer, OPUS_FRAME_SIZE, 0);
+		if (result < 0) throw new RuntimeException("Failed to decode opus to pcm. Error code: " + result);
 
 		short[] shortAudio = new short[result * 2];
 		decodedBuffer.get(shortAudio);
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(shortAudio.length * 2); //
-		byteBuffer.order(ByteOrder.BIG_ENDIAN);                             // Convert to bytes (Big Endian format) TODO: Specify format?
+		byteBuffer.order(ByteOrder.BIG_ENDIAN);                             // Convert to bytes (Big Endian format)
 		byteBuffer.asShortBuffer().put(shortAudio);                         //
 		return byteBuffer.array();
 	}
@@ -125,12 +138,10 @@ public class OpusUtil {
 
 	/**
 	 * Gets the appropriate decoder instance from the number of channels and guild.
-	 * @param channels The number of channels the audio is being decoded for.
 	 * @param user The user from which this audio was received.
 	 * @return The appropriate decoder.
 	 */
-	private static PointerByReference getDecoder(int channels, IUser user) {
-		Pair decoders = decoderPool.get(user);
-		return (PointerByReference) (channels == 1 ? decoders.getLeft() : decoders.getRight());
+	private static PointerByReference getDecoder(IUser user) {
+		return decoderPool.get(user);
 	}
 }

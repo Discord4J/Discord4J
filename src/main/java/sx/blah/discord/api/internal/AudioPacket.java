@@ -16,8 +16,6 @@
 package sx.blah.discord.api.internal;
 
 import org.peergos.crypto.TweetNaCl;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.util.LogMarkers;
 
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
@@ -119,14 +117,7 @@ public class AudioPacket {
 	AudioPacket decrypt(byte[] secret) {
 		byte[] encryptionNonce = getEncryptionNonce();
 		byte[] header = getHeader();
-
-		byte[] decryptedAudio = new byte[0];
-		try {
-			decryptedAudio = TweetNaCl.secretbox_open(encodedAudio, encryptionNonce, secret);
-		} catch (Exception e) {
-			// Something has gone horribly wrong! TODO: Handle this? The following code will surely break if not.
-			Discord4J.LOGGER.error(LogMarkers.VOICE, "Unable to decrypt audio. Please report this to the Discord4J dev!", e);
-		}
+		byte[] decryptedAudio = TweetNaCl.secretbox_open(encodedAudio, encryptionNonce, secret);
 
 		byte[] decryptedPacket = new byte[RTP_HEADER_LENGTH + encodedAudio.length];
 		System.arraycopy(header, 0, decryptedPacket, 0, RTP_HEADER_LENGTH);

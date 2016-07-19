@@ -105,7 +105,7 @@ public class DiscordVoiceWS {
 	 * A map associating IUsers to their respective Ssrcs.
 	 * Each user in a voice channel has a unique Ssrc so we can look up which user is speaking using this map.
 	 */
-	HashMap<Integer, IUser> userSsrcs = new HashMap<>();
+	private HashMap<Integer, IUser> userSSRCs = new HashMap<>();
 
 	static DiscordVoiceWS connect(VoiceUpdateResponse response, IDiscordClient client) throws Exception {
 		SslContextFactory sslFactory = new SslContextFactory();
@@ -191,7 +191,7 @@ public class DiscordVoiceWS {
 			}
 			case OP_USER_SPEAKING_UPDATE: {
 				JsonObject eventObject = (JsonObject) object.get("d");
-				boolean isSpeaking = eventObject.get("speaking").getAsBoolean(); // TODO: It might be helpful to store this
+				boolean isSpeaking = eventObject.get("speaking").getAsBoolean();
 				int ssrc = eventObject.get("ssrc").getAsInt();
 				String userId = eventObject.get("user_id").getAsString();
 
@@ -201,7 +201,7 @@ public class DiscordVoiceWS {
 					return;
 				}
 
-				userSsrcs.put(ssrc, user);
+				userSSRCs.put(ssrc, user);
 				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(user, ssrc, isSpeaking));
 				break;
 			}
@@ -259,12 +259,17 @@ public class DiscordVoiceWS {
 				DatagramPacket receivedPacket = new DatagramPacket(new byte[1920], 1920);
 				try {
 					udpSocket.receive(receivedPacket); // This blocks the thread until a packet is received.
-					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket).decrypt(secret);
+					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket);
+					try {
+						packet = packet.decrypt(secret);
+					} catch (IllegalStateException e) {
+						Discord4J.LOGGER.error(LogMarkers.VOICE, "Unable to decrypt audio. Please report this to the Discord4J dev!", e);
+					}
+					IUser userSpeaking = userSSRCs.get(packet.getSsrc());
 
-					IUser userSpeaking = userSsrcs.get(packet.getSsrc());
 					// We don't have a user associated with this user. This is probably the first time they have spoken since the bot/they joined. Ignore for now.
 					if (userSpeaking != null) {
-						byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), 2, userSpeaking); // TODO: Detect if mono
+						byte[] decodedAudio = OpusUtil.decodeToPCM(packet.getEncodedAudio(), userSpeaking);
 
 						// TODO: Austin software design magic needed!
 						// TODO: Create combined audio stream of multiple users. I feel this is too dependent on the actual implementation of IAudioReceiver to do right now.

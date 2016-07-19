@@ -1,4 +1,4 @@
-package sx.blah.discord.api.internal;
+package sx.blah.discord.util;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,9 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Dynamically creates V objects using {@link #newObject()}
  * @param <K> The key that will be used to retrieve values.
  * @param <V> The value.
- *           TODO: Rename? I'm not sure the current name reflects functionality.
  */
-public abstract class MappedPool<K, V> {
+public abstract class ValuePool<K, V> {
 	private final Map<K, V> map = new ConcurrentHashMap<>();
 
 	/**
