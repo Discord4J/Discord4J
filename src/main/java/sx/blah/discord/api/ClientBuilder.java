@@ -1,5 +1,6 @@
 package sx.blah.discord.api;
 
+import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.util.DiscordException;
 
@@ -15,6 +16,7 @@ public class ClientBuilder {
 	private String botToken;
 	private boolean isDaemon = false;
 	private boolean withReconnects = false;
+	private Pair<Integer, Integer> shard = null;
 
 	/**
 	 * Sets the login info for the client.
@@ -97,6 +99,26 @@ public class ClientBuilder {
 		this.withReconnects = true;
 		return this;
 	}
+	
+	/**
+	 * This makes the client run on a specified shard.
+	 *
+	 * @param shardID The shard to run this client on.
+	 * @param shardCount The number of total shards.
+	 * @return The instance of the builder.
+	 *
+	 * @see <a href="https://discordapp.com/developers/docs/topics/gateway#sharding">Sharding specifications</a>
+	 */
+	public ClientBuilder withShard(int shardID, int shardCount) {
+		if (shardID >= shardCount)
+			throw new RuntimeException("Your shard id must be less than the shard count");
+		
+		if (shardID < 0)
+			throw new RuntimeException("Your shard id cannot be negative");
+		
+		this.shard = Pair.of(shardID, shardCount);
+		return this;
+	}
 
 	/**
 	 * Creates the discord instance with the desired features
@@ -110,7 +132,7 @@ public class ClientBuilder {
 			throw new DiscordException("No login info present!");
 
 		if (isBot) {
-			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, withReconnects, shard);
 		} else {
 			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
 		}
