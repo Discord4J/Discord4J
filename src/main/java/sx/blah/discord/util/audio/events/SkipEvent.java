@@ -4,22 +4,12 @@ import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
  * This event is dispatched whenever a track is skipped.
+ * @deprecated Use {@link TrackSkipEvent} instead.
  */
-public class SkipEvent extends AudioPlayerEvent {
-
-	private final AudioPlayer.Track track;
-
+@Deprecated
+public class SkipEvent extends TrackSkipEvent {
+	
 	public SkipEvent(AudioPlayer player, AudioPlayer.Track track) {
-		super(player);
-		this.track = track;
-	}
-
-	/**
-	 * This gets the track that was skipped.
-	 *
-	 * @return The skipped track.
-	 */
-	public AudioPlayer.Track getTrack() {
-		return track;
+		super(player, track);
 	}
 }
