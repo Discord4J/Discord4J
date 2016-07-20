@@ -89,7 +89,7 @@ public class Channel implements IChannel {
 	protected final Map<String, PermissionOverride> userOverrides;
 
 	/**
-	 * The permission overrides for roles (key = user id).
+	 * The permission overrides for roles (key = role id).
 	 */
 	protected final Map<String, PermissionOverride> roleOverrides;
 
