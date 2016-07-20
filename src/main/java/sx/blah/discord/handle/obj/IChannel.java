@@ -199,9 +199,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	Map<String, PermissionOverride> getUserOverrides();
 
 	/**
-	 * Gets the permissions overrides for users. (Key = User id).
+	 * Gets the permissions overrides for roles. (Key = Role id).
 	 *
-	 * @return The user permissions overrides for this channel.
+	 * @return The role permissions overrides for this channel.
 	 */
 	Map<String, PermissionOverride> getRoleOverrides();
 
