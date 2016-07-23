@@ -34,6 +34,7 @@ public class ChannelEditRequest {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;
+		this.bitrate = 8000;
 	}
 
 	public ChannelEditRequest(String name, int position, int bitrate, int user_limit) {
