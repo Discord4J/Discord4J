@@ -143,9 +143,9 @@ public enum Requests {
 			} else if (responseCode == 502) {
 				LOGGER.trace(LogMarkers.API, "502 response on request to {}, response text: {}", request.getURI(), message); //This can be used to verify if it was cloudflare causing the 502.
 				
-				if (message.contains("cloudflare-nginx")) {
+				if (message.toLowerCase(Locale.ROOT).contains("cloudflare")) {
 					throw new DiscordException("502 error on request to " + request.getURI()
-							+ ". This is due to CloudFlare (detected \"cloudflare-nginx\" in message).");
+							+ ". This is due to CloudFlare.");
 				}
 				
 				throw new DiscordException("502 error on request to "+request.getURI()+". With response text: "+message);
