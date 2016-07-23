@@ -62,6 +62,16 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void setBitrate(int bitrate) { this.bitrate = bitrate; }
 
 	@Override
+	public void changeName(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		edit(Optional.of(name), Optional.empty(), Optional.empty(), Optional.empty());
+	}
+
+	@Override
+	public void changePosition(int position) throws MissingPermissionsException, DiscordException, RateLimitException {
+		edit(Optional.empty(), Optional.of(position), Optional.empty(), Optional.empty());
+	}
+
+	@Override
 	public void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException {
 		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(limit));
 	}
