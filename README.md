@@ -58,6 +58,7 @@ dependencies {
 ### Tutorials/Resources
 * The [Discord4J Tutorial Series](http://blog.darichey.com/) maintained by @Panda
 * The [Discord4J Read The Docs](https://discord4j.readthedocs.org/en/latest/index.html) maintained by @TheFjong.
+* A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by @Mugi.jar
 * A Discord Bot [quick start example](https://gist.github.com/iabarca/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @quantic
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
 
@@ -67,9 +68,9 @@ Example:
 ```java
 public class Example {
 
-  public static IDiscordClient getClient(String email, String password, boolean login) { //Returns an instance of the discord client
+  public static IDiscordClient getClient(String token, boolean login) { //Returns an instance of the discord client
     ClientBuilder clientBuilder = new ClientBuilder(); //Creates the ClientBuilder instance
-    clientBuilder.withLogin(email, password); //Adds the login info to the builder
+    clientBuilder.withToken(token); //Adds the login info to the builder
     if (login) {
       return clientBuilder.login(); //Creates the client instance and logs the client in
     } else {
