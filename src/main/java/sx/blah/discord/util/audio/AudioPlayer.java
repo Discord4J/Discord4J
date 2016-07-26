@@ -311,6 +311,7 @@ public class AudioPlayer implements IAudioProvider {
 
 			if (track.isReady() && track.getCurrentTrackTime() == track.getTotalTrackTime()) { //The track was actually skipped, not skipped due to the way my logic works
 				client.getDispatcher().dispatch(new SkipEvent(this, track));
+				client.getDispatcher().dispatch(new TrackSkipEvent(this, track));
 			}
 
 			if (isLooping()) {
@@ -368,7 +369,7 @@ public class AudioPlayer implements IAudioProvider {
 	 * @return The current track.
 	 */
 	public Track getCurrentTrack() {
-		return playlistSize() > 0 ? trackQueue.get(0) : null;
+		return getPlaylistSize() > 0 ? trackQueue.get(0) : null;
 	}
 
 	/**
@@ -399,15 +400,17 @@ public class AudioPlayer implements IAudioProvider {
 		boolean ready = calculateReady();
 		if (!ready && wasReadyLast) {
 			Track original = getCurrentTrack();
-			skip();
-			Track next = getCurrentTrack();
-
-			ready = calculateReady(); //Check again to allow for continuous playback
-
-			client.getDispatcher().dispatch(new TrackFinishEvent(this, original, next));
-
-			if (next != null)
-				client.getDispatcher().dispatch(new TrackStartEvent(this, next)); //New track is now playing.
+			if (original != null) { //Check if there is no track that is supposed to be playing
+				skip();
+				Track next = getCurrentTrack();
+				
+				ready = calculateReady(); //Check again to allow for continuous playback
+				
+				client.getDispatcher().dispatch(new TrackFinishEvent(this, original, next));
+				
+				if (next != null)
+					client.getDispatcher().dispatch(new TrackStartEvent(this, next)); //New track is now playing.
+			}
 		} else if (!wasReadyLast && ready || (lastTrack != getCurrentTrack() && getCurrentTrack() != null)) { //Track started playing for the first time
 			client.getDispatcher().dispatch(new TrackStartEvent(this, getCurrentTrack()));
 		}
