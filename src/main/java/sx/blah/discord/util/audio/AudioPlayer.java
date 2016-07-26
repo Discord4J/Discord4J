@@ -169,6 +169,18 @@ public class AudioPlayer implements IAudioProvider {
 			client.getDispatcher().dispatch(new PauseStateChangeEvent(this, isPaused));
 		}
 	}
+	
+	/**
+	 * This toggles the pause state on or off.
+	 * This is a convenience shortcut for {@code setPaused(!isPaused())}.
+	 *
+	 * @return The new pause state.
+	 */
+	public boolean togglePause() {
+		boolean newPauseState = !isPaused();
+		setPaused(newPauseState);
+		return newPauseState;
+	}
 
 	/**
 	 * Gets whether this player is paused or not.
@@ -311,7 +323,6 @@ public class AudioPlayer implements IAudioProvider {
 
 			if (track.isReady() && track.getCurrentTrackTime() == track.getTotalTrackTime()) { //The track was actually skipped, not skipped due to the way my logic works
 				client.getDispatcher().dispatch(new SkipEvent(this, track));
-				client.getDispatcher().dispatch(new TrackSkipEvent(this, track));
 			}
 
 			if (isLooping()) {
