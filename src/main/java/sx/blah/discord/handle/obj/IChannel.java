@@ -7,8 +7,8 @@ import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -139,7 +139,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws ParseException 
 	 * @throws MimeTypeException 
 	 */
-	IMessage sendFile(FileInputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Sends a file to the channel.
@@ -155,7 +155,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws ParseException 
 	 * @throws MimeTypeException
 	 */
-	IMessage sendFile(FileInputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 	
 	/**
 	 * Generates an invite for this channel.

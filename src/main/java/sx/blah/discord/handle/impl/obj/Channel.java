@@ -211,7 +211,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage sendFile(FileInputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
+	public IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		if (client.isReady()) {
@@ -240,13 +240,13 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage sendFile(FileInputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
+	public IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		return sendFile(stream, filename, null);
 	}
 	
 	@Override
 	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		FileInputStream stream = new FileInputStream(file);
+		InputStream stream = new FileInputStream(file);
 		return sendFile(stream, file.getName(), null);
 	}
 	
