@@ -6,7 +6,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 
-import eu.medsea.mimeutil.MimeUtil2;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordEndpoints;
@@ -216,14 +215,9 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		if (client.isReady()) {
-			//These next two lines of code took WAAAAAY too long to figure out than I care to admit
-			InputStream is = new BufferedInputStream(stream);
-			MimeUtil2 mimeUtil = new MimeUtil2();
-			mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-			Collection<?> mimeTypes = mimeUtil.getMimeTypes(is);
-			
+			InputStream is = new BufferedInputStream(stream);		
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-					.addBinaryBody("file", is, ContentType.create(MimeUtil2.getMostSpecificMimeType(mimeTypes).toString()), filename);
+					.addBinaryBody("file", is, ContentType.APPLICATION_OCTET_STREAM, filename);
 
 			if (content != null)
 				builder.addTextBody("content", content);
@@ -247,13 +241,13 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendFile(FileInputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		return sendFile(stream, null, filename);
+		return sendFile(stream, filename, null);
 	}
 	
 	@Override
 	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		FileInputStream stream = new FileInputStream(file);
-		return sendFile(stream, content, file.getName());
+		return sendFile(stream, file.getName(), null);
 	}
 	
 	@Override
