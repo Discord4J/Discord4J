@@ -235,7 +235,6 @@ public class RequestBuffer {
 		public void run() {
 			synchronized (requests) {
 				List<RequestFuture> futures = requests.get(bucket);
-				requests.remove(bucket);
 				List<RequestFuture> futuresToRetry = new CopyOnWriteArrayList<>();
 
 				futures.forEach((RequestFuture future) -> {
@@ -245,10 +244,12 @@ public class RequestBuffer {
 				});
 
 				if (futuresToRetry.size() > 0 && futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS) > 0) {
-					requests.put(bucket, futuresToRetry);
+					requests.replace(bucket, futuresToRetry);
 					synchronized (requestTimer) {
 						requestTimer.schedule(new RequestTimerTask(bucket), futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
 					}
+				} else {
+					requests.remove(bucket);
 				}
 			}
 		}
