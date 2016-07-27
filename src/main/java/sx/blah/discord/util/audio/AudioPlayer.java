@@ -193,6 +193,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues an AudioInputStream for the AudioPlayer.
+	 * <br>Supports: ogg, mp3, flac, wav
 	 *
 	 * @param stream The stream to queue.
 	 * @return The {@link Track} object representing this stream.
@@ -207,6 +208,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues a file for the AudioPlayer.
+	 * <br>Supports: ogg, mp3, flac, wav
 	 *
 	 * @param file The file to queue.
 	 * @return The {@link Track} object representing this file.
@@ -223,6 +225,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues a url for the AudioPlayer.
+	 * <br>Supports: ogg, mp3, flac, wav
 	 *
 	 * @param url The url to queue.
 	 * @return The {@link Track} object representing this url.
@@ -239,6 +242,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues an audio provider for the AudioPlayer.
+	 * <br>Supports: ogg, mp3, flac, wav
 	 *
 	 * @param provider The audio provider to queue.
 	 * @return The {@link Track} object representing this audio provider.
@@ -251,6 +255,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues a track for the AudioPlayer.
+	 * <br>Supports: ogg, mp3, flac, wav
 	 *
 	 * @param track The track to queue.
 	 */

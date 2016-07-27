@@ -8,6 +8,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 * @throws ParseException 
+	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
@@ -116,9 +119,44 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 * @throws ParseException 
+	 * @throws MimeTypeException 
 	 */
 	IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	
+	/**
+	 * Sends a file to the channel.
+	 *
+	 * @param stream The input stream to send.
+	 * @param filename The name of the file to send.
+	 * @param content The message to be sent with the file.
+	 * @return The message sent.
+	 *
+	 * @throws IOException
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws ParseException 
+	 * @throws MimeTypeException 
+	 */
+	IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
+	/**
+	 * Sends a file to the channel.
+	 *
+	 * @param stream The input stream to send.
+	 * @param filename The name of the file to send.
+	 * @return The message sent.
+	 *
+	 * @throws IOException
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws ParseException 
+	 * @throws MimeTypeException
+	 */
+	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	
 	/**
 	 * Generates an invite for this channel.
 	 *

@@ -28,9 +28,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.12</version>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>1.7.12</version>
 		</dependency>
 
 		<!--<dependency>-->
@@ -129,6 +129,7 @@
 			<artifactId>tritonus-dsp</artifactId>
 			<version>0.3.6</version>
 		</dependency>
+		
 	</dependencies>
 
 	<build>
