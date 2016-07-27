@@ -421,10 +421,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IUser getUserByID(String userID) {
-		IUser user = getUsers().stream()
-				.filter(u -> u.getID().equalsIgnoreCase(userID))
-				.findAny().orElse(null);
-
+		IGuild guild = guildList.stream()
+				.filter(g -> g.getUserByID(userID) != null)
+				.findFirst()
+				.orElse(null);
+		
+		IUser user = guild != null ? guild.getUserByID(userID) : null;
+		
 		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
 	}
 
