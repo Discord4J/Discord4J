@@ -25,10 +25,6 @@ public enum Permissions {
 	 */
 	ADMINISTRATOR(3),
 	/**
-	 * Allows the user to manage permissions.
-	 */
-	MANAGE_PERMISSIONS(3),
-	/**
 	 * Allows the user to manage channels.
 	 */
 	MANAGE_CHANNELS(4),
@@ -73,6 +69,10 @@ public enum Permissions {
 	 */
 	MENTION_EVERYONE(17),
 	/**
+	 * Allows the user to use emojis from external servers in a given one.
+	 */
+	USE_EXTERNAL_EMOJIS(18),
+	/**
 	 * Allows the user to connect to a voice channel.
 	 */
 	VOICE_CONNECT(20),
@@ -107,7 +107,11 @@ public enum Permissions {
 	/**
 	 * Allows the user to manage roles below yours.
 	 */
-	MANAGE_ROLES(28);
+	MANAGE_ROLES(28),
+	/**
+	 * Allows the user to manage permissions.
+	 */
+	MANAGE_PERMISSIONS(28);
 
 	/**
 	 * The bit offset in the permissions number
