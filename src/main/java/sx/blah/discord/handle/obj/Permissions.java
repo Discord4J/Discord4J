@@ -188,6 +188,9 @@ public enum Permissions {
 	 * @return The raw permissions number.
 	 */
 	public static int generatePermissionsNumber(EnumSet<Permissions> permissions) {
+		if (permissions == null)
+			permissions = EnumSet.noneOf(Permissions.class);
+			
 		int number = 0;
 		for (Permissions permission : permissions) {
 			number |= (1 << permission.offset);

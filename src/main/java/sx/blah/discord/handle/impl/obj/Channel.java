@@ -215,7 +215,7 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		if (client.isReady()) {
-			InputStream is = new BufferedInputStream(stream);		
+			InputStream is = new BufferedInputStream(stream);
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create()
 					.addBinaryBody("file", is, ContentType.APPLICATION_OCTET_STREAM, filename);
 
