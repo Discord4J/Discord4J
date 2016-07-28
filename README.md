@@ -1,4 +1,5 @@
-# Discord4J  [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j)
+<img align="right" src="http://i.imgur.com/2E16Yvi.jpg">
+# Discord4J [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) [![Support Channel Invite](https://img.shields.io/badge/Join-%23java__discord4j-7289DA.svg?style=flat-square)](https://discord.gg/0SBTUU1wZTU7PCok)
 
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
@@ -57,6 +58,7 @@ dependencies {
 ### Tutorials/Resources
 * The [Discord4J Tutorial Series](http://blog.darichey.com/) maintained by @Panda
 * The [Discord4J Read The Docs](https://discord4j.readthedocs.org/en/latest/index.html) maintained by @TheFjong.
+* A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by @oopsjpeg
 * A Discord Bot [quick start example](https://gist.github.com/iabarca/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @quantic
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
 
@@ -66,9 +68,9 @@ Example:
 ```java
 public class Example {
 
-  public static IDiscordClient getClient(String email, String password, boolean login) { //Returns an instance of the discord client
+  public static IDiscordClient getClient(String token, boolean login) { //Returns an instance of the discord client
     ClientBuilder clientBuilder = new ClientBuilder(); //Creates the ClientBuilder instance
-    clientBuilder.withLogin(email, password); //Adds the login info to the builder
+    clientBuilder.withToken(token); //Adds the login info to the builder
     if (login) {
       return clientBuilder.login(); //Creates the client instance and logs the client in
     } else {
@@ -126,7 +128,9 @@ Discord4J has an api for creating modular Discord Bots! See [Martacus's sample r
 See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
 
 ## Projects using Discord4J
+* Official Discord4J Addons: A collection of official addons and modules for Discord4J (https://github.com/Discord4J-Addons)
 * Instructability by @Kaioru: A simple command API (https://github.com/Kaioru/Instructability)
+* Discordinator.java by @alpha;helix: A modularized command API (https://github.com/alphahelix00/Discordinator.java)
 
 ## Deprecation policy
 Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
