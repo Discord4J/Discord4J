@@ -29,10 +29,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -41,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 
 //This is what Hlaaftana uses so it must be good :shrug:
@@ -707,13 +705,38 @@ public class DiscordWS {
 
 		if (guild != null && user != null) {
 			List<IRole> oldRoles = new ArrayList<>(user.getRolesForGuild(guild));
-			user.getRolesForGuild(guild).clear();
-			for (String role : event.roles)
-				user.addRole(guild.getID(), guild.getRoleByID(role));
-
-			user.addRole(guild.getID(), guild.getEveryoneRole());
-
-			client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
+			boolean rolesChanged = oldRoles.size() != event.roles.length+1;//Add one for the @everyone role
+			if (!rolesChanged) {
+				rolesChanged = oldRoles.stream().filter(role -> {
+					if (role.equals(guild.getEveryoneRole()))
+						return false;
+					
+					for (String roleID : event.roles) {
+						if (role.getID().equals(roleID)) {
+							return false;
+						}
+					}
+					
+					return true;
+				}).collect(Collectors.toList()).size() > 0;
+			}
+			
+			if (rolesChanged) {
+				user.getRolesForGuild(guild).clear();
+				for (String role : event.roles)
+					user.addRole(guild.getID(), guild.getRoleByID(role));
+				
+				user.addRole(guild.getID(), guild.getEveryoneRole());
+				
+				client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
+			}
+			
+			if (!user.getNicknameForGuild(guild).equals(Optional.ofNullable(event.nick))) {
+				String oldNick = user.getNicknameForGuild(guild).orElse(null);
+				user.addNick(guild.getID(), event.nick);
+				
+				client.dispatcher.dispatch(new NickNameChangeEvent(guild, user, oldNick, event.nick));
+			}
 		}
 	}
 

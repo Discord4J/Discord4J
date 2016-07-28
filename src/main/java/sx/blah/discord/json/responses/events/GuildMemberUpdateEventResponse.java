@@ -21,4 +21,9 @@ public class GuildMemberUpdateEventResponse {
 	 * The user.
 	 */
 	public UserResponse user;
+	
+	/**
+	 * The user's new nick.
+	 */
+	public String nick;
 }
