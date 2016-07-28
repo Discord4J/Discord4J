@@ -685,4 +685,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 		return null;
 	}
+	
+	@Override
+	public IUser getApplicationOwner() throws DiscordException {
+		try {
+			UserResponse owner = getApplicationInfo().owner;
+			
+			IUser user = getUserByID(owner.id);
+			if (user == null)
+				user = DiscordUtils.getUserFromJSON(this, owner);
+			
+			return user;
+		} catch (RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		return null;
+	}
 }

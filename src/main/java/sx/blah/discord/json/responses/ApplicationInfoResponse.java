@@ -24,4 +24,9 @@ public class ApplicationInfoResponse {
 	 * The application's name.
 	 */
 	public String name;
+	
+	/**
+	 * The application's owner.
+	 */
+	public UserResponse owner;
 }

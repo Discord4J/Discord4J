@@ -376,4 +376,13 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 */
 	String getApplicationName() throws DiscordException;
+	
+	/**
+	 * Gets the bot's application's owner.
+	 *
+	 * @return The application's owner.
+	 *
+	 * @throws DiscordException
+	 */
+	IUser getApplicationOwner() throws DiscordException;
 }
