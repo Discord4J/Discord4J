@@ -74,7 +74,7 @@ public class DiscordWS {
 			public void run() {
 				if (!ranOrCancelled) {
 					ranOrCancelled = true;
-					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection attempt timed out after {} seconds", MAX_RECONNECT_TIME);
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection attempt timed out.");
 					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 				}
 			}
@@ -95,9 +95,8 @@ public class DiscordWS {
 	private final int maxMissedPingCount;
 	private final AtomicInteger missedPingCount = new AtomicInteger(0);
 	private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
-	//TODO: Expose the next two variables:
-	private static final int MAX_RECONNECT_ATTEMPTS = 4;
-	private static final int MAX_RECONNECT_TIME = 15; //Time in seconds before the reconnect is considered a failure.
+	private final int maxReconnectAttempts;
+	private static final int INITIAL_RECONNECT_TIME = 15; //The factor by which the reconnect time is exponentially increased by on successive failures
 	private static final String GATEWAY_VERSION = "5";
 	private static final int READY_TIMEOUT = 10; //Time in seconds where the ready event will timeout from wait for guilds
 	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
@@ -118,12 +117,13 @@ public class DiscordWS {
 	 */
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
-	public DiscordWS(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) throws Exception {
+	public DiscordWS(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) throws Exception {
 		this.client = (DiscordClientImpl)client;
 		this.timeoutTime = timeout;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
-		this.withReconnects = withReconnects;
+		this.withReconnects = reconnectAttempts > 0;
+		this.maxReconnectAttempts = reconnectAttempts;
 		this.startingUp.set(true);
 		//Ensuring gateway is ready
 		if (!gateway.endsWith("/"))
@@ -182,18 +182,18 @@ public class DiscordWS {
 					|| reason == DiscordDisconnectedEvent.Reason.INIT_ERROR
 					|| reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION
 					|| (reason == DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED
-						&& reconnectAttempts.get() <= MAX_RECONNECT_ATTEMPTS))) {
+						&& reconnectAttempts.get() <= maxReconnectAttempts))) {
 
 				isReconnecting.set(true);
 
-				if (reconnectAttempts.incrementAndGet() > MAX_RECONNECT_ATTEMPTS) {
+				if (reconnectAttempts.incrementAndGet() > maxReconnectAttempts) {
 					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
 					disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 					return;
 				} else {
 					if (reason == DiscordDisconnectedEvent.Reason.INIT_ERROR || reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION) {
 						try {
-							client.ws = new DiscordWS(client, gateway, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+							client.ws = new DiscordWS(client, gateway, timeoutTime, maxMissedPingCount, isDaemon, maxReconnectAttempts);
 							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 						} catch (Exception e) {
 							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught while attempting to reconnect.", e);
@@ -210,7 +210,7 @@ public class DiscordWS {
 
 					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
 					cancelReconnectTimer.schedule(cancelReconnectTaskSupplier.get(),
-							TimeUnit.SECONDS.toMillis(((int) (MAX_RECONNECT_TIME*Math.pow(2, reconnectAttempts.get())))
+							TimeUnit.SECONDS.toMillis(((int) (INITIAL_RECONNECT_TIME*Math.pow(2, reconnectAttempts.get())))
 									+ThreadLocalRandom.current().nextLong(-2, 2))); //Applies jitter to not spam discord servers with tons of simultaneous reconnections at the same time
 					return;
 				}
@@ -470,7 +470,7 @@ public class DiscordWS {
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = new DiscordWS(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+				client.ws = new DiscordWS(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, maxReconnectAttempts);
 				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);

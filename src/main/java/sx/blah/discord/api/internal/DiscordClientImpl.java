@@ -139,35 +139,35 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Whether this client represents a bot.
 	 */
 	protected volatile boolean isBot;
-
+	
 	/**
-	 * Whether this client should automatically attempt to reconnect on disconnects.
+	 * The maximum amount of attempts before reconnections are aborted.
 	 */
-	protected final boolean withReconnects;
+	protected final int reconnectAttempts;
 
 	/**
 	 * When this client was logged into. Useful for determining uptime.
 	 */
 	protected volatile LocalDateTime launchTime;
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, boolean withReconnects) {
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.isBot = isBot;
-		this.withReconnects = withReconnects;
+		this.reconnectAttempts = reconnectAttempts;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
 
-	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, false, withReconnects);
+	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, false, reconnectAttempts);
 		this.email = email;
 		this.password = password;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean withReconnects) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, true, withReconnects);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts);
 		this.token = token;
 	}
 
@@ -210,7 +210,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {

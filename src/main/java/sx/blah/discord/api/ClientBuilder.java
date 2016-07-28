@@ -14,7 +14,7 @@ public class ClientBuilder {
 	private boolean isBot = false;
 	private String botToken;
 	private boolean isDaemon = false;
-	private boolean withReconnects = false;
+	private int reconnectAttempts = 4;
 
 	/**
 	 * Sets the login info for the client.
@@ -92,9 +92,24 @@ public class ClientBuilder {
 	 * This makes the client's websocket connection attempt to automatically reconnect when a connection is lost.
 	 *
 	 * @return The instance of the builder.
+	 * @deprecated This is no longer necessary.
 	 */
+	@Deprecated
 	public ClientBuilder withReconnects() {
-		this.withReconnects = true;
+		return this;
+	}
+	
+	/**
+	 * This sets the max amount of attempts the client will make to reconnect in the event of an unexpected
+	 * disconnection.
+	 *
+	 * @param maxAttempts The maximum amount of attempts before the client disconnects with the reason
+	 * {@link sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent.Reason#RECONNECTION_FAILED}. Setting this to
+	 * any value below 1 will disable reconnects altogether.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder setMaxReconnectAttempts(int maxAttempts) {
+		this.reconnectAttempts = maxAttempts;
 		return this;
 	}
 
@@ -110,9 +125,9 @@ public class ClientBuilder {
 			throw new DiscordException("No login info present!");
 
 		if (isBot) {
-			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts);
 		} else {
-			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon, withReconnects);
+			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts);
 		}
 	}
 
