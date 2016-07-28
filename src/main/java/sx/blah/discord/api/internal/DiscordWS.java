@@ -35,6 +35,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -95,8 +96,8 @@ public class DiscordWS {
 	private final AtomicInteger missedPingCount = new AtomicInteger(0);
 	private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
 	//TODO: Expose the next two variables:
-	private static final int MAX_RECONNECT_ATTEMPTS = 3;
-	private static final int MAX_RECONNECT_TIME = 10; //Time in seconds before the reconnect is considered a failure.
+	private static final int MAX_RECONNECT_ATTEMPTS = 4;
+	private static final int MAX_RECONNECT_TIME = 15; //Time in seconds before the reconnect is considered a failure.
 	private static final String GATEWAY_VERSION = "5";
 	private static final int READY_TIMEOUT = 10; //Time in seconds where the ready event will timeout from wait for guilds
 	private final Thread shutdownHook = new Thread() {//Ensures this websocket is closed properly
@@ -208,7 +209,9 @@ public class DiscordWS {
 					}
 
 					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Attempting to reconnect...");
-					cancelReconnectTimer.schedule(cancelReconnectTaskSupplier.get(), TimeUnit.SECONDS.toMillis(MAX_RECONNECT_TIME));
+					cancelReconnectTimer.schedule(cancelReconnectTaskSupplier.get(),
+							TimeUnit.SECONDS.toMillis(((int) (MAX_RECONNECT_TIME*Math.pow(2, reconnectAttempts.get())))
+									+ThreadLocalRandom.current().nextLong(-2, 2))); //Applies jitter to not spam discord servers with tons of simultaneous reconnections at the same time
 					return;
 				}
 			}
