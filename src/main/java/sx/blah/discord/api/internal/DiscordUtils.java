@@ -3,6 +3,7 @@ package sx.blah.discord.api.internal;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -23,10 +24,8 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -375,49 +374,52 @@ public class DiscordUtils {
 	 */
 	public static IChannel getChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) {
 		Channel channel;
-
+		
+		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
+				getPermissionOverwritesFromJSONs(json.permission_overwrites);
+		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
+		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
+		
 		if ((channel = (Channel) guild.getChannelByID(json.id)) != null) {
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			channel.setTopic(json.topic);
-			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
-			HashMap<String, IChannel.PermissionOverride> roleOverrides = new HashMap<>();
-			for (PermissionOverwrite overrides : json.permission_overwrites) {
-				if (overrides.type.equalsIgnoreCase("role")) {
-					roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
-							Permissions.getAllowedPermissionsForNumber(overrides.allow),
-							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-				} else if (overrides.type.equalsIgnoreCase("member")) {
-					userOverrides.put(overrides.id, new IChannel.PermissionOverride(
-							Permissions.getAllowedPermissionsForNumber(overrides.allow),
-							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-				} else {
-					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
-				}
-			}
 			channel.getUserOverrides().clear();
 			channel.getUserOverrides().putAll(userOverrides);
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-
-			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position);
-
-			for (PermissionOverwrite overrides : json.permission_overwrites) {
-				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
-						Permissions.getAllowedPermissionsForNumber(overrides.allow),
-						Permissions.getDeniedPermissionsForNumber(overrides.deny));
-				if (overrides.type.equalsIgnoreCase("role")) {
-					channel.addRoleOverride(overrides.id, override);
-				} else if (overrides.type.equalsIgnoreCase("member")) {
-					channel.addUserOverride(overrides.id, override);
-				} else {
-					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
-				}
-			}
+			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position, roleOverrides, userOverrides);
 		}
 
 		return channel;
+	}
+	
+	/**
+	 * Generates permission override sets from an array of json responses.
+	 *
+	 * @param overwrites The overwrites.
+	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
+	 */
+	public static Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> getPermissionOverwritesFromJSONs(PermissionOverwrite[] overwrites) {
+		Map<String, IChannel.PermissionOverride> userOverrides = new ConcurrentHashMap<>();
+		Map<String, IChannel.PermissionOverride> roleOverrides = new ConcurrentHashMap<>();
+		
+		for (PermissionOverwrite overrides : overwrites) {
+			if (overrides.type.equalsIgnoreCase("role")) {
+				roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
+						Permissions.getAllowedPermissionsForNumber(overrides.allow),
+						Permissions.getDeniedPermissionsForNumber(overrides.deny)));
+			} else if (overrides.type.equalsIgnoreCase("member")) {
+				userOverrides.put(overrides.id, new IChannel.PermissionOverride(
+						Permissions.getAllowedPermissionsForNumber(overrides.allow),
+						Permissions.getDeniedPermissionsForNumber(overrides.deny)));
+			} else {
+				Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
+			}
+		}
+		
+		return Pair.of(userOverrides, roleOverrides);
 	}
 
 	/**
@@ -463,46 +465,23 @@ public class DiscordUtils {
 	 */
 	public static IVoiceChannel getVoiceChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) {
 		VoiceChannel channel;
-
+		
+		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
+				getPermissionOverwritesFromJSONs(json.permission_overwrites);
+		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
+		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
+		
 		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(json.id)) != null) {
 			channel.setUserLimit(json.user_limit);
 			channel.setBitrate(json.bitrate);
 			channel.setName(json.name);
 			channel.setPosition(json.position);
-			HashMap<String, IChannel.PermissionOverride> userOverrides = new HashMap<>();
-			HashMap<String, IChannel.PermissionOverride> roleOverrides = new HashMap<>();
-			for (PermissionOverwrite overrides : json.permission_overwrites) {
-				if (overrides.type.equalsIgnoreCase("role")) {
-					roleOverrides.put(overrides.id, new IChannel.PermissionOverride(
-							Permissions.getAllowedPermissionsForNumber(overrides.allow),
-							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-				} else if (overrides.type.equalsIgnoreCase("member")) {
-					userOverrides.put(overrides.id, new IChannel.PermissionOverride(
-							Permissions.getAllowedPermissionsForNumber(overrides.allow),
-							Permissions.getDeniedPermissionsForNumber(overrides.deny)));
-				} else {
-					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
-				}
-			}
 			channel.getUserOverrides().clear();
 			channel.getUserOverrides().putAll(userOverrides);
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position, json.user_limit, json.bitrate);
-
-			for (PermissionOverwrite overrides : json.permission_overwrites) {
-				IChannel.PermissionOverride override = new IChannel.PermissionOverride(
-						Permissions.getAllowedPermissionsForNumber(overrides.allow),
-						Permissions.getDeniedPermissionsForNumber(overrides.deny));
-				if (overrides.type.equalsIgnoreCase("role")) {
-					channel.addRoleOverride(overrides.id, override);
-				} else if (overrides.type.equalsIgnoreCase("member")) {
-					channel.addUserOverride(overrides.id, override);
-				} else {
-					Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
-				}
-			}
+			channel = new VoiceChannel(client, json.name, json.id, guild, json.topic, json.position, json.user_limit, json.bitrate, roleOverrides, userOverrides);
 		}
 
 		return channel;

@@ -5,7 +5,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
-
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordEndpoints;
@@ -23,14 +22,8 @@ import sx.blah.discord.json.responses.ExtendedInviteResponse;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.*;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -101,10 +94,6 @@ public class Channel implements IChannel {
 	 */
 	protected final IDiscordClient client;
 
-	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-		this(client, name, id, parent, topic, position, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
-	}
-
 	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
@@ -120,6 +109,7 @@ public class Channel implements IChannel {
 		else
 			this.messages = null;
 	}
+	
 
 	@Override
 	public String getName() {

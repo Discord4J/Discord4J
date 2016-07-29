@@ -24,17 +24,13 @@ import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {
 
-	protected int userLimit = 0;
-	protected int bitrate = 0;
-
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate) {
-		this(client, name, id, parent, topic, position, new HashMap<>(), new HashMap<>());
+	protected volatile int userLimit = 0;
+	protected volatile int bitrate = 0;
+	
+	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
-	}
-
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
-		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 	}
 
 	@Override
@@ -214,7 +210,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate);
+		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
 	}
 
 	@Override
