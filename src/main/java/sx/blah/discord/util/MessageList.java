@@ -376,7 +376,6 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		IMessage message = get(index);
 		if (message != null) {
 			message.delete();
-			remove(message);
 		}
 		return message;
 	}
