@@ -36,6 +36,7 @@ import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main class. :D
@@ -58,17 +59,18 @@ public class Discord4J {
 	 * The github repo for the api
 	 */
 	public static final String URL;
-
 	/**
 	 * SLF4J Instance
 	 */
 	public static final Logger LOGGER = initLogger();
-
 	/**
 	 * When this class was loaded.
 	 */
 	protected static final LocalDateTime launchTime = LocalDateTime.now();
-
+	/**
+	 * Whether to log when the user doesn't have the permissions to view a channel.
+     */
+	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
 	 * Cached jetty logger instance.
 	 */
@@ -193,6 +195,13 @@ public class Discord4J {
 	 */
 	public static void enableJettyLogging() {
 		Log.setLog(jettyLogger);
+	}
+
+	/**
+	 * This disables logging for when the user doesn't have the required permissions to view a channel.
+     */
+	public static void disableChannelWarnings() {
+		ignoreChannelWarnings.set(true);
 	}
 
 	private static Logger initLogger() {
