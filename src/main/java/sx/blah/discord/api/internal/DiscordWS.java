@@ -710,31 +710,31 @@ public class DiscordWS {
 				rolesChanged = oldRoles.stream().filter(role -> {
 					if (role.equals(guild.getEveryoneRole()))
 						return false;
-					
+
 					for (String roleID : event.roles) {
 						if (role.getID().equals(roleID)) {
 							return false;
 						}
 					}
-					
+
 					return true;
 				}).collect(Collectors.toList()).size() > 0;
 			}
-			
+
 			if (rolesChanged) {
 				user.getRolesForGuild(guild).clear();
 				for (String role : event.roles)
 					user.addRole(guild.getID(), guild.getRoleByID(role));
-				
+
 				user.addRole(guild.getID(), guild.getEveryoneRole());
-				
+
 				client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
 			}
-			
+
 			if (!user.getNicknameForGuild(guild).equals(Optional.ofNullable(event.nick))) {
 				String oldNick = user.getNicknameForGuild(guild).orElse(null);
 				user.addNick(guild.getID(), event.nick);
-				
+
 				client.dispatcher.dispatch(new NickNameChangeEvent(guild, user, oldNick, event.nick));
 			}
 		}
@@ -877,7 +877,11 @@ public class DiscordWS {
 		if (event.type.equalsIgnoreCase("text")) {
 			Channel channel = (Channel) client.getChannelByID(event.id);
 			if (channel != null) {
-				channel.getGuild().getChannels().remove(channel);
+				if (!channel.isPrivate())
+					channel.getGuild().getChannels().remove(channel);
+				else
+					client.privateChannels.remove(channel);
+
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
 		} else if (event.type.equalsIgnoreCase("voice")) {
