@@ -64,7 +64,7 @@ public class MessageBuilder {
 		for (Styles style : styles)
 			this.content += style.getMarkdown();
 
-		this.content = content;
+		this.content += content;
 
 		ArrayUtils.reverse(styles);
 		for (Styles style : styles)
