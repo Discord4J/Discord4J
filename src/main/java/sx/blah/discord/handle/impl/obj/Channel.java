@@ -109,7 +109,7 @@ public class Channel implements IChannel {
 		else
 			this.messages = null;
 	}
-	
+
 
 	@Override
 	public String getName() {
@@ -233,13 +233,13 @@ public class Channel implements IChannel {
 	public IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		return sendFile(stream, filename, null);
 	}
-	
+
 	@Override
 	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		InputStream stream = new FileInputStream(file);
-		return sendFile(stream, file.getName(), null);
+		return sendFile(stream, file.getName(), content);
 	}
-	
+
 	@Override
 	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		return sendFile(file, null);
