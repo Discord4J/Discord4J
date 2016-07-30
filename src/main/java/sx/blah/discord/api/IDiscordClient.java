@@ -215,10 +215,10 @@ public interface IDiscordClient {
 	IRole getRoleByID(String roleID);
 
 	/**
-	 * Gets a {@link PrivateChannel} for the provided recipient.
+	 * Gets a {@link IPrivateChannel} for the provided recipient.
 	 *
 	 * @param user The user who will be the recipient of the private channel.
-	 * @return The {@link PrivateChannel} object.
+	 * @return The {@link IPrivateChannel} object.
 	 *
 	 * @throws DiscordException
 	 * @throws RateLimitException
@@ -376,7 +376,7 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 */
 	String getApplicationName() throws DiscordException;
-	
+
 	/**
 	 * Gets the bot's application's owner.
 	 *

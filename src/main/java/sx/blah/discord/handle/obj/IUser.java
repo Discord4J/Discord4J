@@ -139,6 +139,16 @@ public interface IUser extends IDiscordObject<IUser> {
 	List<IVoiceChannel> getConnectedVoiceChannels();
 
 	/**
+	 * Gets a {@link IPrivateChannel} for this user.
+	 *
+	 * @return The {@link IPrivateChannel} object.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 */
+	IPrivateChannel getOrCreatePMChannel() throws RateLimitException, DiscordException;
+
+	/**
 	 * Gets whether this user is deafened in the given guild.
 	 *
 	 * @param guild The guild to check the status for.
