@@ -451,6 +451,10 @@ public class DiscordWS {
 					guildBanRemove(eventObject);
 					break;
 
+				case "GUILD_EMOJIS_UPDATE":
+					//Ignored for now TODO: do something with emojis
+					break;
+
 				case "VOICE_STATE_UPDATE":
 					voiceStateUpdate(eventObject);
 					break;
