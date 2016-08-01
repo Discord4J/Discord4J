@@ -133,7 +133,8 @@ public enum Requests {
 				message = EntityUtils.toString(response.getEntity());
 
 			if (responseCode == 404) {
-				LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
+				if (!request.getURI().toString().contains("invite"))
+					LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
 				return null;
 			} else if (responseCode == 403) {
 				LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", request.getURI());
