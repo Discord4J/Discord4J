@@ -85,6 +85,8 @@ public class AudioManager implements IAudioManager {
 			IAudioProvider.AudioEncodingType type = provider.getAudioEncodingType();
 			int channels = provider.getChannels();
 			byte[] data = provider.provide();
+			if (data == null)
+				data = new byte[0];
 
 			if (type != IAudioProvider.AudioEncodingType.OPUS) {
 				data = convertToOpus(data, channels);
