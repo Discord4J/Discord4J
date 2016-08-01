@@ -275,7 +275,13 @@ public class ModuleLoader {
 				try {
 					String[] required = getModuleRequires(file);
 					for (String clazz : required) {
-						loaded = findFileForClass(dependents, clazz) != null;
+						try {
+							Class.forName(clazz);
+							loaded = true;
+						} catch (ClassNotFoundException ignored) {}
+						
+						if (!loaded)
+							loaded = findFileForClass(files, clazz) != null;
 						
 						if (!loaded)
 							break;
