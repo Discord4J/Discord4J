@@ -39,6 +39,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * Represents a maximum message capacity which will be unlimited (-1). Yay, no magic numbers!
 	 */
 	public static final int UNLIMITED_CAPACITY = -1;
+	
+	/**
+	 * This is the max number of guild before the list stops automatically loading its history.
+	 */
+	public static final int MAX_GUILD_COUNT = 10;
 
 	/**
 	 * The client that this list is respecting.
@@ -65,6 +70,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * messages.
 	 */
 	private volatile int capacity = 256;
+	
+	/**
+	 * This determines whether message history is automatically loaded.
+	 */
+	private static volatile boolean loadInitialMessages = true;
 
 	/**
 	 * @param client The client for this list to respect.
@@ -91,11 +101,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
-		try {
-			load(initialContents);
-		} catch (RateLimitException e) {
-			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
-		}
+		RequestBuffer.request(() -> load(initialContents));
 	}
 
 	/**
@@ -548,6 +554,26 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}
+	}
+	
+	/**
+	 * This sets whether MessageLists should automatically fetch message history on initialization. This is
+	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
+	 *
+	 * @param download Whether to automatically download history.
+	 */
+	public static void shouldDownloadHistoryAutomatically(boolean download) {
+		loadInitialMessages = download;
+	}
+	
+	/**
+	 * This gets whether MessageLists will automatically fetch message history on initialization. This is
+	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
+	 *
+	 * @return  Whether it'll automatically download history.
+	 */
+	public static boolean downloadsHistoryAutomatically() {
+		return loadInitialMessages;
 	}
 
 	private void updatePermissions() {

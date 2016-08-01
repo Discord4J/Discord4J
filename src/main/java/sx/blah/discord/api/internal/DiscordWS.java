@@ -20,6 +20,7 @@ import sx.blah.discord.json.requests.ResumeRequest;
 import sx.blah.discord.json.responses.*;
 import sx.blah.discord.json.responses.events.*;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.io.BufferedReader;
@@ -542,8 +543,10 @@ public class DiscordWS {
 
 			client.isReady = true;
 
-			// I hope you like loops.
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to {} guilds.", event.guilds.length);
+			if (event.guilds.length > MessageList.MAX_GUILD_COUNT) //Disable initial caching for performance
+				MessageList.shouldDownloadHistoryAutomatically(false);
+			
 			for (GuildResponse guildResponse : event.guilds) {
 				if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
 					continue;
@@ -553,7 +556,7 @@ public class DiscordWS {
 				if (guild != null)
 					client.guildList.add(guild);
 			}
-
+			
 			guildsToWaitFor.set(event.guilds.length - client.getGuilds().size());
 			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Initially loaded {}/{} guilds.", client.getGuilds().size(), event.guilds.length);
 
