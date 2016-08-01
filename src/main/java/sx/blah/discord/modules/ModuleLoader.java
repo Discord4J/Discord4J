@@ -291,6 +291,9 @@ public class ModuleLoader {
 			if (dependents.size() == 0)
 				break;
 		}
+		
+		if (dependents.size() > 0)
+			Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
 	}
 
 	private static String[] getModuleRequires(File file) throws IOException {
