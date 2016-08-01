@@ -206,7 +206,7 @@ public class DiscordVoiceWS {
 				}
 			}
 		};
-		executorService.scheduleAtFixedRate(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
+		executorService.scheduleWithFixedDelay(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
 	}
 
 	private void setupReceiveThread() {
