@@ -190,6 +190,9 @@ public class User implements IUser {
 
 	@Override
 	public String getDisplayName(IGuild guild) {
+		if (guild == null)
+			return getName();
+			
 		return getNicknameForGuild(guild).isPresent() ? getNicknameForGuild(guild).get() : getName();
 	}
 
