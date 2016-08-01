@@ -155,17 +155,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
 	public String getTopic() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String mention(){
-		throw new UnsupportedOperationException();
+		return "";
 	}
 
 	@Override
@@ -195,7 +190,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public synchronized boolean getTypingStatus() {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
@@ -205,7 +200,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IMessage> getPinnedMessages() {
-		throw new UnsupportedOperationException();
+		return new ArrayList<>();
 	}
 
 	@Override

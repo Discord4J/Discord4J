@@ -23,16 +23,19 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public Map<String, PermissionOverride> getUserOverrides() {
-		throw new UnsupportedOperationException();
+		return new HashMap<>();
 	}
 
 	@Override
 	public Map<String, PermissionOverride> getRoleOverrides() {
-		throw new UnsupportedOperationException();
+		return new HashMap<>();
 	}
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
+		if (user.equals(recipient) || user.equals(client.getOurUser()))
+			return EnumSet.allOf(Permissions.class);
+		
 		throw new UnsupportedOperationException();
 	}
 
@@ -123,12 +126,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public String getTopic() {
-		throw new UnsupportedOperationException();
+		return "";
 	}
 
 	@Override
 	public IGuild getGuild() {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
@@ -143,7 +146,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public List<IMessage> getPinnedMessages() {
-		throw new UnsupportedOperationException();
+		return new ArrayList<>();
 	}
 
 	@Override
