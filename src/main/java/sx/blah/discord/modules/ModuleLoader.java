@@ -267,25 +267,29 @@ public class ModuleLoader {
 		dependents.removeAll(noLongerDependents);
 		noLongerDependents.forEach(ModuleLoader::loadExternalModules);
 
-		dependents.removeIf((file -> { //Filters out all unusable files
-			boolean cannotBeLoaded = true;
-			try {
-				String[] required = getModuleRequires(file);
-				for (String clazz : required) {
-					cannotBeLoaded = findFileForClass(dependents, clazz) == null;
-
-					if (cannotBeLoaded)
-						break;
-				}
-			} catch (IOException ignored) {}
-
-			if (cannotBeLoaded)
-				Discord4J.LOGGER.warn(LogMarkers.MODULES, "Unable to load module file {}. Its dependencies cannot be resolved!", file.getName());
-
-			return cannotBeLoaded;
-		}));
-
-		dependents.forEach(ModuleLoader::loadExternalModules);
+		final int retryAttempts = dependents.size();
+		for (int i = 0; i < retryAttempts; i++) {
+			dependents.removeIf((file -> { //Filters out all usable files
+				boolean loaded = false;
+				try {
+					String[] required = getModuleRequires(file);
+					for (String clazz : required) {
+						loaded = findFileForClass(dependents, clazz) != null;
+						
+						if (loaded)
+							break;
+					}
+				} catch (IOException ignored) {}
+				
+				if (loaded)
+					loadExternalModules(file);
+				
+				return loaded;
+			}));
+			
+			if (dependents.size() == 0)
+				break;
+		}
 	}
 
 	private static String[] getModuleRequires(File file) throws IOException {
