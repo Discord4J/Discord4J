@@ -131,7 +131,14 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 */
 	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
-
+	
+	/**
+	 * This checks if the role is the @everyone role.
+	 *
+	 * @return True if the @everyone role, false if otherwise.
+	 */
+	boolean isEveryoneRole();
+	
 	/**
 	 * Formats a string to @mention the role.
 	 *

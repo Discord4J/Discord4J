@@ -166,7 +166,7 @@ public class Role implements IRole {
 
 	@Override
 	public boolean isMentionable() {
-		return mentionable;
+		return mentionable || isEveryoneRole();
 	}
 
 	/**
@@ -248,10 +248,15 @@ public class Role implements IRole {
 	public IDiscordClient getClient() {
 		return guild.getClient();
 	}
-
+	
+	@Override
+	public boolean isEveryoneRole() {
+		return guild.getEveryoneRole().equals(this);
+	}
+	
 	@Override
 	public String mention() {
-		return isMentionable() ? "<@&"+id+">" : name;
+		return isMentionable() ? (isEveryoneRole() ? "@everyone" : "<@&"+id+">") : name;
 	}
 
 	@Override
