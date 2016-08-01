@@ -277,7 +277,7 @@ public class ModuleLoader {
 					for (String clazz : required) {
 						loaded = findFileForClass(dependents, clazz) != null;
 						
-						if (loaded)
+						if (!loaded)
 							break;
 					}
 				} catch (IOException ignored) {}
