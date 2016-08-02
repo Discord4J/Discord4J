@@ -455,6 +455,10 @@ public class DiscordWS {
 				case "GUILD_EMOJIS_UPDATE":
 					//Ignored for now TODO: do something with emojis
 					break;
+				
+				case "GUILD_INTEGRATIONS_UPDATE":
+					//Ignored for now TODO: do something with integrations
+					break;
 
 				case "VOICE_STATE_UPDATE":
 					voiceStateUpdate(eventObject);
