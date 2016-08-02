@@ -231,7 +231,7 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void unregisterListener(Object listener) {
-		for (Method method : listener.getClass().getDeclaredMethods()) {
+		for (Method method : listener.getClass().getMethods()) {
 			if (method.getParameterCount() == 1) {
 				Class<?> eventClass = method.getParameterTypes()[0];
 				if (Event.class.isAssignableFrom(eventClass)) {
