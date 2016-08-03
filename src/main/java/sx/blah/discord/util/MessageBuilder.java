@@ -156,6 +156,15 @@ public class MessageBuilder {
 	public String getContent() {
 		return content;
 	}
+	
+	/**
+	 * This gets the channel the message will be sent to.
+	 *
+	 * @return The channel.
+	 */
+	public IChannel getChannel() {
+		return channel;
+	}
 
 	/**
 	 * Galactic law requires I have a build() method in
