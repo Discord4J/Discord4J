@@ -391,26 +391,14 @@ public class User implements IUser {
 	public void addRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException {
 		List<IRole> roleList = this.getRolesForGuild(guild);
 		roleList.add(role);
-		try
-		{
-			guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
-		}
-		catch (MissingPermissionsException | DiscordException | RateLimitException e)
-		{
-			e.printStackTrace();
-		}
+		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+
 	}
 
-	public void removeRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException{
+	public void removeRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException {
 		List<IRole> roleList = this.getRolesForGuild(guild);
 		roleList.remove(role);
-		try
-		{
-			guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
-		}
-		catch (MissingPermissionsException |DiscordException |RateLimitException e)
-		{
-			e.printStackTrace();
-		}
+		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+
 	}
 }
