@@ -164,6 +164,8 @@ public class User implements IUser {
 		return avatarURL;
 	}
 
+
+
 	/**
 	 * Sets the user's CACHED avatar id.
 	 *
@@ -392,5 +394,19 @@ public class User implements IUser {
 			return false;
 
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
+	}
+
+	public void addRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException {
+		List<IRole> roleList = this.getRolesForGuild(guild);
+		roleList.add(role);
+		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+
+	}
+
+	public void removeRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException {
+		List<IRole> roleList = this.getRolesForGuild(guild);
+		roleList.remove(role);
+		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+
 	}
 }
