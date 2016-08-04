@@ -19,6 +19,7 @@ import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class Guild implements IGuild {
@@ -97,7 +98,7 @@ public class Guild implements IGuild {
 	protected final IDiscordClient client;
 
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
-		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>());
 	}
 
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users) {
