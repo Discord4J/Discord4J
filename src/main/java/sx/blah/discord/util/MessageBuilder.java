@@ -13,6 +13,7 @@ public class MessageBuilder {
 	private IChannel channel;
 	private IDiscordClient client;
 	private boolean tts = false;
+	private String nonce = null;
 
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
@@ -97,6 +98,16 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * Sets the message to have NONCE token.
+	 *
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withNonce(String nonce) {
+		this.nonce = nonce;
+		return this;
+	}
+
+	/**
 	 * This sets the content to a multiline code block with no language highlighting.
 	 *
 	 * @param content The content inside the code block.
@@ -163,7 +174,7 @@ public class MessageBuilder {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
-			return channel.sendMessage(content, tts);
+			return channel.sendMessage(content, tts, nonce);
 		}
 	}
 

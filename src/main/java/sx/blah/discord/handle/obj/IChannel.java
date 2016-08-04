@@ -69,7 +69,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	String mention();
 
 	/**
-	 * Sends a message without tts to the desired channel.
+	 * Sends a message without tts and NONCE token to the desired channel.
 	 *
 	 * @param content The content of the message.
 	 * @return The message object representing the sent message
@@ -81,7 +81,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IMessage sendMessage(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
-	 * Sends a message to the desired channel.
+	 * Sends a message without NONCE token to the desired channel.
 	 *
 	 * @param content The content of the message.
 	 * @param tts Whether the message should use tts or not.
@@ -94,6 +94,20 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
+	 * Sends a message to the desired channel.
+	 *
+	 * @param content The content of the message.
+	 * @param tts Whether the message should use tts or not.
+	 * @param nonce The NONCE token of the message
+	 * @return The message object representing the sent message
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	IMessage sendMessage(String content, boolean tts, String nonce) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
 	 * Sends a file to the channel with a message attached.
 	 *
 	 * @param file The file to send.
@@ -104,7 +118,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException 
+	 * @throws ParseException
 	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
@@ -119,11 +133,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException 
-	 * @throws MimeTypeException 
+	 * @throws ParseException
+	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-	
+
 	/**
 	 * Sends a file to the channel.
 	 *
@@ -136,8 +150,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException 
-	 * @throws MimeTypeException 
+	 * @throws ParseException
+	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
@@ -152,11 +166,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException 
+	 * @throws ParseException
 	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-	
+
 	/**
 	 * Generates an invite for this channel.
 	 *

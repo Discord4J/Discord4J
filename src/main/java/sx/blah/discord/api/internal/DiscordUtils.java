@@ -362,7 +362,7 @@ public class DiscordUtils {
 					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ?
 					null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
 					getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json),
-					getAttachmentsFromJSON(json), json.pinned);
+					getAttachmentsFromJSON(json), json.pinned, json.nonce);
 	}
 
 	/**
