@@ -184,18 +184,23 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendMessage(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
-		return sendMessage(content, false);
+		return sendMessage(content, false, null);
 	}
 
 	@Override
 	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException {
+		return sendMessage(content, tts, null);
+	}
+
+	@Override
+	public IMessage sendMessage(String content, boolean tts, String nonce) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 
 			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts, nonce)), "UTF-8"),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
@@ -215,7 +220,7 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		if (client.isReady()) {
-			InputStream is = new BufferedInputStream(stream);		
+			InputStream is = new BufferedInputStream(stream);
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create()
 					.addBinaryBody("file", is, ContentType.APPLICATION_OCTET_STREAM, filename);
 
@@ -243,13 +248,13 @@ public class Channel implements IChannel {
 	public IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		return sendFile(stream, filename, null);
 	}
-	
+
 	@Override
 	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		InputStream stream = new FileInputStream(file);
 		return sendFile(stream, file.getName(), null);
 	}
-	
+
 	@Override
 	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		return sendFile(file, null);

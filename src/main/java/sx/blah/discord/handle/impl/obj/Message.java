@@ -82,6 +82,11 @@ public class Message implements IMessage {
 	protected volatile boolean isPinned;
 
 	/**
+	 * The NONCE token of the message
+	 */
+	protected volatile String nonce;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
@@ -89,7 +94,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned) {
+				   boolean pinned, String nonce) {
 		this.client = client;
 		this.id = id;
 		this.content = content;
@@ -102,6 +107,7 @@ public class Message implements IMessage {
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
 		this.isPinned = pinned;
+		this.nonce = nonce;
 	}
 
 	@Override
@@ -189,6 +195,11 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public String getNonce() {
+		return nonce;
+	}
+
+	@Override
 	public void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
 	}
@@ -201,7 +212,7 @@ public class Message implements IMessage {
 //			content = DiscordUtils.escapeString(content);
 
 			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false)), "UTF-8"),
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false, nonce)), "UTF-8"),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
@@ -294,7 +305,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		Message message = new Message(client, id, content, author, channel, timestamp, editedTimestamp,
-				mentionsEveryone, mentions, roleMentions, attachments, isPinned);
+				mentionsEveryone, mentions, roleMentions, attachments, isPinned, nonce);
 		return message;
 	}
 

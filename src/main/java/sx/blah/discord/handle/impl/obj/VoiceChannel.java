@@ -188,6 +188,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
+	public IMessage sendMessage(String content, boolean tts, String nonce) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public IMessage sendFile(File file) throws IOException {
 		throw new UnsupportedOperationException();
 	}
