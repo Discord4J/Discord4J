@@ -18,7 +18,9 @@ import sx.blah.discord.json.responses.*;
 import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,11 @@ public class Guild implements IGuild {
 	 * All users connected to the guild.
 	 */
 	protected final List<IUser> users;
+
+	/**
+	 * The joined timetamps for users.
+	 */
+	protected final Map<IUser, LocalDateTime> joinTimes;
 
 	/**
 	 * The name of the guild.
@@ -98,10 +105,10 @@ public class Guild implements IGuild {
 	protected final IDiscordClient client;
 
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
-		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>());
+		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
 
-	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users) {
+	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
 		this.client = client;
 		this.name = name;
 		this.voiceChannels = voiceChannels;
@@ -109,6 +116,7 @@ public class Guild implements IGuild {
 		this.users = users;
 		this.id = id;
 		this.icon = icon;
+		this.joinTimes = joinTimes;
 		this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
 		this.ownerID = ownerID;
 		this.roles = roles;
@@ -673,6 +681,23 @@ public class Guild implements IGuild {
 		return audioManager;
 	}
 
+	/**
+	 * This gets the CACHED join times map.
+	 *
+	 * @return The join times.
+	 */
+	public Map<IUser, LocalDateTime> getJoinTimes() {
+		return joinTimes;
+	}
+
+	@Override
+	public LocalDateTime getJoinTimeForUser(IUser user) throws DiscordException {
+		if (!joinTimes.containsKey(user))
+			throw new DiscordException("Cannot find user "+user.getDisplayName(this)+" in this guild!");
+
+		return joinTimes.get(user);
+	}
+
 	@Override
 	public IDiscordClient getClient() {
 		return client;
@@ -680,9 +705,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public IGuild copy() {
-		Guild guild =  new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
-				voiceChannels, users);
-		return guild;
+		return new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
+				voiceChannels, users, joinTimes);
 	}
 
 	@Override

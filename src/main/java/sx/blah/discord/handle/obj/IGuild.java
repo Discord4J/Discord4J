@@ -8,6 +8,7 @@ import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
 
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -518,4 +519,14 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The audio manager for this guild.
 	 */
 	IAudioManager getAudioManager();
+
+	/**
+	 * This gets the timestamp for when the provided user joined the guild.
+	 *
+	 * @param user The user to get the timestamp for.
+	 * @return The timestamp.
+	 *
+	 * @throws DiscordException
+	 */
+	LocalDateTime getJoinTimeForUser(IUser user) throws DiscordException;
 }

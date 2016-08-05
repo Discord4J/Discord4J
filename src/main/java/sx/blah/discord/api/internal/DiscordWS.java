@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -695,8 +696,9 @@ public class DiscordWS {
 		if (guild != null) {
 			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(client, guild, new GuildResponse.MemberResponse(event.user, event.roles));
 			guild.addUser(user);
+			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
-			client.dispatcher.dispatch(new UserJoinEvent(guild, user, DiscordUtils.convertFromTimestamp(event.joined_at)));
+			client.dispatcher.dispatch(new UserJoinEvent(guild, user, timestamp));
 		}
 	}
 
@@ -708,6 +710,7 @@ public class DiscordWS {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
 				guild.getUsers().remove(user);
+				guild.getJoinTimes().remove(user);
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
 				client.dispatcher.dispatch(new UserLeaveEvent(guild, user));
 			}
@@ -953,7 +956,8 @@ public class DiscordWS {
 		}
 
 		for (GuildResponse.MemberResponse member : event.members) {
-			guildToUpdate.addUser(DiscordUtils.getUserFromGuildMemberResponse(client, guildToUpdate, member));
+			IUser user = DiscordUtils.getUserFromGuildMemberResponse(client, guildToUpdate, member);
+			guildToUpdate.addUser(user);
 		}
 	}
 
@@ -1013,8 +1017,10 @@ public class DiscordWS {
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
-			if (client.getUserByID(user.getID()) != null)
+			if (client.getUserByID(user.getID()) != null) {
 				guild.getUsers().remove(user);
+				((Guild) guild).getJoinTimes().remove(user);
+			}
 
 			client.dispatcher.dispatch(new UserBanEvent(user, guild));
 		}
