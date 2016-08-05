@@ -98,7 +98,7 @@ public class ClientBuilder {
 	public ClientBuilder withReconnects() {
 		return this;
 	}
-	
+
 	/**
 	 * This sets the max amount of attempts the client will make to reconnect in the event of an unexpected
 	 * disconnection.
@@ -139,9 +139,22 @@ public class ClientBuilder {
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
 	public IDiscordClient login() throws DiscordException {
+		return login(false);
+	}
+
+	/**
+	 * Performs {@link #build()} and logs in automatically
+	 *
+	 * @param async Whether to log in asynchronously (guilds will not be available immediately, you'll have to wait for
+	 *              {@link sx.blah.discord.handle.impl.events.GuildCreateEvent}s.
+	 * @return The discord instance
+	 *
+	 * @throws DiscordException Thrown if the instance isn't built correctly
+	 */
+	public IDiscordClient login(boolean async) throws DiscordException {
 		IDiscordClient client = build();
 		try {
-			client.login();
+			client.login(async);
 		} catch (Exception e) {
 			throw new DiscordException("Exception ("+e.getClass().getSimpleName()+") occurred while logging in: "+e.getMessage());
 		}

@@ -88,6 +88,7 @@ public class DiscordWS {
 	private final Timer cancelReconnectTimer = new Timer("Reconnection Timer", true);
 	private final boolean isDaemon;
 	private final boolean withReconnects;
+	private final boolean async;
 	private final AtomicBoolean sentPing = new AtomicBoolean(false);
 	private final AtomicLong pingResponseTime = new AtomicLong(-1L);
 	private final long timeoutTime;
@@ -116,7 +117,8 @@ public class DiscordWS {
 	 */
 	public static final int LARGE_THRESHOLD = 250; //250 is currently the max handled by discord
 
-	public DiscordWS(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) throws Exception {
+	public DiscordWS(IDiscordClient client, String gateway, long timeout, int maxMissedPingCount, boolean isDaemon,
+					 int reconnectAttempts, boolean async) throws Exception {
 		this.client = (DiscordClientImpl)client;
 		this.timeoutTime = timeout;
 		this.maxMissedPingCount = maxMissedPingCount;
@@ -124,6 +126,7 @@ public class DiscordWS {
 		this.withReconnects = reconnectAttempts > 0;
 		this.maxReconnectAttempts = reconnectAttempts;
 		this.startingUp.set(true);
+		this.async = async;
 		//Ensuring gateway is ready
 		if (!gateway.endsWith("/"))
 			gateway += "/";
@@ -192,7 +195,7 @@ public class DiscordWS {
 				} else {
 					if (reason == DiscordDisconnectedEvent.Reason.INIT_ERROR || reason == DiscordDisconnectedEvent.Reason.INVALID_SESSION) {
 						try {
-							client.ws = new DiscordWS(client, gateway, timeoutTime, maxMissedPingCount, isDaemon, maxReconnectAttempts);
+							client.ws = new DiscordWS(client, gateway, timeoutTime, maxMissedPingCount, isDaemon, maxReconnectAttempts, async);
 							disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 						} catch (Exception e) {
 							Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught while attempting to reconnect.", e);
@@ -455,7 +458,7 @@ public class DiscordWS {
 				case "GUILD_EMOJIS_UPDATE":
 					//Ignored for now TODO: do something with emojis
 					break;
-				
+
 				case "GUILD_INTEGRATIONS_UPDATE":
 					//Ignored for now TODO: do something with integrations
 					break;
@@ -477,7 +480,7 @@ public class DiscordWS {
 			RedirectResponse redirectResponse = DiscordUtils.GSON.fromJson(object.getAsJsonObject("d"), RedirectResponse.class);
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Received a gateway redirect request, closing the socket at reopening at {}", redirectResponse.url);
 			try {
-				client.ws = new DiscordWS(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, maxReconnectAttempts);
+				client.ws = new DiscordWS(client, redirectResponse.url, timeoutTime, maxMissedPingCount, isDaemon, maxReconnectAttempts, async);
 				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
@@ -550,7 +553,7 @@ public class DiscordWS {
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to {} guilds.", event.guilds.length);
 			if (event.guilds.length > MessageList.MAX_GUILD_COUNT) //Disable initial caching for performance
 				MessageList.shouldDownloadHistoryAutomatically(false);
-			
+
 			for (GuildResponse guildResponse : event.guilds) {
 				if (guildResponse.unavailable) { //Guild can't be reached, so we ignore it
 					continue;
@@ -560,24 +563,26 @@ public class DiscordWS {
 				if (guild != null)
 					client.guildList.add(guild);
 			}
-			
+
 			guildsToWaitFor.set(event.guilds.length - client.getGuilds().size());
 			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Initially loaded {}/{} guilds.", client.getGuilds().size(), event.guilds.length);
 
-			final int initialCount = guildsToWaitFor.get();
-			for (int i = 0; i < initialCount; i++) {
-				client.dispatcher.waitFor((GuildCreateEvent createEvent) -> { //Wait for guilds
-					guildsToWaitFor.set(guildsToWaitFor.get()-1);
-					Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Loaded {}/{} guilds.", event.guilds.length-guildsToWaitFor.get(), event.guilds.length);
-					return true;
-				}, READY_TIMEOUT, TimeUnit.SECONDS);
-			}
+			if (!async) {
+				final int initialCount = guildsToWaitFor.get();
+				for (int i = 0; i < initialCount; i++) {
+					client.dispatcher.waitFor((GuildCreateEvent createEvent) -> { //Wait for guilds
+						guildsToWaitFor.set(guildsToWaitFor.get() - 1);
+						Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Loaded {}/{} guilds.", event.guilds.length - guildsToWaitFor.get(), event.guilds.length);
+						return true;
+					}, READY_TIMEOUT, TimeUnit.SECONDS);
+				}
 
-			if (guildsToWaitFor.get() != 0) {
-				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "{} guilds determined unavailable!", guildsToWaitFor.get());
-				for (GuildResponse response : event.guilds) {
-					if (client.getGuildByID(response.id) == null)
-						client.dispatcher.dispatch(new GuildUnavailableEvent(response.id));
+				if (guildsToWaitFor.get() != 0) {
+					Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "{} guilds determined unavailable!", guildsToWaitFor.get());
+					for (GuildResponse response : event.guilds) {
+						if (client.getGuildByID(response.id) == null)
+							client.dispatcher.dispatch(new GuildUnavailableEvent(response.id));
+					}
 				}
 			}
 			return true;

@@ -43,6 +43,15 @@ public interface IDiscordClient {
 	/**
 	 * Logs the client in as the provided account.
 	 *
+	 * @param async Whether to wait for all guilds before dispatching the {@link sx.blah.discord.handle.impl.events.ReadyEvent}.
+	 *
+	 * @throws DiscordException This is thrown if there is an error logging in.
+	 */
+	void login(boolean async) throws DiscordException;
+
+	/**
+	 * Logs the client in as the provided account.
+	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
 	void login() throws DiscordException;

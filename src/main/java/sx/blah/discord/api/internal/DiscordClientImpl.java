@@ -191,7 +191,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void login() throws DiscordException {
+	public void login(boolean async) throws DiscordException {
 		try {
 			if (ws != null) {
 				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
@@ -210,13 +210,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts);
+			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon,
+					reconnectAttempts, async);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Exception caught, logging in!", e);
 			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
+	}
+
+	@Override
+	public void login() throws DiscordException {
+		login(false);
 	}
 
 	private boolean validateToken() {
