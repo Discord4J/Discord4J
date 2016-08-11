@@ -270,7 +270,12 @@ public class Channel implements IChannel {
 
 	@Override
 	public synchronized void toggleTypingStatus() {
-		isTyping.set(!isTyping.get());
+		setTypingStatus(!this.isTyping.get());
+	}
+
+	@Override
+	public void setTypingStatus(boolean typing) {
+		isTyping.set(typing);
 
 		typingTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -545,7 +550,7 @@ public class Channel implements IChannel {
 	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
-		channel.setTypingStatus(isTyping.get());
+		channel.setCachedTypingStatus(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
 		return channel;
@@ -579,7 +584,7 @@ public class Channel implements IChannel {
 	 *
 	 * @param typingStatus The new typing status.
 	 */
-	public void setTypingStatus(boolean typingStatus) {
+	public void setCachedTypingStatus(boolean typingStatus) {
 		this.isTyping.set(typingStatus);
 	}
 }

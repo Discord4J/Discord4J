@@ -650,7 +650,7 @@ public class DiscordWS {
 
 				if (message.getAuthor().equals(client.getOurUser())) {
 					client.dispatcher.dispatch(new MessageSendEvent(message));
-					((Channel) message.getChannel()).setTypingStatus(false); //Messages being sent should stop the bot from typing
+					((Channel) message.getChannel()).setCachedTypingStatus(false); //Messages being sent should stop the bot from typing
 				} else {
 					client.dispatcher.dispatch(new MessageReceivedEvent(message));
 				}
