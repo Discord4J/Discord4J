@@ -62,7 +62,7 @@ public class Channel implements IChannel {
 	/**
 	 * Whether the bot should send out a typing status
 	 */
-	protected AtomicBoolean isTyping = new AtomicBoolean(false);
+	private AtomicBoolean isTyping = new AtomicBoolean(false);
 
 	/**
 	 * Manages all TimerTasks which send typing statuses.
@@ -169,7 +169,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public String mention() {
-		return "<#"+this.getID()+">";
+		return "<#" + this.getID() + ">";
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class Channel implements IChannel {
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 
-			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
+			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
 					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
@@ -214,7 +214,7 @@ public class Channel implements IChannel {
 
 			HttpEntity fileEntity = builder.build();
 			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
-					DiscordEndpoints.CHANNELS+id+"/messages",
+					DiscordEndpoints.CHANNELS + id + "/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
 
 			if (response.id == null) //Message didn't send
@@ -255,7 +255,7 @@ public class Channel implements IChannel {
 		}
 
 		try {
-			ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
+			ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/invites",
 					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
@@ -270,23 +270,29 @@ public class Channel implements IChannel {
 
 	@Override
 	public synchronized void toggleTypingStatus() {
-		isTyping.set(!isTyping.get());
+		setTypingStatus(!this.isTyping.get());
+	}
 
-		typingTimer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				if (!isTyping.get()) {
-					this.cancel();
-					return;
+	@Override
+	public void setTypingStatus(boolean typing) {
+		isTyping.set(typing);
+
+		if (isTyping.get())
+			typingTimer.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					if (!isTyping.get()) {
+						this.cancel();
+						return;
+					}
+					try {
+						Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/typing",
+								new BasicNameValuePair("authorization", client.getToken()));
+					} catch (RateLimitException | DiscordException e) {
+						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+					}
 				}
-				try {
-					Requests.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
-							new BasicNameValuePair("authorization", client.getToken()));
-				} catch (RateLimitException | DiscordException e) {
-					Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-				}
-			}
-		}, 0, TIME_FOR_TYPE_STATUS);
+			}, 0, TIME_FOR_TYPE_STATUS);
 	}
 
 	@Override
@@ -305,7 +311,7 @@ public class Channel implements IChannel {
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id,
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);
@@ -352,7 +358,7 @@ public class Channel implements IChannel {
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -418,7 +424,7 @@ public class Channel implements IChannel {
 	/**
 	 * CACHES a permissions override for a user in this channel.
 	 *
-	 * @param userId The user the permissions override is for.
+	 * @param userId   The user the permissions override is for.
 	 * @param override The permissions override.
 	 */
 	public void addUserOverride(String userId, PermissionOverride override) {
@@ -428,7 +434,7 @@ public class Channel implements IChannel {
 	/**
 	 * CACHES a permissions override for a role in this channel.
 	 *
-	 * @param roleId The role the permissions override is for.
+	 * @param roleId   The role the permissions override is for.
 	 * @param override The permissions override.
 	 */
 	public void addRoleOverride(String roleId, PermissionOverride override) {
@@ -439,7 +445,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID(),
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/permissions/" + user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 
 		userOverrides.remove(user.getID());
@@ -449,7 +455,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID(),
+		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/permissions/" + role.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 
 		roleOverrides.remove(role.getID());
@@ -469,7 +475,7 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		try {
-			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
+			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/permissions/" + id,
 					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id,
 							Permissions.generatePermissionsNumber(toRemove), Permissions.generatePermissionsNumber(toAdd)))),
 					new BasicNameValuePair("authorization", client.getToken()),
@@ -545,7 +551,7 @@ public class Channel implements IChannel {
 	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
-		channel.setTypingStatus(isTyping.get());
+		channel.isTyping.set(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
 		return channel;
@@ -572,14 +578,5 @@ public class Channel implements IChannel {
 			return false;
 
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
-	}
-
-	/**
-	 * Sets the CACHED typing status.
-	 *
-	 * @param typingStatus The new typing status.
-	 */
-	public void setTypingStatus(boolean typingStatus) {
-		this.isTyping.set(typingStatus);
 	}
 }

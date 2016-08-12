@@ -104,8 +104,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException 
-	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
@@ -119,11 +117,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException 
-	 * @throws MimeTypeException 
 	 */
 	IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-	
+
 	/**
 	 * Sends a file to the channel.
 	 *
@@ -136,8 +132,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException 
-	 * @throws MimeTypeException 
 	 */
 	IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
@@ -151,12 +145,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws IOException
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws ParseException 
-	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-	
+
 	/**
 	 * Generates an invite for this channel.
 	 *
@@ -175,6 +166,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Toggles whether the bot is "typing".
 	 */
 	void toggleTypingStatus();
+
+	/**
+	 * Sets whether the bot is "typing".
+	 *
+	 * @param typing True if the bot is typing.
+	 */
+	void setTypingStatus(boolean typing);
 
 	/**
 	 * Gets whether the bot is "typing".
