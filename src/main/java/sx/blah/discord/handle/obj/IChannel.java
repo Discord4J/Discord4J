@@ -104,8 +104,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException
-	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
@@ -119,8 +117,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException
-	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
@@ -136,8 +132,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @throws ParseException
-	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
@@ -151,9 +145,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws IOException
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws ParseException
-	 * @throws MimeTypeException
 	 */
 	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
 
