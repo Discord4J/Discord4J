@@ -139,7 +139,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Whether this client represents a bot.
 	 */
 	protected volatile boolean isBot;
-	
+
 	/**
 	 * The maximum amount of attempts before reconnections are aborted.
 	 */
@@ -149,6 +149,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * When this client was logged into. Useful for determining uptime.
 	 */
 	protected volatile LocalDateTime launchTime;
+
+	/**
+	 * The requests holder object.
+	 */
+	public final Requests REQUESTS = new Requests(this);
 
 	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts) {
 		this.timeoutTime = timeoutTime;
@@ -201,7 +206,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			}
 
 			if (!isBot) {
-				LoginResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.LOGIN,
+				LoginResponse response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.LOGIN,
 						new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
 						new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
 				this.token = response.token;
@@ -221,7 +226,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	private boolean validateToken() {
 		try {
-			Requests.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
+			REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
 					new BasicNameValuePair("authorization", getToken()));
 			return true;
 		} catch (RateLimitException | DiscordException e) {
@@ -233,7 +238,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public void logout() throws RateLimitException, DiscordException {
 		if (isReady()) {
 			if (!isBot())
-				Requests.POST.makeRequest(DiscordEndpoints.LOGOUT,
+				REQUESTS.POST.makeRequest(DiscordEndpoints.LOGOUT,
 						new BasicNameValuePair("authorization", token));
 
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
@@ -250,7 +255,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private String obtainGateway(String token) {
 		String gateway = null;
 		try {
-			GatewayResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest("https://discordapp.com/api/gateway",
+			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest("https://discordapp.com/api/gateway",
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url;//.replaceAll("wss", "ws");
 		} catch (RateLimitException | DiscordException e) {
@@ -269,7 +274,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		try {
-			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
+			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
 					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email.orElse(this.email),
 							this.password, password.orElse(this.password), username.orElse(getOurUser().getName()),
 							avatar == null ? Image.forUser(ourUser).getData() :
@@ -425,9 +430,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 				.filter(g -> g.getUserByID(userID) != null)
 				.findFirst()
 				.orElse(null);
-		
+
 		IUser user = guild != null ? guild.getUserByID(userID) : null;
-		
+
 		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
 	}
 
@@ -461,7 +466,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		PrivateChannelResponse response = null;
 		try {
-			response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
+			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
 					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
 					new BasicNameValuePair("authorization", this.token),
 					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
@@ -484,7 +489,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		try {
-			InviteJSONResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.INVITE+code,
+			InviteJSONResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+code,
 					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
 
 			return DiscordUtils.getInviteFromJSON(this, response);
@@ -496,7 +501,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public List<IRegion> getRegions() throws RateLimitException, DiscordException {
 		if (REGIONS.isEmpty()) {
-			RegionResponse[] regions = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+			RegionResponse[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
 					DiscordEndpoints.VOICE+"regions",
 					new BasicNameValuePair("authorization", this.token)),
 					RegionResponse[].class);
@@ -527,7 +532,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			throw new DiscordException("This action can only be performed by as user");
 
 		try {
-			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
+			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
 							new CreateGuildRequest(name, region.getID(), icon.orElse(null)))),
 					new BasicNameValuePair("authorization", this.token),
@@ -552,7 +557,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			throw new DiscordException("This action can only be performed by as user");
 
 		try {
-			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
+			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
 							new CreateGuildRequest(name, region.getID(), icon))),
 					new BasicNameValuePair("authorization", this.token),
@@ -604,7 +609,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		List<IApplication> applications = new ArrayList<>();
 
-		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
+		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
 				new BasicNameValuePair("authorization", getToken()),
 				new BasicNameValuePair("content-type", "application/json")), ApplicationResponse[].class);
 
@@ -621,7 +626,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		ApplicationResponse response = null;
 		try {
-			response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
+			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
 					new StringEntity(DiscordUtils.GSON.toJson(new ApplicationCreateRequest(name))),
 					new BasicNameValuePair("authorization", getToken()),
 					new BasicNameValuePair("content-type", "application/json")), ApplicationResponse.class);
@@ -640,7 +645,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
-		return DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me",
+		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me",
 				new BasicNameValuePair("authorization", getToken()),
 				new BasicNameValuePair("content-type", "application/json")), ApplicationInfoResponse.class);
 	}

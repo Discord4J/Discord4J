@@ -5,6 +5,7 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
@@ -118,7 +119,7 @@ public class Application implements IApplication {
 
 	private void edit(Optional<String> name, Optional<String> description, Optional<Image> icon, Optional<String[]> redirectUris) throws DiscordException, RateLimitException {
 		try {
-			ApplicationResponse response = DiscordUtils.GSON.fromJson(Requests.PUT.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
+			ApplicationResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new ApplicationResponse(redirectUris.orElse(this.redirectUris),
 							name.orElse(this.name),
 							description.orElse(this.description), icon == null ?
@@ -163,7 +164,7 @@ public class Application implements IApplication {
 	@Override
 	public ClientBuilder createBot() throws DiscordException {
 		try {
-			BotResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
+			BotResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 					DiscordEndpoints.APPLICATIONS+"/"+id+"/bot",
 					new StringEntity("{}"), //Still needs to send a json, but it has to be empty
 					new BasicNameValuePair("authorization", client.getToken()),
@@ -180,7 +181,7 @@ public class Application implements IApplication {
 	@Override
 	public void delete() throws DiscordException {
 		try {
-			Requests.DELETE.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
 					new BasicNameValuePair("authorization", client.getToken()));
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);

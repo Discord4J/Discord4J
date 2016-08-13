@@ -5,6 +5,7 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
@@ -155,7 +156,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (initialSize != 0)
 			queryParams += "&before="+messageCache.getLast().getID();
 
-		String response = Requests.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams,
+		String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams,
 				new BasicNameValuePair("authorization", client.getToken()));
 
 		if (response == null)
@@ -542,7 +543,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			throw new DiscordException("You can only delete 100 messages at a time!");
 
 		try {
-			Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
+			((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
 					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))),
 					new BasicNameValuePair("content-type", "application/json"),
 					new BasicNameValuePair("authorization", client.getToken()));

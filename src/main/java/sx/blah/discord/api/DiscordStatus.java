@@ -25,7 +25,7 @@ public class DiscordStatus {
 	public static double getAPIResponseTimeForDay() {
 		MetricResponse response = null;
 		try {
-			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "day")), MetricResponse.class);
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
@@ -42,7 +42,7 @@ public class DiscordStatus {
 	public static double getAPIResponseTimeForWeek() {
 		MetricResponse response = null;
 		try {
-			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "week")), MetricResponse.class);
 		} catch (DiscordException | RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
@@ -59,7 +59,7 @@ public class DiscordStatus {
 	public static double getAPIResponseTimeForMonth() {
 		MetricResponse response = null;
 		try {
-			response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
 					String.format(DiscordEndpoints.METRICS, "month")), MetricResponse.class);
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
@@ -77,7 +77,7 @@ public class DiscordStatus {
 	 * @throws DiscordException
 	 */
 	public static Maintenance[] getActiveMaintenances() throws RateLimitException, DiscordException {
-		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "active")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
 
@@ -99,7 +99,7 @@ public class DiscordStatus {
 	 * @throws DiscordException
 	 */
 	public static Maintenance[] getUpcomingMaintenances() throws RateLimitException, DiscordException {
-		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(
+		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "upcoming")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
 

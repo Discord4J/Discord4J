@@ -3,6 +3,7 @@ package sx.blah.discord.handle.impl.obj;
 import com.google.gson.Gson;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
@@ -41,7 +42,7 @@ public class Invite implements IInvite {
 			throw new DiscordException("This action can only be performed by a user");
 
 		if (client.isReady()) {
-			String response = Requests.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
+			String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
 
 			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
@@ -57,7 +58,7 @@ public class Invite implements IInvite {
 	@Override
 	public InviteResponse details() throws DiscordException, RateLimitException {
 		if (client.isReady()) {
-			String response = Requests.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
+			String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 					new BasicNameValuePair("authorization", client.getToken()));
 
 			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
@@ -72,7 +73,7 @@ public class Invite implements IInvite {
 
 	@Override
 	public void delete() throws RateLimitException, DiscordException {
-		Requests.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
