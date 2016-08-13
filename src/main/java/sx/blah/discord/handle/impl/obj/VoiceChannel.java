@@ -93,7 +93,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 			throw new DiscordException("Channel user limit can only be between 0 and 99!");
 
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);

@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
@@ -323,7 +324,7 @@ public class Guild implements IGuild {
 	public IRole createRole() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
-		RoleResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.GUILDS+id+"/roles",
+		RoleResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+id+"/roles",
 				new BasicNameValuePair("authorization", client.getToken())), RoleResponse.class);
 		IRole role = DiscordUtils.getRoleFromJSON(this, response);
 		return role;
@@ -331,7 +332,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IUser> getBannedUsers() throws RateLimitException, DiscordException {
-		UserResponse[] users = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans",
+		UserResponse[] users = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans",
 				new BasicNameValuePair("authorization", client.getToken())), UserResponse[].class);
 		List<IUser> banned = new ArrayList<>();
 		for (UserResponse user : users) {
@@ -349,7 +350,7 @@ public class Guild implements IGuild {
 	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.BAN));
 
-		Requests.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays,
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -357,7 +358,7 @@ public class Guild implements IGuild {
 	public void pardonUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID,
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -365,7 +366,7 @@ public class Guild implements IGuild {
 	public void kickUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -374,7 +375,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
-			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(roles))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
@@ -388,7 +389,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
 
 		try {
-			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(deafen))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
@@ -402,7 +403,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
 
 		try {
-			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(mute, true))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
@@ -421,7 +422,7 @@ public class Guild implements IGuild {
 		}
 
 		try {
-			Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(nick == null ? "" : nick, true))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
@@ -434,7 +435,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
-			GuildResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
+			GuildResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
 							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
 							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout)))),
@@ -491,7 +492,7 @@ public class Guild implements IGuild {
 		if (!ownerID.equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("You must be the guild owner to delete guilds!");
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.GUILDS+id,
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -500,7 +501,7 @@ public class Guild implements IGuild {
 		if (ownerID.equals(client.getOurUser().getID()))
 			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id,
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -516,7 +517,7 @@ public class Guild implements IGuild {
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
+			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text"))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")),
@@ -544,7 +545,7 @@ public class Guild implements IGuild {
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
+			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "voice"))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")),
@@ -579,7 +580,7 @@ public class Guild implements IGuild {
 		if (!getOwnerID().equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("Cannot transfer ownership when you aren't the current owner!");
 		try {
-			DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
+			DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new TransferOwnershipRequest(newOwner.getID()))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
@@ -596,7 +597,7 @@ public class Guild implements IGuild {
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
-				Requests.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites",
+				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
 
@@ -622,7 +623,7 @@ public class Guild implements IGuild {
 		}
 
 		try {
-			RoleResponse[] response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(
+			RoleResponse[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS + id + "/roles", new StringEntity(DiscordUtils.GSON.toJson(request)),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), RoleResponse[].class);
@@ -634,7 +635,7 @@ public class Guild implements IGuild {
 	@Override
 	public int getUsersToBePruned(int days) throws DiscordException, RateLimitException {
 		PruneResponse response = DiscordUtils.GSON.fromJson(
-				Requests.GET.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
+				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), PruneResponse.class);
 		return response.pruned;
@@ -643,7 +644,7 @@ public class Guild implements IGuild {
 	@Override
 	public int pruneUsers(int days) throws DiscordException, RateLimitException {
 		PruneResponse response = DiscordUtils.GSON.fromJson(
-				Requests.POST.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
+				((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), PruneResponse.class);
 		return response.pruned;
@@ -662,7 +663,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
-			Requests.POST.makeRequest(DiscordEndpoints.AUTHORIZE+"?client_id="+applicationID+"&scope=bot",
+			((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.AUTHORIZE+"?client_id="+applicationID+"&scope=bot",
 					new StringEntity(DiscordUtils.GSON.toJson(new BotAddRequest(id,
 							Permissions.generatePermissionsNumber(permissions)))),
 					new BasicNameValuePair("authorization", client.getToken()));

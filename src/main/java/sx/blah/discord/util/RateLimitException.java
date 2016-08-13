@@ -8,17 +8,15 @@ import sx.blah.discord.json.responses.RateLimitResponse;
  */
 public class RateLimitException extends HTTP429Exception {
 
-	private long retryAfter;
-	private String bucket;
+	private final long retryAfter;
+	private final String method;
+	private final boolean global;
 
-	public RateLimitException(String message, long retryAfter, String bucket) {
-		super(message, retryAfter, bucket);
+	public RateLimitException(String message, long retryAfter, String method, boolean global) {
+		super(message, retryAfter, method, global);
 		this.retryAfter = retryAfter;
-		this.bucket = bucket;
-	}
-
-	public RateLimitException(RateLimitResponse json) {
-		this(json.message, json.retry_after, json.bucket);
+		this.method = method;
+		this.global = global;
 	}
 
 	/**
@@ -34,8 +32,28 @@ public class RateLimitException extends HTTP429Exception {
 	 * Gets the bucket (set of requests) this exception covers.
 	 *
 	 * @return The bucket.
+	 * @deprecated See {@link #getMethod()}
 	 */
+	@Deprecated
 	public String getBucket() {
-		return bucket;
+		return method;
+	}
+
+	/**
+	 * Gets the method this rate limit was in response to.
+	 *
+	 * @return The method.
+	 */
+	public String getMethod() {
+		return method;
+	}
+
+	/**
+	 * Gets whether this is a global rate limit or limited to a particular method.
+	 *
+	 * @return True if global or false if otherwise.
+	 */
+	public boolean isGlobal() {
+		return global;
 	}
 }

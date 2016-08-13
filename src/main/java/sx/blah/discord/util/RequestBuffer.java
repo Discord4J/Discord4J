@@ -213,7 +213,7 @@ public class RequestBuffer {
 					isDone = true;
 				} catch (RateLimitException e) {
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
-					bucket = e.getBucket();
+					bucket = e.getMethod();
 				}
 			}
 			return isDone() || isCancelled();

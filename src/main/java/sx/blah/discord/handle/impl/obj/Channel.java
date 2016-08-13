@@ -7,6 +7,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
@@ -184,7 +185,7 @@ public class Channel implements IChannel {
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 
-			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
+			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
 					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
@@ -213,7 +214,7 @@ public class Channel implements IChannel {
 				builder.addTextBody("content", content);
 
 			HttpEntity fileEntity = builder.build();
-			MessageResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(
+			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 					DiscordEndpoints.CHANNELS + id + "/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
 
@@ -255,7 +256,7 @@ public class Channel implements IChannel {
 		}
 
 		try {
-			ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/invites",
+			ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
 					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
@@ -311,7 +312,7 @@ public class Channel implements IChannel {
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(Requests.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id,
+			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);
@@ -358,7 +359,7 @@ public class Channel implements IChannel {
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id,
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -445,7 +446,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/permissions/" + user.getID(),
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 
 		userOverrides.remove(user.getID());
@@ -455,7 +456,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/permissions/" + role.getID(),
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 
 		roleOverrides.remove(role.getID());
@@ -475,7 +476,7 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		try {
-			Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/permissions/" + id,
+			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id,
 							Permissions.generatePermissionsNumber(toRemove), Permissions.generatePermissionsNumber(toAdd)))),
 					new BasicNameValuePair("authorization", client.getToken()),
@@ -488,7 +489,7 @@ public class Channel implements IChannel {
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
-				Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
+				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
 						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
 
@@ -510,7 +511,7 @@ public class Channel implements IChannel {
 	@Override
 	public List<IMessage> getPinnedMessages() throws RateLimitException, DiscordException {
 		List<IMessage> messages = new ArrayList<>();
-		MessageResponse[] pinnedMessages = DiscordUtils.GSON.fromJson(Requests.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins",
+		MessageResponse[] pinnedMessages = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins",
 				new BasicNameValuePair("authorization", client.getToken()),
 				new BasicNameValuePair("content-type", "application/json")), MessageResponse[].class);
 
@@ -530,7 +531,7 @@ public class Channel implements IChannel {
 		if (message.isPinned())
 			throw new DiscordException("Message already pinned!");
 
-		Requests.PUT.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 
@@ -544,7 +545,7 @@ public class Channel implements IChannel {
 		if (!message.isPinned())
 			throw new DiscordException("Message already unpinned!");
 
-		Requests.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
 	}
 

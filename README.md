@@ -1,5 +1,5 @@
 <img align="right" src="http://i.imgur.com/2E16Yvi.jpg">
-# Discord4J [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) [![Support Channel Invite](https://img.shields.io/badge/Join-%23java__discord4j-7289DA.svg?style=flat-square)](https://discord.gg/0SBTUU1wZTU7PCok)
+# Discord4J [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY)
 
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
@@ -144,5 +144,6 @@ In such an event, please contact me or submit a pull request.
 No one is perfect at programming and I am no exception. If you see something that can be improved, please read the [contributing guildelines](https://github.com/austinv11/Discord4J/blob/master/.github/CONTRIBUTING.md) and feel free to submit a pull request! 
 
 ## Other info
-More information can be found in the [docs](http://austinv11.github.io/Discord4J/docs.html). 
-You can contact me on the [Discord API server](https://discord.gg/0SBTUU1wZTU7PCok) in the #java_discord4j channel.
+More information can be found in the [javadocs](http://austinv11.github.io/Discord4J/docs.html). 
+
+You can contact me on the [Official Discord4J Server (recommended)](https://discord.gg/NxGAeCY) or the [Discord API server](https://discord.gg/0SBTUU1wZTU7PCok) in the #java_discord4j channel.
