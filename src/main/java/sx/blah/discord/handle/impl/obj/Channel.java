@@ -287,7 +287,7 @@ public class Channel implements IChannel {
 						return;
 					}
 					try {
-						Requests.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/typing",
+						((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/typing",
 								new BasicNameValuePair("authorization", client.getToken()));
 					} catch (RateLimitException | DiscordException e) {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
