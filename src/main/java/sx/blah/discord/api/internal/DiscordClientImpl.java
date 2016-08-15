@@ -386,6 +386,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 			channels.addAll(privateChannels);
 		return channels;
 	}
+	
+	@Override
+	public Collection<IChannel> getChannels() {
+		return getChannels(false);
+	}
 
 	@Override
 	public IChannel getChannelByID(String id) {
@@ -455,6 +460,36 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return getRoles().stream()
 				.filter(r -> r.getID().equalsIgnoreCase(roleID))
 				.findAny().orElse(null);
+	}
+	
+	@Override
+	public Collection<IMessage> getMessages(boolean includePrivate) {
+		return getChannels(includePrivate).stream()
+				.map(IChannel::getMessages)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<IMessage> getMessages() {
+		return getMessages(false);
+	}
+	
+	@Override
+	public IMessage getMessageByID(String messageID) {
+		for (IGuild guild : guildList) {
+			IMessage message = guild.getMessageByID(messageID);
+			if (message != null)
+				return message;
+		}
+		
+		for (IPrivateChannel privateChannel : privateChannels) {
+			IMessage message = privateChannel.getMessageByID(messageID);
+			if (message != null)
+				return message;
+		}
+		
+		return null;
 	}
 
 	@Override

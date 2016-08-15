@@ -710,6 +710,15 @@ public class Guild implements IGuild {
 
 		return joinTimes.get(user);
 	}
+	
+	@Override
+	public IMessage getMessageByID(String id) {
+		return channels.stream()
+				.map(IChannel::getMessages)
+				.flatMap(List::stream)
+				.filter(message -> message.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
+	}
 
 	@Override
 	public IDiscordClient getClient() {

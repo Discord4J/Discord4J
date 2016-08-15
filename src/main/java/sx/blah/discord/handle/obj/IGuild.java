@@ -529,4 +529,12 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 */
 	LocalDateTime getJoinTimeForUser(IUser user) throws DiscordException;
+	
+	/**
+	 * This gets a message by its id.
+	 *
+	 * @param id The message id.
+	 * @return The message or null if not found.
+	 */
+	IMessage getMessageByID(String id);
 }

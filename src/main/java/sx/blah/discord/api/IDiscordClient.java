@@ -154,7 +154,14 @@ public interface IDiscordClient {
 	 * @return A {@link Collection} of all {@link Channel} objects.
 	 */
 	Collection<IChannel> getChannels(boolean includePrivate);
-
+	
+	/**
+	 * Gets a set of all channels visible to the bot user.
+	 *
+	 * @return A {@link Collection} of all non-private {@link Channel} objects.
+	 */
+	Collection<IChannel> getChannels();
+	
 	/**
 	 * Gets a channel by its unique id.
 	 *
@@ -222,7 +229,30 @@ public interface IDiscordClient {
 	 * @return The {@link Role} object
 	 */
 	IRole getRoleByID(String roleID);
-
+	
+	/**
+	 * This gets all messages stored internally by the bot.
+	 *
+	 * @param includePrivate Whether to include private messages or not.
+	 * @return A collection of all messages.
+	 */
+	Collection<IMessage> getMessages(boolean includePrivate);
+	
+	/**
+	 * This gets all messages stored internally by the bot (including from private channels).
+	 *
+	 * @return A collection of all messages.
+	 */
+	Collection<IMessage> getMessages();
+	
+	/**
+	 * This attempts to search all guilds/private channels for a message.
+	 *
+	 * @param messageID The message id of the message to find.
+	 * @return The message or null if not found.
+	 */
+	IMessage getMessageByID(String messageID);
+	
 	/**
 	 * Gets a {@link IPrivateChannel} for the provided recipient.
 	 *
