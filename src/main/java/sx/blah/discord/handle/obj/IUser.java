@@ -182,25 +182,23 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * Adds a Role to this user.
 	 *
 	 * @param role The role to add to the User
-	 * @param guild The guild that the User and Role are in.
 	 *
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void addRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 
 	/**
 	 * Removes a Role from this user.
 	 *
 	 * @param role The role to remove from the User.
-	 * @param guild The guild that the User and Role are in.
 	 *
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void removeRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 }

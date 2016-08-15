@@ -7,13 +7,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MemberEditRequest;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -164,9 +163,7 @@ public class User implements IUser {
 	public String getAvatarURL() {
 		return avatarURL;
 	}
-
-
-
+	
 	/**
 	 * Sets the user's CACHED avatar id.
 	 *
@@ -397,14 +394,18 @@ public class User implements IUser {
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
 	}
 
-	public void addRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException {
+	@Override
+	public void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
+		IGuild guild = role.getGuild();
 		List<IRole> roleList = this.getRolesForGuild(guild);
 		roleList.add(role);
 		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
 
 	}
 
-	public void removeRole(IRole role, IGuild guild) throws MissingPermissionsException, RateLimitException, DiscordException {
+	@Override
+	public void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
+		IGuild guild = role.getGuild();
 		List<IRole> roleList = this.getRolesForGuild(guild);
 		roleList.remove(role);
 		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
