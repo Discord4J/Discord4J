@@ -7,7 +7,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -618,8 +617,21 @@ public class Guild implements IGuild {
 		ReorderRolesRequest[] request = new ReorderRolesRequest[rolesInOrder.length];
 
 		for (int i = 0; i < rolesInOrder.length; i++) {
-			request[i] = new ReorderRolesRequest(rolesInOrder[i].getID(),
-					rolesInOrder[i].getName().equals("@everyone") ? -1 : i+1);
+			int position = rolesInOrder[i].getName().equals("@everyone") ? -1 : i+1;
+			if (position != rolesInOrder[i].getPosition()) {
+				IRole highest = getRolesForUser(client.getOurUser()).stream().sorted((o1, o2) -> {
+					if (o1.getPosition() < o2.getPosition()) {
+						return -1;
+					} else if (o2.getPosition() < o1.getPosition()) {
+						return 1;
+					} else {
+						return 0;
+					}
+				}).findFirst().orElse(null);
+				if (highest != null && highest.getPosition() <= position)
+					throw new MissingPermissionsException("Cannot edit the position of a role with a higher/equal position as your user's highest role.");
+			}
+			request[i] = new ReorderRolesRequest(rolesInOrder[i].getID(), position);
 		}
 
 		try {
