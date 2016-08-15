@@ -538,6 +538,9 @@ public class DiscordWS {
 	private void ready(JsonElement eventObject) {
 		final ReadyEventResponse event = DiscordUtils.GSON.fromJson(eventObject, ReadyEventResponse.class);
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to the Discord Websocket v"+event.v);
+		
+		client.isReady = true;
+		
 		final AtomicInteger guildsToWaitFor = new AtomicInteger(0);
 		isReconnecting.set(false);
 		isConnected.set(true); //Redundancy due to how reconnects work
@@ -548,8 +551,6 @@ public class DiscordWS {
 			client.ourUser = DiscordUtils.getUserFromJSON(client, event.user);
 
 			Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Received heartbeat interval of {}.", client.heartbeat);
-
-			client.isReady = true;
 
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to {} guilds.", event.guilds.length);
 			if (event.guilds.length > MessageList.MAX_GUILD_COUNT) //Disable initial caching for performance
