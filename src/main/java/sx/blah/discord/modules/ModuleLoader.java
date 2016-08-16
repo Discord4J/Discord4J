@@ -178,7 +178,7 @@ public class ModuleLoader {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
 			
-			for (int i = 0; i < Math.min(versions.length, 3); i++) {
+			for (int i = 0; i < Math.min(versions.length, 2); i++) { //We only care about major.minor, the revision change should not be big enough to care about
 				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
 					return false;
 			}
