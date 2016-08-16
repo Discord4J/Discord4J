@@ -1,6 +1,5 @@
 ### Prerequisites
-* [ ] If this is a question/suggestion, I have already considered talking about it on the [#java_discord4j channel on 
-the Discord API Server](https://discord.gg/0SBTUU1wZTU7PCok)
+* [ ] If this is a question/suggestion, I have already considered talking about it on the [Discord4J server](https://discord.gg/NxGAeCY)
 * [ ] This issue specifically has something to do with Discord4J
 * [ ] I have attempted to [look for similar issues](https://github.com/austinv11/Discord4J/issues?utf8=%E2%9C%93&q=is%3Aissue)
 already

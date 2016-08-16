@@ -13,8 +13,7 @@ typos may be better for me than an issue. This is all subjective but you should 
 If there is a problem with a feature please tell me, just please make sure to follow the [template](ISSUE_TEMPLATE.md)
 in order to allow me to more easily identify the issue and fix it. Questions and suggestions are also welcome to be
 posted as an issue, however I'd rather talk about it in a better medium than Github issues so I would prefer if you talk
-to me about it on the [#java_discord4j channel on the Discord API Server](https://discord.gg/0SBTUU1wZTU7PCok) (don't
-worry, I won't bite).
+to me about it on the [Discord4J server](https://discord.gg/NxGAeCY) (don't worry, I won't bite).
 
 ## Pull Requests
 So, you are thinking about sending a pull request, awesome! Before starting on your pull request, you should read up on
