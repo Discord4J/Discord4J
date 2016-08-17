@@ -281,7 +281,7 @@ public class TestBot {
 											return null;
 										});
 									}
-								}, 0, 5000);
+								}, 0, 50);
 							} else if (m.getContent().startsWith(".move ")) {
 								String target = m.getContent().split(" ")[1];
 								try {
