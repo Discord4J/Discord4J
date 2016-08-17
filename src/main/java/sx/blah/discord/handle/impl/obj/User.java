@@ -163,7 +163,7 @@ public class User implements IUser {
 	public String getAvatarURL() {
 		return avatarURL;
 	}
-	
+
 	/**
 	 * Sets the user's CACHED avatar id.
 	 *
@@ -192,7 +192,7 @@ public class User implements IUser {
 	public String getDisplayName(IGuild guild) {
 		if (guild == null)
 			return getName();
-			
+
 		return getNicknameForGuild(guild).isPresent() ? getNicknameForGuild(guild).get() : getName();
 	}
 
@@ -397,18 +397,16 @@ public class User implements IUser {
 	@Override
 	public void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
 		IGuild guild = role.getGuild();
-		List<IRole> roleList = this.getRolesForGuild(guild);
+		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
 		roleList.add(role);
 		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
-
 	}
 
 	@Override
 	public void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
 		IGuild guild = role.getGuild();
-		List<IRole> roleList = this.getRolesForGuild(guild);
+		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
 		roleList.remove(role);
 		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
-
 	}
 }
