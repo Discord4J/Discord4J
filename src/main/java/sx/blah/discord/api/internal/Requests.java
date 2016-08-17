@@ -3,6 +3,7 @@ package sx.blah.discord.api.internal;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -96,9 +97,9 @@ public class Requests {
 		 */
 		private final AtomicLong globalRetryAfter = new AtomicLong(-1);
 		/**
-		 * Keeps track of per-method rate limits.
+		 * Keeps track of per-method rate limits. Pair is method, path
 		 */
-		private final Map<String, Long> retryAfters = new ConcurrentHashMap<>();
+		private final Map<Pair<String, String>, Long> retryAfters = new ConcurrentHashMap<>();
 
 		private Request(Class<? extends HttpUriRequest> clazz, IDiscordClient client) {
 			this.requestClass = clazz;
@@ -177,13 +178,16 @@ public class Requests {
 					throw new RateLimitException("Global rate limit exceeded.",
 							globalRetryAfter.get() - System.currentTimeMillis(), request.getMethod(), true);
 			}
+			
+			Pair<String, String> methodRequestPair = Pair.of(request.getMethod(), request.getURI().getPath());
 
-			if (retryAfters.containsKey(request.getMethod())) {
-				if (System.currentTimeMillis() > retryAfters.get(request.getMethod()))
-					retryAfters.remove(request.getMethod());
+			if (retryAfters.containsKey(methodRequestPair)) {
+				if (System.currentTimeMillis() > retryAfters.get(methodRequestPair))
+					retryAfters.remove(methodRequestPair);
 				else
 					throw new RateLimitException("Rate limit exceeded.",
-							retryAfters.get(request.getMethod()) - System.currentTimeMillis(), request.getMethod(), false);
+							retryAfters.get(methodRequestPair) - System.currentTimeMillis(),
+							String.format("%s %s", methodRequestPair.getLeft(), methodRequestPair.getRight()), false);
 			}
 
 			try (CloseableHttpResponse response = CLIENT.execute(request)){
@@ -192,7 +196,7 @@ public class Requests {
 				if (responseCode != 429 && response.containsHeader("X-RateLimit-Remaining")) {
 					int remaining = Integer.parseInt(response.getFirstHeader("X-RateLimit-Remaining").getValue());
 					if (remaining == 0) {
-						retryAfters.put(request.getMethod(), Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue()));
+						retryAfters.put(methodRequestPair, Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue()));
 					}
 				}
 
@@ -236,11 +240,12 @@ public class Requests {
 					if (rateLimitResponse.global) {
 						globalRetryAfter.set(System.currentTimeMillis()+rateLimitResponse.retry_after);
 					} else {
-						retryAfters.put(request.getMethod(), System.currentTimeMillis()+rateLimitResponse.retry_after);
+						retryAfters.put(methodRequestPair, System.currentTimeMillis()+rateLimitResponse.retry_after);
 					}
 
 					throw new RateLimitException(rateLimitResponse.message, rateLimitResponse.retry_after,
-							request.getMethod(), rateLimitResponse.global);
+							String.format("%s %s", methodRequestPair.getLeft(), methodRequestPair.getRight()),
+							rateLimitResponse.global);
 				}
 
 				if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
