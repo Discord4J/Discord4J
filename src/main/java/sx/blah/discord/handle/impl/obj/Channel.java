@@ -10,7 +10,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
@@ -190,7 +189,7 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
-			if (response.id == null) //Message didn't send
+			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
 			return DiscordUtils.getMessageFromJSON(client, this, response);
@@ -217,8 +216,8 @@ public class Channel implements IChannel {
 			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 					DiscordEndpoints.CHANNELS + id + "/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
-
-			if (response.id == null) //Message didn't send
+			
+			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
 			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
