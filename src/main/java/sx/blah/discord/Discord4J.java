@@ -72,6 +72,10 @@ public class Discord4J {
      */
 	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
+	 * The alternate discord url.
+	 */
+	public static volatile String alternateUrl = null;
+	/**
 	 * Cached jetty logger instance.
 	 */
 	private static final org.eclipse.jetty.util.log.Logger jettyLogger;
@@ -202,6 +206,19 @@ public class Discord4J {
      */
 	public static void disableChannelWarnings() {
 		ignoreChannelWarnings.set(true);
+	}
+	
+	/**
+	 * This sets the base discord api so the provided url. This defaults to https://discordapp.com/.
+	 * NOTE: This will only have any sort of effect if called before the
+	 * {@link sx.blah.discord.api.internal.DiscordEndpoints} class is initialized, meaning that you MUST call this
+	 * before any Discord4J calls.
+	 *
+	 * @param url The url.
+	 */
+	public static void setBaseDiscordUrl(String url) {
+		LOGGER.info("Base url changed to {}", url);
+		alternateUrl = url;
 	}
 
 	private static Logger initLogger() {

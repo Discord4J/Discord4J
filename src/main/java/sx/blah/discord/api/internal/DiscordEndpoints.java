@@ -1,5 +1,7 @@
 package sx.blah.discord.api.internal;
 
+import sx.blah.discord.Discord4J;
+
 /**
  * Static class that contains
  * URLs useful to us.
@@ -8,7 +10,16 @@ public final class DiscordEndpoints {
 	/**
 	 * The base URL.
 	 */
-	public static final String BASE = "https://discordapp.com/";
+	public static final String BASE;
+	
+	static {
+		if (Discord4J.alternateUrl != null) {
+			BASE = Discord4J.alternateUrl;
+		} else {
+			BASE = "https://discordapp.com/";
+		}
+	}
+	
 	/**
 	 * The base API location on Discord's servers.
 	 */
