@@ -1,7 +1,7 @@
 <img align="right" src="http://i.imgur.com/2E16Yvi.jpg">
 # Discord4J [![CircleCI](https://circleci.com/gh/austinv11/Discord4J/tree/dev.svg?style=svg)](https://circleci.com/gh/austinv11/Discord4J/tree/dev) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) [![Coverage Status](https://coveralls.io/repos/github/austinv11/Discord4J/badge.svg?branch=dev)](https://coveralls.io/github/austinv11/Discord4J?branch=dev) [![Dependency Status](https://www.versioneye.com/user/projects/57b27840b9c824005436e491/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57b27840b9c824005436e491) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY)
 
-Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
+Java interface for the official [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
 
 For the latest dev builds, use the short commit hash or `dev-SNAPSHOT` as your version.
