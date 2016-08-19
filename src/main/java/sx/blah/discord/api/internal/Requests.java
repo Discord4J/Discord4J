@@ -190,13 +190,14 @@ public class Requests {
 							String.format("%s %s", methodRequestPair.getLeft(), methodRequestPair.getRight()), false);
 			}
 
-			try (CloseableHttpResponse response = CLIENT.execute(request)){
+			try (CloseableHttpResponse response = CLIENT.execute(request)) {
 				int responseCode = response.getStatusLine().getStatusCode();
 
-				if (responseCode != 429 && response.containsHeader("X-RateLimit-Remaining")) {
+				if (response.containsHeader("X-RateLimit-Remaining")) {
 					int remaining = Integer.parseInt(response.getFirstHeader("X-RateLimit-Remaining").getValue());
 					if (remaining == 0) {
-						retryAfters.put(methodRequestPair, Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue()));
+						retryAfters.put(methodRequestPair,
+								Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue())*1000);
 					}
 				}
 
