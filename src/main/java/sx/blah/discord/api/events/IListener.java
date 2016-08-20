@@ -2,7 +2,7 @@ package sx.blah.discord.api.events;
 
 /**
  * Used to represent a class that handles only one event.
- * <b>WARNING: Due to an issue in TypeTools, it is not recommended to use this class through lambda expressions.</b>
+ * <b>WARNING: Due to an issue in TypeTools, using this class through a lambda expression *may* slow your bot down.</b>
  *
  * @param <T> The event type to handle.
  */
