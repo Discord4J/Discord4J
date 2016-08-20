@@ -253,8 +253,12 @@ public class Message implements IMessage {
 
 	@Override
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
-		if (!getAuthor().equals(client.getOurUser()))
+		if (!getAuthor().equals(client.getOurUser())) {
+			if (channel.isPrivate())
+				throw new DiscordException("Cannot delete the other person's message in a private channel!");
+
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+		}
 
 		if (client.isReady()) {
 			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
