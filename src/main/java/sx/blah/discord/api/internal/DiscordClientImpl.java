@@ -377,8 +377,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public Collection<IChannel> getChannels(boolean priv) {
-		Collection<IChannel> channels = guildList.stream()
+	public List<IChannel> getChannels(boolean priv) {
+		List<IChannel> channels = guildList.stream()
 				.map(IGuild::getChannels)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
@@ -386,9 +386,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 			channels.addAll(privateChannels);
 		return channels;
 	}
-	
+
 	@Override
-	public Collection<IChannel> getChannels() {
+	public List<IChannel> getChannels() {
 		return getChannels(false);
 	}
 
@@ -400,7 +400,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public Collection<IVoiceChannel> getVoiceChannels() {
+	public List<IVoiceChannel> getVoiceChannels() {
 		return guildList.stream()
 				.map(IGuild::getVoiceChannels)
 				.flatMap(List::stream)
@@ -427,7 +427,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public Collection<IUser> getUsers() {
+	public List<IUser> getUsers() {
 		return guildList.stream()
 				.map(IGuild::getUsers)
 				.flatMap(List::stream)
@@ -448,7 +448,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public Collection<IRole> getRoles() {
+	public List<IRole> getRoles() {
 		return guildList.stream()
 				.map(IGuild::getRoles)
 				.flatMap(List::stream)
@@ -461,20 +461,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 				.filter(r -> r.getID().equalsIgnoreCase(roleID))
 				.findAny().orElse(null);
 	}
-	
+
 	@Override
-	public Collection<IMessage> getMessages(boolean includePrivate) {
+	public List<IMessage> getMessages(boolean includePrivate) {
 		return getChannels(includePrivate).stream()
 				.map(IChannel::getMessages)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
 	}
-	
+
 	@Override
-	public Collection<IMessage> getMessages() {
+	public List<IMessage> getMessages() {
 		return getMessages(false);
 	}
-	
+
 	@Override
 	public IMessage getMessageByID(String messageID) {
 		for (IGuild guild : guildList) {
@@ -482,13 +482,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 			if (message != null)
 				return message;
 		}
-		
+
 		for (IPrivateChannel privateChannel : privateChannels) {
 			IMessage message = privateChannel.getMessageByID(messageID);
 			if (message != null)
 				return message;
 		}
-		
+
 		return null;
 	}
 
