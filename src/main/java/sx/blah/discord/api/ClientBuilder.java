@@ -89,17 +89,6 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * This makes the client's websocket connection attempt to automatically reconnect when a connection is lost.
-	 *
-	 * @return The instance of the builder.
-	 * @deprecated This is no longer necessary.
-	 */
-	@Deprecated
-	public ClientBuilder withReconnects() {
-		return this;
-	}
-
-	/**
 	 * This sets the max amount of attempts the client will make to reconnect in the event of an unexpected
 	 * disconnection.
 	 *

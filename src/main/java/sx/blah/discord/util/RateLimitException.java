@@ -4,14 +4,13 @@ package sx.blah.discord.util;
  * Represents a 429 TOO MANY REQUESTS return code from a url connection.
  * This happens if your bot exceeds a Discord api rate limit.
  */
-public class RateLimitException extends HTTP429Exception {
+public class RateLimitException extends Exception {
 
 	private final long retryAfter;
 	private final String method;
 	private final boolean global;
 
 	public RateLimitException(String message, long retryAfter, String method, boolean global) {
-		super(message, retryAfter, method, global);
 		this.retryAfter = retryAfter;
 		this.method = method;
 		this.global = global;

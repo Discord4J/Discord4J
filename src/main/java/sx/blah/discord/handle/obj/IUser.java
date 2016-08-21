@@ -20,15 +20,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	String getName();
 
 	/**
-	 * Gets the game the user is playing, no value if the user isn't playing a game.
-	 *
-	 * @return The game.
-	 * @deprecated Use {@link #getStatus()} instead.
-	 */
-	@Deprecated
-	Optional<String> getGame();
-
-	/**
 	 * Gets the status for this user.
 	 *
 	 * @return The user's status.
@@ -121,15 +112,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws MissingPermissionsException
 	 */
 	void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException;
-
-	/**
-	 * Gets the voice channel this user is in (if in one).
-	 *
-	 * @return The (optional) voice channel.
-	 * @deprecated Use {@link #getConnectedVoiceChannels()} instead.
-	 */
-	@Deprecated
-	Optional<IVoiceChannel> getVoiceChannel();
 
 	/**
 	 * Gets the voice channels this user is connected to.

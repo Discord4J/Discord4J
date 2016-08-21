@@ -127,11 +127,6 @@ public class User implements IUser {
 	}
 
 	@Override
-	public Optional<String> getGame() {
-		return Optional.ofNullable(status.getStatusMessage());
-	}
-
-	@Override
 	public Status getStatus() {
 		return status;
 	}
@@ -300,11 +295,6 @@ public class User implements IUser {
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
-	}
-
-	@Override
-	public Optional<IVoiceChannel> getVoiceChannel() {
-		return channels.stream().findFirst();
 	}
 
 	@Override

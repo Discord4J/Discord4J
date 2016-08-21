@@ -100,30 +100,11 @@ public interface IDiscordClient {
 	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
 
 	/**
-	 * Updates the bot's presence.
-	 *
-	 * @param isIdle If true, the bot will be "idle", otherwise the bot will be "online".
-	 * @param game The optional name of the game the bot is playing. If empty, the bot simply won't be playing a game.
-	 * @deprecated Use {@link #changePresence(boolean)} or {@link #changeStatus(Status)}
-	 */
-	@Deprecated
-	void updatePresence(boolean isIdle, Optional<String> game);
-
-	/**
 	 * Changes this user's presence.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.
 	 */
 	void changePresence(boolean isIdle);
-
-	/**
-	 * Changes the game status message for this bot's user.
-	 *
-	 * @param game The game, or if null then no message will be shown.
-	 * @deprecated Use {@link #changeStatus(Status)} instead.
-	 */
-	@Deprecated
-	void changeGameStatus(String game);
 
 	/**
 	 * Changes the status of the bot user.
@@ -289,21 +270,6 @@ public interface IDiscordClient {
 	 * @return The region (or null if not found).
 	 */
 	IRegion getRegionByID(String regionID);
-
-	/**
-	 * Creates a new guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param region The region for the guild.
-	 * @param icon The icon for the guild.
-	 * @return The new guild's id.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @deprecated Use {@link #createGuild(String, IRegion, Image)} or {@link #createGuild(String, IRegion)} instead.
-	 */
-	@Deprecated
-	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException;
 
 	/**
 	 * Creates a new guild.

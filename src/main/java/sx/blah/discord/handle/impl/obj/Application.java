@@ -146,11 +146,6 @@ public class Application implements IApplication {
 	}
 
 	@Override
-	public void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException {
-		edit(Optional.empty(), Optional.empty(), icon, Optional.empty());
-	}
-
-	@Override
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), Optional.empty());
 	}
@@ -185,19 +180,6 @@ public class Application implements IApplication {
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
-	}
-
-	@Override
-	public String createBotInvite(Optional<EnumSet<Permissions>> requestedPermissions, Optional<String> guildID) {
-		String url = DiscordEndpoints.AUTHORIZE+"?client_id=%s&scope=bot";
-
-		if (requestedPermissions.isPresent())
-			url += "&permissions="+Permissions.generatePermissionsNumber(requestedPermissions.get());
-
-		if (guildID.isPresent())
-			url += "&guild_id="+guildID.get();
-
-		return String.format(url, id);
 	}
 
 	@Override

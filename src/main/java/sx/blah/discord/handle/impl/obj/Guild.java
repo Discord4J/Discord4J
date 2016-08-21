@@ -7,7 +7,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
@@ -88,11 +87,6 @@ public class Guild implements IGuild {
 	 * The region this guild is located in.
 	 */
 	protected volatile String regionID;
-
-	/**
-	 * This guild's audio channel.
-	 */
-	protected volatile AudioChannel audioChannel;
 
 	/**
 	 * This guild's audio manager.
@@ -460,19 +454,8 @@ public class Guild implements IGuild {
 		edit(Optional.empty(), Optional.of(region.getID()), null, null, Optional.empty());
 	}
 
-	@Override
-	public void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), icon, null, Optional.empty());
-	}
-
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), null, Optional.empty());
-	}
-
-	@Override
-	public void changeAFKChannel(Optional<IVoiceChannel> channel) throws RateLimitException, DiscordException, MissingPermissionsException {
-		String id = channel.isPresent() ? channel.get().getID() : null;
-		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
 	}
 
 	@Override
@@ -663,11 +646,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
-		addBot(applicationID, permissions.orElse(EnumSet.noneOf(Permissions.class)));
-	}
-
-	@Override
 	public void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
 		if (client.isBot())
 			throw new DiscordException("Bot accounts are not allowed to add other bots!");
@@ -682,11 +660,6 @@ public class Guild implements IGuild {
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
-	}
-
-	@Override
-	public AudioChannel getAudioChannel() throws DiscordException {
-		return audioChannel == null ? audioChannel = new AudioChannel(this) : audioChannel;
 	}
 
 	@Override

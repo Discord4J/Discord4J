@@ -10,19 +10,13 @@ import sx.blah.discord.handle.obj.Presences;
  */
 public class PresenceUpdateEvent extends Event {
 
-	private final IGuild guild;
 	private final IUser user;
 	private final Presences oldPresence, newPresence;
 
-	public PresenceUpdateEvent(IGuild guild, IUser user, Presences oldPresence, Presences newPresence) {
-		this.guild = guild;
+	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence) {
 		this.user = user;
 		this.oldPresence = oldPresence;
 		this.newPresence = newPresence;
-	}
-
-	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence) {
-		this(null, user, oldPresence, newPresence);
 	}
 
 	/**
@@ -50,16 +44,5 @@ public class PresenceUpdateEvent extends Event {
 	 */
 	public IUser getUser() {
 		return user;
-	}
-
-	/**
-	 * Gets the guild involved.
-	 *
-	 * @return The guild.
-	 * @deprecated This is unreliable.
-	 */
-	@Deprecated
-	public IGuild getGuild() {
-		return guild;
 	}
 }

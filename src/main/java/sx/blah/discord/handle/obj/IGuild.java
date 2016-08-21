@@ -1,6 +1,5 @@
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.util.DiscordException;
@@ -315,36 +314,12 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	/**
 	 * Changes the name of the guild.
 	 *
-	 * @param icon The new icon of the guild (or empty to remove it).
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
-	 * @deprecated Use {@link #changeIcon(Image)} instead.
-	 */
-	@Deprecated
-	void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException, MissingPermissionsException;
-
-	/**
-	 * Changes the name of the guild.
-	 *
 	 * @param icon The new icon of the guild (or null to remove it).
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
 	void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException;
-
-	/**
-	 * Changes the AFK voice channel of the guild.
-	 *
-	 * @param channel The new AFK voice channel of the guild (or empty to remove it).
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
-	 * @deprecated Use {{@link #changeAFKChannel(IVoiceChannel)}} instead.
-	 */
-	@Deprecated
-	void changeAFKChannel(Optional<IVoiceChannel> channel) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK voice channel of the guild.
@@ -480,20 +455,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * Attempts to add a bot to this guild.
 	 *
 	 * @param applicationID The OAuth2 application id for the application owning the bot.
-	 * @param permissions The (optional) permissions for this bot to have when entering the guild.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @deprecated Use {@link #addBot(String, EnumSet)}
-	 */
-	@Deprecated
-	void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, RateLimitException;
-
-	/**
-	 * Attempts to add a bot to this guild.
-	 *
-	 * @param applicationID The OAuth2 application id for the application owning the bot.
 	 * @param permissions The permissions for this bot to have when entering the guild.
 	 *
 	 * @throws MissingPermissionsException
@@ -501,17 +462,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 */
 	void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException;
-
-	/**
-	 * Gets the audio channel of this guild. This throws an exception if the bot isn't in a channel yet.
-	 *
-	 * @return The audio channel.
-	 *
-	 * @throws DiscordException
-	 * @deprecated Use {@link #getAudioManager()} instead.
-	 */
-	@Deprecated
-	AudioChannel getAudioChannel() throws DiscordException;
 
 	/**
 	 * Gets the {@link AudioManager} instance for this guild.
@@ -529,7 +479,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 */
 	LocalDateTime getJoinTimeForUser(IUser user) throws DiscordException;
-	
+
 	/**
 	 * This gets a message by its id.
 	 *

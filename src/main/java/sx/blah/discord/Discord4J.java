@@ -173,7 +173,6 @@ public class Discord4J {
 
 		try {
 			ClientBuilder builder = new ClientBuilder();
-			builder.withReconnects();
 			IDiscordClient client = (args.length == 1 ? builder.withToken(args[0]) : builder.withLogin(args[0], args[1])).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
@@ -207,7 +206,7 @@ public class Discord4J {
 	public static void disableChannelWarnings() {
 		ignoreChannelWarnings.set(true);
 	}
-	
+
 	/**
 	 * This sets the base discord api so the provided url. This defaults to https://discordapp.com/.
 	 * NOTE: This will only have any sort of effect if called before the

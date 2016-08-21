@@ -317,11 +317,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(avatar));
 	}
 
-	@Override
-	public void updatePresence(boolean isIdle, Optional<String> game) { //TODO: make private
-		updatePresence(isIdle, Status.game(game.orElse(null)));
-	}
-
 	private void updatePresence(boolean isIdle, Status status) {
 		if (!isReady()) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
@@ -349,12 +344,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public void changePresence(boolean isIdle) {
-		updatePresence(isIdle, getOurUser().getGame());
-	}
-
-	@Override
-	public void changeGameStatus(String game) {
-		updatePresence(getOurUser().getPresence() == Presences.IDLE, Optional.ofNullable(game));
+		updatePresence(isIdle, getOurUser().getStatus());
 	}
 
 	@Override
@@ -565,26 +555,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 					.filter(r -> r.getID().equals(regionID))
 					.findAny().orElse(null);
 		} catch (RateLimitException | DiscordException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-		return null;
-	}
-
-	@Override
-	public IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException {
-		if (isBot())
-			throw new DiscordException("This action can only be performed by as user");
-
-		try {
-			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
-							new CreateGuildRequest(name, region.getID(), icon.orElse(null)))),
-					new BasicNameValuePair("authorization", this.token),
-					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
-			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);
-			guildList.add(guild);
-			return guild;
-		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;

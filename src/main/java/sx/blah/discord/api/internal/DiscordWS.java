@@ -838,14 +838,13 @@ public class DiscordWS {
 				if (!user.getPresence().equals(presence)) {
 					Presences oldPresence = user.getPresence();
 					user.setPresence(presence);
-					client.dispatcher.dispatch(new PresenceUpdateEvent(guild, user, oldPresence, presence));
+					client.dispatcher.dispatch(new PresenceUpdateEvent(user, oldPresence, presence));
 					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
 				if (!user.getStatus().equals(status)) {
 					Status oldStatus = user.getStatus();
 					user.setStatus(status);
-					client.dispatcher.dispatch(new GameChangeEvent(guild, user, oldStatus.getStatusMessage(), status.getStatusMessage()));
-					client.dispatcher.dispatch(new StatusChangeEvent(guild, user, oldStatus, status));
+					client.dispatcher.dispatch(new StatusChangeEvent(user, oldStatus, status));
 					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed status to {}.", user.getName(), status);
 				}
 			}
