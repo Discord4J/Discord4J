@@ -11,7 +11,7 @@ public final class DiscordEndpoints {
 	 * The base URL.
 	 */
 	public static final String BASE;
-	
+
 	static {
 		if (Discord4J.alternateUrl != null) {
 			BASE = Discord4J.alternateUrl;
@@ -19,11 +19,13 @@ public final class DiscordEndpoints {
 			BASE = "https://discordapp.com/";
 		}
 	}
-	
+
 	/**
 	 * The base API location on Discord's servers.
 	 */
 	public static final String APIBASE = BASE+"api";
+
+	public static final String GATEWAY = APIBASE+"/gateway";
 
 	public static final String USERS = APIBASE+"/users/";
 

@@ -261,7 +261,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private String obtainGateway(String token) {
 		String gateway = null;
 		try {
-			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest("https://discordapp.com/api/gateway",
+			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY,
 					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
 			gateway = response.url;//.replaceAll("wss", "ws");
 		} catch (RateLimitException | DiscordException e) {
