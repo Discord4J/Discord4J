@@ -9,11 +9,11 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.generic.PermissionOverwrite;
-import sx.blah.discord.json.generic.RoleResponse;
-import sx.blah.discord.json.generic.StatusObject;
-import sx.blah.discord.json.requests.GuildMembersRequest;
-import sx.blah.discord.json.responses.*;
+import sx.blah.discord.api.internal.json.generic.PermissionOverwrite;
+import sx.blah.discord.api.internal.json.generic.RoleResponse;
+import sx.blah.discord.api.internal.json.generic.StatusObject;
+import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
+import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 

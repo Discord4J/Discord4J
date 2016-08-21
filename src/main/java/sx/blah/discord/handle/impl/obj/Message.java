@@ -12,10 +12,9 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.MessageRequest;
-import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.api.internal.json.requests.MessageRequest;
+import sx.blah.discord.api.internal.json.responses.MessageResponse;
 import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.api.internal.Requests;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;

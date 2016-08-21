@@ -7,13 +7,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.ChannelEditRequest;
-import sx.blah.discord.json.requests.VoiceChannelRequest;
-import sx.blah.discord.json.responses.ChannelResponse;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceChannelRequest;
+import sx.blah.discord.api.internal.json.responses.ChannelResponse;
 import sx.blah.discord.util.*;
 
 import java.io.File;
@@ -26,7 +25,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	protected volatile int userLimit = 0;
 	protected volatile int bitrate = 0;
-	
+
 	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;

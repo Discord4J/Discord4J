@@ -12,18 +12,16 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.json.responses.RateLimitResponse;
+import sx.blah.discord.api.internal.json.responses.RateLimitResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static sx.blah.discord.Discord4J.*;
@@ -178,7 +176,7 @@ public class Requests {
 					throw new RateLimitException("Global rate limit exceeded.",
 							globalRetryAfter.get() - System.currentTimeMillis(), request.getMethod(), true);
 			}
-			
+
 			Pair<String, String> methodRequestPair = Pair.of(request.getMethod(), request.getURI().getPath());
 
 			if (retryAfters.containsKey(methodRequestPair)) {

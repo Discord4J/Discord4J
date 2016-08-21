@@ -8,11 +8,10 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.BulkDeleteRequest;
-import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
+import sx.blah.discord.api.internal.json.responses.MessageResponse;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -40,7 +39,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * Represents a maximum message capacity which will be unlimited (-1). Yay, no magic numbers!
 	 */
 	public static final int UNLIMITED_CAPACITY = -1;
-	
+
 	/**
 	 * This is the max number of guild before the list stops automatically loading its history.
 	 */
@@ -71,7 +70,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * messages.
 	 */
 	private volatile int capacity = 256;
-	
+
 	/**
 	 * This determines whether message history is automatically loaded.
 	 */
@@ -556,7 +555,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}
 	}
-	
+
 	/**
 	 * This sets whether MessageLists should automatically fetch message history on initialization. This is
 	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
@@ -566,7 +565,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public static void shouldDownloadHistoryAutomatically(boolean download) {
 		loadInitialMessages = download;
 	}
-	
+
 	/**
 	 * This gets whether MessageLists will automatically fetch message history on initialization. This is
 	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.

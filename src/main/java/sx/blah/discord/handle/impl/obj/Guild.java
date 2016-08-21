@@ -12,9 +12,9 @@ import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.generic.RoleResponse;
-import sx.blah.discord.json.requests.*;
-import sx.blah.discord.json.responses.*;
+import sx.blah.discord.api.internal.json.generic.RoleResponse;
+import sx.blah.discord.api.internal.json.requests.*;
+import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
@@ -710,7 +710,7 @@ public class Guild implements IGuild {
 
 		return joinTimes.get(user);
 	}
-	
+
 	@Override
 	public IMessage getMessageByID(String id) {
 		return channels.stream()

@@ -8,7 +8,7 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.MemberEditRequest;
+import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;

@@ -13,13 +13,13 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.generic.PermissionOverwrite;
-import sx.blah.discord.json.requests.ChannelEditRequest;
-import sx.blah.discord.json.requests.InviteRequest;
-import sx.blah.discord.json.requests.MessageRequest;
-import sx.blah.discord.json.responses.ChannelResponse;
-import sx.blah.discord.json.responses.ExtendedInviteResponse;
-import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.api.internal.json.generic.PermissionOverwrite;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
+import sx.blah.discord.api.internal.json.requests.InviteRequest;
+import sx.blah.discord.api.internal.json.requests.MessageRequest;
+import sx.blah.discord.api.internal.json.responses.ChannelResponse;
+import sx.blah.discord.api.internal.json.responses.ExtendedInviteResponse;
+import sx.blah.discord.api.internal.json.responses.MessageResponse;
 import sx.blah.discord.util.*;
 
 import java.io.*;
@@ -216,7 +216,7 @@ public class Channel implements IChannel {
 			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 					DiscordEndpoints.CHANNELS + id + "/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
-			
+
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 

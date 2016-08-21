@@ -16,11 +16,11 @@ import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.json.requests.VoiceConnectRequest;
-import sx.blah.discord.json.requests.VoiceKeepAliveRequest;
-import sx.blah.discord.json.requests.VoiceSpeakingRequest;
-import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
-import sx.blah.discord.json.responses.VoiceUpdateResponse;
+import sx.blah.discord.api.internal.json.requests.VoiceConnectRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceKeepAliveRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceSpeakingRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceUDPConnectRequest;
+import sx.blah.discord.api.internal.json.responses.VoiceUpdateResponse;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
