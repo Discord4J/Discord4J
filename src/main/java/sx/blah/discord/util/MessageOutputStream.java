@@ -100,6 +100,9 @@ public class MessageOutputStream extends OutputStream {
 						exceptionReference.set(new IOException(e));
 				}
 			});
+
+		if (exceptionReference.get() != null)
+			throw exceptionReference.get();
 	}
 
 	private String getStringFromCharBuffer(int length) {
