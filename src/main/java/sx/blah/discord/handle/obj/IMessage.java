@@ -14,6 +14,11 @@ import java.util.Optional;
 public interface IMessage extends IDiscordObject<IMessage> {
 
 	/**
+	 * The maximum length of a discord message.
+	 */
+	int MAX_MESSAGE_LENGTH = 2000;
+
+	/**
 	 * Gets the string content of the message.
 	 *
 	 * @return The content of the message

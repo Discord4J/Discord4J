@@ -13,7 +13,9 @@ import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -300,7 +302,9 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						((DiscordClientImpl) client).ws.disconnect(DiscordDisconnectedEvent.Reason.UNKNOWN);
+						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new MessageOutputStream(message.getChannel())));
+						writer.write(message.getContent());
+						writer.close();
 					}
 				});
 
