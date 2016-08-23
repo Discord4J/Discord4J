@@ -478,7 +478,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			if (message != null)
 				return message;
 		}
-
+		
 		return null;
 	}
 

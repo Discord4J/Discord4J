@@ -686,11 +686,21 @@ public class Guild implements IGuild {
 
 	@Override
 	public IMessage getMessageByID(String id) {
-		return channels.stream()
-				.map(IChannel::getMessages)
-				.flatMap(List::stream)
-				.filter(message -> message.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
+		IMessage message =  channels.stream()
+									.map(IChannel::getMessages)
+									.flatMap(List::stream)
+									.filter(msg -> msg.getID().equalsIgnoreCase(id))
+									.findAny().orElse(null);
+		
+		if (message == null) {
+			for (IChannel channel : channels) {
+				message = channel.getMessageByID(id);
+				if (message != null)
+					return message;
+			}
+		}
+		
+		return message;
 	}
 
 	@Override

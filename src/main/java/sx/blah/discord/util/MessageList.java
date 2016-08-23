@@ -8,6 +8,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
@@ -48,7 +49,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * The client that this list is respecting.
 	 */
-	private final IDiscordClient client;
+	private final DiscordClientImpl client;
 
 	/**
 	 * The channel the messages are from.
@@ -84,7 +85,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (channel instanceof IVoiceChannel)
 			throw new UnsupportedOperationException();
 
-		this.client = client;
+		this.client = (DiscordClientImpl) client;
 		this.channel = channel;
 
 		updatePermissions();
@@ -323,7 +324,18 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return The message object found, or null if nonexistent.
 	 */
 	public IMessage get(String id) {
-		return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+		try {
+			return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(
+					DiscordUtils.getMessageFromJSON(client, channel,
+							DiscordUtils.GSON.fromJson(
+									client.REQUESTS.GET.makeRequest(
+											DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+											new BasicNameValuePair("content-type", "application/json"),
+											new BasicNameValuePair("authorization", client.getToken())),
+									MessageResponse.class)));
+		} catch (RateLimitException | DiscordException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -547,7 +559,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			throw new DiscordException("You can only delete 100 messages at a time!");
 
 		try {
-			((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
+			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
 					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))),
 					new BasicNameValuePair("content-type", "application/json"),
 					new BasicNameValuePair("authorization", client.getToken()));
