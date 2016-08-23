@@ -14,18 +14,22 @@ public class MessageTokenizer {
 	private final String content;
 	private final IDiscordClient client;
 	private int currentPosition = 0;
+	/**
+	 * The remaining substring.
+	 */
+	private String remaining;
 
 	/**
-	 * Initialize using the message contents and client.
+	 * Initializes using the message contents and client.
 	 *
-	 * @param message The message object.
+	 * @param message The message object
 	 */
 	public MessageTokenizer(IMessage message) {
 		this(message.getClient(), message.getContent());
 	}
 
 	/**
-	 * Initialize with the string contents.
+	 * Initializes with the string contents.
 	 *
 	 * @param content What you want to traverse
 	 * @param client  The Discord client that will be used to get objects from
@@ -38,15 +42,85 @@ public class MessageTokenizer {
 
 		this.content = content;
 		this.client = client;
+
+		stepForward(0);
 	}
 
 	/**
-	 * Return the content that the tokenizer is traversing.
+	 * Steps forward the current position and updates the internal remaining string.
 	 *
-	 * @return
+	 * @param amount The amount to step forward, must be zero or higher
+	 * @return The new current position
+	 */
+	public int stepForward(int amount) {
+		if (amount < 0)
+			throw new IllegalArgumentException("Amount cannot be negative!");
+
+		currentPosition += amount;
+		remaining = content.substring(currentPosition);
+
+		return currentPosition;
+	}
+
+	/**
+	 * Returns true if the traverser isn't at the end of the string.
+	 *
+	 * @return If we have another char to step to
+	 */
+	public boolean hasNext() {
+		return currentPosition < content.length();
+	}
+
+	/**
+	 * Exactly the same as {@link MessageTokenizer#hasNext()}. Returns true if there is another char to step to.
+	 *
+	 * @return If there is more to step to
+	 * @see MessageTokenizer#hasNext()
+	 */
+	public boolean hasNextChar() {
+		return hasNext();
+	}
+
+	/**
+	 * Returns the next character, stepping forward the tokenizer.
+	 *
+	 * @return The next char
+	 * @throws IllegalStateException If there aren't more chars to go to
+	 */
+	public char nextChar() {
+		if (!hasNextChar())
+			throw new IllegalStateException("Reached end of string!");
+
+		char c = content.charAt(currentPosition);
+		stepForward(1);
+		return c;
+	}
+
+	/**
+	 * Returns the content that the tokenizer is traversing.
+	 *
+	 * @return The content that is being traversed
 	 */
 	public String getContent() {
 		return content;
+	}
+
+	/**
+	 * Returns the Discord client this tokenizer uses.
+	 *
+	 * @return The Discord client
+	 */
+	public IDiscordClient getClient() {
+		return client;
+	}
+
+	/**
+	 * Returns the current position/index this tokenizer is at.
+	 *
+	 * @return The current position/index
+	 */
+	public int getCurrentPosition() {
+		return currentPosition;
 	}
 
 	/**
@@ -63,8 +137,8 @@ public class MessageTokenizer {
 		 * A part of a message with content and position.
 		 *
 		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents.
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive.
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
 		 */
 		Token(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			if (startIndex < 0 || startIndex >= tokenizer.getContent().length())
@@ -81,7 +155,7 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Get the tokenizer object this token is associated with.
+		 * Gets the tokenizer object this token is associated with.
 		 *
 		 * @return The tokenizer
 		 */
@@ -90,7 +164,7 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Get the content that makes up this token.
+		 * Gets the content that makes up this token.
 		 *
 		 * @return The string of content
 		 */
@@ -99,7 +173,7 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Get the start index which is where this token starts in the tokenizer's contents.
+		 * Gets the start index which is where this token starts in the tokenizer's contents.
 		 *
 		 * @return The start index
 		 */
@@ -127,9 +201,9 @@ public class MessageTokenizer {
 		 * A mention of any type with its content and position.
 		 *
 		 * @param tokenizer     The tokenizer
-		 * @param startIndex    The start index of the tokenizer's contents.
-		 * @param endIndex      The end index of the tokenizer's contents, exclusive.
-		 * @param mentionObject The object the mention is associated with.
+		 * @param startIndex    The start index of the tokenizer's contents
+		 * @param endIndex      The end index of the tokenizer's contents, exclusive
+		 * @param mentionObject The object the mention is associated with
 		 */
 		MentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, T mentionObject) {
 			super(tokenizer, startIndex, endIndex);
@@ -144,9 +218,9 @@ public class MessageTokenizer {
 		 * A user mention with its content and position.
 		 *
 		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents.
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive.
-		 * @param user       The user object it's associated with.
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 * @param user       The user object it's associated with
 		 */
 		UserMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, IUser user) {
 			super(tokenizer, startIndex, endIndex, user);
@@ -159,9 +233,9 @@ public class MessageTokenizer {
 		 * A role mention with its content and position.
 		 *
 		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents.
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive.
-		 * @param role       The role object it's associated with.
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 * @param role       The role object it's associated with
 		 */
 		RoleMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, IRole role) {
 			super(tokenizer, startIndex, endIndex, role);
@@ -174,9 +248,9 @@ public class MessageTokenizer {
 		 * A channel mention with its content and position.
 		 *
 		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents.
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive.
-		 * @param channel    The channel object it's associated with.
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 * @param channel    The channel object it's associated with
 		 */
 		ChannelMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, IChannel channel) {
 			super(tokenizer, startIndex, endIndex, channel);
