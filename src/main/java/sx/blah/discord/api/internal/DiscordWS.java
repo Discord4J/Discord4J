@@ -213,10 +213,7 @@ public class DiscordWS {
 						disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
 						return;
 					}
-				} else {
-					handleReconnect();
 				}
-				return;
 			}
 		}
 		
@@ -534,8 +531,6 @@ public class DiscordWS {
 
 	private void handleReconnect() {
 		send(DiscordUtils.GSON.toJson(new ResumeRequest(client.sessionId, client.lastSequence, client.getToken())));
-		connected();
-		resumed();
 	}
 
 	private void resumed() {
