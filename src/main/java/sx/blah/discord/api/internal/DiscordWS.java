@@ -166,8 +166,6 @@ public class DiscordWS {
 	 * Disconnects the client WS.
 	 */
 	public synchronized void disconnect(DiscordDisconnectedEvent.Reason reason) {
-		executorService.shutdownNow();
-
 		if (startingUp.get() && reason != DiscordDisconnectedEvent.Reason.INIT_ERROR)
 			reason = DiscordDisconnectedEvent.Reason.INIT_ERROR;
 
@@ -221,7 +219,9 @@ public class DiscordWS {
 				return;
 			}
 		}
-
+		
+		executorService.shutdownNow();
+		
 		startingUp.set(false);
 		sentPing.set(false);
 		isReconnecting.set(false);
