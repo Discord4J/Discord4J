@@ -325,14 +325,14 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public IMessage get(String id) {
 		try {
-			return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(
+			return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(hasPermission ?
 					DiscordUtils.getMessageFromJSON(client, channel,
 							DiscordUtils.GSON.fromJson(
 									client.REQUESTS.GET.makeRequest(
 											DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
 											new BasicNameValuePair("content-type", "application/json"),
 											new BasicNameValuePair("authorization", client.getToken())),
-									MessageResponse.class)));
+									MessageResponse.class)) : null);
 		} catch (RateLimitException | DiscordException e) {
 			return null;
 		}
