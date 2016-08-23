@@ -349,8 +349,8 @@ public class DiscordUtils {
 	 * @return The message object.
 	 */
 	public static IMessage getMessageFromJSON(IDiscordClient client, IChannel channel, MessageResponse json) {
-		Message message;
-		if ((message = (Message) channel.getMessageByID(json.id)) != null) {
+		if (channel.getMessages().contains(json.id)) {
+			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);

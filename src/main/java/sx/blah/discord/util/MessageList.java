@@ -223,6 +223,16 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		return cacheChanged;
 	}
+	
+	/**
+	 * This checks if a message with the provided id is cached my this list.
+	 *
+	 * @param id The id.
+	 * @return True if found, false if otherwise.
+	 */
+	public boolean contains(String id) {
+		return messageCache.stream().filter(it -> it.getID().equals(id)).findFirst().isPresent();
+	}
 
 	/**
 	 * {@inheritDoc}
