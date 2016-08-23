@@ -57,6 +57,7 @@ public class MessageTokenizer {
 			throw new IllegalArgumentException("Amount cannot be negative!");
 
 		currentPosition += amount;
+		currentPosition = Math.min(currentPosition, content.length());
 		remaining = content.substring(currentPosition);
 
 		return currentPosition;
@@ -65,7 +66,7 @@ public class MessageTokenizer {
 	/**
 	 * Returns true if the traverser isn't at the end of the string.
 	 *
-	 * @return If we have another char to step to
+	 * @return True if we have another char to step to
 	 */
 	public boolean hasNext() {
 		return currentPosition < content.length();
@@ -74,7 +75,7 @@ public class MessageTokenizer {
 	/**
 	 * Exactly the same as {@link MessageTokenizer#hasNext()}. Returns true if there is another char to step to.
 	 *
-	 * @return If there is more to step to
+	 * @return True if there is more to step to
 	 * @see MessageTokenizer#hasNext()
 	 */
 	public boolean hasNextChar() {
@@ -94,6 +95,34 @@ public class MessageTokenizer {
 		char c = content.charAt(currentPosition);
 		stepForward(1);
 		return c;
+	}
+
+	/**
+	 * Returns true if there is another word to go to. A word is delimited by a space.
+	 *
+	 * @return True if there is another word to step to
+	 */
+	public boolean hasNextWord() {
+		int index = remaining.lastIndexOf(' ');
+		return index < remaining.length() - 2 && index > -1;
+	}
+
+	/**
+	 * Returns the next word, stepping forward the tokenizer to the next non-space character. A word is delimited by
+	 * a space.
+	 *
+	 * @return The next word
+	 */
+	public Token nextWord() {
+		if (!hasNextWord())
+			throw new IllegalStateException("No more words found!");
+
+		int indexOfSpace = remaining.indexOf(' ');
+		Token token = new Token(this, currentPosition, currentPosition + indexOfSpace);
+
+		stepForward(indexOfSpace + 1);
+
+		return token;
 	}
 
 	/**
