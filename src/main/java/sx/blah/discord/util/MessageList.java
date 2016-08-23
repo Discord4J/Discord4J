@@ -334,7 +334,20 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return The message object found, or null if nonexistent.
 	 */
 	public IMessage get(String id) {
-		return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+		
+		if (message == null && hasPermission && client.isReady())
+			try {
+				return DiscordUtils.getMessageFromJSON(client, channel,
+						DiscordUtils.GSON.fromJson(
+								client.REQUESTS.GET.makeRequest(
+										DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+										new BasicNameValuePair("content-type", "application/json"),
+										new BasicNameValuePair("authorization", client.getToken())),
+								MessageResponse.class));
+			} catch (Exception e) {}
+		
+		return message;
 	}
 
 	/**
