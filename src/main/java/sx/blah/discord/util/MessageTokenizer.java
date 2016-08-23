@@ -80,6 +80,43 @@ public class MessageTokenizer {
 			content = tokenizer.getContent().substring(startIndex, endIndex);
 		}
 
+		/**
+		 * Get the tokenizer object this token is associated with.
+		 *
+		 * @return The tokenizer
+		 */
+		public MessageTokenizer getTokenizer() {
+			return tokenizer;
+		}
+
+		/**
+		 * Get the content that makes up this token.
+		 *
+		 * @return The string of content
+		 */
+		public String getContent() {
+			return content;
+		}
+
+		/**
+		 * Get the start index which is where this token starts in the tokenizer's contents.
+		 *
+		 * @return The start index
+		 */
+		public int getStartIndex() {
+			return startIndex;
+		}
+
+		/**
+		 * Get the end index which is the index at which this token terminates, exclusive. Acts like the second
+		 * parameter in
+		 * {@link String#substring(int, int)}.
+		 *
+		 * @return The end index
+		 */
+		public int getEndIndex() {
+			return endIndex;
+		}
 	}
 
 	public static abstract class MentionToken<T extends IDiscordObject<?>> extends Token {
