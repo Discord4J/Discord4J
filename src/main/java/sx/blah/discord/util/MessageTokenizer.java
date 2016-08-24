@@ -3,6 +3,8 @@ package sx.blah.discord.util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
+import java.util.regex.Pattern;
+
 /**
  * A utility class to traverse through a message's contents and step through tokens like mentions, characters, words,
  * etc.
@@ -11,8 +13,11 @@ import sx.blah.discord.handle.obj.*;
  */
 public class MessageTokenizer {
 
+	public static final String ANY_MENTION_REGEX = "<((@[!&]?)|#)\\d+>";
+
 	private final String content;
 	private final IDiscordClient client;
+	private final Pattern anyMentionPattern = Pattern.compile(ANY_MENTION_REGEX);
 	private int currentPosition = 0;
 	/**
 	 * The remaining substring.
@@ -64,6 +69,19 @@ public class MessageTokenizer {
 	}
 
 	/**
+	 * Steps to the desired index.
+	 *
+	 * @param index The index to step to
+	 * @return The new current position
+	 * @see MessageTokenizer#stepForward(int)
+	 */
+	public int stepForwardTo(int index) {
+		if (index < currentPosition)
+			throw new IllegalArgumentException("Cannot go backwards!");
+		return stepForward(index - currentPosition);
+	}
+
+	/**
 	 * Returns true if the traverser isn't at the end of the string.
 	 *
 	 * @return True if we have another char to step to
@@ -103,8 +121,8 @@ public class MessageTokenizer {
 	 * @return True if there is another word to step to
 	 */
 	public boolean hasNextWord() {
-		int index = remaining.lastIndexOf(' ');
-		return index < remaining.length() - 2 && index > -1;
+		int index = remaining.indexOf(' ');
+		return hasNext() && index < remaining.length() - 1;
 	}
 
 	/**
@@ -118,11 +136,85 @@ public class MessageTokenizer {
 			throw new IllegalStateException("No more words found!");
 
 		int indexOfSpace = remaining.indexOf(' ');
+		if (indexOfSpace == -1) {
+			indexOfSpace = content.length() - currentPosition;
+		}
 		Token token = new Token(this, currentPosition, currentPosition + indexOfSpace);
 
 		stepForward(indexOfSpace + 1);
 
 		return token;
+	}
+
+	/**
+	 * Returns true if there is a line to go to.
+	 *
+	 * @return True if there is a line available
+	 */
+	public boolean hasNextLine() {
+		return hasNext();
+	}
+
+	/**
+	 * Returns the current text, up to the next newline/end, stepping forward the tokenizer to the next line.
+	 *
+	 * @return The line
+	 */
+	public Token nextLine() {
+		if (!hasNextLine())
+			throw new IllegalStateException("No more lines found!");
+
+		int indexOfNewline = remaining.indexOf('\n');
+		if (indexOfNewline == -1) {
+			indexOfNewline = content.length() - currentPosition;
+		}
+		Token token = new Token(this, currentPosition, currentPosition + indexOfNewline);
+
+		stepForward(indexOfNewline + 1);
+
+		return token;
+	}
+
+	/**
+	 * Returns true if there is a mention to go to.
+	 *
+	 * @return True if there is a mention to go to.
+	 */
+	public boolean hasNextMention() {
+		return hasNext() && anyMentionPattern.matcher(remaining).find();
+	}
+
+	/**
+	 * Returns the next mention, stepping forward the tokenizer to the end of the mention (exclusive).
+	 *
+	 * @return The next mention token
+	 * @see MentionToken
+	 */
+	public MentionToken nextMention() {
+		if (!hasNextMention())
+			throw new IllegalStateException("No more mentions found!");
+
+		int lessThan = remaining.indexOf('<');
+		int greaterThan = remaining.indexOf('>') + 1;
+		final String matched = remaining.substring(lessThan, greaterThan);
+		final char type = matched.charAt(1);
+
+		lessThan += currentPosition;
+		greaterThan += currentPosition;
+		stepForwardTo(greaterThan);
+
+		if (type == '@') {
+			if (matched.charAt(2) == '&') {
+				return new RoleMentionToken(this, lessThan, greaterThan);
+			}
+
+			return new UserMentionToken(this, lessThan, greaterThan);
+		} else if (type == '#') {
+			return new ChannelMentionToken(this, lessThan, greaterThan);
+		}
+
+		// should NEVER happen because hasNextMention will ensure we get a mention
+		throw new IllegalStateException("Couldn't find a mention even though it was found!");
 	}
 
 	/**
@@ -220,11 +312,16 @@ public class MessageTokenizer {
 		public int getEndIndex() {
 			return endIndex;
 		}
+
+		@Override
+		public String toString() {
+			return content;
+		}
 	}
 
-	public static abstract class MentionToken<T extends IDiscordObject<?>> extends Token {
+	public static abstract class MentionToken<T extends IDiscordObject> extends Token {
 
-		private final T mention;
+		protected T mention;
 
 		/**
 		 * A mention of any type with its content and position.
@@ -234,55 +331,71 @@ public class MessageTokenizer {
 		 * @param endIndex      The end index of the tokenizer's contents, exclusive
 		 * @param mentionObject The object the mention is associated with
 		 */
-		MentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, T mentionObject) {
+		private MentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, T mentionObject) {
 			super(tokenizer, startIndex, endIndex);
 
 			mention = mentionObject;
 		}
 	}
 
-	public static abstract class UserMentionToken<T extends IUser> extends MentionToken {
+	public static class UserMentionToken extends MentionToken<IUser> {
+
+		private final boolean isNickname;
 
 		/**
-		 * A user mention with its content and position.
+		 * A user mention with its content and position. It will grab the user from the content.
 		 *
 		 * @param tokenizer  The tokenizer
 		 * @param startIndex The start index of the tokenizer's contents
 		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 * @param user       The user object it's associated with
 		 */
-		UserMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, IUser user) {
-			super(tokenizer, startIndex, endIndex, user);
+		private UserMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex, null);
+
+			mention = tokenizer.getClient().getUserByID(getContent().replaceAll("<@!?", "").replace(">", ""));
+
+			isNickname = getContent().contains("<@!");
+		}
+
+		/**
+		 * Returns true if the mention type is for nicknames. (<@!)
+		 *
+		 * @return True if the mention is for nicknames, false if it's for the username
+		 */
+		public boolean isNickname() {
+			return isNickname;
 		}
 	}
 
-	public static abstract class RoleMentionToken<T extends IRole> extends MentionToken {
+	public static class RoleMentionToken extends MentionToken<IRole> {
 
 		/**
-		 * A role mention with its content and position.
+		 * A role mention with its content and position. It will grab the role from the content.
 		 *
 		 * @param tokenizer  The tokenizer
 		 * @param startIndex The start index of the tokenizer's contents
 		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 * @param role       The role object it's associated with
 		 */
-		RoleMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, IRole role) {
-			super(tokenizer, startIndex, endIndex, role);
+		private RoleMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex, null);
+
+			mention = tokenizer.getClient().getRoleByID(getContent().replace("<@&", "").replace(">", ""));
 		}
 	}
 
-	public static abstract class ChannelMentionToken<T extends IChannel> extends MentionToken {
+	public static class ChannelMentionToken extends MentionToken<IChannel> {
 
 		/**
-		 * A channel mention with its content and position.
+		 * A channel mention with its content and position. It will grab the channel from the content.
 		 *
 		 * @param tokenizer  The tokenizer
 		 * @param startIndex The start index of the tokenizer's contents
 		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 * @param channel    The channel object it's associated with
 		 */
-		ChannelMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, IChannel channel) {
-			super(tokenizer, startIndex, endIndex, channel);
+		private ChannelMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex, null);
+
+			mention = tokenizer.getClient().getChannelByID(getContent().replace("<#", "").replace(">", ""));
 		}
 	}
 
