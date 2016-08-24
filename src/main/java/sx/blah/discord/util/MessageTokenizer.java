@@ -3,6 +3,7 @@ package sx.blah.discord.util;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -54,15 +55,12 @@ public class MessageTokenizer {
 	/**
 	 * Steps forward the current position and updates the internal remaining string.
 	 *
-	 * @param amount The amount to step forward, must be zero or higher
+	 * @param amount The amount to step forward
 	 * @return The new current position
 	 */
 	public int stepForward(int amount) {
-		if (amount < 0)
-			throw new IllegalArgumentException("Amount cannot be negative!");
-
 		currentPosition += amount;
-		currentPosition = Math.min(currentPosition, content.length());
+		currentPosition = Math.max(0, Math.min(currentPosition, content.length()));
 		remaining = content.substring(currentPosition);
 
 		return currentPosition;
@@ -76,8 +74,6 @@ public class MessageTokenizer {
 	 * @see MessageTokenizer#stepForward(int)
 	 */
 	public int stepForwardTo(int index) {
-		if (index < currentPosition)
-			throw new IllegalArgumentException("Cannot go backwards!");
 		return stepForward(index - currentPosition);
 	}
 
@@ -194,8 +190,11 @@ public class MessageTokenizer {
 		if (!hasNextMention())
 			throw new IllegalStateException("No more mentions found!");
 
-		int lessThan = remaining.indexOf('<');
-		int greaterThan = remaining.indexOf('>') + 1;
+		Matcher matcher = anyMentionPattern.matcher(remaining);
+		if (!matcher.find())
+			throw new IllegalStateException("Couldn't find any matches!");
+		int lessThan = matcher.start();
+		int greaterThan = matcher.end() + 1;
 		final String matched = remaining.substring(lessThan, greaterThan);
 		final char type = matched.charAt(1);
 
