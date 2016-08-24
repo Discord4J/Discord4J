@@ -39,12 +39,15 @@ public class MessageTokenizer {
 	 *
 	 * @param content What you want to traverse
 	 * @param client  The Discord client that will be used to get objects from
+	 * @throws IllegalArgumentException If content is null, empty, or client is null
 	 */
 	public MessageTokenizer(IDiscordClient client, String content) {
 		if (content == null)
 			throw new IllegalArgumentException("Content cannot be null!");
 		if (content.length() == 0)
 			throw new IllegalArgumentException("Content must have length!");
+		if (client == null)
+			throw new IllegalArgumentException("Client cannot be null!");
 
 		this.content = content;
 		this.client = client;
@@ -173,14 +176,15 @@ public class MessageTokenizer {
 
 	/**
 	 * Returns true if an occurence of the regex pattern exists.
+	 *
 	 * @param pattern The regex pattern
 	 * @return True if there is an occurence
 	 */
-	public boolean hasNextRegex(Pattern pattern){
+	public boolean hasNextRegex(Pattern pattern) {
 		return hasNext() && pattern.matcher(remaining).find();
 	}
 
-	public Token nextRegex(Pattern pattern){
+	public Token nextRegex(Pattern pattern) {
 		if (!hasNextRegex(pattern))
 			throw new IllegalStateException("No more occurrences found!");
 
