@@ -23,10 +23,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,6 +181,22 @@ public class DiscordUtils {
 			}
 
 		return attachments;
+	}
+
+	/**
+	 * Gets the embedded attachments on a message.
+	 *
+	 * @param json The json response to use.
+	 * @return The embedded messages.
+	 */
+	public static List<IMessage.EmbeddedAttachment> getEmbedsFromJSON(MessageResponse json) {
+		List<IMessage.EmbeddedAttachment> embeds = new ArrayList<>();
+		if (json.embeds != null)
+			for (MessageResponse.EmbedResponse response : json.embeds) {
+				embeds.add(new IMessage.EmbeddedAttachment(response.title, response.type, response.description, response.url, response.thumbnail, response.provider));
+			}
+
+		return embeds;
 	}
 
 	/**
@@ -350,6 +363,7 @@ public class DiscordUtils {
 		Message message;
 		if ((message = (Message) channel.getMessageByID(json.id)) != null) {
 			message.setAttachments(getAttachmentsFromJSON(json));
+			message.setEmbeddedAttachments(getEmbedsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
 			message.setMentions(getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json));
@@ -362,7 +376,7 @@ public class DiscordUtils {
 					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ?
 					null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
 					getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json),
-					getAttachmentsFromJSON(json), json.pinned);
+					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json));
 	}
 
 	/**
