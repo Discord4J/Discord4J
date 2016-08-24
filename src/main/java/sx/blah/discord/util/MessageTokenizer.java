@@ -336,6 +336,15 @@ public class MessageTokenizer {
 
 			mention = mentionObject;
 		}
+
+		/**
+		 * Returns the object associated with the mention (IUser, IRole, IChannel, etc).
+		 *
+		 * @return The object associated with the mention
+		 */
+		public T getMentionObject() {
+			return mention;
+		}
 	}
 
 	public static class UserMentionToken extends MentionToken<IUser> {
