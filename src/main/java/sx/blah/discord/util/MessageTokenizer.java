@@ -73,7 +73,7 @@ public class MessageTokenizer {
 	 * @return The new current position
 	 * @see MessageTokenizer#stepForward(int)
 	 */
-	public int stepForwardTo(int index) {
+	public int stepTo(int index) {
 		return stepForward(index - currentPosition);
 	}
 
@@ -190,7 +190,7 @@ public class MessageTokenizer {
 		final int start = currentPosition + matcher.start();
 		final int end = currentPosition + matcher.end() + 1;
 
-		stepForwardTo(end);
+		stepTo(end);
 
 		return new Token(this, start, end);
 	}
