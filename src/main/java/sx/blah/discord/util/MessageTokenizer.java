@@ -172,12 +172,36 @@ public class MessageTokenizer {
 	}
 
 	/**
+	 * Returns true if an occurence of the regex pattern exists.
+	 * @param pattern The regex pattern
+	 * @return True if there is an occurence
+	 */
+	public boolean hasNextRegex(Pattern pattern){
+		return hasNext() && pattern.matcher(remaining).find();
+	}
+
+	public Token nextRegex(Pattern pattern){
+		if (!hasNextRegex(pattern))
+			throw new IllegalStateException("No more occurrences found!");
+
+		Matcher matcher = anyMentionPattern.matcher(remaining);
+		if (!matcher.find())
+			throw new IllegalStateException("Couldn't find any matches!");
+		final int start = currentPosition + matcher.start();
+		final int end = currentPosition + matcher.end() + 1;
+
+		stepForwardTo(end);
+
+		return new Token(this, start, end);
+	}
+
+	/**
 	 * Returns true if there is a mention to go to.
 	 *
 	 * @return True if there is a mention to go to.
 	 */
 	public boolean hasNextMention() {
-		return hasNext() && anyMentionPattern.matcher(remaining).find();
+		return hasNextRegex(anyMentionPattern);
 	}
 
 	/**
@@ -190,17 +214,11 @@ public class MessageTokenizer {
 		if (!hasNextMention())
 			throw new IllegalStateException("No more mentions found!");
 
-		Matcher matcher = anyMentionPattern.matcher(remaining);
-		if (!matcher.find())
-			throw new IllegalStateException("Couldn't find any matches!");
-		int lessThan = matcher.start();
-		int greaterThan = matcher.end() + 1;
-		final String matched = remaining.substring(lessThan, greaterThan);
+		Token t = nextRegex(anyMentionPattern);
+		final int lessThan = t.getStartIndex();
+		final int greaterThan = t.getEndIndex();
+		final String matched = t.getContent();
 		final char type = matched.charAt(1);
-
-		lessThan += currentPosition;
-		greaterThan += currentPosition;
-		stepForwardTo(greaterThan);
 
 		if (type == '@') {
 			if (matched.charAt(2) == '&') {
