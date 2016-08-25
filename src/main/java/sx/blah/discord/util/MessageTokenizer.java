@@ -284,11 +284,17 @@ public class MessageTokenizer {
 		 */
 		Token(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			if (startIndex < 0 || startIndex >= tokenizer.getContent().length())
-				throw new IllegalArgumentException("Start index must be within range of content!");
+				throw new IllegalArgumentException("Start index must be within range of content! (Got " + startIndex +
+						" for startIndex, must be between 0 and " + (tokenizer.getContent().length() - 1) +
+						", inclusive)");
 			if (endIndex <= startIndex)
-				throw new IllegalArgumentException("End index cannot be before start index!");
+				throw new IllegalArgumentException(
+						"End index cannot be before or at start index! (Start index is " + startIndex + ", got " +
+								endIndex + ")");
 			if (endIndex > tokenizer.getContent().length())
-				throw new IllegalArgumentException("End index must be within content's length!");
+				throw new IllegalArgumentException(
+						"End index must be within content's length! (End index is " + endIndex + ", length is " +
+								tokenizer.getContent().length() + ")");
 
 			this.tokenizer = tokenizer;
 			this.startIndex = startIndex;
