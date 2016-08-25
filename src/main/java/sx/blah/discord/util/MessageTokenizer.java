@@ -192,7 +192,7 @@ public class MessageTokenizer {
 		if (!matcher.find())
 			throw new IllegalStateException("Couldn't find any matches!");
 		final int start = currentPosition + matcher.start();
-		final int end = currentPosition + matcher.end() + 1;
+		final int end = currentPosition + matcher.end();
 
 		stepTo(end);
 
