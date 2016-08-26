@@ -134,7 +134,7 @@ public class MessageTokenizer {
 		if (!hasNextWord())
 			throw new IllegalStateException("No more words found!");
 
-		int indexOfSpace = remaining.indexOf(' ');
+		int indexOfSpace = Math.min(remaining.indexOf(' '), remaining.indexOf('\n'));
 		if (indexOfSpace == -1) {
 			indexOfSpace = content.length() - currentPosition;
 		}
