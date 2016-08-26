@@ -1,4 +1,4 @@
-<img align="right" src="http://i.imgur.com/kRxiZwA.png">
+<img align="right" src="http://i.imgur.com/kRxiZwAm.png">
 # Discord4J [![Build Status](https://drone.io/github.com/austinv11/Discord4J/status.png)](https://drone.io/github.com/austinv11/Discord4J/latest) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY)
 
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
