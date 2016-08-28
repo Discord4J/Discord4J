@@ -184,6 +184,12 @@ public class MessageTokenizer {
 		return hasNext() && pattern.matcher(remaining).find();
 	}
 
+	/**
+	 * Returns the next occurrence of the regular expression, stepping forward the tokenizer to the next line.
+	 *
+	 * @param pattern The regex pattern
+	 * @return The token of the regex occurrence
+	 */
 	public Token nextRegex(Pattern pattern) {
 		if (!hasNextRegex(pattern))
 			throw new IllegalStateException("No more occurrences found!");
