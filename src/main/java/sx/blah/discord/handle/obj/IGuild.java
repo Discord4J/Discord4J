@@ -416,7 +416,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	List<IInvite> getInvites() throws DiscordException, RateLimitException;
+	List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This reorders the position of the roles in this guild.

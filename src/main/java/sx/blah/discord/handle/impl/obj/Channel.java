@@ -486,7 +486,8 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
+	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),

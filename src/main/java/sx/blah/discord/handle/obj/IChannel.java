@@ -313,7 +313,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	List<IInvite> getInvites() throws DiscordException, RateLimitException;
+	List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This gets the users with the ability to read this channel.
