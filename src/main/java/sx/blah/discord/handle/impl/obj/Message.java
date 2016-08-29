@@ -113,16 +113,7 @@ public class Message implements IMessage {
 		this.isPinned = pinned;
 		this.channelMentions = new ArrayList<>();
 
-		Matcher matcher = CHANNEL_PATTERN.matcher(content);
-
-		while (matcher.find()) {
-			String mentionedID = matcher.group(1);
-			IChannel mentioned = channel.getGuild().getChannelByID(mentionedID);
-
-			if (mentioned != null) {
-				channelMentions.add(mentioned);
-			}
-		}
+		setChannelMentions();
 	}
 
 	@Override
@@ -148,6 +139,23 @@ public class Message implements IMessage {
 	public void setMentions(List<String> mentions, List<String> roleMentions) {
 		this.mentions = mentions;
 		this.roleMentions = roleMentions;
+	}
+
+	/**
+	 * Populates the channel mention list.
+	 */
+	public void setChannelMentions() {
+		channelMentions.clear();
+		Matcher matcher = CHANNEL_PATTERN.matcher(content);
+
+		while (matcher.find()) {
+			String mentionedID = matcher.group(1);
+			IChannel mentioned = channel.getGuild().getChannelByID(mentionedID);
+
+			if (mentioned != null) {
+				channelMentions.add(mentioned);
+			}
+		}
 	}
 
 	/**
