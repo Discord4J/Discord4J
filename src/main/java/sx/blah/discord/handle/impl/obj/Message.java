@@ -73,6 +73,10 @@ public class Message implements IMessage {
 	protected volatile List<Attachment> attachments;
 
 	/**
+	 * The attachments, if any, on the message.
+	 */
+	protected volatile List<EmbeddedAttachment> embedded;
+	/**
 	 * Whether the message mentions everyone.
 	 */
 	protected volatile boolean mentionsEveryone;
@@ -90,7 +94,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned) {
+				   boolean pinned, List<EmbeddedAttachment> embedded) {
 		this.client = client;
 		this.id = id;
 		this.content = content;
@@ -103,6 +107,7 @@ public class Message implements IMessage {
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
 		this.isPinned = pinned;
+		this.embedded = embedded;
 	}
 
 	@Override
@@ -137,6 +142,15 @@ public class Message implements IMessage {
 	 */
 	public void setAttachments(List<Attachment> attachments) {
 		this.attachments = attachments;
+	}
+
+	/**
+	 * Sets the CACHED embedded attachments in this message.
+	 *
+	 * @param attachments The new attachements.
+	 */
+	public void setEmbeddedAttachments(List<EmbeddedAttachment> attachments) {
+		this.embedded = attachments;
 	}
 
 	@Override
@@ -187,6 +201,11 @@ public class Message implements IMessage {
 	@Override
 	public List<Attachment> getAttachments() {
 		return attachments;
+	}
+
+	@Override
+	public List<EmbeddedAttachment> getEmbedded() {
+		return embedded;
 	}
 
 	@Override
@@ -295,7 +314,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		Message message = new Message(client, id, content, author, channel, timestamp, editedTimestamp,
-				mentionsEveryone, mentions, roleMentions, attachments, isPinned);
+				mentionsEveryone, mentions, roleMentions, attachments, isPinned, embedded);
 		return message;
 	}
 
