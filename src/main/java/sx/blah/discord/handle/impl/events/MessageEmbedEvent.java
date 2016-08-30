@@ -15,11 +15,11 @@ public class MessageEmbedEvent extends Event {
 
 	private final List<IMessage.EmbeddedAttachment> newEmbed;
 
-	public MessageEmbedEvent(IMessage message, List<IMessage.EmbeddedAttachment> oldEmbed) {
+	public MessageEmbedEvent (IMessage message, List<IMessage.EmbeddedAttachment> oldEmbed) {
 		this.message = message;
 		List<IMessage.EmbeddedAttachment> tempArray = new ArrayList<>();
-		for(IMessage.EmbeddedAttachment attachment : message.getEmbedded()){
-			if(!oldEmbed.contains(attachment)){
+		for (IMessage.EmbeddedAttachment attachment : message.getEmbedded()) {
+			if (!oldEmbed.contains(attachment)) {
 				tempArray.add(attachment);
 			}
 		}
