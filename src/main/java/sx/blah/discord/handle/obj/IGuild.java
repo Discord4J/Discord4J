@@ -3,14 +3,13 @@ package sx.blah.discord.handle.obj;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class defines a guild/server/clan/whatever it's called.
@@ -415,6 +414,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws DiscordException
 	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
 	List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException;
 

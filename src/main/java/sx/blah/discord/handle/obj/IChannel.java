@@ -312,6 +312,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @throws DiscordException
 	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
 	List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException;
 
