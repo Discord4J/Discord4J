@@ -8,7 +8,11 @@ import java.util.regex.Pattern;
 
 /**
  * A utility class to traverse through a message's contents and step through tokens like mentions, characters, words,
- * etc.
+ * etc. The tokenizer has an internal pointer of where it's at in the message. Everytime you call nextX, the internal
+ * pointer will move <b>past</b> the token it found. For example, if the string is <code>this is a string of
+ * words</code>, when {@link #nextWord()} is first called, it will return <code>this</code>, and move to the first
+ * space. Calling {@link #nextChar()} will return that space, and move to <code>i</code>, in <code>is a...</code>,
+ * and so forth.
  *
  * @author chrislo27
  */
