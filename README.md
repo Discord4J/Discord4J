@@ -4,11 +4,11 @@
 Java interface for the unofficial [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
 
-For the latest dev builds, [download it from my ci server.](https://drone.io/github.com/austinv11/Discord4J/files)
+For the latest dev builds, [download it from my CI server.](https://drone.io/github.com/austinv11/Discord4J/files)
 
 ## Adding Discord4J as a dependency for a project
 Given that `@VERSION@` = the a version of Discord4J (this can either be a release version, the short commit hash or `dev-SNAPSHOT`).
-### With maven
+### With Maven
 In your `pom.xml` add:
 ```xml
 ...
@@ -57,7 +57,6 @@ dependencies {
 ## So, how do I use this?
 ### Tutorials/Resources
 * The [Discord4J Tutorial Series](http://blog.darichey.com/) maintained by @Panda
-* The [Discord4J Read The Docs](https://discord4j.readthedocs.org/en/latest/index.html) maintained by @TheFjong.
 * A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by @oopsjpeg
 * A Discord Bot [quick start example](https://gist.github.com/iabarca/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @quantic
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
@@ -68,13 +67,13 @@ Example:
 ```java
 public class Example {
 
-  public static IDiscordClient getClient(String token, boolean login) { //Returns an instance of the discord client
-    ClientBuilder clientBuilder = new ClientBuilder(); //Creates the ClientBuilder instance
-    clientBuilder.withToken(token); //Adds the login info to the builder
+  public static IDiscordClient getClient(String token, boolean login) { // Returns an instance of the Discord client
+    ClientBuilder clientBuilder = new ClientBuilder(); // Creates the ClientBuilder instance
+    clientBuilder.withToken(token); // Adds the login info to the builder
     if (login) {
-      return clientBuilder.login(); //Creates the client instance and logs the client in
+      return clientBuilder.login(); // Creates the client instance and logs the client in
     } else {
-      return clientBuilder.build(); //Creates the client instance but it doesn't log the client in yet, you would have to call client.login() yourself
+      return clientBuilder.build(); // Creates the client instance but it doesn't log the client in yet, you would have to call client.login() yourself
     }
   }
 }
@@ -84,10 +83,10 @@ The Discord4J library is very event driven. Your bot can detect these events thr
 
 1. Using `IListener`:
 ```java
-public class InterfaceListener implements IListener<ReadyEvent> { //The event type in IListener<> can be any class which extends Event
+public class InterfaceListener implements IListener<ReadyEvent> { // The event type in IListener<> can be any class which extends Event
   
   @Override
-  public void handle(ReadyEvent event) { //This is called when the ReadyEvent is dispatched
+  public void handle(ReadyEvent event) { // This is called when the ReadyEvent is dispatched
     doCoolStuff();
   }
 }
@@ -98,11 +97,11 @@ public class InterfaceListener implements IListener<ReadyEvent> { //The event ty
 public class AnnotationListener {
   
   @EventSubscriber
-  public void onReadyEvent(ReadyEvent event) { //This method is called when the ReadyEvent is dispatched
+  public void onReadyEvent(ReadyEvent event) { // This method is called when the ReadyEvent is dispatched
     foo();
   }
   
-  public void onMessageReceivedEvent(MessageReceivedEvent event) { //This method is NOT called because it doesn't have the @EventSubscriber annotation
+  public void onMessageReceivedEvent(MessageReceivedEvent event) { // This method is NOT called because it doesn't have the @EventSubscriber annotation
     bar();
   }
 }
@@ -113,16 +112,17 @@ Registering your listener:
 public class Main {
   
   public static void main(String[] args) {
-    IDiscordClient client = Example.getClient(args[0], args[1], true); //Gets the client object (from the first example)
-    EventDispatcher dispatcher = client.getDispatcher(); //Gets the EventDispatcher instance for this client instance
-    dispatcher.registerListener(new InterfaceListener()); //Registers the IListener example class from above
-    dispatcher.registerListener(new AnnotationListener()); //Registers the @EventSubscriber example class from above
+    IDiscordClient client = Example.getClient(args[0], args[1], true); // Gets the client object (from the first example)
+    EventDispatcher dispatcher = client.getDispatcher(); // Gets the EventDispatcher instance for this client instance
+    dispatcher.registerListener(new InterfaceListener()); // Registers the IListener example class from above
+    dispatcher.registerListener(new AnnotationListener()); // Registers the @EventSubscriber example class from above
   }
 }
 ```
 
 ### Modules
-Discord4J has an api for creating modular Discord Bots! See [Martacus's sample repo](https://github.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
+Discord4J has an API for creating modular Discord Bots! See [Martacus's sample repo](https://github
+.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
 
 ### More examples
 See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
@@ -134,7 +134,8 @@ See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/
 * Instructability by @Kaioru: A simple command API (https://github.com/Kaioru/Instructability)
 
 ## Deprecation policy
-Due to the nature of the discord api, any deprecations found in the api should not be expected to last past the current version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
+Due to the nature of the Discord API, any deprecations found in the API should not be expected to last past the current
+ version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
 
 ## Development
 The Discord API is still in development. Functions may break at any time.  
