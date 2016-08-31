@@ -192,11 +192,11 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The embedded messages.
 	 */
-	public static List<IMessage.EmbeddedAttachment> getEmbedsFromJSON(MessageResponse json) {
-		List<IMessage.EmbeddedAttachment> embeds = new ArrayList<>();
+	public static List<Embedded> getEmbedsFromJSON(MessageResponse json) {
+		List<Embedded> embeds = new ArrayList<>();
 		if (json.embeds != null)
 			for (MessageResponse.EmbedResponse response : json.embeds) {
-				embeds.add(new IMessage.EmbeddedAttachment(response.title, response.type, response.description, response.url, response.thumbnail, response.provider));
+				embeds.add(new Embedded(response.title, response.type, response.description, response.url, response.thumbnail, response.provider));
 			}
 
 		return embeds;
@@ -366,7 +366,7 @@ public class DiscordUtils {
 		Message message;
 		if ((message = (Message) channel.getMessageByID(json.id)) != null) {
 			message.setAttachments(getAttachmentsFromJSON(json));
-			message.setEmbeddedAttachments(getEmbedsFromJSON(json));
+			message.setEmbedded(getEmbedsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
 			message.setMentions(getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json));

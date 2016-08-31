@@ -15,13 +15,9 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.json.requests.MessageRequest;
 import sx.blah.discord.json.responses.MessageResponse;
 import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.api.internal.Requests;
 
 import java.time.LocalDateTime;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Message implements IMessage {
@@ -75,7 +71,7 @@ public class Message implements IMessage {
 	/**
 	 * The attachments, if any, on the message.
 	 */
-	protected volatile List<EmbeddedAttachment> embedded;
+	protected volatile List<Embedded> embedded;
 	/**
 	 * Whether the message mentions everyone.
 	 */
@@ -94,7 +90,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<EmbeddedAttachment> embedded) {
+				   boolean pinned, List<Embedded> embedded) {
 		this.client = client;
 		this.id = id;
 		this.content = content;
@@ -149,7 +145,7 @@ public class Message implements IMessage {
 	 *
 	 * @param attachments The new attachements.
 	 */
-	public void setEmbeddedAttachments(List<EmbeddedAttachment> attachments) {
+	public void setEmbedded(List<Embedded> attachments) {
 		this.embedded = attachments;
 	}
 
@@ -204,8 +200,11 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public List<EmbeddedAttachment> getEmbedded() {
-		return embedded;
+	public List<IEmbedded> getEmbedded() {
+		List<IEmbedded> interfaces = new ArrayList<>();
+		for(Embedded embed : embedded)
+			interfaces.add(embed);
+		return interfaces;
 	}
 
 	@Override

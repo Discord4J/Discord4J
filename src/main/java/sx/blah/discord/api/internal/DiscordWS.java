@@ -639,7 +639,7 @@ public class DiscordWS {
 				} else {
 					client.dispatcher.dispatch(new MessageReceivedEvent(message));
 					if(!message.getEmbedded().isEmpty()){
-						client.dispatcher.dispatch(new MessageEmbedEvent(message, new ArrayList<IMessage.EmbeddedAttachment>()));
+						client.dispatcher.dispatch(new MessageEmbedEvent(message, new ArrayList<IEmbedded>()));
 					}
 				}
 			}
