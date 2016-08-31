@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.handle.obj.IEmbedded;
+import sx.blah.discord.handle.obj.IMessage.IEmbedded;
 import sx.blah.discord.json.responses.MessageResponse;
 
 public class Embedded implements IEmbedded {
