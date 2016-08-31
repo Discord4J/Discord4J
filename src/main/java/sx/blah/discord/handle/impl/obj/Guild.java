@@ -577,7 +577,8 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
+	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -691,7 +692,7 @@ public class Guild implements IGuild {
 									.flatMap(List::stream)
 									.filter(msg -> msg.getID().equalsIgnoreCase(id))
 									.findAny().orElse(null);
-		
+
 		if (message == null) {
 			for (IChannel channel : channels) {
 				message = channel.getMessageByID(id);
@@ -699,7 +700,7 @@ public class Guild implements IGuild {
 					return message;
 			}
 		}
-		
+
 		return message;
 	}
 
