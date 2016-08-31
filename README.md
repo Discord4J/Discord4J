@@ -60,8 +60,6 @@ dependencies {
 * A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by @oopsjpeg
 * A Discord Bot [quick start example](https://gist.github.com/iabarca/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @quantic
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
-* **Outdated! Pre-v2.5.0 only!** The [Discord4J Read The Docs](https://discord4j.readthedocs.org/en/latest/index
-.html) maintained by @TheFjong.
 
 ### Starting with the API
 The very first thing you need to do is obtain a "DiscordClient" object. This can be done by using the `ClientBuilder`.
