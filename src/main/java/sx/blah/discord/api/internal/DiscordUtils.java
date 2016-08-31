@@ -358,6 +358,8 @@ public class DiscordUtils {
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
 			message.setEditedTimestamp(json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
 			message.setPinned(json.pinned);
+			message.setChannelMentions();
+
 			return message;
 		} else
 			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),

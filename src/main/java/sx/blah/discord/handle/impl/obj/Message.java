@@ -3,24 +3,23 @@ package sx.blah.discord.handle.impl.obj;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
-import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
 import sx.blah.discord.api.internal.json.responses.MessageResponse;
+import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 import java.time.LocalDateTime;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Message implements IMessage {
@@ -82,9 +81,19 @@ public class Message implements IMessage {
 	protected volatile boolean isPinned;
 
 	/**
+	 * The list of channels mentioned by this message.
+	 */
+	protected final List<IChannel> channelMentions;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
+
+	/**
+	 * The pattern for matching channel mentions.
+	 */
+	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
 
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
@@ -102,6 +111,9 @@ public class Message implements IMessage {
 		this.attachments = attachments;
 		this.mentionsEveryone = mentionsEveryone;
 		this.isPinned = pinned;
+		this.channelMentions = new ArrayList<>();
+
+		setChannelMentions();
 	}
 
 	@Override
@@ -127,6 +139,23 @@ public class Message implements IMessage {
 	public void setMentions(List<String> mentions, List<String> roleMentions) {
 		this.mentions = mentions;
 		this.roleMentions = roleMentions;
+	}
+
+	/**
+	 * Populates the channel mention list.
+	 */
+	public void setChannelMentions() {
+		channelMentions.clear();
+		Matcher matcher = CHANNEL_PATTERN.matcher(content);
+
+		while (matcher.find()) {
+			String mentionedID = matcher.group(1);
+			IChannel mentioned = channel.getGuild().getChannelByID(mentionedID);
+
+			if (mentioned != null) {
+				channelMentions.add(mentioned);
+			}
+		}
 	}
 
 	/**
@@ -172,7 +201,7 @@ public class Message implements IMessage {
 		if (mentionsEveryone)
 			return channel.getGuild().getUsers();
 		return mentions.stream()
-				.map(m -> client.getUserByID(m))
+				.map(client::getUserByID)
 				.collect(Collectors.toList());
 	}
 
@@ -181,6 +210,11 @@ public class Message implements IMessage {
 		return roleMentions.stream()
 				.map(m -> getGuild().getRoleByID(m))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IChannel> getChannelMentions() {
+		return channelMentions;
 	}
 
 	@Override
@@ -297,9 +331,8 @@ public class Message implements IMessage {
 
 	@Override
 	public IMessage copy() {
-		Message message = new Message(client, id, content, author, channel, timestamp, editedTimestamp,
+		return new Message(client, id, content, author, channel, timestamp, editedTimestamp,
 				mentionsEveryone, mentions, roleMentions, attachments, isPinned);
-		return message;
 	}
 
 	@Override
@@ -324,9 +357,6 @@ public class Message implements IMessage {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IMessage) other).getID().equals(getID());
+		return other != null && this.getClass().isAssignableFrom(other.getClass()) && ((IMessage) other).getID().equals(getID());
 	}
 }
