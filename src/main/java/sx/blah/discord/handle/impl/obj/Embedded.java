@@ -108,7 +108,7 @@ public class Embedded implements IEmbedded {
 	/**
 	 * Represents a site that provides media which is embedded in chat. Eg. Youtube, Imgur.
 	 */
-	public class EmbedProvider implements IEmbedProvider{
+	public class EmbedProvider implements IEmbedProvider {
 
 		/**
 		 * The name of the Embedded Media Provider
@@ -120,7 +120,7 @@ public class Embedded implements IEmbedded {
 		 */
 		protected String url;
 
-		public EmbedProvider( String name, String url){
+		public EmbedProvider( String name, String url) {
 			this.name = name;
 			this.url = url;
 		}
@@ -130,7 +130,7 @@ public class Embedded implements IEmbedded {
 		 *
 		 * @return The Embedded Media Provider's Name
 		 */
-		public String getName(){
+		public String getName() {
 			return name;
 		}
 
