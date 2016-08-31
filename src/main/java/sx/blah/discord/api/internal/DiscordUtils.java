@@ -599,7 +599,7 @@ public class DiscordUtils {
 	 */
 	public static LocalDateTime getSnowflakeTimeFromID(String id) {
 		long milliseconds = DISCORD_EPOCH.add(new BigInteger(id).shiftRight(22)).longValue();
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.of("UTC+00:00"));
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
 	}
 
 	/**
