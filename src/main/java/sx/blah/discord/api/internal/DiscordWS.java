@@ -638,7 +638,7 @@ public class DiscordWS {
 					((Channel) message.getChannel()).setTypingStatus(false); //Messages being sent should stop the bot from typing
 				} else {
 					client.dispatcher.dispatch(new MessageReceivedEvent(message));
-					if(!message.getEmbedded().isEmpty()){
+					if(!message.getEmbedded().isEmpty()) {
 						client.dispatcher.dispatch(new MessageEmbedEvent(message, new ArrayList<IEmbedded>()));
 					}
 				}
@@ -738,7 +738,7 @@ public class DiscordWS {
 				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
 			} else if (!oldMessage.isPinned() && event.pinned) {
 				client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
-			} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()){
+			} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
 				client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
 			} else {
 				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
