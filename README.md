@@ -57,10 +57,11 @@ dependencies {
 ## So, how do I use this?
 ### Tutorials/Resources
 * The [Discord4J Tutorial Series](http://blog.darichey.com/) maintained by @Panda
-* The [Discord4J Read The Docs](https://discord4j.readthedocs.org/en/latest/index.html) maintained by @TheFjong.
 * A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by @oopsjpeg
 * A Discord Bot [quick start example](https://gist.github.com/iabarca/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @quantic
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
+* **Outdated! Pre-v2.5.0 only!** The [Discord4J Read The Docs](https://discord4j.readthedocs.org/en/latest/index
+.html) maintained by @TheFjong.
 
 ### Starting with the API
 The very first thing you need to do is obtain a "DiscordClient" object. This can be done by using the `ClientBuilder`.
@@ -68,7 +69,7 @@ Example:
 ```java
 public class Example {
 
-  public static IDiscordClient getClient(String token, boolean login) { // Returns an instance of the discord client
+  public static IDiscordClient getClient(String token, boolean login) { // Returns an instance of the Discord client
     ClientBuilder clientBuilder = new ClientBuilder(); // Creates the ClientBuilder instance
     clientBuilder.withToken(token); // Adds the login info to the builder
     if (login) {
@@ -135,7 +136,7 @@ See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/
 * Instructability by @Kaioru: A simple command API (https://github.com/Kaioru/Instructability)
 
 ## Deprecation policy
-Due to the nature of the discord API, any deprecations found in the API should not be expected to last past the current
+Due to the nature of the Discord API, any deprecations found in the API should not be expected to last past the current
  version. Meaning that if a method is deprecated on version 2.1.0, do not assume the method will be available in version 2.2.0.
 
 ## Development
