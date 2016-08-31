@@ -145,15 +145,17 @@ public class Message implements IMessage {
 	 * Populates the channel mention list.
 	 */
 	public void setChannelMentions() {
-		channelMentions.clear();
-		Matcher matcher = CHANNEL_PATTERN.matcher(content);
+		if (content != null) {
+			channelMentions.clear();
+			Matcher matcher = CHANNEL_PATTERN.matcher(content);
 
-		while (matcher.find()) {
-			String mentionedID = matcher.group(1);
-			IChannel mentioned = channel.getGuild().getChannelByID(mentionedID);
+			while (matcher.find()) {
+				String mentionedID = matcher.group(1);
+				IChannel mentioned = channel.getGuild().getChannelByID(mentionedID);
 
-			if (mentioned != null) {
-				channelMentions.add(mentioned);
+				if (mentioned != null) {
+					channelMentions.add(mentioned);
+				}
 			}
 		}
 	}
