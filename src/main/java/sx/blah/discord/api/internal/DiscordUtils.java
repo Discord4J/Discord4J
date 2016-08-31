@@ -358,6 +358,8 @@ public class DiscordUtils {
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
 			message.setEditedTimestamp(json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
 			message.setPinned(json.pinned);
+			message.setChannelMentions();
+
 			return message;
 		} else
 			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author),
@@ -597,7 +599,7 @@ public class DiscordUtils {
 	 */
 	public static LocalDateTime getSnowflakeTimeFromID(String id) {
 		long milliseconds = DISCORD_EPOCH.add(new BigInteger(id).shiftRight(22)).longValue();
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.of("UTC+00:00"));
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
 	}
 
 	/**

@@ -61,6 +61,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	List<IRole> getRoleMentions();
 
 	/**
+	 * Gets the channels mentioned in this message.
+	 *
+	 * @return The channels mentioned.
+	 */
+	List<IChannel> getChannelMentions();
+
+	/**
 	 * Gets the attachments in this message.
 	 *
 	 * @return The attachments.
