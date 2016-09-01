@@ -3,6 +3,7 @@ package sx.blah.discord.api.events;
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.lang.reflect.InvocationTargetException;
@@ -266,7 +267,7 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public synchronized void dispatch(Event event) {
-		if (client.isReady()) {
+		if (client.isReady() || event instanceof DiscordDisconnectedEvent) {
 			eventExecutor.submit(() -> {
 				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 				event.client = client;
