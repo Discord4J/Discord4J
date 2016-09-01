@@ -71,6 +71,11 @@ public class Message implements IMessage {
 	protected volatile List<Attachment> attachments;
 
 	/**
+	 * The Embeds, if any, on the message.
+	 */
+	protected volatile List<Embedded> embedded;
+
+	/**
 	 * Whether the message mentions everyone.
 	 */
 	protected volatile boolean mentionsEveryone;
@@ -98,7 +103,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned) {
+				   boolean pinned, List<Embedded> embedded) {
 		this.client = client;
 		this.id = id;
 		this.content = content;
@@ -112,6 +117,7 @@ public class Message implements IMessage {
 		this.mentionsEveryone = mentionsEveryone;
 		this.isPinned = pinned;
 		this.channelMentions = new ArrayList<>();
+		this.embedded = embedded;
 
 		setChannelMentions();
 	}
@@ -169,6 +175,15 @@ public class Message implements IMessage {
 		this.attachments = attachments;
 	}
 
+	/**
+	 * Sets the CACHED embedded attachments in this message.
+	 *
+	 * @param attachments The new attachements.
+	 */
+	public void setEmbedded(List<Embedded> attachments) {
+		this.embedded = attachments;
+	}
+
 	@Override
 	public IChannel getChannel() {
 		return channel;
@@ -222,6 +237,14 @@ public class Message implements IMessage {
 	@Override
 	public List<Attachment> getAttachments() {
 		return attachments;
+	}
+
+	@Override
+	public List<IEmbedded> getEmbedded() {
+		List<IEmbedded> interfaces = new ArrayList<>();
+		for(Embedded embed : embedded)
+			interfaces.add(embed);
+		return interfaces;
 	}
 
 	@Override
@@ -334,7 +357,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp,
-				mentionsEveryone, mentions, roleMentions, attachments, isPinned);
+				mentionsEveryone, mentions, roleMentions, attachments, isPinned, embedded);
 	}
 
 	@Override

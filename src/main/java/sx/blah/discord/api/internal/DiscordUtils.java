@@ -186,6 +186,22 @@ public class DiscordUtils {
 	}
 
 	/**
+	 * Gets the embedded attachments on a message.
+	 *
+	 * @param json The json response to use.
+	 * @return The embedded messages.
+	 */
+	public static List<Embedded> getEmbedsFromJSON(MessageResponse json) {
+		List<Embedded> embeds = new ArrayList<>();
+		if (json.embeds != null)
+			for (MessageResponse.EmbedResponse response : json.embeds) {
+				embeds.add(new Embedded(response.title, response.type, response.description, response.url, response.thumbnail, response.provider));
+			}
+
+		return embeds;
+	}
+
+	/**
 	 * Creates a guild object from a json response.
 	 *
 	 * @param client The discord client.
@@ -352,6 +368,7 @@ public class DiscordUtils {
 		if (channel.getMessages() != null && channel.getMessages().contains(json.id)) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
+			message.setEmbedded(getEmbedsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
 			message.setMentions(getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json));
@@ -366,7 +383,7 @@ public class DiscordUtils {
 					channel, convertFromTimestamp(json.timestamp), json.edited_timestamp == null ?
 					null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
 					getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json),
-					getAttachmentsFromJSON(json), json.pinned);
+					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json));
 	}
 
 	/**
