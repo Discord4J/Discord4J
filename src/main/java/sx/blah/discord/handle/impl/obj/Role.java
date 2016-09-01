@@ -186,10 +186,6 @@ public class Role implements IRole {
 	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		if (((Guild) guild).client.getOurUser().getRolesForGuild(guild).contains(this)) {
-			throw new MissingPermissionsException("Cannot edit own role.");
-		}
-
 		try {
 			RoleResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
