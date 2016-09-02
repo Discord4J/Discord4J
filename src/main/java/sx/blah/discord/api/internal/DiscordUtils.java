@@ -669,7 +669,7 @@ public class DiscordUtils {
 			if (rolesPosition < role.getPosition())
 				rolesPosition = role.getPosition();
 
-		return user1Position >= rolesPosition;
+		return user1Position > rolesPosition;
 	}
 
 	/**
