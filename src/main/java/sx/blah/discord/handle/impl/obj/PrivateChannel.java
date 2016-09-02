@@ -33,10 +33,10 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
-		if (user.equals(recipient) || user.equals(client.getOurUser()))
+		if (user != null && (user.equals(recipient) || user.equals(client.getOurUser())))
 			return EnumSet.allOf(Permissions.class);
-		
-		throw new UnsupportedOperationException();
+
+		return EnumSet.noneOf(Permissions.class);
 	}
 
 	@Override
