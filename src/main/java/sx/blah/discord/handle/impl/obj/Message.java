@@ -157,7 +157,7 @@ public class Message implements IMessage {
 
 			while (matcher.find()) {
 				String mentionedID = matcher.group(1);
-				IChannel mentioned = channel.getGuild().getChannelByID(mentionedID);
+				IChannel mentioned = client.getChannelByID(mentionedID);
 
 				if (mentioned != null) {
 					channelMentions.add(mentioned);
