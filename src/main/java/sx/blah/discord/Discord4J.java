@@ -72,6 +72,10 @@ public class Discord4J {
      */
 	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
+	 * Whether to allow for audio to be used.
+	 */
+	public static final AtomicBoolean audioDisabled = new AtomicBoolean(false);
+	/**
 	 * The alternate discord url.
 	 */
 	public static volatile String alternateUrl = null;
@@ -218,6 +222,14 @@ public class Discord4J {
 	public static void setBaseDiscordUrl(String url) {
 		LOGGER.info("Base url changed to {}", url);
 		alternateUrl = url;
+	}
+
+	/**
+	 * This disables audio, use this if you receive {@link UnsatisfiedLinkError}s.
+	 */
+	public static void disableAudio() {
+		LOGGER.info("Disabled audio.");
+		audioDisabled.set(false);
 	}
 
 	private static Logger initLogger() {

@@ -34,9 +34,12 @@ public class AudioManager implements IAudioManager {
 	public AudioManager(IGuild guild) {
 		this.guild = guild;
 		client = guild.getClient();
-		//Creates encoders for the 2 most common channel counts. The rest are uncommon enough that it's better to use lazy initialization for them.
-		getEncoderForChannels(1);
-		getEncoderForChannels(2);
+
+		if (!Discord4J.audioDisabled.get()) {
+			//Creates encoders for the 2 most common channel counts. The rest are uncommon enough that it's better to use lazy initialization for them.
+			getEncoderForChannels(1);
+			getEncoderForChannels(2);
+		}
 	}
 
 	@Override
@@ -81,7 +84,7 @@ public class AudioManager implements IAudioManager {
 	}
 
 	private byte[] getAudioDataForProvider(IAudioProvider provider) {
-		if (provider.isReady()) {
+		if (provider.isReady() && !Discord4J.audioDisabled.get()) {
 			IAudioProvider.AudioEncodingType type = provider.getAudioEncodingType();
 			int channels = provider.getChannels();
 			byte[] data = provider.provide();

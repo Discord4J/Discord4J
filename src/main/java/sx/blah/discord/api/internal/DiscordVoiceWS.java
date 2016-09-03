@@ -185,7 +185,7 @@ public class DiscordVoiceWS {
 				try {
 					if (isConnected.get()) {
 						byte[] data = guild.getAudioManager().getAudio();
-						if (data != null && data.length > 0) {
+						if (data != null && data.length > 0 && !Discord4J.audioDisabled.get()) {
 							client.timer = System.currentTimeMillis();
 							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
 							if (!isSpeaking)
