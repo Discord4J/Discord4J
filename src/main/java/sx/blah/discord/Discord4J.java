@@ -229,7 +229,7 @@ public class Discord4J {
 	 */
 	public static void disableAudio() {
 		LOGGER.info("Disabled audio.");
-		audioDisabled.set(false);
+		audioDisabled.set(true);
 	}
 
 	private static Logger initLogger() {
