@@ -858,7 +858,7 @@ public class DiscordWS {
 		client.getGuilds().remove(guild);
 		if (event.unavailable) { //Guild can't be reached
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Guild with id {} is unavailable, is there an outage?", event.id);
-			client.dispatcher.dispatch(new GuildUnavailableEvent(guild));
+			client.dispatcher.dispatch(new GuildUnavailableEvent(event.id));
 		} else {
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "You have been kicked from or left \"{}\"! :O", guild.getName());
 			client.dispatcher.dispatch(new GuildLeaveEvent(guild));
