@@ -271,9 +271,9 @@ public class User implements IUser {
 			MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
 
-		// if the client user isn't the one moving (this), then the client user is moving THIS user, and the client
-		// must have a perm check
-		// however, if the client user has the ADMINISTRATOR permission, it overrides this
+		// in order to move a member, both users have to be able to access the new VC
+		// Move Members also bypasses the role hierarchy
+		// Administrator bypasses this check
 		if (!client.getOurUser().equals(this) &&
 				!newChannel.getModifiedPermissions(client.getOurUser()).contains(Permissions.ADMINISTRATOR))
 			DiscordUtils.checkPermissions(client, newChannel.getGuild(), this.getRolesForGuild(newChannel.getGuild()),
