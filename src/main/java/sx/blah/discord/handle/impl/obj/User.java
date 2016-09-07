@@ -269,15 +269,21 @@ public class User implements IUser {
 	@Override
 	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException,
 			MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
+		// can this user go to this channel?
+		DiscordUtils.checkPermissions(this, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
 
-		// in order to move a member, both users have to be able to access the new VC
-		// Move Members also bypasses the role hierarchy
-		// Administrator bypasses this check
-		if (!client.getOurUser().equals(this) &&
-				!newChannel.getModifiedPermissions(client.getOurUser()).contains(Permissions.ADMINISTRATOR))
-			DiscordUtils.checkPermissions(client, newChannel.getGuild(), this.getRolesForGuild(newChannel.getGuild()),
+		// in order to move a member:
+		// both users have to be able to access the new VC (half of it is covered above)
+		// the client must have either Move Members or Administrator
+
+		// this isn't the client, so the client is moving this uesr
+		if (!this.equals(client.getOurUser())) {
+			// can the client go to this channel?
+			DiscordUtils.checkPermissions(client.getOurUser(), newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
+
+			DiscordUtils.checkPermissions(newChannel.getModifiedPermissions(client.getOurUser()),
 					EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
+		}
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH
