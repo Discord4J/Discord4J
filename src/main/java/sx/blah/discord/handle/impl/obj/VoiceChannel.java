@@ -7,13 +7,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.ChannelEditRequest;
-import sx.blah.discord.json.requests.VoiceChannelRequest;
-import sx.blah.discord.json.responses.ChannelResponse;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceChannelRequest;
+import sx.blah.discord.api.internal.json.responses.ChannelResponse;
 import sx.blah.discord.util.*;
 
 import java.io.File;
@@ -24,17 +23,13 @@ import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {
 
-	protected int userLimit = 0;
-	protected int bitrate = 0;
+	protected volatile int userLimit = 0;
+	protected volatile int bitrate = 0;
 
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate) {
-		this(client, name, id, parent, topic, position, new HashMap<>(), new HashMap<>());
+	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
-	}
-
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
-		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 	}
 
 	@Override
@@ -143,7 +138,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent))
 				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		} else {
-			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave and not joined voice channel! Ignoring the method call...");
+			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave a non-joined voice channel! Ignoring the method call...");
 		}
 	}
 
@@ -159,17 +154,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
 	public String getTopic() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public String mention(){
-		throw new UnsupportedOperationException();
+		return "";
 	}
 
 	@Override
@@ -199,7 +189,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public synchronized boolean getTypingStatus() {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
@@ -209,12 +199,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IMessage> getPinnedMessages() {
-		throw new UnsupportedOperationException();
+		return new ArrayList<>();
 	}
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate);
+		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
 	}
 
 	@Override

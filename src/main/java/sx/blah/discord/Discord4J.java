@@ -36,6 +36,7 @@ import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main class. :D
@@ -58,17 +59,26 @@ public class Discord4J {
 	 * The github repo for the api
 	 */
 	public static final String URL;
-
 	/**
 	 * SLF4J Instance
 	 */
 	public static final Logger LOGGER = initLogger();
-
 	/**
 	 * When this class was loaded.
 	 */
 	protected static final LocalDateTime launchTime = LocalDateTime.now();
-
+	/**
+	 * Whether to log when the user doesn't have the permissions to view a channel.
+     */
+	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
+	/**
+	 * Whether to allow for audio to be used.
+	 */
+	public static final AtomicBoolean audioDisabled = new AtomicBoolean(false);
+	/**
+	 * The alternate discord url.
+	 */
+	public static volatile String alternateUrl = null;
 	/**
 	 * Cached jetty logger instance.
 	 */
@@ -167,7 +177,6 @@ public class Discord4J {
 
 		try {
 			ClientBuilder builder = new ClientBuilder();
-			builder.withReconnects();
 			IDiscordClient client = (args.length == 1 ? builder.withToken(args[0]) : builder.withLogin(args[0], args[1])).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
@@ -193,6 +202,34 @@ public class Discord4J {
 	 */
 	public static void enableJettyLogging() {
 		Log.setLog(jettyLogger);
+	}
+
+	/**
+	 * This disables logging for when the user doesn't have the required permissions to view a channel.
+     */
+	public static void disableChannelWarnings() {
+		ignoreChannelWarnings.set(true);
+	}
+
+	/**
+	 * This sets the base discord api so the provided url. This defaults to https://discordapp.com/.
+	 * NOTE: This will only have any sort of effect if called before the
+	 * {@link sx.blah.discord.api.internal.DiscordEndpoints} class is initialized, meaning that you MUST call this
+	 * before any Discord4J calls.
+	 *
+	 * @param url The url.
+	 */
+	public static void setBaseDiscordUrl(String url) {
+		LOGGER.info("Base url changed to {}", url);
+		alternateUrl = url;
+	}
+
+	/**
+	 * This disables audio, use this if you receive {@link UnsatisfiedLinkError}s.
+	 */
+	public static void disableAudio() {
+		LOGGER.info("Disabled audio.");
+		audioDisabled.set(true);
 	}
 
 	private static Logger initLogger() {

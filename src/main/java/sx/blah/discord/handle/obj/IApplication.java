@@ -78,18 +78,6 @@ public interface IApplication extends IDiscordObject<IApplication> {
 	/**
 	 * Changes the application's icon.
 	 *
-	 * @param icon The new icon.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @deprecated Use {@link #changeIcon(Image)} instead.
-	 */
-	@Deprecated
-	void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException;
-
-	/**
-	 * Changes the application's icon.
-	 *
 	 * @param icon The new icon, or deletes the icon if null.
 	 *
 	 * @throws RateLimitException
@@ -122,17 +110,6 @@ public interface IApplication extends IDiscordObject<IApplication> {
 	 * @throws DiscordException
 	 */
 	void delete() throws DiscordException;
-
-	/**
-	 * Generates a bot invite url for this application.
-	 *
-	 * @param requestedPermissions The (optional) requested permissions for the bot.
-	 * @param guildID The (optional) specific guild for the bot to be added to.
-	 * @return The url.
-	 * @deprecated Use {@link sx.blah.discord.util.BotInviteBuilder} instead.
-	 */
-	@Deprecated
-	String createBotInvite(Optional<EnumSet<Permissions>> requestedPermissions, Optional<String> guildID);
 
 	/**
 	 * Gets the bot owned by this application (if it exists).

@@ -7,19 +7,20 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
-import sx.blah.discord.handle.AudioChannel;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.generic.RoleResponse;
-import sx.blah.discord.json.requests.*;
-import sx.blah.discord.json.responses.*;
+import sx.blah.discord.api.internal.json.generic.RoleResponse;
+import sx.blah.discord.api.internal.json.requests.*;
+import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class Guild implements IGuild {
@@ -37,6 +38,11 @@ public class Guild implements IGuild {
 	 * All users connected to the guild.
 	 */
 	protected final List<IUser> users;
+
+	/**
+	 * The joined timetamps for users.
+	 */
+	protected final Map<IUser, LocalDateTime> joinTimes;
 
 	/**
 	 * The name of the guild.
@@ -83,11 +89,6 @@ public class Guild implements IGuild {
 	protected volatile String regionID;
 
 	/**
-	 * This guild's audio channel.
-	 */
-	protected volatile AudioChannel audioChannel;
-
-	/**
 	 * This guild's audio manager.
 	 */
 	protected volatile AudioManager audioManager;
@@ -98,10 +99,10 @@ public class Guild implements IGuild {
 	protected final IDiscordClient client;
 
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
-		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
 
-	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users) {
+	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
 		this.client = client;
 		this.name = name;
 		this.voiceChannels = voiceChannels;
@@ -109,6 +110,7 @@ public class Guild implements IGuild {
 		this.users = users;
 		this.id = id;
 		this.icon = icon;
+		this.joinTimes = joinTimes;
 		this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
 		this.ownerID = ownerID;
 		this.roles = roles;
@@ -452,19 +454,8 @@ public class Guild implements IGuild {
 		edit(Optional.empty(), Optional.of(region.getID()), null, null, Optional.empty());
 	}
 
-	@Override
-	public void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), icon, null, Optional.empty());
-	}
-
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), null, Optional.empty());
-	}
-
-	@Override
-	public void changeAFKChannel(Optional<IVoiceChannel> channel) throws RateLimitException, DiscordException, MissingPermissionsException {
-		String id = channel.isPresent() ? channel.get().getID() : null;
-		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
 	}
 
 	@Override
@@ -586,7 +577,8 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
+	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -609,8 +601,21 @@ public class Guild implements IGuild {
 		ReorderRolesRequest[] request = new ReorderRolesRequest[rolesInOrder.length];
 
 		for (int i = 0; i < rolesInOrder.length; i++) {
-			request[i] = new ReorderRolesRequest(rolesInOrder[i].getID(),
-					rolesInOrder[i].getName().equals("@everyone") ? -1 : i+1);
+			int position = rolesInOrder[i].getName().equals("@everyone") ? -1 : i+1;
+			if (position != rolesInOrder[i].getPosition()) {
+				IRole highest = getRolesForUser(client.getOurUser()).stream().sorted((o1, o2) -> {
+					if (o1.getPosition() < o2.getPosition()) {
+						return -1;
+					} else if (o2.getPosition() < o1.getPosition()) {
+						return 1;
+					} else {
+						return 0;
+					}
+				}).findFirst().orElse(null);
+				if (highest != null && highest.getPosition() <= position)
+					throw new MissingPermissionsException("Cannot edit the position of a role with a higher/equal position as your user's highest role.");
+			}
+			request[i] = new ReorderRolesRequest(rolesInOrder[i].getID(), position);
 		}
 
 		try {
@@ -642,11 +647,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void addBot(String applicationID, Optional<EnumSet<Permissions>> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
-		addBot(applicationID, permissions.orElse(EnumSet.noneOf(Permissions.class)));
-	}
-
-	@Override
 	public void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
 		if (client.isBot())
 			throw new DiscordException("Bot accounts are not allowed to add other bots!");
@@ -664,13 +664,44 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public AudioChannel getAudioChannel() throws DiscordException {
-		return audioChannel == null ? audioChannel = new AudioChannel(this) : audioChannel;
+	public IAudioManager getAudioManager() {
+		return audioManager;
+	}
+
+	/**
+	 * This gets the CACHED join times map.
+	 *
+	 * @return The join times.
+	 */
+	public Map<IUser, LocalDateTime> getJoinTimes() {
+		return joinTimes;
 	}
 
 	@Override
-	public IAudioManager getAudioManager() {
-		return audioManager;
+	public LocalDateTime getJoinTimeForUser(IUser user) throws DiscordException {
+		if (!joinTimes.containsKey(user))
+			throw new DiscordException("Cannot find user "+user.getDisplayName(this)+" in this guild!");
+
+		return joinTimes.get(user);
+	}
+
+	@Override
+	public IMessage getMessageByID(String id) {
+		IMessage message =  channels.stream()
+									.map(IChannel::getMessages)
+									.flatMap(List::stream)
+									.filter(msg -> msg.getID().equalsIgnoreCase(id))
+									.findAny().orElse(null);
+
+		if (message == null) {
+			for (IChannel channel : channels) {
+				message = channel.getMessageByID(id);
+				if (message != null)
+					return message;
+			}
+		}
+
+		return message;
 	}
 
 	@Override
@@ -680,9 +711,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public IGuild copy() {
-		Guild guild =  new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
-				voiceChannels, users);
-		return guild;
+		return new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
+				voiceChannels, users, joinTimes);
 	}
 
 	@Override

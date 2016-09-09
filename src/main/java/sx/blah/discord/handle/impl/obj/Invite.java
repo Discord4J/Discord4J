@@ -8,9 +8,8 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.json.responses.InviteJSONResponse;
+import sx.blah.discord.api.internal.json.responses.InviteJSONResponse;
 import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.util.LogMarkers;
 
 import java.util.Objects;

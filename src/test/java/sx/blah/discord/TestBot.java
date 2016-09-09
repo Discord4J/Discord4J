@@ -5,6 +5,8 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
+import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.json.responses.RateLimitResponse;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.Invite;
 import sx.blah.discord.handle.obj.*;
@@ -12,12 +14,11 @@ import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -52,9 +53,9 @@ public class TestBot {
 			IDiscordClient client;
 
 			if ((isTesting && args.length > 2) || (!isTesting && args.length > 1))
-				client = new ClientBuilder().withReconnects().withLogin(args[0] /* username */, args[1] /* password */).build();
+				client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
 			else
-				client = new ClientBuilder().withReconnects().withToken(args[0]).build();
+				client = new ClientBuilder().withToken(args[0]).build();
 
 			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
@@ -83,8 +84,8 @@ public class TestBot {
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
 							if (channel != null) {
 								channel.join();
-								channel.getGuild().getAudioChannel().queueFile(new File("./test.mp3")); //Mono test
-								channel.getGuild().getAudioChannel().queueFile(new File("./test2.mp3")); //Stereo test
+								AudioPlayer.getAudioPlayerForGuild(channel.getGuild()).queue(new File("./test.mp3")); //Mono test
+								AudioPlayer.getAudioPlayerForGuild(channel.getGuild()).queue(new File("./test2.mp3")); //Stereo test
 							}
 
 							//Start testing
@@ -116,7 +117,7 @@ public class TestBot {
 											try {
 												new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
 														MessageBuilder.Styles.BOLD).build();
-											} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
+											} catch (RateLimitException | MissingPermissionsException | DiscordException e) {
 												e.printStackTrace();
 											}
 										}
@@ -153,7 +154,7 @@ public class TestBot {
 									new MessageBuilder(client).appendContent("MEMES REQUESTED:", MessageBuilder.Styles.UNDERLINE_BOLD_ITALICS)
 											.appendContent(" http://niceme.me/").withChannel(messageReceivedEvent.getMessage().getChannel())
 											.build();
-								} catch (HTTP429Exception | DiscordException | MissingPermissionsException e) {
+								} catch (RateLimitException | DiscordException | MissingPermissionsException e) {
 									e.printStackTrace();
 								}
 							} else if (m.getContent().startsWith(".clear")) {
@@ -164,7 +165,7 @@ public class TestBot {
 										try {
 											Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
 											message.delete();
-										} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+										} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 											e.printStackTrace();
 										}
 									});
@@ -174,7 +175,7 @@ public class TestBot {
 								try {
 									client.changeUsername(s);
 									m.reply("is this better?");
-								} catch (HTTP429Exception | MissingPermissionsException | DiscordException e) {
+								} catch (RateLimitException | MissingPermissionsException | DiscordException e) {
 									e.printStackTrace();
 								}
 							} else if (m.getContent().startsWith(".pm")) {
@@ -185,18 +186,16 @@ public class TestBot {
 									e.printStackTrace();
 								}
 							} else if (m.getContent().startsWith(".presence")) {
-								client.updatePresence(!client.getOurUser().getPresence().equals(Presences.IDLE),
-										client.getOurUser().getGame());
+								client.changePresence(!client.getOurUser().getPresence().equals(Presences.IDLE));
 							} else if (m.getContent().startsWith(".game")) {
 								String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
-								client.updatePresence(client.getOurUser().getPresence().equals(Presences.IDLE),
-										Optional.ofNullable(game));
+								client.changeStatus(Status.game(game));
 							} else if (m.getContent().startsWith(".type")) {
 								m.getChannel().toggleTypingStatus();
 							} else if (m.getContent().startsWith(".invite")) {
 								try {
 									m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false).getInviteCode());
-								} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+								} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 									e.printStackTrace();
 								}
 							} else if (m.getContent().startsWith(".avatar")) {
@@ -226,7 +225,7 @@ public class TestBot {
 								try {
 									Discord4J.LOGGER.info("{}", m.getAuthor().getID());
 									m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
-								} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+								} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 									e.printStackTrace();
 								}
 							} else if (m.getContent().startsWith(".join")) {
@@ -287,7 +286,7 @@ public class TestBot {
 								try {
 									client.getOurUser().moveToVoiceChannel(m.getGuild().getVoiceChannels().stream()
 											.filter((IVoiceChannel channel) -> channel.getName().equals(target)).findFirst().orElseGet(null));
-								} catch (DiscordException | HTTP429Exception | MissingPermissionsException e) {
+								} catch (DiscordException | RateLimitException | MissingPermissionsException e) {
 									e.printStackTrace();
 								}
 							} else if (m.getContent().startsWith(".logout")) {
@@ -302,18 +301,16 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-//						Field sessionField = DiscordWS.class.getDeclaredField("session");
-//						sessionField.setAccessible(true);
-//						Session session = (Session) sessionField.get(((DiscordClientImpl) client).ws);
-//						session.close(new CloseStatus(1337, "blah"));
-						client.logout();
+						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new MessageOutputStream(message.getChannel())));
+						writer.write(message.getContent());
+						writer.close();
 					}
 				});
 
 				client.getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
 					@Override
 					public void handle(InviteReceivedEvent event) {
-						IInvite invite = event.getInvite();
+						IInvite invite = event.getInvites()[0];
 						try {
 							Invite.InviteResponse response = invite.details();
 							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));

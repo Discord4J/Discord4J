@@ -10,18 +10,13 @@ import sx.blah.discord.handle.obj.Status;
  */
 public class StatusChangeEvent extends Event {
 
-	private final IGuild guild;
 	private final IUser user;
 	private final Status oldStatus, newStatus;
 
-	public StatusChangeEvent(IGuild guild, IUser user, Status oldStatus, Status newStatus) {
-		this.guild = guild;
+	public StatusChangeEvent(IUser user, Status oldStatus, Status newStatus) {
 		this.user = user;
 		this.oldStatus = oldStatus;
 		this.newStatus = newStatus;
-	}
-	public StatusChangeEvent(IUser user, Status oldStatus, Status newStatus) {
-		this(null, user, oldStatus, newStatus);
 	}
 
 	/**
@@ -49,16 +44,5 @@ public class StatusChangeEvent extends Event {
 	 */
 	public Status getOldStatus() {
 		return oldStatus;
-	}
-
-	/**
-	 * Gets the guild involved.
-	 *
-	 * @return The guild.
-	 * @deprecated This is unreliable and unnecessary.
-	 */
-	@Deprecated
-	public IGuild getGuild() {
-		return guild;
 	}
 }

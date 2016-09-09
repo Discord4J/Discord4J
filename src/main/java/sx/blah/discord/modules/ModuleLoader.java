@@ -3,6 +3,7 @@ package sx.blah.discord.modules;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.impl.events.ModuleDisabledEvent;
 import sx.blah.discord.handle.impl.events.ModuleEnabledEvent;
 import sx.blah.discord.util.LogMarkers;
 
@@ -160,7 +161,7 @@ public class ModuleLoader {
 			return false;
 		});
 
-		client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
+		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
 	}
 
 	private boolean hasDependency(List<IModule> modules, String className) {
@@ -176,13 +177,14 @@ public class ModuleLoader {
 		try {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
+			
+			for (int i = 0; i < Math.min(versions.length, 2); i++) { //We only care about major.minor, the revision change should not be big enough to care about
+				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
+					return false;
+			}
 		} catch (NumberFormatException e) {
 			Discord4J.LOGGER.error(LogMarkers.MODULES, "Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
 			return false;
-		}
-		for (int i = 0; i < Math.min(versions.length, 3); i++) {
-			if (!(Integer.parseInt(versions[i]) <= Integer.parseInt(discord4jVersion[i])))
-				return false;
 		}
 		return true;
 	}
@@ -267,25 +269,38 @@ public class ModuleLoader {
 		dependents.removeAll(noLongerDependents);
 		noLongerDependents.forEach(ModuleLoader::loadExternalModules);
 
-		dependents.removeIf((file -> { //Filters out all unusable files
-			boolean cannotBeLoaded = true;
-			try {
-				String[] required = getModuleRequires(file);
-				for (String clazz : required) {
-					cannotBeLoaded = findFileForClass(dependents, clazz) == null;
-
-					if (cannotBeLoaded)
-						break;
-				}
-			} catch (IOException ignored) {}
-
-			if (cannotBeLoaded)
-				Discord4J.LOGGER.warn(LogMarkers.MODULES, "Unable to load module file {}. Its dependencies cannot be resolved!", file.getName());
-
-			return cannotBeLoaded;
-		}));
-
-		dependents.forEach(ModuleLoader::loadExternalModules);
+		final int retryAttempts = dependents.size();
+		for (int i = 0; i < retryAttempts; i++) {
+			dependents.removeIf((file -> { //Filters out all usable files
+				boolean loaded = false;
+				try {
+					String[] required = getModuleRequires(file);
+					for (String clazz : required) {
+						try {
+							Class.forName(clazz);
+							loaded = true;
+						} catch (ClassNotFoundException ignored) {}
+						
+						if (!loaded)
+							loaded = findFileForClass(files, clazz) != null;
+						
+						if (!loaded)
+							break;
+					}
+				} catch (IOException ignored) {}
+				
+				if (loaded)
+					loadExternalModules(file);
+				
+				return loaded;
+			}));
+			
+			if (dependents.size() == 0)
+				break;
+		}
+		
+		if (dependents.size() > 0)
+			Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
 	}
 
 	private static String[] getModuleRequires(File file) throws IOException {

@@ -7,8 +7,8 @@ import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.HTTP429Exception;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
 import java.lang.reflect.Constructor;
@@ -66,7 +66,7 @@ public class SpoofBot {
 												try {
 													lastSpoofData = channel.sendMessage((rng.nextInt(10) == 9 ?
 															other.getOurUser().mention()+" " : "")+getRandMessage());
-												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+												} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -74,7 +74,7 @@ public class SpoofBot {
 											case MESSAGE_EDIT:
 												try {
 													((IMessage) lastSpoofData).edit(getRandMessage());
-												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+												} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -84,18 +84,17 @@ public class SpoofBot {
 												break;
 
 											case GAME:
-												client.updatePresence(client.getOurUser().getPresence() == Presences.IDLE,
-														Optional.ofNullable(rng.nextBoolean() ? getRandString() : null));
+												client.changeStatus(Status.game(rng.nextBoolean() ? getRandString() : null));
 												break;
 
 											case PRESENCE:
-												client.updatePresence(rng.nextBoolean(), client.getOurUser().getGame());
+												client.changePresence(rng.nextBoolean());
 												break;
 
 											case MESSAGE_DELETE:
 												try {
 													((IMessage) lastSpoofData).delete();
-												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+												} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -106,13 +105,13 @@ public class SpoofBot {
 													invite = client.getGuilds().get(0).getChannels().get(
 															rng.nextInt(client.getGuilds().get(0).getChannels().size()))
 															.createInvite(18000, 1, false);
-												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+												} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 													e.printStackTrace();
 												}
 												if (invite.getInviteCode() != null) {
 													try {
 														channel.sendMessage("https://discord.gg/"+invite.getInviteCode());
-													} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+													} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 														e.printStackTrace();
 													}
 												}
@@ -128,11 +127,11 @@ public class SpoofBot {
 														}
 														try {
 															newChannel.delete();
-														} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+														} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (DiscordException | MissingPermissionsException | HTTP429Exception e) {
+												} catch (DiscordException | MissingPermissionsException | RateLimitException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -141,7 +140,7 @@ public class SpoofBot {
 												try {
 													channel.changeName(getRandString());
 													channel.changeTopic(getRandSentence());
-												} catch (DiscordException | MissingPermissionsException | HTTP429Exception e) {
+												} catch (DiscordException | MissingPermissionsException | RateLimitException e) {
 													e.printStackTrace();
 												}
 												break;
@@ -158,11 +157,11 @@ public class SpoofBot {
 														}
 														try {
 															role.delete();
-														} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+														} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 															e.printStackTrace();
 														}
 													}).start();
-												} catch (MissingPermissionsException | HTTP429Exception | DiscordException e) {
+												} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 													e.printStackTrace();
 												}
 												break;

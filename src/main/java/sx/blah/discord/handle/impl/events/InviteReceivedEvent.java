@@ -18,17 +18,6 @@ public class InviteReceivedEvent extends Event {
 	}
 
 	/**
-	 * Gets the invite received.
-	 *
-	 * @return The invite.
-	 * @deprecated Use {@link #getInvites()} instead.
-	 */
-	@Deprecated
-	public IInvite getInvite() {
-		return invites[0];
-	}
-
-	/**
 	 * Gets the invites received.
 	 *
 	 * @return The invites received.

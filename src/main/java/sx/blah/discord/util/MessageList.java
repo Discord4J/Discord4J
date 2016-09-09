@@ -11,8 +11,8 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.requests.BulkDeleteRequest;
-import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
+import sx.blah.discord.api.internal.json.responses.MessageResponse;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -42,9 +42,14 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public static final int UNLIMITED_CAPACITY = -1;
 
 	/**
+	 * This is the max number of guild before the list stops automatically loading its history.
+	 */
+	public static final int MAX_GUILD_COUNT = 10;
+
+	/**
 	 * The client that this list is respecting.
 	 */
-	private final IDiscordClient client;
+	private final DiscordClientImpl client;
 
 	/**
 	 * The channel the messages are from.
@@ -68,6 +73,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	private volatile int capacity = 256;
 
 	/**
+	 * This determines whether message history is automatically loaded.
+	 */
+	private static volatile boolean loadInitialMessages = true;
+
+	/**
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
 	 */
@@ -75,7 +85,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (channel instanceof IVoiceChannel)
 			throw new UnsupportedOperationException();
 
-		this.client = client;
+		this.client = (DiscordClientImpl) client;
 		this.channel = channel;
 
 		updatePermissions();
@@ -92,11 +102,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
-		try {
-			load(initialContents);
-		} catch (RateLimitException e) {
-			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
-		}
+		RequestBuffer.request(() -> load(initialContents));
 	}
 
 	/**
@@ -217,6 +223,16 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		return cacheChanged;
 	}
+	
+	/**
+	 * This checks if a message with the provided id is cached my this list.
+	 *
+	 * @param id The id.
+	 * @return True if found, false if otherwise.
+	 */
+	public boolean contains(String id) {
+		return messageCache.stream().filter(it -> it.getID().equals(id)).findFirst().isPresent();
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -318,7 +334,20 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return The message object found, or null if nonexistent.
 	 */
 	public IMessage get(String id) {
-		return stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+		
+		if (message == null && hasPermission && client.isReady())
+			try {
+				return DiscordUtils.getMessageFromJSON(client, channel,
+						DiscordUtils.GSON.fromJson(
+								client.REQUESTS.GET.makeRequest(
+										DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+										new BasicNameValuePair("content-type", "application/json"),
+										new BasicNameValuePair("authorization", client.getToken())),
+								MessageResponse.class));
+			} catch (Exception e) {}
+		
+		return message;
 	}
 
 	/**
@@ -377,7 +406,6 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		IMessage message = get(index);
 		if (message != null) {
 			message.delete();
-			remove(message);
 		}
 		return message;
 	}
@@ -543,7 +571,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			throw new DiscordException("You can only delete 100 messages at a time!");
 
 		try {
-			((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
+			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
 					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))),
 					new BasicNameValuePair("content-type", "application/json"),
 					new BasicNameValuePair("authorization", client.getToken()));
@@ -552,12 +580,33 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		}
 	}
 
+	/**
+	 * This sets whether MessageLists should automatically fetch message history on initialization. This is
+	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
+	 *
+	 * @param download Whether to automatically download history.
+	 */
+	public static void shouldDownloadHistoryAutomatically(boolean download) {
+		loadInitialMessages = download;
+	}
+
+	/**
+	 * This gets whether MessageLists will automatically fetch message history on initialization. This is
+	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
+	 *
+	 * @return  Whether it'll automatically download history.
+	 */
+	public static boolean downloadsHistoryAutomatically() {
+		return loadInitialMessages;
+	}
+
 	private void updatePermissions() {
 		try {
 			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 			hasPermission = true;
 		} catch (MissingPermissionsException e) {
-			Discord4J.LOGGER.warn(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
+			if (!Discord4J.ignoreChannelWarnings.get())
+				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
 			hasPermission = false;
 		}
 	}

@@ -1,5 +1,6 @@
 package sx.blah.discord.util;
 
+import org.apache.commons.lang3.ArrayUtils;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -33,10 +34,10 @@ public class MessageBuilder {
 	 * Sets the content of the message with a given style.
 	 *
 	 * @param content The message contents.
-	 * @param styles The style to be applied to the content.
+	 * @param styles The styles to be applied to the content.
 	 * @return The message builder instance.
 	 */
-	public MessageBuilder withContent(String content, Styles styles) {
+	public MessageBuilder withContent(String content, Styles... styles) {
 		this.content = "";
 		return appendContent(content, styles);
 	}
@@ -56,11 +57,19 @@ public class MessageBuilder {
 	 * Appends extra text to the current content with given style.
 	 *
 	 * @param content The content to append.
-	 * @param styles The style to be applied to the new content.
+	 * @param styles The styles to be applied to the new content.
 	 * @return The message builder instance.
 	 */
-	public MessageBuilder appendContent(String content, Styles styles) {
-		this.content += (styles.getMarkdown()+content+styles.getReverseMarkdown());
+	public MessageBuilder appendContent(String content, Styles... styles) {
+		for (Styles style : styles)
+			this.content += style.getMarkdown();
+
+		this.content += content;
+
+		ArrayUtils.reverse(styles);
+		for (Styles style : styles)
+			this.content += style.getReverseMarkdown();
+
 		return this;
 	}
 
@@ -146,6 +155,15 @@ public class MessageBuilder {
      */
 	public String getContent() {
 		return content;
+	}
+	
+	/**
+	 * This gets the channel the message will be sent to.
+	 *
+	 * @return The channel.
+	 */
+	public IChannel getChannel() {
+		return channel;
 	}
 
 	/**

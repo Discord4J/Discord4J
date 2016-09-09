@@ -12,18 +12,16 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.json.responses.RateLimitResponse;
+import sx.blah.discord.api.internal.json.responses.RateLimitResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static sx.blah.discord.Discord4J.*;
@@ -178,7 +176,7 @@ public class Requests {
 					throw new RateLimitException("Global rate limit exceeded.",
 							globalRetryAfter.get() - System.currentTimeMillis(), request.getMethod(), true);
 			}
-			
+
 			Pair<String, String> methodRequestPair = Pair.of(request.getMethod(), request.getURI().getPath());
 
 			if (retryAfters.containsKey(methodRequestPair)) {
@@ -190,13 +188,14 @@ public class Requests {
 							String.format("%s %s", methodRequestPair.getLeft(), methodRequestPair.getRight()), false);
 			}
 
-			try (CloseableHttpResponse response = CLIENT.execute(request)){
+			try (CloseableHttpResponse response = CLIENT.execute(request)) {
 				int responseCode = response.getStatusLine().getStatusCode();
 
-				if (responseCode != 429 && response.containsHeader("X-RateLimit-Remaining")) {
+				if (response.containsHeader("X-RateLimit-Remaining")) {
 					int remaining = Integer.parseInt(response.getFirstHeader("X-RateLimit-Remaining").getValue());
 					if (remaining == 0) {
-						retryAfters.put(methodRequestPair, Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue()));
+						retryAfters.put(methodRequestPair,
+								Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue())*1000);
 					}
 				}
 
@@ -205,7 +204,8 @@ public class Requests {
 					message = EntityUtils.toString(response.getEntity());
 
 				if (responseCode == 404) {
-					LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
+					if (!request.getURI().toString().contains("invite"))
+					    LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
 					return null;
 				} else if (responseCode == 403) {
 					LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", request.getURI());

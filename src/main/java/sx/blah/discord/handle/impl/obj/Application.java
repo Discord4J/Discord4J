@@ -8,12 +8,11 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.obj.IApplication;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.json.responses.ApplicationResponse;
-import sx.blah.discord.json.responses.BotResponse;
+import sx.blah.discord.api.internal.json.responses.ApplicationResponse;
+import sx.blah.discord.api.internal.json.responses.BotResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
@@ -147,11 +146,6 @@ public class Application implements IApplication {
 	}
 
 	@Override
-	public void changeIcon(Optional<Image> icon) throws RateLimitException, DiscordException {
-		edit(Optional.empty(), Optional.empty(), icon, Optional.empty());
-	}
-
-	@Override
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException {
 		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), Optional.empty());
 	}
@@ -186,19 +180,6 @@ public class Application implements IApplication {
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
-	}
-
-	@Override
-	public String createBotInvite(Optional<EnumSet<Permissions>> requestedPermissions, Optional<String> guildID) {
-		String url = DiscordEndpoints.AUTHORIZE+"?client_id=%s&scope=bot";
-
-		if (requestedPermissions.isPresent())
-			url += "&permissions="+Permissions.generatePermissionsNumber(requestedPermissions.get());
-
-		if (guildID.isPresent())
-			url += "&guild_id="+guildID.get();
-
-		return String.format(url, id);
 	}
 
 	@Override

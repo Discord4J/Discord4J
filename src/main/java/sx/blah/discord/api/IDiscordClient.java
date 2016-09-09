@@ -43,6 +43,15 @@ public interface IDiscordClient {
 	/**
 	 * Logs the client in as the provided account.
 	 *
+	 * @param async Whether to wait for all guilds before dispatching the {@link sx.blah.discord.handle.impl.events.ReadyEvent}.
+	 *
+	 * @throws DiscordException This is thrown if there is an error logging in.
+	 */
+	void login(boolean async) throws DiscordException;
+
+	/**
+	 * Logs the client in as the provided account.
+	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
 	void login() throws DiscordException;
@@ -91,30 +100,11 @@ public interface IDiscordClient {
 	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
 
 	/**
-	 * Updates the bot's presence.
-	 *
-	 * @param isIdle If true, the bot will be "idle", otherwise the bot will be "online".
-	 * @param game The optional name of the game the bot is playing. If empty, the bot simply won't be playing a game.
-	 * @deprecated Use {@link #changePresence(boolean)} or {@link #changeStatus(Status)}
-	 */
-	@Deprecated
-	void updatePresence(boolean isIdle, Optional<String> game);
-
-	/**
 	 * Changes this user's presence.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.
 	 */
 	void changePresence(boolean isIdle);
-
-	/**
-	 * Changes the game status message for this bot's user.
-	 *
-	 * @param game The game, or if null then no message will be shown.
-	 * @deprecated Use {@link #changeStatus(Status)} instead.
-	 */
-	@Deprecated
-	void changeGameStatus(String game);
 
 	/**
 	 * Changes the status of the bot user.
@@ -144,7 +134,14 @@ public interface IDiscordClient {
 	 * @param includePrivate Whether to include private channels in the set.
 	 * @return A {@link Collection} of all {@link Channel} objects.
 	 */
-	Collection<IChannel> getChannels(boolean includePrivate);
+	List<IChannel> getChannels(boolean includePrivate);
+
+	/**
+	 * Gets a set of all channels visible to the bot user.
+	 *
+	 * @return A {@link Collection} of all non-private {@link Channel} objects.
+	 */
+	List<IChannel> getChannels();
 
 	/**
 	 * Gets a channel by its unique id.
@@ -159,7 +156,7 @@ public interface IDiscordClient {
 	 *
 	 * @return A {@link Collection} of all {@link VoiceChannel} objects.
 	 */
-	Collection<IVoiceChannel> getVoiceChannels();
+	List<IVoiceChannel> getVoiceChannels();
 
 	/**
 	 * Gets a voice channel from a given id.
@@ -189,7 +186,7 @@ public interface IDiscordClient {
 	 *
 	 * @return A {@link Collection} of all {@link User} objects.
 	 */
-	Collection<IUser> getUsers();
+	List<IUser> getUsers();
 
 	/**
 	 * Gets a user by its unique id.
@@ -204,7 +201,7 @@ public interface IDiscordClient {
 	 *
 	 * @return A {@link Collection} of all {@link Role} objects.
 	 */
-	Collection<IRole> getRoles();
+	List<IRole> getRoles();
 
 	/**
 	 * Gets a role by its unique id.
@@ -215,10 +212,33 @@ public interface IDiscordClient {
 	IRole getRoleByID(String roleID);
 
 	/**
-	 * Gets a {@link PrivateChannel} for the provided recipient.
+	 * This gets all messages stored internally by the bot.
+	 *
+	 * @param includePrivate Whether to include private messages or not.
+	 * @return A collection of all messages.
+	 */
+	List<IMessage> getMessages(boolean includePrivate);
+
+	/**
+	 * This gets all messages stored internally by the bot (including from private channels).
+	 *
+	 * @return A collection of all messages.
+	 */
+	List<IMessage> getMessages();
+
+	/**
+	 * This attempts to search all guilds/private channels for a message.
+	 *
+	 * @param messageID The message id of the message to find.
+	 * @return The message or null if not found.
+	 */
+	IMessage getMessageByID(String messageID);
+
+	/**
+	 * Gets a {@link IPrivateChannel} for the provided recipient.
 	 *
 	 * @param user The user who will be the recipient of the private channel.
-	 * @return The {@link PrivateChannel} object.
+	 * @return The {@link IPrivateChannel} object.
 	 *
 	 * @throws DiscordException
 	 * @throws RateLimitException
@@ -250,21 +270,6 @@ public interface IDiscordClient {
 	 * @return The region (or null if not found).
 	 */
 	IRegion getRegionByID(String regionID);
-
-	/**
-	 * Creates a new guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param region The region for the guild.
-	 * @param icon The icon for the guild.
-	 * @return The new guild's id.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @deprecated Use {@link #createGuild(String, IRegion, Image)} or {@link #createGuild(String, IRegion)} instead.
-	 */
-	@Deprecated
-	IGuild createGuild(String name, IRegion region, Optional<Image> icon) throws RateLimitException, DiscordException;
 
 	/**
 	 * Creates a new guild.
@@ -376,4 +381,13 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 */
 	String getApplicationName() throws DiscordException;
+
+	/**
+	 * Gets the bot's application's owner.
+	 *
+	 * @return The application's owner.
+	 *
+	 * @throws DiscordException
+	 */
+	IUser getApplicationOwner() throws DiscordException;
 }

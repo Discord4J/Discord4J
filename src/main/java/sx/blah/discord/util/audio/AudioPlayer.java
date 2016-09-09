@@ -134,12 +134,12 @@ public class AudioPlayer implements IAudioProvider {
 		manager.setAudioProcessor(backupProcessor);
 
 		playerInstances.remove(manager.getGuild(), this);
-		
+
 		clear();
 
 		client.getDispatcher().dispatch(new AudioPlayerCleanEvent(this));
 	}
-	
+
 	/**
 	 * This clears the current playlist. It should be noted that this closes the stream that provides the audio to each
 	 * {@link Track} object (if it exists). Which prevents these objects from being reused reliably.
@@ -169,7 +169,7 @@ public class AudioPlayer implements IAudioProvider {
 			client.getDispatcher().dispatch(new PauseStateChangeEvent(this, isPaused));
 		}
 	}
-	
+
 	/**
 	 * This toggles the pause state on or off.
 	 * This is a convenience shortcut for {@code setPaused(!isPaused())}.
@@ -327,7 +327,7 @@ public class AudioPlayer implements IAudioProvider {
 			Track track = trackQueue.remove(0);
 
 			if (track.isReady() && track.getCurrentTrackTime() == track.getTotalTrackTime()) { //The track was actually skipped, not skipped due to the way my logic works
-				client.getDispatcher().dispatch(new SkipEvent(this, track));
+				client.getDispatcher().dispatch(new TrackSkipEvent(this, track));
 			}
 
 			if (isLooping()) {
@@ -350,17 +350,6 @@ public class AudioPlayer implements IAudioProvider {
 			skip();
 	}
 
-	/**
-	 * Gets the size of the playlist.
-	 *
-	 * @return The playlist size.
-	 * @deprecated Use {@link #getPlaylistSize()}
-	 */
-	@Deprecated
-	public int playlistSize() {
-		return trackQueue.size();
-	}
-	
 	/**
 	 * Gets the size of the playlist.
 	 *
@@ -419,11 +408,11 @@ public class AudioPlayer implements IAudioProvider {
 			if (original != null) { //Check if there is no track that is supposed to be playing
 				skip();
 				Track next = getCurrentTrack();
-				
+
 				ready = calculateReady(); //Check again to allow for continuous playback
-				
+
 				client.getDispatcher().dispatch(new TrackFinishEvent(this, original, next));
-				
+
 				if (next != null)
 					client.getDispatcher().dispatch(new TrackStartEvent(this, next)); //New track is now playing.
 			}

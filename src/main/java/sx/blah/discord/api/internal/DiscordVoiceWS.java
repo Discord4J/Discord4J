@@ -16,11 +16,11 @@ import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.json.requests.VoiceConnectRequest;
-import sx.blah.discord.json.requests.VoiceKeepAliveRequest;
-import sx.blah.discord.json.requests.VoiceSpeakingRequest;
-import sx.blah.discord.json.requests.VoiceUDPConnectRequest;
-import sx.blah.discord.json.responses.VoiceUpdateResponse;
+import sx.blah.discord.api.internal.json.requests.VoiceConnectRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceKeepAliveRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceSpeakingRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceUDPConnectRequest;
+import sx.blah.discord.api.internal.json.responses.VoiceUpdateResponse;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
@@ -185,7 +185,7 @@ public class DiscordVoiceWS {
 				try {
 					if (isConnected.get()) {
 						byte[] data = guild.getAudioManager().getAudio();
-						if (data != null && data.length > 0) {
+						if (data != null && data.length > 0 && !Discord4J.audioDisabled.get()) {
 							client.timer = System.currentTimeMillis();
 							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
 							if (!isSpeaking)
@@ -206,7 +206,7 @@ public class DiscordVoiceWS {
 				}
 			}
 		};
-		executorService.scheduleAtFixedRate(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
+		executorService.scheduleWithFixedDelay(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT-1, TimeUnit.MILLISECONDS);
 	}
 
 	private void setupReceiveThread() {

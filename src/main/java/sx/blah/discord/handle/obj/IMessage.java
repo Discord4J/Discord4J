@@ -14,6 +14,11 @@ import java.util.Optional;
 public interface IMessage extends IDiscordObject<IMessage> {
 
 	/**
+	 * The maximum length of a discord message.
+	 */
+	int MAX_MESSAGE_LENGTH = 2000;
+
+	/**
 	 * Gets the string content of the message.
 	 *
 	 * @return The content of the message
@@ -56,11 +61,25 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	List<IRole> getRoleMentions();
 
 	/**
+	 * Gets the channels mentioned in this message.
+	 *
+	 * @return The channels mentioned.
+	 */
+	List<IChannel> getChannelMentions();
+
+	/**
 	 * Gets the attachments in this message.
 	 *
 	 * @return The attachments.
 	 */
 	List<Attachment> getAttachments();
+
+	/**
+	 * Gets the Embedded attachments in this message.
+	 *
+	 * @return The attachments.
+	 */
+	List<IEmbedded> getEmbedded();
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
@@ -187,6 +206,69 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		 */
 		public String getUrl() {
 			return url;
+		}
+	}
+	interface IEmbedded {
+
+		/**
+		 * Gets the title of the embedded media.
+		 *
+		 * @return The title of the embedded media. Can be null.
+		 */
+		public String getTitle();
+
+		/**
+		 * Gets the type of embedded media.
+		 *
+		 * @return The type of embedded media as a string.
+		 */
+		public String getType();
+
+		/**
+		 * Gets a description of the embedded media.
+		 *
+		 * @return A description of the embedded media. Can be null.
+		 */
+		public String getDescription();
+
+		/**
+		 * Gets the direct link to the media.
+		 *
+		 * @return The download link for the attachment.
+		 */
+		public String getUrl();
+
+		/**
+		 * Gets the thumbnail of the embedded media.
+		 *
+		 * @return An object containing information about the embedded media's thumbnail. Can be null.
+		 */
+		public String getThumbnail();
+
+		/**
+		 * Gets the provider of the embedded media.
+		 *
+		 * @return An object containing information about the embedded media's provider. <b>Can Be Null!</b>
+		 */
+		public IEmbedded.IEmbedProvider getEmbedProvider();
+
+		/**
+		 * Represents a site that provides media which is embedded in chat. Eg. Youtube, Imgur.
+		 */
+		interface IEmbedProvider {
+			/**
+			 * Gets the Embedded Media Provider's Name
+			 *
+			 * @return The Embedded Media Provider's Name
+			 */
+			public String getName();
+
+			/**
+			 * Gets the Embedded Media Provider's Url
+			 *
+			 * @return A url link to the Embedded Media Provider as a String
+			 */
+			public String getUrl();
 		}
 	}
 }

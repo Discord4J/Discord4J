@@ -14,6 +14,7 @@
 permissions, added voice channel bitrate support, and fixed various permission caching problems
 * @Techtony96 -Made IVoiceChannel#mention() throw an UnsupportedOperationException
 * @chrislo27 -Fixed message pin event logic and clarified cloudflare errors
+* @poncethecat - Added .addRole and .removeRole for the User object
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer

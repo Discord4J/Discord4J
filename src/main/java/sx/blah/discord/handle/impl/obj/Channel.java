@@ -5,33 +5,25 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
-
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.json.generic.PermissionOverwrite;
-import sx.blah.discord.json.requests.ChannelEditRequest;
-import sx.blah.discord.json.requests.InviteRequest;
-import sx.blah.discord.json.requests.MessageRequest;
-import sx.blah.discord.json.responses.ChannelResponse;
-import sx.blah.discord.json.responses.ExtendedInviteResponse;
-import sx.blah.discord.json.responses.MessageResponse;
+import sx.blah.discord.api.internal.json.generic.PermissionOverwrite;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
+import sx.blah.discord.api.internal.json.requests.InviteRequest;
+import sx.blah.discord.api.internal.json.requests.MessageRequest;
+import sx.blah.discord.api.internal.json.responses.ChannelResponse;
+import sx.blah.discord.api.internal.json.responses.ExtendedInviteResponse;
+import sx.blah.discord.api.internal.json.responses.MessageResponse;
 import sx.blah.discord.util.*;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -70,7 +62,7 @@ public class Channel implements IChannel {
 	/**
 	 * Whether the bot should send out a typing status
 	 */
-	protected AtomicBoolean isTyping = new AtomicBoolean(false);
+	private AtomicBoolean isTyping = new AtomicBoolean(false);
 
 	/**
 	 * Manages all TimerTasks which send typing statuses.
@@ -102,10 +94,6 @@ public class Channel implements IChannel {
 	 */
 	protected final IDiscordClient client;
 
-	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position) {
-		this(client, name, id, parent, topic, position, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
-	}
-
 	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
@@ -121,6 +109,7 @@ public class Channel implements IChannel {
 		else
 			this.messages = null;
 	}
+
 
 	@Override
 	public String getName() {
@@ -180,7 +169,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public String mention() {
-		return "<#"+this.getID()+">";
+		return "<#" + this.getID() + ">";
 	}
 
 	@Override
@@ -200,7 +189,7 @@ public class Channel implements IChannel {
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
 
-			if (response.id == null) //Message didn't send
+			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
 			return DiscordUtils.getMessageFromJSON(client, this, response);
@@ -225,10 +214,10 @@ public class Channel implements IChannel {
 
 			HttpEntity fileEntity = builder.build();
 			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-					DiscordEndpoints.CHANNELS+id+"/messages",
+					DiscordEndpoints.CHANNELS + id + "/messages",
 					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
 
-			if (response.id == null) //Message didn't send
+			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
 			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
@@ -248,7 +237,7 @@ public class Channel implements IChannel {
 	@Override
 	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		InputStream stream = new FileInputStream(file);
-		return sendFile(stream, file.getName(), null);
+		return sendFile(stream, file.getName(), content);
 	}
 
 	@Override
@@ -281,23 +270,29 @@ public class Channel implements IChannel {
 
 	@Override
 	public synchronized void toggleTypingStatus() {
-		isTyping.set(!isTyping.get());
+		setTypingStatus(!this.isTyping.get());
+	}
 
-		typingTimer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				if (!isTyping.get()) {
-					this.cancel();
-					return;
+	@Override
+	public void setTypingStatus(boolean typing) {
+		isTyping.set(typing);
+
+		if (isTyping.get())
+			typingTimer.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					if (!isTyping.get()) {
+						this.cancel();
+						return;
+					}
+					try {
+						((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/typing",
+								new BasicNameValuePair("authorization", client.getToken()));
+					} catch (RateLimitException | DiscordException e) {
+						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+					}
 				}
-				try {
-					((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/typing",
-							new BasicNameValuePair("authorization", client.getToken()));
-				} catch (RateLimitException | DiscordException e) {
-					Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-				}
-			}
-		}, 0, TIME_FOR_TYPE_STATUS);
+			}, 0, TIME_FOR_TYPE_STATUS);
 	}
 
 	@Override
@@ -429,7 +424,7 @@ public class Channel implements IChannel {
 	/**
 	 * CACHES a permissions override for a user in this channel.
 	 *
-	 * @param userId The user the permissions override is for.
+	 * @param userId   The user the permissions override is for.
 	 * @param override The permissions override.
 	 */
 	public void addUserOverride(String userId, PermissionOverride override) {
@@ -439,7 +434,7 @@ public class Channel implements IChannel {
 	/**
 	 * CACHES a permissions override for a role in this channel.
 	 *
-	 * @param roleId The role the permissions override is for.
+	 * @param roleId   The role the permissions override is for.
 	 * @param override The permissions override.
 	 */
 	public void addRoleOverride(String roleId, PermissionOverride override) {
@@ -491,7 +486,8 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
+	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -556,7 +552,7 @@ public class Channel implements IChannel {
 	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
-		channel.setTypingStatus(isTyping.get());
+		channel.isTyping.set(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
 		return channel;
@@ -583,14 +579,5 @@ public class Channel implements IChannel {
 			return false;
 
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IChannel) other).getID().equals(getID());
-	}
-
-	/**
-	 * Sets the CACHED typing status.
-	 *
-	 * @param typingStatus The new typing status.
-	 */
-	public void setTypingStatus(boolean typingStatus) {
-		this.isTyping.set(typingStatus);
 	}
 }

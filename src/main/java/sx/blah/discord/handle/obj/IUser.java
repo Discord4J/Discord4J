@@ -20,15 +20,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	String getName();
 
 	/**
-	 * Gets the game the user is playing, no value if the user isn't playing a game.
-	 *
-	 * @return The game.
-	 * @deprecated Use {@link #getStatus()} instead.
-	 */
-	@Deprecated
-	Optional<String> getGame();
-
-	/**
 	 * Gets the status for this user.
 	 *
 	 * @return The user's status.
@@ -123,20 +114,21 @@ public interface IUser extends IDiscordObject<IUser> {
 	void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
-	 * Gets the voice channel this user is in (if in one).
-	 *
-	 * @return The (optional) voice channel.
-	 * @deprecated Use {@link #getConnectedVoiceChannels()} instead.
-	 */
-	@Deprecated
-	Optional<IVoiceChannel> getVoiceChannel();
-
-	/**
 	 * Gets the voice channels this user is connected to.
 	 *
 	 * @return The voice channels.
 	 */
 	List<IVoiceChannel> getConnectedVoiceChannels();
+
+	/**
+	 * Gets a {@link IPrivateChannel} for this user.
+	 *
+	 * @return The {@link IPrivateChannel} object.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 */
+	IPrivateChannel getOrCreatePMChannel() throws RateLimitException, DiscordException;
 
 	/**
 	 * Gets whether this user is deafened in the given guild.
@@ -167,4 +159,28 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return True if muted, false if otherwise.
      */
 	boolean isMutedLocally();
+
+	/**
+	 * Adds a Role to this user.
+	 *
+	 * @param role The role to add to the User
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+
+	/**
+	 * Removes a Role from this user.
+	 *
+	 * @param role The role to remove from the User.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+
 }

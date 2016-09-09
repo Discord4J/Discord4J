@@ -7,13 +7,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.handle.impl.events.RoleUpdateEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.json.generic.RoleResponse;
-import sx.blah.discord.json.requests.RoleEditRequest;
+import sx.blah.discord.api.internal.json.generic.RoleResponse;
+import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
@@ -167,7 +166,7 @@ public class Role implements IRole {
 
 	@Override
 	public boolean isMentionable() {
-		return mentionable;
+		return mentionable || isEveryoneRole();
 	}
 
 	/**
@@ -251,8 +250,13 @@ public class Role implements IRole {
 	}
 
 	@Override
+	public boolean isEveryoneRole() {
+		return guild.getEveryoneRole().equals(this);
+	}
+
+	@Override
 	public String mention() {
-		return isMentionable() ? "<@&"+id+">" : name;
+		return isMentionable() ? (isEveryoneRole() ? "@everyone" : "<@&"+id+">") : name;
 	}
 
 	@Override
