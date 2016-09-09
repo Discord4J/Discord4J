@@ -173,7 +173,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
 		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts);
-		this.token = token;
+		this.token = isBot ? "Bot " + token : token;
 	}
 
 	@Override
@@ -188,11 +188,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public String getToken() {
-		if (isBot) {
-			return "Bot "+token;
-		} else {
-			return token;
-		}
+		return token;
 	}
 
 	@Override
@@ -245,7 +241,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		if (isReady()) {
 			if (!isBot())
 				REQUESTS.POST.makeRequest(DiscordEndpoints.LOGOUT,
-						new BasicNameValuePair("authorization", token));
+						new BasicNameValuePair("authorization", getToken()));
 
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else
@@ -285,10 +281,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 							this.password, password.orElse(this.password), username.orElse(getOurUser().getName()),
 							avatar == null ? Image.forUser(ourUser).getData() :
 									(avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData())))),
-					new BasicNameValuePair("Authorization", token),
+					new BasicNameValuePair("Authorization", getToken()),
 					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
 
-			if (!this.token.equals(response.token)) {
+			if (!this.getToken().equals(response.token)) {
 				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
 				this.token = response.token;
 			}
@@ -478,7 +474,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			if (message != null)
 				return message;
 		}
-		
+
 		return null;
 	}
 
@@ -502,7 +498,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
 					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
-					new BasicNameValuePair("authorization", this.token),
+					new BasicNameValuePair("authorization", getToken()),
 					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
 
 			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
@@ -524,7 +520,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		try {
 			InviteJSONResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+code,
-					new BasicNameValuePair("authorization", token)), InviteJSONResponse.class);
+					new BasicNameValuePair("authorization", getToken())), InviteJSONResponse.class);
 
 			return DiscordUtils.getInviteFromJSON(this, response);
 		} catch (Exception e) {
@@ -537,7 +533,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		if (REGIONS.isEmpty()) {
 			RegionResponse[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
 					DiscordEndpoints.VOICE+"regions",
-					new BasicNameValuePair("authorization", this.token)),
+					new BasicNameValuePair("authorization", getToken())),
 					RegionResponse[].class);
 
 			Arrays.stream(regions)
@@ -574,7 +570,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
 					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
 							new CreateGuildRequest(name, region.getID(), icon))),
-					new BasicNameValuePair("authorization", this.token),
+					new BasicNameValuePair("authorization", getToken()),
 					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
 			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);
 			guildList.add(guild);
