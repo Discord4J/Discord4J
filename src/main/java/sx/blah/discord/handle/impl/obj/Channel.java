@@ -23,6 +23,8 @@ import sx.blah.discord.api.internal.json.responses.MessageResponse;
 import sx.blah.discord.util.*;
 
 import java.io.*;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -244,7 +246,30 @@ public class Channel implements IChannel {
 	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
 		return sendFile(file, null);
 	}
-
+	
+	@Override
+	public IMessage sendFile(URL url, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
+		InputStream stream = url.openStream();
+		return sendFile(stream, filename, content);
+	}
+	
+	@Override
+	public IMessage sendFile(URL url, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
+		return sendFile(url, filename, null);
+	}
+	
+	@Override
+	public IMessage sendFile(String text, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
+		InputStream stream = new ByteArrayInputStream(Charset.forName("UTF-8").encode(text).array());
+		return sendFile(stream, filename, content);
+	}
+	
+	@Override
+	public IMessage sendFile(String text, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
+		return sendFile(text, filename, null);
+	}
+	
+	
 	@Override
 	public IInvite createInvite(int maxAge, int maxUses, boolean temporary) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
