@@ -228,7 +228,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	private boolean validateToken() {
 		try {
-			REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
+			REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me",
 					new BasicNameValuePair("authorization", getToken()));
 			return true;
 		} catch (RateLimitException | DiscordException e) {
