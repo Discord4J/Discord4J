@@ -102,7 +102,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
-		RequestBuffer.request(() -> load(initialContents));
+		if (loadInitialMessages)
+			RequestBuffer.request(() -> load(initialContents));
 	}
 
 	/**
@@ -223,7 +224,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		return cacheChanged;
 	}
-	
+
 	/**
 	 * This checks if a message with the provided id is cached my this list.
 	 *
@@ -335,7 +336,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public IMessage get(String id) {
 		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
-		
+
 		if (message == null && hasPermission && client.isReady())
 			try {
 				return DiscordUtils.getMessageFromJSON(client, channel,
@@ -346,7 +347,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 										new BasicNameValuePair("authorization", client.getToken())),
 								MessageResponse.class));
 			} catch (Exception e) {}
-		
+
 		return message;
 	}
 
