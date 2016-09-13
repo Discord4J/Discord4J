@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
 
+import static sx.blah.discord.Discord4J.LOGGER;
+
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordVoiceWS {
 
@@ -70,12 +72,13 @@ public class DiscordVoiceWS {
 	private byte[] secret;
 
 	private Session session;
+	private final WebSocketClient wsClient;
 
 	public static DiscordVoiceWS connect(VoiceUpdateResponse response, IDiscordClient client) throws Exception {
 		SslContextFactory sslFactory = new SslContextFactory();
 		WebSocketClient wsClient = new WebSocketClient(sslFactory);
 		wsClient.setDaemon(true);
-		DiscordVoiceWS socket = new DiscordVoiceWS(response, (DiscordClientImpl) client);
+		DiscordVoiceWS socket = new DiscordVoiceWS(response, (DiscordClientImpl) client, wsClient);
 		wsClient.start();
 		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
 		upgradeRequest.setHeader("Accept-Encoding", "gzip, deflate");
@@ -83,17 +86,18 @@ public class DiscordVoiceWS {
 		return socket;
 	}
 
-	public DiscordVoiceWS(VoiceUpdateResponse event, DiscordClientImpl client) throws URISyntaxException {
+	public DiscordVoiceWS(VoiceUpdateResponse event, DiscordClientImpl client, WebSocketClient wsClient) throws URISyntaxException {
 		this.client = client;
 		this.event = event;
 		this.guild = client.getGuildByID(event.guild_id);
+		this.wsClient = wsClient;
 	}
 
 	@OnWebSocketConnect
 	public void onOpen(Session session) {
 		this.session = session;
 		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(event.guild_id, client.ourUser.getID(), client.sessionId, event.token)));
-		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Connected to the Discord Voice websocket.");
+		LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Connected to the Discord Voice websocket.");
 	}
 
 	@OnWebSocketMessage
@@ -133,7 +137,7 @@ public class DiscordVoiceWS {
 
 					startKeepalive(eventObject.get("heartbeat_interval").getAsInt());
 				} catch (IOException e) {
-					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
+					LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
 				break;
 			}
@@ -162,7 +166,7 @@ public class DiscordVoiceWS {
 
 				IUser user = client.getUserByID(userId);
 				if (user == null) {
-					Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Got an Audio USER_SPEAKING_UPDATE for a non-existent User. JSON: "+object.toString());
+					LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Got an Audio USER_SPEAKING_UPDATE for a non-existent User. JSON: "+object.toString());
 					return;
 				}
 
@@ -170,7 +174,7 @@ public class DiscordVoiceWS {
 				break;
 			}
 			default: {
-				Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Uncaught voice packet: "+object);
+				LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Uncaught voice packet: "+object);
 			}
 		}
 	}
@@ -202,7 +206,7 @@ public class DiscordVoiceWS {
 							setSpeaking(false);
 					}
 				} catch (Exception e) {
-					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
+					LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
 			}
 		};
@@ -231,7 +235,7 @@ public class DiscordVoiceWS {
 		Runnable keepAlive = ()->{
 			if (this.isConnected.get()) {
 				long l = System.currentTimeMillis()-client.timer;
-				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
+				LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 				send(DiscordUtils.GSON.toJson(new VoiceKeepAliveRequest(System.currentTimeMillis())));
 				client.timer = System.currentTimeMillis();
 			}
@@ -261,19 +265,19 @@ public class DiscordVoiceWS {
 
 			onMessage(session, data);
 		} catch (IOException e) {
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
+			LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 		}
 	}
 
 	@OnWebSocketClose
 	public void onClose(Session session, int code, String reason){
-		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
+		LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected. Exit Code: {}. Reason: {}.", code, reason);
 		disconnect(VoiceDisconnectedEvent.Reason.UNKNOWN);
 	}
 
 	@OnWebSocketError
 	public void onError(Session session, Throwable e) {
-		Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket error, disconnecting...", e);
+		LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket error, disconnecting...", e);
 		if (session == null || !session.isOpen()) {
 			disconnect(VoiceDisconnectedEvent.Reason.INIT_ERROR);
 		} else {
@@ -288,14 +292,14 @@ public class DiscordVoiceWS {
 	 */
 	public void send(String message) {
 		if (session == null || !session.isOpen()) {
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Socket attempting to send a message ({}) without a valid session!", message);
+			LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Socket attempting to send a message ({}) without a valid session!", message);
 			return;
 		}
 		if (isConnected.get()) {
 			try {
 				session.getRemote().sendString(message);
 			} catch (IOException e) {
-				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error caught attempting to send a websocket message", e);
+				LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error caught attempting to send a websocket message", e);
 			}
 		}
 	}
@@ -322,6 +326,11 @@ public class DiscordVoiceWS {
 				udpSocket.close();
 			if (reason != VoiceDisconnectedEvent.Reason.INIT_ERROR) {
 				session.close();
+			}
+			try {
+				wsClient.stop();
+			} catch (Exception e) {
+				LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error caught attempting to close the WebSocketClient!", e);
 			}
 		}
 	}

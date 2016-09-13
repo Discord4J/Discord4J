@@ -44,6 +44,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 
+import static sx.blah.discord.Discord4J.LOGGER;
+
 //This is what Hlaaftana uses so it must be good :shrug:
 @WebSocket(maxBinaryMessageSize = Integer.MAX_VALUE, maxIdleTime = Integer.MAX_VALUE, maxTextMessageSize = Integer.MAX_VALUE)
 public class DiscordWS {
@@ -237,6 +239,11 @@ public class DiscordWS {
 			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 			if (reason != DiscordDisconnectedEvent.Reason.INIT_ERROR) {
 				session.close();
+			}
+			try {
+				wsClient.stop();
+			} catch (Exception e) {
+				LOGGER.error(LogMarkers.WEBSOCKET, "Error caught attempting to close the WebSocketClient!", e);
 			}
 		}
 	}
