@@ -10,7 +10,6 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IApplication;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.api.internal.json.responses.ApplicationResponse;
 import sx.blah.discord.api.internal.json.responses.BotResponse;
 import sx.blah.discord.util.DiscordException;
@@ -19,7 +18,6 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.UnsupportedEncodingException;
-import java.util.EnumSet;
 import java.util.Optional;
 
 public class Application implements IApplication {

@@ -12,7 +12,6 @@ import sx.blah.discord.util.Image;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents the main discord api.

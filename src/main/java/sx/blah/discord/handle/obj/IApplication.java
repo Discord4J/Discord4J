@@ -5,9 +5,6 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 
-import java.util.EnumSet;
-import java.util.Optional;
-
 /**
  * This represents a Discord application.
  */
