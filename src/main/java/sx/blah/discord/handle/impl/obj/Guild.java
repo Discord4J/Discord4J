@@ -206,6 +206,12 @@ public class Guild implements IGuild {
 				|| (includeNicknames && user.getNicknameForGuild(this).orElse("").equals(name)))
 				.collect(Collectors.toList());
 	}
+	
+	@Override
+	public List<IUser> getUsersByRole(IRole role) {
+		return users.stream().filter((user) -> user.getRolesForGuild(this).contains(role))
+				.collect(Collectors.toList());
+	}
 
 	@Override
 	public String getName() {
