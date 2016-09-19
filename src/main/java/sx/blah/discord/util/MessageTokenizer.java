@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public class MessageTokenizer {
 
-	public static final String ANY_MENTION_REGEX = "<((@[!&]?)|#)\\d+>";
+	public static final String ANY_MENTION_REGEX = "(<(((@[!&]?)|#)\\d+)>)|(@here)|(@everyone)";
 
 	private final String content;
 	private final IDiscordClient client;
@@ -234,6 +234,12 @@ public class MessageTokenizer {
 		final String matched = t.getContent();
 		final char type = matched.charAt(1);
 
+		if (matched.equalsIgnoreCase("@everyone")) {
+			return new EveryoneMentionToken(this, lessThan, greaterThan);
+		} else if (matched.equalsIgnoreCase("@here")) {
+			return new HereMentionToken(this, lessThan, greaterThan);
+		}
+
 		if (type == '@') {
 			if (matched.charAt(2) == '&') {
 				return new RoleMentionToken(this, lessThan, greaterThan);
@@ -442,6 +448,34 @@ public class MessageTokenizer {
 			super(tokenizer, startIndex, endIndex, null);
 
 			mention = tokenizer.getClient().getChannelByID(getContent().replace("<#", "").replace(">", ""));
+		}
+	}
+
+	public static class EveryoneMentionToken extends MentionToken {
+
+		/**
+		 * An everyone mention with its content and position. <b>The mention object is null.</b>
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private EveryoneMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex, null);
+		}
+	}
+
+	public static class HereMentionToken extends MentionToken {
+
+		/**
+		 * A here mention with its content and position. <b>The mention object is null.</b>
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private HereMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex, null);
 		}
 	}
 
