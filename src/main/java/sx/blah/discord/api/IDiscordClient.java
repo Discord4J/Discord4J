@@ -315,7 +315,21 @@ public interface IDiscordClient {
 	 * @return True if a bot, false if otherwise.
 	 */
 	boolean isBot();
-
+	
+	/**
+	 * Gets the current shard this client is running on.
+	 *
+	 * @return The current shard id.
+	 */
+	int getCurrentShard();
+	
+	/**
+	 * Gets the number of shards this account is spread across.
+	 *
+	 * @return The shard count.
+	 */
+	int getShardCount();
+	
 	/**
 	 * Gets the applications owned by this user.
 	 *

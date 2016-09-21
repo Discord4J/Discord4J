@@ -1,6 +1,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * This is used to request a connection to the discord websocket
@@ -17,8 +18,8 @@ public class ConnectRequest {
 	 */
 	public EventObject d;
 
-	public ConnectRequest(String token, String os, String browser, String device, String referrer, String referring_domain, int large_threshold, boolean compress) {
-		d = new EventObject(token, new PropertiesObject(os, browser, device, referrer, referring_domain), large_threshold, compress);
+	public ConnectRequest(String token, String os, String browser, String device, String referrer, String referring_domain, int large_threshold, boolean compress, Pair<Integer, Integer> shard) {
+		d = new EventObject(token, new PropertiesObject(os, browser, device, referrer, referring_domain), large_threshold, compress, shard);
 	}
 
 	/**
@@ -37,11 +38,6 @@ public class ConnectRequest {
 		public PropertiesObject properties;
 
 		/**
-		 * The version?? of the event, always 3
-		 */
-		public int v = 3;
-
-		/**
 		 * The amount of users in a guild before the guild is perceived as "large"
 		 */
 		public int large_threshold;
@@ -50,12 +46,18 @@ public class ConnectRequest {
 		 * Whether events should be compressed with a gzip format
 		 */
 		public boolean compress;
+		
+		/**
+		 * Array of two integers, (shard_id, num_shards).
+		 */
+		public int[] shard;
 
-		public EventObject(String token, PropertiesObject properties, int large_threshold, boolean compress) {
+		public EventObject(String token, PropertiesObject properties, int large_threshold, boolean compress, Pair<Integer, Integer> shard) {
 			this.token = token;
 			this.properties = properties;
 			this.large_threshold = large_threshold;
 			this.compress = compress;
+			this.shard = shard != null ? new int[]{shard.getLeft(), shard.getRight()} : null;
 		}
 	}
 

@@ -1,5 +1,6 @@
 package sx.blah.discord.api.internal;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
@@ -136,6 +137,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final boolean isDaemon;
 
 	/**
+	 * The shard this client represents. [shard_id, num_shards]
+	 */
+	protected final Pair<Integer, Integer> shard;
+
+	/**
 	 * Whether this client represents a bot.
 	 */
 	protected volatile boolean isBot;
@@ -155,7 +161,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts) {
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts, Pair<Integer, Integer> shard) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
@@ -163,16 +169,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.reconnectAttempts = reconnectAttempts;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
+		this.shard = shard;
 	}
 
 	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, false, reconnectAttempts);
+		this(timeoutTime, maxMissedPingCount, isDaemon, false, reconnectAttempts, null);
 		this.email = email;
 		this.password = password;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts, Pair<Integer, Integer> shard) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts, shard);
 		this.token = isBot ? "Bot " + token : token;
 	}
 
@@ -212,7 +219,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			}
 
 			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon,
-					reconnectAttempts, async);
+					reconnectAttempts, async, shard);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {
@@ -594,6 +601,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public boolean isBot() {
 		return isBot;
+	}
+
+	@Override
+	public int getCurrentShard() {
+		return shard == null ? 0 : shard.getLeft();
+	}
+
+	@Override
+	public int getShardCount() {
+		return shard == null ? 1 : shard.getRight();
 	}
 
 	/**
