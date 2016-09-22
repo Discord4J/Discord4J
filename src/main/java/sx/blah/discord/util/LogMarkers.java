@@ -59,7 +59,12 @@ public enum LogMarkers implements Marker {
 	 * The marker for websocket keepalive actions.
 	 * It is a child of {@link #WEBSOCKET} and {@link #VOICE_WEBSOCKET}.
 	 */
-	KEEPALIVE(WEBSOCKET, VOICE_WEBSOCKET);
+	KEEPALIVE(WEBSOCKET, VOICE_WEBSOCKET),
+	/**
+	 * The marker for all websocket-related logging.
+	 * It is a child of {@link #API}.
+	 */
+	CLOUDFLARE(WEBSOCKET);
 
 	final Marker marker;
 
