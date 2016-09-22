@@ -280,8 +280,18 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public List<IRole> getRolesByName(String name, boolean ignoreCase) {
+		return roles.stream()
+				.filter((role) -> {
+					if(ignoreCase) return role.getName().equalsIgnoreCase(name);
+					else return role.getName().equals(name);
+				})
+				.collect(Collectors.toList());
+	}
+	
+	@Override
 	public List<IRole> getRolesByName(String name) {
-		return roles.stream().filter((role) -> role.getName().equals(name)).collect(Collectors.toList());
+		return getRolesByName(name, false);
 	}
 
 	@Override

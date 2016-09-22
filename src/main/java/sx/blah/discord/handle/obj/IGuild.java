@@ -149,6 +149,14 @@ public interface IGuild extends IDiscordObject<IGuild> {
 
 	/**
 	 * This finds all the roles which has the same name as the provided one.
+	 * @param name The name to search for.
+	 * @param ignoreCase Whether or not to ignore the casing in the role's name.
+	 * @return The roles with a matching name.
+	 */
+	List<IRole> getRolesByName(String name, boolean ignoreCase);
+	
+	/**
+	 * This finds all the roles which has the same name as the provided one.
 	 *
 	 * @param name The name to search for.
 	 * @return The roles with a matching name.
