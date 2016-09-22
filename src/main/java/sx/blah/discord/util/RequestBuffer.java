@@ -217,7 +217,7 @@ public class RequestBuffer {
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
 					bucket = e.getMethod();
 				} catch (CloudFlareException e){
-					Discord4J.LOGGER.debug(LogMarkers.CLOUDFLARE, "A CloudFlare exception has occured and a request will be re-attempted!", e);
+					Discord4J.LOGGER.debug(LogMarkers.UTIL, "A CloudFlare exception has occured and a request will be re-attempted!", e);
 					return tryAgain();
 				}
 			}
