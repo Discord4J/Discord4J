@@ -13,6 +13,7 @@ import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.responses.RateLimitResponse;
+import sx.blah.discord.util.CloudFlareException;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
@@ -122,8 +123,9 @@ public class Requests {
 		 *
 		 * @throws RateLimitException
 		 * @throws DiscordException
+		 * @throws CloudFlareException
 		 */
-		public String makeRequest(String url, BasicNameValuePair... headers) throws RateLimitException, DiscordException {
+		public String makeRequest(String url, BasicNameValuePair... headers) throws RateLimitException, DiscordException, CloudFlareException {
 			try {
 				HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 				for (BasicNameValuePair header : headers) {
@@ -147,8 +149,9 @@ public class Requests {
 		 *
 		 * @throws RateLimitException
 		 * @throws DiscordException
+		 * @throws CloudFlareException
 		 */
-		public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws RateLimitException, DiscordException {
+		public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws RateLimitException, DiscordException, CloudFlareException {
 			try {
 				if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 					HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -168,7 +171,7 @@ public class Requests {
 			return null;
 		}
 
-		private String request(HttpUriRequest request) throws DiscordException, RateLimitException {
+		private String request(HttpUriRequest request) throws DiscordException, RateLimitException, CloudFlareException {
 			if (globalRetryAfter.get() != -1) {
 				if (System.currentTimeMillis() > globalRetryAfter.get())
 					globalRetryAfter.set(-1);
@@ -216,7 +219,7 @@ public class Requests {
 					LOGGER.trace(LogMarkers.API, "502 response on request to {}, response text: {}", request.getURI(), message); //This can be used to verify if it was cloudflare causing the 502.
 
 					if (message.toLowerCase(Locale.ROOT).contains("cloudflare")) {
-						throw new DiscordException("502 error on request to " + request.getURI()
+						throw new CloudFlareException("502 error on request to " + request.getURI()
 								+ ". This is due to CloudFlare.");
 					}
 

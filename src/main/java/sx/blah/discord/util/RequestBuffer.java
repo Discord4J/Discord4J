@@ -73,8 +73,9 @@ public class RequestBuffer {
 		 * @return The result of this request, if any.
 		 *
 		 * @throws RateLimitException
+		 * @throws CloudFlareException
 		 */
-		T request() throws RateLimitException;
+		T request() throws RateLimitException, CloudFlareException;
 	}
 
 	/**
@@ -84,7 +85,7 @@ public class RequestBuffer {
 	@FunctionalInterface
 	public interface IVoidRequest extends IRequest<Object> {
 
-		default Object request() throws RateLimitException {
+		default Object request() throws RateLimitException, CloudFlareException {
 			doRequest();
 			return null;
 		}
@@ -93,8 +94,9 @@ public class RequestBuffer {
 		 * This is called when the request is attempted.
 		 *
 		 * @throws RateLimitException
+		 * @throws CloudFlareException
 		 */
-		void doRequest() throws RateLimitException;
+		void doRequest() throws RateLimitException, CloudFlareException;
 	}
 
 	/**
@@ -214,6 +216,9 @@ public class RequestBuffer {
 				} catch (RateLimitException e) {
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
 					bucket = e.getMethod();
+				} catch (CloudFlareException e){
+					Discord4J.LOGGER.debug(LogMarkers.CLOUDFLARE, "A CloudFlare exception has occured and a request will be re-attempted!", e);
+					return tryAgain();
 				}
 			}
 			return isDone() || isCancelled();
