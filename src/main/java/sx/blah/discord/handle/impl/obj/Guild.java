@@ -187,24 +187,50 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IChannel> getChannelsByName(String name) {
-		return channels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+		return getChannelsByName(name, false);
+	}
+	
+	@Override
+	public List<IChannel> getChannelsByName(String name, boolean ignoreCase) {
+		return channels.stream()
+				.filter((channel) ->
+					(ignoreCase) ? channel.getName().equalsIgnoreCase(name) : channel.getName().equals(name)
+				)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannelsByName(String name) {
-		return voiceChannels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+		return getVoiceChannelsByName(name, false);
+	}
+	
+	@Override
+	public List<IVoiceChannel> getVoiceChannelsByName(String name, boolean ignoreCase) {
+		return voiceChannels.stream()
+				.filter((channel) ->
+					(ignoreCase) ? channel.getName().equalsIgnoreCase(name) : channel.getName().equals(name)
+				)
+				.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<IUser> getUsersByName(String name) {
-		return getUsersByName(name, true);
+	public List<IUser> getUsersByName(String name, boolean includeNicknames, boolean ignoreCase) {
+		return users.stream()
+				.filter((user) ->
+					(ignoreCase) ? user.getName().equalsIgnoreCase(name) || (includeNicknames && user.getNicknameForGuild(this).orElse("").equalsIgnoreCase(name))
+						: user.getName().equals(name) || (includeNicknames && user.getNicknameForGuild(this).orElse("").equals(name))
+				)
+				.collect(Collectors.toList());
 	}
-
+	
 	@Override
 	public List<IUser> getUsersByName(String name, boolean includeNicknames) {
-		return users.stream().filter((user) -> user.getName().equals(name)
-				|| (includeNicknames && user.getNicknameForGuild(this).orElse("").equals(name)))
-				.collect(Collectors.toList());
+		return getUsersByName(name, includeNicknames, false);
+	}
+	
+	@Override
+	public List<IUser> getUsersByName(String name) {
+		return getUsersByName(name, true, false);
 	}
 	
 	@Override
@@ -280,8 +306,17 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public List<IRole> getRolesByName(String name, boolean ignoreCase) {
+		return roles.stream()
+				.filter((role) -> 
+					(ignoreCase) ? role.getName().equalsIgnoreCase(name) : role.getName().equals(name)
+				)
+				.collect(Collectors.toList());
+	}
+	
+	@Override
 	public List<IRole> getRolesByName(String name) {
-		return roles.stream().filter((role) -> role.getName().equals(name)).collect(Collectors.toList());
+		return getRolesByName(name, false);
 	}
 
 	@Override
