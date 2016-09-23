@@ -210,7 +210,7 @@ public class DiscordWS {
 			if (reconnectAttempts.incrementAndGet() > maxReconnectAttempts) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Reconnection was attempted too many times ({} attempts)", reconnectAttempts);
 				isReconnecting.set(false);//When reconnect has timed out then allow the bot to fully disconnect
-				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_FAILED);
+				disconnect(DiscordDisconnectedEvent.Reason.RECONNECTION_ABORTED);
 				return;
 			} else {
 				final TimerTask cancelReconnectTask = cancelReconnectTaskSupplier.get();

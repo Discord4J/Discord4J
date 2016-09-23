@@ -57,6 +57,10 @@ public class DiscordDisconnectedEvent extends Event {
 		/**
 		 * The websocket attempted reconnect to discord but it failed.
 		 */
-		RECONNECTION_FAILED
+		RECONNECTION_FAILED,
+		/**
+		 * The websocket has attempted to reconnect the maximum number of times and has ceased attempting.
+		 */
+		RECONNECTION_ABORTED
 	}
 }
