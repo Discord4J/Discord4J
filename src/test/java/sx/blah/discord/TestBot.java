@@ -157,6 +157,8 @@ public class TestBot {
 								} catch (RateLimitException | DiscordException | MissingPermissionsException e) {
 									e.printStackTrace();
 								}
+							} else if (m.getContent().startsWith(".updateShard")) {
+								messageReceivedEvent.getClient().setShardCount(2);
 							} else if (m.getContent().startsWith(".clear")) {
 								IChannel c = client.getChannelByID(m.getChannel().getID());
 								if (null != c) {

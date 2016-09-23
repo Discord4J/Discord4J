@@ -16,7 +16,7 @@ public class ClientBuilder {
 	private String botToken;
 	private boolean isDaemon = false;
 	private int reconnectAttempts = 4;
-	private Pair<Integer, Integer> shard = null;
+	private int shardCount = 1;
 
 	/**
 	 * Sets the login info for the client.
@@ -107,20 +107,13 @@ public class ClientBuilder {
 	/**
 	 * This makes the client run on a specified shard.
 	 *
-	 * @param shardID The shard to run this client on.
 	 * @param shardCount The number of total shards.
 	 * @return The instance of the builder.
 	 *
 	 * @see <a href="https://discordapp.com/developers/docs/topics/gateway#sharding">Sharding specifications</a>
 	 */
-	public ClientBuilder withShard(int shardID, int shardCount) {
-		if (shardID >= shardCount)
-			throw new RuntimeException("Your shard id must be less than the shard count");
-
-		if (shardID < 0)
-			throw new RuntimeException("Your shard id cannot be negative");
-
-		this.shard = Pair.of(shardID, shardCount);
+	public ClientBuilder withShard(int shardCount) {
+		this.shardCount = shardCount;
 		return this;
 	}
 
@@ -136,7 +129,7 @@ public class ClientBuilder {
 			throw new DiscordException("No login info present!");
 
 		if (isBot) {
-			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts, shard);
+			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts, shardCount);
 		} else {
 			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts);
 		}

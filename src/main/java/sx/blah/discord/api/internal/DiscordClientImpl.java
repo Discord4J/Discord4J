@@ -8,6 +8,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.StatusChangeEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
@@ -24,6 +25,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -79,7 +83,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * WebSocket over which to communicate with Discord.
 	 */
-	public volatile DiscordWS ws;
+	public volatile Map<Integer, DiscordWS> ws = new ConcurrentHashMap<>();
 
 	/**
 	 * Holds the active connections to voice sockets.
@@ -100,11 +104,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Whether the api is logged in.
 	 */
 	protected volatile boolean isReady = false;
-
-	/**
-	 * The websocket session id.
-	 */
-	protected volatile String sessionId;
 
 	/**
 	 * Caches the last operation done by the websocket, required for handling redirects.
@@ -137,9 +136,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final boolean isDaemon;
 
 	/**
-	 * The shard this client represents. [shard_id, num_shards]
+	 * The amount of shards that should be created
 	 */
-	protected final Pair<Integer, Integer> shard;
+	protected Integer shardCount;
 
 	/**
 	 * Whether this client represents a bot.
@@ -161,7 +160,22 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts, Pair<Integer, Integer> shard) {
+	/**
+	 * The list of websocket that need to be connected
+	 */
+	private Map<Integer, String> connectingWS = new ConcurrentHashMap<>();
+
+	/**
+	 * Should the websockets be async'ed
+	 */
+	private boolean async;
+
+	/**
+	 * The schedule executor to run new websockets at the certain delay
+	 */
+	private volatile ScheduledExecutorService executorService;
+
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts, Integer shardCount) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
@@ -169,17 +183,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.reconnectAttempts = reconnectAttempts;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
-		this.shard = shard;
+		this.shardCount = shardCount;
 	}
 
 	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, false, reconnectAttempts, null);
+		this(timeoutTime, maxMissedPingCount, isDaemon, false, reconnectAttempts, 1);
 		this.email = email;
 		this.password = password;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts, Pair<Integer, Integer> shard) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts, shard);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts, Integer shardCount) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts, shardCount);
 		this.token = isBot ? "Bot " + token : token;
 	}
 
@@ -202,12 +216,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public void login(boolean async) throws DiscordException {
 		try {
 			if (ws != null) {
-				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
-
+				for (int i = 0; i < this.shardCount; i++) {
+					this.disconnectWebSocket(i, DiscordDisconnectedEvent.Reason.RECONNECTING);
+				}
 				lastSequence = 0;
-				sessionId = null; //Prevents the websocket from sending a resume request.
 			}
 
+			this.async = async;
 			if (!isBot) {
 				LoginResponse response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.LOGIN,
 						new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
@@ -218,8 +233,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon,
-					reconnectAttempts, async, shard);
+			String gatewayURL = obtainGateway(getToken());
+			for (int i = 0; i < this.shardCount; i++) {
+				connectWebSocket(i, gatewayURL);
+			}
+
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {
@@ -250,7 +268,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 				REQUESTS.POST.makeRequest(DiscordEndpoints.LOGOUT,
 						new BasicNameValuePair("authorization", getToken()));
 
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
+			for (int i = 0; i < this.shardCount; i++) {
+				this.disconnectWebSocket(i, DiscordDisconnectedEvent.Reason.LOGGED_OUT);
+			}
 		} else
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 	}
@@ -342,7 +362,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
 		}
 
-		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));
+		getWebSocket(0).send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));
 	}
 
 	@Override
@@ -357,12 +377,89 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isReady() {
-		return isReady && ws != null && ws.isConnected.get() && !ws.isReconnecting.get();
+		for (int i = 0; i < this.shardCount; i++) {
+			if (!isReady(i) || !getWebSocket(i).isReady) {
+				return false;
+			}
+		}
+
+		if (!this.isReady) {
+			this.isReady = true;
+			this.dispatcher.dispatch(new ReadyEvent());
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean isReady(int shard) {
+		if (!this.ws.containsKey(shard) || !this.getWebSocket(shard).isConnected.get() || this.getWebSocket(shard).isReconnecting.get()) {
+			isReady = false;
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public void connectWebSocket(int shard, String gatewayURL) {
+		this.connectingWS.put(shard, gatewayURL);
+
+		if (executorService == null || executorService.isShutdown() || executorService.isTerminated()) {
+			executorService = Executors.newScheduledThreadPool(1, r -> {
+				Thread thread = Executors.defaultThreadFactory().newThread(r);
+				thread.setName("Discord4J WS Connection Executor");
+				return thread;
+			});
+
+			Runnable keepAlive = () -> {
+				if (connectingWS.size() > 0) {
+					Map.Entry<Integer, String> entry = this.connectingWS.entrySet().iterator().next();
+
+					int i = entry.getKey();
+					try {
+						this.ws.put(i, new DiscordWS(this, entry.getValue(), timeoutTime, maxMissedPingCount, isDaemon,
+								reconnectAttempts, async, Pair.of(i, this.shardCount)));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					connectingWS.remove(entry.getKey());
+				}
+			};
+			executorService.scheduleAtFixedRate(keepAlive,
+					0,
+					6000, TimeUnit.MILLISECONDS);
+		}
+	}
+	@Override
+	public void disconnectWebSocket(int shard, DiscordDisconnectedEvent.Reason reason) {
+		if (this.ws.containsKey(shard)) {
+			this.getWebSocket(shard).disconnect(reason);
+		}
+	}
+
+	@Override
+	public void setShardCount(int shardCount){
+		for (int i = 0; i < this.shardCount; i++) {
+			disconnectWebSocket(i, DiscordDisconnectedEvent.Reason.RECONNECTING);
+		}
+		this.voiceConnections.clear();
+		this.guildList.clear();
+		this.heartbeat = 0;
+		this.lastSequence = 0;
+		this.ourUser = null;
+		this.privateChannels.clear();
+		this.REGIONS.clear();
+
+		String gatewayURL = obtainGateway(getToken());
+		this.shardCount = shardCount;
+		for (int i = 0; i < this.shardCount; i++) {
+			connectWebSocket(i, gatewayURL);
+		}
 	}
 
 	@Override
 	public IUser getOurUser() {
-		if (!isReady()) {
+		if (!isReady(0)) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return null;
 		}
@@ -405,6 +502,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return getVoiceChannels().stream()
 				.filter(c -> c.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IGuild> getGuilds(int shard) {
+		return guildList.stream()
+				.filter(g -> DiscordUtils.getShard(this, g) == shard)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -503,7 +607,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		PrivateChannelResponse response = null;
 		try {
-			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
+			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS + this.ourUser.getID() + "/channels",
 					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
 					new BasicNameValuePair("authorization", getToken()),
 					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
@@ -589,8 +693,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public long getResponseTime() {
-		return ws.getResponseTime();
+	public long getResponseTime(int shard) {
+		return this.getWebSocket(shard).getResponseTime();
 	}
 
 	@Override
@@ -604,13 +708,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public int getCurrentShard() {
-		return shard == null ? 0 : shard.getLeft();
-	}
-
-	@Override
 	public int getShardCount() {
-		return shard == null ? 1 : shard.getRight();
+		return this.shardCount;
 	}
 
 	/**
@@ -732,5 +831,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
+	}
+
+	public DiscordWS getWebSocket(int shard) {
+		return this.ws.get(shard);
+	}
+
+	public DiscordWS getWebSocket(IGuild parent) {
+		return this.getWebSocket(parent.getID());
+	}
+
+	public DiscordWS getWebSocket(String guildID) {
+		return this.ws.get(DiscordUtils.getShard(this, guildID));
 	}
 }

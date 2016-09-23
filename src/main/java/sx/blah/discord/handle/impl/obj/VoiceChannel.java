@@ -122,7 +122,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 				} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
 					throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
 
-				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
+				((DiscordClientImpl) client).getWebSocket(parent).send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
 			} else {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
@@ -134,7 +134,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void leave() {
 		if (client.getConnectedVoiceChannels().contains(this)) {
-			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
+			((DiscordClientImpl) client).getWebSocket(parent).send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
 			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent))
 				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		} else {
