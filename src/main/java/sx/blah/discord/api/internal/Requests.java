@@ -216,10 +216,9 @@ public class Requests {
 					LOGGER.trace(LogMarkers.API, "502 response on request to {}, response text: {}", request.getURI(), message); //This can be used to verify if it was cloudflare causing the 502.
 
 					if (message.toLowerCase(Locale.ROOT).contains("cloudflare")) {
-						throw new DiscordException("502 error on request to " + request.getURI()
-								+ ". This is due to CloudFlare.");
+						LOGGER.debug(LogMarkers.API, "Retrying the request due to CloudFlare interruption!");
+						return request(request);
 					}
-
 					throw new DiscordException("502 error on request to "+request.getURI()+". With response text: "+message);
 				} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
 					throw new DiscordException("Error on request to "+request.getURI()+". Received response code "+responseCode+". With response text: "+message);
