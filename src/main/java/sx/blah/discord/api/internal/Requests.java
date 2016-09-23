@@ -97,7 +97,7 @@ public class Requests {
 		/**
 		 * Keeps track of per-method rate limits. Pair is method, path
 		 */
-		private final Map<Pair<String, String>, Long> retryAfters = new ConcurrentHashMap<>();
+		private final Map<String, Long> retryAfters = new ConcurrentHashMap<>();
 
 		private Request(Class<? extends HttpUriRequest> clazz, IDiscordClient client) {
 			this.requestClass = clazz;
@@ -177,15 +177,17 @@ public class Requests {
 							globalRetryAfter.get() - System.currentTimeMillis(), request.getMethod(), true);
 			}
 
-			Pair<String, String> methodRequestPair = Pair.of(request.getMethod(), request.getURI().getPath());
+			String route = request.getURI().getPath();
+			if (route.contains("?"))
+				route = route.substring(0, route.lastIndexOf("?")); //Strips query parameters
 
-			if (retryAfters.containsKey(methodRequestPair)) {
-				if (System.currentTimeMillis() > retryAfters.get(methodRequestPair))
-					retryAfters.remove(methodRequestPair);
+			if (retryAfters.containsKey(route)) {
+				if (System.currentTimeMillis() > retryAfters.get(route))
+					retryAfters.remove(route);
 				else
 					throw new RateLimitException("Rate limit exceeded.",
-							retryAfters.get(methodRequestPair) - System.currentTimeMillis(),
-							String.format("%s %s", methodRequestPair.getLeft(), methodRequestPair.getRight()), false);
+							retryAfters.get(route) - System.currentTimeMillis(),
+							route, false);
 			}
 
 			try (CloseableHttpResponse response = CLIENT.execute(request)) {
@@ -194,7 +196,7 @@ public class Requests {
 				if (response.containsHeader("X-RateLimit-Remaining")) {
 					int remaining = Integer.parseInt(response.getFirstHeader("X-RateLimit-Remaining").getValue());
 					if (remaining == 0) {
-						retryAfters.put(methodRequestPair,
+						retryAfters.put(route,
 								Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue())*1000);
 					}
 				}
@@ -238,11 +240,11 @@ public class Requests {
 					if (rateLimitResponse.global) {
 						globalRetryAfter.set(System.currentTimeMillis()+rateLimitResponse.retry_after);
 					} else {
-						retryAfters.put(methodRequestPair, System.currentTimeMillis()+rateLimitResponse.retry_after);
+						retryAfters.put(route, System.currentTimeMillis()+rateLimitResponse.retry_after);
 					}
 
 					throw new RateLimitException(rateLimitResponse.message, rateLimitResponse.retry_after,
-							String.format("%s %s", methodRequestPair.getLeft(), methodRequestPair.getRight()),
+							route,
 							rateLimitResponse.global);
 				}
 
