@@ -2,6 +2,7 @@ package sx.blah.discord.api;
 
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
@@ -120,6 +121,14 @@ public interface IDiscordClient {
 	boolean isReady();
 
 	/**
+	 * Checks if the websocket is ready to be interacted with
+	 *
+	 * @param shard The shard of the websocket being check
+	 *
+	 * @return True if the the shard's websocket is ready, false if otherwise
+     */
+	boolean isReady(int shard);
+	/**
 	 * Gets the {@link User} this bot is representing.
 	 *
 	 * @return The user object.
@@ -171,6 +180,15 @@ public interface IDiscordClient {
 	 * @return The list of {@link Guild}s the api is connected to.
 	 */
 	List<IGuild> getGuilds();
+
+	/**
+	 * Gets all guilds the api is connected to on a certain shard
+	 *
+	 * @param shard The shard of the guild list being collected
+	 *
+	 * @return The list of {@link Guild}s the api is connected to with the certain shard.
+     */
+	List<IGuild> getGuilds(int shard);
 
 	/**
 	 * Gets a guild by its unique id.
@@ -298,9 +316,11 @@ public interface IDiscordClient {
 	/**
 	 * Gets the latest response time by the discord websocket to a ping.
 	 *
+	 * @param shard The shard's websocket you ar3e getting the response time of.
+	 *
 	 * @return The response time (in ms).
 	 */
-	long getResponseTime();
+	long getResponseTime(int shard);
 
 	/**
 	 * Gets the connected voice channels.
@@ -315,21 +335,36 @@ public interface IDiscordClient {
 	 * @return True if a bot, false if otherwise.
 	 */
 	boolean isBot();
-	
-	/**
-	 * Gets the current shard this client is running on.
-	 *
-	 * @return The current shard id.
-	 */
-	int getCurrentShard();
-	
+
 	/**
 	 * Gets the number of shards this account is spread across.
 	 *
 	 * @return The shard count.
 	 */
 	int getShardCount();
-	
+
+	/**
+	 * Connects the api to a websocket with a shard and gateway
+	 *
+	 * @param shard The shard of the connecting webscoket.
+	 * @param gatewayURL The url the websocket is connecting to.
+     */
+	void connectWebSocket(int shard, String gatewayURL);
+
+	/**
+	 * Disconnects the websocket from te api
+	 *
+	 * @param shard The shard of the disconnecting webscoket
+	 * @param reason The reason why the websocket is being disconnected
+	 */
+	void disconnectWebSocket(int shard, DiscordDisconnectedEvent.Reason reason);
+
+	/**
+	 * Change the amount of shards the websockets are using
+	 *
+	 * @param shardCount The new amount of shards the guilds should span across
+     */
+	void setShardCount(int shardCount);
 	/**
 	 * Gets the applications owned by this user.
 	 *

@@ -255,7 +255,7 @@ public class DiscordUtils {
 				}
 
 			if (json.large) { //The guild is large, we have to send a request to get the offline users
-				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new GuildMembersRequest(json.id)));
+				((DiscordClientImpl) client).getWebSocket(json.id).send(DiscordUtils.GSON.toJson(new GuildMembersRequest(json.id)));
 			}
 
 			if (json.presences != null)
@@ -773,5 +773,13 @@ public class DiscordUtils {
 				toPCM.getSampleSizeInBits(), toPCM.getChannels(), toPCM.getFrameSize(), toPCM.getFrameRate(), true);
 
 		return AudioSystem.getAudioInputStream(audioFormat, pcmStream);
+	}
+
+	public static int getShard(IDiscordClient client, IGuild parent) {
+		return getShard(client, parent.getID());
+	}
+
+	public static int getShard(IDiscordClient client, String guildID) {
+		return Math.toIntExact(((Long.parseLong(guildID) >> 22) % client.getShardCount()));
 	}
 }
