@@ -82,7 +82,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The list of matching channels.
 	 */
 	List<IChannel> getChannelsByName(String name, boolean ignoreCase);
-	
+
 	/**
 	 * Gets all the channels which has a name matching the provided one.
 	 *
@@ -99,7 +99,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The list of matching channels.
 	 */
 	List<IVoiceChannel> getVoiceChannelsByName(String name, boolean ignoreCase);
-	
+
 	/**
 	 * Gets all the voice channels which has a name matching the provided one.
 	 *
@@ -118,7 +118,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The list of matching users.
 	 */
 	List<IUser> getUsersByName(String name, boolean includeNicknames, boolean ignoreCase);
-	
+
 	/**
 	 * Gets all the users which have a name which matches the.
 	 * provided name.
@@ -128,7 +128,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The list of matching users.
 	 */
 	List<IUser> getUsersByName(String name, boolean includeNicknames);
-	
+
 	/**
 	 * Gets all the users which have a display name (i.e. nickname if present else discord name) which matches the
 	 * provided name. This is effectively the same as #getUsersByName(name, true).
@@ -137,10 +137,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The list of matching users.
 	 */
 	List<IUser> getUsersByName(String name);
-	
+
 	/**
 	 * Gets all the users who have the provided role.
-	 * 
+	 *
 	 * @param role The role to search with.
 	 * @return The list of matching users.
 	 */
@@ -183,7 +183,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The roles with a matching name.
 	 */
 	List<IRole> getRolesByName(String name, boolean ignoreCase);
-	
+
 	/**
 	 * This finds all the roles which has the same name as the provided one.
 	 *
@@ -532,4 +532,11 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The message or null if not found.
 	 */
 	IMessage getMessageByID(String id);
+
+	/**
+	 * This gets the shard the guild is currently on
+	 *
+	 * @return The shard of the guild
+     */
+	int getShard();
 }

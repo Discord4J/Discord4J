@@ -241,7 +241,7 @@ public class DiscordUtils {
 			}
 		} else {
 			guild = new Guild(client, json.name, json.id, json.icon, json.owner_id, json.afk_channel_id,
-					json.afk_timeout, json.region);
+					json.afk_timeout, json.region, DiscordUtils.getShard(client, json.id));
 
 			if (json.roles != null)
 				for (RoleResponse roleResponse : json.roles) {
@@ -776,10 +776,16 @@ public class DiscordUtils {
 	}
 
 	public static int getShard(IDiscordClient client, IGuild parent) {
+		if (parent == null)
+			return 0;
+
 		return getShard(client, parent.getID());
 	}
 
 	public static int getShard(IDiscordClient client, String guildID) {
+		if (guildID == null)
+			return 0;
+
 		return Math.toIntExact(((Long.parseLong(guildID) >> 22) % client.getShardCount()));
 	}
 }
