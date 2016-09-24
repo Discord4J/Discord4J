@@ -786,6 +786,6 @@ public class DiscordUtils {
 		if (guildID == null)
 			return 0;
 
-		return Math.toIntExact(((Long.parseLong(guildID) >> 22) % client.getShardCount()));
+		return Math.toIntExact(((Long.parseUnsignedLong(guildID) >> 22) % client.getShardCount()));
 	}
 }
