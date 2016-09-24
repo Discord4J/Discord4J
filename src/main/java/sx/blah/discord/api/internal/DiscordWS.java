@@ -224,6 +224,7 @@ public class DiscordWS {
 					try {
 						client.connectWebSocket(shard.getLeft(), gateway);
 						disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
+						return;
 					} catch (Exception e) {
 						Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error caught while attempting to reconnect.", e);
 					}
