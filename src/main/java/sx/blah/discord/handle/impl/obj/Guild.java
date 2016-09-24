@@ -103,21 +103,11 @@ public class Guild implements IGuild {
 	 */
 	protected final int shard;
 
-	@Deprecated
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
-		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, 0);
+		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
 
-	@Deprecated
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
-		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, roles, channels, voiceChannels, users, joinTimes, 0);
-	}
-
-	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int shard) {
-		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>(), shard);
-	}
-
-	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes, int shard) {
 		this.client = client;
 		this.name = name;
 		this.voiceChannels = voiceChannels;
@@ -133,7 +123,7 @@ public class Guild implements IGuild {
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
 		this.audioManager = new AudioManager(this);
-		this.shard = shard;
+		this.shard = DiscordUtils.getShard(this.client, this.id);
 	}
 
 	@Override
@@ -774,7 +764,7 @@ public class Guild implements IGuild {
 	@Override
 	public IGuild copy() {
 		return new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
-				voiceChannels, users, joinTimes, shard);
+				voiceChannels, users, joinTimes);
 	}
 
 	@Override
