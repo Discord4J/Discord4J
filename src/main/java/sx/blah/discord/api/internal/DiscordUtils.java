@@ -776,10 +776,16 @@ public class DiscordUtils {
 	}
 
 	public static int getShard(IDiscordClient client, IGuild parent) {
+		if (parent == null)
+			return 0;
+
 		return getShard(client, parent.getID());
 	}
 
 	public static int getShard(IDiscordClient client, String guildID) {
-		return Math.toIntExact(((Long.parseLong(guildID) >> 22) % client.getShardCount()));
+		if (guildID == null)
+			return 0;
+
+		return Math.toIntExact(((Long.parseUnsignedLong(guildID) >> 22) % client.getShardCount()));
 	}
 }

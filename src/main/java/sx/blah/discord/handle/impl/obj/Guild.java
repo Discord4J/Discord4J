@@ -98,6 +98,11 @@ public class Guild implements IGuild {
 	 */
 	protected final IDiscordClient client;
 
+	/**
+	 * The shard of the guild
+	 */
+	protected final int shard;
+
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
 		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
@@ -118,6 +123,7 @@ public class Guild implements IGuild {
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
 		this.audioManager = new AudioManager(this);
+		this.shard = DiscordUtils.getShard(this.client, this.id);
 	}
 
 	@Override
@@ -189,7 +195,7 @@ public class Guild implements IGuild {
 	public List<IChannel> getChannelsByName(String name) {
 		return getChannelsByName(name, false);
 	}
-	
+
 	@Override
 	public List<IChannel> getChannelsByName(String name, boolean ignoreCase) {
 		return channels.stream()
@@ -203,7 +209,7 @@ public class Guild implements IGuild {
 	public List<IVoiceChannel> getVoiceChannelsByName(String name) {
 		return getVoiceChannelsByName(name, false);
 	}
-	
+
 	@Override
 	public List<IVoiceChannel> getVoiceChannelsByName(String name, boolean ignoreCase) {
 		return voiceChannels.stream()
@@ -222,17 +228,17 @@ public class Guild implements IGuild {
 				)
 				.collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public List<IUser> getUsersByName(String name, boolean includeNicknames) {
 		return getUsersByName(name, includeNicknames, false);
 	}
-	
+
 	@Override
 	public List<IUser> getUsersByName(String name) {
 		return getUsersByName(name, true, false);
 	}
-	
+
 	@Override
 	public List<IUser> getUsersByRole(IRole role) {
 		return users.stream().filter((user) -> user.getRolesForGuild(this).contains(role))
@@ -308,12 +314,12 @@ public class Guild implements IGuild {
 	@Override
 	public List<IRole> getRolesByName(String name, boolean ignoreCase) {
 		return roles.stream()
-				.filter((role) -> 
+				.filter((role) ->
 					(ignoreCase) ? role.getName().equalsIgnoreCase(name) : role.getName().equals(name)
 				)
 				.collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public List<IRole> getRolesByName(String name) {
 		return getRolesByName(name, false);
@@ -743,6 +749,11 @@ public class Guild implements IGuild {
 		}
 
 		return message;
+	}
+
+	@Override
+	public int getShard() {
+		return this.shard;
 	}
 
 	@Override
