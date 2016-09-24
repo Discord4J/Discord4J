@@ -6,14 +6,14 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.api.internal.json.requests.*;
+import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.StatusChangeEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.*;
-import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
@@ -23,11 +23,7 @@ import sx.blah.discord.util.RateLimitException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -695,6 +691,21 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public long getResponseTime(int shard) {
 		return this.getWebSocket(shard).getResponseTime();
+	}
+
+	@Override
+	public long getResponseTime() {
+		return getResponseTime(0);
+	}
+
+	@Override
+	public long getAverageResponseTime() {
+		long total = 0;
+		final int shardCount = getShardCount();
+		for (int i = 0; i < shardCount; i++)
+			total += getResponseTime(i);
+
+		return total / shardCount;
 	}
 
 	@Override

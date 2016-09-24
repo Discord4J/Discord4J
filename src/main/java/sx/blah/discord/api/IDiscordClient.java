@@ -314,13 +314,27 @@ public interface IDiscordClient {
 	IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException;
 
 	/**
-	 * Gets the latest response time by the discord websocket to a ping.
+	 * Gets the latest response time by the Discord websocket from a ping.
 	 *
-	 * @param shard The shard's websocket you ar3e getting the response time of.
+	 * @param shard The shard's websocket you are getting the response time of.
 	 *
 	 * @return The response time (in ms).
 	 */
 	long getResponseTime(int shard);
+
+	/**
+	 * Gets the latest response time by the Discord websocket (shard 0) from a ping.
+	 *
+	 * @return The response time (in ms).
+	 */
+	long getResponseTime();
+
+	/**
+	 * Gets the average response time by all shards from a ping.
+	 *
+	 * @return The average response time (in ms).
+	 */
+	long getAverageResponseTime();
 
 	/**
 	 * Gets the connected voice channels.
