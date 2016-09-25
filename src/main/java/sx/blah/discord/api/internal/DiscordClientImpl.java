@@ -358,7 +358,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
 		}
 
-		getWebSocket(0).send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));
+		final String request = DiscordUtils.GSON
+				.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status));
+		for (int i = 0; i < getShardCount(); i++) {
+			getWebSocket(i).send(request);
+		}
 	}
 
 	@Override
