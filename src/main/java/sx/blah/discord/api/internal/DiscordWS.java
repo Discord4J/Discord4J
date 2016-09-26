@@ -593,8 +593,9 @@ public class DiscordWS {
 
 			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
 
-			if(!this.async) {
+			if(this.async) {
 				this.isReady = true;
+				client.isReady();
 			}
 			return true;
 		}).execute();
@@ -691,7 +692,7 @@ public class DiscordWS {
 		client.guildList.add(guild);
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
 
-		if(this.async){
+		if(!this.async){
 			if (client.getGuilds(DiscordUtils.getShard(client, event.id)).size() == this.guildCount) {
 				this.isReady = true;
 				client.isReady();
