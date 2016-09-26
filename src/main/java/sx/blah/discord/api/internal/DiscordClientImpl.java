@@ -336,43 +336,62 @@ public final class DiscordClientImpl implements IDiscordClient {
 		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(avatar));
 	}
 
-	private void updatePresence(boolean isIdle, Status status) {
+	private void updatePresence(int shard, boolean isIdle, Status status) {
 		if (!isReady()) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 			return;
 		}
 
-		if (!status.equals(getOurUser().getStatus())) {
-			Status oldStatus = getOurUser().getStatus();
-			((User) getOurUser()).setStatus(status);
-			dispatcher.dispatch(new StatusChangeEvent(getOurUser(), oldStatus, status));
+		final Status oldStatus = getOurUser().getStatus(shard);
+		final Presences oldPresence = getOurUser().getPresence(shard);
+
+		if (!status.equals(oldStatus)) {
+			((User) getOurUser()).setStatus(status, shard);
+			dispatcher.dispatch(new StatusChangeEvent(getOurUser(), oldStatus, status, shard));
 		}
 
-		if ((getOurUser().getPresence() != Presences.IDLE && isIdle)
-				|| (getOurUser().getPresence() == Presences.IDLE && !isIdle)
-				|| (getOurUser().getPresence() != Presences.STREAMING && status.getType() == Status.StatusType.STREAM)) {
-			Presences oldPresence = getOurUser().getPresence();
+		if ((oldPresence != Presences.IDLE && isIdle)
+				|| (oldPresence == Presences.IDLE && !isIdle)
+				|| (oldPresence != Presences.STREAMING && status.getType() == Status.StatusType.STREAM)) {
 			Presences newPresence = isIdle ? Presences.IDLE :
 					(status.getType() == Status.StatusType.STREAM ? Presences.STREAMING : Presences.ONLINE);
-			((User) getOurUser()).setPresence(newPresence);
-			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
+			((User) getOurUser()).setPresence(newPresence, shard);
+			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence, shard));
 		}
 
 		final String request = DiscordUtils.GSON
 				.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status));
-		for (int i = 0; i < getShardCount(); i++) {
-			getWebSocket(i).send(request);
-		}
+		getWebSocket(shard).send(request);
+	}
+
+	@Override
+	public void changePresence(boolean isIdle, int index) {
+		if (index < 0 || index >= getShardCount())
+			throw new IllegalArgumentException(
+					"Shard number out of bounds. Cannot be less than zero or bigger than the shard count.");
+
+		updatePresence(index, isIdle, getOurUser().getStatus(index));
+	}
+
+	@Override
+	public void changeStatus(Status status, int index) {
+		if (index < 0 || index >= getShardCount())
+			throw new IllegalArgumentException(
+					"Shard number out of bounds. Cannot be less than zero or bigger than the shard count.");
+
+		updatePresence(index, getOurUser().getPresence(index) == Presences.IDLE, status);
 	}
 
 	@Override
 	public void changePresence(boolean isIdle) {
-		updatePresence(isIdle, getOurUser().getStatus());
+		for (int i = 0; i < getShardCount(); i++)
+			changePresence(isIdle, i);
 	}
 
 	@Override
 	public void changeStatus(Status status) {
-		updatePresence(getOurUser().getPresence() == Presences.IDLE, status);
+		for (int i = 0; i < getShardCount(); i++)
+			changeStatus(status, i);
 	}
 
 	@Override

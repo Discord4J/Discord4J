@@ -7,8 +7,8 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.RateLimitException;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -100,18 +100,38 @@ public interface IDiscordClient {
 	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
 
 	/**
-	 * Changes this user's presence.
+	 * Changes this user's presence across all shards.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.
 	 */
 	void changePresence(boolean isIdle);
 
 	/**
-	 * Changes the status of the bot user.
+	 * Changes the status of the bot user across all shards.
 	 *
 	 * @param status The new status to use.
 	 */
 	void changeStatus(Status status);
+
+	/**
+	 * Changes this user's presence.
+	 *
+	 * @param index  The shard number to set it on.
+	 * @param isIdle If true, this user becomes idle, or online if false.
+	 *
+	 * @throws IllegalArgumentException If an invalid index is provided.
+	 */
+	void changePresence(boolean isIdle, int index);
+
+	/**
+	 * Changes the status of the bot user.
+	 *
+	 * @param index  The shard number to set it on.
+	 * @param status The new status to use.
+	 *
+	 *               @throws IllegalArgumentException If an invalid index is provided.
+	 */
+	void changeStatus(Status status, int index);
 
 	/**
 	 * Checks if the api is ready to be interacted with (if it is logged in).

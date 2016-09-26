@@ -841,14 +841,14 @@ public class DiscordWS {
 
 				if (!user.getPresence().equals(presence)) {
 					Presences oldPresence = user.getPresence();
-					user.setPresence(presence);
-					client.dispatcher.dispatch(new PresenceUpdateEvent(user, oldPresence, presence));
+					user.setPresence(presence, 0);
+					client.dispatcher.dispatch(new PresenceUpdateEvent(user, oldPresence, presence, 0));
 					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
 				if (!user.getStatus().equals(status)) {
 					Status oldStatus = user.getStatus();
-					user.setStatus(status);
-					client.dispatcher.dispatch(new StatusChangeEvent(user, oldStatus, status));
+					user.setStatus(status, 0);
+					client.dispatcher.dispatch(new StatusChangeEvent(user, oldStatus, status, 0));
 					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed status to {}.", user.getName(), status);
 				}
 			}

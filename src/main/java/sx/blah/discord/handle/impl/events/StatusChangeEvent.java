@@ -11,11 +11,13 @@ public class StatusChangeEvent extends Event {
 
 	private final IUser user;
 	private final Status oldStatus, newStatus;
+	private final int index;
 
-	public StatusChangeEvent(IUser user, Status oldStatus, Status newStatus) {
+	public StatusChangeEvent(IUser user, Status oldStatus, Status newStatus, int index) {
 		this.user = user;
 		this.oldStatus = oldStatus;
 		this.newStatus = newStatus;
+		this.index = index;
 	}
 
 	/**
@@ -43,5 +45,14 @@ public class StatusChangeEvent extends Event {
 	 */
 	public Status getOldStatus() {
 		return oldStatus;
+	}
+
+	/**
+	 * In the case of the client, the shard. Otherwise, the index.
+	 *
+	 * @return The index.
+	 */
+	public int getIndex() {
+		return index;
 	}
 }
