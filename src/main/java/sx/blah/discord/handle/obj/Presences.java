@@ -19,5 +19,9 @@ public enum Presences {
 	/**
 	 * Represents that the user is streaming.
 	 */
-	STREAMING
+	STREAMING,
+	/**
+	 * Represents that the user is in 'do not disturb' mode.
+	 */
+	DND
 }
