@@ -19,10 +19,12 @@ import java.util.regex.Pattern;
 public class MessageTokenizer {
 
 	public static final String ANY_MENTION_REGEX = "(<(((@[!&]?)|#)\\d+)>)|(@here)|(@everyone)";
+	public static final String SERVER_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
 
 	private final String content;
 	private final IDiscordClient client;
 	private final Pattern anyMentionPattern = Pattern.compile(ANY_MENTION_REGEX);
+	private final Pattern serverEmojiPattern = Pattern.compile(SERVER_EMOJI_REGEX);
 	private int currentPosition = 0;
 	/**
 	 * The remaining substring.
@@ -198,7 +200,7 @@ public class MessageTokenizer {
 		if (!hasNextRegex(pattern))
 			throw new IllegalStateException("No more occurrences found!");
 
-		Matcher matcher = anyMentionPattern.matcher(remaining);
+		Matcher matcher = pattern.matcher(remaining);
 		if (!matcher.find())
 			throw new IllegalStateException("Couldn't find any matches!");
 		final int start = currentPosition + matcher.start();
@@ -252,6 +254,32 @@ public class MessageTokenizer {
 
 		// should NEVER happen because hasNextMention will ensure we get a mention
 		throw new IllegalStateException("Couldn't find a mention even though it was found!");
+	}
+
+	/**
+	 * Returns true if there is another server emoji to go to.
+	 *
+	 * @return True if there is another server emoji.
+	 */
+	public boolean hasNextServerEmoji() {
+		return hasNextRegex(serverEmojiPattern);
+	}
+
+	/**
+	 * Returns the next server emoji, stepping forward the tokenizer to the end of the emoji (exclusive).
+	 *
+	 * @return The next server emoji token
+	 * @see ServerEmojiToken
+	 */
+	public ServerEmojiToken nextServerEmoji() {
+		if (!hasNextServerEmoji())
+			throw new IllegalStateException("No more server emojis found!");
+
+		Token t = nextRegex(serverEmojiPattern);
+		final int lessThan = t.getStartIndex();
+		final int greaterThan = t.getEndIndex();
+
+		return new ServerEmojiToken(this, lessThan, greaterThan);
 	}
 
 	/**
@@ -476,6 +504,52 @@ public class MessageTokenizer {
 		 */
 		private HereMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
+		}
+	}
+
+	public static class ServerEmojiToken extends Token {
+
+		/**
+		 * The emoji (:text:)
+		 */
+		private final String emoji;
+		/**
+		 * The guild ID
+		 */
+		private final String guildID;
+
+		/**
+		 * A server emoji from a message with content and position.
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private ServerEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex);
+
+			final String content = getContent();
+
+			emoji = content.substring(content.indexOf(":"), content.lastIndexOf(":") + 1);
+			guildID = content.substring(content.lastIndexOf(":") + 1, content.length());
+		}
+
+		/**
+		 * Return the emoji. Will contain colons surrounding the emoji.
+		 *
+		 * @return The :emoji:
+		 */
+		public String getEmoji() {
+			return emoji;
+		}
+
+		/**
+		 * Return the guild ID of the emoji.
+		 *
+		 * @return The guild ID of the emoji
+		 */
+		public String getGuildID() {
+			return guildID;
 		}
 	}
 
