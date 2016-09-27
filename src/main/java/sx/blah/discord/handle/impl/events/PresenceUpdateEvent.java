@@ -11,11 +11,13 @@ public class PresenceUpdateEvent extends Event {
 
 	private final IUser user;
 	private final Presences oldPresence, newPresence;
+	private final int index;
 
-	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence) {
+	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence, int index) {
 		this.user = user;
 		this.oldPresence = oldPresence;
 		this.newPresence = newPresence;
+		this.index = index;
 	}
 
 	/**
@@ -43,5 +45,14 @@ public class PresenceUpdateEvent extends Event {
 	 */
 	public IUser getUser() {
 		return user;
+	}
+
+	/**
+	 * In the case of the client, the shard. Otherwise, the index.
+	 *
+	 * @return The index.
+	 */
+	public int getIndex() {
+		return index;
 	}
 }

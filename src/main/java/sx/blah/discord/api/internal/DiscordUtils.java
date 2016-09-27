@@ -264,11 +264,11 @@ public class DiscordUtils {
 					if (user != null) {
 						Status status = getStatusFromJSON(presence.game);
 						if (status.getType() == Status.StatusType.STREAM) {
-							user.setPresence(Presences.STREAMING);
+							user.setPresence(Presences.STREAMING, 0);
 						} else {
-							user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
+							user.setPresence(Presences.valueOf((presence.status).toUpperCase()), 0);
 						}
-						user.setStatus(status);
+						user.setStatus(status, 0);
 					}
 				}
 

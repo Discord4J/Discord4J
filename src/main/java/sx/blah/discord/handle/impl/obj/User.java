@@ -58,9 +58,9 @@ public class User implements IUser {
 	 */
 	protected volatile String avatar;
 	/**
-	 * The user's status.
+	 * The user's statuses.
 	 */
-	protected volatile Status status = Status.empty();
+	protected final Map<Integer, Status> statuses = new ConcurrentHashMap<>();
 	/**
 	 * User discriminator.
 	 * Distinguishes users with the same name.
@@ -71,10 +71,10 @@ public class User implements IUser {
 	 */
 	protected volatile boolean isBot;
 	/**
-	 * This user's presence.
-	 * One of [online/idle/offline].
+	 * This user's presences.
+	 * [online/idle/offline].
 	 */
-	protected volatile Presences presence;
+	protected final Map<Integer, Presences> presences = new ConcurrentHashMap<>();
 	/**
 	 * The user's avatar in URL form.
 	 */
@@ -96,7 +96,10 @@ public class User implements IUser {
 		this.discriminator = discriminator;
 		this.avatar = avatar;
 		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
-		this.presence = presence;
+		this.presences.clear();
+		this.presences.put(0, presence);
+		this.statuses.clear();
+		this.statuses.put(0, Status.empty());
 		this.roles = new ConcurrentHashMap<>();
 		this.nicks = new ConcurrentHashMap<>();
 		this.isBot = isBot;
@@ -122,17 +125,38 @@ public class User implements IUser {
 	}
 
 	@Override
+	public Status getStatus(int index) {
+		if (!this.equals(getClient().getOurUser())) {
+			if (index != 0) {
+				return null;
+			}
+		} else {
+			if (index < 0 || index >= getClient().getShardCount())
+				throw new IllegalArgumentException(
+						"Index out of bounds. Cannot be less than zero, or higher than the shard count.");
+		}
+
+		return statuses.putIfAbsent(index, Status.empty());
+	}
+
+	@Override
 	public Status getStatus() {
-		return status;
+		return getStatus(0);
 	}
 
 	/**
 	 * Sets the user's CACHED status.
 	 *
+	 * @param num The index.
 	 * @param status The status.
 	 */
-	public void setStatus(Status status) {
-		this.status = status;
+	public void setStatus(Status status, int num) {
+		if (!this.equals(getClient().getOurUser()))
+			num = 0;
+
+		this.statuses.put(num, status);
+
+		trimPresencesAndStatuses();
 	}
 
 	@Override
@@ -156,17 +180,65 @@ public class User implements IUser {
 	}
 
 	@Override
+	public Presences getPresence(int index) {
+		if (!this.equals(getClient().getOurUser())) {
+			if (index != 0) {
+				return null;
+			}
+		} else {
+			if (index < 0 || index >= getClient().getShardCount())
+				if (index < 0 || index >= getClient().getShardCount())
+					throw new IllegalArgumentException(
+							"Index out of bounds. Cannot be less than zero, or higher than the shard count.");
+		}
+
+		return presences.putIfAbsent(index, Presences.ONLINE);
+	}
+
+	@Override
 	public Presences getPresence() {
-		return presence;
+		return getPresence(0);
 	}
 
 	/**
 	 * Sets the CACHED presence of the user.
 	 *
+	 * @param num      The index.
 	 * @param presence The new presence.
 	 */
-	public void setPresence(Presences presence) {
-		this.presence = presence;
+	public void setPresence(Presences presence, int num) {
+		if (!this.equals(getClient().getOurUser()))
+			num = 0;
+
+		this.presences.put(num, presence);
+
+		trimPresencesAndStatuses();
+	}
+
+	/**
+	 * Removes presences and statuses outside of the shard range (which is 1 for non-client users)
+	 */
+	private void trimPresencesAndStatuses() {
+		if (this.equals(getClient().getOurUser())) {
+			for (int i = 0; i < Math.max(statuses.size(), presences.size()); i++) {
+				if (i < getClient().getShardCount()) {
+					statuses.putIfAbsent(i, Status.empty());
+					presences.put(i, Presences.ONLINE);
+				} else {
+					statuses.remove(i);
+					presences.remove(i);
+				}
+			}
+		} else {
+			final Presences firstPresence = getPresence();
+			final Status firstStatus = getStatus();
+
+			presences.clear();
+			presences.put(0, firstPresence);
+
+			statuses.clear();
+			statuses.put(0, firstStatus);
+		}
 	}
 
 	@Override
@@ -242,8 +314,15 @@ public class User implements IUser {
 
 	@Override
 	public IUser copy() {
-		User newUser = new User(client, name, id, discriminator, avatar, presence, isBot);
-		newUser.setStatus(this.status);
+		User newUser = new User(client, name, id, discriminator, avatar, this.getPresence(), isBot);
+		newUser.presences.clear();
+		for (int i = 0; i < this.presences.size(); i++) {
+			newUser.setPresence(this.presences.get(i), i);
+		}
+		newUser.statuses.clear();
+		for (int i = 0; i < this.statuses.size(); i++) {
+			newUser.setStatus(this.statuses.get(i), i);
+		}
 		for (String key : isMuted.keySet())
 			newUser.setIsMute(key, isMuted.get(key));
 		for (String key : isDeaf.keySet())
@@ -402,5 +481,15 @@ public class User implements IUser {
 		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
 		roleList.remove(role);
 		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+	}
+
+	@Override
+	public int getNumberOfPresences() {
+		return presences.size();
+	}
+
+	@Override
+	public int getNumberOfStatuses() {
+		return statuses.size();
 	}
 }

@@ -20,11 +20,20 @@ public interface IUser extends IDiscordObject<IUser> {
 	String getName();
 
 	/**
-	 * Gets the status for this user.
+	 * Gets the FIRST status for this user. This will only work with index=0 for non-client users (returns null otherwise).
 	 *
 	 * @return The user's status.
 	 */
 	Status getStatus();
+
+	/**
+	 * Gets the status for this user.
+	 *
+	 * @param index The status index.
+	 *
+	 * @return The user's status.
+	 */
+	Status getStatus(int index);
 
 	/**
 	 * Gets the user's avatar id.
@@ -41,11 +50,20 @@ public interface IUser extends IDiscordObject<IUser> {
 	String getAvatarURL();
 
 	/**
-	 * Gets the user's presence.
+	 * Gets the user's FIRST presence.
 	 *
 	 * @return The user's presence.
 	 */
 	Presences getPresence();
+
+	/**
+	 * Gets the user's presence by the shard number. This will only work with index=0 for non-client users (returns null otherwise).
+	 *
+	 * @param index The presence index.
+	 *
+	 * @return The user's presence.
+	 */
+	Presences getPresence(int index);
 
 	/**
 	 * Gets the name displayed to a guild for this user.
@@ -182,5 +200,19 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws MissingPermissionsException
 	 */
 	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Gets the number of presences this user has. This only has a number greater than 1 for the client.
+	 *
+	 * @return The number of presences.
+	 */
+	int getNumberOfPresences();
+
+	/**
+	 * Gets the number of statuses this user has. This only has a number greater than 1 for the client.
+	 *
+	 * @return The number of statuses.
+	 */
+	int getNumberOfStatuses();
 
 }
