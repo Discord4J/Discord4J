@@ -593,12 +593,17 @@ public class DiscordWS {
 
 			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Logged in as {} (ID {}).", client.ourUser.getName(), client.ourUser.getID());
 
-			if(this.async) {
-				this.isReady = true;
-				client.isReady();
-			}
+			setReady();
+
 			return true;
 		}).execute();
+	}
+
+	private void setReady(){
+		if (this.async || client.getGuilds(this.shard.getLeft()).size() == this.guildCount) {
+			this.isReady = true;
+			client.isReady();
+		}
 	}
 
 	private void messageCreate(JsonElement eventObject) {
@@ -692,13 +697,9 @@ public class DiscordWS {
 		client.guildList.add(guild);
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
 
-		if(!this.async){
-			if (client.getGuilds(DiscordUtils.getShard(client, event.id)).size() == this.guildCount) {
-				this.isReady = true;
-				client.isReady();
-			}
-		}
 		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
+
+		setReady();
 	}
 
 	private void guildMemberAdd(JsonElement eventObject) {
