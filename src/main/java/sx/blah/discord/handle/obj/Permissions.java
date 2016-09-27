@@ -111,7 +111,11 @@ public enum Permissions {
 	/**
 	 * Allows the user to manage permissions.
 	 */
-	MANAGE_PERMISSIONS(28);
+	MANAGE_PERMISSIONS(28),
+	/**
+	 * Allows the user to manage server emojis.
+	 */
+	MANAGE_EMOJIS(30);
 
 	/**
 	 * The bit offset in the permissions number
@@ -190,7 +194,7 @@ public enum Permissions {
 	public static int generatePermissionsNumber(EnumSet<Permissions> permissions) {
 		if (permissions == null)
 			permissions = EnumSet.noneOf(Permissions.class);
-			
+
 		int number = 0;
 		for (Permissions permission : permissions) {
 			number |= (1 << permission.offset);
