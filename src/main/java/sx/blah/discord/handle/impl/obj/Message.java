@@ -366,6 +366,18 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public Message pin() throws RateLimitException, DiscordException, MissingPermissionsException {
+		this.getChannel().pin(this);
+		return this;
+	}
+
+	@Override
+	public Message unpin() throws RateLimitException, DiscordException, MissingPermissionsException {
+		this.getChannel().unpin(this);
+		return this;
+	}
+
+	@Override
 	public IDiscordClient getClient() {
 		return client;
 	}

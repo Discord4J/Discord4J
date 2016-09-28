@@ -141,6 +141,28 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IGuild getGuild();
 
 	/**
+	 * This pins this message to its channel.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 *
+	 * @return Itself, for chaining.
+	 */
+	IMessage pin() throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
+	 * This unpins this message from its channel.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 *
+	 * @return Itself, for chaining.
+	 */
+	IMessage unpin() throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
 	 * Represents an attachment included in the message.
 	 */
 	class Attachment {
