@@ -121,7 +121,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 */
 	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-	
+
 	/**
 	 * Sends a file to the channel with a message attached.
 	 *
@@ -158,26 +158,26 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The message sent.
 	 *
 	 * @throws IOException
-	 * @throws DiscordException 
+	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 */
 	IMessage sendFile(URL url, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-	
+
 	/**
 	 * Sends a file from a URL to the channel.
 	 *
 	 * @param url The URL of the file to send.
 	 * @param filename The name of the file.
 	 * @return The message sent.
-	 * @throws DiscordException 
+	 * @throws DiscordException
 	 *
 	 * @throws IOException
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 */
 	IMessage sendFile(URL url, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-	
+
 	/**
 	 * Sends a text file to the channel with a message attached.
 	 *
@@ -186,13 +186,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param content The message to be sent with the file.
 	 * @return The message sent.
 	 *
-	 * @throws DiscordException 
+	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	IMessage sendFile(String text, String filename, String content) throws MissingPermissionsException, RateLimitException, DiscordException, IOException;
-	
+
 	/**
 	 * Sends a text file to the channel.
 	 *
@@ -200,13 +200,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param filename The name of the file.
 	 * @return The message sent.
 	 *
-	 * @throws DiscordException 
+	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	IMessage sendFile(String text, String filename) throws MissingPermissionsException, RateLimitException, DiscordException, IOException;
-	
+
 	/**
 	 * Generates an invite for this channel.
 	 *
@@ -413,6 +413,16 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 */
 	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
+	 * This bulk deletes a list of messages from this channel.
+	 *
+	 * @param messages
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void bulkDeleteMessages(List<IMessage> messages) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.
