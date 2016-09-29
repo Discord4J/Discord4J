@@ -413,7 +413,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public boolean isReady(int shard) {
 		if (!this.ws.containsKey(shard) || !this.getWebSocket(shard).isConnected.get() || this.getWebSocket(shard).isReconnecting.get()) {
-			isReady = false;
 			return false;
 		}
 		return true;
