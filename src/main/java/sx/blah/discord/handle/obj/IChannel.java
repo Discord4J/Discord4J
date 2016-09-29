@@ -415,16 +415,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
-	 * This bulk deletes a list of messages from this channel.
-	 *
-	 * @param messages
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
-	 */
-	void bulkDeleteMessages(List<IMessage> messages) throws RateLimitException, DiscordException, MissingPermissionsException;
-
-	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
 	class PermissionOverride {

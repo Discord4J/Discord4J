@@ -575,12 +575,6 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void bulkDeleteMessages(List<IMessage> messages) throws RateLimitException, DiscordException,
-			MissingPermissionsException {
-		getMessages().bulkDelete(messages);
-	}
-
-	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 		channel.isTyping.set(isTyping.get());

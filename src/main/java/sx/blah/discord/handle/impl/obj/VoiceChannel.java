@@ -203,12 +203,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void bulkDeleteMessages(List<IMessage> messages) throws RateLimitException, DiscordException,
-			MissingPermissionsException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public IVoiceChannel copy() {
 		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
 	}
