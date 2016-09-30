@@ -141,11 +141,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected volatile boolean isBot;
 
 	/**
-	 * The maximum amount of attempts before reconnections are aborted.
-	 */
-	protected final int reconnectAttempts;
-
-	/**
 	 * When this client was logged into. Useful for determining uptime.
 	 */
 	protected volatile LocalDateTime launchTime;
@@ -155,24 +150,23 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts) {
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.isBot = isBot;
-		this.reconnectAttempts = reconnectAttempts;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
 
-	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, false, reconnectAttempts);
+	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, false);
 		this.email = email;
 		this.password = password;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
+		this(timeoutTime, maxMissedPingCount, isDaemon, true);
 		this.token = isBot ? "Bot " + token : token;
 	}
 
@@ -211,8 +205,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 					throw new DiscordException("Invalid token!");
 			}
 
-			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon,
-					reconnectAttempts, async);
+			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, async);
 
 			launchTime = LocalDateTime.now();
 		} catch (Exception e) {

@@ -14,7 +14,6 @@ public class ClientBuilder {
 	private boolean isBot = false;
 	private String botToken;
 	private boolean isDaemon = false;
-	private int reconnectAttempts = 4;
 
 	/**
 	 * Sets the login info for the client.
@@ -89,20 +88,6 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * This sets the max amount of attempts the client will make to reconnect in the event of an unexpected
-	 * disconnection.
-	 *
-	 * @param maxAttempts The maximum amount of attempts before the client disconnects with the reason
-	 * {@link sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent.Reason#RECONNECTION_FAILED}. Setting this to
-	 * any value below 1 will disable reconnects altogether.
-	 * @return The instance of the builder.
-	 */
-	public ClientBuilder setMaxReconnectAttempts(int maxAttempts) {
-		this.reconnectAttempts = maxAttempts;
-		return this;
-	}
-
-	/**
 	 * Creates the discord instance with the desired features
 	 *
 	 * @return The discord instance
@@ -114,9 +99,9 @@ public class ClientBuilder {
 			throw new DiscordException("No login info present!");
 
 		if (isBot) {
-			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts);
+			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon);
 		} else {
-			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon, reconnectAttempts);
+			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon);
 		}
 	}
 
