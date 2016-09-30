@@ -2,6 +2,7 @@
 * [ ] I have read and understand the [contribution guidelines](CONTRIBUTING.md)
 * [ ] This pull request follows the code style of the project
 * [ ] I have tested this feature thoroughly
+  * [Proof of testing](screenshot, any evidence you tested this pull request)
 
 **Issues Fixed:** [The issues fixed by this pull request]
 
