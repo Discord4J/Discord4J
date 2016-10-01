@@ -7,7 +7,7 @@ Java interface for the official [Discord](https://discordapp.com/) API, written 
 For the latest dev builds, use the short commit hash or `dev-SNAPSHOT` as your version.
 
 ## Adding Discord4J as a dependency for a project
-Given that `@VERSION@` = the a version of Discord4J (this can either be a release version, the short commit hash or `dev-SNAPSHOT`).
+Given that `@VERSION@` = the version of Discord4J (this can either be a release version, the short commit hash or `dev-SNAPSHOT`).
 ### With Maven
 In your `pom.xml` add:
 ```xml
@@ -120,8 +120,7 @@ public class Main {
 ```
 
 ### Modules
-Discord4J has an API for creating modular Discord Bots! See [Martacus's sample repo](https://github
-.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
+Discord4J has an API for creating modular Discord Bots! See [Martacus's sample repo](https://github.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
 
 ### More examples
 See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
