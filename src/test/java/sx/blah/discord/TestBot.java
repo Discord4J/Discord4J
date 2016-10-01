@@ -50,12 +50,7 @@ public class TestBot {
 
 			boolean isTesting = args[args.length-1].equals("CITest");
 
-			IDiscordClient client;
-
-			if ((isTesting && args.length > 2) || (!isTesting && args.length > 1))
-				client = new ClientBuilder().withLogin(args[0] /* username */, args[1] /* password */).build();
-			else
-				client = new ClientBuilder().withToken(args[0]).build();
+			IDiscordClient client = new ClientBuilder().withToken(args[0]).build();
 
 			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
@@ -304,23 +299,6 @@ public class TestBot {
 						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new MessageOutputStream(message.getChannel())));
 						writer.write(message.getContent());
 						writer.close();
-					}
-				});
-
-				client.getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
-					@Override
-					public void handle(InviteReceivedEvent event) {
-						IInvite invite = event.getInvites()[0];
-						try {
-							Invite.InviteResponse response = invite.details();
-							event.getMessage().reply(String.format("you've invited me to join #%s in the %s guild!", response.getChannelName(), response.getGuildName()));
-							invite.accept();
-							client.getChannelByID(invite.details().getChannelID()).sendMessage(String.format("Hello, #%s and the \"%s\" guild! I was invited by %s!",
-									response.getChannelName(), response.getGuildName(), event.getMessage().getAuthor()));
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
 					}
 				});
 

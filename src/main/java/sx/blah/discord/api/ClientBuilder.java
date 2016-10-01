@@ -8,29 +8,10 @@ import sx.blah.discord.util.DiscordException;
  */
 public class ClientBuilder {
 
-	private String[] loginInfo = new String[0];
 	private long timeoutTime = -1L;
 	private int maxMissedPingCount = -1;
-	private boolean isBot = false;
 	private String botToken;
 	private boolean isDaemon = false;
-
-	/**
-	 * Sets the login info for the client.
-	 *
-	 * @param email The user's email.
-	 * @param password The user's password.
-	 * @return The instance of the builder.
-	 *
-	 * @deprecated The Discord Developers discourage using a user account! This library still supports its usage, but
-	 * it is discouraged. Since it is not supported, there may be bugs associated with it which will NOT be fixed as
-	 * again, this is discouraged. Use a bot account and {@link #withToken(String)} instead.
-	 */
-	@Deprecated
-	public ClientBuilder withLogin(String email, String password) {
-		loginInfo = new String[]{email, password};
-		return this;
-	}
 
 	/**
 	 * Provides the login info for the client.
@@ -40,7 +21,6 @@ public class ClientBuilder {
 	 */
 	public ClientBuilder withToken(String token) {
 		this.botToken = token;
-		isBot = true;
 		return this;
 	}
 
@@ -95,14 +75,10 @@ public class ClientBuilder {
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
 	public IDiscordClient build() throws DiscordException {
-		if ((loginInfo.length < 2 && !isBot) && botToken == null)
+		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		if (isBot) {
-			return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon);
-		} else {
-			return new DiscordClientImpl(loginInfo[0], loginInfo[1], timeoutTime, maxMissedPingCount, isDaemon);
-		}
+		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon);
 	}
 
 	/**

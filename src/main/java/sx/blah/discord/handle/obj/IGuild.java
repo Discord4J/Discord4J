@@ -452,18 +452,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	int pruneUsers(int days) throws DiscordException, RateLimitException;
 
 	/**
-	 * Attempts to add a bot to this guild.
-	 *
-	 * @param applicationID The OAuth2 application id for the application owning the bot.
-	 * @param permissions The permissions for this bot to have when entering the guild.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException;
-
-	/**
 	 * Gets the {@link AudioManager} instance for this guild.
 	 *
 	 * @return The audio manager for this guild.

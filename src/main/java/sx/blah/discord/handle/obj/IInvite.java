@@ -15,18 +15,6 @@ public interface IInvite {
 	String getInviteCode();
 
 	/**
-	 * Accepts the invite and returns relevant information,
-	 * such as the Guild ID and name, and the channel the invite
-	 * was created from.
-	 *
-	 * @return Information about the invite.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	InviteResponse accept() throws DiscordException, RateLimitException;
-
-	/**
 	 * Gains the same information as accepting,
 	 * but doesn't actually accept the invite.
 	 *

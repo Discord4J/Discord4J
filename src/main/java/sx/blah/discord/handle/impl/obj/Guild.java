@@ -647,23 +647,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void addBot(String applicationID, EnumSet<Permissions> permissions) throws MissingPermissionsException, DiscordException, RateLimitException {
-		if (client.isBot())
-			throw new DiscordException("Bot accounts are not allowed to add other bots!");
-
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
-
-		try {
-			((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.AUTHORIZE+"?client_id="+applicationID+"&scope=bot",
-					new StringEntity(DiscordUtils.GSON.toJson(new BotAddRequest(id,
-							Permissions.generatePermissionsNumber(permissions)))),
-					new BasicNameValuePair("authorization", client.getToken()));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-	}
-
-	@Override
 	public IAudioManager getAudioManager() {
 		return audioManager;
 	}

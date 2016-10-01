@@ -36,25 +36,6 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public InviteResponse accept() throws DiscordException, RateLimitException {
-		if (client.isBot())
-			throw new DiscordException("This action can only be performed by a user");
-
-		if (client.isReady()) {
-			String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
-					new BasicNameValuePair("authorization", client.getToken()));
-
-			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
-
-			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
-					inviteResponse.channel.id, inviteResponse.channel.name);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
-			return null;
-		}
-	}
-
-	@Override
 	public InviteResponse details() throws DiscordException, RateLimitException {
 		if (client.isReady()) {
 			String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,

@@ -223,7 +223,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		return cacheChanged;
 	}
-	
+
 	/**
 	 * This checks if a message with the provided id is cached my this list.
 	 *
@@ -335,7 +335,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public IMessage get(String id) {
 		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
-		
+
 		if (message == null && hasPermission && client.isReady())
 			try {
 				return DiscordUtils.getMessageFromJSON(client, channel,
@@ -346,7 +346,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 										new BasicNameValuePair("authorization", client.getToken())),
 								MessageResponse.class));
 			} catch (Exception e) {}
-		
+
 		return message;
 	}
 
@@ -563,9 +563,6 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public void bulkDelete(List<IMessage> messages) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
-
-		if (!client.isBot())
-			throw new DiscordException("You must be a bot to bulk delete!");
 
 		if (messages.size() > 100)
 			throw new DiscordException("You can only delete 100 messages at a time!");
