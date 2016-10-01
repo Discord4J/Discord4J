@@ -55,12 +55,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected volatile String token;
 
 	/**
-	 * Time (in ms) between keep alive
-	 * messages.
-	 */
-	protected volatile long heartbeat;
-
-	/**
 	 * Local copy of all guilds/servers.
 	 */
 	protected final List<IGuild> guildList = new CopyOnWriteArrayList<>();
@@ -106,11 +100,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected volatile String sessionId;
 
 	/**
-	 * Caches the last operation done by the websocket, required for handling redirects.
-	 */
-	protected volatile long lastSequence = 0;
-
-	/**
 	 * Caches the available regions for discord.
 	 */
 	protected final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
@@ -136,11 +125,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final boolean isDaemon;
 
 	/**
-	 * Whether this client represents a bot.
-	 */
-	protected volatile boolean isBot;
-
-	/**
 	 * When this client was logged into. Useful for determining uptime.
 	 */
 	protected volatile LocalDateTime launchTime;
@@ -150,24 +134,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot) {
+	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
-		this.isBot = isBot;
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
 
-	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, false);
-		this.email = email;
-		this.password = password;
-	}
-
 	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, true);
-		this.token = isBot ? "Bot " + token : token;
+		this(timeoutTime, maxMissedPingCount, isDaemon);
+		this.token = "Bot " + token;
 	}
 
 	@Override
@@ -188,26 +165,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void login(boolean async) throws DiscordException {
 		try {
-			if (ws != null) {
-				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
+			if (!validateToken()) throw new DiscordException("Invalid token!");
 
-				lastSequence = 0;
-				sessionId = null; //Prevents the websocket from sending a resume request.
-			}
-
-			if (!isBot) {
-				LoginResponse response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.LOGIN,
-						new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
-						new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
-				this.token = response.token;
-			} else {
-				if (!validateToken())
-					throw new DiscordException("Invalid token!");
-			}
-
-			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon, async);
-
+			System.out.println("login");
+			this.ws = new DiscordWS(this);
 			launchTime = LocalDateTime.now();
+
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Exception caught, logging in!", e);
 			throw new DiscordException("Login error occurred! Are your login details correct?");
@@ -232,13 +195,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void logout() throws RateLimitException, DiscordException {
 		if (isReady()) {
-			if (!isBot())
-				REQUESTS.POST.makeRequest(DiscordEndpoints.LOGOUT,
-						new BasicNameValuePair("authorization", getToken()));
-
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-		} else
+		} else {
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+		}
 	}
 
 	/**
@@ -343,7 +303,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isReady() {
-		return isReady && ws != null && ws.isConnected.get() && !ws.isReconnecting.get();
+		return isReady && ws != null;
 	}
 
 	@Override
@@ -550,96 +510,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException {
-		return createGuild(name, region, (Image) null);
-	}
-
-	@Override
-	public IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException {
-		if (isBot())
-			throw new DiscordException("This action can only be performed by as user");
-
-		try {
-			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
-							new CreateGuildRequest(name, region.getID(), icon))),
-					new BasicNameValuePair("authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
-			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);
-			guildList.add(guild);
-			return guild;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-		return null;
-	}
-
-	@Override
 	public long getResponseTime() {
-		return ws.getResponseTime();
+		//return ws.getResponseTime();
+		return 0;
 	}
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
 		return ourUser.getConnectedVoiceChannels();
-	}
-
-	@Override
-	public boolean isBot() {
-		return isBot;
-	}
-
-	/**
-	 * FOR INTERNAL USE ONLY: Converts this user client to a bot client.
-	 *
-	 * @param token The bot's new token.
-	 */
-	public void convert(String token) {
-		isBot = true;
-		email = null;
-		password = null;
-		this.token = token;
-
-		if (isReady()) {
-			((User) getOurUser()).convertToBot();
-		}
-	}
-
-	@Override
-	public List<IApplication> getApplications() throws RateLimitException, DiscordException {
-		if (isBot())
-			throw new DiscordException("This action can only be performed by a user");
-
-		List<IApplication> applications = new ArrayList<>();
-
-		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
-				new BasicNameValuePair("authorization", getToken()),
-				new BasicNameValuePair("content-type", "application/json")), ApplicationResponse[].class);
-
-		for (ApplicationResponse response : responses)
-			applications.add(DiscordUtils.getApplicationFromJSON(this, response));
-
-		return applications;
-	}
-
-	@Override
-	public IApplication createApplication(String name) throws DiscordException, RateLimitException {
-		if (isBot())
-			throw new DiscordException("This action can only be performed by a user");
-
-		ApplicationResponse response = null;
-		try {
-			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
-					new StringEntity(DiscordUtils.GSON.toJson(new ApplicationCreateRequest(name))),
-					new BasicNameValuePair("authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ApplicationResponse.class);
-			return DiscordUtils.getApplicationFromJSON(this, response);
-
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-
-		return null;
 	}
 
 	@Override

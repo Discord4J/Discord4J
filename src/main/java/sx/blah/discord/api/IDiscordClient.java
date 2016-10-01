@@ -272,31 +272,6 @@ public interface IDiscordClient {
 	IRegion getRegionByID(String regionID);
 
 	/**
-	 * Creates a new guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param region The region for the guild.
-	 * @return The new guild's id.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException;
-
-	/**
-	 * Creates a new guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param region The region for the guild.
-	 * @param icon The icon for the guild.
-	 * @return The new guild's id.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException;
-
-	/**
 	 * Gets the latest response time by the discord websocket to a ping.
 	 *
 	 * @return The response time (in ms).
@@ -309,34 +284,6 @@ public interface IDiscordClient {
 	 * @return The voice channels.
 	 */
 	List<IVoiceChannel> getConnectedVoiceChannels();
-
-	/**
-	 * Gets whether or not this client represents a bot account.
-	 *
-	 * @return True if a bot, false if otherwise.
-	 */
-	boolean isBot();
-
-	/**
-	 * Gets the applications owned by this user.
-	 *
-	 * @return The list of owned applications.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	List<IApplication> getApplications() throws RateLimitException, DiscordException;
-
-	/**
-	 * Creates a new application for this user.
-	 *
-	 * @param name The name of the application.
-	 * @return The application object.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	IApplication createApplication(String name) throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets the time when this client was last logged into. Useful for keeping track of uptime.
