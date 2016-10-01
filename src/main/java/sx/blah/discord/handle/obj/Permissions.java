@@ -113,6 +113,10 @@ public enum Permissions {
 	 */
 	MANAGE_PERMISSIONS(28),
 	/**
+	 * Allows the user to manage webhooks. Note: this is not present in the stable builds yet.
+	 */
+	MANAGE_WEBHOOKS(29),
+	/**
 	 * Allows the user to manage server emojis.
 	 */
 	MANAGE_EMOJIS(30);
