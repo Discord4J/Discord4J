@@ -510,13 +510,9 @@ public class MessageTokenizer {
 	public static class ServerEmojiToken extends Token {
 
 		/**
-		 * The emoji (:text:)
+		 * The emoji.
 		 */
-		private final String emoji;
-		/**
-		 * The guild ID
-		 */
-		private final String guildID;
+		private final IEmoji emoji;
 
 		/**
 		 * A server emoji from a message with content and position.
@@ -529,27 +525,20 @@ public class MessageTokenizer {
 			super(tokenizer, startIndex, endIndex);
 
 			final String content = getContent();
+			final String emojiId = content.substring(content.lastIndexOf(":") + 1, content.length());
 
-			emoji = content.substring(content.indexOf(":"), content.lastIndexOf(":") + 1);
-			guildID = content.substring(content.lastIndexOf(":") + 1, content.length());
+			emoji = tokenizer.getClient().getGuilds().stream()
+					.map(guild -> guild.getEmojiByID(emojiId) != null ? guild.getEmojiByID(emojiId) : null).findFirst()
+					.orElse(null);
 		}
 
 		/**
-		 * Return the emoji. Will contain colons surrounding the emoji.
+		 * Return the emoji.
 		 *
-		 * @return The :emoji:
+		 * @return The emoji
 		 */
-		public String getEmoji() {
+		public IEmoji getEmoji() {
 			return emoji;
-		}
-
-		/**
-		 * Return the guild ID of the emoji.
-		 *
-		 * @return The guild ID of the emoji
-		 */
-		public String getGuildID() {
-			return guildID;
 		}
 	}
 
