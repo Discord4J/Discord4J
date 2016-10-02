@@ -539,4 +539,27 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The shard of the guild
      */
 	int getShard();
+
+	/**
+	 * This gets all the emojis in the guild.
+	 *
+	 * @return A list of emojis.
+	 */
+	List<IEmoji> getEmojis();
+
+	/**
+	 * This gets an emoji by its ID.
+	 *
+	 * @param id The ID.
+	 * @return The emoji.
+	 */
+	IEmoji getEmojiByID(String id);
+
+	/**
+	 * This gets an emoji by its name.
+	 *
+	 * @param name The name, <b>without colons</b>.
+	 * @return The emoji.
+	 */
+	IEmoji getEmojiByName(String name);
 }

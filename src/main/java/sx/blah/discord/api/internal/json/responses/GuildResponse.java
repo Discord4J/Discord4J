@@ -83,9 +83,9 @@ public class GuildResponse {
 //	public thing[] features;
 
 	/**
-	 * Custom emojis for the guild. TODO: maybe implement some day?
+	 * Custom emojis for the guild.
 	 */
-//	public thing[] emojis; TODO
+	public GuildEmojiUpdateResponse.EmojiObj[] emojis;
 
 	/**
 	 * The channels in the guild

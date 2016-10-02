@@ -103,6 +103,11 @@ public class Guild implements IGuild {
 	 */
 	protected final int shard;
 
+	/**
+	 * The list of emojis.
+	 */
+	protected final List<IEmoji> emojis;
+
 	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
 		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
@@ -124,6 +129,7 @@ public class Guild implements IGuild {
 		this.regionID = region;
 		this.audioManager = new AudioManager(this);
 		this.shard = DiscordUtils.getShard(this.client, this.id);
+		this.emojis = new CopyOnWriteArrayList<>();
 	}
 
 	@Override
@@ -754,6 +760,21 @@ public class Guild implements IGuild {
 	@Override
 	public int getShard() {
 		return this.shard;
+	}
+
+	@Override
+	public List<IEmoji> getEmojis() {
+		return emojis;
+	}
+
+	@Override
+	public IEmoji getEmojiByID(String idToUse) {
+		return emojis.stream().filter(iemoji -> iemoji.getID().equals(idToUse)).findFirst().orElse(null);
+	}
+
+	@Override
+	public IEmoji getEmojiByName(String name) {
+		return emojis.stream().filter(iemoji -> iemoji.getName().equals(name)).findFirst().orElse(null);
 	}
 
 	@Override

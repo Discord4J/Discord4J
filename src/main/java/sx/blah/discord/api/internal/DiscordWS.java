@@ -12,14 +12,14 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.impl.obj.*;
-import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.ConnectRequest;
 import sx.blah.discord.api.internal.json.requests.KeepAliveRequest;
 import sx.blah.discord.api.internal.json.requests.ResumeRequest;
 import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.api.internal.json.responses.events.*;
+import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.obj.*;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.RequestBuilder;
@@ -34,10 +34,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.UnresolvedAddressException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -483,7 +480,7 @@ public class DiscordWS {
 					break;
 
 				case "GUILD_EMOJIS_UPDATE":
-					//Ignored for now TODO: do something with emojis
+					guildEmojisUpdate(eventObject);
 					break;
 
 				case "GUILD_INTEGRATIONS_UPDATE":
@@ -1047,6 +1044,22 @@ public class DiscordWS {
 			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
 
 			client.dispatcher.dispatch(new UserPardonEvent(user, guild));
+		}
+	}
+
+	private void guildEmojisUpdate(JsonElement eventObject) {
+		GuildEmojiUpdateResponse event = DiscordUtils.GSON.fromJson(eventObject, GuildEmojiUpdateResponse.class);
+		IGuild guild = client.getGuildByID(event.guild_id);
+		if (guild != null) {
+			List<IEmoji> oldList = guild.getEmojis().stream().map(IEmoji::copy)
+					.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
+			guild.getEmojis().clear();
+			for (GuildEmojiUpdateResponse.EmojiObj obj : event.emojis){
+				DiscordUtils.getEmojiFromJSON(guild, obj);
+			}
+
+			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldList, guild.getEmojis()));
 		}
 	}
 
