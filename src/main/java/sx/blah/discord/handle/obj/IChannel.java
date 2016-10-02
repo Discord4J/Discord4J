@@ -2,9 +2,9 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.io.File;
 import java.io.IOException;
@@ -339,30 +339,32 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
-	 * Creates/edits permission overrides for this channel.
+	 * Sets permission overrides for this channel. Note: this acts as if it resets all permission overrides to
+	 * "neutral" first, and then applies your settings.
 	 *
-	 * @param role The role to create/edit the permission overrides for.
-	 * @param toAdd The permissions to add.
-	 * @param toRemove The permissions to remove.
+	 * @param role The role to set the permission overrides for.
+	 * @param allowed The permissions to be explicitly allowed.
+	 * @param denied The permissions to be explicitly denied.
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void overrideRolePermissions(IRole role, EnumSet<Permissions> allowed, EnumSet<Permissions> denied) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
-	 * Creates/edits permission overrides for this channel.
+	 * Sets permission overrides for this channel. Note: this acts as if it resets all permission overrides to
+	 * "neutral" first, and then applies your settings.
 	 *
-	 * @param user The user to create/edit the permission overrides for.
-	 * @param toAdd The permissions to add.
-	 * @param toRemove The permissions to remove.
+	 * @param user The user to set the permission overrides for.
+	 * @param allowed The permissions to be explicitly allowed.
+	 * @param denied The permissions to be explicitly denied.
 	 *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void overrideUserPermissions(IUser user, EnumSet<Permissions> allowed, EnumSet<Permissions> denied) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * This gets all the currently available invites for this channel.

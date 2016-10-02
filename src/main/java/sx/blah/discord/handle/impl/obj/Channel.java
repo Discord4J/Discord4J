@@ -487,13 +487,13 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
-		overridePermissions("role", role.getID(), toAdd, toRemove);
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> allowed, EnumSet<Permissions> denied) throws MissingPermissionsException, RateLimitException, DiscordException {
+		overridePermissions("role", role.getID(), allowed, denied);
 	}
 
 	@Override
-	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
-		overridePermissions("member", user.getID(), toAdd, toRemove);
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> allowed, EnumSet<Permissions> denied) throws MissingPermissionsException, RateLimitException, DiscordException {
+		overridePermissions("member", user.getID(), allowed, denied);
 	}
 
 	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {

@@ -65,12 +65,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> allowed, EnumSet<Permissions> denied) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> allowed, EnumSet<Permissions> denied) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 
