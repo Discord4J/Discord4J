@@ -7,7 +7,7 @@ public class ChannelObject {
 	public String type;
 	public int position;
 	public boolean is_private;
-	public OverwriteObject[] permissions_overwrites;
+	public OverwriteObject[] permission_overwrites;
 	public String topic;
 	public String last_message_id;
 	public String last_pin_timestamp;

@@ -5,6 +5,10 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.api.internal.json.objects.InviteObject;
+import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
+import sx.blah.discord.api.internal.json.objects.UserObject;
+import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
 import sx.blah.discord.handle.impl.events.StatusChangeEvent;
@@ -42,7 +46,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * that we sent the keep alive so we can accurately
 	 * time our keep alive messages.
 	 */
-	protected volatile long timer = System.currentTimeMillis();
+	protected volatile long lastHeartbeat = System.currentTimeMillis();
 
 	/**
 	 * User we are logged in as
@@ -167,8 +171,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			if (!validateToken()) throw new DiscordException("Invalid token!");
 
-			System.out.println("login");
-			this.ws = new DiscordWS(this);
+			this.ws = new DiscordWS(this, obtainGateway(getToken()), isDaemon);
 			launchTime = LocalDateTime.now();
 
 		} catch (Exception e) {
@@ -184,20 +187,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	private boolean validateToken() {
 		try {
-			REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
-					new BasicNameValuePair("authorization", getToken()));
+			REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds");
 			return true;
 		} catch (RateLimitException | DiscordException e) {
 			return false;
-		}
-	}
-
-	@Override
-	public void logout() throws RateLimitException, DiscordException {
-		if (isReady()) {
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
 		}
 	}
 
@@ -210,14 +203,23 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private String obtainGateway(String token) {
 		String gateway = null;
 		try {
-			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY,
-					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
-			gateway = response.url;//.replaceAll("wss", "ws");
+			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY),
+					GatewayResponse.class);
+			gateway = response.url + "?encoding=json&v=5";
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
 		return gateway;
+	}
+
+	@Override
+	public void logout() throws RateLimitException, DiscordException {
+		if (isReady()) {
+			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
+		} else {
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+		}
 	}
 
 	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws RateLimitException, DiscordException {
@@ -233,9 +235,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email.orElse(this.email),
 							this.password, password.orElse(this.password), username.orElse(getOurUser().getName()),
 							avatar == null ? Image.forUser(ourUser).getData() :
-									(avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData())))),
-					new BasicNameValuePair("Authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
+									(avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData()))))),
+					AccountInfoChangeResponse.class);
 
 			if (!this.getToken().equals(response.token)) {
 				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
@@ -447,14 +448,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 		if (opt.isPresent())
 			return opt.get();
 
-		PrivateChannelResponse response = null;
+		PrivateChannelObject pmChannel;
 		try {
-			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
-					new BasicNameValuePair("authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
+			pmChannel = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
+					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelCreateRequest(user.getID())))),
+					PrivateChannelObject.class);
 
-			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
+			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
 			privateChannels.add(channel);
 			return channel;
 		} catch (UnsupportedEncodingException e) {
@@ -472,8 +472,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		try {
-			InviteJSONResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+code,
-					new BasicNameValuePair("authorization", getToken())), InviteJSONResponse.class);
+			InviteObject response = DiscordUtils.GSON.fromJson(
+					REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+code),
+					InviteObject.class);
 
 			return DiscordUtils.getInviteFromJSON(this, response);
 		} catch (Exception e) {
@@ -484,10 +485,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public List<IRegion> getRegions() throws RateLimitException, DiscordException {
 		if (REGIONS.isEmpty()) {
-			RegionResponse[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
-					DiscordEndpoints.VOICE+"regions",
-					new BasicNameValuePair("authorization", getToken())),
-					RegionResponse[].class);
+			VoiceRegionObject[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
+					DiscordEndpoints.VOICE+"regions"),
+					VoiceRegionObject[].class);
 
 			Arrays.stream(regions)
 					.map(DiscordUtils::getRegionFromJSON)
@@ -526,9 +526,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
-		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me",
-				new BasicNameValuePair("authorization", getToken()),
-				new BasicNameValuePair("content-type", "application/json")), ApplicationInfoResponse.class);
+		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me"),
+				ApplicationInfoResponse.class);
 	}
 
 	@Override
@@ -575,7 +574,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IUser getApplicationOwner() throws DiscordException {
 		try {
-			UserResponse owner = getApplicationInfo().owner;
+			UserObject owner = getApplicationInfo().owner;
 
 			IUser user = getUserByID(owner.id);
 			if (user == null)

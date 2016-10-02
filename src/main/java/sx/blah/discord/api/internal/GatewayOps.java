@@ -3,7 +3,7 @@ package sx.blah.discord.api.internal;
 /**
  * This enum represents gateway op codes.
  */
-enum GatewayOps {
+public enum GatewayOps {
 	/**
 	 * Dispatches an event.
 	 */

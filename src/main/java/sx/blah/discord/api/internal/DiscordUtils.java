@@ -21,10 +21,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -404,7 +401,7 @@ public class DiscordUtils {
 		Channel channel;
 
 		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs(json.permissions_overwrites);
+				getPermissionOverwritesFromJSONs(json.permission_overwrites);
 		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
 		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
 
@@ -417,8 +414,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position, roleOverrides,
-					userOverrides);
+			channel = new Channel(client, json.name, json.id, guild, json.topic, json.position, roleOverrides, userOverrides);
 		}
 
 		return channel;
@@ -497,7 +493,7 @@ public class DiscordUtils {
 		VoiceChannel channel;
 
 		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs(json.permissions_overwrites);
+				getPermissionOverwritesFromJSONs(json.permission_overwrites);
 		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
 		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
 
