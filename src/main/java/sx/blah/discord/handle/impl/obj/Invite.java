@@ -38,8 +38,7 @@ public class Invite implements IInvite {
 	@Override
 	public InviteResponse details() throws DiscordException, RateLimitException {
 		if (client.isReady()) {
-			String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
-					new BasicNameValuePair("authorization", client.getToken()));
+			String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode);
 
 			InviteObject inviteResponse = new Gson().fromJson(response, InviteObject.class);
 
@@ -53,8 +52,7 @@ public class Invite implements IInvite {
 
 	@Override
 	public void delete() throws RateLimitException, DiscordException {
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode);
 	}
 
 	@Override

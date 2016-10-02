@@ -191,9 +191,8 @@ public class Role implements IRole {
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
 							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions()),
-							isMentionable.orElse(isMentionable())))),
-					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), RoleObject.class);
+							isMentionable.orElse(isMentionable()))))),
+					RoleObject.class);
 
 			IRole oldRole = copy();
 			IRole newRole = DiscordUtils.getRoleFromJSON(guild, response);
@@ -233,8 +232,7 @@ public class Role implements IRole {
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		((DiscordClientImpl) guild.getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
-				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
+		((DiscordClientImpl) guild.getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);
 	}
 
 	@Override

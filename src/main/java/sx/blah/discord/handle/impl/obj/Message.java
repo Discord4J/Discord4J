@@ -260,9 +260,8 @@ public class Message implements IMessage {
 //			content = DiscordUtils.escapeString(content);
 
 			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, false)), "UTF-8"),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), MessageObject.class);
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, false)), "UTF-8")),
+					MessageObject.class);
 
 			IMessage oldMessage = copy();
 			DiscordUtils.getMessageFromJSON(client, channel, response);
@@ -319,8 +318,7 @@ public class Message implements IMessage {
 		}
 
 		if (client.isReady()) {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
-					new BasicNameValuePair("authorization", client.getToken()));
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id);
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
 		}

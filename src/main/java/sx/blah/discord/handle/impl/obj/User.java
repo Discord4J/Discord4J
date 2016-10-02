@@ -288,10 +288,7 @@ public class User implements IUser {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH
 					.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-							new StringEntity(
-									DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))),
-							new BasicNameValuePair("authorization", client.getToken()),
-							new BasicNameValuePair("content-type", "application/json"));
+							new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}

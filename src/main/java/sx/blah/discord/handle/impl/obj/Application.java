@@ -120,9 +120,8 @@ public class Application implements IApplication {
 							new ApplicationObject(
 									redirectUris.orElse(this.redirectUris),
 									name.orElse(this.name), description.orElse(this.description),
-									icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null)))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ApplicationObject.class);
+									icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null))))),
+					ApplicationObject.class);
 
 			this.name = response.name;
 			this.description = response.description;
@@ -158,9 +157,8 @@ public class Application implements IApplication {
 		try {
 			ApplicationObject.BotObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 					DiscordEndpoints.APPLICATIONS+"/"+id+"/bot",
-					new StringEntity("{}"), //Still needs to send a json, but it has to be empty
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ApplicationObject.BotObject.class);
+					new StringEntity("{}")), //Still needs to send a json, but it has to be empty
+					ApplicationObject.BotObject.class);
 			this.bot = DiscordUtils.getUserFromJSON(client, response);
 			this.botToken = response.token;
 			return new ClientBuilder().withToken(botToken);
@@ -173,8 +171,7 @@ public class Application implements IApplication {
 	@Override
 	public void delete() throws DiscordException {
 		try {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
-					new BasicNameValuePair("authorization", client.getToken()));
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id);
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}

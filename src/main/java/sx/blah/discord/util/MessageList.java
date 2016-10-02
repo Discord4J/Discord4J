@@ -161,8 +161,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (initialSize != 0)
 			queryParams += "&before="+messageCache.getLast().getID();
 
-		String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams,
-				new BasicNameValuePair("authorization", client.getToken()));
+		String response = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams);
 
 		if (response == null)
 			return false;
@@ -340,9 +339,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 				return DiscordUtils.getMessageFromJSON(client, channel,
 						DiscordUtils.GSON.fromJson(
 								client.REQUESTS.GET.makeRequest(
-										DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-										new BasicNameValuePair("content-type", "application/json"),
-										new BasicNameValuePair("authorization", client.getToken())),
+										DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id),
 								MessageObject.class));
 			} catch (Exception e) {}
 
@@ -568,9 +565,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		try {
 			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
-					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))),
-					new BasicNameValuePair("content-type", "application/json"),
-					new BasicNameValuePair("authorization", client.getToken()));
+					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}

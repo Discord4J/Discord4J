@@ -93,9 +93,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 		try {
 			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ChannelObject.class);
+					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit)))),
+					ChannelObject.class);
 
 			IChannel oldChannel = copy();
 			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
