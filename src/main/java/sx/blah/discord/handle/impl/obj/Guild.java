@@ -7,11 +7,11 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.generic.RoleResponse;
 import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.util.*;
@@ -317,18 +317,18 @@ public class Guild implements IGuild {
 	public IRole createRole() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
-		RoleResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+id+"/roles",
-				new BasicNameValuePair("authorization", client.getToken())), RoleResponse.class);
+		RoleObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+id+"/roles",
+				new BasicNameValuePair("authorization", client.getToken())), RoleObject.class);
 		IRole role = DiscordUtils.getRoleFromJSON(this, response);
 		return role;
 	}
 
 	@Override
 	public List<IUser> getBannedUsers() throws RateLimitException, DiscordException {
-		UserResponse[] users = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans",
-				new BasicNameValuePair("authorization", client.getToken())), UserResponse[].class);
+		UserObject[] users = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans"),
+				UserObject[].class);
 		List<IUser> banned = new ArrayList<>();
-		for (UserResponse user : users) {
+		for (UserObject user : users) {
 			banned.add(DiscordUtils.getUserFromJSON(client, user));
 		}
 		return banned;
@@ -428,12 +428,12 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
-			GuildResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
+			GuildObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
 							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
 							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout)))),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), GuildObject.class);
 
 			IGuild oldGuild = copy();
 			IGuild newGuild = DiscordUtils.getGuildFromJSON(client, response);
@@ -474,8 +474,7 @@ public class Guild implements IGuild {
 		if (!ownerID.equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("You must be the guild owner to delete guilds!");
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id,
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id);
 	}
 
 	@Override
@@ -499,11 +498,9 @@ public class Guild implements IGuild {
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text"))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")),
-					ChannelResponse.class);
+			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
+					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text")))),
+					ChannelObject.class);
 
 			IChannel channel = DiscordUtils.getChannelFromJSON(client, this, response);
 			addChannel(channel);
@@ -527,11 +524,11 @@ public class Guild implements IGuild {
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
+			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "voice"))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json")),
-					ChannelResponse.class);
+					ChannelObject.class);
 
 			IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(client, this, response);
 			addVoiceChannel(channel);
@@ -558,20 +555,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void transferOwnership(IUser newOwner) throws RateLimitException, MissingPermissionsException, DiscordException {
-		if (!getOwnerID().equals(client.getOurUser().getID()))
-			throw new MissingPermissionsException("Cannot transfer ownership when you aren't the current owner!");
-		try {
-			DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new TransferOwnershipRequest(newOwner.getID()))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-	}
-
-	@Override
 	public IRole getEveryoneRole() {
 		return getRoleByID(this.id);
 	}
@@ -579,13 +562,13 @@ public class Guild implements IGuild {
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
-		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
+		ExtendedInviteObject[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
-						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
+						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteObject[].class);
 
 		List<IInvite> invites = new ArrayList<>();
-		for (ExtendedInviteResponse inviteResponse : response)
+		for (ExtendedInviteObject inviteResponse : response)
 			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
 
 		return invites;
@@ -619,10 +602,10 @@ public class Guild implements IGuild {
 		}
 
 		try {
-			RoleResponse[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+			RoleObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS + id + "/roles", new StringEntity(DiscordUtils.GSON.toJson(request)),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), RoleResponse[].class);
+					new BasicNameValuePair("content-type", "application/json")), RoleObject[].class);
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}

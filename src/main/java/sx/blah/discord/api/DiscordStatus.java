@@ -3,8 +3,8 @@ package sx.blah.discord.api;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.responses.MetricResponse;
-import sx.blah.discord.api.internal.json.responses.StatusResponse;
+import sx.blah.discord.api.internal.json.responses.metrics.MetricsResponse;
+import sx.blah.discord.api.internal.json.responses.metrics.StatusResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.api.internal.Requests;
@@ -23,10 +23,10 @@ public class DiscordStatus {
 	 * @return The mean response time (in milliseconds).
 	 */
 	public static double getAPIResponseTimeForDay() {
-		MetricResponse response = null;
+		MetricsResponse response = null;
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-					String.format(DiscordEndpoints.METRICS, "day")), MetricResponse.class);
+					String.format(DiscordEndpoints.METRICS, "day")), MetricsResponse.class);
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
@@ -40,10 +40,10 @@ public class DiscordStatus {
 	 * @return The mean response time (in milliseconds).
 	 */
 	public static double getAPIResponseTimeForWeek() {
-		MetricResponse response = null;
+		MetricsResponse response = null;
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-					String.format(DiscordEndpoints.METRICS, "week")), MetricResponse.class);
+					String.format(DiscordEndpoints.METRICS, "week")), MetricsResponse.class);
 		} catch (DiscordException | RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;
@@ -57,10 +57,10 @@ public class DiscordStatus {
 	 * @return The mean response time (in milliseconds).
 	 */
 	public static double getAPIResponseTimeForMonth() {
-		MetricResponse response = null;
+		MetricsResponse response = null;
 		try {
 			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-					String.format(DiscordEndpoints.METRICS, "month")), MetricResponse.class);
+					String.format(DiscordEndpoints.METRICS, "month")), MetricsResponse.class);
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 			return -1;

@@ -8,11 +8,10 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
-import sx.blah.discord.api.internal.json.responses.MessageResponse;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -168,13 +167,13 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (response == null)
 			return false;
 
-		MessageResponse[] messages = DiscordUtils.GSON.fromJson(response, MessageResponse[].class);
+		MessageObject[] messages = DiscordUtils.GSON.fromJson(response, MessageObject[].class);
 
 		if (messages.length == 0) {
 			return false;
 		}
 
-		for (MessageResponse messageResponse : messages) {
+		for (MessageObject messageResponse : messages) {
 			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse), true))
 				return false;
 		}
@@ -344,7 +343,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 										DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
 										new BasicNameValuePair("content-type", "application/json"),
 										new BasicNameValuePair("authorization", client.getToken())),
-								MessageResponse.class));
+								MessageObject.class));
 			} catch (Exception e) {}
 
 		return message;

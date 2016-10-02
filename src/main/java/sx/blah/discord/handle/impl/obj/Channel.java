@@ -10,16 +10,16 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
+import sx.blah.discord.api.internal.json.objects.MessageObject;
+import sx.blah.discord.api.internal.json.objects.OverwriteObject;
+import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.generic.PermissionOverwrite;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
-import sx.blah.discord.api.internal.json.requests.InviteRequest;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
-import sx.blah.discord.api.internal.json.responses.ChannelResponse;
-import sx.blah.discord.api.internal.json.responses.ExtendedInviteResponse;
-import sx.blah.discord.api.internal.json.responses.MessageResponse;
+import sx.blah.discord.api.internal.json.objects.ExtendedInviteObject;
 import sx.blah.discord.util.*;
 
 import java.io.*;
@@ -184,10 +184,10 @@ public class Channel implements IChannel {
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 
-			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
+			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, tts)), "UTF-8"),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), MessageObject.class);
 
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
@@ -213,9 +213,9 @@ public class Channel implements IChannel {
 				builder.addTextBody("content", content);
 
 			HttpEntity fileEntity = builder.build();
-			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 					DiscordEndpoints.CHANNELS + id + "/messages",
-					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
+					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageObject.class);
 
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
@@ -246,7 +246,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
 		if (!client.isReady()) {
@@ -255,10 +255,10 @@ public class Channel implements IChannel {
 		}
 
 		try {
-			ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
-					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary))),
+			ExtendedInviteObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
+					new StringEntity(DiscordUtils.GSON.toJson(new InviteCreateRequest(maxAge, maxUses, temporary, unique))),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), ExtendedInviteObject.class);
 
 			return DiscordUtils.getInviteFromJSON(client, response);
 		} catch (UnsupportedEncodingException e) {
@@ -311,10 +311,10 @@ public class Channel implements IChannel {
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic))),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), ChannelObject.class);
 
 			IChannel oldChannel = copy();
 			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
@@ -476,7 +476,7 @@ public class Channel implements IChannel {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id,
+					new StringEntity(DiscordUtils.GSON.toJson(new OverwriteObject(type, id,
 							Permissions.generatePermissionsNumber(toRemove), Permissions.generatePermissionsNumber(toAdd)))),
 					new BasicNameValuePair("authorization", client.getToken()),
 					new BasicNameValuePair("content-type", "application/json"));
@@ -488,13 +488,13 @@ public class Channel implements IChannel {
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
-		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
+		ExtendedInviteObject[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
-						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
+						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteObject[].class);
 
 		List<IInvite> invites = new ArrayList<>();
-		for (ExtendedInviteResponse inviteResponse : response)
+		for (ExtendedInviteObject inviteResponse : response)
 			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
 
 		return invites;
@@ -511,11 +511,11 @@ public class Channel implements IChannel {
 	@Override
 	public List<IMessage> getPinnedMessages() throws RateLimitException, DiscordException {
 		List<IMessage> messages = new ArrayList<>();
-		MessageResponse[] pinnedMessages = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins",
+		MessageObject[] pinnedMessages = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins",
 				new BasicNameValuePair("authorization", client.getToken()),
-				new BasicNameValuePair("content-type", "application/json")), MessageResponse[].class);
+				new BasicNameValuePair("content-type", "application/json")), MessageObject[].class);
 
-		for (MessageResponse message : pinnedMessages)
+		for (MessageObject message : pinnedMessages)
 			messages.add(DiscordUtils.getMessageFromJSON(client, this, message));
 
 		return messages;

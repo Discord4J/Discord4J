@@ -16,19 +16,12 @@ public class MessageRequest {
 	public String content;
 
 	/**
-	 * The users mentioned in the message TODO: Remove
-	 */
-	@Deprecated
-	public String[] mentions;
-
-	/**
 	 * Whether or not the message should use tts.
 	 */
 	public boolean tts = false;
 
-	public MessageRequest(String content, String[] mentions, boolean tts) {
+	public MessageRequest(String content, boolean tts) {
 		this.content = content;
-		this.mentions = mentions;
 		this.tts = tts;
 	}
 }

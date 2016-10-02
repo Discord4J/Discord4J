@@ -8,18 +8,15 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.ApplicationObject;
 import sx.blah.discord.handle.obj.IApplication;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.api.internal.json.responses.ApplicationResponse;
-import sx.blah.discord.api.internal.json.responses.BotResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.UnsupportedEncodingException;
-import java.util.EnumSet;
 import java.util.Optional;
 
 public class Application implements IApplication {
@@ -118,13 +115,14 @@ public class Application implements IApplication {
 
 	private void edit(Optional<String> name, Optional<String> description, Optional<Image> icon, Optional<String[]> redirectUris) throws DiscordException, RateLimitException {
 		try {
-			ApplicationResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new ApplicationResponse(redirectUris.orElse(this.redirectUris),
-							name.orElse(this.name),
-							description.orElse(this.description), icon == null ?
-							this.icon : (icon.isPresent() ? icon.get().getData() : null)))),
+			ApplicationObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.APPLICATIONS+"/"+id,
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
+							new ApplicationObject(
+									redirectUris.orElse(this.redirectUris),
+									name.orElse(this.name), description.orElse(this.description),
+									icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null)))),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ApplicationResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), ApplicationObject.class);
 
 			this.name = response.name;
 			this.description = response.description;
@@ -158,11 +156,11 @@ public class Application implements IApplication {
 	@Override
 	public ClientBuilder createBot() throws DiscordException {
 		try {
-			BotResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+			ApplicationObject.BotObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 					DiscordEndpoints.APPLICATIONS+"/"+id+"/bot",
 					new StringEntity("{}"), //Still needs to send a json, but it has to be empty
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), BotResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), ApplicationObject.BotObject.class);
 			this.bot = DiscordUtils.getUserFromJSON(client, response);
 			this.botToken = response.token;
 			return new ClientBuilder().withToken(botToken);

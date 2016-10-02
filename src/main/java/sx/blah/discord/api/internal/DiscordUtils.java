@@ -6,11 +6,8 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.json.generic.PermissionOverwrite;
-import sx.blah.discord.api.internal.json.generic.RoleResponse;
-import sx.blah.discord.api.internal.json.generic.StatusObject;
+import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
-import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -83,7 +80,7 @@ public class DiscordUtils {
 	/**
 	 * Returns a user from the java form of the raw JSON data.
 	 */
-	public static User getUserFromJSON(IDiscordClient client, UserResponse response) {
+	public static User getUserFromJSON(IDiscordClient client, UserObject response) {
 		if (response == null)
 			return null;
 
@@ -138,7 +135,7 @@ public class DiscordUtils {
 	 * @param json   The json response to use.
 	 * @return The java invite object.
 	 */
-	public static IInvite getInviteFromJSON(IDiscordClient client, InviteJSONResponse json) {
+	public static IInvite getInviteFromJSON(IDiscordClient client, InviteObject json) {
 		return new Invite(client, json.code);
 	}
 
@@ -149,10 +146,10 @@ public class DiscordUtils {
 	 * @param json   The json response to use.
 	 * @return The list of mentioned users.
 	 */
-	public static List<String> getMentionsFromJSON(IDiscordClient client, MessageResponse json) {
+	public static List<String> getMentionsFromJSON(IDiscordClient client, MessageObject json) {
 		List<String> mentions = new ArrayList<>();
 		if (json.mentions != null)
-			for (UserResponse response : json.mentions)
+			for (UserObject response : json.mentions)
 				mentions.add(response.id);
 
 		return mentions;
@@ -165,7 +162,7 @@ public class DiscordUtils {
 	 * @param json   The json response to use.
 	 * @return The list of mentioned roles.
 	 */
-	public static List<String> getRoleMentionsFromJSON(IDiscordClient client, MessageResponse json) {
+	public static List<String> getRoleMentionsFromJSON(IDiscordClient client, MessageObject json) {
 		List<String> mentions = new ArrayList<>();
 		if (json.mention_roles != null)
 			for (String role : json.mention_roles)
@@ -180,10 +177,10 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The attached messages.
 	 */
-	public static List<IMessage.Attachment> getAttachmentsFromJSON(MessageResponse json) {
+	public static List<IMessage.Attachment> getAttachmentsFromJSON(MessageObject json) {
 		List<IMessage.Attachment> attachments = new ArrayList<>();
 		if (json.attachments != null)
-			for (MessageResponse.AttachmentResponse response : json.attachments) {
+			for (MessageObject.AttachmentObject response : json.attachments) {
 				attachments.add(new IMessage.Attachment(response.filename, response.size, response.id, response.url));
 			}
 
@@ -196,10 +193,10 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The embedded messages.
 	 */
-	public static List<Embedded> getEmbedsFromJSON(MessageResponse json) {
+	public static List<Embedded> getEmbedsFromJSON(MessageObject json) {
 		List<Embedded> embeds = new ArrayList<>();
 		if (json.embeds != null)
-			for (MessageResponse.EmbedResponse response : json.embeds) {
+			for (MessageObject.EmbedObject response : json.embeds) {
 				embeds.add(new Embedded(response.title, response.type, response.description, response.url,
 						response.thumbnail, response.provider));
 			}
@@ -214,7 +211,7 @@ public class DiscordUtils {
 	 * @param json   The json response.
 	 * @return The guild object.
 	 */
-	public static IGuild getGuildFromJSON(IDiscordClient client, GuildResponse json) {
+	public static IGuild getGuildFromJSON(IDiscordClient client, GuildObject json) {
 		Guild guild;
 
 		if ((guild = (Guild) client.getGuildByID(json.id)) != null) {
@@ -226,7 +223,7 @@ public class DiscordUtils {
 			guild.setRegion(json.region);
 
 			List<IRole> newRoles = new ArrayList<>();
-			for (RoleResponse roleResponse : json.roles) {
+			for (RoleObject roleResponse : json.roles) {
 				newRoles.add(getRoleFromJSON(guild, roleResponse));
 			}
 			guild.getRoles().clear();
@@ -244,12 +241,12 @@ public class DiscordUtils {
 					json.afk_timeout, json.region);
 
 			if (json.roles != null)
-				for (RoleResponse roleResponse : json.roles) {
+				for (RoleObject roleResponse : json.roles) {
 					getRoleFromJSON(guild, roleResponse); //Implicitly adds the role to the guild.
 				}
 
 			if (json.members != null)
-				for (GuildResponse.MemberResponse member : json.members) {
+				for (MemberObject member : json.members) {
 					IUser user = getUserFromGuildMemberResponse(client, guild, member);
 					guild.addUser(user);
 				}
@@ -259,7 +256,7 @@ public class DiscordUtils {
 			}
 
 			if (json.presences != null)
-				for (PresenceResponse presence : json.presences) {
+				for (PresenceObject presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
 					if (user != null) {
 						Status status = getStatusFromJSON(presence.game);
@@ -273,7 +270,7 @@ public class DiscordUtils {
 				}
 
 			if (json.channels != null)
-				for (ChannelResponse channelResponse : json.channels) {
+				for (ChannelObject channelResponse : json.channels) {
 					String channelType = channelResponse.type;
 					if (channelType.equalsIgnoreCase("text")) {
 						guild.addChannel(getChannelFromJSON(client, guild, channelResponse));
@@ -283,7 +280,7 @@ public class DiscordUtils {
 				}
 
 			if (json.voice_states != null) {
-				for (VoiceStateResponse voiceState : json.voice_states) {
+				for (VoiceStateObject voiceState : json.voice_states) {
 					((User) guild.getUserByID(voiceState.user_id)).getConnectedVoiceChannels()
 							.add(guild.getVoiceChannelByID(voiceState.channel_id));
 				}
@@ -299,7 +296,7 @@ public class DiscordUtils {
 	 * @param json The json status object.
 	 * @return The Status instance.
 	 */
-	public static Status getStatusFromJSON(StatusObject json) {
+	public static Status getStatusFromJSON(GameObject json) {
 		if (json == null) {
 			return Status.empty();
 		} else if (json.type == 0) {
@@ -319,8 +316,7 @@ public class DiscordUtils {
 	 * @param json   The json response.
 	 * @return The user object.
 	 */
-	public static IUser getUserFromGuildMemberResponse(IDiscordClient client, IGuild guild,
-													   GuildResponse.MemberResponse json) {
+	public static IUser getUserFromGuildMemberResponse(IDiscordClient client, IGuild guild, MemberObject json) {
 		User user = getUserFromJSON(client, json.user);
 		for (String role : json.roles) {
 			Role roleObj = (Role) guild.getRoleByID(role);
@@ -345,7 +341,7 @@ public class DiscordUtils {
 	 * @param json   The json response.
 	 * @return The private channel object.
 	 */
-	public static IPrivateChannel getPrivateChannelFromJSON(IDiscordClient client, PrivateChannelResponse json) {
+	public static IPrivateChannel getPrivateChannelFromJSON(IDiscordClient client, PrivateChannelObject json) {
 		String id = json.id;
 		User recipient = (User) client.getUserByID(id);
 		if (recipient == null)
@@ -373,7 +369,7 @@ public class DiscordUtils {
 	 * @param json    The json response.
 	 * @return The message object.
 	 */
-	public static IMessage getMessageFromJSON(IDiscordClient client, IChannel channel, MessageResponse json) {
+	public static IMessage getMessageFromJSON(IDiscordClient client, IChannel channel, MessageObject json) {
 		if (channel.getMessages() != null && channel.getMessages().contains(json.id)) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
@@ -404,12 +400,11 @@ public class DiscordUtils {
 	 * @param json   The json response.
 	 * @return The channel object.
 	 */
-	public static IChannel getChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) {
+	public static IChannel getChannelFromJSON(IDiscordClient client, IGuild guild, ChannelObject json) {
 		Channel channel;
 
 		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs(
-				json.permission_overwrites);
+				getPermissionOverwritesFromJSONs(json.permissions_overwrites);
 		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
 		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
 
@@ -435,13 +430,11 @@ public class DiscordUtils {
 	 * @param overwrites The overwrites.
 	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
 	 */
-	public static Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>>
-	getPermissionOverwritesFromJSONs(
-			PermissionOverwrite[] overwrites) {
+	public static Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> getPermissionOverwritesFromJSONs(OverwriteObject[] overwrites) {
 		Map<String, IChannel.PermissionOverride> userOverrides = new ConcurrentHashMap<>();
 		Map<String, IChannel.PermissionOverride> roleOverrides = new ConcurrentHashMap<>();
 
-		for (PermissionOverwrite overrides : overwrites) {
+		for (OverwriteObject overrides : overwrites) {
 			if (overrides.type.equalsIgnoreCase("role")) {
 				roleOverrides.put(overrides.id,
 						new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
@@ -465,7 +458,7 @@ public class DiscordUtils {
 	 * @param json  The json response.
 	 * @return The role object.
 	 */
-	public static IRole getRoleFromJSON(IGuild guild, RoleResponse json) {
+	public static IRole getRoleFromJSON(IGuild guild, RoleObject json) {
 		Role role;
 		if ((role = (Role) guild.getRoleByID(json.id)) != null) {
 			role.setColor(json.color);
@@ -488,7 +481,7 @@ public class DiscordUtils {
 	 * @param json The json response.
 	 * @return The region object.
 	 */
-	public static IRegion getRegionFromJSON(RegionResponse json) {
+	public static IRegion getRegionFromJSON(VoiceRegionObject json) {
 		return new Region(json.id, json.name, json.vip);
 	}
 
@@ -500,12 +493,11 @@ public class DiscordUtils {
 	 * @param json   The json response.
 	 * @return The channel object.
 	 */
-	public static IVoiceChannel getVoiceChannelFromJSON(IDiscordClient client, IGuild guild, ChannelResponse json) {
+	public static IVoiceChannel getVoiceChannelFromJSON(IDiscordClient client, IGuild guild, ChannelObject json) {
 		VoiceChannel channel;
 
 		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs(
-				json.permission_overwrites);
+				getPermissionOverwritesFromJSONs(json.permissions_overwrites);
 		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
 		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
 
@@ -702,7 +694,7 @@ public class DiscordUtils {
 	 * @param response The json representation of an application.
 	 * @return The application object.
 	 */
-	public static IApplication getApplicationFromJSON(IDiscordClient client, ApplicationResponse response) {
+	public static IApplication getApplicationFromJSON(IDiscordClient client, ApplicationObject response) {
 		return new Application(client, response.secret, response.redirect_uris, response.description, response.name,
 				response.id, response.icon, DiscordUtils.getUserFromJSON(client, response.bot),
 				response.bot == null ? null : response.bot.token);

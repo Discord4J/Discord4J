@@ -1,6 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.api.internal.json.responses.MessageResponse;
+import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.handle.obj.IMessage.IEmbedded;
 
 public class Embedded implements IEmbedded {
@@ -34,7 +34,7 @@ public class Embedded implements IEmbedded {
 	 */
 	protected final EmbedProvider provider;
 
-	public Embedded(String title, String type, String description, String url, MessageResponse.EmbedResponse.ThumbnailResponse thumbnail, MessageResponse.EmbedResponse.ProviderResponse provider) {
+	public Embedded(String title, String type, String description, String url, MessageObject.ThumbnailObject thumbnail, MessageObject.ProviderObject provider) {
 		this.title = title;
 		this.type = type;
 		this.description = description;

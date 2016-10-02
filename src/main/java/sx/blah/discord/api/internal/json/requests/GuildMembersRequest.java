@@ -1,43 +1,22 @@
 package sx.blah.discord.api.internal.json.requests;
 
-/**
- * Used to request the offline guild members if a guild is "large"
- */
 public class GuildMembersRequest {
+	/**
+	 * The guild's id
+	 */
+	public String guild_id;
 
 	/**
-	 * The opcode for this request, always 8
+	 * String the username starts with or empty for all users.
 	 */
-	public int op = 8;
+	public String query = "";
 
 	/**
-	 * The object containing all the request data
+	 * The limit on users to receive or 0 for max.
 	 */
-	public RequestObject d;
+	public int limit = 0;
 
 	public GuildMembersRequest(String guild_id) {
-		d = new RequestObject(guild_id);
-	}
-
-	public static class RequestObject {
-
-		/**
-		 * The guild's id
-		 */
-		public String guild_id;
-
-		/**
-		 * String the username starts with or empty for all users.
-		 */
-		public String query = "";
-
-		/**
-		 * The limit on users to receive or 0 for max.
-		 */
-		public int limit = 0;
-
-		public RequestObject(String guild_id) {
-			this.guild_id = guild_id;
-		}
+		this.guild_id = guild_id;
 	}
 }

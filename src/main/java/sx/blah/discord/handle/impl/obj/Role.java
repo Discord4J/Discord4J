@@ -7,11 +7,11 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.RoleObject;
 import sx.blah.discord.handle.impl.events.RoleUpdateEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.api.internal.json.generic.RoleResponse;
 import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
@@ -187,13 +187,13 @@ public class Role implements IRole {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
-			RoleResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
+			RoleObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
 							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions()),
 							isMentionable.orElse(isMentionable())))),
 					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), RoleResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), RoleObject.class);
 
 			IRole oldRole = copy();
 			IRole newRole = DiscordUtils.getRoleFromJSON(guild, response);

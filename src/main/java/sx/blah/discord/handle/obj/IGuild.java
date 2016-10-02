@@ -390,17 +390,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IRegion getRegion();
 
 	/**
-	 * Transfers the ownership of this guild to another user.
-	 *
-	 * @param newOwner The new owner.
-	 *
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 */
-	void transferOwnership(IUser newOwner) throws RateLimitException, MissingPermissionsException, DiscordException;
-
-	/**
 	 * This retrieves the @everyone role which exists on all guilds.
 	 *
 	 * @return The object representing the @everyone role.

@@ -189,7 +189,7 @@ public class TestBot {
 								m.getChannel().toggleTypingStatus();
 							} else if (m.getContent().startsWith(".invite")) {
 								try {
-									m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false).getInviteCode());
+									m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
 								} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 									e.printStackTrace();
 								}

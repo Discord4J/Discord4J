@@ -7,12 +7,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceChannelJoinRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
-import sx.blah.discord.api.internal.json.requests.VoiceChannelRequest;
-import sx.blah.discord.api.internal.json.responses.ChannelResponse;
 import sx.blah.discord.util.*;
 
 import java.io.File;
@@ -92,10 +92,10 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 			throw new DiscordException("Channel user limit can only be between 0 and 99!");
 
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit))),
 					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);
+					new BasicNameValuePair("content-type", "application/json")), ChannelObject.class);
 
 			IChannel oldChannel = copy();
 			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
@@ -121,7 +121,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 					}
 				}
 
-				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
+				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelJoinRequest(parent.getID(), id, false, false)));
 			} else {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
@@ -133,7 +133,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void leave() {
 		if (client.getConnectedVoiceChannels().contains(this)) {
-			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
+			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelJoinRequest(parent.getID(), null, false, false)));
 			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent))
 				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		} else {

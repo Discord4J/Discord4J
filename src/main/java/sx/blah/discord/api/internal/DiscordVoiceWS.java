@@ -10,17 +10,17 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceKeepAliveRequest;
+import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.VoicePingEvent;
 import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.api.internal.json.requests.VoiceConnectRequest;
-import sx.blah.discord.api.internal.json.requests.VoiceKeepAliveRequest;
-import sx.blah.discord.api.internal.json.requests.VoiceSpeakingRequest;
-import sx.blah.discord.api.internal.json.requests.VoiceUDPConnectRequest;
-import sx.blah.discord.api.internal.json.responses.VoiceUpdateResponse;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceConnectRequest;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceSpeakingRequest;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceUDPConnectRequest;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
@@ -186,7 +186,7 @@ public class DiscordVoiceWS {
 					if (isConnected.get()) {
 						byte[] data = guild.getAudioManager().getAudio();
 						if (data != null && data.length > 0 && !Discord4J.audioDisabled.get()) {
-							client.timer = System.currentTimeMillis();
+							client.lastHeartbeat = System.currentTimeMillis();
 							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
 							if (!isSpeaking)
 								setSpeaking(true);
@@ -230,14 +230,14 @@ public class DiscordVoiceWS {
 	private void startKeepalive(int hearbeat_interval) {
 		Runnable keepAlive = ()->{
 			if (this.isConnected.get()) {
-				long l = System.currentTimeMillis()-client.timer;
+				long l = System.currentTimeMillis()-client.lastHeartbeat;
 				Discord4J.LOGGER.debug(LogMarkers.KEEPALIVE, "Sending keep alive... ({}). Took {} ms.", System.currentTimeMillis(), l);
 				send(DiscordUtils.GSON.toJson(new VoiceKeepAliveRequest(System.currentTimeMillis())));
-				client.timer = System.currentTimeMillis();
+				client.lastHeartbeat = System.currentTimeMillis();
 			}
 		};
 		executorService.scheduleAtFixedRate(keepAlive,
-				client.timer+hearbeat_interval-System.currentTimeMillis(),
+				client.lastHeartbeat +hearbeat_interval-System.currentTimeMillis(),
 				hearbeat_interval, TimeUnit.MILLISECONDS);
 	}
 
