@@ -362,7 +362,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IRole createRole() throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		RoleResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+id+"/roles",
 				new BasicNameValuePair("authorization", client.getToken())), RoleResponse.class);
@@ -388,7 +388,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.BAN));
+		PermissionsUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.BAN));
 
 		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays,
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -396,7 +396,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void pardonUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID,
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -404,7 +404,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void kickUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
+		PermissionsUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -412,7 +412,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
+		PermissionsUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
@@ -426,7 +426,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, RateLimitException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
+		PermissionsUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
@@ -440,7 +440,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void setMuteUser(IUser user, boolean mute) throws DiscordException, RateLimitException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
+		PermissionsUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
@@ -456,9 +456,9 @@ public class Guild implements IGuild {
 	public void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, RateLimitException {
 		boolean isSelf = user.equals(client.getOurUser());
 		if (isSelf) {
-			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CHANGE_NICKNAME));
+			PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.CHANGE_NICKNAME));
 		} else {
-			DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.MANAGE_NICKNAMES));
+			PermissionsUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.MANAGE_NICKNAMES));
 		}
 
 		try {
@@ -472,7 +472,7 @@ public class Guild implements IGuild {
 	}
 
 	private void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
 			GuildResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
@@ -536,7 +536,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IChannel createChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
@@ -564,7 +564,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
@@ -625,7 +625,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -643,7 +643,7 @@ public class Guild implements IGuild {
 		if (rolesInOrder.length != getRoles().size())
 			throw new DiscordException("The number of roles to reorder does not equal the number of available roles!");
 
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		ReorderRolesRequest[] request = new ReorderRolesRequest[rolesInOrder.length];
 
@@ -698,7 +698,7 @@ public class Guild implements IGuild {
 		if (client.isBot())
 			throw new DiscordException("Bot accounts are not allowed to add other bots!");
 
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.AUTHORIZE+"?client_id="+applicationID+"&scope=bot",

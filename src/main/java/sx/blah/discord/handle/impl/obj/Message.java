@@ -11,10 +11,7 @@ import sx.blah.discord.api.internal.json.requests.MessageRequest;
 import sx.blah.discord.api.internal.json.responses.MessageResponse;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -315,7 +312,7 @@ public class Message implements IMessage {
 			if (channel.isPrivate())
 				throw new DiscordException("Cannot delete the other person's message in a private channel!");
 
-			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+			PermissionsUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		}
 
 		if (client.isReady()) {

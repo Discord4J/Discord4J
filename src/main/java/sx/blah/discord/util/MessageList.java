@@ -562,7 +562,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws MissingPermissionsException
 	 */
 	public void bulkDelete(List<IMessage> messages) throws DiscordException, RateLimitException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
+		PermissionsUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (!client.isBot())
 			throw new DiscordException("You must be a bot to bulk delete!");
@@ -602,7 +602,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 	private void updatePermissions() {
 		try {
-			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
+			PermissionsUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 			hasPermission = true;
 		} catch (MissingPermissionsException e) {
 			if (!Discord4J.ignoreChannelWarnings.get())

@@ -181,7 +181,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
@@ -204,7 +204,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		if (client.isReady()) {
 			InputStream is = new BufferedInputStream(stream);
@@ -272,7 +272,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IInvite createInvite(int maxAge, int maxUses, boolean temporary) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
 		if (!client.isReady()) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
@@ -326,7 +326,7 @@ public class Channel implements IChannel {
 	}
 
 	private void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, RateLimitException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
 		String newName = name.orElse(this.name);
 		int newPosition = position.orElse(this.position);
@@ -381,7 +381,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -468,7 +468,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		PermissionsUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -478,7 +478,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		PermissionsUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID(),
 				new BasicNameValuePair("authorization", client.getToken()));
@@ -497,7 +497,7 @@ public class Channel implements IChannel {
 	}
 
 	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
@@ -512,7 +512,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
 		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
 				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
 						new BasicNameValuePair("authorization", client.getToken()),
@@ -548,7 +548,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void pin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (!message.getChannel().equals(this))
 			throw new DiscordException("Message channel doesn't match current channel!");
@@ -562,7 +562,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (!message.getChannel().equals(this))
 			throw new DiscordException("Message channel doesn't match current channel!");

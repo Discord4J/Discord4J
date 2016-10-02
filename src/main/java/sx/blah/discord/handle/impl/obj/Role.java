@@ -13,10 +13,7 @@ import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.api.internal.json.generic.RoleResponse;
 import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.*;
 
 import java.awt.*;
 import java.io.UnsupportedEncodingException;
@@ -184,7 +181,7 @@ public class Role implements IRole {
 	}
 
 	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
+		PermissionsUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
 			RoleResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
@@ -231,7 +228,7 @@ public class Role implements IRole {
 
 	@Override
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
+		PermissionsUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		((DiscordClientImpl) guild.getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));

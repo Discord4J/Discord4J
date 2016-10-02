@@ -9,10 +9,7 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -349,7 +346,7 @@ public class User implements IUser {
 	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException,
 			MissingPermissionsException {
 		// can this user go to this channel?
-		DiscordUtils.checkPermissions(this, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
+		PermissionsUtils.checkPermissions(this, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
 
 		// in order to move a member:
 		// both users have to be able to access the new VC (half of it is covered above)
@@ -358,9 +355,9 @@ public class User implements IUser {
 		// this isn't the client, so the client is moving this uesr
 		if (!this.equals(client.getOurUser())) {
 			// can the client go to this channel?
-			DiscordUtils.checkPermissions(client.getOurUser(), newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
+			PermissionsUtils.checkPermissions(client.getOurUser(), newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
 
-			DiscordUtils.checkPermissions(newChannel.getModifiedPermissions(client.getOurUser()),
+			PermissionsUtils.checkPermissions(newChannel.getModifiedPermissions(client.getOurUser()),
 					EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 		}
 

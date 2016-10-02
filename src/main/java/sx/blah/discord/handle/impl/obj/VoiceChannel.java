@@ -77,7 +77,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	private void edit(Optional<String> name, Optional<Integer> position, Optional<Integer> bitrate, Optional<Integer> userLimit) throws MissingPermissionsException, DiscordException, RateLimitException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
+		PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
 		String newName = name.orElse(this.name);
 		int newPosition = position.orElse(this.position);
@@ -109,7 +109,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void join() throws MissingPermissionsException {
 		if (client.isReady()) {
-			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_CONNECT));
+			PermissionsUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_CONNECT));
 			if (!client.getOurUser().getConnectedVoiceChannels().contains(this)) {
 				if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
 					Discord4J.LOGGER.info(LogMarkers.HANDLE, "Attempting to join multiple channels in the same guild! Moving channels instead...");
