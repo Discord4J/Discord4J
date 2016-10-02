@@ -62,6 +62,13 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	List<IRole> getRoles();
 
 	/**
+	 * Gets the image URL for this emoji.
+	 *
+	 * @return The image URL.
+	 */
+	String getImageUrl();
+
+	/**
 	 * The emoji as a properly formatted string. "<:name:emoji_id>"
 	 *
 	 * @return The formatted string.

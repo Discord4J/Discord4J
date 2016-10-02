@@ -142,6 +142,11 @@ public class Emoji implements IEmoji {
 	}
 
 	@Override
+	public String getImageUrl() {
+		return "https://cdn.discordapp.com/emojis/" + getID() + ".png";
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(id);
 	}
