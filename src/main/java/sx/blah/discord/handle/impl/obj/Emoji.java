@@ -16,6 +16,7 @@
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -142,7 +143,7 @@ public class Emoji implements IEmoji {
 
 	@Override
 	public String getImageUrl() {
-		return "https://cdn.discordapp.com/emojis/" + getID() + ".png";
+		return String.format(DiscordEndpoints.EMOJI_IMAGE, getID());
 	}
 
 	@Override
