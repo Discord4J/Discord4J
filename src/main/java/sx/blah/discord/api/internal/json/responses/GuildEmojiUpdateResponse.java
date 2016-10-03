@@ -15,6 +15,9 @@
 
 package sx.blah.discord.api.internal.json.responses;
 
+/**
+ * The response when the emoji list for a guild updates.
+ */
 public class GuildEmojiUpdateResponse {
 
 	/**
