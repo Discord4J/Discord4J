@@ -221,6 +221,17 @@ public class RequestBuilder {
 	}
 
 	/**
+	 * This creates a handler for when the current action times out on doActionBefore or doActionAfter
+	 *
+	 * @param timeoutProcedure The timeout handler.
+	 * @return The builder instance.
+	 */
+	public RequestBuilder onTimeout(Procedure timeoutProcedure) {
+		activeAction.timeoutHandler = timeoutProcedure;
+		return this;
+	}
+
+	/**
 	 * This creates a new active action which will be executed after the current one succeeds.
 	 *
 	 * @param action The action to run.
