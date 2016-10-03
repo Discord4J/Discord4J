@@ -17,7 +17,6 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.handle.obj.IDiscordObject;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -26,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class Emoji implements IEmoji {
 
@@ -77,8 +75,7 @@ public class Emoji implements IEmoji {
 	}
 
 	private static String[] convertRolesToIDs(IRole[] roles) {
-		return Arrays.stream(roles).filter(role -> role != null).map(IDiscordObject::getID)
-				.collect(Collectors.toList()).toArray(new String[0]);
+		return Arrays.stream(roles).filter(role -> role != null).map(IRole::getID).toArray(String[]::new);
 	}
 
 	public void setRequiresColons(boolean requiresColons) {
