@@ -16,8 +16,10 @@ import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -43,8 +45,11 @@ public class DiscordWS extends WebSocketAdapter {
 
 	protected long seq = 0;
 
+	private String gateway;
+
 	public DiscordWS(IDiscordClient client, String gateway, boolean isDaemon) {
 		this.client = (DiscordClientImpl) client;
+		this.gateway = gateway;
 		this.dispatchHandler = new DispatchHandler(this, this.client);
 
 		try {
@@ -70,10 +75,20 @@ public class DiscordWS extends WebSocketAdapter {
 				beginHeartbeat(d.get("heartbeat_interval").getAsInt());
 				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token)));
 				break;
+			case RECONNECT:
+				try {
+					disconnect(DiscordDisconnectedEvent.Reason.RECONNECT_OP);
+					wsClient.connect(this, new URI(this.gateway), new ClientUpgradeRequest());
+				} catch (IOException | URISyntaxException e) {
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while handling RECONNECT op, REPORT THIS TO THE DISCORD4J DEV! {}", e);
+				}
+				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
+			case INVALID_SESSION:disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION_OP); break;
+			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
 
 			default:
-				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown op received: {}, REPORT THIS TO THE DISCORD4J DEV!", op);
+				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
 	}
 
@@ -114,7 +129,9 @@ public class DiscordWS extends WebSocketAdapter {
 	}
 
 	protected void disconnect(DiscordDisconnectedEvent.Reason reason) {
-		System.out.println("disconnect");
+		// TODO: Handle reconnects
+		keepAlive.shutdown();
+		getSession().close();
 	}
 
 	@Override

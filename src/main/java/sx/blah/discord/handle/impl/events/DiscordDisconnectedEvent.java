@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.impl.events;
 
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.Event;
 
 /**
@@ -27,36 +28,20 @@ public class DiscordDisconnectedEvent extends Event {
 	 */
 	public enum Reason {
 		/**
-		 * The reason is unknown for disconnecting.
+		 * The websocket received {@link sx.blah.discord.api.internal.GatewayOps#INVALID_SESSION}
+		 * This is irrecoverable and the connection is abandoned.
 		 */
-		UNKNOWN,
+		INVALID_SESSION_OP,
+
 		/**
-		 * The connection timed out.
+		 * The websocket received {@link sx.blah.discord.api.internal.GatewayOps#RECONNECT}
+		 * It will clear its caches and attempt to establish a new connection to the gateway.
 		 */
-		TIMEOUT,
+		RECONNECT_OP,
+
 		/**
-		 * The client logged out
+		 * A direct call to {@link IDiscordClient#logout()} was made.
 		 */
-		LOGGED_OUT,
-		/**
-		 * Discord missed too many pings.
-		 */
-		MISSED_PINGS,
-		/**
-		 * The websocket attempting to reconnect.
-		 */
-		RECONNECTING,
-		/**
-		 * The websocket encountered an error while initializing. This is unrecoverable.
-		 */
-		INIT_ERROR,
-		/**
-		 * The websocket declared the current session to be invalid.
-		 */
-		INVALID_SESSION,
-		/**
-		 * The websocket attempted reconnect to discord but it failed.
-		 */
-		RECONNECTION_FAILED
+		LOGGED_OUT
 	}
 }
