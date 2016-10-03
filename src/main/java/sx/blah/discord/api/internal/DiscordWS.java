@@ -1055,8 +1055,8 @@ public class DiscordWS {
 					.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
 			guild.getEmojis().clear();
-			for (GuildEmojiUpdateResponse.EmojiObj obj : event.emojis){
-				DiscordUtils.getEmojiFromJSON(guild, obj);
+			for (GuildEmojiUpdateResponse.EmojiObj obj : event.emojis) {
+				guild.getEmojis().add(DiscordUtils.getEmojiFromJSON(guild, obj));
 			}
 
 			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldList, guild.getEmojis()));

@@ -289,8 +289,8 @@ public class DiscordUtils {
 		}
 
 		guild.getEmojis().clear();
-		for (GuildEmojiUpdateResponse.EmojiObj obj : json.emojis){
-			DiscordUtils.getEmojiFromJSON(guild, obj);
+		for (GuildEmojiUpdateResponse.EmojiObj obj : json.emojis) {
+			guild.getEmojis().add(DiscordUtils.getEmojiFromJSON(guild, obj));
 		}
 
 		return guild;
@@ -485,24 +485,15 @@ public class DiscordUtils {
 		return role;
 	}
 
+	/**
+	 * Creates an IEmoji object from the EmojiObj json data.
+	 *
+	 * @param guild The guild.
+	 * @param json  The json object data.
+	 * @return
+	 */
 	public static IEmoji getEmojiFromJSON(IGuild guild, GuildEmojiUpdateResponse.EmojiObj json) {
-		Emoji emoji;
-		if ((emoji = (Emoji) guild.getEmojiByID(json.id)) != null) {
-			emoji.setManaged(json.managed);
-			emoji.setName(json.name);
-			emoji.setRequiresColons(json.require_colons);
-			emoji.getRoles().clear();
-			for (String roleId : json.roles) {
-				IRole role = guild.getRoleByID(roleId);
-
-				if (role != null) {
-					emoji.getRoles().add(role);
-				}
-			}
-		} else{
-			emoji = new Emoji(guild, json.id, json.name, json.require_colons, json.managed, json.roles);
-			guild.getEmojis().add(emoji);
-		}
+		Emoji emoji = new Emoji(guild, json.id, json.name, json.require_colons, json.managed, json.roles);
 
 		return emoji;
 	}
