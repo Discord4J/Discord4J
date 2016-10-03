@@ -29,6 +29,16 @@ public class DiscordWS extends WebSocketAdapter {
 	private SocketEventHandler socketEventHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
 
+	/**
+	 * When the bot has received all available guilds.
+	 */
+	public boolean isReady = false;
+
+	/**
+	 * When the bot has received the initial Ready payload from Discord.
+	 */
+	public boolean hasReceivedReady = false;
+
 	protected long seq = 0;
 
 	public DiscordWS(IDiscordClient client, String gateway, boolean isDaemon) {
@@ -56,7 +66,7 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		System.out.println("closed");
+		System.out.println("closed with statuscode " + statusCode + " and reason " + reason);
 	}
 
 	@Override
@@ -94,7 +104,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	protected void beginHeartbeat(long interval) {
 		keepAlive.scheduleAtFixedRate(() -> {
-			send(new GatewayPayload(GatewayOps.HEARTBEAT, seq));
+			send(GatewayOps.HEARTBEAT, seq);
 		}, 0, interval, TimeUnit.MILLISECONDS);
 	}
 

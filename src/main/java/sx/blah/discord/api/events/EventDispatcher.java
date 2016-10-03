@@ -290,7 +290,7 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public synchronized void dispatch(Event event) {
-		if (client.isReady() || event instanceof DiscordDisconnectedEvent) {
+		if (client.isLoggedIn() || event instanceof DiscordDisconnectedEvent) {
 			eventExecutor.submit(() -> {
 				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 				event.client = client;

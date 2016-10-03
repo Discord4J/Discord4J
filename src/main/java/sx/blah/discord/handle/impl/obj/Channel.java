@@ -193,7 +193,7 @@ public class Channel implements IChannel {
 			return DiscordUtils.getMessageFromJSON(client, this, response);
 
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
 			return null;
 		}
 	}
@@ -222,7 +222,7 @@ public class Channel implements IChannel {
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
 			return null;
 		}
 	}
@@ -248,7 +248,7 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
 			return null;
 		}
 

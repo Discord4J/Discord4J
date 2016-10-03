@@ -94,11 +94,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
 	/**
-	 * Whether the api is logged in.
-	 */
-	protected volatile boolean isReady = false;
-
-	/**
 	 * The websocket session id.
 	 */
 	protected volatile String sessionId;
@@ -215,18 +210,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public void logout() throws RateLimitException, DiscordException {
-		if (isReady()) {
+		if (isLoggedIn()) {
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
 		}
 	}
 
 	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws RateLimitException, DiscordException {
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+		if (!isLoggedIn()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
 			return;
 		}
 
@@ -268,8 +263,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	private void updatePresence(boolean isIdle, Status status) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+		if (!isLoggedIn()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
 			return;
 		}
 
@@ -304,13 +299,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isReady() {
-		return isReady && ws != null;
+		return ws != null && ws.isReady;
+	}
+
+	@Override
+	public boolean isLoggedIn() {
+		return ws != null && ws.hasReceivedReady;
 	}
 
 	@Override
 	public IUser getOurUser() {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+		if (!isLoggedIn()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
 			return null;
 		}
 		return ourUser;
@@ -435,7 +435,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
 		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot is not yet ready!");
 			return null;
 		}
 
@@ -466,8 +466,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IInvite getInviteForCode(String code) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+		if (!isLoggedIn()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
 			return null;
 		}
 

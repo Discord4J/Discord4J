@@ -13,12 +13,16 @@ import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class SocketEventHandler {
@@ -113,12 +117,45 @@ public class SocketEventHandler {
 	}
 
 	private void ready(JsonElement eventObject) {
+		/*
 		ReadyResponse ready = DiscordUtils.GSON.fromJson(eventObject, ReadyResponse.class);
 		client.ourUser = DiscordUtils.getUserFromJSON(client, ready.user);
+		ws.isReady = true;
+		*/
 
-		//Arrays.stream(ready.private_channels).map(c -> DiscordUtils.getPrivateChannelFromJSON(client, c)).forEach(client.privateChannels::add);
 
-		client.isReady = true;
+		ws.hasReceivedReady = true; // Websocket received actual ready event
+		client.getDispatcher().dispatch(new LoginEvent());
+
+		final ReadyResponse ready = DiscordUtils.GSON.fromJson(eventObject, ReadyResponse.class);
+		new RequestBuilder(client).setAsync(true).doAction(() -> {
+			client.ourUser = DiscordUtils.getUserFromJSON(client, ready.user);
+			client.sessionId = ready.session_id;
+
+			//Disable initial caching for performance
+			if (ready.guilds.length > MessageList.MAX_GUILD_COUNT) MessageList.shouldDownloadHistoryAutomatically(false);
+
+			ArrayList<UnavailableGuildObject> waitingGuilds = new ArrayList<>(Arrays.asList(ready.guilds));
+			for (int i = 0; i < ready.guilds.length; i++) {
+				client.getDispatcher().waitFor((GuildCreateEvent e) -> {
+					waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getID()));
+					return true;
+				}, 10, TimeUnit.SECONDS);
+			}
+
+			waitingGuilds.forEach(guild ->
+				client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id))
+			);
+			return true;
+		}).andThen(() -> {
+			Arrays.stream(ready.private_channels)
+					.map(pm -> DiscordUtils.getPrivateChannelFromJSON(client, pm))
+					.forEach(client.privateChannels::add);
+
+			ws.isReady = true;
+			client.getDispatcher().dispatch(new ReadyEvent()); // All information has been received
+			return true;
+		}).execute();
 
 	}
 
