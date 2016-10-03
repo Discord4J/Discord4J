@@ -114,11 +114,18 @@ public interface IDiscordClient {
 	void changeStatus(Status status);
 
 	/**
-	 * Checks if the api is ready to be interacted with (if it is logged in).
+	 * Checks if the api is ready to be interacted with.
 	 *
 	 * @return True if ready, false if otherwise.
 	 */
 	boolean isReady();
+
+	/**
+	 * Checks if the api has established a connection with the Discord gateway.
+	 *
+	 * @return True if logged in, false if otherwise.
+	 */
+	boolean isLoggedIn();
 
 	/**
 	 * Gets the {@link User} this bot is representing.
