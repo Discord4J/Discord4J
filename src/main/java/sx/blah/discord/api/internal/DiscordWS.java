@@ -7,10 +7,12 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -26,7 +28,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	private WebSocketClient wsClient;
 	private DiscordClientImpl client;
-	private SocketEventHandler socketEventHandler;
+	private DispatchHandler dispatchHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
 
 	/**
@@ -43,7 +45,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	public DiscordWS(IDiscordClient client, String gateway, boolean isDaemon) {
 		this.client = (DiscordClientImpl) client;
-		this.socketEventHandler = new SocketEventHandler(this, this.client);
+		this.dispatchHandler = new DispatchHandler(this, this.client);
 
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
@@ -54,6 +56,24 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
 		} catch (Exception e) {
 			//TODO: Log exception
+		}
+	}
+
+	@Override
+	public void onWebSocketText(String message) {
+		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
+		GatewayOps op = GatewayOps.values()[payload.get("op").getAsInt()];
+		JsonObject d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d").getAsJsonObject() : null;
+
+		switch (op) {
+			case HELLO:
+				beginHeartbeat(d.get("heartbeat_interval").getAsInt());
+				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token)));
+				break;
+			case DISPATCH: dispatchHandler.handle(payload); break;
+
+			default:
+				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown op received: {}, REPORT THIS TO THE DISCORD4J DEV!", op);
 		}
 	}
 
@@ -85,21 +105,6 @@ public class DiscordWS extends WebSocketAdapter {
 
 	public void send(String message) {
 		getSession().getRemote().sendStringByFuture(message);
-	}
-
-	@Override
-	public void onWebSocketText(String message) {
-		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
-		GatewayOps op = GatewayOps.values()[payload.get("op").getAsInt()];
-		JsonObject d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d").getAsJsonObject() : null;
-
-		switch (op) {
-			case HELLO:
-				beginHeartbeat(d.get("heartbeat_interval").getAsInt());
-				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token)));
-				break;
-			case DISPATCH: socketEventHandler.onMessage(message); break;
-		}
 	}
 
 	protected void beginHeartbeat(long interval) {
