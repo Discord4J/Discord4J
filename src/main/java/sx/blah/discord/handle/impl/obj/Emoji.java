@@ -31,7 +31,6 @@ public class Emoji implements IEmoji {
 	 * The guild.
 	 */
 	protected final IGuild guild;
-
 	/**
 	 * The ID.
 	 */
