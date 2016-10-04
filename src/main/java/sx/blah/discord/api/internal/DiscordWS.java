@@ -11,7 +11,9 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
+import sx.blah.discord.api.internal.json.requests.ResumeRequest;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.LoginEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
@@ -20,18 +22,29 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 
 public class DiscordWS extends WebSocketAdapter {
 
 	private WebSocketClient wsClient;
+
 	private DiscordClientImpl client;
+	private String gateway;
+
 	private DispatchHandler dispatchHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
+
+	private static final int MAX_RECONNECT_ATTEMPTS = 5; // TODO: Expose
+	private final AtomicBoolean shouldAttemptReconnect = new AtomicBoolean(false);
+
+	protected long seq = 0;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -43,9 +56,8 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	protected long seq = 0;
 
-	private String gateway;
+
 
 	public DiscordWS(IDiscordClient client, String gateway, boolean isDaemon) {
 		this.client = (DiscordClientImpl) client;
@@ -72,6 +84,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 		switch (op) {
 			case HELLO:
+				shouldAttemptReconnect.set(false);
 				beginHeartbeat(d.get("heartbeat_interval").getAsInt());
 				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token)));
 				break;
@@ -84,7 +97,7 @@ public class DiscordWS extends WebSocketAdapter {
 				}
 				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
-			case INVALID_SESSION:disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION_OP); break;
+			case INVALID_SESSION: disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION_OP); break;
 			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
 
 			default:
@@ -96,12 +109,21 @@ public class DiscordWS extends WebSocketAdapter {
 	public void onWebSocketConnect(Session sess) {
 		super.onWebSocketConnect(sess);
 		System.out.println("Connected!");
+
+		if (shouldAttemptReconnect.get()) {
+			send(GatewayOps.RESUME, new ResumeRequest(client.sessionId, seq, client.getToken()));
+		}
 	}
 
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
 		System.out.println("closed with statuscode " + statusCode + " and reason " + reason);
+
+		if (statusCode == 1006) {
+			System.out.println("1006");
+			disconnect(DiscordDisconnectedEvent.Reason.ABNORMAL_CLOSE);
+		}
 	}
 
 	@Override
@@ -123,15 +145,55 @@ public class DiscordWS extends WebSocketAdapter {
 	}
 
 	protected void beginHeartbeat(long interval) {
+		if (keepAlive.isShutdown()) keepAlive = Executors.newSingleThreadScheduledExecutor();
+
 		keepAlive.scheduleAtFixedRate(() -> {
 			send(GatewayOps.HEARTBEAT, seq);
 		}, 0, interval, TimeUnit.MILLISECONDS);
 	}
 
-	protected void disconnect(DiscordDisconnectedEvent.Reason reason) {
-		// TODO: Handle reconnects
+
+	// TODO: Access modifier
+	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
+		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Disconnected with reason {}", reason);
+
 		keepAlive.shutdown();
-		getSession().close();
+		switch (reason) {
+			case ABNORMAL_CLOSE:
+				beginReconnect();
+				break;
+			default:
+				System.out.println("Unhandled reason " + reason);
+		}
+	}
+
+	private void beginReconnect() {
+		System.out.println("beginning reconnect");
+
+		shouldAttemptReconnect.set(true);
+		int curAttempt = 0;
+
+		while (curAttempt < MAX_RECONNECT_ATTEMPTS && shouldAttemptReconnect.get()) {
+			System.out.println("current attempt: " + curAttempt);
+			try {
+				wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
+
+				int timeout = (int) Math.min(1024, Math.pow(2, curAttempt)) + ThreadLocalRandom.current().nextInt(-2, 2);
+				client.getDispatcher().waitFor((LoginEvent event) -> {
+					System.out.println("received login event in reconnect waitFor");
+					return true;
+				}, timeout, TimeUnit.SECONDS, () -> {
+					System.out.println("reconnect attempt timed out.");
+				});
+
+			} catch (IOException | URISyntaxException | InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			curAttempt++;
+		}
+
+		System.out.println("Reconnection failed after " + MAX_RECONNECT_ATTEMPTS + " attempts.");
 	}
 
 	@Override

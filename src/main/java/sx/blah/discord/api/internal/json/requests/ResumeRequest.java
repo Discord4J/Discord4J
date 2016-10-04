@@ -3,6 +3,11 @@ package sx.blah.discord.api.internal.json.requests;
 public class ResumeRequest {
 
 	/**
+	 * The session token
+	 */
+	public String token;
+
+	/**
 	 * The session id to resume.
 	 */
 	public String session_id;
@@ -11,11 +16,6 @@ public class ResumeRequest {
 	 * This is the last cached value of {@link sx.blah.discord.api.internal.json.GatewayPayload#s}
 	 */
 	public long seq;
-
-	/**
-	 * The session token
-	 */
-	public String token;
 
 	public ResumeRequest(String session_id, long seq, String token) {
 		this.session_id = session_id;

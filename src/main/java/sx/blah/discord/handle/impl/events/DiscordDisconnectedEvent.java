@@ -42,6 +42,11 @@ public class DiscordDisconnectedEvent extends Event {
 		/**
 		 * A direct call to {@link IDiscordClient#logout()} was made.
 		 */
-		LOGGED_OUT
+		LOGGED_OUT,
+
+		/**
+		 * The websocket was closed unexpectedly (error code 1006). It will attempt to reconnect.
+		 */
+		ABNORMAL_CLOSE
 	}
 }
