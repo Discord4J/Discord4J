@@ -77,7 +77,15 @@ public class DiscordWS extends WebSocketAdapter {
 	public void onWebSocketText(String message) {
 		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
 		GatewayOps op = GatewayOps.values()[payload.get("op").getAsInt()];
-		JsonObject d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d").getAsJsonObject() : null;
+
+		JsonObject d;
+		try {
+			d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d").getAsJsonObject() : null;
+		} catch (IllegalStateException e) {
+			System.out.println("Received invalid message: " + message);
+			e.printStackTrace();
+			return;
+		}
 
 		switch (op) {
 			case HELLO:
