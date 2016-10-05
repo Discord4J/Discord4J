@@ -183,6 +183,8 @@ public class DiscordWS extends WebSocketAdapter {
 	private void beginReconnect() {
 		System.out.println("beginning reconnect");
 
+		hasReceivedReady = false;
+		isReady = false;
 		shouldAttemptReconnect.set(true);
 		int curAttempt = 0;
 
