@@ -7,6 +7,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.GatewayOps;
 import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceChannelJoinRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
@@ -120,7 +121,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 					}
 				}
 
-				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelJoinRequest(parent.getID(), id, false, false)));
+				((DiscordClientImpl) client).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceChannelJoinRequest(parent.getID(), id, false, false));
 			} else {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
@@ -132,7 +133,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void leave() {
 		if (client.getConnectedVoiceChannels().contains(this)) {
-			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelJoinRequest(parent.getID(), null, false, false)));
+			((DiscordClientImpl) client).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceChannelJoinRequest(parent.getID(), null, false, false));
 			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent))
 				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		} else {

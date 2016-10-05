@@ -280,7 +280,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
 		}
 
-		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status));
 	}
 
 	@Override
