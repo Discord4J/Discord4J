@@ -145,7 +145,11 @@ public class DiscordWS extends WebSocketAdapter {
 	}
 
 	public void send(String message) {
-		getSession().getRemote().sendStringByFuture(message);
+		if (getSession().isOpen()) {
+			getSession().getRemote().sendStringByFuture(message);
+		} else {
+			System.out.println("Attempt to send message on closed session. This should never happen"); // somehow invalid state?
+		}
 	}
 
 	protected void beginHeartbeat(long interval) {

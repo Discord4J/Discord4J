@@ -14,7 +14,7 @@ public class PresenceUpdateRequest {
 	 */
 	public GameObject game;
 
-	public PresenceUpdateRequest(Long idle_since, Status status) {
+	public PresenceUpdateRequest(long idle_since, Status status) {
 		this.idle_since = idle_since;
 		this.game = new GameObject(status);
 	}
