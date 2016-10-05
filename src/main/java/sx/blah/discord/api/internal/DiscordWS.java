@@ -45,6 +45,7 @@ public class DiscordWS extends WebSocketAdapter {
 	private final AtomicBoolean shouldAttemptReconnect = new AtomicBoolean(false);
 
 	protected long seq = 0;
+	protected String sessionId;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -116,7 +117,7 @@ public class DiscordWS extends WebSocketAdapter {
 		System.out.println("Connected!");
 
 		if (shouldAttemptReconnect.get()) {
-			send(GatewayOps.RESUME, new ResumeRequest(client.sessionId, seq, client.getToken()));
+			send(GatewayOps.RESUME, new ResumeRequest(sessionId, seq, client.getToken()));
 		}
 	}
 
@@ -170,6 +171,10 @@ public class DiscordWS extends WebSocketAdapter {
 			case ABNORMAL_CLOSE:
 				beginReconnect();
 				break;
+			case LOGGED_OUT:
+				clearCaches();
+				getSession().close();
+				break;
 			default:
 				System.out.println("Unhandled reason " + reason);
 		}
@@ -202,6 +207,15 @@ public class DiscordWS extends WebSocketAdapter {
 		}
 
 		System.out.println("Reconnection failed after " + MAX_RECONNECT_ATTEMPTS + " attempts.");
+	}
+
+	private void clearCaches() {
+		client.guildList.clear();
+		client.privateChannels.clear();
+		client.ourUser = null;
+		client.REGIONS.clear();
+		seq = 0;
+		sessionId = null;
 	}
 
 	@Override

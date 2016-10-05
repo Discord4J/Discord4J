@@ -79,7 +79,7 @@ public class DispatchHandler {
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			client.ourUser = DiscordUtils.getUserFromJSON(client, ready.user);
-			client.sessionId = ready.session_id;
+			ws.sessionId = ready.session_id;
 
 			//Disable initial caching for performance
 			if (ready.guilds.length > MessageList.MAX_GUILD_COUNT) MessageList.shouldDownloadHistoryAutomatically(false);

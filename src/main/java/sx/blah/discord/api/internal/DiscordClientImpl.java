@@ -94,11 +94,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
 	/**
-	 * The websocket session id.
-	 */
-	protected volatile String sessionId;
-
-	/**
 	 * Caches the available regions for discord.
 	 */
 	protected final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
@@ -211,6 +206,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void logout() throws RateLimitException, DiscordException {
 		if (isLoggedIn()) {
+			getConnectedVoiceChannels().forEach(IVoiceChannel::leave);
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");

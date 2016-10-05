@@ -92,7 +92,7 @@ public class DiscordVoiceWS {
 	@OnWebSocketConnect
 	public void onOpen(Session session) {
 		this.session = session;
-		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(event.guild_id, client.ourUser.getID(), client.sessionId, event.token)));
+		send(DiscordUtils.GSON.toJson(new VoiceConnectRequest(event.guild_id, client.ourUser.getID(), client.ws.sessionId, event.token)));
 		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Connected to the Discord Voice websocket.");
 	}
 
