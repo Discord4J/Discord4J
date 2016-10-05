@@ -56,9 +56,6 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-
-
-
 	public DiscordWS(IDiscordClient client, String gateway, boolean isDaemon) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
@@ -120,8 +117,7 @@ public class DiscordWS extends WebSocketAdapter {
 		super.onWebSocketClose(statusCode, reason);
 		System.out.println("closed with statuscode " + statusCode + " and reason " + reason);
 
-		if (statusCode == 1006) {
-			System.out.println("1006");
+		if (statusCode == 1006 || statusCode == 1001) { // Which status codes represent errors? All but 1000?
 			disconnect(DiscordDisconnectedEvent.Reason.ABNORMAL_CLOSE);
 		}
 	}
