@@ -1,5 +1,6 @@
 package sx.blah.discord.api.internal;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -78,20 +79,12 @@ public class DiscordWS extends WebSocketAdapter {
 	public void onWebSocketText(String message) {
 		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
 		GatewayOps op = GatewayOps.values()[payload.get("op").getAsInt()];
-
-		JsonObject d;
-		try {
-			d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d").getAsJsonObject() : null;
-		} catch (IllegalStateException e) {
-			System.out.println("Received invalid message: " + message);
-			e.printStackTrace();
-			return;
-		}
+		JsonElement d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d") : null;
 
 		switch (op) {
 			case HELLO:
 				shouldAttemptReconnect.set(false);
-				beginHeartbeat(d.get("heartbeat_interval").getAsInt());
+				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
 				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token)));
 				break;
 			case RECONNECT:

@@ -29,13 +29,15 @@ public class DiscordDisconnectedEvent extends Event {
 	public enum Reason {
 		/**
 		 * The websocket received {@link sx.blah.discord.api.internal.GatewayOps#INVALID_SESSION}
-		 * This is irrecoverable and the connection is abandoned.
+		 * The client will attempt to reconnect.
+		 * Note: The connection may sometimes be resumed. However, reidentifying may be required. In this case, caches
+		 * will be cleared and the client will attempt to establish a brand new connection to the gateway.
 		 */
 		INVALID_SESSION_OP,
 
 		/**
 		 * The websocket received {@link sx.blah.discord.api.internal.GatewayOps#RECONNECT}
-		 * It will clear its caches and attempt to establish a new connection to the gateway.
+		 * The client will clear its caches and attempt to establish a new connection to the gateway.
 		 */
 		RECONNECT_OP,
 
