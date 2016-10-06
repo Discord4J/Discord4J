@@ -50,7 +50,7 @@ public class DispatchHandler {
 			case "CHANNEL_DELETE": channelDelete(DiscordUtils.GSON.fromJson(event.get("d"), ChannelObject.class)); break;
 			case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */ break;
 			case "USER_UPDATE": userUpdate(DiscordUtils.GSON.fromJson(event.get("d"), UserUpdateEventResponse.class)); break;
-			case "CHANNEL_UPDATE": channelUpdate(DiscordUtils.GSON.fromJson(event.get("d"), ChannelUpdateEventResponse.class)); break;
+			case "CHANNEL_UPDATE": channelUpdate(DiscordUtils.GSON.fromJson(event.get("d"), ChannelObject.class)); break;
 			case "GUILD_MEMBERS_CHUNK": guildMembersChunk(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberChunkEventResponse.class)); break;
 			case "GUILD_UPDATE": guildUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildObject.class)); break;
 			case "GUILD_ROLE_CREATE": guildRoleCreate(DiscordUtils.GSON.fromJson(event.get("d"), GuildRoleEventResponse.class)); break;
@@ -418,23 +418,23 @@ public class DispatchHandler {
 		}
 	}
 
-	private void channelUpdate(ChannelUpdateEventResponse event) {
-		if (!event.is_private) {
-			if (event.type.equalsIgnoreCase("text")) {
-				Channel toUpdate = (Channel) client.getChannelByID(event.id);
+	private void channelUpdate(ChannelObject json) {
+		if (!json.is_private) {
+			if (json.type.equalsIgnoreCase("text")) {
+				Channel toUpdate = (Channel) client.getChannelByID(json.id);
 				if (toUpdate != null) {
 					IChannel oldChannel = toUpdate.copy();
 
-					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), event);
+					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), json);
 
 					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 				}
-			} else if (event.type.equalsIgnoreCase("voice")) {
-				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(event.id);
+			} else if (json.type.equalsIgnoreCase("voice")) {
+				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(json.id);
 				if (toUpdate != null) {
 					VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
 
-					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), event);
+					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), json);
 
 					client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 				}
