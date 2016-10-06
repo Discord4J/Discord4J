@@ -495,6 +495,10 @@ public class DiscordWS {
 					voiceServerUpdate(eventObject);
 					break;
 
+				case "WEBHOOKS_UPDATE":
+					// Ignored for now TODO: do something with webhooks when docs are available
+					break;
+
 				default:
 					Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV! (ignoring): {}", type, message);
 			}
