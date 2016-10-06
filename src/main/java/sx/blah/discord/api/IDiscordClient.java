@@ -73,24 +73,6 @@ public interface IDiscordClient {
 	void changeUsername(String username) throws DiscordException, RateLimitException;
 
 	/**
-	 * Changes this client's account's email.
-	 *
-	 * @param email The new email.
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	void changeEmail(String email) throws DiscordException, RateLimitException;
-
-	/**
-	 * Changes this client's account's password.
-	 *
-	 * @param password The new password.
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	void changePassword(String password) throws DiscordException, RateLimitException;
-
-	/**
 	 * Changes this client's account's avatar.
 	 *
 	 * @param avatar The new avatar.

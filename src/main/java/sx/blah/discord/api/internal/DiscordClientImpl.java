@@ -64,16 +64,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final List<IGuild> guildList = new CopyOnWriteArrayList<>();
 
 	/**
-	 * Private copy of the email you logged in with.
-	 */
-	protected volatile String email;
-
-	/**
-	 * Private copy of the password you used to log in.
-	 */
-	protected volatile String password;
-
-	/**
 	 * WebSocket over which to communicate with Discord.
 	 */
 	public volatile DiscordWS ws;
@@ -213,7 +203,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 	}
 
-	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws RateLimitException, DiscordException {
+	private void changeAccountInfo(String username, String avatar) throws RateLimitException, DiscordException {
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
 		if (!isLoggedIn()) {
@@ -222,12 +212,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		try {
-			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
-					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email.orElse(this.email),
-							this.password, password.orElse(this.password), username.orElse(getOurUser().getName()),
-							avatar == null ? Image.forUser(ourUser).getData() :
-									(avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData()))))),
-					AccountInfoChangeResponse.class);
+			String json = REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
+					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(username, avatar))));
+			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(json, AccountInfoChangeResponse.class);
 
 			if (!this.getToken().equals(response.token)) {
 				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
@@ -240,22 +227,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public void changeUsername(String username) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.of(username), Optional.empty(), Optional.empty(), null);
-	}
-
-	@Override
-	public void changeEmail(String email) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.empty(), Optional.of(email), Optional.empty(), null);
-	}
-
-	@Override
-	public void changePassword(String password) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.of(password), null);
+		changeAccountInfo(username, Image.forUser(ourUser).getData());
 	}
 
 	@Override
 	public void changeAvatar(Image avatar) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(avatar));
+		changeAccountInfo(ourUser.getName(), avatar.getData());
 	}
 
 	private void updatePresence(boolean isIdle, Status status) {
