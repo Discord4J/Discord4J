@@ -12,6 +12,7 @@ public class ClientBuilder {
 	private int maxMissedPingCount = -1;
 	private String botToken;
 	private boolean isDaemon = false;
+	private int[] shard = {0, 1};
 
 	/**
 	 * Provides the login info for the client.
@@ -67,6 +68,12 @@ public class ClientBuilder {
 		return this;
 	}
 
+	public ClientBuilder withShards(int curShard, int totalShards) {
+		this.shard[0] = curShard;
+		this.shard[1] = totalShards;
+		return this;
+	}
+
 	/**
 	 * Creates the discord instance with the desired features
 	 *
@@ -78,7 +85,7 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon);
+		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shard);
 	}
 
 	/**
@@ -89,22 +96,9 @@ public class ClientBuilder {
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
 	public IDiscordClient login() throws DiscordException {
-		return login(false);
-	}
-
-	/**
-	 * Performs {@link #build()} and logs in automatically
-	 *
-	 * @param async Whether to log in asynchronously (guilds will not be available immediately, you'll have to wait for
-	 *              {@link sx.blah.discord.handle.impl.events.GuildCreateEvent}s.
-	 * @return The discord instance
-	 *
-	 * @throws DiscordException Thrown if the instance isn't built correctly
-	 */
-	public IDiscordClient login(boolean async) throws DiscordException {
 		IDiscordClient client = build();
 		try {
-			client.login(async);
+			client.login();
 		} catch (Exception e) {
 			throw new DiscordException("Exception ("+e.getClass().getSimpleName()+") occurred while logging in: "+e.getMessage());
 		}

@@ -11,12 +11,8 @@ public class IdentifyRequest {
 	private final int large_threshold;
 	private final int[] shard;
 
-	public IdentifyRequest(String token) {
-		this.token = token;
-		this.properties = new Properties();
-		this.compress = true;
-		this.large_threshold = 250;
-		this.shard = new int[] {0, 1}; // TODO: Impl sharding
+	public IdentifyRequest(String token, int[] shard) {
+		this(token, new Properties(), true, 250, shard);
 	}
 
 	private IdentifyRequest(String token, Properties properties, boolean compress, int large_threshold, int[] shard) {

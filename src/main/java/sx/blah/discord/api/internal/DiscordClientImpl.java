@@ -30,10 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
- * Defines the client.
- * This class receives and
- * sends messages, as well
- * as holds our user data.
+ * Defines the client. This class receives and sends messages, as well as holds our user data.
  */
 public final class DiscordClientImpl implements IDiscordClient {
 
@@ -109,6 +106,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final boolean isDaemon;
 
 	/**
+	 * The sharding information of this client. [0] is the current shard, [1] is the total number of shards.
+	 */
+	protected int[] shard;
+
+	/**
 	 * When this client was logged into. Useful for determining uptime.
 	 */
 	protected volatile LocalDateTime launchTime;
@@ -118,17 +120,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard, EventDispatcher dispatcher, ModuleLoader loader) {
+		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
-		this.dispatcher = new EventDispatcher(this);
-		this.loader = new ModuleLoader(this);
+		this.shard = shard;
+		this.dispatcher = dispatcher;
+		this.loader = loader;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon) {
-		this(timeoutTime, maxMissedPingCount, isDaemon);
-		this.token = "Bot " + token;
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard) {
+		this(token, timeoutTime, maxMissedPingCount, isDaemon, shard, null, null);
+		this.dispatcher = new EventDispatcher(this);
+		this.loader = new ModuleLoader(this);
 	}
 
 	@Override
@@ -147,22 +152,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void login(boolean async) throws DiscordException {
+	public void login() throws DiscordException {
 		try {
 			if (!validateToken()) throw new DiscordException("Invalid token!");
 
-			this.ws = new DiscordWS(this, obtainGateway(getToken()), isDaemon);
+			this.ws = new DiscordWS(this, obtainGateway(), shard, isDaemon);
 			launchTime = LocalDateTime.now();
 
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Exception caught, logging in!", e);
 			throw new DiscordException("Login error occurred! Are your login details correct?");
 		}
-	}
-
-	@Override
-	public void login() throws DiscordException {
-		login(false);
 	}
 
 	private boolean validateToken() {
@@ -177,10 +177,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Gets the WebSocket gateway
 	 *
-	 * @param token Our login token
-	 * @return the WebSocket URL of which to connect
+	 * @return the WebSocket URL to connect to
 	 */
-	private String obtainGateway(String token) {
+	private String obtainGateway() {
 		String gateway = null;
 		try {
 			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY),
@@ -191,6 +190,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
 		return gateway;
+	}
+
+	/**
+	 * @return The current shard this client is on.
+	 */
+	public int getCurrentShard() {
+		return this.shard[0];
+	}
+
+	/**
+	 * @return The total number of shards
+	 */
+	public int getTotalShards() {
+		return this.shard[1];
 	}
 
 	@Override
@@ -484,7 +497,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public long getResponseTime() {
-		//return ws.getResponseTime();
+		// TODO
 		return 0;
 	}
 

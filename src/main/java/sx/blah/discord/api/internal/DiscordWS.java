@@ -38,6 +38,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	private DiscordClientImpl client;
 	private String gateway;
+	private int[] shard;
 
 	private DispatchHandler dispatchHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
@@ -58,9 +59,10 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	public DiscordWS(IDiscordClient client, String gateway, boolean isDaemon) {
+	public DiscordWS(IDiscordClient client, String gateway, int[] shard, boolean isDaemon) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
+		this.shard = shard;
 		this.dispatchHandler = new DispatchHandler(this, this.client);
 
 		try {
@@ -85,7 +87,7 @@ public class DiscordWS extends WebSocketAdapter {
 			case HELLO:
 				shouldAttemptReconnect.set(false);
 				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
-				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token)));
+				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token, shard)));
 				break;
 			case RECONNECT:
 				try {
