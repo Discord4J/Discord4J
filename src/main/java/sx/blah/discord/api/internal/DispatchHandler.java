@@ -307,7 +307,7 @@ public class DispatchHandler {
 		}
 	}
 
-	private void messageDeleteBulk(MessageDeleteBulkEventResponse event) { //TODO: maybe add a separate event for this?
+	private void messageDeleteBulk(MessageDeleteBulkEventResponse event) {
 		for (String id : event.ids) {
 			messageDelete(new MessageDeleteEventResponse(id, event.channel_id));
 		}

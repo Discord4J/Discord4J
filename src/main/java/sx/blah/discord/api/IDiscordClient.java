@@ -107,7 +107,6 @@ public interface IDiscordClient {
 	 */
 	IUser getOurUser();
 
-
 	/**
 	 * Gets a set of all channels visible to the bot user.
 	 *

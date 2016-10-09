@@ -72,7 +72,7 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.start();
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
 		} catch (Exception e) {
-			//TODO: Log exception
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while initializing voice websocket: {}", e);
 		}
 	}
 
@@ -110,7 +110,7 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketConnect(Session sess) {
 		super.onWebSocketConnect(sess);
-		System.out.println("Connected!");
+		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket Connected.");
 
 		if (shouldAttemptReconnect.get()) {
 			send(GatewayOps.RESUME, new ResumeRequest(sessionId, seq, client.getToken()));
@@ -120,7 +120,7 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		System.out.println("closed with statuscode " + statusCode + " and reason " + reason);
+		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket disconnected with status code {} and reason \"{}\".", statusCode, reason);
 
 		if (statusCode == 1006 || statusCode == 1001) { // Which status codes represent errors? All but 1000?
 			disconnect(DiscordDisconnectedEvent.Reason.ABNORMAL_CLOSE);
@@ -145,7 +145,7 @@ public class DiscordWS extends WebSocketAdapter {
 		if (getSession().isOpen()) {
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
-			System.out.println("Attempt to send message on closed session. This should never happen"); // somehow invalid state?
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session.");
 		}
 	}
 
@@ -157,13 +157,12 @@ public class DiscordWS extends WebSocketAdapter {
 		}, 0, interval, TimeUnit.MILLISECONDS);
 	}
 
-
-	// TODO: Access modifier
-	public void disconnect(DiscordDisconnectedEvent.Reason reason) {
+	protected void disconnect(DiscordDisconnectedEvent.Reason reason) {
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Disconnected with reason {}", reason);
 
 		keepAlive.shutdown();
 		switch (reason) {
+			case INVALID_SESSION_OP:
 			case ABNORMAL_CLOSE:
 				beginReconnect();
 				break;
@@ -172,12 +171,12 @@ public class DiscordWS extends WebSocketAdapter {
 				getSession().close();
 				break;
 			default:
-				System.out.println("Unhandled reason " + reason);
+				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled disconnect reason");
 		}
 	}
 
 	private void beginReconnect() {
-		System.out.println("beginning reconnect");
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Beginning reconnect.");
 
 		hasReceivedReady = false;
 		isReady = false;
@@ -185,16 +184,16 @@ public class DiscordWS extends WebSocketAdapter {
 		int curAttempt = 0;
 
 		while (curAttempt < MAX_RECONNECT_ATTEMPTS && shouldAttemptReconnect.get()) {
-			System.out.println("current attempt: " + curAttempt);
+			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Attempting reconnect {}", curAttempt);
 			try {
 				wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
 
 				int timeout = (int) Math.min(1024, Math.pow(2, curAttempt)) + ThreadLocalRandom.current().nextInt(-2, 2);
 				client.getDispatcher().waitFor((LoginEvent event) -> {
-					System.out.println("received login event in reconnect waitFor");
+					Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Received login event in reconnect waitFor.");
 					return true;
 				}, timeout, TimeUnit.SECONDS, () -> {
-					System.out.println("reconnect attempt timed out.");
+					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnect attempt timed out.");
 				});
 
 			} catch (IOException | URISyntaxException | InterruptedException e) {
@@ -204,7 +203,7 @@ public class DiscordWS extends WebSocketAdapter {
 			curAttempt++;
 		}
 
-		System.out.println("Reconnection failed after " + MAX_RECONNECT_ATTEMPTS + " attempts.");
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnection failed after {} attempts.", MAX_RECONNECT_ATTEMPTS);
 	}
 
 	private void clearCaches() {

@@ -63,17 +63,16 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 			wsClient = new WebSocketClient(new SslContextFactory());
 			wsClient.setDaemon(true);
 			wsClient.start();
-			System.out.println(response.endpoint);
 			wsClient.connect(this, new URI("wss://" + response.endpoint), new ClientUpgradeRequest());
 		} catch (Exception e) {
-			//TODO: Log exception
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error while initializing voice websocket: {}", e);
 		}
 	}
 
 	@Override
 	public void onWebSocketConnect(Session sess) {
 		super.onWebSocketConnect(sess);
-		System.out.println("Voice connected!");
+		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice websocket connected.");
 
 		VoiceIdentifyRequest request = new VoiceIdentifyRequest(guild.getID(), client.getOurUser().getID(), client.ws.sessionId, token);
 		send(VoiceOps.IDENTIFY, request);
@@ -198,25 +197,23 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	}
 
 	private void send(String message) {
-		System.out.println(message);
 		if (getSession().isOpen()) {
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
-			System.out.println("Attempt to send message on closed session. This should never happen"); // somehow invalid state?
+			Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Attempt to send message on closed session.");
 		}
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
-		System.out.println("voice error");
-		cause.printStackTrace();
+		Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error on voice websocket: {}", cause);
 	}
 
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		System.out.println("voice ws disconnected with status code " + statusCode + " and reason " + reason);
+		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason {}.", statusCode, reason);
 	}
 
 }
