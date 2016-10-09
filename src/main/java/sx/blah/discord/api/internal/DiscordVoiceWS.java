@@ -16,10 +16,13 @@ import sx.blah.discord.api.internal.json.requests.voice.VoiceIdentifyRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceSpeakingRequest;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceDescriptionResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceReadyResponse;
+import sx.blah.discord.api.internal.json.responses.voice.VoiceSpeakingResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.VoiceUserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
@@ -105,6 +108,11 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				this.secret = description.secret_key;
 
 				setupSendThread();
+				break;
+			case SPEAKING:
+				VoiceSpeakingResponse speaking = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceSpeakingResponse.class);
+				IUser user = client.getUserByID(speaking.user_id);
+				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(user, speaking.ssrc, speaking.isSpeaking));
 				break;
 		}
 	}
