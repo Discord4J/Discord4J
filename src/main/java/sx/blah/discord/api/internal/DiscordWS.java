@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -81,7 +80,9 @@ public class DiscordWS extends WebSocketAdapter {
 	public void onWebSocketText(String message) {
 		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
 		GatewayOps op = GatewayOps.values()[payload.get("op").getAsInt()];
-		JsonElement d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d") : null;
+		JsonElement d = payload.has("d") && !payload.get("d").isJsonNull() ? payload.get("d") : null;
+
+		if (payload.has("s") && !payload.get("s").isJsonNull()) seq = payload.get("s").getAsLong();
 
 		switch (op) {
 			case HELLO:
