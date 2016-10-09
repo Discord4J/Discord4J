@@ -82,7 +82,8 @@ public class DispatchHandler {
 			ws.sessionId = ready.session_id;
 
 			//Disable initial caching for performance
-			if (ready.guilds.length > MessageList.MAX_GUILD_COUNT) MessageList.shouldDownloadHistoryAutomatically(false);
+			if (ready.guilds.length > MessageList.MAX_GUILD_COUNT)
+				MessageList.shouldDownloadHistoryAutomatically(false);
 
 			ArrayList<UnavailableGuildObject> waitingGuilds = new ArrayList<>(Arrays.asList(ready.guilds));
 			for (int i = 0; i < ready.guilds.length; i++) {
@@ -93,7 +94,7 @@ public class DispatchHandler {
 			}
 
 			waitingGuilds.forEach(guild ->
-				client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id))
+					client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id))
 			);
 			return true;
 		}).andThen(() -> {
@@ -159,7 +160,7 @@ public class DispatchHandler {
 					message.getChannel().setTypingStatus(false); //Messages being sent should stop the bot from typing
 				} else {
 					client.dispatcher.dispatch(new MessageReceivedEvent(message));
-					if(!message.getEmbedded().isEmpty()) {
+					if (!message.getEmbedded().isEmpty()) {
 						client.dispatcher.dispatch(new MessageEmbedEvent(message, new ArrayList<>()));
 					}
 				}
@@ -227,7 +228,7 @@ public class DispatchHandler {
 
 		if (guild != null && user != null) {
 			List<IRole> oldRoles = new ArrayList<>(user.getRolesForGuild(guild));
-			boolean rolesChanged = oldRoles.size() != event.roles.length+1;//Add one for the @everyone role
+			boolean rolesChanged = oldRoles.size() != event.roles.length + 1;//Add one for the @everyone role
 			if (!rolesChanged) {
 				rolesChanged = oldRoles.stream().filter(role -> {
 					if (role.equals(guild.getEveryoneRole()))
@@ -568,7 +569,7 @@ public class DispatchHandler {
 	private void voiceServerUpdate(VoiceUpdateResponse event) {
 		try {
 			event.endpoint = event.endpoint.substring(0, event.endpoint.indexOf(":"));
-			client.voiceConnections.put(client.getGuildByID(event.guild_id), DiscordVoiceWS.connect(event, client));
+			client.voiceConnections.put(client.getGuildByID(event.guild_id), new DiscordVoiceWS(event, client));
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}

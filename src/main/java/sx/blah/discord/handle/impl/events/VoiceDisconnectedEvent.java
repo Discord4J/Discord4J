@@ -27,33 +27,9 @@ public class VoiceDisconnectedEvent extends Event {
 	 */
 	public enum Reason {
 		/**
-		 * The reason is unknown for disconnecting.
-		 */
-		UNKNOWN,
-		/**
-		 * The connection timed out.
-		 */
-		TIMEOUT,
-		/**
-		 * The client logged out
-		 */
-		LOGGED_OUT,
-		/**
-		 * Discord missed too many pings.
-		 */
-		MISSED_PINGS,
-		/**
-		 * The websocket attempting to reconnect.
-		 */
-		RECONNECTING,
-		/**
 		 * The user left the voice channel.
 		 */
-		LEFT_CHANNEL,
-		/**
-		 * The websocket encountered an error while initializing
-		 */
-		INIT_ERROR
+		LEFT_CHANNEL
 	}
 }
 

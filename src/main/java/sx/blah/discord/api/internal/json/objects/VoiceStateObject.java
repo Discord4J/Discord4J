@@ -10,5 +10,4 @@ public class VoiceStateObject {
 	public boolean self_deaf;
 	public boolean self_mute;
 	public boolean suppress;
-
 }
