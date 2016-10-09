@@ -111,6 +111,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected int[] shard;
 
 	/**
+	 * The maximum number of times a reconnection will be attempted before exiting.
+	 */
+	protected int maxReconnectAttempts = 0;
+
+	/**
 	 * When this client was logged into. Useful for determining uptime.
 	 */
 	protected volatile LocalDateTime launchTime;
@@ -120,18 +125,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard, EventDispatcher dispatcher, ModuleLoader loader) {
+	private DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard, int maxReconnectAttempts, EventDispatcher dispatcher, ModuleLoader loader) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.shard = shard;
+		this.maxReconnectAttempts = maxReconnectAttempts;
 		this.dispatcher = dispatcher;
 		this.loader = loader;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard) {
-		this(token, timeoutTime, maxMissedPingCount, isDaemon, shard, null, null);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard, int maxReconnectAttempts) {
+		this(token, timeoutTime, maxMissedPingCount, isDaemon, shard, maxReconnectAttempts, null, null);
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
@@ -156,7 +162,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			if (!validateToken()) throw new DiscordException("Invalid token!");
 
-			this.ws = new DiscordWS(this, obtainGateway(), shard, isDaemon);
+			this.ws = new DiscordWS(this, obtainGateway(), shard, isDaemon, maxReconnectAttempts);
 			launchTime = LocalDateTime.now();
 
 		} catch (Exception e) {

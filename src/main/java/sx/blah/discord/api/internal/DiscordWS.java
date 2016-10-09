@@ -42,11 +42,11 @@ public class DiscordWS extends WebSocketAdapter {
 	private DispatchHandler dispatchHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
 
-	private static final int MAX_RECONNECT_ATTEMPTS = 5; // TODO: Expose
+	private int maxReconnectAttempts;
 	private final AtomicBoolean shouldAttemptReconnect = new AtomicBoolean(false);
 
-	protected long seq = 0;
-	protected String sessionId;
+	private long seq = 0;
+	private String sessionId;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -58,10 +58,11 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	public DiscordWS(IDiscordClient client, String gateway, int[] shard, boolean isDaemon) {
+	public DiscordWS(IDiscordClient client, String gateway, int[] shard, boolean isDaemon, int maxReconnectAttempts) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
 		this.shard = shard;
+		this.maxReconnectAttempts = maxReconnectAttempts;
 		this.dispatchHandler = new DispatchHandler(this, this.client);
 
 		try {
@@ -72,7 +73,7 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.start();
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
 		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while initializing voice websocket: {}", e);
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while initializing websocket: {}", e);
 		}
 	}
 
@@ -183,7 +184,7 @@ public class DiscordWS extends WebSocketAdapter {
 		shouldAttemptReconnect.set(true);
 		int curAttempt = 0;
 
-		while (curAttempt < MAX_RECONNECT_ATTEMPTS && shouldAttemptReconnect.get()) {
+		while (curAttempt < maxReconnectAttempts && shouldAttemptReconnect.get()) {
 			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Attempting reconnect {}", curAttempt);
 			try {
 				wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
@@ -203,7 +204,7 @@ public class DiscordWS extends WebSocketAdapter {
 			curAttempt++;
 		}
 
-		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnection failed after {} attempts.", MAX_RECONNECT_ATTEMPTS);
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnection failed after {} attempts.", maxReconnectAttempts);
 	}
 
 	private void clearCaches() {

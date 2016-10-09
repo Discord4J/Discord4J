@@ -13,6 +13,7 @@ public class ClientBuilder {
 	private String botToken;
 	private boolean isDaemon = false;
 	private int[] shard = {0, 1};
+	private int maxReconnectAttempts = 0;
 
 	/**
 	 * Provides the login info for the client.
@@ -68,9 +69,20 @@ public class ClientBuilder {
 		return this;
 	}
 
+	/**
+	 * Sets the sharding information for the client.
+	 * @param curShard The shard this client will run on.
+	 * @param totalShards The total number of shards that will be created.
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder withShards(int curShard, int totalShards) {
 		this.shard[0] = curShard;
 		this.shard[1] = totalShards;
+		return this;
+	}
+
+	public ClientBuilder withMaxReconnectAttempts(int maxReconnectAttempts) {
+		this.maxReconnectAttempts = maxReconnectAttempts;
 		return this;
 	}
 
@@ -85,7 +97,7 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shard);
+		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shard, maxReconnectAttempts);
 	}
 
 	/**
