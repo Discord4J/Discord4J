@@ -1,6 +1,5 @@
 package sx.blah.discord.api;
 
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -9,10 +8,8 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents the main discord api.
@@ -33,7 +30,17 @@ public interface IDiscordClient {
 	 */
 	ModuleLoader getModuleLoader();
 
+	/**
+	 * Gets the list of shards this client manages.
+	 * @return The shards.
+	 */
 	List<IShard> getShards();
+
+	/**
+	 * Gets the total number of shards this client manages. Purely for convenience.
+	 * @return The shard count.
+	 */
+	int getShardCount();
 
 	/**
 	 * Gets the authorization token for this client.

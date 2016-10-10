@@ -127,6 +127,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	public int getShardCount() {
+		return this.shardCount;
+	}
+
+	@Override
 	public EventDispatcher getDispatcher() {
 		return this.dispatcher;
 	}
