@@ -53,7 +53,7 @@ public class RequestBuffer {
 	}
 
 	/**
-	 * This returns the number of active requests.
+	 * This returns the number of incomplete requests.
 	 *
 	 * @return The number of incomplete requests.
 	 */
