@@ -553,6 +553,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IShard getShard() {
+		if (this.isPrivate) return getClient().getShards().get(0);
 		return getGuild().getShard();
 	}
 
