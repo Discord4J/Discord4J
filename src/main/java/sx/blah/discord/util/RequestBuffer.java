@@ -57,7 +57,7 @@ public class RequestBuffer {
 	 *
 	 * @return The number of incomplete requests.
 	 */
-	public static int incompleteRequestCount(){
+	public static int getIncompleteRequestCount() {
 		return incompleteRequestCount;
 	}
 
@@ -137,7 +137,7 @@ public class RequestBuffer {
 		 */
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
-			if (!isDone()){
+			if (!isDone()) {
 				cancelled = true;
 				--incompleteRequestCount;
 			}
