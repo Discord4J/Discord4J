@@ -50,14 +50,14 @@ public interface IDiscordClient {
 	String getToken();
 
 	/**
-	 * Logs the client in as the provided account.
+	 * Logs in every shard this client manages.
 	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
 	void login() throws DiscordException, RateLimitException;
 
 	/**
-	 * Logs out the client.
+	 * Logs out every shard this client manages.
 	 *
 	 * @throws RateLimitException
 	 */
@@ -82,28 +82,30 @@ public interface IDiscordClient {
 	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
 
 	/**
-	 * Changes this user's presence.
+	 * Changes this user's presence on all shards.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.
 	 */
 	void changePresence(boolean isIdle);
 
 	/**
-	 * Changes the status of the bot user.
+	 * Changes the status of the bot user on all shards.
 	 *
 	 * @param status The new status to use.
 	 */
 	void changeStatus(Status status);
 
 	/**
-	 * Checks if the api is ready to be interacted with.
+	 * Checks if the api is ready to be interacted with on all shards.
+	 * @see IShard#isReady()
 	 *
 	 * @return True if ready, false if otherwise.
 	 */
 	boolean isReady();
 
 	/**
-	 * Checks if the api has established a connection with the Discord gateway.
+	 * Checks if the api has established a connection with the Discord gateway on all shards.
+	 * @see IShard#isLoggedIn() 
 	 *
 	 * @return True if logged in, false if otherwise.
 	 */

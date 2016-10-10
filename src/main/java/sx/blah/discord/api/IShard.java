@@ -10,23 +10,41 @@ import java.util.List;
 
 public interface IShard {
 
+	/**
+	 * Gets the client this shard is managed by.
+	 * @return The client.
+	 */
 	IDiscordClient getClient();
 
+	/**
+	 * Gets the sharding information for this shard. Index 0 is the current shard number and index 1 is the total number of shards.
+	 * @return The sharding information.
+	 */
 	int[] getInfo();
 
-void login() throws DiscordException;
+	/**
+	 * Connects this shard to the Discord gateway.
+	 * @throws DiscordException
+	 */
+	void login() throws DiscordException;
 
+	/**
+	 * Disconnects this shard from the Discord gateway.
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 */
 	void logout() throws DiscordException, RateLimitException;
 
 	/**
-	 * Checks if the api is ready to be interacted with.
+	 * Checks if the api is ready to be interacted with. This means all available guilds on this shard have been received.
 	 *
 	 * @return True if ready, false if otherwise.
 	 */
 	boolean isReady();
 
 	/**
-	 * Checks if the api has established a connection with the Discord gateway.
+	 * Checks if the api has established a connection with the Discord gateway. This means the Ready payload has been received.
+	 * Note: This is most likely only useful to advanced users.
 	 *
 	 * @return True if logged in, false if otherwise.
 	 */
@@ -47,7 +65,7 @@ void login() throws DiscordException;
 	void changeStatus(Status status);
 
 	/**
-	 * Gets a set of all channels visible to the bot user.
+	 * Gets a set of all channels visible to this shard.
 	 *
 	 * @param includePrivate Whether to include private channels in the set.
 	 * @return A {@link Collection} of all {@link Channel} objects.
@@ -55,7 +73,7 @@ void login() throws DiscordException;
 	List<IChannel> getChannels(boolean includePrivate);
 
 	/**
-	 * Gets a set of all channels visible to the bot user.
+	 * Gets a set of all channels visible to this shard.
 	 *
 	 * @return A {@link Collection} of all non-private {@link Channel} objects.
 	 */
@@ -70,14 +88,14 @@ void login() throws DiscordException;
 	IChannel getChannelByID(String channelID);
 
 	/**
-	 * Gets a set of all voice channels visible to the bot user.
+	 * Gets a set of all voice channels visible to this shard.
 	 *
 	 * @return A {@link Collection} of all {@link VoiceChannel} objects.
 	 */
 	List<IVoiceChannel> getVoiceChannels();
 
 	/**
-	 * Gets the connected voice channels.
+	 * Gets the connected voice channels on this shard.
 	 *
 	 * @return The voice channels.
 	 */
@@ -92,7 +110,7 @@ void login() throws DiscordException;
 	IVoiceChannel getVoiceChannelByID(String id);
 
 	/**
-	 * Gets all the guilds the user the api represents is connected to.
+	 * Gets a set of all guilds visible to this shard.
 	 *
 	 * @return The list of {@link Guild}s the api is connected to.
 	 */
@@ -107,7 +125,7 @@ void login() throws DiscordException;
 	IGuild getGuildByID(String guildID);
 
 	/**
-	 * Gets a set of all users visible to the bot user.
+	 * Gets a set of all users visible to this shard.
 	 *
 	 * @return A {@link Collection} of all {@link User} objects.
 	 */
@@ -122,7 +140,7 @@ void login() throws DiscordException;
 	IUser getUserByID(String userID);
 
 	/**
-	 * Gets a set of all roles visible to the bot user.
+	 * Gets a set of all roles visible to this shard.
 	 *
 	 * @return A {@link Collection} of all {@link Role} objects.
 	 */
@@ -137,7 +155,7 @@ void login() throws DiscordException;
 	IRole getRoleByID(String roleID);
 
 	/**
-	 * This gets all messages stored internally by the bot.
+	 * This gets all messages stored in this shard's cache.
 	 *
 	 * @param includePrivate Whether to include private messages or not.
 	 * @return A collection of all messages.
@@ -145,14 +163,14 @@ void login() throws DiscordException;
 	List<IMessage> getMessages(boolean includePrivate);
 
 	/**
-	 * This gets all messages stored internally by the bot (including from private channels).
+	 * This gets all messages stored in this shard's cache. (including from private channels).
 	 *
 	 * @return A collection of all messages.
 	 */
 	List<IMessage> getMessages();
 
 	/**
-	 * This attempts to search all guilds/private channels for a message.
+	 * This attempts to search all guilds/private channels visible to this shard for a message.
 	 *
 	 * @param messageID The message id of the message to find.
 	 * @return The message or null if not found.
