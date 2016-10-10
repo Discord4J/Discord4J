@@ -7,6 +7,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -190,7 +191,7 @@ public class Channel implements IChannel {
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
-			return DiscordUtils.getMessageFromJSON(client, this, response);
+			return DiscordUtils.getMessageFromJSON(getShard(), this, response);
 
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
@@ -218,7 +219,7 @@ public class Channel implements IChannel {
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
-			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
+			IMessage message = DiscordUtils.getMessageFromJSON(getShard(), this, response);
 			client.getDispatcher().dispatch(new MessageSendEvent(message));
 			return message;
 		} else {
@@ -505,7 +506,7 @@ public class Channel implements IChannel {
 				MessageObject[].class);
 
 		for (MessageObject message : pinnedMessages)
-			messages.add(DiscordUtils.getMessageFromJSON(client, this, message));
+			messages.add(DiscordUtils.getMessageFromJSON(getShard(), this, message));
 
 		return messages;
 	}
@@ -548,6 +549,11 @@ public class Channel implements IChannel {
 	@Override
 	public IDiscordClient getClient() {
 		return client;
+	}
+
+	@Override
+	public IShard getShard() {
+		return getGuild().getShard();
 	}
 
 	@Override

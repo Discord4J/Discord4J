@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -244,7 +245,12 @@ public class Role implements IRole {
 
 	@Override
 	public IDiscordClient getClient() {
-		return guild.getClient();
+		return getGuild().getClient();
+	}
+
+	@Override
+	public IShard getShard() {
+		return getGuild().getShard();
 	}
 
 	@Override

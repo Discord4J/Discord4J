@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -77,19 +78,19 @@ public class DiscordUtils {
 	/**
 	 * Returns a user from the java form of the raw JSON data.
 	 */
-	public static User getUserFromJSON(IDiscordClient client, UserObject response) {
+	public static User getUserFromJSON(IShard shard, UserObject response) {
 		if (response == null)
 			return null;
 
 		User user;
-		if ((user = (User) client.getUserByID(response.id)) != null) {
+		if ((user = (User) shard.getUserByID(response.id)) != null) {
 			user.setAvatar(response.avatar);
 			user.setName(response.username);
 			user.setDiscriminator(response.discriminator);
 			if (response.bot && !user.isBot())
 				user.convertToBot();
 		} else {
-			user = new User(client, response.username, response.id, response.discriminator, response.avatar,
+			user = new User(shard, response.username, response.id, response.discriminator, response.avatar,
 					Presences.OFFLINE, response.bot);
 		}
 		return user;
@@ -204,14 +205,14 @@ public class DiscordUtils {
 	/**
 	 * Creates a guild object from a json response.
 	 *
-	 * @param client The discord client.
+	 * @param shard The shard this guild is on
 	 * @param json   The json response.
 	 * @return The guild object.
 	 */
-	public static IGuild getGuildFromJSON(IDiscordClient client, GuildObject json) {
+	public static IGuild getGuildFromJSON(IShard shard, GuildObject json) {
 		Guild guild;
 
-		if ((guild = (Guild) client.getGuildByID(json.id)) != null) {
+		if ((guild = (Guild) shard.getGuildByID(json.id)) != null) {
 			guild.setIcon(json.icon);
 			guild.setName(json.name);
 			guild.setOwnerID(json.owner_id);
@@ -234,7 +235,7 @@ public class DiscordUtils {
 				}
 			}
 		} else {
-			guild = new Guild(client, json.name, json.id, json.icon, json.owner_id, json.afk_channel_id,
+			guild = new Guild(shard, json.name, json.id, json.icon, json.owner_id, json.afk_channel_id,
 					json.afk_timeout, json.region);
 
 			if (json.roles != null)
@@ -244,12 +245,12 @@ public class DiscordUtils {
 
 			if (json.members != null)
 				for (MemberObject member : json.members) {
-					IUser user = getUserFromGuildMemberResponse(client, guild, member);
+					IUser user = getUserFromGuildMemberResponse(shard, guild, member);
 					guild.addUser(user);
 				}
 
 			if (json.large) { //The guild is large, we have to send a request to get the offline users
-				((DiscordClientImpl) client).ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
+				((ShardImpl) shard).ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
 			}
 
 			if (json.presences != null)
@@ -270,9 +271,9 @@ public class DiscordUtils {
 				for (ChannelObject channelResponse : json.channels) {
 					String channelType = channelResponse.type;
 					if (channelType.equalsIgnoreCase("text")) {
-						guild.addChannel(getChannelFromJSON(client, guild, channelResponse));
+						guild.addChannel(getChannelFromJSON(shard.getClient(), guild, channelResponse));
 					} else if (channelType.equalsIgnoreCase("voice")) {
-						guild.addVoiceChannel(getVoiceChannelFromJSON(client, guild, channelResponse));
+						guild.addVoiceChannel(getVoiceChannelFromJSON(shard.getClient(), guild, channelResponse));
 					}
 				}
 
@@ -308,13 +309,13 @@ public class DiscordUtils {
 	/**
 	 * Creates a user object from a guild member json response.
 	 *
-	 * @param client The discord client.
+	 * @param shard The shard
 	 * @param guild  The guild the member belongs to.
 	 * @param json   The json response.
 	 * @return The user object.
 	 */
-	public static IUser getUserFromGuildMemberResponse(IDiscordClient client, IGuild guild, MemberObject json) {
-		User user = getUserFromJSON(client, json.user);
+	public static IUser getUserFromGuildMemberResponse(IShard shard, IGuild guild, MemberObject json) {
+		User user = getUserFromJSON(shard, json.user);
 		for (String role : json.roles) {
 			Role roleObj = (Role) guild.getRoleByID(role);
 			if (roleObj != null && !user.getRolesForGuild(guild).contains(roleObj))
@@ -334,25 +335,25 @@ public class DiscordUtils {
 	/**
 	 * Creates a private channel object from a json response.
 	 *
-	 * @param client The discord client.
+	 * @param shard The shard this channel is on.
 	 * @param json   The json response.
 	 * @return The private channel object.
 	 */
-	public static IPrivateChannel getPrivateChannelFromJSON(IDiscordClient client, PrivateChannelObject json) {
+	public static IPrivateChannel getPrivateChannelFromJSON(IShard shard, PrivateChannelObject json) {
 		String id = json.id;
-		User recipient = (User) client.getUserByID(id);
+		User recipient = (User) shard.getUserByID(id);
 		if (recipient == null)
-			recipient = getUserFromJSON(client, json.recipient);
+			recipient = getUserFromJSON(shard, json.recipient);
 
 		PrivateChannel channel = null;
-		for (IPrivateChannel privateChannel : ((DiscordClientImpl) client).privateChannels) {
+		for (IPrivateChannel privateChannel : ((ShardImpl) shard).privateChannels) {
 			if (privateChannel.getRecipient().equals(recipient)) {
 				channel = (PrivateChannel) privateChannel;
 				break;
 			}
 		}
 		if (channel == null) {
-			channel = new PrivateChannel(client, recipient, id);
+			channel = new PrivateChannel(shard.getClient(), recipient, id);
 		}
 
 		return channel;
@@ -361,19 +362,19 @@ public class DiscordUtils {
 	/**
 	 * Creates a message object from a json response.
 	 *
-	 * @param client  The discord client.
+	 * @param shard  The shard.
 	 * @param channel The channel.
 	 * @param json    The json response.
 	 * @return The message object.
 	 */
-	public static IMessage getMessageFromJSON(IDiscordClient client, IChannel channel, MessageObject json) {
+	public static IMessage getMessageFromJSON(IShard shard, IChannel channel, MessageObject json) {
 		if (channel.getMessages() != null && channel.getMessages().contains(json.id)) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setEmbedded(getEmbedsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
-			message.setMentions(getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json));
+			message.setMentions(getMentionsFromJSON(shard.getClient(), json), getRoleMentionsFromJSON(shard.getClient(), json));
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
 			message.setEditedTimestamp(
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
@@ -382,10 +383,10 @@ public class DiscordUtils {
 
 			return message;
 		} else
-			return new Message(client, json.id, json.content, getUserFromJSON(client, json.author), channel,
+			return new Message(shard.getClient(), json.id, json.content, getUserFromJSON(shard, json.author), channel,
 					convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
-					json.mention_everyone, getMentionsFromJSON(client, json), getRoleMentionsFromJSON(client, json),
+					json.mention_everyone, getMentionsFromJSON(shard.getClient(), json), getRoleMentionsFromJSON(shard.getClient(), json),
 					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json));
 	}
 
@@ -681,19 +682,6 @@ public class DiscordUtils {
 	public static LocalDateTime getSnowflakeTimeFromID(String id) {
 		long milliseconds = DISCORD_EPOCH.add(new BigInteger(id).shiftRight(22)).longValue();
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
-	}
-
-	/**
-	 * Gets an application from a json response.
-	 *
-	 * @param client   The discord client owner.
-	 * @param response The json representation of an application.
-	 * @return The application object.
-	 */
-	public static IApplication getApplicationFromJSON(IDiscordClient client, ApplicationObject response) {
-		return new Application(client, response.secret, response.redirect_uris, response.description, response.name,
-				response.id, response.icon, DiscordUtils.getUserFromJSON(client, response.bot),
-				response.bot == null ? null : response.bot.token);
 	}
 
 	/**

@@ -23,11 +23,13 @@ import java.util.stream.Collectors;
 
 public class DispatchHandler {
 	private DiscordWS ws;
+	private ShardImpl shard;
 	private DiscordClientImpl client;
 
-	protected DispatchHandler(DiscordWS ws, DiscordClientImpl client) {
+	protected DispatchHandler(DiscordWS ws, ShardImpl shard) {
 		this.ws = ws;
-		this.client = client;
+		this.shard = shard;
+		this.client = (DiscordClientImpl) shard.getClient();
 	}
 
 	public void handle(JsonObject event) {
@@ -78,7 +80,7 @@ public class DispatchHandler {
 		client.getDispatcher().dispatch(new LoginEvent());
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
-			client.ourUser = DiscordUtils.getUserFromJSON(client, ready.user);
+			client.ourUser = DiscordUtils.getUserFromJSON(shard, ready.user);
 			ws.sessionId = ready.session_id;
 
 			//Disable initial caching for performance
@@ -98,9 +100,11 @@ public class DispatchHandler {
 			);
 			return true;
 		}).andThen(() -> {
-			Arrays.stream(ready.private_channels)
-					.map(pm -> DiscordUtils.getPrivateChannelFromJSON(client, pm))
-					.forEach(client.privateChannels::add);
+			if (this.shard.getInfo()[1] == 0) { // pms are only sent to shard one
+				Arrays.stream(ready.private_channels)
+						.map(pm -> DiscordUtils.getPrivateChannelFromJSON(shard, pm))
+						.forEach(shard.privateChannels::add);
+			}
 
 			ws.isReady = true;
 			client.getDispatcher().dispatch(new ReadyEvent()); // All information has been received
@@ -132,7 +136,7 @@ public class DispatchHandler {
 				}
 			}
 
-			IMessage message = DiscordUtils.getMessageFromJSON(client, channel, json);
+			IMessage message = DiscordUtils.getMessageFromJSON(shard, channel, json);
 
 			if (!channel.getMessages().contains(message)) {
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
@@ -190,8 +194,8 @@ public class DispatchHandler {
 			return;
 		}
 
-		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(client, json);
-		client.guildList.add(guild);
+		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
+		shard.guildList.add(guild);
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
 		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
 	}
@@ -200,7 +204,7 @@ public class DispatchHandler {
 		String guildID = event.guild_id;
 		Guild guild = (Guild) client.getGuildByID(guildID);
 		if (guild != null) {
-			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(client, guild, new MemberObject(event.user, event.roles));
+			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(shard, guild, new MemberObject(event.user, event.roles));
 			guild.addUser(user);
 			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
@@ -275,7 +279,7 @@ public class DispatchHandler {
 		if (toUpdate != null) {
 			IMessage oldMessage = toUpdate.copy();
 
-			toUpdate = (Message) DiscordUtils.getMessageFromJSON(client, channel, json);
+			toUpdate = (Message) DiscordUtils.getMessageFromJSON(shard, channel, json);
 
 			if (oldMessage.isPinned() && !json.pinned) {
 				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
@@ -307,7 +311,7 @@ public class DispatchHandler {
 		}
 	}
 
-	private void messageDeleteBulk(MessageDeleteBulkEventResponse event) {
+	private void messageDeleteBulk(MessageDeleteBulkEventResponse event) { //TODO: maybe add a separate event for this?
 		for (String id : event.ids) {
 			messageDelete(new MessageDeleteEventResponse(id, event.channel_id));
 		}
@@ -323,7 +327,7 @@ public class DispatchHandler {
 			if (user != null) {
 				if (event.user.username != null) { //Full object was sent so there is a user change, otherwise all user fields but id would be null
 					IUser oldUser = user.copy();
-					user = DiscordUtils.getUserFromJSON(client, event.user);
+					user = DiscordUtils.getUserFromJSON(shard, event.user);
 					client.dispatcher.dispatch(new UserUpdateEvent(oldUser, user));
 				}
 
@@ -362,7 +366,7 @@ public class DispatchHandler {
 			PrivateChannelObject event = DiscordUtils.GSON.fromJson(json, PrivateChannelObject.class);
 			String id = event.id;
 			boolean contained = false;
-			for (IPrivateChannel privateChannel : client.privateChannels) {
+			for (IPrivateChannel privateChannel : shard.privateChannels) {
 				if (privateChannel.getID().equalsIgnoreCase(id))
 					contained = true;
 			}
@@ -370,7 +374,7 @@ public class DispatchHandler {
 			if (contained)
 				return; // we already have this PM channel; no need to create another.
 
-			client.privateChannels.add(DiscordUtils.getPrivateChannelFromJSON(client, event));
+			shard.privateChannels.add(DiscordUtils.getPrivateChannelFromJSON(shard, event));
 
 		} else { // Regular channel.
 			ChannelObject event = DiscordUtils.GSON.fromJson(json, ChannelObject.class);
@@ -397,7 +401,7 @@ public class DispatchHandler {
 				if (!channel.isPrivate())
 					channel.getGuild().getChannels().remove(channel);
 				else
-					client.privateChannels.remove(channel);
+					shard.privateChannels.remove(channel);
 
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
@@ -414,7 +418,7 @@ public class DispatchHandler {
 		User newUser = (User) client.getUserByID(event.id);
 		if (newUser != null) {
 			IUser oldUser = newUser.copy();
-			newUser = DiscordUtils.getUserFromJSON(client, event);
+			newUser = DiscordUtils.getUserFromJSON(shard, event);
 			client.dispatcher.dispatch(new UserUpdateEvent(oldUser, newUser));
 		}
 	}
@@ -451,7 +455,7 @@ public class DispatchHandler {
 		}
 
 		for (MemberObject member : event.members) {
-			IUser user = DiscordUtils.getUserFromGuildMemberResponse(client, guildToUpdate, member);
+			IUser user = DiscordUtils.getUserFromGuildMemberResponse(shard, guildToUpdate, member);
 			guildToUpdate.addUser(user);
 		}
 	}
@@ -462,7 +466,7 @@ public class DispatchHandler {
 		if (toUpdate != null) {
 			IGuild oldGuild = toUpdate.copy();
 
-			toUpdate = (Guild) DiscordUtils.getGuildFromJSON(client, json);
+			toUpdate = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
 
 			if (!toUpdate.getOwnerID().equals(oldGuild.getOwnerID())) {
 				client.dispatcher.dispatch(new GuildTransferOwnershipEvent(oldGuild.getOwner(), toUpdate.getOwner(), toUpdate));
@@ -506,7 +510,7 @@ public class DispatchHandler {
 	private void guildBanAdd(GuildBanEventResponse event) {
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
-			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
+			IUser user = DiscordUtils.getUserFromJSON(shard, event.user);
 			if (client.getUserByID(user.getID()) != null) {
 				guild.getUsers().remove(user);
 				((Guild) guild).getJoinTimes().remove(user);
@@ -519,7 +523,7 @@ public class DispatchHandler {
 	private void guildBanRemove(GuildBanEventResponse event) {
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
-			IUser user = DiscordUtils.getUserFromJSON(client, event.user);
+			IUser user = DiscordUtils.getUserFromJSON(shard, event.user);
 
 			client.dispatcher.dispatch(new UserPardonEvent(user, guild));
 		}
@@ -569,7 +573,7 @@ public class DispatchHandler {
 	private void voiceServerUpdate(VoiceUpdateResponse event) {
 		try {
 			event.endpoint = event.endpoint.substring(0, event.endpoint.indexOf(":"));
-			client.voiceConnections.put(client.getGuildByID(event.guild_id), new DiscordVoiceWS(event, client));
+			client.voiceConnections.put(client.getGuildByID(event.guild_id), new DiscordVoiceWS(event, shard));
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}

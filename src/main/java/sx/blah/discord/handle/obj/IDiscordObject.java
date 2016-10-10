@@ -1,6 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordUtils;
 
 import java.time.LocalDateTime;
@@ -18,11 +19,16 @@ public interface IDiscordObject<SELF extends IDiscordObject> { //The SELF thing 
 	String getID();
 
 	/**
-	 * Gets the {@link IDiscordClient} instance this object is tied to.
+	 * Gets the {@link IDiscordClient} instance this object belongs to.
 	 *
 	 * @return The client instance.
 	 */
 	IDiscordClient getClient();
+
+	/**
+	 * Get the {@link IShard} instance this object belongs to.
+	 */
+	IShard getShard();
 
 	/**
 	 * Gets the {@link LocalDateTime} this object was created at. This is calculated by reversing the snowflake

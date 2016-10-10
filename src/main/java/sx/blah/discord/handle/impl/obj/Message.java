@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -264,7 +265,7 @@ public class Message implements IMessage {
 					MessageObject.class);
 
 			IMessage oldMessage = copy();
-			DiscordUtils.getMessageFromJSON(client, channel, response);
+			DiscordUtils.getMessageFromJSON(getShard(), channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
 			//Original message edited to null, then the null message edited to the new content
@@ -366,6 +367,11 @@ public class Message implements IMessage {
 	@Override
 	public IDiscordClient getClient() {
 		return client;
+	}
+
+	@Override
+	public IShard getShard() {
+		return getChannel().getShard();
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
@@ -39,11 +40,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	/**
-	 * Used for keep alive. Keeps last time (in ms)
-	 * that we sent the keep alive so we can accurately
-	 * time our keep alive messages.
+	 * The shards this client controls.
 	 */
-	protected volatile long lastHeartbeat = System.currentTimeMillis();
+	protected final List<IShard> shards = new CopyOnWriteArrayList<>();
 
 	/**
 	 * User we are logged in as
@@ -56,29 +55,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected volatile String token;
 
 	/**
-	 * Local copy of all guilds/servers.
-	 */
-	protected final List<IGuild> guildList = new CopyOnWriteArrayList<>();
-
-	/**
-	 * WebSocket over which to communicate with Discord.
-	 */
-	public volatile DiscordWS ws;
-
-	/**
-	 * Holds the active connections to voice sockets.
-	 */
-	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
-
-	/**
 	 * Event dispatcher.
 	 */
 	protected volatile EventDispatcher dispatcher;
 
 	/**
-	 * All of the private message channels that the bot is connected to.
+	 * The module loader for this client.
 	 */
-	protected final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
+	protected volatile ModuleLoader loader;
 
 	/**
 	 * Caches the available regions for discord.
@@ -86,9 +70,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
-	 * The module loader for this client.
+	 * Holds the active connections to voice sockets.
 	 */
-	protected volatile ModuleLoader loader;
+	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
 
 	/**
 	 * The time for the client to timeout.
@@ -106,9 +90,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final boolean isDaemon;
 
 	/**
-	 * The sharding information of this client. [0] is the current shard, [1] is the total number of shards.
+	 * The total number of shards this client manages.
 	 */
-	protected int[] shard;
+	private int shardCount;
 
 	/**
 	 * The maximum number of times a reconnection will be attempted before exiting.
@@ -116,110 +100,45 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected int maxReconnectAttempts = 0;
 
 	/**
-	 * When this client was logged into. Useful for determining uptime.
-	 */
-	protected volatile LocalDateTime launchTime;
-
-	/**
 	 * The requests holder object.
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard, int maxReconnectAttempts, EventDispatcher dispatcher, ModuleLoader loader) {
+	private DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts, EventDispatcher dispatcher, ModuleLoader loader) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
-		this.shard = shard;
+		this.shardCount = shardCount;
 		this.maxReconnectAttempts = maxReconnectAttempts;
 		this.dispatcher = dispatcher;
 		this.loader = loader;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int[] shard, int maxReconnectAttempts) {
-		this(token, timeoutTime, maxMissedPingCount, isDaemon, shard, maxReconnectAttempts, null, null);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts) {
+		this(token, timeoutTime, maxMissedPingCount, isDaemon, shardCount, maxReconnectAttempts, null, null);
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
 
 	@Override
+	public List<IShard> getShards() {
+		return this.shards;
+	}
+
+	@Override
 	public EventDispatcher getDispatcher() {
-		return dispatcher;
+		return this.dispatcher;
 	}
 
 	@Override
 	public ModuleLoader getModuleLoader() {
-		return loader;
+		return this.loader;
 	}
 
 	@Override
 	public String getToken() {
-		return token;
-	}
-
-	@Override
-	public void login() throws DiscordException {
-		try {
-			if (!validateToken()) throw new DiscordException("Invalid token!");
-
-			this.ws = new DiscordWS(this, obtainGateway(), shard, isDaemon, maxReconnectAttempts);
-			launchTime = LocalDateTime.now();
-
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Exception caught, logging in!", e);
-			throw new DiscordException("Login error occurred! Are your login details correct?");
-		}
-	}
-
-	private boolean validateToken() {
-		try {
-			REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds");
-			return true;
-		} catch (RateLimitException | DiscordException e) {
-			return false;
-		}
-	}
-
-	/**
-	 * Gets the WebSocket gateway
-	 *
-	 * @return the WebSocket URL to connect to
-	 */
-	private String obtainGateway() {
-		String gateway = null;
-		try {
-			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY),
-					GatewayResponse.class);
-			gateway = response.url + "?encoding=json&v=5";
-		} catch (RateLimitException | DiscordException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
-		return gateway;
-	}
-
-	/**
-	 * @return The current shard this client is on.
-	 */
-	public int getCurrentShard() {
-		return this.shard[0];
-	}
-
-	/**
-	 * @return The total number of shards
-	 */
-	public int getTotalShards() {
-		return this.shard[1];
-	}
-
-	@Override
-	public void logout() throws RateLimitException, DiscordException {
-		if (isLoggedIn()) {
-			getConnectedVoiceChannels().forEach(IVoiceChannel::leave);
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
-		}
+		return this.token;
 	}
 
 	private void changeAccountInfo(String username, String avatar) throws RateLimitException, DiscordException {
@@ -254,51 +173,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 		changeAccountInfo(ourUser.getName(), avatar.getData());
 	}
 
-	private void updatePresence(boolean isIdle, Status status) {
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
-			return;
-		}
-
-		if (!status.equals(getOurUser().getStatus())) {
-			Status oldStatus = getOurUser().getStatus();
-			((User) getOurUser()).setStatus(status);
-			dispatcher.dispatch(new StatusChangeEvent(getOurUser(), oldStatus, status));
-		}
-
-		if ((getOurUser().getPresence() != Presences.IDLE && isIdle)
-				|| (getOurUser().getPresence() == Presences.IDLE && !isIdle)
-				|| (getOurUser().getPresence() != Presences.STREAMING && status.getType() == Status.StatusType.STREAM)) {
-			Presences oldPresence = getOurUser().getPresence();
-			Presences newPresence = isIdle ? Presences.IDLE :
-					(status.getType() == Status.StatusType.STREAM ? Presences.STREAMING : Presences.ONLINE);
-			((User) getOurUser()).setPresence(newPresence);
-			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
-		}
-
-		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status));
-	}
-
-	@Override
-	public void changePresence(boolean isIdle) {
-		updatePresence(isIdle, getOurUser().getStatus());
-	}
-
-	@Override
-	public void changeStatus(Status status) {
-		updatePresence(getOurUser().getPresence() == Presences.IDLE, status);
-	}
-
-	@Override
-	public boolean isReady() {
-		return ws != null && ws.isReady;
-	}
-
-	@Override
-	public boolean isLoggedIn() {
-		return ws != null && ws.hasReceivedReady;
-	}
-
 	@Override
 	public IUser getOurUser() {
 		if (!isLoggedIn()) {
@@ -306,172 +180,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return null;
 		}
 		return ourUser;
-	}
-
-	@Override
-	public List<IChannel> getChannels(boolean priv) {
-		List<IChannel> channels = guildList.stream()
-				.map(IGuild::getChannels)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-		if (priv)
-			channels.addAll(privateChannels);
-		return channels;
-	}
-
-	@Override
-	public List<IChannel> getChannels() {
-		return getChannels(false);
-	}
-
-	@Override
-	public IChannel getChannelByID(String id) {
-		return getChannels(true).stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IVoiceChannel> getVoiceChannels() {
-		return guildList.stream()
-				.map(IGuild::getVoiceChannels)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public IVoiceChannel getVoiceChannelByID(String id) {
-		return getVoiceChannels().stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IGuild> getGuilds() {
-		return guildList;
-	}
-
-	@Override
-	public IGuild getGuildByID(String guildID) {
-		return guildList.stream()
-				.filter(g -> g.getID().equalsIgnoreCase(guildID))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IUser> getUsers() {
-		return guildList.stream()
-				.map(IGuild::getUsers)
-				.flatMap(List::stream)
-				.distinct()
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public IUser getUserByID(String userID) {
-		IGuild guild = guildList.stream()
-				.filter(g -> g.getUserByID(userID) != null)
-				.findFirst()
-				.orElse(null);
-
-		IUser user = guild != null ? guild.getUserByID(userID) : null;
-
-		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
-	}
-
-	@Override
-	public List<IRole> getRoles() {
-		return guildList.stream()
-				.map(IGuild::getRoles)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public IRole getRoleByID(String roleID) {
-		return getRoles().stream()
-				.filter(r -> r.getID().equalsIgnoreCase(roleID))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IMessage> getMessages(boolean includePrivate) {
-		return getChannels(includePrivate).stream()
-				.map(IChannel::getMessages)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public List<IMessage> getMessages() {
-		return getMessages(false);
-	}
-
-	@Override
-	public IMessage getMessageByID(String messageID) {
-		for (IGuild guild : guildList) {
-			IMessage message = guild.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		for (IPrivateChannel privateChannel : privateChannels) {
-			IMessage message = privateChannel.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		return null;
-	}
-
-	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot is not yet ready!");
-			return null;
-		}
-
-		if (user.equals(getOurUser()))
-			throw new DiscordException("Cannot PM yourself!");
-
-		Optional<IPrivateChannel> opt = privateChannels.stream()
-				.filter(c -> c.getRecipient().getID().equalsIgnoreCase(user.getID()))
-				.findAny();
-		if (opt.isPresent())
-			return opt.get();
-
-		PrivateChannelObject pmChannel;
-		try {
-			pmChannel = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelCreateRequest(user.getID())))),
-					PrivateChannelObject.class);
-
-			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
-			privateChannels.add(channel);
-			return channel;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Error creating creating a private channel!", e);
-		}
-
-		return null;
-	}
-
-	@Override
-	public IInvite getInviteForCode(String code) {
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
-			return null;
-		}
-
-		try {
-			InviteObject response = DiscordUtils.GSON.fromJson(
-					REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+code),
-					InviteObject.class);
-
-			return DiscordUtils.getInviteFromJSON(this, response);
-		} catch (Exception e) {
-			return null;
-		}
 	}
 
 	@Override
@@ -501,29 +209,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return null;
 	}
 
-	@Override
-	public long getResponseTime() {
-		// TODO
-		return 0;
-	}
-
-	@Override
-	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return ourUser.getConnectedVoiceChannels();
-	}
-
-	@Override
-	public LocalDateTime getLaunchTime() {
-		return launchTime;
-	}
-
 	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
 		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me"),
 				ApplicationInfoResponse.class);
 	}
 
 	@Override
-	public String getDescription() throws DiscordException {
+	public String getApplicationDescription() throws DiscordException {
 		try {
 			return getApplicationInfo().description;
 		} catch (RateLimitException e) {
@@ -570,12 +262,195 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 			IUser user = getUserByID(owner.id);
 			if (user == null)
-				user = DiscordUtils.getUserFromJSON(this, owner);
+				user = DiscordUtils.getUserFromJSON(getShards().get(0), owner);
 
 			return user;
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
+		return null;
+	}
+
+	private void validateToken() throws DiscordException, RateLimitException {
+		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds");
+	}
+
+	private String obtainGateway() {
+		String gateway = null;
+		try {
+			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY),
+					GatewayResponse.class);
+			gateway = response.url + "?encoding=json&v=5";
+		} catch (RateLimitException | DiscordException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
+		return gateway;
+	}
+
+	// Sharding delegation
+
+	@Override
+	public void login() throws DiscordException, RateLimitException {
+		validateToken();
+		String gateway = obtainGateway();
+		for (int i = 0; i < shardCount; i++) {
+			ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon, maxReconnectAttempts);
+			getShards().add(i, shard);
+			shard.login();
+		}
+	}
+
+	@Override
+	public void logout() throws DiscordException, RateLimitException {
+		for (IShard shard : getShards()) {
+			shard.logout();
+		}
+		getShards().clear();
+	}
+
+	@Override
+	public boolean isLoggedIn() {
+		return getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
+	}
+
+	@Override
+	public boolean isReady() {
+		return getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
+	}
+
+	@Override
+	public void changeStatus(Status status) {
+		getShards().forEach(shard -> shard.changeStatus(status));
+	}
+
+	@Override
+	public void changePresence(boolean isIdle) {
+		getShards().forEach(shard -> shard.changePresence(isIdle));
+	}
+
+	@Override
+	public List<IGuild> getGuilds() {
+		return getShards().stream()
+				.map(IShard::getGuilds)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IGuild getGuildByID(String guildID) {
+		return getGuilds().stream()
+				.filter(g -> g.getID().equals(guildID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IChannel> getChannels(boolean includePrivate) {
+		return getShards().stream()
+				.map(c -> c.getChannels(includePrivate))
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IChannel> getChannels() {
+		return getShards().stream()
+				.map(IShard::getChannels)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IChannel getChannelByID(String channelID) {
+		return getChannels(true).stream()
+				.filter(c -> c.getID().equals(channelID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IVoiceChannel> getVoiceChannels() {
+		return getShards().stream()
+				.map(IShard::getVoiceChannels)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IVoiceChannel> getConnectedVoiceChannels() {
+		return getShards().stream()
+				.map(IShard::getConnectedVoiceChannels)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IVoiceChannel getVoiceChannelByID(String id) {
+		return getVoiceChannels().stream()
+				.filter(vc -> vc.getID().equals(id))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IUser> getUsers() {
+		return getShards().stream()
+				.map(IShard::getUsers)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IUser getUserByID(String userID) {
+		return getUsers().stream()
+				.filter(u -> u.getID().equals(userID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IRole> getRoles() {
+		return getShards().stream()
+				.map(IShard::getRoles)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IRole getRoleByID(String roleID) {
+		return getRoles().stream()
+				.filter(r -> r.getID().equals(roleID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IMessage> getMessages(boolean includePrivate) {
+		return getShards().stream()
+				.map(c -> c.getMessages(includePrivate))
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IMessage> getMessages() {
+		return getShards().stream()
+				.map(IShard::getMessages)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IMessage getMessageByID(String messageID) {
+		return getMessages(true).stream()
+				.filter(m -> m.getID().equals(messageID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
+		IShard shard = getShards().stream().filter(s -> s.getUserByID(user.getID()) != null).findFirst().get();
+		return shard.getOrCreatePMChannel(user);
+	}
+
+	@Override
+	public IInvite getInviteForCode(String code) {
 		return null;
 	}
 }

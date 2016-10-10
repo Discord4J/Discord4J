@@ -10,6 +10,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
 import sx.blah.discord.api.internal.json.requests.ResumeRequest;
@@ -36,8 +37,8 @@ public class DiscordWS extends WebSocketAdapter {
 	private WebSocketClient wsClient;
 
 	private DiscordClientImpl client;
+	private ShardImpl shard;
 	private String gateway;
-	private int[] shard;
 
 	private DispatchHandler dispatchHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
@@ -46,7 +47,7 @@ public class DiscordWS extends WebSocketAdapter {
 	private final AtomicBoolean shouldAttemptReconnect = new AtomicBoolean(false);
 
 	private long seq = 0;
-	private String sessionId;
+	protected String sessionId;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -58,12 +59,12 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	public DiscordWS(IDiscordClient client, String gateway, int[] shard, boolean isDaemon, int maxReconnectAttempts) {
-		this.client = (DiscordClientImpl) client;
+	public DiscordWS(IShard shard, String gateway, boolean isDaemon, int maxReconnectAttempts) {
+		this.client = (DiscordClientImpl) shard.getClient();
+		this.shard = (ShardImpl) shard;
 		this.gateway = gateway;
-		this.shard = shard;
 		this.maxReconnectAttempts = maxReconnectAttempts;
-		this.dispatchHandler = new DispatchHandler(this, this.client);
+		this.dispatchHandler = new DispatchHandler(this, this.shard);
 
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
@@ -89,7 +90,7 @@ public class DiscordWS extends WebSocketAdapter {
 			case HELLO:
 				shouldAttemptReconnect.set(false);
 				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
-				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token, shard)));
+				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token, shard.getInfo())));
 				break;
 			case RECONNECT:
 				try {
@@ -208,8 +209,8 @@ public class DiscordWS extends WebSocketAdapter {
 	}
 
 	private void clearCaches() {
-		client.guildList.clear();
-		client.privateChannels.clear();
+		shard.guildList.clear();
+		shard.privateChannels.clear();
 		client.ourUser = null;
 		client.REGIONS.clear();
 		seq = 0;

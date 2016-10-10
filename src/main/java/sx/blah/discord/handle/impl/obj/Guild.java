@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -98,12 +99,18 @@ public class Guild implements IGuild {
 	 */
 	protected final IDiscordClient client;
 
-	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
-		this(client, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
+	/**
+	 * The shard this object belongs to.
+	 */
+	private final IShard shard;
+
+	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
+		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
 
-	public Guild(IDiscordClient client, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
-		this.client = client;
+	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
+		this.shard = shard;
+		this.client = shard.getClient();
 		this.name = name;
 		this.voiceChannels = voiceChannels;
 		this.channels = channels;
@@ -328,7 +335,7 @@ public class Guild implements IGuild {
 				UserObject[].class);
 		List<IUser> banned = new ArrayList<>();
 		for (UserObject user : users) {
-			banned.add(DiscordUtils.getUserFromJSON(client, user));
+			banned.add(DiscordUtils.getUserFromJSON(getShard(), user));
 		}
 		return banned;
 	}
@@ -422,7 +429,7 @@ public class Guild implements IGuild {
 					GuildObject.class);
 
 			IGuild oldGuild = copy();
-			IGuild newGuild = DiscordUtils.getGuildFromJSON(client, response);
+			IGuild newGuild = DiscordUtils.getGuildFromJSON(shard, response);
 
 			client.getDispatcher().dispatch(new GuildUpdateEvent(oldGuild, newGuild));
 		} catch (UnsupportedEncodingException e) {
@@ -655,8 +662,13 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public IShard getShard() {
+		return shard;
+	}
+
+	@Override
 	public IGuild copy() {
-		return new Guild(client, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
+		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
 				voiceChannels, users, joinTimes);
 	}
 

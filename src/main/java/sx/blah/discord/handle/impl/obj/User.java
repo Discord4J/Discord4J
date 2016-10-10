@@ -4,6 +4,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -41,6 +42,10 @@ public class User implements IUser {
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
+	/**
+	 * The shard this object belongs to.
+	 */
+	protected final IShard shard;
 	/**
 	 * The muted status of this user. (Key = guild id).
 	 */
@@ -88,9 +93,9 @@ public class User implements IUser {
 	 */
 	private volatile boolean isDeafLocally;
 
-	public User(IDiscordClient client, String name, String id, String discriminator, String avatar, Presences presence,
-				boolean isBot) {
-		this.client = client;
+	public User(IShard shard, String name, String id, String discriminator, String avatar, Presences presence, boolean isBot) {
+		this.shard = shard;
+		this.client = shard.getClient();
 		this.id = id;
 		this.name = name;
 		this.discriminator = discriminator;
@@ -242,7 +247,7 @@ public class User implements IUser {
 
 	@Override
 	public IUser copy() {
-		User newUser = new User(client, name, id, discriminator, avatar, presence, isBot);
+		User newUser = new User(shard, name, id, discriminator, avatar, presence, isBot);
 		newUser.setStatus(this.status);
 		for (String key : isMuted.keySet())
 			newUser.setIsMute(key, isMuted.get(key));
@@ -365,6 +370,11 @@ public class User implements IUser {
 	@Override
 	public IDiscordClient getClient() {
 		return client;
+	}
+
+	@Override
+	public IShard getShard() {
+		return shard;
 	}
 
 	@Override

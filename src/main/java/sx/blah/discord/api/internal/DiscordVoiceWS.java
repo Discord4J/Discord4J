@@ -41,6 +41,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	private WebSocketClient wsClient;
 
 	private DiscordClientImpl client;
+	private ShardImpl shard;
 	private IGuild guild;
 	private int ssrc;
 	private DatagramSocket udpSocket;
@@ -53,8 +54,9 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
 	private ScheduledExecutorService sendHandler = Executors.newSingleThreadScheduledExecutor();
 
-	public DiscordVoiceWS(VoiceUpdateResponse response, DiscordClientImpl client) {
-		this.client = client;
+	public DiscordVoiceWS(VoiceUpdateResponse response, ShardImpl shard) {
+		this.shard = shard;
+		this.client = (DiscordClientImpl) shard.getClient();
 		this.token = response.token;
 		this.endpoint = response.endpoint;
 		this.guild = client.getGuildByID(response.guild_id);
@@ -74,7 +76,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 		super.onWebSocketConnect(sess);
 		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice websocket connected.");
 
-		VoiceIdentifyRequest request = new VoiceIdentifyRequest(guild.getID(), client.getOurUser().getID(), client.ws.sessionId, token);
+		VoiceIdentifyRequest request = new VoiceIdentifyRequest(guild.getID(), client.getOurUser().getID(), shard.ws.sessionId, token);
 		send(VoiceOps.IDENTIFY, request);
 	}
 

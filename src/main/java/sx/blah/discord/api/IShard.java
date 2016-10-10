@@ -1,92 +1,22 @@
 package sx.blah.discord.api;
 
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.Image;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
-/**
- * Represents the main discord api.
- */
-public interface IDiscordClient {
+public interface IShard {
 
-	/**
-	 * Gets the {@link EventDispatcher} instance for this client. Use this to handle events.
-	 *
-	 * @return The event dispatcher instance.
-	 */
-	EventDispatcher getDispatcher();
+	IDiscordClient getClient();
 
-	/**
-	 * Gets the {@link ModuleLoader} instance for this client.
-	 *
-	 * @return The module loader instance.
-	 */
-	ModuleLoader getModuleLoader();
+	int[] getInfo();
 
-	List<IShard> getShards();
+void login() throws DiscordException;
 
-	/**
-	 * Gets the authorization token for this client.
-	 *
-	 * @return The authorization token.
-	 */
-	String getToken();
-
-	/**
-	 * Logs the client in as the provided account.
-	 *
-	 * @throws DiscordException This is thrown if there is an error logging in.
-	 */
-	void login() throws DiscordException, RateLimitException;
-
-	/**
-	 * Logs out the client.
-	 *
-	 * @throws RateLimitException
-	 */
 	void logout() throws DiscordException, RateLimitException;
-
-	/**
-	 * Changes this client's account's username.
-	 *
-	 * @param username The new username.
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	void changeUsername(String username) throws DiscordException, RateLimitException;
-
-	/**
-	 * Changes this client's account's avatar.
-	 *
-	 * @param avatar The new avatar.
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
-
-	/**
-	 * Changes this user's presence.
-	 *
-	 * @param isIdle If true, this user becomes idle, or online if false.
-	 */
-	void changePresence(boolean isIdle);
-
-	/**
-	 * Changes the status of the bot user.
-	 *
-	 * @param status The new status to use.
-	 */
-	void changeStatus(Status status);
 
 	/**
 	 * Checks if the api is ready to be interacted with.
@@ -103,11 +33,18 @@ public interface IDiscordClient {
 	boolean isLoggedIn();
 
 	/**
-	 * Gets the {@link User} this bot is representing.
+	 * Changes this user's presence.
 	 *
-	 * @return The user object.
+	 * @param isIdle If true, this user becomes idle, or online if false.
 	 */
-	IUser getOurUser();
+	void changePresence(boolean isIdle);
+
+	/**
+	 * Changes the status of the bot user.
+	 *
+	 * @param status The new status to use.
+	 */
+	void changeStatus(Status status);
 
 	/**
 	 * Gets a set of all channels visible to the bot user.
@@ -138,6 +75,13 @@ public interface IDiscordClient {
 	 * @return A {@link Collection} of all {@link VoiceChannel} objects.
 	 */
 	List<IVoiceChannel> getVoiceChannels();
+
+	/**
+	 * Gets the connected voice channels.
+	 *
+	 * @return The voice channels.
+	 */
+	List<IVoiceChannel> getConnectedVoiceChannels();
 
 	/**
 	 * Gets a voice channel from a given id.
@@ -233,74 +177,4 @@ public interface IDiscordClient {
 	 * @return The invite, or null if it doesn't exist.
 	 */
 	IInvite getInviteForCode(String code);
-
-	/**
-	 * Gets the regions available for discord.
-	 *
-	 * @return The list of available regions.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	List<IRegion> getRegions() throws RateLimitException, DiscordException;
-
-	/**
-	 * Gets the corresponding region for a given id.
-	 *
-	 * @param regionID The region id.
-	 * @return The region (or null if not found).
-	 */
-	IRegion getRegionByID(String regionID);
-
-	/**
-	 * Gets the connected voice channels.
-	 *
-	 * @return The voice channels.
-	 */
-	List<IVoiceChannel> getConnectedVoiceChannels();
-
-	/**
-	 * Gets the application description for this bot.
-	 *
-	 * @return The application's description.
-	 *
-	 * @throws DiscordException
-	 */
-	String getApplicationDescription() throws DiscordException;
-
-	/**
-	 * Gets the url leading to this bot's application's icon.
-	 *
-	 * @return The application's icon url.
-	 *
-	 * @throws DiscordException
-	 */
-	String getApplicationIconURL() throws DiscordException;
-
-	/**
-	 * Gets the bot's application's client id.
-	 *
-	 * @return The application's client id.
-	 *
-	 * @throws DiscordException
-	 */
-	String getApplicationClientID() throws DiscordException;
-
-	/**
-	 * Gets the bot's application's name.
-	 *
-	 * @return The application's name.
-	 *
-	 * @throws DiscordException
-	 */
-	String getApplicationName() throws DiscordException;
-
-	/**
-	 * Gets the bot's application's owner.
-	 *
-	 * @return The application's owner.
-	 *
-	 * @throws DiscordException
-	 */
-	IUser getApplicationOwner() throws DiscordException;
 }

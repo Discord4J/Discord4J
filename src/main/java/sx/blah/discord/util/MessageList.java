@@ -173,7 +173,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		}
 
 		for (MessageObject messageResponse : messages) {
-			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse), true))
+			if (!add(DiscordUtils.getMessageFromJSON(channel.getShard(), channel, messageResponse), true))
 				return false;
 		}
 
@@ -336,7 +336,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		if (message == null && hasPermission && client.isReady())
 			try {
-				return DiscordUtils.getMessageFromJSON(client, channel,
+				return DiscordUtils.getMessageFromJSON(channel.getShard(), channel,
 						DiscordUtils.GSON.fromJson(
 								client.REQUESTS.GET.makeRequest(
 										DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id),
