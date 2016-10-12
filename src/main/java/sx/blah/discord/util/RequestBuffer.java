@@ -16,7 +16,6 @@ public class RequestBuffer {
 
 	private static final Timer requestTimer = new Timer("Request Buffer Timer", true);
 	private static final Map<String, List<RequestFuture>> requests = new ConcurrentHashMap<>();
-	private static volatile int incompleteRequestCount = 0;
 
 	/**
 	 * Here it is, the magical method that does it all.
@@ -26,7 +25,6 @@ public class RequestBuffer {
 	 * @return The future value, the future will have a value after the request has been successfully executed.
 	 */
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
-		++incompleteRequestCount;
 		final RequestFuture<T> future = new RequestFuture<>(request);
 		if (!future.isDone()) {
 			Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
@@ -58,7 +56,7 @@ public class RequestBuffer {
 	 * @return The number of incomplete requests.
 	 */
 	public static int getIncompleteRequestCount() {
-		return incompleteRequestCount;
+		return requests.size();
 	}
 
 	/**
@@ -67,7 +65,6 @@ public class RequestBuffer {
 	 * @return The number of requests killed.
 	 */
 	public static int killAllRequests() {
-		incompleteRequestCount = 0;
 		return requestTimer.purge();
 	}
 
@@ -137,10 +134,8 @@ public class RequestBuffer {
 		 */
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
-			if (!isDone()) {
+			if (!isDone())
 				cancelled = true;
-				--incompleteRequestCount;
-			}
 			return isCancelled();
 		}
 
@@ -225,7 +220,6 @@ public class RequestBuffer {
 					value = request.request();
 					timeForNextRequest = -1;
 					isDone = true;
-					--incompleteRequestCount;
 				} catch (RateLimitException e) {
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
 					bucket = e.getMethod();
