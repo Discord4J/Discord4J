@@ -1,7 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -97,6 +96,12 @@ public class Message implements IMessage {
 	protected final IDiscordClient client;
 
 	/**
+	 * The formatted content. It's cached until the content changes, and this gets re-set to null. This is
+	 * only made when a call to getFormattedContent is made.
+	 */
+	protected volatile String formattedContent = null;
+
+	/**
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
@@ -135,6 +140,7 @@ public class Message implements IMessage {
 	 */
 	public void setContent(String content) {
 		this.content = content;
+		this.formattedContent = null; // Force re-update later
 	}
 
 	/**
@@ -362,6 +368,30 @@ public class Message implements IMessage {
 	@Override
 	public IGuild getGuild() {
 		return getChannel().getGuild();
+	}
+
+	@Override
+	public String getFormattedContent() {
+		if (content == null)
+			return null;
+
+		if (formattedContent == null) {
+			String currentContent = content;
+
+			for (IUser u : getMentions())
+				currentContent = currentContent.replace(u.mention(false), "@" + u.getName())
+						.replace(u.mention(true), "@" + u.getDisplayName(getGuild()));
+
+			for (IChannel ch : getChannelMentions())
+				currentContent = currentContent.replace(ch.mention(), "#" + ch.getName());
+
+			for (IRole r : getRoleMentions())
+				currentContent = currentContent.replace(r.mention(), "@" + r.getName());
+
+			formattedContent = currentContent;
+		}
+
+		return formattedContent;
 	}
 
 	@Override

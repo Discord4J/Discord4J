@@ -141,6 +141,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IGuild getGuild();
 
 	/**
+	 * Gets formatted content. All user, channel, and role mentions are converted to a readable form.
+	 *
+	 * @return The formatted content.
+	 */
+	String getFormattedContent();
+
+	/**
 	 * Represents an attachment included in the message.
 	 */
 	class Attachment {
