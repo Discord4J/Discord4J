@@ -65,19 +65,6 @@ public class RequestBuffer {
 	}
 
 	/**
-	 * This returns the number of incomplete requests.
-	 *
-	 * @return The number of incomplete requests.
-	 */
-	public static int getIncompleteRequestCount() {
-		final int[] count = {0};
-		synchronized (requests) {
-			requests.forEach((s, requestFutures) -> count[0] += requestFutures.size());
-		}
-		return count[0];
-	}
-
-	/**
 	 * This kills all currently queued requests.
 	 *
 	 * @return The number of requests killed.
