@@ -56,7 +56,11 @@ public class RequestBuffer {
 	 * @return The number of incomplete requests.
 	 */
 	public static int getIncompleteRequestCount() {
-		return requests.size();
+		final int[] count = {0};
+		synchronized (requests) {
+			requests.forEach((s, requestFutures) -> count[0] += requestFutures.size());
+		}
+		return count[0];
 	}
 
 	/**
