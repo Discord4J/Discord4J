@@ -13,7 +13,7 @@ public class ClientBuilder {
 	private String botToken;
 	private boolean isDaemon = false;
 	private int shardCount = 1;
-	private int maxReconnectAttempts = 0;
+	private int maxReconnectAttempts = 5;
 
 	/**
 	 * Provides the login info for the client.
