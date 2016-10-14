@@ -18,7 +18,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
 		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
 		this.recipient = recipient;
-		this.isPrivate = true;
 	}
 
 	@Override

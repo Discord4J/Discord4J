@@ -46,11 +46,6 @@ public class Channel implements IChannel {
 	protected final MessageList messages;
 
 	/**
-	 * Indicates whether or not this channel is a PM channel.
-	 */
-	protected volatile boolean isPrivate;
-
-	/**
 	 * The guild this channel belongs to.
 	 */
 	protected final IGuild parent;
@@ -100,15 +95,15 @@ public class Channel implements IChannel {
 		this.name = name;
 		this.id = id;
 		this.parent = parent;
-		this.isPrivate = false;
 		this.topic = topic;
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
-		if (!(this instanceof IVoiceChannel))
+		if (!(this instanceof IVoiceChannel)) {
 			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
-		else
+		} else {
 			this.messages = null;
+		}
 	}
 
 
@@ -151,7 +146,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isPrivate() {
-		return isPrivate;
+		return this instanceof PrivateChannel;
 	}
 
 	@Override
@@ -369,7 +364,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
-		if (isPrivate || getGuild().getOwnerID().equals(user.getID()))
+		if (isPrivate() || getGuild().getOwnerID().equals(user.getID()))
 			return EnumSet.allOf(Permissions.class);
 
 		List<IRole> roles = user.getRolesForGuild(parent);
@@ -553,7 +548,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IShard getShard() {
-		if (this.isPrivate) return getClient().getShards().get(0);
+		if (isPrivate()) return getClient().getShards().get(0);
 		return getGuild().getShard();
 	}
 

@@ -100,7 +100,7 @@ public class DispatchHandler {
 			);
 			return true;
 		}).andThen(() -> {
-			if (this.shard.getInfo()[1] == 0) { // pms are only sent to shard one
+			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard one
 				Arrays.stream(ready.private_channels)
 						.map(pm -> DiscordUtils.getPrivateChannelFromJSON(shard, pm))
 						.forEach(shard.privateChannels::add);

@@ -150,7 +150,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
 		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
 			return;
 		}
 
@@ -181,7 +181,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IUser getOurUser() {
 		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
 			return null;
 		}
 		return ourUser;
