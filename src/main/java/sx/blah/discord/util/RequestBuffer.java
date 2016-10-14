@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This is utility class intended to help with dealing with {@link RateLimitException}s by queueing rate-limited
@@ -48,6 +49,19 @@ public class RequestBuffer {
 	 */
 	public static void request(IVoidRequest request) {
 		request((IRequest) request);
+	}
+
+	/**
+	 * This returns the number of incomplete requests.
+	 *
+	 * @return The number of incomplete requests.
+	 */
+	public static int getIncompleteRequestCount() {
+		final AtomicInteger count = new AtomicInteger();
+		synchronized (requests) {
+			requests.forEach((s, requestFutures) -> count.addAndGet(requestFutures.size()));
+		}
+		return count.get();
 	}
 
 	/**
