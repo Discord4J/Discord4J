@@ -151,8 +151,11 @@ public class Message implements IMessage {
 	public void setContent(String content) {
 		this.content = content;
 		this.formattedContent = null; // Force re-update later
-		this.mentionsEveryone = content.contains("@everyone");
-		this.mentionsHere = content.contains("@here");
+
+		if (content != null) {
+			this.mentionsEveryone = content.contains("@everyone");
+			this.mentionsHere = content.contains("@here");
+		}
 	}
 
 	/**
