@@ -385,7 +385,7 @@ public class DiscordUtils {
 		} else
 			return new Message(shard.getClient(), json.id, json.content, getUserFromJSON(shard, json.author), channel,
 					convertFromTimestamp(json.timestamp),
-					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
+					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp), json.mention_everyone,
 					getMentionsFromJSON(shard.getClient(), json), getRoleMentionsFromJSON(shard.getClient(), json),
 					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json));
 	}
