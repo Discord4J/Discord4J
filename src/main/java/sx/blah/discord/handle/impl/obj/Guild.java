@@ -215,6 +215,12 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public List<IUser> getUsersByRole(IRole role) {
+		return users.stream().filter((user) -> user.getRolesForGuild(this).contains(role))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}

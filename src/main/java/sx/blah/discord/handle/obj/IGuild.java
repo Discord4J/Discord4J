@@ -110,6 +110,14 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	List<IUser> getUsersByName(String name, boolean includeNicknames);
 
 	/**
+	 * Gets all the users who have the provided role.
+	 *
+	 * @param role The role to search with.
+	 * @return The list of matching users.
+	 */
+	List<IUser> getUsersByRole(IRole role);
+
+	/**
 	 * Gets the name of the guild.
 	 *
 	 * @return The name of the guild
