@@ -309,6 +309,13 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public IVoiceChannel getConnectedVoiceChannel() {
+		return client.getConnectedVoiceChannels().stream()
+				.filter((iVoiceChannel -> guild.getVoiceChannels().contains(iVoiceChannel)))
+				.findFirst().orElse(null);
+	}
+
+	@Override
 	public int getAFKTimeout() {
 		return afkTimeout;
 	}

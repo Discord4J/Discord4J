@@ -171,6 +171,13 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IVoiceChannel getVoiceChannelByID(String id);
 
 	/**
+	 * Gets the voice channel that the bot is currently connected to.
+	 *
+	 * @return the voice channel (or null if the bot is not connected to a voice channel in this guild)
+	 */
+	IVoiceChannel getConnectedVoiceChannel();
+
+	/**
 	 * Gets the channel where afk users are placed.
 	 *
 	 * @return The voice channel (or null if nonexistant).
