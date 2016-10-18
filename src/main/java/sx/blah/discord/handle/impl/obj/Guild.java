@@ -289,7 +289,7 @@ public class Guild implements IGuild {
 	@Override
 	public List<IRole> getRolesByName(String name) {
 		return roles.stream()
-				.filter(role -> role.getName().equals(name))
+				.filter(r -> r.getName().equals(name))
 				.collect(Collectors.toList());
 	}
 
@@ -313,7 +313,7 @@ public class Guild implements IGuild {
 	@Override
 	public IVoiceChannel getConnectedVoiceChannel() {
 		return client.getConnectedVoiceChannels().stream()
-				.filter((iVoiceChannel -> voiceChannels.contains(iVoiceChannel)))
+				.filter((c -> voiceChannels.contains(c)))
 				.findFirst().orElse(null);
 	}
 
