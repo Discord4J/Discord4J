@@ -288,7 +288,9 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IRole> getRolesByName(String name) {
-		return roles.stream().filter((role) -> role.getName().equals(name)).collect(Collectors.toList());
+		return roles.stream()
+				.filter(role -> role.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
