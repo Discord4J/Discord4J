@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -132,7 +133,11 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
-		cause.printStackTrace();
+		if (cause instanceof UnresolvedAddressException) {
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UnresolvedAddressException. Internet outage?");
+		} else {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: {}", cause);
+		}
 	}
 
 	public void send(GatewayOps op, Object payload) {
@@ -195,11 +200,11 @@ public class DiscordWS extends WebSocketAdapter {
 					Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Received login event in reconnect waitFor.");
 					return true;
 				}, timeout, TimeUnit.SECONDS, () -> {
-					Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnect attempt timed out.");
+					Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Reconnect attempt timed out.");
 				});
 
-			} catch (IOException | URISyntaxException | InterruptedException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while reconnecting: {}", e);
 			}
 
 			curAttempt++;
