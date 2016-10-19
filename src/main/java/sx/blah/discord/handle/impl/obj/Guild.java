@@ -215,6 +215,13 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public List<IUser> getUsersByRole(IRole role) {
+		return users.stream()
+				.filter(user -> user.getRolesForGuild(this).contains(role))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -300,6 +307,13 @@ public class Guild implements IGuild {
 	@Override
 	public IVoiceChannel getAFKChannel() {
 		return getVoiceChannelByID(afkChannel);
+	}
+
+	@Override
+	public IVoiceChannel getConnectedVoiceChannel() {
+		return client.getConnectedVoiceChannels().stream()
+				.filter((c -> voiceChannels.contains(c)))
+				.findFirst().orElse(null);
 	}
 
 	@Override
