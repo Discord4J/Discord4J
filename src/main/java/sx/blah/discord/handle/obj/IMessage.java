@@ -104,11 +104,18 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
-	 * Returns whether this message mentions everyone.
+	 * Returns whether this message mentions everyone through @everyone.
 	 *
 	 * @return True if it mentions everyone, false if otherwise.
 	 */
 	boolean mentionsEveryone();
+
+	/**
+	 * Returns whether this message mentions the online users through @here.
+	 *
+	 * @return True if it mentions all the online users, false if otherwise.
+	 */
+	boolean mentionsHere();
 
 	/**
 	 * Deletes the message.

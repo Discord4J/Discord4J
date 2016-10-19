@@ -81,6 +81,16 @@ public class Message implements IMessage {
 	protected volatile boolean mentionsEveryone;
 
 	/**
+	 * Whether the message mentions all online users.
+	 */
+	protected volatile boolean mentionsHere;
+
+	/**
+	 * Whether the everyone mention is valid (has permission).
+	 */
+	protected volatile boolean everyoneMentionIsValid;
+
+	/**
 	 * Whether the message has been pinned to its channel or not.
 	 */
 	protected volatile boolean isPinned;
@@ -112,7 +122,7 @@ public class Message implements IMessage {
 				   boolean pinned, List<Embedded> embedded) {
 		this.client = client;
 		this.id = id;
-		this.content = content;
+		setContent(content);
 		this.author = (User) user;
 		this.channel = (Channel) channel;
 		this.timestamp = timestamp;
@@ -120,10 +130,10 @@ public class Message implements IMessage {
 		this.mentions = mentions;
 		this.roleMentions = roleMentions;
 		this.attachments = attachments;
-		this.mentionsEveryone = mentionsEveryone;
 		this.isPinned = pinned;
 		this.channelMentions = new ArrayList<>();
 		this.embedded = embedded;
+		this.everyoneMentionIsValid = mentionsEveryone;
 
 		setChannelMentions();
 	}
@@ -141,6 +151,11 @@ public class Message implements IMessage {
 	public void setContent(String content) {
 		this.content = content;
 		this.formattedContent = null; // Force re-update later
+
+		if (content != null) {
+			this.mentionsEveryone = content.contains("@everyone");
+			this.mentionsHere = content.contains("@here");
+		}
 	}
 
 	/**
@@ -303,7 +318,12 @@ public class Message implements IMessage {
 
 	@Override
 	public boolean mentionsEveryone() {
-		return mentionsEveryone;
+		return everyoneMentionIsValid && mentionsEveryone;
+	}
+
+	@Override
+	public boolean mentionsHere() {
+		return everyoneMentionIsValid && mentionsHere;
 	}
 
 	/**
@@ -361,8 +381,8 @@ public class Message implements IMessage {
 
 	@Override
 	public IMessage copy() {
-		return new Message(client, id, content, author, channel, timestamp, editedTimestamp,
-				mentionsEveryone, mentions, roleMentions, attachments, isPinned, embedded);
+		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
+				mentions, roleMentions, attachments, isPinned, embedded);
 	}
 
 	@Override

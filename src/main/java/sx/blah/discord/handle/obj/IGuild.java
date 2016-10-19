@@ -110,6 +110,14 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	List<IUser> getUsersByName(String name, boolean includeNicknames);
 
 	/**
+	 * Gets all the users who have the provided role.
+	 *
+	 * @param role The role to search with.
+	 * @return The list of matching users.
+	 */
+	List<IUser> getUsersByRole(IRole role);
+
+	/**
 	 * Gets the name of the guild.
 	 *
 	 * @return The name of the guild
@@ -161,6 +169,13 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The voice channel (or null if not found).
 	 */
 	IVoiceChannel getVoiceChannelByID(String id);
+
+	/**
+	 * Gets the voice channel that the bot is currently connected to.
+	 *
+	 * @return the voice channel (or null if the bot is not connected to a voice channel in this guild)
+	 */
+	IVoiceChannel getConnectedVoiceChannel();
 
 	/**
 	 * Gets the channel where afk users are placed.
