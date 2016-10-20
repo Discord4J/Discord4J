@@ -170,7 +170,14 @@ public class Requests {
 
 		private String request(HttpUriRequest request) throws DiscordException, RateLimitException {
 			request.addHeader("Authorization", client.getToken());
-			request.addHeader("Content-Type", "application/json");
+
+			if (request.containsHeader("Content-Type")) {
+				if (request.getFirstHeader("Content-Type").getValue().equals("multipart/form-data")) {
+					request.removeHeaders("Content-Type");
+				}
+			} else {
+				request.addHeader("Content-Type", "application/json");
+			}
 
 			if (globalRetryAfter.get() != -1) {
 				if (System.currentTimeMillis() > globalRetryAfter.get())

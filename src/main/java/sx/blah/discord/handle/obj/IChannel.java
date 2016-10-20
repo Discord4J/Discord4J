@@ -7,7 +7,7 @@ import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
@@ -91,62 +91,49 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
-	 * Sends a file to the channel with a message attached.
+	 * Uploads a file to the channel.
 	 *
-	 * @param file The file to send.
-	 * @param content The message to be sent with the file.
-	 * @return The message sent.
+	 * @param file The file to upload.
+	 * @return The message created by this action.
 	 *
-	 * @throws IOException
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
+	 * @throws FileNotFoundException
 	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
-	 * Sends a file to the channel.
+	 * Uploads a file to the channel with a message attached.
 	 *
-	 * @param file The file to send.
-	 * @return The message sent.
+	 * @param content The content of the attached message.
+	 * @param file The file to upload.
+	 * @return The message created by this action.
 	 *
-	 * @throws IOException
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
+	 * @throws FileNotFoundException
 	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
-	 * Sends a file to the channel.
+	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 * 
+	 * @param content The content of the attached message.
+	 * @param tts Whether the message should use tts or not.
+	 * @param file The input stream to upload.
+	 * @param fileName The name of the file that should be shown in Discord.
 	 *
-	 * @param stream The input stream to send.
-	 * @param filename The name of the file to send.
-	 * @param content The message to be sent with the file.
-	 * @return The message sent.
-	 *
-	 * @throws IOException
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
+	 * @return
 	 * @throws DiscordException
-	 */
-	IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
-
-	/**
-	 * Sends a file to the channel.
-	 *
-	 * @param stream The input stream to send.
-	 * @param filename The name of the file to send.
-	 * @return The message sent.
-	 *
-	 * @throws IOException
-	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Generates an invite for this channel.

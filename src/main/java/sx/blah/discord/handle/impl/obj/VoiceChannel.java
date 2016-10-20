@@ -13,9 +13,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.util.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -175,7 +173,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws IOException {
+	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException {
 		throw new UnsupportedOperationException();
 	}
 

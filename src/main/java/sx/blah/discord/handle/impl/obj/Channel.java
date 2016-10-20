@@ -16,7 +16,6 @@ import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.objects.OverwriteObject;
 import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
-import sx.blah.discord.handle.impl.events.MessageSendEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
@@ -195,48 +194,31 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
-
-		if (client.isReady()) {
-			InputStream is = new BufferedInputStream(stream);
-			MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-					.addBinaryBody("file", is, ContentType.APPLICATION_OCTET_STREAM, filename);
-
-			if (content != null)
-				builder.addTextBody("content", content);
-
-			HttpEntity fileEntity = builder.build();
-			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-					DiscordEndpoints.CHANNELS + id + "/messages",
-					fileEntity), MessageObject.class);
-
-			if (response == null || response.id == null) //Message didn't send
-				throw new DiscordException("Message was unable to be sent.");
-
-			IMessage message = DiscordUtils.getMessageFromJSON(getShard(), this, response);
-			client.getDispatcher().dispatch(new MessageSendEvent(message));
-			return message;
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
-			return null;
-		}
+	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException, MissingPermissionsException {
+		return sendFile(null, file);
 	}
 
 	@Override
-	public IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		return sendFile(stream, filename, null);
+	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFile(content, false, new FileInputStream(file), file.getName());
 	}
 
 	@Override
-	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		InputStream stream = new FileInputStream(file);
-		return sendFile(stream, file.getName(), content);
-	}
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
-	@Override
-	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		return sendFile(file, null);
+		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+		if (content != null) builder.addTextBody("content", content);
+		builder.addTextBody("tts", String.valueOf(tts));
+		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
+
+		HttpEntity fileEntity = builder.build();
+		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages"
+				, fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data"));
+		MessageObject messageObject = DiscordUtils.GSON.fromJson(response, MessageObject.class);
+
+		return DiscordUtils.getMessageFromJSON(getShard(), this, messageObject);
 	}
 
 	@Override
