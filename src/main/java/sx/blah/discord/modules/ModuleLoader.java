@@ -17,6 +17,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -38,22 +39,23 @@ public class ModuleLoader {
 	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
 
 	static {
-		//Yay! Proprietary hooks. This is used for ModuleLoader+ (https://github.com/Discord4J-Addons/Module-Loader-Plus)
+		// Yay! Proprietary hooks. This is used for ModuleLoader+ (https://github.com/Discord4J-Addons/Module-Loader-Plus)
 		// to be able to load internal modules automagically. This is not in Discord4J by default due to the massive
 		// overhead it provides.
 		try {
-			Class.forName("com.austinv11.modules.ModuleLoaderPlus"); //Loads the class' static initializer block
-		} catch (ClassNotFoundException ignored) {}
+			Class.forName("com.austinv11.modules.ModuleLoaderPlus"); // Loads the class' static initializer block
+		} catch (ClassNotFoundException ignored) {
+		}
 
 		if (Configuration.LOAD_EXTERNAL_MODULES) {
 			File modulesDir = new File(MODULE_DIR);
 			if (modulesDir.exists()) {
 				if (!modulesDir.isDirectory()) {
-					throw new RuntimeException(MODULE_DIR+" isn't a directory!");
+					throw new RuntimeException(MODULE_DIR + " isn't a directory!");
 				}
 			} else {
 				if (!modulesDir.mkdir()) {
-					throw new RuntimeException("Error creating "+MODULE_DIR+" directory");
+					throw new RuntimeException("Error creating " + MODULE_DIR + " directory");
 				}
 			}
 
@@ -78,11 +80,11 @@ public class ModuleLoader {
 					Discord4J.LOGGER.warn(LogMarkers.MODULES, "Skipped loading of module {} (expected Discord4J v{} instead of v{})", module.getName(), module.getMinimumDiscord4JVersion(), Discord4J.VERSION);
 				}
 			} catch (InstantiationException | IllegalAccessException e) {
-				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module "+clazz.getName()+"!", e);
+				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + clazz.getName() + "!", e);
 			}
 		}
 
-		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {//Handles module load order and loads the modules
+		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
 			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
 			while (toLoad.size() > 0) {
 				for (IModule module : toLoad) {
@@ -106,7 +108,6 @@ public class ModuleLoader {
 	 * Gets the module classes which will/has been loaded and may or may not be enabled in a given module instance.
 	 *
 	 * @return The module classes.
-	 *
 	 * @see #getLoadedModules()
 	 */
 	public static List<Class<? extends IModule>> getModules() {
@@ -117,7 +118,7 @@ public class ModuleLoader {
 	 * Manually loads a module.
 	 *
 	 * @param module The module to load.
-	 * @return True if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
+	 * @return true if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
 	 */
 	public boolean loadModule(IModule module) {
 		Class<? extends IModule> clazz = module.getClass();
@@ -132,10 +133,8 @@ public class ModuleLoader {
 			client.getDispatcher().registerListener(module);
 			if (!loadedModules.contains(module))
 				loadedModules.add(module);
-
 			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
 		}
-
 		return true;
 	}
 
@@ -153,14 +152,13 @@ public class ModuleLoader {
 			Class<? extends IModule> clazz = module.getClass();
 			if (clazz.isAnnotationPresent(Requires.class)) {
 				Requires annotation = clazz.getAnnotation(Requires.class);
-				if (annotation.value().equals(module.getClass().getName())) {
+				if (annotation.value().toLowerCase(Locale.ROOT).equals(module.getClass().getName())) {
 					unloadModule(mod);
 					return true;
 				}
 			}
 			return false;
 		});
-
 		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
 	}
 
@@ -175,10 +173,9 @@ public class ModuleLoader {
 		String[] versions;
 		String[] discord4jVersion;
 		try {
-			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
-			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
-
-			for (int i = 0; i < Math.min(versions.length, 2); i++) { //We only care about major.minor, the revision change should not be big enough to care about
+			versions = module.getMinimumDiscord4JVersion().toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
+			discord4jVersion = Discord4J.VERSION.toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
+			for (int i = 0; i < Math.min(versions.length, 2); i++) { // We only care about major.minor, the revision change should not be big enough to care about
 				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
 					return false;
 			}
@@ -191,46 +188,65 @@ public class ModuleLoader {
 
 	/**
 	 * Loads a jar file and automatically adds any modules.
+	 * To avoid high overhead recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest
+	 * Multiple classes should be separated by a semicolon ";"
 	 *
 	 * @param file The jar file to load.
 	 */
-	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
-		if (file.isFile() && file.getName().endsWith(".jar")) { //Can't be a directory and must be a jar
-			try {
-				//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
+	public static synchronized void loadExternalModules(File file) { // A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
+		if (file.isFile() && file.getName().endsWith(".jar")) { // Can't be a directory and must be a jar
+			try (JarFile jar = new JarFile(file)) {
+				Manifest man = jar.getManifest();
+				String moduleAttrib = man.getMainAttributes().getValue("Discord4J-ModuleClass");
+				String[] moduleClasses = new String[0];
+				if (moduleAttrib != null) {
+					moduleClasses = moduleAttrib.split(";");
+				}
+				// Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
 				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 				URL url = file.toURI().toURL();
-				for (URL it : Arrays.asList(loader.getURLs())) {//Ensures duplicate libraries aren't loaded
+				for (URL it : Arrays.asList(loader.getURLs())) { // Ensures duplicate libraries aren't loaded
 					if (it.equals(url)) {
 						return;
 					}
 				}
-				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
-				method.invoke(loader, new Object[]{url});
-
-				//Scans the jar file for classes which have IModule as a super class
-				List<String> classes = new ArrayList<>();
-				try (JarFile jar = new JarFile(file)) {
-					jar.stream().forEach(jarEntry -> {
-						if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")) {
-							String className = jarEntry.getName().replace('/', '.');
-							classes.add(className.substring(0, className.length()-".class".length()));
-						}
-					});
-				}
-				for (String clazz : classes) {
-					if(clazz.contains("$"))
-						continue;	//Avoids Nested Classes which can cause Errors due to instantiating before parent class
-					Class classInstance = Class.forName(clazz);
-					if (IModule.class.isAssignableFrom(classInstance)) {
-						addModuleClass(classInstance);
+				method.invoke(loader, url);
+				if (moduleClasses.length == 0) { // If the Module Developer has not specified the Implementing Class, revert to recursive search
+					// Scans the jar file for classes which have IModule as a super class
+					List<String> classes = new ArrayList<>();
+					jar.stream().filter(jarEntry -> !jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")).map(path -> path.getName().replace('/', '.').substring(0, path.getName().length() - ".class".length())).forEach(classes::add);
+					for (String clazz : classes) {
+						try {
+							Class classInstance = loadClass(clazz);
+							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
+								addModuleClass(classInstance);
+							}
+						} catch (NoClassDefFoundError ignored) { /* This can happen. Looking recursively looking through the classpath is hackish... */ }
+					}
+				} else {
+					for (String moduleClass : moduleClasses) {
+						Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClass);
+						Class classInstance = loadClass(moduleClass);
+						if (IModule.class.isAssignableFrom(classInstance))
+							addModuleClass(classInstance);
 					}
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
-				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module "+file.getName()+"!", e);
+				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + file.getName() + "!", e);
 			}
 		}
+	}
+
+	private static Class loadClass(String clazz) throws ClassNotFoundException {
+		if (clazz.contains("$") && clazz.substring(0, clazz.lastIndexOf("$")).length() > 0) {
+			try {
+				loadClass(clazz.substring(0, clazz.lastIndexOf("$")));
+			} catch (ClassNotFoundException ignored) {
+			} // If the parent class doesn't exist then it is safe to instantiate the child
+		}
+		return Class.forName(clazz);
 	}
 
 	/**
@@ -256,7 +272,7 @@ public class ModuleLoader {
 
 		independents.forEach(ModuleLoader::loadExternalModules);
 
-		List<File> noLongerDependents = dependents.stream().filter(jarFile -> { //loads all dependents whose requirements have been met already
+		List<File> noLongerDependents = dependents.stream().filter(jarFile -> { // loads all dependents whose requirements have been met already
 			try {
 				String[] moduleRequires = getModuleRequires(jarFile);
 				List<Class> classes = new ArrayList<>();
@@ -273,7 +289,7 @@ public class ModuleLoader {
 
 		final int retryAttempts = dependents.size();
 		for (int i = 0; i < retryAttempts; i++) {
-			dependents.removeIf((file -> { //Filters out all usable files
+			dependents.removeIf((file -> { // Filters out all usable files
 				boolean loaded = false;
 				try {
 					String[] required = getModuleRequires(file);
@@ -282,25 +298,19 @@ public class ModuleLoader {
 							Class.forName(clazz);
 							loaded = true;
 						} catch (ClassNotFoundException ignored) {}
-
 						if (!loaded)
 							loaded = findFileForClass(files, clazz) != null;
-
 						if (!loaded)
 							break;
 					}
 				} catch (IOException ignored) {}
-
 				if (loaded)
 					loadExternalModules(file);
-
 				return loaded;
 			}));
-
 			if (dependents.size() == 0)
 				break;
 		}
-
 		if (dependents.size() > 0)
 			Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
 	}
@@ -309,8 +319,7 @@ public class ModuleLoader {
 		JarFile jarFile = new JarFile(file);
 		Manifest manifest = jarFile.getManifest();
 		Attributes.Name moduleRequires = new Attributes.Name("module-requires");
-		if (manifest != null && manifest.getMainAttributes() != null
-				&& manifest.getMainAttributes().containsKey(moduleRequires)) {
+		if (manifest != null && manifest.getMainAttributes() != null && manifest.getMainAttributes().containsKey(moduleRequires)) {
 			String value = manifest.getMainAttributes().getValue(moduleRequires);
 			return value.contains(";") ? value.split(";") : new String[]{value};
 		} else {
@@ -322,7 +331,7 @@ public class ModuleLoader {
 		return files.stream().filter((file) -> {
 			try {
 				JarFile jarFile = new JarFile(file);
-				return jarFile.getJarEntry(clazz.replaceAll("\\.", File.pathSeparator)+".class") != null;
+				return jarFile.getJarEntry(clazz.replaceAll("\\.", File.pathSeparator) + ".class") != null;
 			} catch (IOException e) {
 				return false;
 			}
@@ -337,4 +346,5 @@ public class ModuleLoader {
 	public static void addModuleClass(Class<? extends IModule> clazz) {
 		modules.add(clazz);
 	}
+
 }
