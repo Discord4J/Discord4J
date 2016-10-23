@@ -44,9 +44,6 @@ public class DiscordWS extends WebSocketAdapter {
 	private DispatchHandler dispatchHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
 
-	private int maxReconnectAttempts;
-	private final AtomicBoolean shouldAttemptReconnect = new AtomicBoolean(false);
-
 	private long seq = 0;
 	protected String sessionId;
 
@@ -60,11 +57,10 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	public DiscordWS(IShard shard, String gateway, boolean isDaemon, int maxReconnectAttempts) {
+	public DiscordWS(IShard shard, String gateway, boolean isDaemon) {
 		this.client = (DiscordClientImpl) shard.getClient();
 		this.shard = (ShardImpl) shard;
 		this.gateway = gateway;
-		this.maxReconnectAttempts = maxReconnectAttempts;
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
 
 		try {
@@ -89,7 +85,6 @@ public class DiscordWS extends WebSocketAdapter {
 
 		switch (op) {
 			case HELLO:
-				shouldAttemptReconnect.set(false);
 				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
 				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token, shard.getInfo())));
 				break;
@@ -114,10 +109,6 @@ public class DiscordWS extends WebSocketAdapter {
 	public void onWebSocketConnect(Session sess) {
 		super.onWebSocketConnect(sess);
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket Connected.");
-
-		if (shouldAttemptReconnect.get()) {
-			send(GatewayOps.RESUME, new ResumeRequest(sessionId, seq, client.getToken()));
-		}
 	}
 
 	@Override
@@ -171,7 +162,7 @@ public class DiscordWS extends WebSocketAdapter {
 		switch (reason) {
 			case INVALID_SESSION_OP:
 			case ABNORMAL_CLOSE:
-				beginReconnect();
+				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "WS should reconnect panda is bad.");
 				break;
 			case LOGGED_OUT:
 				clearCaches();
@@ -180,37 +171,6 @@ public class DiscordWS extends WebSocketAdapter {
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled disconnect reason");
 		}
-	}
-
-	private void beginReconnect() {
-		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Beginning reconnect.");
-
-		hasReceivedReady = false;
-		isReady = false;
-		shouldAttemptReconnect.set(true);
-		int curAttempt = 0;
-
-		while (curAttempt < maxReconnectAttempts && shouldAttemptReconnect.get()) {
-			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Attempting reconnect {}", curAttempt);
-			try {
-				wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
-
-				int timeout = (int) Math.min(1024, Math.pow(2, curAttempt)) + ThreadLocalRandom.current().nextInt(-2, 2);
-				client.getDispatcher().waitFor((LoginEvent event) -> {
-					Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Received login event in reconnect waitFor.");
-					return true;
-				}, timeout, TimeUnit.SECONDS, () -> {
-					Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Reconnect attempt timed out.");
-				});
-
-			} catch (Exception e) {
-				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while reconnecting: {}", e);
-			}
-
-			curAttempt++;
-		}
-
-		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnection failed after {} attempts.", maxReconnectAttempts);
 	}
 
 	private void clearCaches() {

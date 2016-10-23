@@ -35,7 +35,7 @@ public class DispatchHandler {
 	public void handle(JsonObject event) {
 		String type = event.get("t").getAsString();
 		switch (type) {
-			case "RESUMED": resumed(); break;
+			case "RESUMED": Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "WS should resume panda is bad."); break;
 			case "READY": ready(DiscordUtils.GSON.fromJson(event.get("d"), ReadyResponse.class)); break;
 			case "MESSAGE_CREATE": messageCreate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class)); break;
 			case "TYPING_START": typingStart(DiscordUtils.GSON.fromJson(event.get("d"), TypingEventResponse.class)); break;
@@ -68,11 +68,6 @@ public class DispatchHandler {
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
 		}
-	}
-
-	private void resumed() {
-		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnected to the Discord websocket.");
-		client.dispatcher.dispatch(new DiscordReconnectedEvent());
 	}
 
 	private void ready(ReadyResponse ready) {

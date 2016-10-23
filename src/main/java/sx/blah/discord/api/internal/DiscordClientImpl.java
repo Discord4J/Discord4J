@@ -95,28 +95,22 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private int shardCount;
 
 	/**
-	 * The maximum number of times a reconnection will be attempted before exiting.
-	 */
-	protected int maxReconnectAttempts = 0;
-
-	/**
 	 * The requests holder object.
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts, EventDispatcher dispatcher, ModuleLoader loader) {
+	private DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, EventDispatcher dispatcher, ModuleLoader loader) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
-		this.maxReconnectAttempts = maxReconnectAttempts;
 		this.dispatcher = dispatcher;
 		this.loader = loader;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts) {
-		this(token, timeoutTime, maxMissedPingCount, isDaemon, shardCount, maxReconnectAttempts, null, null);
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount) {
+		this(token, timeoutTime, maxMissedPingCount, isDaemon, shardCount, null, null);
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
@@ -300,7 +294,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		validateToken();
 		String gateway = obtainGateway();
 		for (int i = 0; i < shardCount; i++) {
-			ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon, maxReconnectAttempts);
+			ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon);
 			getShards().add(i, shard);
 			shard.login();
 		}

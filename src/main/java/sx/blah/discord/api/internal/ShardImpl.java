@@ -30,18 +30,16 @@ public class ShardImpl implements IShard {
 	private String gateway;
 	private boolean isDaemon;
 	private int[] info;
-	private int maxReconnectAttempts;
 
 	private final DiscordClientImpl client;
 	protected List<IGuild> guildList = new CopyOnWriteArrayList<>();
 	protected List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
-	public ShardImpl(IDiscordClient client, String gateway, int[] info, boolean isDaemon, int maxReconnectAttempts) {
+	public ShardImpl(IDiscordClient client, String gateway, int[] info, boolean isDaemon) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
 		this.isDaemon = isDaemon;
 		this.info = info;
-		this.maxReconnectAttempts = maxReconnectAttempts;
 	}
 
 	@Override
@@ -56,7 +54,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void login() throws DiscordException {
-		this.ws = new DiscordWS(this, gateway, isDaemon, maxReconnectAttempts);
+		this.ws = new DiscordWS(this, gateway, isDaemon);
 	}
 
 	@Override
