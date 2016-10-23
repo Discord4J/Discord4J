@@ -21,18 +21,19 @@ package sx.blah.discord;
 import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.*;
+import org.slf4j.helpers.FormattingTuple;
+import org.slf4j.helpers.MarkerIgnoringBase;
+import org.slf4j.helpers.MessageFormatter;
+import org.slf4j.helpers.NOPLoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Properties;
@@ -163,6 +164,7 @@ public class Discord4J {
 
 	/**
 	 * This is used to run Discord4J independent of any bot, making it module dependent.
+	 * if no arguments are given, it will look for a token in a file called "auth.txt"
 	 *
 	 * @param args The args should be either email/password or just the bot token
 	 */
@@ -170,14 +172,24 @@ public class Discord4J {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
 			throw new RuntimeException("Invalid configuration!");
-
-		// There needs to be at least 1 arg
-		if (args.length < 1)
-			throw new IllegalArgumentException("At least 1 argument required!");
-
+		String token;
+		if (args.length == 0){
+			File auth = new File("auth.txt");
+			if(!auth.exists())
+				throw new RuntimeException("No arguments Provided and auth.txt does not exists");
+			try(BufferedReader reader = new BufferedReader(new FileReader(auth))) {
+				token = reader.readLine();
+			} catch (IOException e){
+				throw new RuntimeException("Unable to Load Token from Auth file", e);
+			}
+		} else if(args.length == 1){
+			token = args[0];
+		} else {
+			throw new RuntimeException("Invalid configuration!");
+		}
 		try {
 			ClientBuilder builder = new ClientBuilder();
-			IDiscordClient client = (args.length == 1 ? builder.withToken(args[0]) : builder.withLogin(args[0], args[1])).login();
+			IDiscordClient client = builder.withToken(token).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
 			});
