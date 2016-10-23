@@ -224,7 +224,7 @@ public class ModuleLoader {
 						continue;	//Avoids Nested Classes which can cause Errors due to instantiating before parent class
 					try {
 						Class classInstance = Class.forName(clazz);
-						if (IModule.class.isAssignableFrom(classInstance)) {
+						if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
 							addModuleClass(classInstance);
 						}
 					} catch (NoClassDefFoundError e){	/*This can happen. Looking recursively looking through the classpath is hackish... */}
