@@ -131,7 +131,7 @@ public class DispatchHandler {
 				}
 			}
 
-			IMessage message = DiscordUtils.getMessageFromJSON(shard, channel, json);
+			IMessage message = DiscordUtils.getMessageFromJSON(channel, json);
 
 			if (!channel.getMessages().contains(message)) {
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
@@ -199,7 +199,7 @@ public class DispatchHandler {
 		String guildID = event.guild_id;
 		Guild guild = (Guild) client.getGuildByID(guildID);
 		if (guild != null) {
-			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(shard, guild, new MemberObject(event.user, event.roles));
+			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(guild, new MemberObject(event.user, event.roles));
 			guild.addUser(user);
 			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
@@ -274,7 +274,7 @@ public class DispatchHandler {
 		if (toUpdate != null) {
 			IMessage oldMessage = toUpdate.copy();
 
-			toUpdate = (Message) DiscordUtils.getMessageFromJSON(shard, channel, json);
+			toUpdate = (Message) DiscordUtils.getMessageFromJSON(channel, json);
 
 			if (oldMessage.isPinned() && !json.pinned) {
 				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
@@ -377,11 +377,11 @@ public class DispatchHandler {
 			Guild guild = (Guild) client.getGuildByID(event.guild_id);
 			if (guild != null) {
 				if (type.equalsIgnoreCase("text")) { //Text channel
-					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(client, guild, event);
+					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(guild, event);
 					guild.addChannel(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
 				} else if (type.equalsIgnoreCase("voice")) {
-					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, guild, event);
+					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(guild, event);
 					guild.addVoiceChannel(channel);
 					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
 				}
@@ -425,7 +425,7 @@ public class DispatchHandler {
 				if (toUpdate != null) {
 					IChannel oldChannel = toUpdate.copy();
 
-					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(client, toUpdate.getGuild(), json);
+					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(toUpdate.getGuild(), json);
 
 					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 				}
@@ -434,7 +434,7 @@ public class DispatchHandler {
 				if (toUpdate != null) {
 					VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
 
-					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(client, toUpdate.getGuild(), json);
+					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(toUpdate.getGuild(), json);
 
 					client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 				}
@@ -450,7 +450,7 @@ public class DispatchHandler {
 		}
 
 		for (MemberObject member : event.members) {
-			IUser user = DiscordUtils.getUserFromGuildMemberResponse(shard, guildToUpdate, member);
+			IUser user = DiscordUtils.getUserFromGuildMemberResponse(guildToUpdate, member);
 			guildToUpdate.addUser(user);
 		}
 	}

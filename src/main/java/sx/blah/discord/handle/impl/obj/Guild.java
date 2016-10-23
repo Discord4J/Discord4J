@@ -508,7 +508,7 @@ public class Guild implements IGuild {
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text")))),
 					ChannelObject.class);
 
-			IChannel channel = DiscordUtils.getChannelFromJSON(client, this, response);
+			IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
 			addChannel(channel);
 
 			return channel;
@@ -534,7 +534,7 @@ public class Guild implements IGuild {
 					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "voice")))),
 					ChannelObject.class);
 
-			IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(client, this, response);
+			IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
 			addVoiceChannel(channel);
 
 			return channel;

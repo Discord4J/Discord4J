@@ -185,7 +185,7 @@ public class Channel implements IChannel {
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
-			return DiscordUtils.getMessageFromJSON(getShard(), this, response);
+			return DiscordUtils.getMessageFromJSON(this, response);
 
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to send message before bot is ready!");
@@ -218,7 +218,7 @@ public class Channel implements IChannel {
 				, fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data"));
 		MessageObject messageObject = DiscordUtils.GSON.fromJson(response, MessageObject.class);
 
-		return DiscordUtils.getMessageFromJSON(getShard(), this, messageObject);
+		return DiscordUtils.getMessageFromJSON(this, messageObject);
 	}
 
 	@Override
@@ -290,7 +290,7 @@ public class Channel implements IChannel {
 					ChannelObject.class);
 
 			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
+			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
 
 			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 		} catch (UnsupportedEncodingException e) {
@@ -483,7 +483,7 @@ public class Channel implements IChannel {
 				MessageObject[].class);
 
 		for (MessageObject message : pinnedMessages)
-			messages.add(DiscordUtils.getMessageFromJSON(getShard(), this, message));
+			messages.add(DiscordUtils.getMessageFromJSON(this, message));
 
 		return messages;
 	}

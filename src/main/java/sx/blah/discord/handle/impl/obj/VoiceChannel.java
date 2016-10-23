@@ -93,7 +93,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 					ChannelObject.class);
 
 			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
+			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
 
 			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 		} catch (UnsupportedEncodingException e) {

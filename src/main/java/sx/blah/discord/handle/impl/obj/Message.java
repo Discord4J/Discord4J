@@ -286,7 +286,7 @@ public class Message implements IMessage {
 					MessageObject.class);
 
 			IMessage oldMessage = copy();
-			DiscordUtils.getMessageFromJSON(getShard(), channel, response);
+			DiscordUtils.getMessageFromJSON(channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
 			//Original message edited to null, then the null message edited to the new content
