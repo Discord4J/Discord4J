@@ -111,7 +111,7 @@ Registering your listener:
 public class Main {
   
   public static void main(String[] args) {
-    IDiscordClient client = Example.getClient(args[0], args[1], true); // Gets the client object (from the first example)
+    IDiscordClient client = Example.getClient(args[0], true); // Gets the client object (from the first example)
     EventDispatcher dispatcher = client.getDispatcher(); // Gets the EventDispatcher instance for this client instance
     dispatcher.registerListener(new InterfaceListener()); // Registers the IListener example class from above
     dispatcher.registerListener(new AnnotationListener()); // Registers the @EventSubscriber example class from above
