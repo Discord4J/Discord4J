@@ -65,7 +65,7 @@ public class ShardImpl implements IShard {
 			getConnectedVoiceChannels().forEach(IVoiceChannel::leave);
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to logout before bot has logged in!");
 		}
 	}
 
@@ -91,7 +91,7 @@ public class ShardImpl implements IShard {
 
 	private void updatePresence(boolean isIdle, Status status) {
 		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to change presence before bot has logged in!");
 			return;
 		}
 
@@ -273,7 +273,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public IInvite getInviteForCode(String code) {
 		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite code before bot has logged in!");
 			return null;
 		}
 
