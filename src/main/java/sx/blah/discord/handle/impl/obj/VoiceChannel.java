@@ -121,7 +121,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to join voice channel before bot is ready!");
 		}
 	}
 

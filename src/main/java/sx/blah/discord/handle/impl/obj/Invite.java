@@ -45,7 +45,7 @@ public class Invite implements IInvite {
 			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
 					inviteResponse.channel.id, inviteResponse.channel.name);
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to get invite details before bot is ready!");
 			return null;
 		}
 	}

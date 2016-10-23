@@ -497,7 +497,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create channel before bot is ready!");
 			return null;
 		}
 
@@ -523,7 +523,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create voice channel before bot is ready!");
 			return null;
 		}
 

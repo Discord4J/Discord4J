@@ -188,7 +188,7 @@ public class Channel implements IChannel {
 			return DiscordUtils.getMessageFromJSON(getShard(), this, response);
 
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to send message before bot is ready!");
 			return null;
 		}
 	}
@@ -226,7 +226,7 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create invite before bot is ready!");
 			return null;
 		}
 

@@ -239,7 +239,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
 		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get PM channel before bot is ready!");
 			return null;
 		}
 
