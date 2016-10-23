@@ -177,7 +177,7 @@ public class ModuleLoader {
 		try {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
-			
+
 			for (int i = 0; i < Math.min(versions.length, 2); i++) { //We only care about major.minor, the revision change should not be big enough to care about
 				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
 					return false;
@@ -220,6 +220,8 @@ public class ModuleLoader {
 					});
 				}
 				for (String clazz : classes) {
+					if(clazz.contains("$"))
+						continue;	//Avoids Nested Classes which can cause Errors due to instantiating before parent class
 					Class classInstance = Class.forName(clazz);
 					if (IModule.class.isAssignableFrom(classInstance)) {
 						addModuleClass(classInstance);
@@ -280,25 +282,25 @@ public class ModuleLoader {
 							Class.forName(clazz);
 							loaded = true;
 						} catch (ClassNotFoundException ignored) {}
-						
+
 						if (!loaded)
 							loaded = findFileForClass(files, clazz) != null;
-						
+
 						if (!loaded)
 							break;
 					}
 				} catch (IOException ignored) {}
-				
+
 				if (loaded)
 					loadExternalModules(file);
-				
+
 				return loaded;
 			}));
-			
+
 			if (dependents.size() == 0)
 				break;
 		}
-		
+
 		if (dependents.size() > 0)
 			Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
 	}
