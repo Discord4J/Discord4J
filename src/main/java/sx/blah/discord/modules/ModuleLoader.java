@@ -222,10 +222,12 @@ public class ModuleLoader {
 				for (String clazz : classes) {
 					if(clazz.contains("$"))
 						continue;	//Avoids Nested Classes which can cause Errors due to instantiating before parent class
-					Class classInstance = Class.forName(clazz);
-					if (IModule.class.isAssignableFrom(classInstance)) {
-						addModuleClass(classInstance);
-					}
+					try {
+						Class classInstance = Class.forName(clazz);
+						if (IModule.class.isAssignableFrom(classInstance)) {
+							addModuleClass(classInstance);
+						}
+					} catch (NoClassDefFoundError e){	/*This can happen. Looking recursively looking through the classpath is hackish... */}
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module "+file.getName()+"!", e);
