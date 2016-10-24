@@ -233,7 +233,7 @@ public class ModuleLoader {
 						} catch (NoClassDefFoundError e) {	/*This can happen. Looking recursively looking through the classpath is hackish... */}
 					}
 				} else {
-					Discord4J.LOGGER.debug(LogMarkers.MODULES, "Manifest Attribute \"Discord4J-ModuleClass: {}", moduleClass);
+					Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClass);
 					Class classInstance = Class.forName(moduleClass);
 					if(IModule.class.isAssignableFrom(classInstance))
 						addModuleClass(classInstance);
