@@ -197,41 +197,52 @@ public class ModuleLoader {
 	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
 		if (file.isFile() && file.getName().endsWith(".jar")) { //Can't be a directory and must be a jar
 			try {
-				//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
-				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-				URL url = file.toURI().toURL();
-				for (URL it : Arrays.asList(loader.getURLs())) {//Ensures duplicate libraries aren't loaded
-					if (it.equals(url)) {
-						return;
+				Manifest man = new JarFile(file).getManifest();
+				String moduleClass = (String) man.getMainAttributes().get("Discord4J-ModuleClass");
+				if (moduleClass == null) {
+					//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
+					URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+					URL url = file.toURI().toURL();
+					for (URL it : Arrays.asList(loader.getURLs())) {//Ensures duplicate libraries aren't loaded
+						if (it.equals(url)) {
+							return;
+						}
 					}
-				}
-				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
-				method.setAccessible(true);
-				method.invoke(loader, new Object[]{url});
+					Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+					method.setAccessible(true);
+					method.invoke(loader, new Object[]{url});
 
-				//Scans the jar file for classes which have IModule as a super class
-				List<String> classes = new ArrayList<>();
-				try (JarFile jar = new JarFile(file)) {
-					jar.stream().forEach(jarEntry -> {
-						if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")) {
-							String className = jarEntry.getName().replace('/', '.');
-							classes.add(className.substring(0, className.length()-".class".length()));
-						}
-					});
+					//Scans the jar file for classes which have IModule as a super class
+					List<String> classes = new ArrayList<>();
+					try (JarFile jar = new JarFile(file)) {
+						jar.stream().forEach(jarEntry -> {
+							if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")) {
+								String className = jarEntry.getName().replace('/', '.');
+								classes.add(className.substring(0, className.length() - ".class".length()));
+							}
+						});
+					}
+					for (String clazz : classes) {
+						if (clazz.contains("$"))
+							continue;    //Avoids Nested Classes which can cause Errors due to instantiating before parent class
+						try {
+							Class classInstance = Class.forName(clazz);
+							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
+								addModuleClass(classInstance);
+							}
+						} catch (NoClassDefFoundError e) {	/*This can happen. Looking recursively looking through the classpath is hackish... */}
+					}
+				} else {
+					Discord4J.LOGGER.debug(LogMarkers.MODULES, "Manifest Attribute \"Discord4J-ModuleClass: {}", moduleClass);
+					Class classInstance = Class.forName(moduleClass);
+					if(IModule.class.isAssignableFrom(classInstance))
+						addModuleClass(classInstance);
 				}
-				for (String clazz : classes) {
-					if(clazz.contains("$"))
-						continue;	//Avoids Nested Classes which can cause Errors due to instantiating before parent class
-					try {
-						Class classInstance = Class.forName(clazz);
-						if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
-							addModuleClass(classInstance);
-						}
-					} catch (NoClassDefFoundError e){	/*This can happen. Looking recursively looking through the classpath is hackish... */}
-				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
-				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module "+file.getName()+"!", e);
+			} catch
+					(NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
+				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + file.getName() + "!", e);
 			}
+
 		}
 	}
 
