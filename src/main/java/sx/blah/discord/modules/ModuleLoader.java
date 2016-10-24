@@ -197,8 +197,8 @@ public class ModuleLoader {
 	 */
 	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
 		if (file.isFile() && file.getName().endsWith(".jar")) { //Can't be a directory and must be a jar
-			try {
-				Manifest man = new JarFile(file).getManifest();
+			try(JarFile jar = new JarFile(file)) {
+				Manifest man = jar.getManifest();
 				String moduleClass = man.getMainAttributes().getValue("Discord4J-ModuleClass");
 				//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
 				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
@@ -214,24 +214,19 @@ public class ModuleLoader {
 				if (moduleClass == null) { //If the Module Developer has not specified the Implementing Class, revert to recursive search
 										//Scans the jar file for classes which have IModule as a super class
 					List<String> classes = new ArrayList<>();
-					try (JarFile jar = new JarFile(file)) {
-						jar.stream().forEach(jarEntry -> {
-							if (!jarEntry.isDirectory() && jarEntry.getName().endsWith(".class")) {
-								String className = jarEntry.getName().replace('/', '.');
-								classes.add(className.substring(0, className.length() - ".class".length()));
-							}
-						});
-					}
+					jar.stream().filter(jarEntry -> !jarEntry.isDirectory() && jarEntry.getName().endsWith(".class"))
+							.map(path -> path.getName().replace('/', '.').substring(0, path.getName().length() - ".class".length()))
+							.forEach(classes::add);
 					for (String clazz : classes) {
 						if (clazz.contains("$"))
-							continue;    //Avoids Nested Classes which can cause Errors due to instantiating before parent class
+							continue; //Avoids Nested Classes which can cause Errors due to instantiating before parent class
 						try {
 							Class classInstance = Class.forName(clazz);
 							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
 								Discord4J.LOGGER.info(LogMarkers.MODULES, clazz);
 								addModuleClass(classInstance);
 							}
-						} catch (NoClassDefFoundError e) {	/*This can happen. Looking recursively looking through the classpath is hackish... */}
+						} catch (NoClassDefFoundError ignored) { /*This can happen. Looking recursively looking through the classpath is hackish... */}
 					}
 				} else {
 					Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClass);
