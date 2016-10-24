@@ -180,13 +180,13 @@ public class Discord4J {
 		String token;
 		if (args.length == 0) {
 			File auth = new File("auth.txt");
-			if(!auth.exists())
+			if (!auth.exists())
 				throw new RuntimeException("No arguments Provided and auth.txt does not exists");
-			try(BufferedReader reader = new BufferedReader(new FileReader(auth))) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(auth))) {
 				token = reader.readLine();
-				if(token.length()==0)
+				if (token.length()==0)
 					throw new RuntimeException("Token is Blank");
-			} catch (IOException e){
+			} catch (IOException e) {
 				throw new RuntimeException("Unable to Load Token from Auth file", e);
 			}
 		} else if (args.length == 1) {
