@@ -72,7 +72,7 @@ public class DispatchHandler {
 
 	private void ready(ReadyResponse ready) {
 		ws.hasReceivedReady = true; // Websocket received actual ready event
-		client.getDispatcher().dispatch(new LoginEvent());
+		client.getDispatcher().dispatch(new LoginEvent(shard));
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			client.ourUser = DiscordUtils.getUserFromJSON(shard, ready.user);
@@ -102,7 +102,7 @@ public class DispatchHandler {
 			}
 
 			ws.isReady = true;
-			client.getDispatcher().dispatch(new ReadyEvent()); // All information has been received
+			client.getDispatcher().dispatch(new ReadyEvent(shard)); // All information has been received
 			return true;
 		}).execute();
 	}
