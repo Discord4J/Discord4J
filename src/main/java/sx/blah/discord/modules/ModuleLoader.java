@@ -191,7 +191,7 @@ public class ModuleLoader {
 
 	/**
 	 * Loads a jar file and automatically adds any modules.
-	 * To Avoid High Overhead Recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest
+	 * To avoid high overhead recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest
 	 *
 	 * @param file The jar file to load.
 	 */
@@ -236,10 +236,10 @@ public class ModuleLoader {
 				} else {
 					Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClass);
 					Class classInstance = Class.forName(moduleClass);
-					if(IModule.class.isAssignableFrom(classInstance))
+					if (IModule.class.isAssignableFrom(classInstance))
 						addModuleClass(classInstance);
 				}
-			} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + file.getName() + "!", e);
 			}
 
