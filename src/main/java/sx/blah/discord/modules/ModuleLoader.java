@@ -197,7 +197,7 @@ public class ModuleLoader {
 	 */
 	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
 		if (file.isFile() && file.getName().endsWith(".jar")) { //Can't be a directory and must be a jar
-			try(JarFile jar = new JarFile(file)) {
+			try (JarFile jar = new JarFile(file)) {
 				Manifest man = jar.getManifest();
 				String moduleClass = man.getMainAttributes().getValue("Discord4J-ModuleClass");
 				//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
