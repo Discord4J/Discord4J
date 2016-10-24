@@ -26,14 +26,19 @@ import org.slf4j.helpers.MarkerIgnoringBase;
 import org.slf4j.helpers.MessageFormatter;
 import org.slf4j.helpers.NOPLoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.modules.Configuration;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Properties;
@@ -179,6 +184,8 @@ public class Discord4J {
 				throw new RuntimeException("No arguments Provided and auth.txt does not exists");
 			try(BufferedReader reader = new BufferedReader(new FileReader(auth))) {
 				token = reader.readLine();
+				if(token.length()==0)
+					throw new RuntimeException("Token is Blank");
 			} catch (IOException e){
 				throw new RuntimeException("Unable to Load Token from Auth file", e);
 			}

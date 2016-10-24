@@ -196,7 +196,6 @@ public class ModuleLoader {
 	 * @param file The jar file to load.
 	 */
 	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
-
 		if (file.isFile() && file.getName().endsWith(".jar")) { //Can't be a directory and must be a jar
 			try {
 				Manifest man = new JarFile(file).getManifest();
@@ -240,8 +239,7 @@ public class ModuleLoader {
 					if(IModule.class.isAssignableFrom(classInstance))
 						addModuleClass(classInstance);
 				}
-			} catch
-					(NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
+			} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + file.getName() + "!", e);
 			}
 
