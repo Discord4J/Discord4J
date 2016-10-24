@@ -178,7 +178,7 @@ public class Discord4J {
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
 			throw new RuntimeException("Invalid configuration!");
 		String token;
-		if (args.length == 0){
+		if (args.length == 0) {
 			File auth = new File("auth.txt");
 			if(!auth.exists())
 				throw new RuntimeException("No arguments Provided and auth.txt does not exists");
@@ -189,7 +189,7 @@ public class Discord4J {
 			} catch (IOException e){
 				throw new RuntimeException("Unable to Load Token from Auth file", e);
 			}
-		} else if(args.length == 1){
+		} else if (args.length == 1) {
 			token = args[0];
 		} else {
 			throw new RuntimeException("Invalid configuration!");
