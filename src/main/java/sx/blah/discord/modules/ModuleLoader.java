@@ -191,28 +191,29 @@ public class ModuleLoader {
 
 	/**
 	 * Loads a jar file and automatically adds any modules.
+	 * To Avoid High Overhead Recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest
 	 *
 	 * @param file The jar file to load.
 	 */
 	public static synchronized void loadExternalModules(File file) { //A bit hacky, but oracle be dumb and encapsulates URLClassLoader#addUrl()
+
 		if (file.isFile() && file.getName().endsWith(".jar")) { //Can't be a directory and must be a jar
 			try {
 				Manifest man = new JarFile(file).getManifest();
-				String moduleClass = (String) man.getMainAttributes().get("Discord4J-ModuleClass");
-				if (moduleClass == null) {
-					//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
-					URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-					URL url = file.toURI().toURL();
-					for (URL it : Arrays.asList(loader.getURLs())) {//Ensures duplicate libraries aren't loaded
-						if (it.equals(url)) {
-							return;
-						}
+				String moduleClass = man.getMainAttributes().getValue("Discord4J-ModuleClass");
+				//Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
+				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+				URL url = file.toURI().toURL();
+				for (URL it : Arrays.asList(loader.getURLs())) {//Ensures duplicate libraries aren't loaded
+					if (it.equals(url)) {
+						return;
 					}
-					Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
-					method.setAccessible(true);
-					method.invoke(loader, new Object[]{url});
-
-					//Scans the jar file for classes which have IModule as a super class
+				}
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+				method.setAccessible(true);
+				method.invoke(loader, new Object[]{url});
+				if (moduleClass == null) { //If the Module Developer has not specified the Implementing Class, revert to recursive search
+										//Scans the jar file for classes which have IModule as a super class
 					List<String> classes = new ArrayList<>();
 					try (JarFile jar = new JarFile(file)) {
 						jar.stream().forEach(jarEntry -> {
@@ -228,6 +229,7 @@ public class ModuleLoader {
 						try {
 							Class classInstance = Class.forName(clazz);
 							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
+								Discord4J.LOGGER.info(LogMarkers.MODULES, clazz);
 								addModuleClass(classInstance);
 							}
 						} catch (NoClassDefFoundError e) {	/*This can happen. Looking recursively looking through the classpath is hackish... */}
