@@ -200,7 +200,11 @@ public class ModuleLoader {
 		if (file.isFile() && file.getName().endsWith(".jar")) { // Can't be a directory and must be a jar
 			try (JarFile jar = new JarFile(file)) {
 				Manifest man = jar.getManifest();
-				String[] moduleClasses = man.getMainAttributes().getValue("Discord4J-ModuleClass").split(":");
+				String moduleAttrib = man.getMainAttributes().getValue("Discord4J-ModuleClass");
+				String[] moduleClasses = new String[0];
+				if (moduleAttrib != null) {
+					moduleClasses = moduleAttrib.split(":");
+				}
 				// Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
 				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 				URL url = file.toURI().toURL();
@@ -220,10 +224,16 @@ public class ModuleLoader {
 							.forEach(classes::add);
 					for (String clazz : classes) {
 						loadClass(clazz);
+						try {
+							Class classInstance = Class.forName(clazz);
+							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
+								addModuleClass(classInstance);
+							}
+						} catch (NoClassDefFoundError ignored) { /*This can happen. Looking recursively looking through the classpath is hackish... */ }
 					}
 				} else {
 					for (String moduleClass : moduleClasses) {
-						Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClasses);
+						Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClass);
 						Class classInstance = Class.forName(moduleClass);
 						if (IModule.class.isAssignableFrom(classInstance)) addModuleClass(classInstance);
 					}
@@ -241,12 +251,6 @@ public class ModuleLoader {
 				loadClass(clazz.substring(0, clazz.lastIndexOf("$")));
 			} catch (ClassNotFoundException ignored){ /* If the parent class doesn't exist then it is safe to instantiate the child */}
 		}
-		try {
-			Class classInstance = Class.forName(clazz);
-			if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
-				addModuleClass(classInstance);
-			}
-		} catch (NoClassDefFoundError ignored) { /*This can happen. Looking recursively looking through the classpath is hackish... */ }
 	}
 
 	/**
