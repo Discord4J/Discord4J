@@ -192,6 +192,7 @@ public class ModuleLoader {
 	/**
 	 * Loads a jar file and automatically adds any modules.
 	 * To avoid high overhead recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest
+	 * Multiple classes should be separated by a colon ":"
 	 *
 	 * @param file The jar file to load.
 	 */
@@ -199,7 +200,7 @@ public class ModuleLoader {
 		if (file.isFile() && file.getName().endsWith(".jar")) { // Can't be a directory and must be a jar
 			try (JarFile jar = new JarFile(file)) {
 				Manifest man = jar.getManifest();
-				String moduleClass = man.getMainAttributes().getValue("Discord4J-ModuleClass");
+				String[] moduleClasses = man.getMainAttributes().getValue("Discord4J-ModuleClass").split(":");
 				// Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
 				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 				URL url = file.toURI().toURL();
@@ -208,37 +209,44 @@ public class ModuleLoader {
 						return;
 					}
 				}
-				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
-				method.invoke(loader, new Object[]{url});
-				if (moduleClass == null) { //If the Module Developer has not specified the Implementing Class, revert to recursive search
+				method.invoke(loader, url);
+				if (moduleClasses.length == 0) { //If the Module Developer has not specified the Implementing Class, revert to recursive search
 					// Scans the jar file for classes which have IModule as a super class
 					List<String> classes = new ArrayList<>();
 					jar.stream().filter(jarEntry -> !jarEntry.isDirectory() && jarEntry.getName().endsWith(".class"))
 							.map(path -> path.getName().replace('/', '.').substring(0, path.getName().length() - ".class".length()))
 							.forEach(classes::add);
 					for (String clazz : classes) {
-						if (clazz.contains("$"))
-							continue; // Avoids Nested Classes which can cause Errors due to instantiating before parent class
-						try {
-							Class classInstance = Class.forName(clazz);
-							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
-								Discord4J.LOGGER.info(LogMarkers.MODULES, clazz);
-								addModuleClass(classInstance);
-							}
-						} catch (NoClassDefFoundError ignored) { /* This can happen. Looking recursively looking through the classpath is hackish... */}
+						loadClass(clazz);
 					}
 				} else {
-					Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClass);
-					Class classInstance = Class.forName(moduleClass);
-					if (IModule.class.isAssignableFrom(classInstance))
-						addModuleClass(classInstance);
+					for (String moduleClass : moduleClasses) {
+						Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClasses);
+						Class classInstance = Class.forName(moduleClass);
+						if (IModule.class.isAssignableFrom(classInstance)) addModuleClass(classInstance);
+					}
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + file.getName() + "!", e);
 			}
 
 		}
+	}
+
+	private static void loadClass(String clazz) throws ClassNotFoundException{
+		if (clazz.contains("$")) {
+			try {
+				loadClass(clazz.substring(0, clazz.lastIndexOf("$")));
+			} catch (ClassNotFoundException ignored){ /* If the parent class doesn't exist then it is safe to instantiate the child */}
+		}
+		try {
+			Class classInstance = Class.forName(clazz);
+			if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
+				addModuleClass(classInstance);
+			}
+		} catch (NoClassDefFoundError ignored) { /*This can happen. Looking recursively looking through the classpath is hackish... */ }
 	}
 
 	/**

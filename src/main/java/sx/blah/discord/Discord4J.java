@@ -169,7 +169,6 @@ public class Discord4J {
 
 	/**
 	 * This is used to run Discord4J independent of any bot, making it module dependent.
-	 * if no arguments are given, it will look for a token in a file called "auth.txt"
 	 *
 	 * @param args The args should be either email/password or just the bot token
 	 */
@@ -178,18 +177,7 @@ public class Discord4J {
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
 			throw new RuntimeException("Invalid configuration!");
 		String token;
-		if (args.length == 0) {
-			File auth = new File("auth.txt");
-			if (!auth.exists())
-				throw new RuntimeException("No arguments Provided and auth.txt does not exists");
-			try (BufferedReader reader = new BufferedReader(new FileReader(auth))) {
-				token = reader.readLine();
-				if (token.length()==0)
-					throw new RuntimeException("Token is Blank");
-			} catch (IOException e) {
-				throw new RuntimeException("Unable to Load Token from Auth file", e);
-			}
-		} else if (args.length == 1) {
+		if (args.length == 1) {
 			token = args[0];
 		} else {
 			throw new RuntimeException("Invalid configuration!");
