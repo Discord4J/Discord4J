@@ -215,7 +215,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason {}.", statusCode, reason);
+		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason {}", statusCode, reason);
 	}
 
 }

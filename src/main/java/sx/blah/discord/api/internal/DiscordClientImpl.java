@@ -1,33 +1,22 @@
 package sx.blah.discord.api.internal;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.api.internal.json.objects.InviteObject;
-import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
-import sx.blah.discord.handle.impl.events.StatusChangeEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -99,18 +88,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, EventDispatcher dispatcher, ModuleLoader loader) {
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
-		this.dispatcher = dispatcher;
-		this.loader = loader;
-	}
-
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount) {
-		this(token, timeoutTime, maxMissedPingCount, isDaemon, shardCount, null, null);
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
@@ -174,10 +157,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IUser getOurUser() {
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get current user before bot has logged in!");
-			return null;
-		}
 		return ourUser;
 	}
 
@@ -270,10 +249,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return null;
 	}
 
-	private void validateToken() throws DiscordException, RateLimitException {
-		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds");
-	}
-
 	private String obtainGateway() {
 		String gateway = null;
 		try {
@@ -290,13 +265,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 	// Sharding delegation
 
 	@Override
-	public void login() throws DiscordException, RateLimitException {
-		validateToken();
+	public void login() {
+		ScheduledExecutorService loginHandler = Executors.newSingleThreadScheduledExecutor();
+
 		String gateway = obtainGateway();
 		for (int i = 0; i < shardCount; i++) {
 			ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon);
 			getShards().add(i, shard);
-			shard.login();
+			loginHandler.schedule(() -> {
+				try {
+					shard.login();
+				} catch (DiscordException e) {
+					e.printStackTrace();
+				}
+			}, i * 7, TimeUnit.SECONDS); // Login ratelimit
 		}
 	}
 

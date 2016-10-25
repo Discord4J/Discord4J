@@ -75,7 +75,9 @@ public class DispatchHandler {
 		client.getDispatcher().dispatch(new LoginEvent(shard));
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
-			client.ourUser = DiscordUtils.getUserFromJSON(shard, ready.user);
+			if (client.ourUser == null) client.ourUser = new User(shard, ready.user.username, ready.user.id,
+					ready.user.discriminator, ready.user.avatar, Presences.OFFLINE, ready.user.bot);
+
 			ws.sessionId = ready.session_id;
 
 			//Disable initial caching for performance
@@ -192,7 +194,7 @@ public class DispatchHandler {
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
 		shard.guildList.add(guild);
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
-		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {}.", guild.getName(), guild.getID());
+		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
 	}
 
 	private void guildMemberAdd(GuildMemberAddEventResponse event) {

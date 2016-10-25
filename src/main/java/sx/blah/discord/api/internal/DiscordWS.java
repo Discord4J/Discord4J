@@ -163,23 +163,14 @@ public class DiscordWS extends WebSocketAdapter {
 			case INVALID_SESSION_OP:
 			case ABNORMAL_CLOSE:
 				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "WS should reconnect panda is bad.");
+				getSession().close(); // TODO: Definitely not
 				break;
 			case LOGGED_OUT:
-				clearCaches();
 				getSession().close();
 				break;
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled disconnect reason");
 		}
-	}
-
-	private void clearCaches() {
-		shard.guildList.clear();
-		shard.privateChannels.clear();
-		client.ourUser = null;
-		client.REGIONS.clear();
-		seq = 0;
-		sessionId = null;
 	}
 
 	@Override
