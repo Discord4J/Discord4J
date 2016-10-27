@@ -37,6 +37,10 @@ public enum Permissions {
 	 */
 	MANAGE_SERVER(5),
 	/**
+	 * Allows the user to add emoji reactions.
+	 */
+	ADD_REACTIONS(6),
+	/**
 	 * Allows the user to read messages.
 	 */
 	READ_MESSAGES(10),
@@ -190,7 +194,7 @@ public enum Permissions {
 	public static int generatePermissionsNumber(EnumSet<Permissions> permissions) {
 		if (permissions == null)
 			permissions = EnumSet.noneOf(Permissions.class);
-			
+
 		int number = 0;
 		for (Permissions permission : permissions) {
 			number |= (1 << permission.offset);
