@@ -7,7 +7,7 @@
  * <p>
  * First, the class loading. If a jar file's MANIFEST.MF includes an attribute called "Discord4J-ModuleClass", then it
  * will load only that class and skip the recursive search. If there is more than one IModule implementation than the
- * classes should be listed, separated by a colon ":". This method is recommended as it saves on loading overhead.
+ * classes should be listed, separated by a semicolon ";". This method is recommended as it saves on loading overhead.
  * When Discord4J searches for a class implementing {@link sx.blah.discord.modules.IModule}, it will first check the
  * jar file's MANIFEST.MF for the "module-requires" property. If that property exists, Discord4J will attempt to load
  * a jar file containing a class which corresponds to the value of that property first, preventing any class loading

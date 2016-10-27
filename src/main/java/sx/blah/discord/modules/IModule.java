@@ -9,7 +9,7 @@ import sx.blah.discord.api.events.IListener;
  * as event listeners, so your module can use {@link EventSubscriber} or
  * {@link IListener} to listen for events.
  * Deployment: The Module Loader will first look for an attribute called "Discord4J-ModuleClass" in a jar's manifest which
- * contains the fully qualified name of all IModule implementations, separated by colons ":". If it does not exist then it will default to a
+ * contains the fully qualified name of all IModule implementations, separated by semicolons ";". If it does not exist then it will default to a
  * recursive search through all the classes of the jar. It is recommended to use the jar attribute in order to reduce Loader overhead.
  * NOTE: This module must respect the enable() and disable() methods. And it <b>MUST</b> have a default constructor.
  */

@@ -192,7 +192,7 @@ public class ModuleLoader {
 	/**
 	 * Loads a jar file and automatically adds any modules.
 	 * To avoid high overhead recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest
-	 * Multiple classes should be separated by a colon ":"
+	 * Multiple classes should be separated by a semicolon ";"
 	 *
 	 * @param file The jar file to load.
 	 */
@@ -203,7 +203,7 @@ public class ModuleLoader {
 				String moduleAttrib = man.getMainAttributes().getValue("Discord4J-ModuleClass");
 				String[] moduleClasses = new String[0];
 				if (moduleAttrib != null) {
-					moduleClasses = moduleAttrib.split(":");
+					moduleClasses = moduleAttrib.split(";");
 				}
 				// Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
 				URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
