@@ -34,9 +34,6 @@ public class ModuleLoader {
 	public static final String MODULE_DIR = "modules";
 	protected static final List<Class<? extends IModule>> modules = new CopyOnWriteArrayList<>();
 
-	private IDiscordClient client;
-	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
-
 	static {
 		//Yay! Proprietary hooks. This is used for ModuleLoader+ (https://github.com/Discord4J-Addons/Module-Loader-Plus)
 		// to be able to load internal modules automagically. This is not in Discord4J by default due to the massive
@@ -64,6 +61,9 @@ public class ModuleLoader {
 			}
 		}
 	}
+
+	private IDiscordClient client;
+	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
 
 	public ModuleLoader(IDiscordClient client) {
 		this.client = client;
@@ -94,15 +94,6 @@ public class ModuleLoader {
 	}
 
 	/**
-	 * Gets the modules loaded in this ModuleLoader instance.
-	 *
-	 * @return The list of loaded modules.
-	 */
-	public List<IModule> getLoadedModules() {
-		return loadedModules;
-	}
-
-	/**
 	 * Gets the module classes which will/has been loaded and may or may not be enabled in a given module instance.
 	 *
 	 * @return The module classes.
@@ -111,82 +102,6 @@ public class ModuleLoader {
 	 */
 	public static List<Class<? extends IModule>> getModules() {
 		return modules;
-	}
-
-	/**
-	 * Manually loads a module.
-	 *
-	 * @param module The module to load.
-	 * @return True if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
-	 */
-	public boolean loadModule(IModule module) {
-		Class<? extends IModule> clazz = module.getClass();
-		if (clazz.isAnnotationPresent(Requires.class)) {
-			Requires annotation = clazz.getAnnotation(Requires.class);
-			if (!hasDependency(loadedModules, annotation.value())) {
-				return false;
-			}
-		}
-		boolean enabled = module.enable(client);
-		if (enabled) {
-			client.getDispatcher().registerListener(module);
-			if (!loadedModules.contains(module))
-				loadedModules.add(module);
-
-			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
-		}
-
-		return true;
-	}
-
-	/**
-	 * Manually unloads a module.
-	 *
-	 * @param module The module to unload.
-	 */
-	public void unloadModule(IModule module) {
-		loadedModules.remove(module);
-		module.disable();
-		client.getDispatcher().unregisterListener(module);
-
-		loadedModules.removeIf(mod -> {
-			Class<? extends IModule> clazz = module.getClass();
-			if (clazz.isAnnotationPresent(Requires.class)) {
-				Requires annotation = clazz.getAnnotation(Requires.class);
-				if (annotation.value().equals(module.getClass().getName())) {
-					unloadModule(mod);
-					return true;
-				}
-			}
-			return false;
-		});
-
-		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
-	}
-
-	private boolean hasDependency(List<IModule> modules, String className) {
-		for (IModule module : modules)
-			if (module.getClass().getName().equals(className))
-				return true;
-		return false;
-	}
-
-	private boolean canModuleLoad(IModule module) {
-		String[] versions;
-		String[] discord4jVersion;
-		try {
-			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
-			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
-
-			for (int i = 0; i < Math.min(versions.length, 2); i++) { //We only care about major.minor, the revision change should not be big enough to care about
-				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
-					return false;
-			}
-		} catch (NumberFormatException e) {
-			Discord4J.LOGGER.error(LogMarkers.MODULES, "Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -243,11 +158,11 @@ public class ModuleLoader {
 		}
 	}
 
-	private static Class loadClass(String clazz) throws ClassNotFoundException{
+	private static Class loadClass(String clazz) throws ClassNotFoundException {
 		if (clazz.contains("$")) {
 			try {
 				loadClass(clazz.substring(0, clazz.lastIndexOf("$")));
-			} catch (ClassNotFoundException ignored){ /* If the parent class doesn't exist then it is safe to instantiate the child */}
+			} catch (ClassNotFoundException ignored) { /* If the parent class doesn't exist then it is safe to instantiate the child */}
 		}
 		return loadClass(clazz);
 	}
@@ -355,5 +270,75 @@ public class ModuleLoader {
 	 */
 	public static void addModuleClass(Class<? extends IModule> clazz) {
 		modules.add(clazz);
+	}
+
+	/**
+	 * Gets the modules loaded in this ModuleLoader instance.
+	 *
+	 * @return The list of loaded modules.
+	 */
+	public List<IModule> getLoadedModules() {
+		return loadedModules;
+	}
+
+	/**
+	 * Manually loads a module.
+	 *
+	 * @param module The module to load.
+	 * @return True if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
+	 */
+	public boolean loadModule(IModule module) {
+		Class<? extends IModule> clazz = module.getClass(); if (clazz.isAnnotationPresent(Requires.class)) {
+			Requires annotation = clazz.getAnnotation(Requires.class);
+			if (!hasDependency(loadedModules, annotation.value())) {
+				return false;
+			}
+		} boolean enabled = module.enable(client); if (enabled) {
+			client.getDispatcher().registerListener(module);
+			if (!loadedModules.contains(module)) loadedModules.add(module);
+
+			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
+		}
+
+		return true;
+	}
+
+	/**
+	 * Manually unloads a module.
+	 *
+	 * @param module The module to unload.
+	 */
+	public void unloadModule(IModule module) {
+		loadedModules.remove(module); module.disable(); client.getDispatcher().unregisterListener(module);
+
+		loadedModules.removeIf(mod -> {
+			Class<? extends IModule> clazz = module.getClass(); if (clazz.isAnnotationPresent(Requires.class)) {
+				Requires annotation = clazz.getAnnotation(Requires.class);
+				if (annotation.value().equals(module.getClass().getName())) {
+					unloadModule(mod); return true;
+				}
+			} return false;
+		});
+
+		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
+	}
+
+	private boolean hasDependency(List<IModule> modules, String className) {
+		for (IModule module : modules)
+			if (module.getClass().getName().equals(className)) return true; return false;
+	}
+
+	private boolean canModuleLoad(IModule module) {
+		String[] versions; String[] discord4jVersion; try {
+			versions = module.getMinimumDiscord4JVersion().toLowerCase().replace("-snapshot", "").split("\\.");
+			discord4jVersion = Discord4J.VERSION.toLowerCase().replace("-snapshot", "").split("\\.");
+
+			for (int i = 0; i < Math.min(versions.length, 2); i++) { //We only care about major.minor, the revision change should not be big enough to care about
+				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i])) return false;
+			}
+		} catch (NumberFormatException e) {
+			Discord4J.LOGGER.error(LogMarkers.MODULES, "Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
+			return false;
+		} return true;
 	}
 }
