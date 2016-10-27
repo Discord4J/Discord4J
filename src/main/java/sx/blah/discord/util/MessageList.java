@@ -1,17 +1,16 @@
 package sx.blah.discord.util;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.MessageObject;
+import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -563,7 +562,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			throw new DiscordException("You can only delete 100 messages at a time!");
 
 		try {
-			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
+			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk-delete",
 					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
