@@ -223,9 +223,8 @@ public class ModuleLoader {
 							.map(path -> path.getName().replace('/', '.').substring(0, path.getName().length() - ".class".length()))
 							.forEach(classes::add);
 					for (String clazz : classes) {
-						loadClass(clazz);
 						try {
-							Class classInstance = Class.forName(clazz);
+							Class classInstance = loadClass(clazz);
 							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
 								addModuleClass(classInstance);
 							}
@@ -244,12 +243,13 @@ public class ModuleLoader {
 		}
 	}
 
-	private static void loadClass(String clazz) throws ClassNotFoundException{
+	private static Class loadClass(String clazz) throws ClassNotFoundException{
 		if (clazz.contains("$")) {
 			try {
 				loadClass(clazz.substring(0, clazz.lastIndexOf("$")));
 			} catch (ClassNotFoundException ignored){ /* If the parent class doesn't exist then it is safe to instantiate the child */}
 		}
+		return loadClass(clazz);
 	}
 
 	/**
