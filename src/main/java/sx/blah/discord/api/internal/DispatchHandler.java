@@ -61,9 +61,11 @@ public class DispatchHandler {
 			case "GUILD_BAN_ADD": guildBanAdd(DiscordUtils.GSON.fromJson(event.get("d"), GuildBanEventResponse.class)); break;
 			case "GUILD_BAN_REMOVE": guildBanRemove(DiscordUtils.GSON.fromJson(event.get("d"), GuildBanEventResponse.class)); break;
 			case "GUILD_EMOJIS_UPDATE": /* TODO: Impl Emoji */ break;
-			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations*/ break;
+			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */ break;
 			case "VOICE_STATE_UPDATE": voiceStateUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceStateObject.class)); break;
 			case "VOICE_SERVER_UPDATE": voiceServerUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceUpdateResponse.class)); break;
+			case "MESSAGE_REACTION_ADD": /* TODO: Impl Message reactions */ break;
+			case "MESSAGE_REACTION_REMOVE": /* TODO: Impl Message reactions */ break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
