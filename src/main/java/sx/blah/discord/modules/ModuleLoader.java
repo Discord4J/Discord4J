@@ -45,7 +45,8 @@ public class ModuleLoader {
 		}
 
 		if (Configuration.LOAD_EXTERNAL_MODULES) {
-			File modulesDir = new File(MODULE_DIR); if (modulesDir.exists()) {
+			File modulesDir = new File(MODULE_DIR);
+			if (modulesDir.exists()) {
 				if (!modulesDir.isDirectory()) {
 					throw new RuntimeException(MODULE_DIR + " isn't a directory!");
 				}
@@ -84,7 +85,8 @@ public class ModuleLoader {
 		}
 
 		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {//Handles module load order and loads the modules
-			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules); while (toLoad.size() > 0) {
+			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
+			while (toLoad.size() > 0) {
 				for (IModule module : toLoad) {
 					if (loadModule(module)) toLoad.remove(module);
 				}
@@ -114,7 +116,8 @@ public class ModuleLoader {
 			try (JarFile jar = new JarFile(file)) {
 				Manifest man = jar.getManifest();
 				String moduleAttrib = man.getMainAttributes().getValue("Discord4J-ModuleClass");
-				String[] moduleClasses = new String[0]; if (moduleAttrib != null) {
+				String[] moduleClasses = new String[0];
+				if (moduleAttrib != null) {
 					moduleClasses = moduleAttrib.split(";");
 				}
 				// Executes would should be URLCLassLoader.addUrl(file.toURI().toURL());
@@ -124,8 +127,10 @@ public class ModuleLoader {
 					if (it.equals(url)) {
 						return;
 					}
-				} Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-				method.setAccessible(true); method.invoke(loader, url);
+				}
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+				method.setAccessible(true);
+				method.invoke(loader, url);
 				if (moduleClasses.length == 0) { // If the Module Developer has not specified the Implementing Class, revert to recursive search
 					// Scans the jar file for classes which have IModule as a super class
 					List<String> classes = new ArrayList<>();
@@ -156,7 +161,8 @@ public class ModuleLoader {
 			try {
 				loadClass(clazz.substring(0, clazz.lastIndexOf("$")));
 			} catch (ClassNotFoundException ignored) { /* If the parent class doesn't exist then it is safe to instantiate the child */}
-		} return loadClass(clazz);
+		}
+		return loadClass(clazz);
 	}
 
 	/**
@@ -165,7 +171,8 @@ public class ModuleLoader {
 	 * @param files The jar files to load.
 	 */
 	public static void loadExternalModules(List<File> files) {
-		List<File> independents = new ArrayList<>(); List<File> dependents = new ArrayList<>();
+		List<File> independents = new ArrayList<>();
+		List<File> dependents = new ArrayList<>();
 
 		files.forEach((file) -> {
 			try {
@@ -183,22 +190,29 @@ public class ModuleLoader {
 
 		List<File> noLongerDependents = dependents.stream().filter(jarFile -> { // loads all dependents whose requirements have been met already
 			try {
-				String[] moduleRequires = getModuleRequires(jarFile); List<Class> classes = new ArrayList<>();
+				String[] moduleRequires = getModuleRequires(jarFile);
+				List<Class> classes = new ArrayList<>();
 				for (String clazz : moduleRequires) {
 					classes.add(Class.forName(clazz));
-				} return classes.size() == moduleRequires.length;
+				}
+				return classes.size() == moduleRequires.length;
 			} catch (Exception e) {
 				return false;
 			}
-		}).collect(Collectors.toList()); dependents.removeAll(noLongerDependents);
+		}).collect(Collectors.toList());
+		dependents.removeAll(noLongerDependents);
 		noLongerDependents.forEach(ModuleLoader::loadExternalModules);
 
-		final int retryAttempts = dependents.size(); for (int i = 0; i < retryAttempts; i++) {
+		final int retryAttempts = dependents.size();
+		for (int i = 0; i < retryAttempts; i++) {
 			dependents.removeIf((file -> { // Filters out all usable files
-				boolean loaded = false; try {
-					String[] required = getModuleRequires(file); for (String clazz : required) {
+				boolean loaded = false;
+				try {
+					String[] required = getModuleRequires(file);
+					for (String clazz : required) {
 						try {
-							Class.forName(clazz); loaded = true;
+							Class.forName(clazz);
+							loaded = true;
 						} catch (ClassNotFoundException ignored) {
 						}
 
@@ -221,7 +235,8 @@ public class ModuleLoader {
 	}
 
 	private static String[] getModuleRequires(File file) throws IOException {
-		JarFile jarFile = new JarFile(file); Manifest manifest = jarFile.getManifest();
+		JarFile jarFile = new JarFile(file);
+		Manifest manifest = jarFile.getManifest();
 		Attributes.Name moduleRequires = new Attributes.Name("module-requires");
 		if (manifest != null && manifest.getMainAttributes() != null && manifest.getMainAttributes().containsKey(moduleRequires)) {
 			String value = manifest.getMainAttributes().getValue(moduleRequires);
@@ -267,12 +282,15 @@ public class ModuleLoader {
 	 * @return true if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
 	 */
 	public boolean loadModule(IModule module) {
-		Class<? extends IModule> clazz = module.getClass(); if (clazz.isAnnotationPresent(Requires.class)) {
+		Class<? extends IModule> clazz = module.getClass();
+		if (clazz.isAnnotationPresent(Requires.class)) {
 			Requires annotation = clazz.getAnnotation(Requires.class);
 			if (!hasDependency(loadedModules, annotation.value())) {
 				return false;
 			}
-		} boolean enabled = module.enable(client); if (enabled) {
+		}
+		boolean enabled = module.enable(client);
+		if (enabled) {
 			client.getDispatcher().registerListener(module);
 			if (!loadedModules.contains(module)) loadedModules.add(module);
 			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
@@ -287,15 +305,20 @@ public class ModuleLoader {
 	 * @param module The module to unload.
 	 */
 	public void unloadModule(IModule module) {
-		loadedModules.remove(module); module.disable(); client.getDispatcher().unregisterListener(module);
+		loadedModules.remove(module);
+		module.disable();
+		client.getDispatcher().unregisterListener(module);
 
 		loadedModules.removeIf(mod -> {
-			Class<? extends IModule> clazz = module.getClass(); if (clazz.isAnnotationPresent(Requires.class)) {
+			Class<? extends IModule> clazz = module.getClass();
+			if (clazz.isAnnotationPresent(Requires.class)) {
 				Requires annotation = clazz.getAnnotation(Requires.class);
 				if (annotation.value().toLowerCase(Locale.ROOT).equals(module.getClass().getName())) {
-					unloadModule(mod); return true;
+					unloadModule(mod);
+					return true;
 				}
-			} return false;
+			}
+			return false;
 		});
 
 		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
@@ -303,11 +326,14 @@ public class ModuleLoader {
 
 	private boolean hasDependency(List<IModule> modules, String className) {
 		for (IModule module : modules)
-			if (module.getClass().getName().equals(className)) return true; return false;
+			if (module.getClass().getName().equals(className)) return true;
+		return false;
 	}
 
 	private boolean canModuleLoad(IModule module) {
-		String[] versions; String[] discord4jVersion; try {
+		String[] versions;
+		String[] discord4jVersion;
+		try {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
 
@@ -317,6 +343,7 @@ public class ModuleLoader {
 		} catch (NumberFormatException e) {
 			Discord4J.LOGGER.error(LogMarkers.MODULES, "Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
 			return false;
-		} return true;
+		}
+		return true;
 	}
 }
