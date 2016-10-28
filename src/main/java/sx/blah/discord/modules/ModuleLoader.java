@@ -44,8 +44,7 @@ public class ModuleLoader {
 		// overhead it provides.
 		try {
 			Class.forName("com.austinv11.modules.ModuleLoaderPlus"); // Loads the class' static initializer block
-		} catch (ClassNotFoundException ignored) {
-		}
+		} catch (ClassNotFoundException ignored) {}
 
 		if (Configuration.LOAD_EXTERNAL_MODULES) {
 			File modulesDir = new File(MODULE_DIR);
@@ -133,8 +132,10 @@ public class ModuleLoader {
 			client.getDispatcher().registerListener(module);
 			if (!loadedModules.contains(module))
 				loadedModules.add(module);
+
 			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
 		}
+
 		return true;
 	}
 
@@ -159,6 +160,7 @@ public class ModuleLoader {
 			}
 			return false;
 		});
+
 		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
 	}
 
@@ -175,6 +177,7 @@ public class ModuleLoader {
 		try {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
+			
 			for (int i = 0; i < Math.min(versions.length, 2); i++) { // We only care about major.minor, the revision change should not be big enough to care about
 				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
 					return false;
@@ -239,6 +242,9 @@ public class ModuleLoader {
 		}
 	}
 
+	/**
+	 * This method is used to recursively load the parents of subclasses in order to avoid errors
+	 */
 	private static Class loadClass(String clazz) throws ClassNotFoundException {
 		if (clazz.contains("$") && clazz.substring(0, clazz.lastIndexOf("$")).length() > 0) {
 			try {
@@ -298,19 +304,25 @@ public class ModuleLoader {
 							Class.forName(clazz);
 							loaded = true;
 						} catch (ClassNotFoundException ignored) {}
+
 						if (!loaded)
 							loaded = findFileForClass(files, clazz) != null;
+
 						if (!loaded)
 							break;
 					}
 				} catch (IOException ignored) {}
+
 				if (loaded)
 					loadExternalModules(file);
+
 				return loaded;
 			}));
+
 			if (dependents.size() == 0)
 				break;
 		}
+
 		if (dependents.size() > 0)
 			Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
 	}
@@ -319,7 +331,8 @@ public class ModuleLoader {
 		JarFile jarFile = new JarFile(file);
 		Manifest manifest = jarFile.getManifest();
 		Attributes.Name moduleRequires = new Attributes.Name("module-requires");
-		if (manifest != null && manifest.getMainAttributes() != null && manifest.getMainAttributes().containsKey(moduleRequires)) {
+		if (manifest != null && manifest.getMainAttributes() != null
+				&& manifest.getMainAttributes().containsKey(moduleRequires)) {
 			String value = manifest.getMainAttributes().getValue(moduleRequires);
 			return value.contains(";") ? value.split(";") : new String[]{value};
 		} else {
@@ -346,5 +359,4 @@ public class ModuleLoader {
 	public static void addModuleClass(Class<? extends IModule> clazz) {
 		modules.add(clazz);
 	}
-
 }
