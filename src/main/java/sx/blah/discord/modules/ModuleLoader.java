@@ -153,7 +153,7 @@ public class ModuleLoader {
 			Class<? extends IModule> clazz = module.getClass();
 			if (clazz.isAnnotationPresent(Requires.class)) {
 				Requires annotation = clazz.getAnnotation(Requires.class);
-				if (annotation.value().toLowerCase(Locale.ROOT).equals(module.getClass().getName())) {
+				if (annotation.value().equals(module.getClass().getName())) {
 					unloadModule(mod);
 					return true;
 				}
@@ -177,7 +177,7 @@ public class ModuleLoader {
 		try {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
-			
+
 			for (int i = 0; i < Math.min(versions.length, 2); i++) { // We only care about major.minor, the revision change should not be big enough to care about
 				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
 					return false;
