@@ -41,8 +41,7 @@ public class ModuleLoader {
 		// overhead it provides.
 		try {
 			Class.forName("com.austinv11.modules.ModuleLoaderPlus"); // Loads the class' static initializer block
-		} catch (ClassNotFoundException ignored) {
-		}
+		} catch (ClassNotFoundException ignored) {}
 
 		if (Configuration.LOAD_EXTERNAL_MODULES) {
 			File modulesDir = new File(MODULE_DIR);
@@ -84,11 +83,12 @@ public class ModuleLoader {
 			}
 		}
 
-		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {//Handles module load order and loads the modules
+		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
 			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
 			while (toLoad.size() > 0) {
 				for (IModule module : toLoad) {
-					if (loadModule(module)) toLoad.remove(module);
+					if (loadModule(module))
+						toLoad.remove(module);
 				}
 			}
 		}
@@ -141,13 +141,14 @@ public class ModuleLoader {
 							if (IModule.class.isAssignableFrom(classInstance) && !classInstance.equals(IModule.class)) {
 								addModuleClass(classInstance);
 							}
-						} catch (NoClassDefFoundError ignored) { /*This can happen. Looking recursively looking through the classpath is hackish... */ }
+						} catch (NoClassDefFoundError ignored) { /* This can happen. Looking recursively looking through the classpath is hackish... */ }
 					}
 				} else {
 					for (String moduleClass : moduleClasses) {
 						Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading Class from Manifest Attribute: {}", moduleClass);
 						Class classInstance = Class.forName(moduleClass);
-						if (IModule.class.isAssignableFrom(classInstance)) addModuleClass(classInstance);
+						if (IModule.class.isAssignableFrom(classInstance))
+							addModuleClass(classInstance);
 					}
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
@@ -160,7 +161,7 @@ public class ModuleLoader {
 		if (clazz.contains("$") && clazz.substring(0, clazz.lastIndexOf("$")).length() > 0) {
 			try {
 				loadClass(clazz.substring(0, clazz.lastIndexOf("$")));
-			} catch (ClassNotFoundException ignored) { /* If the parent class doesn't exist then it is safe to instantiate the child */}
+			} catch (ClassNotFoundException ignored) {} // If the parent class doesn't exist then it is safe to instantiate the child
 		}
 		return loadClass(clazz);
 	}
@@ -213,24 +214,20 @@ public class ModuleLoader {
 						try {
 							Class.forName(clazz);
 							loaded = true;
-						} catch (ClassNotFoundException ignored) {
-						}
-
-						if (!loaded) loaded = findFileForClass(files, clazz) != null;
-
-						if (!loaded) break;
+						} catch (ClassNotFoundException ignored) {}
+						if (!loaded)
+							loaded = findFileForClass(files, clazz) != null;
+						if (!loaded)
+							break;
 					}
-				} catch (IOException ignored) {
-				}
-
-				if (loaded) loadExternalModules(file);
-
+				} catch (IOException ignored) {}
+				if (loaded)
+					loadExternalModules(file);
 				return loaded;
 			}));
-
-			if (dependents.size() == 0) break;
+			if (dependents.size() == 0)
+				break;
 		}
-
 		if (dependents.size() > 0) Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
 	}
 
@@ -292,10 +289,10 @@ public class ModuleLoader {
 		boolean enabled = module.enable(client);
 		if (enabled) {
 			client.getDispatcher().registerListener(module);
-			if (!loadedModules.contains(module)) loadedModules.add(module);
+			if (!loadedModules.contains(module))
+				loadedModules.add(module);
 			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
 		}
-
 		return true;
 	}
 
@@ -320,13 +317,13 @@ public class ModuleLoader {
 			}
 			return false;
 		});
-
 		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
 	}
 
 	private boolean hasDependency(List<IModule> modules, String className) {
 		for (IModule module : modules)
-			if (module.getClass().getName().equals(className)) return true;
+			if (module.getClass().getName().equals(className))
+				return true;
 		return false;
 	}
 
@@ -336,9 +333,9 @@ public class ModuleLoader {
 		try {
 			versions = module.getMinimumDiscord4JVersion().toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
 			discord4jVersion = Discord4J.VERSION.toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
-
 			for (int i = 0; i < Math.min(versions.length, 2); i++) { // We only care about major.minor, the revision change should not be big enough to care about
-				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i])) return false;
+				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
+					return false;
 			}
 		} catch (NumberFormatException e) {
 			Discord4J.LOGGER.error(LogMarkers.MODULES, "Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
