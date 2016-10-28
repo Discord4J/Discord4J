@@ -178,8 +178,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.isBot = isBot;
 		this.reconnectAttempts = reconnectAttempts;
 		this.dispatcher = new EventDispatcher(this);
-		this.loader = new ModuleLoader(this);
 		this.shardCount = shardCount;
+		this.loader = new ModuleLoader(this);
 	}
 
 	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
