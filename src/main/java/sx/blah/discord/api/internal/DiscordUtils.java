@@ -2,7 +2,6 @@ package sx.blah.discord.api.internal;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
@@ -22,7 +21,10 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -253,7 +255,25 @@ public class DiscordUtils {
 			}
 		}
 
+		guild.getEmojis().clear();
+		for (EmojiObject obj : json.emojis) {
+			guild.getEmojis().add(DiscordUtils.getEmojiFromJSON(guild, obj));
+		}
+
 		return guild;
+	}
+
+	/**
+	 * Creates an IEmoji object from the EmojiObj json data.
+	 *
+	 * @param guild The guild.
+	 * @param json  The json object data.
+	 * @return
+	 */
+	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
+		Emoji emoji = new Emoji(guild, json.id, json.name, json.require_colons, json.managed, json.roles);
+
+		return emoji;
 	}
 
 	/**

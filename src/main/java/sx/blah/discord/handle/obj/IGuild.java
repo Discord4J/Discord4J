@@ -8,7 +8,6 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 import java.time.LocalDateTime;
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -479,4 +478,27 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The message or null if not found.
 	 */
 	IMessage getMessageByID(String id);
+
+	/**
+	 * This gets all the emojis in the guild.
+	 *
+	 * @return A list of emojis.
+	 */
+	List<IEmoji> getEmojis();
+
+	/**
+	 * This gets an emoji by its ID.
+	 *
+	 * @param id The ID.
+	 * @return The emoji.
+	 */
+	IEmoji getEmojiByID(String id);
+
+	/**
+	 * This gets an emoji by its name.
+	 *
+	 * @param name The name, <b>without colons</b>.
+	 * @return The emoji.
+	 */
+	IEmoji getEmojiByName(String name);
 }

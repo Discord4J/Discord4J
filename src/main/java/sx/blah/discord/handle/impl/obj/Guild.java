@@ -1,7 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -9,12 +8,15 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
+import sx.blah.discord.api.internal.json.requests.EditGuildRequest;
+import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
+import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
+import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.*;
-import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
@@ -104,6 +106,11 @@ public class Guild implements IGuild {
 	 */
 	private final IShard shard;
 
+	/**
+	 * The list of emojis.
+	 */
+	protected final List<IEmoji> emojis;
+
 	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
 		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
@@ -125,6 +132,7 @@ public class Guild implements IGuild {
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
 		this.audioManager = new AudioManager(this);
+		this.emojis = new CopyOnWriteArrayList<>();
 	}
 
 	@Override
@@ -684,6 +692,21 @@ public class Guild implements IGuild {
 	public IGuild copy() {
 		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
 				voiceChannels, users, joinTimes);
+	}
+
+	@Override
+	public List<IEmoji> getEmojis() {
+		return emojis;
+	}
+
+	@Override
+	public IEmoji getEmojiByID(String idToUse) {
+		return emojis.stream().filter(iemoji -> iemoji.getID().equals(idToUse)).findFirst().orElse(null);
+	}
+
+	@Override
+	public IEmoji getEmojiByName(String name) {
+		return emojis.stream().filter(iemoji -> iemoji.getName().equals(name)).findFirst().orElse(null);
 	}
 
 	@Override
