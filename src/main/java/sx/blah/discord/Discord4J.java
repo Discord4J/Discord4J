@@ -176,15 +176,11 @@ public class Discord4J {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
 			throw new RuntimeException("Invalid configuration!");
-		String token;
-		if (args.length == 1) {
-			token = args[0];
-		} else {
+		if (args.length == 0)
 			throw new RuntimeException("Invalid configuration!");
-		}
 		try {
 			ClientBuilder builder = new ClientBuilder();
-			IDiscordClient client = builder.withToken(token).login();
+			IDiscordClient client = builder.withToken(args[0]).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
 			});
