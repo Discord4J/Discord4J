@@ -21,7 +21,10 @@ package sx.blah.discord;
 import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.*;
+import org.slf4j.helpers.FormattingTuple;
+import org.slf4j.helpers.MarkerIgnoringBase;
+import org.slf4j.helpers.MessageFormatter;
+import org.slf4j.helpers.NOPLoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
@@ -33,6 +36,9 @@ import sx.blah.discord.util.LogMarkers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Properties;
@@ -170,14 +176,11 @@ public class Discord4J {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
 			throw new RuntimeException("Invalid configuration!");
-
-		// There needs to be at least 1 arg
-		if (args.length < 1)
-			throw new IllegalArgumentException("At least 1 argument required!");
-
+		if (args.length == 0)
+			throw new RuntimeException("Invalid configuration!");
 		try {
 			ClientBuilder builder = new ClientBuilder();
-			IDiscordClient client = (args.length == 1 ? builder.withToken(args[0]) : builder.withLogin(args[0], args[1])).login();
+			IDiscordClient client = builder.withToken(args[0]).login();
 			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
 				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
 			});
