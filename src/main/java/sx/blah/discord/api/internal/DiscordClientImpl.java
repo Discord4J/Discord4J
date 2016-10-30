@@ -312,7 +312,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isReady() {
-		return getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
+		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
 	}
 
 	@Override
