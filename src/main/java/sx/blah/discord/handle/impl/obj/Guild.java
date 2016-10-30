@@ -94,7 +94,7 @@ public class Guild implements IGuild {
 	/**
 	 * The verification level of this guild
 	 */
-	protected volatile Verification verification;
+	protected volatile VerificationLevel verification;
 
 	/**
 	 * This guild's audio manager.
@@ -136,7 +136,7 @@ public class Guild implements IGuild {
 		this.afkChannel = afkChannel;
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
-		this.verification = Verification.getByLevel(verification);
+		this.verification = VerificationLevel.values()[verification];
 		this.audioManager = new AudioManager(this);
 		this.emojis = new CopyOnWriteArrayList<>();
 	}
@@ -451,7 +451,8 @@ public class Guild implements IGuild {
 
 		try {
 			GuildObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID), verificationLevel.orElse(this.verification.getLevel()),
+					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
+							verificationLevel.orElse(this.verification.ordinal()),
 							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
 							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout))))),
 					GuildObject.class);
@@ -476,8 +477,8 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void changeVerification(Verification verification) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(verification.getLevel()), null, null, Optional.empty());
+	public void changeVerificationLevel(VerificationLevel verification) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.of(verification.ordinal()), null, null, Optional.empty());
 	}
 
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException {
@@ -578,7 +579,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public Verification getVerification() {
+	public VerificationLevel getVerificationLevel() {
 		return verification;
 	}
 
@@ -587,8 +588,8 @@ public class Guild implements IGuild {
 	 *
 	 * @param verification The verification level.
 	 */
-	public void setVerification(int verification) {
-		this.verification = Verification.getByLevel(verification);
+	public void setVerificationLevel(int verification) {
+		this.verification = VerificationLevel.values()[verification];
 	}
 
 	@Override
@@ -715,7 +716,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IGuild copy() {
-		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, verification.getLevel(),
+		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, verification.ordinal(),
 				roles, channels, voiceChannels, users, joinTimes);
 	}
 

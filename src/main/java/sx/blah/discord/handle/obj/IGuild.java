@@ -332,7 +332,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeVerification(Verification verification) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeVerificationLevel(VerificationLevel verification) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the guild.
@@ -418,7 +418,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @return The verification level.
 	 */
-	Verification getVerification();
+	VerificationLevel getVerificationLevel();
 
 	/**
 	 * This retrieves the @everyone role which exists on all guilds.
