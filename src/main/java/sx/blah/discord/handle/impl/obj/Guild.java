@@ -92,6 +92,11 @@ public class Guild implements IGuild {
 	protected volatile String regionID;
 
 	/**
+	 * The validation level of this guild
+	 */
+	protected volatile Validation validation;
+
+	/**
 	 * This guild's audio manager.
 	 */
 	protected volatile AudioManager audioManager;
@@ -440,12 +445,12 @@ public class Guild implements IGuild {
 		}
 	}
 
-	private void edit(Optional<String> name, Optional<String> regionID, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
+	private void edit(Optional<String> name, Optional<String> regionID, Optional<Integer> validationLevel, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
 			GuildObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
+					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID), validationLevel.orElse(this.validation.getLevel()),
 							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
 							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout))))),
 					GuildObject.class);
@@ -461,27 +466,32 @@ public class Guild implements IGuild {
 
 	@Override
 	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.of(name), Optional.empty(), null, null, Optional.empty());
+		edit(Optional.of(name), Optional.empty(), Optional.empty(), null, null, Optional.empty());
 	}
 
 	@Override
 	public void changeRegion(IRegion region) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(region.getID()), null, null, Optional.empty());
+		edit(Optional.empty(), Optional.of(region.getID()), Optional.empty(), null, null, Optional.empty());
+	}
+
+	@Override
+	public void changeValidation(Validation validation) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.of(validation.getLevel()), null, null, Optional.empty());
 	}
 
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.ofNullable(icon), null, Optional.empty());
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.ofNullable(icon), null, Optional.empty());
 	}
 
 	@Override
 	public void changeAFKChannel(IVoiceChannel channel) throws RateLimitException, DiscordException, MissingPermissionsException {
 		String id = channel != null ? channel.getID() : null;
-		edit(Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
 	}
 
 	@Override
 	public void changeAFKTimeout(int timeout) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), null, null, Optional.of(timeout));
+		edit(Optional.empty(), Optional.empty(), Optional.empty(), null, null, Optional.of(timeout));
 	}
 
 	@Override
@@ -565,6 +575,9 @@ public class Guild implements IGuild {
 	public void setRegion(String regionID) {
 		this.regionID = regionID;
 	}
+
+	@Override
+	public Validation getValidation() { return validation; }
 
 	@Override
 	public IRole getEveryoneRole() {

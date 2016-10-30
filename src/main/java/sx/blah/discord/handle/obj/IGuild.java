@@ -325,6 +325,16 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void changeRegion(IRegion region) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
+	 * Changes the validation level of the guild.
+	 *
+	 * @param validation The new validation level of the guild.
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeValidation(Validation validation) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
 	 * Changes the name of the guild.
 	 *
 	 * @param icon The new icon of the guild (or null to remove it).
@@ -402,6 +412,13 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The region.
 	 */
 	IRegion getRegion();
+
+	/**
+	 * Gets the validation level of this guild.
+	 *
+	 * @return The validation level.
+	 */
+	Validation getValidation();
 
 	/**
 	 * This retrieves the @everyone role which exists on all guilds.
