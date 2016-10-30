@@ -80,6 +80,7 @@ public class DiscordWS extends WebSocketAdapter {
 		switch (op) {
 			case HELLO:
 				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
+				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Shard {} _trace: {}", shard.getInfo()[0], d.getAsJsonObject().get("_trace"));
 				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token, shard.getInfo())));
 				break;
 			case RECONNECT:

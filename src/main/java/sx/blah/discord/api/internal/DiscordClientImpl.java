@@ -271,11 +271,15 @@ public final class DiscordClientImpl implements IDiscordClient {
 		String gateway = obtainGateway();
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
 			for (int i = 0; i < shardCount; i++) {
-				ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon);
-				getShards().add(i, shard);
+				final int shardNum = i;
+				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount}, isDaemon);
+				getShards().add(shardNum, shard);
 				shard.login();
 
-				getDispatcher().waitFor((ShardReadyEvent e) -> true, 10, TimeUnit.SECONDS);
+				getDispatcher().waitFor((ShardReadyEvent e) -> true, 10, TimeUnit.SECONDS, () ->
+					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
+				);
+
 				if (i != shardCount - 1) { // all but last
 					Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
 					Thread.sleep(5000);
