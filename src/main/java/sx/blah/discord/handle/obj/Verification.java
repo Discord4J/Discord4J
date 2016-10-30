@@ -7,26 +7,19 @@ public enum Verification {
 	/**
 	 * Represents a validation level of None
 	 */
-	NONE(0),
+	NONE,
 	/**
 	 * Represents a validation level of Low
 	 */
-	LOW(1),
+	LOW,
 	/**
 	 * Represents a validation level of Medium
 	 */
-	MEDIUM(2),
+	MEDIUM,
 	/**
 	 * Represents a validation level of (╯°□°）╯︵ ┻━┻
 	 */
-	HIGH(3);
-
-	/**
-	 * The validation level
-	 */
-	private int level;
-
-	Verification(int level) { this.level = level; }
+	HIGH;
 
 	/**
 	 * Gets the Validation object for an integer level, or null if outside 0-3
@@ -35,12 +28,10 @@ public enum Verification {
 	 * @return The Validation object for the given level.
 	 */
 	public static Verification getByLevel(int level) {
-		switch(level) {
-			case 0: return NONE;
-			case 1: return LOW;
-			case 2: return MEDIUM;
-			case 3: return HIGH;
-			default: return null;
+		try {
+			return Verification.values()[level];
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return null;
 		}
 	}
 
@@ -49,6 +40,6 @@ public enum Verification {
 	 * @return The int corresponding to this validation level
 	 */
 	public int getLevel() {
-		return level;
+		return this.ordinal();
 	}
 }
