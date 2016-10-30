@@ -61,7 +61,7 @@ public interface IDiscordClient {
 	 *
 	 * @throws RateLimitException
 	 */
-	void logout() throws DiscordException, RateLimitException;
+	void logout() throws DiscordException;
 
 	/**
 	 * Changes this client's account's username.
@@ -105,7 +105,7 @@ public interface IDiscordClient {
 
 	/**
 	 * Checks if the api has established a connection with the Discord gateway on all shards.
-	 * @see IShard#isLoggedIn() 
+	 * @see IShard#isLoggedIn()
 	 *
 	 * @return True if logged in, false if otherwise.
 	 */

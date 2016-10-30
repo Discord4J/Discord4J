@@ -154,18 +154,22 @@ public class DiscordWS extends WebSocketAdapter {
 	protected void disconnect(DiscordDisconnectedEvent.Reason reason) {
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Disconnected with reason {}", reason);
 
-		keepAlive.shutdown();
 		switch (reason) {
-			case INVALID_SESSION_OP:
-			case ABNORMAL_CLOSE:
-				Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "WS should reconnect panda is bad.");
-				getSession().close(); // TODO: Definitely not
-				break;
 			case LOGGED_OUT:
-				getSession().close();
+				shutdown();
 				break;
 			default:
-				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled disconnect reason");
+				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled disconnect reason: {}", reason);
+		}
+	}
+
+	private void shutdown() {
+		try {
+			keepAlive.shutdown();
+			getSession().close(1000, "Logout");
+			wsClient.stop();
+		} catch (Exception e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: {}", e);
 		}
 	}
 

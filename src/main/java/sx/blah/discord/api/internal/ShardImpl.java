@@ -16,6 +16,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -59,9 +60,15 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public void logout() throws DiscordException, RateLimitException {
+	public void logout() throws DiscordException {
 		if (isLoggedIn()) {
-			getConnectedVoiceChannels().forEach(IVoiceChannel::leave);
+			getConnectedVoiceChannels().forEach(channel -> {
+				RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
+					channel.leave();
+					return channel;
+				});
+				request.get();
+			});
 			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to logout before bot has logged in!");

@@ -268,6 +268,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public void login() {
+		if (!getShards().isEmpty()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to login client more than once.");
+			return;
+		}
+
 		String gateway = obtainGateway();
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
 			for (int i = 0; i < shardCount; i++) {
@@ -302,7 +307,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void logout() throws DiscordException, RateLimitException {
+	public void logout() throws DiscordException {
 		for (IShard shard : getShards()) {
 			shard.logout();
 		}
