@@ -28,11 +28,9 @@ public enum Verification {
 	 * @return The Verification object for the given level.
 	 */
 	public static Verification getByLevel(int level) {
-		try {
+		if(level >= 0 && level <= 3)
 			return Verification.values()[level];
-		} catch (ArrayIndexOutOfBoundsException e) {
-			return null;
-		}
+		else return null;
 	}
 
 	/**
