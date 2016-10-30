@@ -28,9 +28,7 @@ public enum Verification {
 	 * @return The Verification object for the given level.
 	 */
 	public static Verification getByLevel(int level) {
-		if(level >= 0 && level <= 3)
-			return Verification.values()[level];
-		else return null;
+		return Verification.values()[level];
 	}
 
 	/**
