@@ -189,7 +189,7 @@ public class DiscordUtils {
 			guild.setAFKChannel(json.afk_channel_id);
 			guild.setAfkTimeout(json.afk_timeout);
 			guild.setRegion(json.region);
-			guild.setVerification(json.verification_level);
+			guild.setVerificationLevel(json.verification_level);
 
 			List<IRole> newRoles = new ArrayList<>();
 			for (RoleObject roleResponse : json.roles) {
