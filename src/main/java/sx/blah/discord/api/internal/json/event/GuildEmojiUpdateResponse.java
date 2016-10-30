@@ -1,4 +1,3 @@
-
 package sx.blah.discord.api.internal.json.event;
 
 import sx.blah.discord.api.internal.json.objects.EmojiObject;

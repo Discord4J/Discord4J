@@ -1,4 +1,3 @@
-
 package sx.blah.discord.handle.obj;
 
 import java.util.List;

@@ -107,7 +107,7 @@ public class DispatchHandler {
 			}
 
 			ws.isReady = true;
-			client.getDispatcher().dispatch(new ReadyEvent(shard)); // All information has been received
+			client.getDispatcher().dispatch(new ShardReadyEvent(shard)); // All information for this shard has been received
 			return true;
 		}).execute();
 	}

@@ -7,6 +7,8 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.*;
@@ -266,19 +268,32 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public void login() {
-		ScheduledExecutorService loginHandler = Executors.newSingleThreadScheduledExecutor();
-
 		String gateway = obtainGateway();
-		for (int i = 0; i < shardCount; i++) {
-			ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon);
-			getShards().add(i, shard);
-			loginHandler.schedule(() -> {
-				try {
-					shard.login();
-				} catch (DiscordException e) {
-					e.printStackTrace();
+		new RequestBuilder(this).setAsync(true).doAction(() -> {
+			for (int i = 0; i < shardCount; i++) {
+				ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon);
+				getShards().add(i, shard);
+				shard.login();
+
+				getDispatcher().waitFor((ShardReadyEvent e) -> true, 10, TimeUnit.SECONDS);
+				if (i != shardCount - 1) { // all but last
+					Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
+					Thread.sleep(5000);
 				}
-			}, i * 7, TimeUnit.SECONDS); // Login ratelimit
+			}
+			getDispatcher().dispatch(new ReadyEvent());
+			return true;
+		}).build();
+
+		if (!isDaemon) {
+			new Timer().scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					if (getShards().stream().anyMatch(IShard::isLoggedIn)) {
+						this.cancel();
+					}
+				}
+			}, 0, 1000);
 		}
 	}
 

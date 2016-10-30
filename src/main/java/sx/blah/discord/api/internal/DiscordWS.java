@@ -1,7 +1,6 @@
 package sx.blah.discord.api.internal;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
@@ -9,13 +8,10 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
-import sx.blah.discord.api.internal.json.requests.ResumeRequest;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.LoginEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
@@ -27,9 +23,7 @@ import java.net.URISyntaxException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 
@@ -57,7 +51,7 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	public DiscordWS(IShard shard, String gateway, boolean isDaemon) {
+	public DiscordWS(IShard shard, String gateway) {
 		this.client = (DiscordClientImpl) shard.getClient();
 		this.shard = (ShardImpl) shard;
 		this.gateway = gateway;
@@ -65,7 +59,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
-			wsClient.setDaemon(isDaemon);
+			wsClient.setDaemon(true);
 			wsClient.getPolicy().setMaxBinaryMessageSize(Integer.MAX_VALUE);
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
 			wsClient.start();
@@ -98,6 +92,7 @@ public class DiscordWS extends WebSocketAdapter {
 				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
 			case INVALID_SESSION: disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION_OP); break;
+			case HEARTBEAT: send(GatewayOps.HEARTBEAT, seq);
 			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
 
 			default:

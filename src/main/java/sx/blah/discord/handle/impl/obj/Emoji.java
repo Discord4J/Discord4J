@@ -1,4 +1,3 @@
-
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;

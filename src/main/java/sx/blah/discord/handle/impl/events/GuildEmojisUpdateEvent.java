@@ -1,4 +1,3 @@
-
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.api.events.Event;

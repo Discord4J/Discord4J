@@ -172,6 +172,22 @@ public class EventDispatcher {
 	}
 
 	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched.
+	 *
+	 * @param eventClass The class of the event to wait for.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
+	 * event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param onTimeout The procedure to execute when the timeout is reached.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
+		waitFor((T event) -> true, time, unit, onTimeout);
+	}
+
+	/**
 	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
 	 * {@link Predicate} returns true.
 	 *
@@ -223,6 +239,7 @@ public class EventDispatcher {
 	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
 	 * event fired.
 	 * @param unit The unit for the time parameter.
+	 * @param onTimeout The procedure to execute when the timeout is reached.
 	 * @param <T> The event type to wait for.
 	 *
 	 * @throws InterruptedException
