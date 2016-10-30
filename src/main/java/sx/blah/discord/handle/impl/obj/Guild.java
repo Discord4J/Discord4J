@@ -578,14 +578,18 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public Verification getVerification() { return verification; }
+	public Verification getVerification() {
+		return verification;
+	}
 
 	/**
 	 * CACHES the verification for this guild.
 	 *
 	 * @param verification The verification level.
 	 */
-	public void setVerification(int verification) { this.verification = Verification.getByLevel(verification); }
+	public void setVerification(int verification) {
+		this.verification = Verification.getByLevel(verification);
+	}
 
 	@Override
 	public IRole getEveryoneRole() {
