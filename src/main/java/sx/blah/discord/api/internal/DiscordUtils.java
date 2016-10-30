@@ -189,6 +189,7 @@ public class DiscordUtils {
 			guild.setAFKChannel(json.afk_channel_id);
 			guild.setAfkTimeout(json.afk_timeout);
 			guild.setRegion(json.region);
+			guild.setVerification(json.verification_level);
 
 			List<IRole> newRoles = new ArrayList<>();
 			for (RoleObject roleResponse : json.roles) {
@@ -206,7 +207,7 @@ public class DiscordUtils {
 			}
 		} else {
 			guild = new Guild(shard, json.name, json.id, json.icon, json.owner_id, json.afk_channel_id,
-					json.afk_timeout, json.region);
+					json.afk_timeout, json.region, json.verification_level);
 
 			if (json.roles != null)
 				for (RoleObject roleResponse : json.roles) {

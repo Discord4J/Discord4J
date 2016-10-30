@@ -92,9 +92,9 @@ public class Guild implements IGuild {
 	protected volatile String regionID;
 
 	/**
-	 * The validation level of this guild
+	 * The verification level of this guild
 	 */
-	protected volatile Validation validation;
+	protected volatile Verification verification;
 
 	/**
 	 * This guild's audio manager.
@@ -116,11 +116,11 @@ public class Guild implements IGuild {
 	 */
 	protected final List<IEmoji> emojis;
 
-	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region) {
-		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
+	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int verification) {
+		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
 
-	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
+	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int verification, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
 		this.shard = shard;
 		this.client = shard.getClient();
 		this.name = name;
@@ -136,6 +136,7 @@ public class Guild implements IGuild {
 		this.afkChannel = afkChannel;
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
+		this.verification = Verification.getByLevel(verification);
 		this.audioManager = new AudioManager(this);
 		this.emojis = new CopyOnWriteArrayList<>();
 	}
@@ -445,12 +446,12 @@ public class Guild implements IGuild {
 		}
 	}
 
-	private void edit(Optional<String> name, Optional<String> regionID, Optional<Integer> validationLevel, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
+	private void edit(Optional<String> name, Optional<String> regionID, Optional<Integer> verificationLevel, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		try {
 			GuildObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID), validationLevel.orElse(this.validation.getLevel()),
+					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID), verificationLevel.orElse(this.verification.getLevel()),
 							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
 							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout))))),
 					GuildObject.class);
@@ -475,8 +476,8 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void changeValidation(Validation validation) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(validation.getLevel()), null, null, Optional.empty());
+	public void changeVerification(Verification verification) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(Optional.empty(), Optional.empty(), Optional.of(verification.getLevel()), null, null, Optional.empty());
 	}
 
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException {
@@ -577,7 +578,14 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public Validation getValidation() { return validation; }
+	public Verification getVerification() { return verification; }
+
+	/**
+	 * CACHES the verification for this guild.
+	 *
+	 * @param verification The verification level.
+	 */
+	public void setVerification(int verification) { this.verification = Verification.getByLevel(verification); }
 
 	@Override
 	public IRole getEveryoneRole() {
@@ -703,8 +711,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public IGuild copy() {
-		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, roles, channels,
-				voiceChannels, users, joinTimes);
+		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, verification.getLevel(),
+				roles, channels, voiceChannels, users, joinTimes);
 	}
 
 	@Override
