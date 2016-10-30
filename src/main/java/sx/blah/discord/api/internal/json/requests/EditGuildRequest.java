@@ -16,9 +16,9 @@ public class EditGuildRequest {
 	public String region;
 
 	/**
-	 * The new validation for the guild.
+	 * The new verification for the guild.
 	 */
-	public int validation_level;
+	public int verification_level;
 
 	/**
 	 * The new icon.
@@ -35,10 +35,10 @@ public class EditGuildRequest {
 	 */
 	public int afk_timeout;
 
-	public EditGuildRequest(String name, String region, int validation_level, String icon, String afk_channel_id, int afk_timeout) {
+	public EditGuildRequest(String name, String region, int verification_level, String icon, String afk_channel_id, int afk_timeout) {
 		this.name = name;
 		this.region = region;
-		this.validation_level = validation_level;
+		this.verification_level = verification_level;
 		this.icon = icon;
 		this.afk_channel_id = afk_channel_id;
 		this.afk_timeout = afk_timeout;

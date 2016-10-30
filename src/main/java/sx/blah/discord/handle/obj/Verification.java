@@ -1,31 +1,31 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * Represents a validation level for a guild
+ * Represents a verification level for a guild
  */
 public enum Verification {
 	/**
-	 * Represents a validation level of None
+	 * Represents a verification level of None
 	 */
 	NONE,
 	/**
-	 * Represents a validation level of Low
+	 * Represents a verification level of Low
 	 */
 	LOW,
 	/**
-	 * Represents a validation level of Medium
+	 * Represents a verification level of Medium
 	 */
 	MEDIUM,
 	/**
-	 * Represents a validation level of (╯°□°）╯︵ ┻━┻
+	 * Represents a verification level of (╯°□°）╯︵ ┻━┻
 	 */
 	HIGH;
 
 	/**
-	 * Gets the Validation object for an integer level, or null if outside 0-3
+	 * Gets the Verification object for an integer level, or null if outside 0-3
 	 *
-	 * @param level The validation level as an int.
-	 * @return The Validation object for the given level.
+	 * @param level The verification level as an int.
+	 * @return The Verification object for the given level.
 	 */
 	public static Verification getByLevel(int level) {
 		try {
@@ -37,7 +37,7 @@ public enum Verification {
 
 	/**
 	 * Gets the level as an int
-	 * @return The int corresponding to this validation level
+	 * @return The int corresponding to this verification level
 	 */
 	public int getLevel() {
 		return this.ordinal();
