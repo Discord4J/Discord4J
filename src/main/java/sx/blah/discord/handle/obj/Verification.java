@@ -19,7 +19,7 @@ public enum Verification {
 	/**
 	 * Represents a validation level of (╯°□°）╯︵ ┻━┻
 	 */
-	HIGH(4);
+	HIGH(3);
 
 	/**
 	 * The validation level
