@@ -9,7 +9,18 @@ import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.audio.events.*;
+import sx.blah.discord.util.audio.events.AudioPlayerCleanEvent;
+import sx.blah.discord.util.audio.events.AudioPlayerInitEvent;
+import sx.blah.discord.util.audio.events.LoopStateChangeEvent;
+import sx.blah.discord.util.audio.events.PauseStateChangeEvent;
+import sx.blah.discord.util.audio.events.ProcessorAddEvent;
+import sx.blah.discord.util.audio.events.ProcessorRemoveEvent;
+import sx.blah.discord.util.audio.events.ShuffleEvent;
+import sx.blah.discord.util.audio.events.TrackFinishEvent;
+import sx.blah.discord.util.audio.events.TrackQueueEvent;
+import sx.blah.discord.util.audio.events.TrackSkipEvent;
+import sx.blah.discord.util.audio.events.TrackStartEvent;
+import sx.blah.discord.util.audio.events.VolumeChangeEvent;
 import sx.blah.discord.util.audio.processors.MultiProcessor;
 import sx.blah.discord.util.audio.processors.PauseableProcessor;
 import sx.blah.discord.util.audio.providers.AudioInputStreamProvider;
@@ -251,12 +262,7 @@ public class AudioPlayer implements IAudioProvider {
 		Track track;
 
 		if (provider instanceof AudioInputStreamProvider)
-			try {
-				track = new Track((AudioInputStreamProvider) provider);
-			} catch (IOException exception) {
-				Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Queue Exception", exception);
-				track = new Track(provider);
-			}
+			track = new Track((AudioInputStreamProvider) provider);
 		else
 			track = new Track(provider);
 
@@ -476,11 +482,11 @@ public class AudioPlayer implements IAudioProvider {
 			stream = null;
 		}
 
-		public Track(AudioInputStreamProvider provider) throws IOException {
+		public Track(AudioInputStreamProvider provider) {
 			this(provider.getStream());
 		}
 
-		public Track(AudioInputStream stream) throws IOException {
+		public Track(AudioInputStream stream) {
 			this.stream = new AmplitudeAudioInputStream(DiscordUtils.getPCMStream(stream));
 			this.provider = new AudioInputStreamProvider(this.stream);
 
