@@ -248,7 +248,13 @@ public class AudioPlayer implements IAudioProvider {
 	 * @return The {@link Track} object representing this audio provider.
 	 */
 	public Track queue(IAudioProvider provider) {
-		Track track = new Track(provider);
+		Track track;
+
+		if (provider instanceof AudioInputStreamProvider)
+			track = new Track((AudioInputStreamProvider) provider);
+		else
+			track = new Track(provider);
+
 		queue(track);
 		return track;
 	}
