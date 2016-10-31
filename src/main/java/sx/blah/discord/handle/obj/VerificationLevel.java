@@ -19,5 +19,17 @@ public enum VerificationLevel {
 	/**
 	 * Represents a verification level of (╯°□°）╯︵ ┻━┻
 	 */
-	HIGH
+	HIGH,
+	/**
+	 * Unknown verification level
+	 */
+	UNKNOWN;
+
+	public static VerificationLevel get(int id) {
+		if (id >= values().length) {
+			return UNKNOWN;
+		} else {
+			return values()[id];
+		}
+	}
 }

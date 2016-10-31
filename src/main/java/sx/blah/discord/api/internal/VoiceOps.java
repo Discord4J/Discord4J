@@ -30,5 +30,18 @@ public enum VoiceOps {
 	/**
 	 * Used to indicate which users are speaking
 	 */
-	SPEAKING
+	SPEAKING,
+
+	/**
+	 * Unknown opcode.
+	 */
+	UNKNOWN;
+
+	public static VoiceOps get(int opcode) {
+		if (opcode >= values().length) {
+			return UNKNOWN;
+		} else {
+			return values()[opcode];
+		}
+	}
 }

@@ -51,5 +51,17 @@ public enum GatewayOps {
 	/**
 	 * Sent after a heartbeat was received.
 	 */
-	HEARTBEAT_ACK
+	HEARTBEAT_ACK,
+	/**
+	 * Unknown opcode.
+	 */
+	UNKNOWN;
+
+	public static GatewayOps get(int opcode) {
+		if (opcode >= values().length) {
+			return UNKNOWN;
+		} else {
+			return values()[opcode];
+		}
+	}
 }

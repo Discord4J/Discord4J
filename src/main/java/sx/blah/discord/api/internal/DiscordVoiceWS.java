@@ -83,7 +83,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketText(String message) {
 		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
-		VoiceOps op = VoiceOps.values()[payload.get("op").getAsInt()];
+		VoiceOps op = VoiceOps.get(payload.get("op").getAsInt());
 		JsonElement d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d") : null;
 
 		switch (op) {
@@ -114,6 +114,9 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				VoiceSpeakingResponse speaking = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceSpeakingResponse.class);
 				IUser user = client.getUserByID(speaking.user_id);
 				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(user, speaking.ssrc, speaking.isSpeaking));
+				break;
+			case UNKNOWN:
+				Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
 				break;
 		}
 	}
