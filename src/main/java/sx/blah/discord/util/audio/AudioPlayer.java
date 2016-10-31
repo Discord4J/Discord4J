@@ -251,7 +251,12 @@ public class AudioPlayer implements IAudioProvider {
 		Track track;
 
 		if (provider instanceof AudioInputStreamProvider)
-			track = new Track((AudioInputStreamProvider) provider);
+			try {
+				track = new Track((AudioInputStreamProvider) provider);
+			} catch (IOException exception) {
+				Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Queue Exception", e);
+				track = new Track(provider);
+			}
 		else
 			track = new Track(provider);
 
