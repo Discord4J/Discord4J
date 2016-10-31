@@ -72,7 +72,7 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketText(String message) {
 		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
-		GatewayOps op = GatewayOps.values()[payload.get("op").getAsInt()];
+		GatewayOps op = GatewayOps.get(payload.get("op").getAsInt());
 		JsonElement d = payload.has("d") && !payload.get("d").isJsonNull() ? payload.get("d") : null;
 
 		if (payload.has("s") && !payload.get("s").isJsonNull()) seq = payload.get("s").getAsLong();
@@ -95,9 +95,9 @@ public class DiscordWS extends WebSocketAdapter {
 			case INVALID_SESSION: disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION_OP); break;
 			case HEARTBEAT: send(GatewayOps.HEARTBEAT, seq);
 			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
-
-			default:
-				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled opcode received: {} (ignoring), REPORT THIS TO THE DISCORD4J DEV!", op);
+			case UNKNOWN:
+				Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Received unknown opcode, {}", message);
+				break;
 		}
 	}
 
