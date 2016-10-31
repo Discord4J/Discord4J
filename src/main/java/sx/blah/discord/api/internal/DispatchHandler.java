@@ -320,7 +320,7 @@ public class DispatchHandler {
 	private void presenceUpdate(PresenceUpdateEventResponse event) {
 		Status status = DiscordUtils.getStatusFromJSON(event.game);
 		Presences presence = status.getType() == Status.StatusType.STREAM ?
-				Presences.STREAMING : Presences.valueOf(event.status.toUpperCase());
+				Presences.STREAMING : Presences.get(event.status);
 		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			User user = (User) guild.getUserByID(event.user.id);

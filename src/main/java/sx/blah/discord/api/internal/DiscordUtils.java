@@ -232,7 +232,7 @@ public class DiscordUtils {
 						if (status.getType() == Status.StatusType.STREAM) {
 							user.setPresence(Presences.STREAMING);
 						} else {
-							user.setPresence(Presences.valueOf((presence.status).toUpperCase()));
+							user.setPresence(Presences.get(presence.status));
 						}
 						user.setStatus(status);
 					}

@@ -136,7 +136,7 @@ public class Guild implements IGuild {
 		this.afkChannel = afkChannel;
 		this.afkTimeout = afkTimeout;
 		this.regionID = region;
-		this.verification = VerificationLevel.values()[verification];
+		this.verification = VerificationLevel.get(verification);
 		this.audioManager = new AudioManager(this);
 		this.emojis = new CopyOnWriteArrayList<>();
 	}
@@ -589,7 +589,7 @@ public class Guild implements IGuild {
 	 * @param verification The verification level.
 	 */
 	public void setVerificationLevel(int verification) {
-		this.verification = VerificationLevel.values()[verification];
+		this.verification = VerificationLevel.get(verification);
 	}
 
 	@Override
