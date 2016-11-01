@@ -87,7 +87,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 		JsonElement d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d") : null;
 
 		switch (op) {
-			case READY :
+			case READY:
 				VoiceReadyResponse ready = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceReadyResponse.class);
 				this.ssrc = ready.ssrc;
 
@@ -136,7 +136,8 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				keepAlive.shutdownNow();
 				sendHandler.shutdownNow();
 				udpSocket.close();
-				getSession().close();
+				if (getSession() != null)
+					getSession().close();
 				break;
 		}
 	}
@@ -155,7 +156,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 						if (!isSpeaking) setSpeaking(true);
 						udpSocket.send(packet.asUdpPacket(address));
 
-						if (seq+1 > Character.MAX_VALUE) {
+						if (seq + 1 > Character.MAX_VALUE) {
 							seq = 0;
 						} else {
 							seq++;
@@ -170,7 +171,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				}
 			}
 		};
-		sendHandler.scheduleWithFixedDelay(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT-1, TimeUnit.MILLISECONDS);
+		sendHandler.scheduleWithFixedDelay(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT - 1, TimeUnit.MILLISECONDS);
 	}
 
 	private void setSpeaking(boolean isSpeaking) {
@@ -202,7 +203,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	}
 
 	private void send(String message) {
-		if (getSession().isOpen()) {
+		if (getSession() != null && getSession().isOpen()) {
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
 			Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Attempt to send message on closed session.");
