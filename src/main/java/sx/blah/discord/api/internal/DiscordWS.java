@@ -11,7 +11,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
@@ -85,14 +85,14 @@ public class DiscordWS extends WebSocketAdapter {
 				break;
 			case RECONNECT:
 				try {
-					disconnect(DiscordDisconnectedEvent.Reason.RECONNECT_OP);
+					disconnect(DisconnectedEvent.Reason.RECONNECT_OP);
 					wsClient.connect(this, new URI(this.gateway), new ClientUpgradeRequest());
 				} catch (IOException | URISyntaxException e) {
 					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while handling RECONNECT op, REPORT THIS TO THE DISCORD4J DEV! {}", e);
 				}
 				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
-			case INVALID_SESSION: disconnect(DiscordDisconnectedEvent.Reason.INVALID_SESSION_OP); break;
+			case INVALID_SESSION: disconnect(DisconnectedEvent.Reason.INVALID_SESSION_OP); break;
 			case HEARTBEAT: send(GatewayOps.HEARTBEAT, seq);
 			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
 			case UNKNOWN:
@@ -113,7 +113,7 @@ public class DiscordWS extends WebSocketAdapter {
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket disconnected with status code {} and reason \"{}\".", statusCode, reason);
 
 		if (statusCode == 1006 || statusCode == 1001) { // Which status codes represent errors? All but 1000?
-			disconnect(DiscordDisconnectedEvent.Reason.ABNORMAL_CLOSE);
+			disconnect(DisconnectedEvent.Reason.ABNORMAL_CLOSE);
 		}
 	}
 
@@ -151,11 +151,12 @@ public class DiscordWS extends WebSocketAdapter {
 		}, 0, interval, TimeUnit.MILLISECONDS);
 	}
 
-	protected void disconnect(DiscordDisconnectedEvent.Reason reason) {
+	protected void disconnect(DisconnectedEvent.Reason reason) {
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Disconnected with reason {}", reason);
 
 		switch (reason) {
 			case LOGGED_OUT:
+				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, shard));
 				shutdown();
 				break;
 			default:

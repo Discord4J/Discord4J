@@ -8,7 +8,7 @@ import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
 import sx.blah.discord.handle.impl.events.StatusChangeEvent;
 import sx.blah.discord.handle.impl.obj.User;
@@ -69,7 +69,7 @@ public class ShardImpl implements IShard {
 				});
 				request.get();
 			});
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
+			ws.disconnect(DisconnectedEvent.Reason.LOGGED_OUT);
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to logout before bot has logged in!");
 		}

@@ -59,7 +59,7 @@ public interface IDiscordClient {
 	/**
 	 * Logs out every shard this client manages.
 	 *
-	 * @throws RateLimitException
+	 * @throws DiscordException
 	 */
 	void logout() throws DiscordException;
 
