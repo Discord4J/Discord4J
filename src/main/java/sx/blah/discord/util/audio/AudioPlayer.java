@@ -313,10 +313,12 @@ public class AudioPlayer implements IAudioProvider {
 	 * This shuffles the playlist in the queue.
 	 */
 	public synchronized void shuffle() {
-		getCurrentTrack().rewindTo(0);
-		Collections.shuffle(trackQueue);
+		if (trackQueue.size() > 0) {
+			getCurrentTrack().rewindTo(0);
+			Collections.shuffle(trackQueue);
 
-		client.getDispatcher().dispatch(new ShuffleEvent(this));
+			client.getDispatcher().dispatch(new ShuffleEvent(this));
+		}
 	}
 
 	/**
