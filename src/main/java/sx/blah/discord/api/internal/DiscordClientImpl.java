@@ -316,7 +316,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isLoggedIn() {
-		return getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
+		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
 	}
 
 	@Override

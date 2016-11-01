@@ -3,6 +3,7 @@ package sx.blah.discord.api.events;
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.Procedure;
@@ -10,6 +11,7 @@ import sx.blah.discord.util.Procedure;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -306,14 +308,14 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public synchronized void dispatch(Event event) {
-		if (client.isLoggedIn() || event instanceof DisconnectedEvent) {
+		if (client.getShards().stream().anyMatch(IShard::isLoggedIn) || event instanceof DisconnectedEvent) {
 			eventExecutor.submit(() -> {
 				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 				event.client = client;
 
 				methodListeners.entrySet().stream()
 						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(e -> e.getValue())
+						.map(Map.Entry::getValue)
 						.forEach(m ->
 								m.forEach((k, v) ->
 										v.forEach(o -> {
@@ -332,7 +334,7 @@ public class EventDispatcher {
 
 				classListeners.entrySet().stream()
 						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(e -> e.getValue())
+						.map(Map.Entry::getValue)
 						.forEach(s -> s.forEach(l -> {
 							try {
 								l.listener.handle(event);
