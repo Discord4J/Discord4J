@@ -209,7 +209,7 @@ public class Channel implements IChannel {
 
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 
-		if (content != null) builder.addTextBody("content", content);
+		if (content != null) builder.addTextBody("content", content, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
 		builder.addTextBody("tts", String.valueOf(tts));
 		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
 
