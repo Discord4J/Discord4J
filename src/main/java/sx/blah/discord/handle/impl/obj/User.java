@@ -438,7 +438,7 @@ public class User implements IUser {
 			DiscordException {
 		DiscordUtils.checkPermissions(this, message.getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
 
-		emoji = emoji.replace("<", "").replace(">", "");
+		emoji = emoji.replace("<:", "").replace(">", "");
 
 		if (emoji.matches("\\d+")) {
 			IEmoji em = message.getGuild().getEmojiByID(emoji);
