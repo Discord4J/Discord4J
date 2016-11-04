@@ -455,7 +455,7 @@ public class User implements IUser {
 		}
 
 		try {
-			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
 							reaction.isCustomEmoji()
 									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getID())
