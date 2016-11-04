@@ -279,17 +279,11 @@ public class DiscordUtils {
 	}
 
 	public static IReaction getReactionFromJSON(IGuild guild, MessageObject.ReactionObject object) {
-		Reaction reaction = null;
+		Reaction reaction = new Reaction(guild.getShard(), object.count, new CopyOnWriteArrayList<>(),
+				object.emoji.id != null
+						? object.emoji.id
+						: object.emoji.name, object.emoji.id != null);
 
-		if (object.emoji.id == null) {
-			reaction = new Reaction(guild.getShard(), object.count, new CopyOnWriteArrayList<>(), object.emoji.name);
-		} else {
-			IEmoji emoji = guild.getEmojiByID(object.emoji.id);
-
-			if (emoji != null) {
-				reaction = new Reaction(guild.getShard(), object.count, new CopyOnWriteArrayList<>(), emoji);
-			}
-		}
 
 		return reaction;
 	}
@@ -299,7 +293,9 @@ public class DiscordUtils {
 
 		if (objects != null) {
 			for (MessageObject.ReactionObject obj : objects) {
-				reactions.add(getReactionFromJSON(guild, obj));
+				IReaction r = getReactionFromJSON(guild, obj);
+				if (r != null)
+					reactions.add(r);
 			}
 		}
 
@@ -398,13 +394,20 @@ public class DiscordUtils {
 			message.setChannelMentions();
 
 			return message;
-		} else
-			return new Message(channel.getClient(), json.id, json.content,
+		} else {
+			Message message = new Message(channel.getClient(), json.id, json.content,
 					getUserFromJSON(channel.getShard(), json.author), channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json),
 					getReactionsFromJson(channel.getGuild(), json.reactions));
+
+			for (IReaction reaction : message.getReactions()) {
+				((Reaction) reaction).setMessage(message);
+			}
+
+			return message;
+		}
 	}
 
 	/**

@@ -609,12 +609,9 @@ public class DispatchHandler {
 					List<IUser> list = new CopyOnWriteArrayList<>();
 					list.add(user);
 
-					if (event.emoji.id == null) {
-						reaction = new Reaction(message.getShard(), 1, list, event.emoji.name);
-					} else {
-						reaction = new Reaction(message.getShard(), 1, list,
-								message.getGuild().getEmojiByID(event.emoji.id));
-					}
+					reaction = new Reaction(message.getShard(), 1, list, event.emoji.id != null
+							? event.emoji.id
+							: event.emoji.name, event.emoji.id != null);
 
 					message.getReactions().add(reaction);
 				} else {
@@ -622,6 +619,7 @@ public class DispatchHandler {
 				}
 
 				reaction.setCount(reaction.getCount() + 1);
+				reaction.setMessage(message);
 
 				client.dispatcher.dispatch(
 						new ReactionAddEvent(message, reaction, user));
@@ -641,6 +639,7 @@ public class DispatchHandler {
 				IUser user = message.getGuild().getUserByID(event.user_id);
 
 				if (reaction != null) {
+					reaction.setMessage(message); // safeguard
 					reaction.setCount(reaction.getCount() - 1);
 					reaction.getUsers().remove(user);
 

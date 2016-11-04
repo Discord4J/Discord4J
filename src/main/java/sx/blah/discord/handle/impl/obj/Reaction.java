@@ -1,19 +1,26 @@
 package sx.blah.discord.handle.impl.obj;
 
+import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.ReactionUserObject;
 import sx.blah.discord.handle.obj.IEmoji;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.util.List;
 
 public class Reaction implements IReaction {
 
 	protected final IShard shard;
-	protected final IEmoji customEmoji;
-	protected final String normalEmoji;
-
+	protected final boolean isCustomEmoji;
+	protected final String emoji;
 	/**
 	 * How many users reacted
 	 */
@@ -22,40 +29,41 @@ public class Reaction implements IReaction {
 	 * The users that reacted
 	 */
 	protected volatile List<IUser> users;
+	/**
+	 * Can't be final since it has to be set after creation
+	 */
+	private volatile IMessage message;
 
-	public Reaction(IShard shard, int count, List<IUser> users, IEmoji customEmoji) {
+	public Reaction(IShard shard, int count, List<IUser> users, String emoji, boolean isCustom) {
 		this.shard = shard;
 		this.count = count;
 		this.users = users;
-		this.customEmoji = customEmoji;
-		this.normalEmoji = null;
-	}
-
-	public Reaction(IShard shard, int count, List<IUser> users, String normalEmoji) {
-		this.shard = shard;
-		this.count = count;
-		this.users = users;
-		this.normalEmoji = normalEmoji;
-		this.customEmoji = null;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
+		this.emoji = emoji;
+		this.isCustomEmoji = isCustom;
 	}
 
 	@Override
 	public String toString() {
-		return isCustomEmoji() ? getCustomEmoji().toString() : normalEmoji;
+		return isCustomEmoji() ? getCustomEmoji().toString() : emoji;
+	}
+
+	@Override
+	public IMessage getMessage() {
+		return message;
+	}
+
+	public void setMessage(IMessage message) {
+		this.message = message;
 	}
 
 	@Override
 	public boolean isCustomEmoji() {
-		return customEmoji != null;
+		return isCustomEmoji;
 	}
 
 	@Override
 	public IEmoji getCustomEmoji() {
-		return customEmoji;
+		return getMessage().getGuild().getEmojiByID(emoji);
 	}
 
 	@Override
@@ -63,18 +71,49 @@ public class Reaction implements IReaction {
 		return count;
 	}
 
-	/**
-	 * This will attempt to retrieve the users if the list count doesn't match the actual count
-	 *
-	 * @return User list
-	 */
+	public void setCount(int count) {
+		this.count = count;
+	}
+
 	@Override
 	public List<IUser> getUsers() {
-		if (users.size() != count) {
+		return users;
+	}
 
+	@Override
+	public synchronized List<IUser> refreshUsers() throws RateLimitException, DiscordException {
+		if (users.size() != count) {
+			users.clear();
+
+			int gottenSoFar = 0;
+			String emoji = isCustomEmoji() ? (getCustomEmoji().getName() + ":" + getCustomEmoji().getID()) : this.emoji;
+			String userAfter = null;
+			DiscordClientImpl clientImpl = ((DiscordClientImpl) getClient());
+			while (gottenSoFar < count) {
+				String response = clientImpl.REQUESTS.GET.makeRequest(
+						String.format(DiscordEndpoints.REACTIONS_USERS, message.getChannel().getID(), message.getID(),
+								emoji), new BasicNameValuePair("after", userAfter));
+
+				ReactionUserObject[] userObjs = DiscordUtils.GSON.fromJson(response, ReactionUserObject[].class);
+
+				if (userObjs.length == 0)
+					break;
+
+				gottenSoFar += userObjs.length;
+
+				for (ReactionUserObject obj : userObjs) {
+					IUser u = getClient().getUserByID(obj.id);
+
+					if (u != null) {
+						users.add(u);
+					}
+
+					userAfter = obj.id;
+				}
+			}
 		}
 
-		return users;
+		return getUsers();
 	}
 
 	@Override
@@ -89,8 +128,6 @@ public class Reaction implements IReaction {
 
 	@Override
 	public IReaction copy() {
-		return isCustomEmoji()
-				? new Reaction(shard, count, users, customEmoji)
-				: new Reaction(shard, count, users, normalEmoji);
+		return new Reaction(shard, count, users, emoji, isCustomEmoji);
 	}
 }
