@@ -100,4 +100,9 @@ public final class DiscordEndpoints {
 	 */
 	public static final String EMOJI_IMAGE = "https://cdn.discordapp.com/emojis/%s.png";
 
+	/**
+	 * The reactions url. Replacements in order: channel ID, message ID, emoji (emoji or name:id), user (@me or ID)
+	 */
+	public static final String REACTIONS = CHANNELS + "%s/messages/%s/reactions/%s/%s";
+
 }

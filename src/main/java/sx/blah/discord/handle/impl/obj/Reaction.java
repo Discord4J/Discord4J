@@ -70,6 +70,10 @@ public class Reaction implements IReaction {
 	 */
 	@Override
 	public List<IUser> getUsers() {
+		if (users.size() != count) {
+
+		}
+
 		return users;
 	}
 
