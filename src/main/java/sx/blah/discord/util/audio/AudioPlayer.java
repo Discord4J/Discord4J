@@ -248,7 +248,13 @@ public class AudioPlayer implements IAudioProvider {
 	 * @return The {@link Track} object representing this audio provider.
 	 */
 	public Track queue(IAudioProvider provider) {
-		Track track = new Track(provider);
+		Track track;
+
+		if (provider instanceof AudioInputStreamProvider)
+			track = new Track((AudioInputStreamProvider) provider);
+		else
+			track = new Track(provider);
+
 		queue(track);
 		return track;
 	}
@@ -465,11 +471,11 @@ public class AudioPlayer implements IAudioProvider {
 			stream = null;
 		}
 
-		public Track(AudioInputStreamProvider provider) throws IOException {
+		public Track(AudioInputStreamProvider provider) {
 			this(provider.getStream());
 		}
 
-		public Track(AudioInputStream stream) throws IOException {
+		public Track(AudioInputStream stream) {
 			this.stream = new AmplitudeAudioInputStream(DiscordUtils.getPCMStream(stream));
 			this.provider = new AudioInputStreamProvider(this.stream);
 
