@@ -602,7 +602,7 @@ public class DispatchHandler {
 			if (message != null) {
 				Reaction reaction = (Reaction) (event.emoji.id == null
 						? message.getReactionByName(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(event.emoji.id)));
+						: message.getReactionByName(event.emoji.name + ":" + event.emoji.id));
 				IUser user = message.getGuild().getUserByID(event.user_id);
 
 				if (reaction == null) {
@@ -634,7 +634,7 @@ public class DispatchHandler {
 			if (message != null) {
 				Reaction reaction = (Reaction) (event.emoji.id == null
 						? message.getReactionByName(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(event.emoji.id)));
+						: message.getReactionByName(event.emoji.name + ":" + event.emoji.id));
 				IUser user = message.getGuild().getUserByID(event.user_id);
 
 				if (reaction != null) {
