@@ -426,11 +426,7 @@ public class User implements IUser {
 	@Override
 	public void addReaction(IEmoji emoji, IMessage message) throws MissingPermissionsException, RateLimitException,
 			DiscordException {
-		DiscordUtils.checkPermissions(this, message.getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
-
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
-				String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
-						emoji.getName() + ":" + emoji.getID(), "@me"));
+		addReaction(emoji.toString(), message);
 	}
 
 	@Override
