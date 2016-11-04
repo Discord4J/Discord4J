@@ -609,16 +609,15 @@ public class DispatchHandler {
 					List<IUser> list = new CopyOnWriteArrayList<>();
 					list.add(user);
 
-					reaction = new Reaction(message.getShard(), 1, list, event.emoji.id != null
-							? event.emoji.id
-							: event.emoji.name, event.emoji.id != null);
+					reaction = new Reaction(message.getShard(), 1, list,
+							event.emoji.id != null ? event.emoji.id : event.emoji.name, event.emoji.id != null);
 
 					message.getReactions().add(reaction);
 				} else {
 					reaction.getUsers().add(user);
+					reaction.setCount(reaction.getCount() + 1);
 				}
 
-				reaction.setCount(reaction.getCount() + 1);
 				reaction.setMessage(message);
 
 				client.dispatcher.dispatch(

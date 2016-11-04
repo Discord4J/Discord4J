@@ -187,12 +187,11 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * Adds your reaction to an existing object.
 	 *
 	 * @param reaction The reaction object
-	 * @param message  The message
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(IReaction reaction, IMessage message) throws MissingPermissionsException, RateLimitException,
+	void addReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
 			DiscordException;
 
 	/**
@@ -208,7 +207,7 @@ public interface IUser extends IDiscordObject<IUser> {
 			DiscordException;
 
 	/**
-	 * Adds your reaction as a normal emoji. This <b>cannot</b> be like the :potato: emojis.
+	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;name:id&gt;)
 	 *
 	 * @param emoji   The string emoji
 	 * @param message The message
@@ -223,11 +222,10 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * Removes your reaction.
 	 *
 	 * @param reaction The reaction to remove from
-	 * @param message  The message
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removeReaction(IReaction reaction, IMessage message) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 }

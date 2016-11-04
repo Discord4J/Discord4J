@@ -412,15 +412,15 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void addReaction(IReaction reaction, IMessage message) throws MissingPermissionsException,
+	public void addReaction(IReaction reaction) throws MissingPermissionsException,
 			RateLimitException, DiscordException {
 		if (reaction == null)
 			return;
 
 		if (reaction.isCustomEmoji())
-			addReaction(reaction.getCustomEmoji(), message);
+			addReaction(reaction.getCustomEmoji(), reaction.getMessage());
 		else
-			addReaction(reaction.toString(), message);
+			addReaction(reaction.toString(), reaction.getMessage());
 	}
 
 	@Override
@@ -438,6 +438,15 @@ public class User implements IUser {
 			DiscordException {
 		DiscordUtils.checkPermissions(this, message.getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
 
+		emoji = emoji.replace("<", "").replace(">", "");
+
+		if (emoji.matches("\\d+")) {
+			IEmoji em = message.getGuild().getEmojiByID(emoji);
+			if (em != null) {
+				emoji = em.getName() + ":" + em.getID();
+			}
+		}
+
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
@@ -448,8 +457,10 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void removeReaction(IReaction reaction, IMessage message) throws MissingPermissionsException, RateLimitException,
+	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
 			DiscordException {
+		IMessage message = reaction.getMessage();
+
 		if (!this.equals(client.getOurUser())) {
 			DiscordUtils.checkPermissions(this, message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		}
