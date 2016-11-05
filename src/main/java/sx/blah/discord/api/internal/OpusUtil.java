@@ -116,12 +116,9 @@ public class OpusUtil {
 		int result = Opus.INSTANCE.opus_decode(decoder, opusAudio, opusAudio.length, decodedBuffer, OPUS_FRAME_SIZE, 0);
 		if (result < 0) throw new RuntimeException("Failed to decode opus to pcm. Error code: " + result);
 
-		short[] shortAudio = new short[result * 2];
-		decodedBuffer.get(shortAudio);
-
-		ByteBuffer byteBuffer = ByteBuffer.allocate(shortAudio.length * 2); //
+		ByteBuffer byteBuffer = ByteBuffer.allocate(result * 2); //
 		byteBuffer.order(ByteOrder.BIG_ENDIAN);                             // Convert to bytes (Big Endian format)
-		byteBuffer.asShortBuffer().put(shortAudio);                         //
+		byteBuffer.asShortBuffer().put(decodedBuffer.array(), 0, result);                         //
 		return byteBuffer.array();
 	}
 
