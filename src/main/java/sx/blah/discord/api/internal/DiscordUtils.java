@@ -278,8 +278,8 @@ public class DiscordUtils {
 		return emoji;
 	}
 
-	public static IReaction getReactionFromJSON(IGuild guild, MessageObject.ReactionObject object) {
-		Reaction reaction = new Reaction(guild.getShard(), object.count, new CopyOnWriteArrayList<>(),
+	public static IReaction getReactionFromJSON(IShard shard, MessageObject.ReactionObject object) {
+		Reaction reaction = new Reaction(shard, object.count, new CopyOnWriteArrayList<>(),
 				object.emoji.id != null
 						? object.emoji.id
 						: object.emoji.name, object.emoji.id != null);
@@ -288,12 +288,12 @@ public class DiscordUtils {
 		return reaction;
 	}
 
-	public static List<IReaction> getReactionsFromJson(IGuild guild, MessageObject.ReactionObject[] objects) {
+	public static List<IReaction> getReactionsFromJson(IShard shard, MessageObject.ReactionObject[] objects) {
 		List<IReaction> reactions = new CopyOnWriteArrayList<>();
 
 		if (objects != null) {
 			for (MessageObject.ReactionObject obj : objects) {
-				IReaction r = getReactionFromJSON(guild, obj);
+				IReaction r = getReactionFromJSON(shard, obj);
 				if (r != null)
 					reactions.add(r);
 			}
@@ -400,7 +400,7 @@ public class DiscordUtils {
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json),
-					getReactionsFromJson(channel.getGuild(), json.reactions));
+					getReactionsFromJson(channel.getShard(), json.reactions));
 
 			for (IReaction reaction : message.getReactions()) {
 				((Reaction) reaction).setMessage(message);
