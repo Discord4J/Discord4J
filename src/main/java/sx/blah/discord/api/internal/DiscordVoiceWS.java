@@ -264,9 +264,6 @@ public class DiscordVoiceWS {
 				try {
 					udpSocket.receive(receivedPacket); // This blocks the thread until a packet is received.
                                         
-                                        System.out.println(receivedPacket.getLength());
-                                        System.out.println((int)receivedPacket.getData()[0]+" "+(int)receivedPacket.getData()[1]);
-                                        
 					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket);
 					try {
 						packet = packet.decrypt(secret);
