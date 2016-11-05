@@ -13,7 +13,6 @@ public class ClientBuilder {
 	private String botToken;
 	private boolean isDaemon = false;
 	private int shardCount = 1;
-	private int maxReconnectAttempts = 5;
 
 	/**
 	 * Provides the login info for the client.
@@ -79,11 +78,6 @@ public class ClientBuilder {
 		return this;
 	}
 
-	public ClientBuilder withMaxReconnectAttempts(int maxReconnectAttempts) {
-		this.maxReconnectAttempts = maxReconnectAttempts;
-		return this;
-	}
-
 	/**
 	 * Creates the discord instance with the desired features
 	 *
@@ -95,7 +89,7 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shardCount, maxReconnectAttempts);
+		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shardCount);
 	}
 
 	/**

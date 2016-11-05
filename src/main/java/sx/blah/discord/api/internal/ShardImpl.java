@@ -8,7 +8,7 @@ import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
 import sx.blah.discord.handle.impl.events.StatusChangeEvent;
 import sx.blah.discord.handle.impl.obj.User;
@@ -16,6 +16,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -30,18 +31,16 @@ public class ShardImpl implements IShard {
 	private String gateway;
 	private boolean isDaemon;
 	private int[] info;
-	private int maxReconnectAttempts;
 
 	private final DiscordClientImpl client;
 	protected List<IGuild> guildList = new CopyOnWriteArrayList<>();
 	protected List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
-	public ShardImpl(IDiscordClient client, String gateway, int[] info, boolean isDaemon, int maxReconnectAttempts) {
+	public ShardImpl(IDiscordClient client, String gateway, int[] info, boolean isDaemon) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
 		this.isDaemon = isDaemon;
 		this.info = info;
-		this.maxReconnectAttempts = maxReconnectAttempts;
 	}
 
 	@Override
@@ -56,16 +55,23 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void login() throws DiscordException {
-		this.ws = new DiscordWS(this, gateway, isDaemon, maxReconnectAttempts);
+		Discord4J.LOGGER.trace(LogMarkers.API, "Shard logging in.");
+		this.ws = new DiscordWS(this, gateway);
 	}
 
 	@Override
-	public void logout() throws DiscordException, RateLimitException {
+	public void logout() throws DiscordException {
 		if (isLoggedIn()) {
-			getConnectedVoiceChannels().forEach(IVoiceChannel::leave);
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
+			getConnectedVoiceChannels().forEach(channel -> {
+				RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
+					channel.leave();
+					return channel;
+				});
+				request.get();
+			});
+			ws.disconnect(DisconnectedEvent.Reason.LOGGED_OUT);
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to logout before bot has logged in!");
 		}
 	}
 
@@ -91,7 +97,7 @@ public class ShardImpl implements IShard {
 
 	private void updatePresence(boolean isIdle, Status status) {
 		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to change presence before bot has logged in!");
 			return;
 		}
 
@@ -241,7 +247,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
 		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get PM channel before bot is ready!");
 			return null;
 		}
 
@@ -273,7 +279,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public IInvite getInviteForCode(String code) {
 		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite code before bot has logged in!");
 			return null;
 		}
 

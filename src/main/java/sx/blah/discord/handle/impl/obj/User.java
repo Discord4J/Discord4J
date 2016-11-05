@@ -1,7 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -16,6 +15,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -409,5 +409,67 @@ public class User implements IUser {
 		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
 		roleList.remove(role);
 		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+	}
+
+	@Override
+	public void addReaction(IReaction reaction) throws MissingPermissionsException,
+			RateLimitException, DiscordException {
+		if (reaction == null)
+			return;
+
+		if (reaction.isCustomEmoji())
+			addReaction(reaction.getCustomEmoji(), reaction.getMessage());
+		else
+			addReaction(reaction.toString(), reaction.getMessage());
+	}
+
+	@Override
+	public void addReaction(IEmoji emoji, IMessage message) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		addReaction(emoji.toString(), message);
+	}
+
+	@Override
+	public void addReaction(String emoji, IMessage message) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		DiscordUtils.checkPermissions(this, message.getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
+
+		emoji = emoji.replace("<:", "").replace(">", "");
+
+		if (emoji.matches("\\d+")) {
+			IEmoji em = message.getGuild().getEmojiByID(emoji);
+			if (em != null) {
+				emoji = em.getName() + ":" + em.getID();
+			}
+		}
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
+							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20"), "@me"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		IMessage message = reaction.getMessage();
+
+		if (!this.equals(client.getOurUser())) {
+			DiscordUtils.checkPermissions(this, message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+		}
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
+							reaction.isCustomEmoji()
+									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getID())
+									: URLEncoder.encode(reaction.toString(), "UTF-8").replace("+", "%20"),
+							this.equals(client.getOurUser()) ? "@me" : getID()));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
 	}
 }

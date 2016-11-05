@@ -13,9 +13,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.util.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -95,7 +93,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 					ChannelObject.class);
 
 			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
+			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
 
 			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 		} catch (UnsupportedEncodingException e) {
@@ -123,7 +121,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to join voice channel before bot is ready!");
 		}
 	}
 
@@ -175,7 +173,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws IOException {
+	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException {
 		throw new UnsupportedOperationException();
 	}
 

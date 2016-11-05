@@ -94,4 +94,20 @@ public final class DiscordEndpoints {
 	 * The OAuth2 authorization url.
 	 */
 	public static final String AUTHORIZE = "https://discordapp.com/oauth2/authorize";
+
+	/**
+	 * The emoji image URL.
+	 */
+	public static final String EMOJI_IMAGE = "https://cdn.discordapp.com/emojis/%s.png";
+
+	/**
+	 * The reactions user list url. Replacements in order: channel ID, message ID, emoji (emoji or name:id)
+	 */
+	public static final String REACTIONS_USERS = CHANNELS + "%s/messages/%s/reactions/%s";
+
+	/**
+	 * The reactions url. Replacements in order: channel ID, message ID, emoji (emoji or name:id), user (@me or ID)
+	 */
+	public static final String REACTIONS = REACTIONS_USERS + "/%s";
+
 }

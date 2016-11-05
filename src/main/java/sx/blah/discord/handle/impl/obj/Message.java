@@ -112,6 +112,11 @@ public class Message implements IMessage {
 	protected volatile String formattedContent = null;
 
 	/**
+	 * The list of reactions
+	 */
+	protected volatile List<IReaction> reactions;
+
+	/**
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
@@ -119,7 +124,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embedded> embedded) {
+				   boolean pinned, List<Embedded> embedded, List<IReaction> reactions) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -134,6 +139,7 @@ public class Message implements IMessage {
 		this.channelMentions = new ArrayList<>();
 		this.embedded = embedded;
 		this.everyoneMentionIsValid = mentionsEveryone;
+		this.reactions = reactions;
 
 		setChannelMentions();
 	}
@@ -151,8 +157,11 @@ public class Message implements IMessage {
 	public void setContent(String content) {
 		this.content = content;
 		this.formattedContent = null; // Force re-update later
-		this.mentionsEveryone = content.contains("@everyone");
-		this.mentionsHere = content.contains("@here");
+
+		if (content != null) {
+			this.mentionsEveryone = content.contains("@everyone");
+			this.mentionsHere = content.contains("@here");
+		}
 	}
 
 	/**
@@ -283,14 +292,14 @@ public class Message implements IMessage {
 					MessageObject.class);
 
 			IMessage oldMessage = copy();
-			DiscordUtils.getMessageFromJSON(getShard(), channel, response);
+			DiscordUtils.getMessageFromJSON(channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
 			//Original message edited to null, then the null message edited to the new content
 			client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
 
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to edit message before bot is ready!");
 		}
 		return this;
 	}
@@ -344,7 +353,7 @@ public class Message implements IMessage {
 		if (client.isReady()) {
 			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id);
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot is not yet ready!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to delete message before bot is ready!");
 		}
 	}
 
@@ -379,7 +388,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embedded);
+				mentions, roleMentions, attachments, isPinned, embedded, reactions);
 	}
 
 	@Override
@@ -409,6 +418,27 @@ public class Message implements IMessage {
 		}
 
 		return formattedContent;
+	}
+
+	public void setReactions(List<IReaction> reactions) {
+		this.reactions = reactions;
+	}
+
+	@Override
+	public List<IReaction> getReactions() {
+		return reactions;
+	}
+
+	@Override
+	public IReaction getReactionByIEmoji(IEmoji emoji) {
+		return reactions.stream().filter(r -> r.isCustomEmoji() && r.getCustomEmoji().equals(emoji)).findFirst()
+				.orElse(null);
+	}
+
+	@Override
+	public IReaction getReactionByName(String name) {
+		return reactions.stream().filter(r -> !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
+				.orElse(null);
 	}
 
 	@Override

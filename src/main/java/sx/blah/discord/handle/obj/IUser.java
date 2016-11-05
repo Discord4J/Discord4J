@@ -1,8 +1,8 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.util.List;
 import java.util.Optional;
@@ -182,5 +182,50 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws MissingPermissionsException
 	 */
 	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Adds your reaction to an existing object.
+	 *
+	 * @param reaction The reaction object
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void addReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
+			DiscordException;
+
+	/**
+	 * Adds your reaction as a custom emoji
+	 *
+	 * @param emoji   The custom emoji
+	 * @param message The message
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void addReaction(IEmoji emoji, IMessage message) throws MissingPermissionsException, RateLimitException,
+			DiscordException;
+
+	/**
+	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;name:id&gt;)
+	 *
+	 * @param emoji   The string emoji
+	 * @param message The message
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void addReaction(String emoji, IMessage message) throws MissingPermissionsException, RateLimitException,
+			DiscordException;
+
+	/**
+	 * Removes your reaction.
+	 *
+	 * @param reaction The reaction to remove from
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 }

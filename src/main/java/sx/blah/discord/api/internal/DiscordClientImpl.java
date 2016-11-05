@@ -1,33 +1,24 @@
 package sx.blah.discord.api.internal;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.api.internal.json.objects.InviteObject;
-import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
-import sx.blah.discord.handle.impl.events.StatusChangeEvent;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -95,28 +86,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private int shardCount;
 
 	/**
-	 * The maximum number of times a reconnection will be attempted before exiting.
-	 */
-	protected int maxReconnectAttempts = 0;
-
-	/**
 	 * The requests holder object.
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts, EventDispatcher dispatcher, ModuleLoader loader) {
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
-		this.maxReconnectAttempts = maxReconnectAttempts;
-		this.dispatcher = dispatcher;
-		this.loader = loader;
-	}
-
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts) {
-		this(token, timeoutTime, maxMissedPingCount, isDaemon, shardCount, maxReconnectAttempts, null, null);
 		this.dispatcher = new EventDispatcher(this);
 		this.loader = new ModuleLoader(this);
 	}
@@ -150,7 +129,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
 		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to change account info before bot has logged in!");
 			return;
 		}
 
@@ -180,10 +159,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IUser getOurUser() {
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not yet logged in!");
-			return null;
-		}
 		return ourUser;
 	}
 
@@ -276,10 +251,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return null;
 	}
 
-	private void validateToken() throws DiscordException, RateLimitException {
-		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds");
-	}
-
 	private String obtainGateway() {
 		String gateway = null;
 		try {
@@ -296,18 +267,47 @@ public final class DiscordClientImpl implements IDiscordClient {
 	// Sharding delegation
 
 	@Override
-	public void login() throws DiscordException, RateLimitException {
-		validateToken();
+	public void login() {
+		if (!getShards().isEmpty()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to login client more than once.");
+			return;
+		}
+
 		String gateway = obtainGateway();
-		for (int i = 0; i < shardCount; i++) {
-			ShardImpl shard = new ShardImpl(this, gateway, new int[] {i, shardCount}, isDaemon, maxReconnectAttempts);
-			getShards().add(i, shard);
-			shard.login();
+		new RequestBuilder(this).setAsync(true).doAction(() -> {
+			for (int i = 0; i < shardCount; i++) {
+				final int shardNum = i;
+				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount}, isDaemon);
+				getShards().add(shardNum, shard);
+				shard.login();
+
+				getDispatcher().waitFor((ShardReadyEvent e) -> true, 10, TimeUnit.SECONDS, () ->
+					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
+				);
+
+				if (i != shardCount - 1) { // all but last
+					Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
+					Thread.sleep(5000);
+				}
+			}
+			getDispatcher().dispatch(new ReadyEvent());
+			return true;
+		}).build();
+
+		if (!isDaemon) {
+			new Timer().scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					if (getShards().stream().anyMatch(IShard::isLoggedIn)) {
+						this.cancel();
+					}
+				}
+			}, 0, 1000);
 		}
 	}
 
 	@Override
-	public void logout() throws DiscordException, RateLimitException {
+	public void logout() throws DiscordException {
 		for (IShard shard : getShards()) {
 			shard.logout();
 		}
@@ -316,12 +316,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isLoggedIn() {
-		return getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
+		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
 	}
 
 	@Override
 	public boolean isReady() {
-		return getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
+		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
 	}
 
 	@Override

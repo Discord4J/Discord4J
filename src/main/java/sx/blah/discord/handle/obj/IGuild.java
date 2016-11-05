@@ -8,7 +8,6 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 import java.time.LocalDateTime;
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -326,6 +325,16 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void changeRegion(IRegion region) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
+	 * Changes the verification level of the guild.
+	 *
+	 * @param verification The new verification level of the guild.
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void changeVerificationLevel(VerificationLevel verification) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
 	 * Changes the name of the guild.
 	 *
 	 * @param icon The new icon of the guild (or null to remove it).
@@ -405,6 +414,13 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IRegion getRegion();
 
 	/**
+	 * Gets the verification level of this guild.
+	 *
+	 * @return The verification level.
+	 */
+	VerificationLevel getVerificationLevel();
+
+	/**
 	 * This retrieves the @everyone role which exists on all guilds.
 	 *
 	 * @return The object representing the @everyone role.
@@ -479,4 +495,27 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The message or null if not found.
 	 */
 	IMessage getMessageByID(String id);
+
+	/**
+	 * This gets all the emojis in the guild.
+	 *
+	 * @return A list of emojis.
+	 */
+	List<IEmoji> getEmojis();
+
+	/**
+	 * This gets an emoji by its ID.
+	 *
+	 * @param id The ID.
+	 * @return The emoji.
+	 */
+	IEmoji getEmojiByID(String id);
+
+	/**
+	 * This gets an emoji by its name.
+	 *
+	 * @param name The name, <b>without colons</b>.
+	 * @return The emoji.
+	 */
+	IEmoji getEmojiByName(String name);
 }

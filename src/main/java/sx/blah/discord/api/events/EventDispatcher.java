@@ -3,17 +3,18 @@ package sx.blah.discord.api.events;
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.api.IShard;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * Manages event listeners and event logic.
@@ -172,6 +173,22 @@ public class EventDispatcher {
 	}
 
 	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched.
+	 *
+	 * @param eventClass The class of the event to wait for.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
+	 * event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param onTimeout The procedure to execute when the timeout is reached.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
+		waitFor((T event) -> true, time, unit, onTimeout);
+	}
+
+	/**
 	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
 	 * {@link Predicate} returns true.
 	 *
@@ -223,6 +240,7 @@ public class EventDispatcher {
 	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
 	 * event fired.
 	 * @param unit The unit for the time parameter.
+	 * @param onTimeout The procedure to execute when the timeout is reached.
 	 * @param <T> The event type to wait for.
 	 *
 	 * @throws InterruptedException
@@ -290,14 +308,14 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public synchronized void dispatch(Event event) {
-		if (client.isLoggedIn() || event instanceof DiscordDisconnectedEvent) {
+		if (client.getShards().stream().anyMatch(IShard::isLoggedIn) || event instanceof DisconnectedEvent) {
 			eventExecutor.submit(() -> {
 				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 				event.client = client;
 
 				methodListeners.entrySet().stream()
 						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(e -> e.getValue())
+						.map(Map.Entry::getValue)
 						.forEach(m ->
 								m.forEach((k, v) ->
 										v.forEach(o -> {
@@ -316,7 +334,7 @@ public class EventDispatcher {
 
 				classListeners.entrySet().stream()
 						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(e -> e.getValue())
+						.map(Map.Entry::getValue)
 						.forEach(s -> s.forEach(l -> {
 							try {
 								l.listener.handle(event);

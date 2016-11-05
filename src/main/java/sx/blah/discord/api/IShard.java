@@ -31,9 +31,8 @@ public interface IShard {
 	/**
 	 * Disconnects this shard from the Discord gateway.
 	 * @throws DiscordException
-	 * @throws RateLimitException
 	 */
-	void logout() throws DiscordException, RateLimitException;
+	void logout() throws DiscordException;
 
 	/**
 	 * Checks if the api is ready to be interacted with. This means all available guilds on this shard have been received.

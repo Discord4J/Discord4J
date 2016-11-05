@@ -2,20 +2,41 @@ package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.events.Event;
 
 /**
  * This event is dispatched when either a shard loses connection to discord or is logged out.
- * @deprecated Use {@link DisconnectedEvent}
  */
-public class DiscordDisconnectedEvent extends DisconnectedEvent {
+public class DisconnectedEvent extends Event {
 
-	public DiscordDisconnectedEvent(Reason reason, IShard shard) {
-		super(DisconnectedEvent.Reason.valueOf(reason.name()), shard);
+	private final Reason reason;
+	private final IShard shard;
+
+	public DisconnectedEvent(Reason reason, IShard shard) {
+		this.reason = reason;
+		this.shard = shard;
+	}
+
+	/**
+	 * Gets the reason this shard disconnected.
+	 *
+	 * @return The reason.
+	 */
+	public Reason getReason() {
+		return reason;
+	}
+
+	/**
+	 * Gets the shard that disconnected.
+	 *
+	 * @return The shard.
+	 */
+	public IShard getShard() {
+		return shard;
 	}
 
 	/**
 	 * This enum represents the possible reasons for discord being disconnected.
-	 * @deprecated Use {@link DisconnectedEvent.Reason}
 	 */
 	public enum Reason {
 		/**

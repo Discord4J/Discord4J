@@ -83,11 +83,11 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketText(String message) {
 		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
-		VoiceOps op = VoiceOps.values()[payload.get("op").getAsInt()];
+		VoiceOps op = VoiceOps.get(payload.get("op").getAsInt());
 		JsonElement d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d") : null;
 
 		switch (op) {
-			case READY :
+			case READY:
 				VoiceReadyResponse ready = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceReadyResponse.class);
 				this.ssrc = ready.ssrc;
 
@@ -115,6 +115,9 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				IUser user = client.getUserByID(speaking.user_id);
 				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(user, speaking.ssrc, speaking.isSpeaking));
 				break;
+			case UNKNOWN:
+				Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
+				break;
 		}
 	}
 
@@ -133,7 +136,8 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				keepAlive.shutdownNow();
 				sendHandler.shutdownNow();
 				udpSocket.close();
-				getSession().close();
+				if (getSession() != null)
+					getSession().close();
 				break;
 		}
 	}
@@ -152,7 +156,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 						if (!isSpeaking) setSpeaking(true);
 						udpSocket.send(packet.asUdpPacket(address));
 
-						if (seq+1 > Character.MAX_VALUE) {
+						if (seq + 1 > Character.MAX_VALUE) {
 							seq = 0;
 						} else {
 							seq++;
@@ -167,7 +171,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				}
 			}
 		};
-		sendHandler.scheduleWithFixedDelay(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT-1, TimeUnit.MILLISECONDS);
+		sendHandler.scheduleWithFixedDelay(sendThread, 0, AudioManager.OPUS_FRAME_TIME_AMOUNT - 1, TimeUnit.MILLISECONDS);
 	}
 
 	private void setSpeaking(boolean isSpeaking) {
@@ -199,7 +203,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	}
 
 	private void send(String message) {
-		if (getSession().isOpen()) {
+		if (getSession() != null && getSession().isOpen()) {
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
 			Discord4J.LOGGER.warn(LogMarkers.VOICE_WEBSOCKET, "Attempt to send message on closed session.");
@@ -215,7 +219,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason {}.", statusCode, reason);
+		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason {}", statusCode, reason);
 	}
 
 }
