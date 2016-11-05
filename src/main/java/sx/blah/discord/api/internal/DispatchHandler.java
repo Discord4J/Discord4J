@@ -603,7 +603,7 @@ public class DispatchHandler {
 				Reaction reaction = (Reaction) (event.emoji.id == null
 						? message.getReactionByName(event.emoji.name)
 						: message.getReactionByName(event.emoji.name + ":" + event.emoji.id));
-				IUser user = message.getGuild().getUserByID(event.user_id);
+				IUser user = message.getClient().getUserByID(event.user_id);
 
 				if (reaction == null) {
 					List<IUser> list = new CopyOnWriteArrayList<>();
@@ -635,7 +635,7 @@ public class DispatchHandler {
 				Reaction reaction = (Reaction) (event.emoji.id == null
 						? message.getReactionByName(event.emoji.name)
 						: message.getReactionByName(event.emoji.name + ":" + event.emoji.id));
-				IUser user = message.getGuild().getUserByID(event.user_id);
+				IUser user = message.getClient().getUserByID(event.user_id);
 
 				if (reaction != null) {
 					reaction.setMessage(message); // safeguard
