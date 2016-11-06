@@ -92,7 +92,7 @@ public class Reaction implements IReaction {
 
 	@Override
 	public synchronized List<IUser> refreshUsers() throws RateLimitException, DiscordException {
-		if (users.size() != count) {
+		if (shouldRefreshUsers()) {
 			users.clear();
 
 			int gottenSoFar = 0;
@@ -124,6 +124,11 @@ public class Reaction implements IReaction {
 		}
 
 		return getUsers();
+	}
+
+	@Override
+	public boolean shouldRefreshUsers() {
+		return users.size() != count;
 	}
 
 	@Override

@@ -57,6 +57,14 @@ public interface IReaction {
 	List<IUser> refreshUsers() throws RateLimitException, DiscordException;
 
 	/**
+	 * Returns true if refreshUsers() should be called (the users and count are out of sync).
+	 *
+	 * @see IReaction#refreshUsers()
+	 * @return True if you should call refreshUsers()
+	 */
+	boolean shouldRefreshUsers();
+
+	/**
 	 * Gets the {@link IDiscordClient} instance this object belongs to.
 	 *
 	 * @return The client instance.
