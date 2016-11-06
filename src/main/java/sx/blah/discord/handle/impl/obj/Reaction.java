@@ -48,6 +48,16 @@ public class Reaction implements IReaction {
 	}
 
 	@Override
+	public boolean getUserReacted(IUser user) {
+		return users.stream().anyMatch(u -> u.equals(user));
+	}
+
+	@Override
+	public boolean getClientReacted() {
+		return getUserReacted(getClient().getOurUser());
+	}
+
+	@Override
 	public IMessage getMessage() {
 		return message;
 	}
