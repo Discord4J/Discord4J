@@ -119,27 +119,6 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	void execute(String content) throws RateLimitException, DiscordException;
 
 	/**
-	 * Executes this webhook with a simple message, but a different username
-	 *
-	 * @param content  The message to post.
-	 * @param username The username to post under.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(String content, String username) throws RateLimitException, DiscordException;
-
-	/**
-	 * Executes this webhook with a simple message, but a different username and avatar.
-	 *
-	 * @param content   The message to post.
-	 * @param username  The username to post under.
-	 * @param avatarUrl The avatar url to use.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(String content, String username, String avatarUrl) throws RateLimitException, DiscordException;
-
-	/**
 	 * Executes this webhook with a simple TTS message, but a different username and avatar
 	 *
 	 * @param content   The message to post.
@@ -160,17 +139,6 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws DiscordException
 	 */
 	void execute(File file) throws FileNotFoundException, RateLimitException, DiscordException;
-
-	/**
-	 * Executes this webhook by uploading a file (8 MB limit). Uses a different username to the default.
-	 *
-	 * @param file     The file to upload.
-	 * @param username The username to post under.
-	 * @throws FileNotFoundException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(File file, String username) throws FileNotFoundException, RateLimitException, DiscordException;
 
 	/**
 	 * Executes this webhook by uploading a file (8 MB limit). Uses a different username and avatar to the default.
@@ -196,31 +164,6 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	void execute(String content, File file) throws FileNotFoundException, RateLimitException, DiscordException;
 
 	/**
-	 * Executes this webhook by uploading a file (8 MB limit) and posting a message, under a different username and avatar to the default.
-	 *
-	 * @param content  The message to post.
-	 * @param file     The file to upload.
-	 * @param username The username to post under.
-	 * @throws FileNotFoundException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(String content, File file, String username) throws FileNotFoundException, RateLimitException, DiscordException;
-
-	/**
-	 * Executes this webhook by uploading a file (8 MB limit) and posting a message, under a different username and avatar to the default.
-	 *
-	 * @param content   The message to post.
-	 * @param file      The file to upload.
-	 * @param username  The username to post under.
-	 * @param avatarUrl The avatar url to use.
-	 * @throws FileNotFoundException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(String content, File file, String username, String avatarUrl) throws FileNotFoundException, RateLimitException, DiscordException;
-
-	/**
 	 * Executes this webhook by uploading a sequence of data (8 MB limit) with a filename.
 	 *
 	 * @param data     The InputStream to read data from, to upload.
@@ -229,17 +172,6 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws DiscordException
 	 */
 	void execute(InputStream data, String fileName) throws RateLimitException, DiscordException;
-
-	/**
-	 * Executes this webhook by uploading a sequence of data (8 MB limit) with a filename, under a different username to the default.
-	 *
-	 * @param data     The InputStream to read data from, to upload.
-	 * @param fileName The filename to post as.
-	 * @param username The username to post under.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(InputStream data, String fileName, String username) throws RateLimitException, DiscordException;
 
 	/**
 	 * Executes this webhook by uploading a sequence of data (8 MB limit) with a filename, under a different username and avatar to the default.
@@ -264,19 +196,6 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 */
 	void execute(String content, InputStream data, String fileName) throws RateLimitException, DiscordException;
 
-
-	/**
-	 * Executes this webhook by uploading a sequence of data (8 MB limit) with a filename, and sending a message, under a different username to the default.
-	 *
-	 * @param content  The message to post.
-	 * @param data     The InputStream to read data from, to upload.
-	 * @param fileName The filename to post as.
-	 * @param username The username to post under.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(String content, InputStream data, String fileName, String username) throws RateLimitException, DiscordException;
-
 	/**
 	 * Executes this webhook by uploading a sequence of data (8 MB limit) with a filename, and sending a message, under a different username and avatar to the default.
 	 *
@@ -297,17 +216,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void execute(IMessage.IEmbedded[] content) throws RateLimitException, DiscordException;
-
-	/**
-	 * Executes this webhook with an array of embedded content, under a different username to the default.
-	 *
-	 * @param content  The array of embedded content.
-	 * @param username The username to post under.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void execute(IMessage.IEmbedded[] content, String username) throws RateLimitException, DiscordException;
+	void execute(IEmbedded[] content) throws RateLimitException, DiscordException;
 
 	/**
 	 * Executes this webhook with an array of embedded content, under a different username and avatar to the default.
@@ -318,5 +227,5 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void execute(IMessage.IEmbedded[] content, String username, String avatarUrl) throws RateLimitException, DiscordException;
+	void execute(IEmbedded[] content, String username, String avatarUrl) throws RateLimitException, DiscordException;
 }

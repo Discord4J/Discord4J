@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.api.internal.json.objects.MessageObject;
-import sx.blah.discord.handle.obj.IMessage.IEmbedded;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.obj.IEmbedded;
 
 import java.awt.Color;
 import java.time.LocalDateTime;
@@ -54,7 +54,7 @@ public class Embedded implements IEmbedded {
 
 	protected final List<IEmbedField> embedFields;
 
-	public Embedded(String title, String type, String description, String url, MessageObject.ThumbnailObject thumbnail, MessageObject.ProviderObject provider, LocalDateTime timestamp, Color color, MessageObject.FooterObject footer, MessageObject.ImageObject image, MessageObject.VideoObject video, MessageObject.AuthorObject author, MessageObject.EmbedFieldObject[] embedFields) {
+	public Embedded(String title, String type, String description, String url, EmbedObject.ThumbnailObject thumbnail, EmbedObject.ProviderObject provider, LocalDateTime timestamp, Color color, EmbedObject.FooterObject footer, EmbedObject.ImageObject image, EmbedObject.VideoObject video, EmbedObject.AuthorObject author, EmbedObject.EmbedFieldObject[] embedFields) {
 		this.title = title;
 		this.type = type;
 		this.description = description;
@@ -93,7 +93,7 @@ public class Embedded implements IEmbedded {
 		else {
 			this.embedFields = new CopyOnWriteArrayList<>();
 
-			for (MessageObject.EmbedFieldObject embedField : embedFields)
+			for (EmbedObject.EmbedFieldObject embedField : embedFields)
 				this.embedFields.add(new EmbedField(embedField.name, embedField.value, embedField.inline));
 		}
 	}

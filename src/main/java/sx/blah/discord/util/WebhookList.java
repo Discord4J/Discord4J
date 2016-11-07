@@ -58,7 +58,7 @@ public class WebhookList extends AbstractList<IWebhook> implements List<IWebhook
 	 * @param channel The channel to retrieve webhooks from.
 	 */
 	public WebhookList(IDiscordClient client, IChannel channel) {
-		if (channel instanceof IVoiceChannel)
+		if (channel instanceof IVoiceChannel || channel instanceof IPrivateChannel)
 			throw new UnsupportedOperationException();
 
 		this.client = (DiscordClientImpl) client;

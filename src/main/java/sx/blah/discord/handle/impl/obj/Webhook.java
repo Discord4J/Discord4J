@@ -157,16 +157,6 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public void execute(String content, String username) throws RateLimitException, DiscordException {
-		execute(content, username, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg", false);
-	}
-
-	@Override
-	public void execute(String content, String username, String avatarUrl) throws RateLimitException, DiscordException {
-		execute(content, username, avatarUrl, false);
-	}
-
-	@Override
 	public void execute(String content, String username, String avatarUrl, boolean tts) throws RateLimitException, DiscordException {
 		((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.WEBHOOKS + id + "/" + token,
 				new StringEntity(DiscordUtils.GSON.toJson(new WebhookExecuteRequest(content, username, avatarUrl, tts)), "UTF-8"));
@@ -175,11 +165,6 @@ public class Webhook implements IWebhook {
 	@Override
 	public void execute(File data) throws FileNotFoundException, RateLimitException, DiscordException {
 		execute(new FileInputStream(data), data.getName(), name, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
-	}
-
-	@Override
-	public void execute(File data, String username) throws FileNotFoundException, RateLimitException, DiscordException {
-		execute(new FileInputStream(data), data.getName(), username, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
 	}
 
 	@Override
@@ -193,23 +178,8 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public void execute(String content, File file, String username) throws FileNotFoundException, RateLimitException, DiscordException {
-		execute(content, new FileInputStream(file), file.getName(), username, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
-	}
-
-	@Override
-	public void execute(String content, File file, String username, String avatarUrl) throws FileNotFoundException, RateLimitException, DiscordException {
-		execute(content, new FileInputStream(file), file.getName(), username, avatarUrl);
-	}
-
-	@Override
 	public void execute(InputStream data, String fileName) throws RateLimitException, DiscordException {
 		execute(data, fileName, name, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
-	}
-
-	@Override
-	public void execute(InputStream data, String fileName, String username) throws RateLimitException, DiscordException {
-		execute(data, fileName, username, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
 	}
 
 	@Override
@@ -220,11 +190,6 @@ public class Webhook implements IWebhook {
 	@Override
 	public void execute(String content, InputStream data, String fileName) throws RateLimitException, DiscordException {
 		execute(content, data, fileName, name, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
-	}
-
-	@Override
-	public void execute(String content, InputStream data, String fileName, String username) throws RateLimitException, DiscordException {
-		execute(content, data, fileName, username, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
 	}
 
 	@Override
@@ -244,17 +209,12 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public void execute(IMessage.IEmbedded[] content) throws RateLimitException, DiscordException {
+	public void execute(IEmbedded[] content) throws RateLimitException, DiscordException {
 		execute(content, name, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
 	}
 
 	@Override
-	public void execute(IMessage.IEmbedded[] content, String username) throws RateLimitException, DiscordException {
-		execute(content, username, avatar == null ? "" : avatar.isEmpty() ? "" : "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".jpg");
-	}
-
-	@Override
-	public void execute(IMessage.IEmbedded[] content, String username, String avatarUrl) throws RateLimitException, DiscordException {
+	public void execute(IEmbedded[] content, String username, String avatarUrl) throws RateLimitException, DiscordException {
 		((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.WEBHOOKS + id + "/" + token,
 				new StringEntity(DiscordUtils.GSON.toJson(new WebhookExecuteRequest(username, avatarUrl, content)), "UTF-8"));
 	}

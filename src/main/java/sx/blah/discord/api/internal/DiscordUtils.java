@@ -166,7 +166,7 @@ public class DiscordUtils {
 	public static List<Embedded> getEmbedsFromJSON(MessageObject json) {
 		List<Embedded> embeds = new ArrayList<>();
 		if (json.embeds != null)
-			for (MessageObject.EmbedObject response : json.embeds) {
+			for (EmbedObject response : json.embeds) {
 				embeds.add(new Embedded(response.title, response.type, response.description, response.url,
 						response.thumbnail, response.provider, convertFromTimestamp(response.timestamp), new Color(response.color), response.footer, response.image, response.video, response.author, response.fields));
 			}
