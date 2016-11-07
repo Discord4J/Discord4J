@@ -11,6 +11,7 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
@@ -67,6 +68,7 @@ public class DispatchHandler {
 			case "VOICE_SERVER_UPDATE": voiceServerUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceUpdateResponse.class)); break;
 			case "MESSAGE_REACTION_ADD": reactionAdd(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE": reactionRemove(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
+			case "WEBHOOKS_UPDATE": webhookUpdate(DiscordUtils.GSON.fromJson(event.get("d"), WebhookObject.class));break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
@@ -649,6 +651,45 @@ public class DispatchHandler {
 					client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 				}
 			}
+		}
+	}
+
+	private void webhookUpdate(WebhookObject event) {
+		Channel channel = (Channel) client.getChannelByID(event.channel_id);
+		if (channel != null) {
+			RequestBuffer.request(() -> {
+				try {
+					List<IWebhook> oldList = channel.getWebhooks().stream().map(IWebhook::copy)
+							.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
+					WebhookObject[] response = DiscordUtils.GSON.fromJson(client.REQUESTS.GET.makeRequest(
+							DiscordEndpoints.CHANNELS + channel.getID() + "/webhooks"),
+							WebhookObject[].class);
+
+					for (WebhookObject webhookObject : response) {
+						if (!channel.getWebhooks().contains(webhookObject.id)) {
+							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
+							client.dispatcher.dispatch(new WebhookCreateEvent(newWebhook));
+							channel.addWebhook(newWebhook);
+						} else {
+							IWebhook toUpdate = channel.getWebhookByID(webhookObject.id);
+							IWebhook oldWebhook = toUpdate.copy();
+							toUpdate = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
+							if (!oldWebhook.getName().equals(toUpdate.getName()) || !String.valueOf(oldWebhook.getAvatar()).equals(String.valueOf(toUpdate.getAvatar())))
+								client.dispatcher.dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, channel));
+
+							oldList.remove(oldWebhook);
+						}
+					}
+
+					oldList.forEach(webhook -> {
+						channel.removeWebhook(webhook);
+						client.dispatcher.dispatch(new WebhookDeleteEvent(webhook));
+					});
+				} catch (Exception e) {
+					Discord4J.LOGGER.warn(LogMarkers.UTIL, "Discord4J Internal Exception", e);
+				}
+			});
 		}
 	}
 

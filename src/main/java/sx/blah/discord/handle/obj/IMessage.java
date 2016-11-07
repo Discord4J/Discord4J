@@ -4,6 +4,7 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import java.awt.Color;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -274,6 +275,29 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		public String getUrl();
 
 		/**
+		 * Gets the timestamp for the media.
+		 *
+		 * @return The timestamp.
+		 */
+		public LocalDateTime getTimestamp();
+
+		/**
+		 * Gets the color of the embed.
+		 *
+		 * @return The color.
+		 */
+		public Color getColor();
+
+		public IEmbedFooter getFooter();
+
+		/**
+		 * Gets the image in the embedded media.
+		 *
+		 * @return A url pointing to the image. Can be null.
+		 */
+		public String getImage();
+
+		/**
 		 * Gets the thumbnail of the embedded media.
 		 *
 		 * @return An object containing information about the embedded media's thumbnail. Can be null.
@@ -281,11 +305,65 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		public String getThumbnail();
 
 		/**
+		 * Gets the video url for the embedded media.
+		 *
+		 * @return A url pointing to the video. Can be null.
+		 */
+		public String getVideo();
+
+		/**
 		 * Gets the provider of the embedded media.
 		 *
 		 * @return An object containing information about the embedded media's provider. <b>Can Be Null!</b>
 		 */
 		public IEmbedded.IEmbedProvider getEmbedProvider();
+
+		/**
+		 * Gets the author for this embedded media.
+		 *
+		 * @return An object containing information about the author for the embedded media. Cna be null.
+		 */
+		public IEmbedded.IEmbedAuthor getAuthor();
+
+		public List<IEmbedded.IEmbedField> getEmbeddedFields();
+
+		/**
+		 * Represents an embedded footer object
+		 */
+		interface IEmbedFooter {
+			/**
+			 * Gets the footer's text
+			 *
+			 * @return The footer's text
+			 */
+			public String getText();
+
+			/**
+			 * Gets the footer's icon URL
+			 *
+			 * @return A url link as a string
+			 */
+			public String getIconUrl();
+		}
+
+		/**
+		 * Represents the author for an embedded object
+		 */
+		interface IEmbedAuthor {
+			public String getName();
+
+			public String getUrl();
+
+			public String getIconUrl();
+		}
+
+		interface IEmbedField {
+			public String getName();
+
+			public String getValue();
+
+			public boolean isInline();
+		}
 
 		/**
 		 * Represents a site that provides media which is embedded in chat. Eg. Youtube, Imgur.
