@@ -208,6 +208,36 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
+	public WebhookList getWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public IVoiceChannel copy() {
 		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
 	}
