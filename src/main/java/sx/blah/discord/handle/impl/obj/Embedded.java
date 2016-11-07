@@ -103,40 +103,14 @@ public class Embedded implements IEmbedded {
 		this.type = type;
 		this.description = description;
 		this.url = url;
-		if (thumbnailUrl == null) {
-			this.thumbnail = null;
-		} else {
-			this.thumbnail = thumbnailUrl;
-		}
-		if (provider == null) {
-			this.provider = null;
-		} else {
-			this.provider = provider;
-		}
-		if (timestamp == null)
-			this.timestamp = null;
-		else
-			this.timestamp = timestamp;
-		if (color == null)
-			this.color = new Color(0, 0, 0);
-		else
-			this.color = color;
-		if (footer == null)
-			this.footer = null;
-		else
-			this.footer = footer;
-		if (imageUrl == null)
-			this.image = null;
-		else
-			this.image = imageUrl;
-		if (videoUrl == null)
-			this.video = null;
-		else
-			this.video = videoUrl;
-		if (author == null)
-			this.author = null;
-		else
-			this.author = author;
+		this.thumbnail = thumbnailUrl;
+		this.provider = provider;
+		this.timestamp = timestamp;
+		this.color = color;
+		this.footer = footer;
+		this.image = imageUrl;
+		this.video = videoUrl;
+		this.author = author;
 
 		if (embedFields == null || embedFields.length == 0)
 			this.embedFields = null;
