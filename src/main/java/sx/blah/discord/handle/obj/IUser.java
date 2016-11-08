@@ -207,7 +207,7 @@ public interface IUser extends IDiscordObject<IUser> {
 			DiscordException;
 
 	/**
-	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;name:id&gt;)
+	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;:name:id&gt;)
 	 *
 	 * @param emoji   The string emoji
 	 * @param message The message
