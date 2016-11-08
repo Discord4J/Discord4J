@@ -432,6 +432,8 @@ public class User implements IUser {
 	@Override
 	public void addReaction(String emoji, IMessage message) throws MissingPermissionsException, RateLimitException,
 			DiscordException {
+		if (!this.equals(client.getOurUser()))
+			throw new DiscordException("You cannot add a reaction for other people.");
 		DiscordUtils.checkPermissions(this, message.getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
 
 		emoji = emoji.replace("<:", "").replace(">", "");
@@ -446,7 +448,7 @@ public class User implements IUser {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
-							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20"), "@me"));
+							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
