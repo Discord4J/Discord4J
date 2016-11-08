@@ -19,10 +19,12 @@ import java.util.regex.Pattern;
 public class MessageTokenizer {
 
 	public static final String ANY_MENTION_REGEX = "<((@[!&]?)|#)\\d+>";
+	public static final String CUSTOM_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
 
 	private final String content;
 	private final IDiscordClient client;
 	private final Pattern anyMentionPattern = Pattern.compile(ANY_MENTION_REGEX);
+	private final Pattern customEmojiPattern = Pattern.compile(CUSTOM_EMOJI_REGEX);
 	private int currentPosition = 0;
 	/**
 	 * The remaining substring.
@@ -249,6 +251,32 @@ public class MessageTokenizer {
 	}
 
 	/**
+	 * Returns true if there is another custom emoji to go to.
+	 *
+	 * @return True if there is another custom emoji.
+	 */
+	public boolean hasNextEmoji() {
+		return hasNextRegex(customEmojiPattern);
+	}
+
+	/**
+	 * Returns the next scustom emoji, stepping forward the tokenizer to the end of the emoji (exclusive).
+	 *
+	 * @return The next custom emoji token
+	 * @see CustomEmojiToken
+	 */
+	public CustomEmojiToken nextEmoji() {
+		if (!hasNextEmoji())
+			throw new IllegalStateException("No more custom server emojis found!");
+
+		Token t = nextRegex(customEmojiPattern);
+		final int lessThan = t.getStartIndex();
+		final int greaterThan = t.getEndIndex();
+
+		return new CustomEmojiToken(this, lessThan, greaterThan);
+	}
+
+	/**
 	 * Returns the content that the tokenizer is traversing.
 	 *
 	 * @return The content that is being traversed
@@ -442,6 +470,41 @@ public class MessageTokenizer {
 			super(tokenizer, startIndex, endIndex, null);
 
 			mention = tokenizer.getClient().getChannelByID(getContent().replace("<#", "").replace(">", ""));
+		}
+	}
+
+	public static class CustomEmojiToken extends Token {
+
+		/**
+		 * The emoji.
+		 */
+		private final IEmoji emoji;
+
+		/**
+		 * A custom server emoji from a message with content and position.
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private CustomEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex);
+
+			final String content = getContent();
+			final String emojiId = content.substring(content.lastIndexOf(":") + 1, content.length());
+
+			emoji = tokenizer.getClient().getGuilds().stream()
+					.map(guild -> guild.getEmojiByID(emojiId) != null ? guild.getEmojiByID(emojiId) : null).findFirst()
+					.orElse(null);
+		}
+
+		/**
+		 * Return the emoji.
+		 *
+		 * @return The emoji
+		 */
+		public IEmoji getEmoji() {
+			return emoji;
 		}
 	}
 
