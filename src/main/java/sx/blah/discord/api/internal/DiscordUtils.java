@@ -747,7 +747,7 @@ public class DiscordUtils {
 
                 if(user1HighestRole.getPosition() == highestRole.getPosition()) //If the positions are the same
                 {
-                    return user1HighestRole.getCreationDate().compareTo(highestRole.getCreationDate()) > 1; //If user's rank was created before the highest role in role.
+                    return user1HighestRole.getCreationDate().compareTo(highestRole.getCreationDate()) > 0; //If user's rank was created before the highest role in role.
                 }
 		return user1HighestRole.getPosition() > highestRole.getPosition();
 	}
