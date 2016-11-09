@@ -726,26 +726,30 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * This checks if user1 can interact with the set of provided roles by checking their role hierarchies.
+	 * This checks if user1 can interact with the set of provided roles by checking their role hierarchies and/or creation dates.
 	 *
 	 * @param guild The guild to check from.
 	 * @param user1 The first user to check.
 	 * @param roles The roles to check.
-	 * @return True if user1's role hierarchy position > provided roles hierarchy.
+	 * @return True if user1's role hierarchy position > provided roles hierarchy or user1's highest role was created before the highest role in roles (only checked if the hierarchal positions are the same).
 	 */
 	public static boolean isUserHigher(IGuild guild, IUser user1, List<IRole> roles) {
 		List<IRole> user1Roles = guild.getRolesForUser(user1);
-		int user1Position = 0;
-		int rolesPosition = 0;
+		IRole user1HighestRole = user1Roles.get(0);
+		IRole highestRole = roles.get(0);
 		for (IRole role : user1Roles)
-			if (user1Position < role.getPosition())
-				user1Position = role.getPosition();
+			if (user1HighestRole.getPosition() < role.getPosition())
+				user1HighestRole = role;
 
 		for (IRole role : roles)
-			if (rolesPosition < role.getPosition())
-				rolesPosition = role.getPosition();
+			if(highestRole.getPosition() < role.getPosition())
+                            highestRole = role;
 
-		return user1Position > rolesPosition;
+                if(user1HighestRole.getPosition() == highestRole.getPosition()) //If the positions are the same
+                {
+                    return user1HighestRole.getCreationDate().compareTo(highestRole.getCreationDate()) < 0; //If user's rank was created before the highest role in role.
+                }
+		return user1HighestRole.getPosition() > highestRole.getPosition();
 	}
 
 	/**
