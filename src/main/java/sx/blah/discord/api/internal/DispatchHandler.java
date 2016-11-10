@@ -36,7 +36,7 @@ public class DispatchHandler {
 	public void handle(JsonObject event) {
 		String type = event.get("t").getAsString();
 		switch (type) {
-			case "RESUMED": Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "WS should resume panda is bad."); break;
+			case "RESUMED": Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]); break;
 			case "READY": ready(DiscordUtils.GSON.fromJson(event.get("d"), ReadyResponse.class)); break;
 			case "MESSAGE_CREATE": messageCreate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class)); break;
 			case "TYPING_START": typingStart(DiscordUtils.GSON.fromJson(event.get("d"), TypingEventResponse.class)); break;
@@ -74,6 +74,7 @@ public class DispatchHandler {
 	}
 
 	private void ready(ReadyResponse ready) {
+		ws.state = DiscordWS.State.READY;
 		ws.hasReceivedReady = true; // Websocket received actual ready event
 		client.getDispatcher().dispatch(new LoginEvent(shard));
 

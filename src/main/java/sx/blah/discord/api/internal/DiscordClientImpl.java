@@ -51,6 +51,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected volatile EventDispatcher dispatcher;
 
 	/**
+	 * Reconnect manager.
+	 */
+	protected volatile ReconnectManager reconnectManager;
+
+	/**
 	 * The module loader for this client.
 	 */
 	protected volatile ModuleLoader loader;
@@ -97,6 +102,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
 		this.dispatcher = new EventDispatcher(this);
+		this.reconnectManager = new ReconnectManager(5); // TODO: Expose 5
 		this.loader = new ModuleLoader(this);
 	}
 
