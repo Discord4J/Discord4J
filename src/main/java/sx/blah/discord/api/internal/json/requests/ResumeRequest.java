@@ -17,9 +17,9 @@ public class ResumeRequest {
 	 */
 	public long seq;
 
-	public ResumeRequest(String session_id, long seq, String token) {
+	public ResumeRequest(String token, String session_id, long seq) {
+		this.token = token;
 		this.session_id = session_id;
 		this.seq = seq;
-		this.token = token;
 	}
 }
