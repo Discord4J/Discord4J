@@ -1,8 +1,8 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -153,6 +153,27 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @return The formatted content.
 	 */
 	String getFormattedContent();
+
+	/**
+	 * Gets the reactions for this message.
+	 *
+	 * @return A list of reactions
+	 */
+	List<IReaction> getReactions();
+
+	/**
+	 * Gets a reaction by the IEmoji object.
+	 * @param emoji The emoji
+	 * @return The reaction, or null if there aren't any that match
+	 */
+	IReaction getReactionByIEmoji(IEmoji emoji);
+
+	/**
+	 * Gets a reaction by either the emoji text itself.
+	 * @param name The emoji text
+	 * @return The reaction, or null if there aren't any that match
+	 */
+	IReaction getReactionByName(String name);
 
 	/**
 	 * Represents an attachment included in the message.

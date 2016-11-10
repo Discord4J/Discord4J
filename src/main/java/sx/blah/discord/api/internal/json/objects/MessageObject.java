@@ -16,6 +16,7 @@ public class MessageObject {
 	public EmbedObject[] embeds;
 	public String nonce;
 	public boolean pinned;
+	public ReactionObject[] reactions;
 
 	public static class AttachmentObject {
 		public String id;
@@ -46,5 +47,11 @@ public class MessageObject {
 	public static class ProviderObject {
 		public String name;
 		public String url;
+	}
+
+	public static class ReactionObject {
+		public int count;
+		public boolean me;
+		public ReactionEmojiObject emoji;
 	}
 }

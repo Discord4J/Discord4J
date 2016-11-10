@@ -112,6 +112,11 @@ public class Message implements IMessage {
 	protected volatile String formattedContent = null;
 
 	/**
+	 * The list of reactions
+	 */
+	protected volatile List<IReaction> reactions;
+
+	/**
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
@@ -119,7 +124,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embedded> embedded) {
+				   boolean pinned, List<Embedded> embedded, List<IReaction> reactions) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -134,6 +139,7 @@ public class Message implements IMessage {
 		this.channelMentions = new ArrayList<>();
 		this.embedded = embedded;
 		this.everyoneMentionIsValid = mentionsEveryone;
+		this.reactions = reactions;
 
 		setChannelMentions();
 	}
@@ -382,7 +388,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embedded);
+				mentions, roleMentions, attachments, isPinned, embedded, reactions);
 	}
 
 	@Override
@@ -412,6 +418,27 @@ public class Message implements IMessage {
 		}
 
 		return formattedContent;
+	}
+
+	public void setReactions(List<IReaction> reactions) {
+		this.reactions = reactions;
+	}
+
+	@Override
+	public List<IReaction> getReactions() {
+		return reactions;
+	}
+
+	@Override
+	public IReaction getReactionByIEmoji(IEmoji emoji) {
+		return reactions.stream().filter(r -> r.isCustomEmoji() && r.getCustomEmoji().equals(emoji)).findFirst()
+				.orElse(null);
+	}
+
+	@Override
+	public IReaction getReactionByName(String name) {
+		return reactions.stream().filter(r -> !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
+				.orElse(null);
 	}
 
 	@Override

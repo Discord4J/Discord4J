@@ -54,7 +54,7 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	String getImageUrl();
 
 	/**
-	 * The emoji as a properly formatted string. "<:name:emoji_id>"
+	 * The emoji as a properly formatted string. "&lt;:name:emoji_id&gt;"
 	 *
 	 * @return The formatted string.
 	 */

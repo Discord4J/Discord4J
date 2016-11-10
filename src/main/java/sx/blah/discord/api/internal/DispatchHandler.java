@@ -65,8 +65,8 @@ public class DispatchHandler {
 			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */ break;
 			case "VOICE_STATE_UPDATE": voiceStateUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceStateObject.class)); break;
 			case "VOICE_SERVER_UPDATE": voiceServerUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceUpdateResponse.class)); break;
-			case "MESSAGE_REACTION_ADD": /* TODO: Impl Message reactions */ break;
-			case "MESSAGE_REACTION_REMOVE": /* TODO: Impl Message reactions */ break;
+			case "MESSAGE_REACTION_ADD": reactionAdd(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
+			case "MESSAGE_REACTION_REMOVE": reactionRemove(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
@@ -594,4 +594,63 @@ public class DispatchHandler {
 			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldList, guild.getEmojis()));
 		}
 	}
+
+	private void reactionAdd(ReactionEventResponse event) {
+		IChannel channel = client.getChannelByID(event.channel_id);
+		if (channel != null) {
+			IMessage message = channel.getMessageByID(event.message_id);
+
+			if (message != null) {
+				Reaction reaction = (Reaction) (event.emoji.id == null
+						? message.getReactionByName(event.emoji.name)
+						: message.getReactionByName(event.emoji.name + ":" + event.emoji.id));
+				IUser user = message.getClient().getUserByID(event.user_id);
+
+				if (reaction == null) {
+					List<IUser> list = new CopyOnWriteArrayList<>();
+					list.add(user);
+
+					reaction = new Reaction(message.getShard(), 1, list,
+							event.emoji.id != null ? event.emoji.id : event.emoji.name, event.emoji.id != null);
+
+					message.getReactions().add(reaction);
+				} else {
+					reaction.getUsers().add(user);
+					reaction.setCount(reaction.getCount() + 1);
+				}
+
+				reaction.setMessage(message);
+
+				client.dispatcher.dispatch(
+						new ReactionAddEvent(message, reaction, user));
+			}
+		}
+	}
+
+	private void reactionRemove(ReactionEventResponse event) {
+		IChannel channel = client.getChannelByID(event.channel_id);
+		if (channel != null) {
+			IMessage message = channel.getMessageByID(event.message_id);
+
+			if (message != null) {
+				Reaction reaction = (Reaction) (event.emoji.id == null
+						? message.getReactionByName(event.emoji.name)
+						: message.getReactionByName(event.emoji.name + ":" + event.emoji.id));
+				IUser user = message.getClient().getUserByID(event.user_id);
+
+				if (reaction != null) {
+					reaction.setMessage(message); // safeguard
+					reaction.setCount(reaction.getCount() - 1);
+					reaction.getUsers().remove(user);
+
+					if (reaction.getCount() <= 0) {
+						message.getReactions().remove(reaction);
+					}
+
+					client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
+				}
+			}
+		}
+	}
+
 }

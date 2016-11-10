@@ -138,7 +138,7 @@ public class Emoji implements IEmoji {
 		if (other == null)
 			return false;
 
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IGuild) other).getID().equals(getID());
+		return this.getClass().isAssignableFrom(other.getClass()) && ((IEmoji) other).getID().equals(getID());
 	}
 
 	@Override
