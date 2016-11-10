@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 
-class DiscordWS extends WebSocketAdapter {
+public class DiscordWS extends WebSocketAdapter {
 
 	State state;
 	private WebSocketClient wsClient;
