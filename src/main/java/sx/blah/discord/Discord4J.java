@@ -72,6 +72,10 @@ public class Discord4J {
      */
 	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
+	 * Whether to log when the user doesn't have the permissions to manage webhooks for a channel.
+	 */
+	public static final AtomicBoolean ignoreWebhookWarnings = new AtomicBoolean(true);
+	/**
 	 * Whether to allow for audio to be used.
 	 */
 	public static final AtomicBoolean audioDisabled = new AtomicBoolean(false);

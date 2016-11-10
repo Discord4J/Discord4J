@@ -17,6 +17,7 @@ public class MessageObject {
 	public String nonce;
 	public boolean pinned;
 	public ReactionObject[] reactions;
+	public String webhook_id;
 
 	public static class AttachmentObject {
 		public String id;
@@ -26,27 +27,6 @@ public class MessageObject {
 		public String proxy_url;
 		public int height;
 		public int width;
-	}
-
-	public static class EmbedObject {
-		public String title;
-		public String type;
-		public String description;
-		public String url;
-		public ThumbnailObject thumbnail;
-		public ProviderObject provider;
-	}
-
-	public static class ThumbnailObject {
-		public String url;
-		public String proxy_url;
-		public int height;
-		public int width;
-	}
-
-	public static class ProviderObject {
-		public String name;
-		public String url;
 	}
 
 	public static class ReactionObject {

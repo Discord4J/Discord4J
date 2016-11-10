@@ -1,10 +1,8 @@
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.*;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.RateLimitException;
 
 import java.util.*;
 
@@ -146,6 +144,36 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	@Override
 	public List<IMessage> getPinnedMessages() {
 		return new ArrayList<>();
+	}
+
+	@Override
+	public WebhookList getWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

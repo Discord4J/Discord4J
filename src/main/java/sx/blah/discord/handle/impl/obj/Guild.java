@@ -736,6 +736,34 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public IWebhook getWebhookByID(String id) {
+		IWebhook webhook = channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.filter(hook -> hook.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
+
+		if (webhook == null) {
+			for (IChannel channel : channels) {
+				webhook = channel.getWebhookByID(id);
+				if (webhook != null)
+					return webhook;
+			}
+		}
+
+		return webhook;
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		return channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.filter(hook -> hook.getName().equals(name))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(id);
 	}
