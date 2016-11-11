@@ -88,17 +88,9 @@ public class DiscordWS extends WebSocketAdapter {
 				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
 			case INVALID_SESSION:
-				boolean canResume = d.getAsBoolean();
-				if (canResume) {
-					this.state = State.RESUMING;
-					Executors.newSingleThreadScheduledExecutor().schedule(() -> {
-						send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
-					}, 5, TimeUnit.SECONDS); // Wait 5 seconds then resume
-				} else {
-					this.state = State.RECONNECTING;
-					invalidate();
-					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
-				}
+				this.state = State.RECONNECTING;
+				invalidate();
+				send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
 				break;
 			case HEARTBEAT: send(GatewayOps.HEARTBEAT, seq);
 			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
