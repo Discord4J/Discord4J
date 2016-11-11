@@ -169,9 +169,12 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IReaction getReactionByIEmoji(IEmoji emoji);
 
 	/**
-	 * Gets a reaction by either the emoji text itself.
+	 * Gets a reaction by the emoji text. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
+	 * instead.
+	 *
 	 * @param name The emoji text
 	 * @return The reaction, or null if there aren't any that match
+	 * @see IMessage#getReactionByIEmoji(IEmoji)
 	 */
 	IReaction getReactionByName(String name);
 
