@@ -85,24 +85,29 @@ public class Reaction implements IReaction {
 		this.count = count;
 	}
 
-	@Override
-	public List<IUser> getUsers() {
+	/**
+	 * Returns the CACHED users.
+	 *
+	 * @return The CACHED users
+	 */
+	public List<IUser> getCachedUsers() {
 		return users;
 	}
 
 	@Override
-	public synchronized List<IUser> refreshUsers() throws RateLimitException, DiscordException {
+	public synchronized List<IUser> getUsers() throws RateLimitException, DiscordException {
 		if (shouldRefreshUsers()) {
 			users.clear();
 
 			int gottenSoFar = 0;
-			String emoji = isCustomEmoji() ? (getCustomEmoji().getName() + ":" + getCustomEmoji().getID()) : this.emoji;
+			String emoji = isCustomEmoji() ? (getCustomEmoji().getName() + ":" + getCustomEmoji().getID()) : this
+					.emoji;
 			String userAfter = null;
 			DiscordClientImpl clientImpl = ((DiscordClientImpl) getClient());
 			while (gottenSoFar < count) {
 				String response = clientImpl.REQUESTS.GET.makeRequest(
-						String.format(DiscordEndpoints.REACTIONS_USER_LIST, message.getChannel().getID(), message.getID(),
-								emoji), new BasicNameValuePair("after", userAfter));
+						String.format(DiscordEndpoints.REACTIONS_USER_LIST, message.getChannel().getID(),
+								message.getID(), emoji), new BasicNameValuePair("after", userAfter));
 
 				ReactionUserObject[] userObjs = DiscordUtils.GSON.fromJson(response, ReactionUserObject[].class);
 
@@ -123,11 +128,10 @@ public class Reaction implements IReaction {
 			}
 		}
 
-		return getUsers();
+		return users;
 	}
 
-	@Override
-	public boolean shouldRefreshUsers() {
+	private boolean shouldRefreshUsers() {
 		return users.size() != count;
 	}
 

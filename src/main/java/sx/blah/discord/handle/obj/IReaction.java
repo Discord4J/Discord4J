@@ -41,28 +41,11 @@ public interface IReaction {
 	int getCount();
 
 	/**
-	 * Gets the users that reacted. Note: this may not be in sync with getCount (getCount is always right). To
-	 * re-sync, call refreshUsers.
+	 * Gets the users that reacted.
 	 *
 	 * @return A list of users that reacted
-	 * @see IReaction#refreshUsers()
 	 */
-	List<IUser> getUsers();
-
-	/**
-	 * Forces a call to get all the users that reacted.
-	 *
-	 * @return The list of users that reacted (getUsers)
-	 */
-	List<IUser> refreshUsers() throws RateLimitException, DiscordException;
-
-	/**
-	 * Returns true if refreshUsers() should be called (the users and count are out of sync).
-	 *
-	 * @see IReaction#refreshUsers()
-	 * @return True if you should call refreshUsers()
-	 */
-	boolean shouldRefreshUsers();
+	List<IUser> getUsers() throws RateLimitException, DiscordException;
 
 	/**
 	 * Gets the {@link IDiscordClient} instance this object belongs to.

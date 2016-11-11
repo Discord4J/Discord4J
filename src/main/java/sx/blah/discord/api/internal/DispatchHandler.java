@@ -616,7 +616,7 @@ public class DispatchHandler {
 
 					message.getReactions().add(reaction);
 				} else {
-					reaction.getUsers().add(user);
+					reaction.getCachedUsers().add(user);
 					reaction.setCount(reaction.getCount() + 1);
 				}
 
@@ -642,7 +642,7 @@ public class DispatchHandler {
 				if (reaction != null) {
 					reaction.setMessage(message); // safeguard
 					reaction.setCount(reaction.getCount() - 1);
-					reaction.getUsers().remove(user);
+					reaction.getCachedUsers().remove(user);
 
 					if (reaction.getCount() <= 0) {
 						message.getReactions().remove(reaction);
@@ -652,10 +652,6 @@ public class DispatchHandler {
 				}
 			}
 		}
-	}
-
-	private void reactionRemoveAll(String channelId, String messageId){
-
 	}
 
 }
