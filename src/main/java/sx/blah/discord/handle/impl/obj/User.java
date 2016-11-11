@@ -447,7 +447,7 @@ public class User implements IUser {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
-					String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
+					String.format(DiscordEndpoints.REACTIONS_USER, message.getChannel().getID(), message.getID(),
 							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -465,7 +465,7 @@ public class User implements IUser {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
-					String.format(DiscordEndpoints.REACTIONS, message.getChannel().getID(), message.getID(),
+					String.format(DiscordEndpoints.REACTIONS_USER, message.getChannel().getID(), message.getID(),
 							reaction.isCustomEmoji()
 									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getID())
 									: URLEncoder.encode(reaction.toString(), "UTF-8").replace("+", "%20"),

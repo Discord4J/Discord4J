@@ -101,7 +101,7 @@ public class Reaction implements IReaction {
 			DiscordClientImpl clientImpl = ((DiscordClientImpl) getClient());
 			while (gottenSoFar < count) {
 				String response = clientImpl.REQUESTS.GET.makeRequest(
-						String.format(DiscordEndpoints.REACTIONS_USERS, message.getChannel().getID(), message.getID(),
+						String.format(DiscordEndpoints.REACTIONS_USER_LIST, message.getChannel().getID(), message.getID(),
 								emoji), new BasicNameValuePair("after", userAfter));
 
 				ReactionUserObject[] userObjs = DiscordUtils.GSON.fromJson(response, ReactionUserObject[].class);

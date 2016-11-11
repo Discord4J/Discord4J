@@ -176,6 +176,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IReaction getReactionByName(String name);
 
 	/**
+	 * Delete all reactions. Requires the MANAGE_MESSAGES permission.
+	 *
+	 * @see Permissions#MANAGE_MESSAGES
+	 */
+	void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException;
+
+	/**
 	 * Represents an attachment included in the message.
 	 */
 	class Attachment {
