@@ -500,10 +500,12 @@ public class Message implements IMessage {
 	public void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException,
 			DiscordException {
 		IMessage message = reaction.getMessage();
+		if (!this.equals(message))
+			return;
 
 		if (!user.equals(client.getOurUser())) {
-			DiscordUtils.checkPermissions(client.getOurUser(), message.getChannel(),
-					EnumSet.of(Permissions.MANAGE_MESSAGES));
+			DiscordUtils
+					.checkPermissions(client.getOurUser(), message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		}
 
 		try {
