@@ -78,7 +78,6 @@ public interface IReaction {
 	 *
 	 * @param user The user
 	 * @return True if the user reacted, false otherwise
-	 * @see IReaction#refreshUsers()
 	 */
 	boolean getUserReacted(IUser user);
 
@@ -86,7 +85,6 @@ public interface IReaction {
 	 * Returns true if this client's user reacted to the emoji. You may need to call refreshUsers first.
 	 *
 	 * @return True if we reacted, false otherwise
-	 * @see IReaction#refreshUsers()
 	 */
 	boolean getClientReacted();
 
