@@ -455,10 +455,10 @@ public class Message implements IMessage {
 	public void addReaction(IReaction reaction) throws MissingPermissionsException,
 			RateLimitException, DiscordException {
 		if (reaction == null)
-			return;
+			throw new NullPointerException("Reaction argument cannot be null.");
 
 		if (!reaction.getMessage().equals(this))
-			return;
+			throw new DiscordException("Reaction argument's message does not match this one.");
 
 		if (reaction.isCustomEmoji())
 			addReaction(reaction.getCustomEmoji());
@@ -501,7 +501,7 @@ public class Message implements IMessage {
 			DiscordException {
 		IMessage message = reaction.getMessage();
 		if (!this.equals(message))
-			return;
+			throw new DiscordException("Reaction argument's message does not match this one.");
 
 		if (!user.equals(client.getOurUser())) {
 			DiscordUtils
