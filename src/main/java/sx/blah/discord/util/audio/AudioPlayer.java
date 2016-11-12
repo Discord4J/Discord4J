@@ -324,7 +324,7 @@ public class AudioPlayer implements IAudioProvider {
 	/**
 	 * This skips the current track.
 	 */
-	public void skip() {
+	public Track skip() {
 		if (trackQueue.size() > 0) {
 			Track track = trackQueue.remove(0);
 
@@ -338,7 +338,9 @@ public class AudioPlayer implements IAudioProvider {
 			} else {
 				track.close();
 			}
+			return track;
 		}
+		return null;
 	}
 
 	/**
