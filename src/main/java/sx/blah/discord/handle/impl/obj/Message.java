@@ -122,6 +122,10 @@ public class Message implements IMessage {
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
+	/**
+	 * Cached value of isDeleted()
+	 */
+	private boolean deleted = false;
 
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
@@ -169,7 +173,7 @@ public class Message implements IMessage {
 	/**
 	 * Sets the CACHED mentions in this message.
 	 *
-	 * @param mentions The new user mentions.
+	 * @param mentions     The new user mentions.
 	 * @param roleMentions The new role mentions.
 	 */
 	public void setMentions(List<String> mentions, List<String> roleMentions) {
@@ -272,7 +276,7 @@ public class Message implements IMessage {
 	@Override
 	public List<IEmbedded> getEmbedded() {
 		List<IEmbedded> interfaces = new ArrayList<>();
-		for(Embedded embed : embedded)
+		for (Embedded embed : embedded)
 			interfaces.add(embed);
 		return interfaces;
 	}
@@ -286,10 +290,12 @@ public class Message implements IMessage {
 	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
+		if(isDeleted())
+			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 
-			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
+			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
 					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, false)), "UTF-8")),
 					MessageObject.class);
 
@@ -353,7 +359,7 @@ public class Message implements IMessage {
 		}
 
 		if (client.isReady()) {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id);
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id);
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to delete message before bot is ready!");
 		}
@@ -531,6 +537,11 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	@Override
 	public IDiscordClient getClient() {
 		return client;
 	}
@@ -553,5 +564,14 @@ public class Message implements IMessage {
 	@Override
 	public boolean equals(Object other) {
 		return other != null && this.getClass().isAssignableFrom(other.getClass()) && ((IMessage) other).getID().equals(getID());
+	}
+
+	/**
+	 * Sets the CACHED deleted value
+	 *
+	 * @param deleted The value to assign into the cache
+	 */
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 }

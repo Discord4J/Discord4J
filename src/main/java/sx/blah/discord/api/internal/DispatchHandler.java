@@ -301,13 +301,13 @@ public class DispatchHandler {
 		Channel channel = (Channel) client.getChannelByID(channelID);
 
 		if (channel != null) {
-			IMessage message = channel.getMessageByID(id);
+			Message message = (Message) channel.getMessageByID(id);
 			if (message != null) {
 				if (message.isPinned()) {
-					((Message) message).setPinned(false); //For consistency with the event
+					message.setPinned(false); //For consistency with the event
 					client.dispatcher.dispatch(new MessageUnpinEvent(message));
 				}
-
+				message.setDeleted(true);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}
