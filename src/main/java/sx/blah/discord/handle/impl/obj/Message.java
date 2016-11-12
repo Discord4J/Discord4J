@@ -567,9 +567,9 @@ public class Message implements IMessage {
 	}
 
 	/**
-	 * Sets the CACHED deleted value
+	 * Sets the CACHED deleted value.
 	 *
-	 * @param deleted The value to assign into the cache
+	 * @param deleted The value to assign into the cache.
 	 */
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;

@@ -225,7 +225,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @[param user The user
+	 * @param user The user
 	 */
 	void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
 
