@@ -95,14 +95,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount) {
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
 		this.dispatcher = new EventDispatcher(this);
-		this.reconnectManager = new ReconnectManager(5); // TODO: Expose 5
+		this.reconnectManager = new ReconnectManager(maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
 	}
 
