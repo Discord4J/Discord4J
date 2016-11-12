@@ -125,7 +125,7 @@ public class Message implements IMessage {
 	/**
 	 * Cached value of isDeleted()
 	 */
-	private boolean deleted = false;
+	private volatile boolean deleted = false;
 
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
@@ -290,7 +290,7 @@ public class Message implements IMessage {
 	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
-		if(isDeleted())
+		if (isDeleted())
 			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);

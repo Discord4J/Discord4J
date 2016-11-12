@@ -222,10 +222,10 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Removes a reaction for a user.
 	 *
 	 * @param reaction The reaction to remove from
+	 * @param user The user
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
-	 * @param user The user
 	 */
 	void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
 
