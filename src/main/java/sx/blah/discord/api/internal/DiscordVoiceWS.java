@@ -128,18 +128,12 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	}
 
 	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
-		// TODO: Other reasons
-		switch (reason) {
-			case LEFT_CHANNEL:
-				client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
-				client.voiceConnections.remove(guild);
-				keepAlive.shutdownNow();
-				sendHandler.shutdownNow();
-				udpSocket.close();
-				if (getSession() != null)
-					getSession().close();
-				break;
-		}
+		client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
+		client.voiceConnections.remove(guild);
+		keepAlive.shutdownNow();
+		sendHandler.shutdownNow();
+		udpSocket.close();
+		if (getSession() != null) getSession().close();
 	}
 
 	private void setupSendThread() {
@@ -219,7 +213,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason {}", statusCode, reason);
+		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason \"{}\".", statusCode, reason);
+		disconnect(VoiceDisconnectedEvent.Reason.ABNORMAL_CLOSE);
 	}
-
 }
