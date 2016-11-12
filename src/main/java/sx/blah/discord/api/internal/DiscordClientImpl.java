@@ -102,7 +102,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
 		this.dispatcher = new EventDispatcher(this);
-		this.reconnectManager = new ReconnectManager(maxReconnectAttempts);
+		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
 	}
 
