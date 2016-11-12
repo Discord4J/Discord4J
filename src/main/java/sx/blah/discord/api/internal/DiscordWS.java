@@ -82,9 +82,9 @@ public class DiscordWS extends WebSocketAdapter {
 
 				break;
 			case RECONNECT:
-				shutdown(DisconnectedEvent.Reason.RECONNECT_OP);
-				this.state = State.RECONNECTING;
-				connect();
+				keepAlive.shutdown();
+				this.state = State.RESUMING;
+				send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
 				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
 			case INVALID_SESSION:
