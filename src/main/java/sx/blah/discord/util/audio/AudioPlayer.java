@@ -324,6 +324,8 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This skips the current track.
+	 *
+	 * @return The track skipped. (null if the playlist is empty)
 	 */
 	public Track skip() {
 		if (trackQueue.size() > 0) {
@@ -348,6 +350,7 @@ public class AudioPlayer implements IAudioProvider {
 	 * This skips until the playlist is playing the specified track.
 	 *
 	 * @param desiredPosition The playlist spot to skip to.
+	 * @return A list of all tracks skipped (if any)
 	 */
 	public List<Track> skipTo(int desiredPosition) {
 		desiredPosition = Math.max(0, desiredPosition);
