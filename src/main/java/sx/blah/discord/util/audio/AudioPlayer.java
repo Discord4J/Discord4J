@@ -21,6 +21,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -348,10 +349,12 @@ public class AudioPlayer implements IAudioProvider {
 	 *
 	 * @param desiredPosition The playlist spot to skip to.
 	 */
-	public void skipTo(int desiredPosition) {
+	public List<Track> skipTo(int desiredPosition) {
 		desiredPosition = Math.max(0, desiredPosition);
+		List<Track> skipped = new ArrayList<>();
 		for (int i = 0; i < desiredPosition; i++)
-			skip();
+			skipped.add(skip());
+		return skipped;
 	}
 
 	/**
