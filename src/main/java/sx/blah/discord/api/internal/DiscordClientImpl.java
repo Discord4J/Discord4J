@@ -287,7 +287,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 				getShards().add(shardNum, shard);
 				shard.login();
 
-				getDispatcher().waitFor((ShardReadyEvent e) -> true, 10, TimeUnit.SECONDS, () ->
+				getDispatcher().waitFor((ShardReadyEvent e) -> true, 1, TimeUnit.MINUTES, () ->
 					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
 				);
 
