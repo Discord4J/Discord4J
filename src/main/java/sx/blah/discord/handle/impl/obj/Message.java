@@ -433,19 +433,23 @@ public class Message implements IMessage {
 
 	@Override
 	public IReaction getReactionByIEmoji(IEmoji emoji) {
-		return reactions.stream().filter(r -> r.isCustomEmoji() && r.getCustomEmoji().equals(emoji)).findFirst()
-				.orElse(null);
+		if (emoji == null)
+			return null;
+		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji().equals(emoji))
+				.findFirst().orElse(null);
 	}
 
 	@Override
 	public IReaction getReactionByName(String name) {
-		return reactions.stream().filter(r -> !r.isCustomEmoji() && r.toString().equals(name)).findFirst().orElse(null);
+		if (name == null)
+			return null;
+		return reactions.stream().filter(r -> r != null && !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
+				.orElse(null);
 	}
 
 	@Override
 	public void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException {
-		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(),
-				EnumSet.of(Permissions.MANAGE_MESSAGES));
+		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE
 				.makeRequest(String.format(DiscordEndpoints.REACTIONS, this.getChannel().getID(), this.getID()));
