@@ -16,6 +16,8 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -431,14 +433,101 @@ public class Message implements IMessage {
 
 	@Override
 	public IReaction getReactionByIEmoji(IEmoji emoji) {
-		return reactions.stream().filter(r -> r.isCustomEmoji() && r.getCustomEmoji().equals(emoji)).findFirst()
-				.orElse(null);
+		if (emoji == null)
+			return null;
+		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji().equals(emoji))
+				.findFirst().orElse(null);
 	}
 
 	@Override
 	public IReaction getReactionByName(String name) {
-		return reactions.stream().filter(r -> !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
+		if (name == null)
+			return null;
+		return reactions.stream().filter(r -> r != null && !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
 				.orElse(null);
+	}
+
+	@Override
+	public void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException {
+		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+
+		((DiscordClientImpl) client).REQUESTS.DELETE
+				.makeRequest(String.format(DiscordEndpoints.REACTIONS, this.getChannel().getID(), this.getID()));
+	}
+
+	@Override
+	public void addReaction(IReaction reaction) throws MissingPermissionsException,
+			RateLimitException, DiscordException {
+		if (reaction == null)
+			throw new NullPointerException("Reaction argument cannot be null.");
+
+		if (!reaction.getMessage().equals(this))
+			throw new DiscordException("Reaction argument's message does not match this one.");
+
+		if (reaction.isCustomEmoji())
+			addReaction(reaction.getCustomEmoji());
+		else
+			addReaction(reaction.toString());
+	}
+
+	@Override
+	public void addReaction(IEmoji emoji) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		addReaction(emoji.toString());
+	}
+
+	@Override
+	public void addReaction(String emoji) throws MissingPermissionsException, RateLimitException, DiscordException {
+		emoji = emoji.replace("<:", "").replace(">", "");
+
+		if (emoji.matches("\\d+")) {
+			IEmoji em = getGuild().getEmojiByID(emoji);
+			if (em != null) {
+				emoji = em.getName() + ":" + em.getID();
+			}
+		}
+
+		if (this.getReactionByName(emoji) == null)
+			DiscordUtils
+					.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getID(), getID(),
+							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		IMessage message = reaction.getMessage();
+		if (!this.equals(message))
+			throw new DiscordException("Reaction argument's message does not match this one.");
+
+		if (!user.equals(client.getOurUser())) {
+			DiscordUtils
+					.checkPermissions(client.getOurUser(), message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+		}
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS_USER, message.getChannel().getID(), message.getID(),
+							reaction.isCustomEmoji()
+									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getID())
+									: URLEncoder.encode(reaction.toString(), "UTF-8").replace("+", "%20"),
+							user.equals(client.getOurUser()) ? "@me" : getID()));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		removeReaction(client.getOurUser(), reaction);
 	}
 
 	@Override
