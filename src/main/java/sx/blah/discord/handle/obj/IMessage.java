@@ -1,8 +1,8 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.MissingPermissionsException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -97,7 +97,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @param content The new content for the message to contain.
 	 * @return The new message (this).
-	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
@@ -148,96 +147,18 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IGuild getGuild();
 
 	/**
+	 * Checks to see is this message deleted.
+	 *
+	 * @return True if this message is deleted
+	 */
+	boolean isDeleted();
+
+	/**
 	 * Gets formatted content. All user, channel, and role mentions are converted to a readable form.
 	 *
 	 * @return The formatted content.
 	 */
 	String getFormattedContent();
-
-	/**
-	 * Gets the reactions for this message.
-	 *
-	 * @return A list of reactions
-	 */
-	List<IReaction> getReactions();
-
-	/**
-	 * Gets a reaction by the IEmoji object.
-	 * @param emoji The emoji
-	 * @return The reaction, or null if there aren't any that match
-	 */
-	IReaction getReactionByIEmoji(IEmoji emoji);
-
-	/**
-	 * Gets a reaction by the emoji text. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
-	 * instead.
-	 *
-	 * @param name The emoji text
-	 * @return The reaction, or null if there aren't any that match
-	 * @see IMessage#getReactionByIEmoji(IEmoji)
-	 */
-	IReaction getReactionByName(String name);
-
-	/**
-	 * Delete all reactions. Requires the MANAGE_MESSAGES permission.
-	 *
-	 * @see Permissions#MANAGE_MESSAGES
-	 */
-	void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException;
-
-	/**
-	 * Adds your reaction to an existing one.
-	 *
-	 * @param reaction The reaction object
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void addReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
-
-	/**
-	 * Adds your reaction as a custom emoji
-	 *
-	 * @param emoji   The custom emoji
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void addReaction(IEmoji emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
-
-	/**
-	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;:name:id&gt;)
-	 *
-	 * @param emoji   The string emoji
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void addReaction(String emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
-
-	/**
-	 * Removes a reaction for a user.
-	 *
-	 * @[param user The user
-	 * @param reaction The reaction to remove from
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
-
-	/**
-	 * Removes a reaction for yourself.
-	 *
-	 * @param reaction The reaction to remove from
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Represents an attachment included in the message.
@@ -307,6 +228,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 			return url;
 		}
 	}
+
 	interface IEmbedded {
 
 		/**
@@ -349,7 +271,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		 *
 		 * @return An object containing information about the embedded media's provider. <b>Can Be Null!</b>
 		 */
-		public IEmbedded.IEmbedProvider getEmbedProvider();
+		public IEmbedProvider getEmbedProvider();
 
 		/**
 		 * Represents a site that provides media which is embedded in chat. Eg. Youtube, Imgur.

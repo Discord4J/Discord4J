@@ -16,8 +16,6 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -114,19 +112,19 @@ public class Message implements IMessage {
 	protected volatile String formattedContent = null;
 
 	/**
-	 * The list of reactions
-	 */
-	protected volatile List<IReaction> reactions;
-
-	/**
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
 
+	/**
+	 * Cached value for isDeleted()
+	 */
+	private boolean deleted;
+
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embedded> embedded, List<IReaction> reactions) {
+				   boolean pinned, List<Embedded> embedded) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -141,7 +139,6 @@ public class Message implements IMessage {
 		this.channelMentions = new ArrayList<>();
 		this.embedded = embedded;
 		this.everyoneMentionIsValid = mentionsEveryone;
-		this.reactions = reactions;
 
 		setChannelMentions();
 	}
@@ -169,7 +166,7 @@ public class Message implements IMessage {
 	/**
 	 * Sets the CACHED mentions in this message.
 	 *
-	 * @param mentions The new user mentions.
+	 * @param mentions     The new user mentions.
 	 * @param roleMentions The new role mentions.
 	 */
 	public void setMentions(List<String> mentions, List<String> roleMentions) {
@@ -272,7 +269,7 @@ public class Message implements IMessage {
 	@Override
 	public List<IEmbedded> getEmbedded() {
 		List<IEmbedded> interfaces = new ArrayList<>();
-		for(Embedded embed : embedded)
+		for (Embedded embed : embedded)
 			interfaces.add(embed);
 		return interfaces;
 	}
@@ -286,10 +283,12 @@ public class Message implements IMessage {
 	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
+		if (isDeleted())
+			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 
-			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
+			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
 					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, false)), "UTF-8")),
 					MessageObject.class);
 
@@ -353,7 +352,7 @@ public class Message implements IMessage {
 		}
 
 		if (client.isReady()) {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id);
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id);
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to delete message before bot is ready!");
 		}
@@ -373,6 +372,15 @@ public class Message implements IMessage {
 		this.editedTimestamp = editedTimestamp;
 	}
 
+	/**
+	 * Sets the CACHED value of isDeleted()
+	 *
+	 * @param deleted True if the message is deleted.
+	 */
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+
 	@Override
 	public boolean isPinned() {
 		return isPinned;
@@ -390,7 +398,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embedded, reactions);
+				mentions, roleMentions, attachments, isPinned, embedded);
 	}
 
 	@Override
@@ -399,6 +407,10 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public boolean isDeleted() {
+		return deleted;
+	}
+
 	public String getFormattedContent() {
 		if (content == null)
 			return null;
@@ -420,114 +432,6 @@ public class Message implements IMessage {
 		}
 
 		return formattedContent;
-	}
-
-	public void setReactions(List<IReaction> reactions) {
-		this.reactions = reactions;
-	}
-
-	@Override
-	public List<IReaction> getReactions() {
-		return reactions;
-	}
-
-	@Override
-	public IReaction getReactionByIEmoji(IEmoji emoji) {
-		if (emoji == null)
-			return null;
-		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji().equals(emoji))
-				.findFirst().orElse(null);
-	}
-
-	@Override
-	public IReaction getReactionByName(String name) {
-		if (name == null)
-			return null;
-		return reactions.stream().filter(r -> r != null && !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
-				.orElse(null);
-	}
-
-	@Override
-	public void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException {
-		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
-
-		((DiscordClientImpl) client).REQUESTS.DELETE
-				.makeRequest(String.format(DiscordEndpoints.REACTIONS, this.getChannel().getID(), this.getID()));
-	}
-
-	@Override
-	public void addReaction(IReaction reaction) throws MissingPermissionsException,
-			RateLimitException, DiscordException {
-		if (reaction == null)
-			throw new NullPointerException("Reaction argument cannot be null.");
-
-		if (!reaction.getMessage().equals(this))
-			throw new DiscordException("Reaction argument's message does not match this one.");
-
-		if (reaction.isCustomEmoji())
-			addReaction(reaction.getCustomEmoji());
-		else
-			addReaction(reaction.toString());
-	}
-
-	@Override
-	public void addReaction(IEmoji emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
-		addReaction(emoji.toString());
-	}
-
-	@Override
-	public void addReaction(String emoji) throws MissingPermissionsException, RateLimitException, DiscordException {
-		emoji = emoji.replace("<:", "").replace(">", "");
-
-		if (emoji.matches("\\d+")) {
-			IEmoji em = getGuild().getEmojiByID(emoji);
-			if (em != null) {
-				emoji = em.getName() + ":" + em.getID();
-			}
-		}
-
-		if (this.getReactionByName(emoji) == null)
-			DiscordUtils
-					.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
-
-		try {
-			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
-					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getID(), getID(),
-							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-	}
-
-	@Override
-	public void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
-		IMessage message = reaction.getMessage();
-		if (!this.equals(message))
-			throw new DiscordException("Reaction argument's message does not match this one.");
-
-		if (!user.equals(client.getOurUser())) {
-			DiscordUtils
-					.checkPermissions(client.getOurUser(), message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
-		}
-
-		try {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
-					String.format(DiscordEndpoints.REACTIONS_USER, message.getChannel().getID(), message.getID(),
-							reaction.isCustomEmoji()
-									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getID())
-									: URLEncoder.encode(reaction.toString(), "UTF-8").replace("+", "%20"),
-							user.equals(client.getOurUser()) ? "@me" : getID()));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-	}
-
-	@Override
-	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
-		removeReaction(client.getOurUser(), reaction);
 	}
 
 	@Override

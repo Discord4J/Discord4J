@@ -36,7 +36,7 @@ public class DispatchHandler {
 	public void handle(JsonObject event) {
 		String type = event.get("t").getAsString();
 		switch (type) {
-			case "RESUMED": Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]); break;
+			case "RESUMED": Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "WS should resume panda is bad."); break;
 			case "READY": ready(DiscordUtils.GSON.fromJson(event.get("d"), ReadyResponse.class)); break;
 			case "MESSAGE_CREATE": messageCreate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class)); break;
 			case "TYPING_START": typingStart(DiscordUtils.GSON.fromJson(event.get("d"), TypingEventResponse.class)); break;
@@ -65,9 +65,8 @@ public class DispatchHandler {
 			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */ break;
 			case "VOICE_STATE_UPDATE": voiceStateUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceStateObject.class)); break;
 			case "VOICE_SERVER_UPDATE": voiceServerUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceUpdateResponse.class)); break;
-			case "MESSAGE_REACTION_ADD": reactionAdd(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
-			case "MESSAGE_REACTION_REMOVE": reactionRemove(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
-			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
+			case "MESSAGE_REACTION_ADD": /* TODO: Impl Message reactions */ break;
+			case "MESSAGE_REACTION_REMOVE": /* TODO: Impl Message reactions */ break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
@@ -75,7 +74,6 @@ public class DispatchHandler {
 	}
 
 	private void ready(ReadyResponse ready) {
-		ws.state = DiscordWS.State.READY;
 		ws.hasReceivedReady = true; // Websocket received actual ready event
 		client.getDispatcher().dispatch(new LoginEvent(shard));
 
@@ -301,13 +299,13 @@ public class DispatchHandler {
 		Channel channel = (Channel) client.getChannelByID(channelID);
 
 		if (channel != null) {
-			IMessage message = channel.getMessageByID(id);
+			Message message = (Message) channel.getMessageByID(id);
 			if (message != null) {
 				if (message.isPinned()) {
-					((Message) message).setPinned(false); //For consistency with the event
+					message.setPinned(false); //For consistency with the event
 					client.dispatcher.dispatch(new MessageUnpinEvent(message));
 				}
-
+				message.setDeleted(true);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}
@@ -595,63 +593,4 @@ public class DispatchHandler {
 			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldList, guild.getEmojis()));
 		}
 	}
-
-	private void reactionAdd(ReactionEventResponse event) {
-		IChannel channel = client.getChannelByID(event.channel_id);
-		if (channel != null) {
-			IMessage message = channel.getMessageByID(event.message_id);
-
-			if (message != null) {
-				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByName(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(event.emoji.id)));
-				IUser user = message.getClient().getUserByID(event.user_id);
-
-				if (reaction == null) {
-					List<IUser> list = new CopyOnWriteArrayList<>();
-					list.add(user);
-
-					reaction = new Reaction(message.getShard(), 1, list,
-							event.emoji.id != null ? event.emoji.id : event.emoji.name, event.emoji.id != null);
-
-					message.getReactions().add(reaction);
-				} else {
-					reaction.getCachedUsers().add(user);
-					reaction.setCount(reaction.getCount() + 1);
-				}
-
-				reaction.setMessage(message);
-
-				client.dispatcher.dispatch(
-						new ReactionAddEvent(message, reaction, user));
-			}
-		}
-	}
-
-	private void reactionRemove(ReactionEventResponse event) {
-		IChannel channel = client.getChannelByID(event.channel_id);
-		if (channel != null) {
-			IMessage message = channel.getMessageByID(event.message_id);
-
-			if (message != null) {
-				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByName(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(event.emoji.id)));
-				IUser user = message.getClient().getUserByID(event.user_id);
-
-				if (reaction != null) {
-					reaction.setMessage(message); // safeguard
-					reaction.setCount(reaction.getCount() - 1);
-					reaction.getCachedUsers().remove(user);
-
-					if (reaction.getCount() <= 0) {
-						message.getReactions().remove(reaction);
-					}
-
-					client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
-				}
-			}
-		}
-	}
-
 }
