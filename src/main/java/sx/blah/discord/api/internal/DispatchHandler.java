@@ -36,99 +36,38 @@ public class DispatchHandler {
 	public void handle(JsonObject event) {
 		String type = event.get("t").getAsString();
 		switch (type) {
-			case "RESUMED":
-				Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]);
-				break;
-			case "READY":
-				ready(DiscordUtils.GSON.fromJson(event.get("d"), ReadyResponse.class));
-				break;
-			case "MESSAGE_CREATE":
-				messageCreate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class));
-				break;
-			case "TYPING_START":
-				typingStart(DiscordUtils.GSON.fromJson(event.get("d"), TypingEventResponse.class));
-				break;
-			case "GUILD_CREATE":
-				guildCreate(DiscordUtils.GSON.fromJson(event.get("d"), GuildObject.class));
-				break;
-			case "GUILD_MEMBER_ADD":
-				guildMemberAdd(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberAddEventResponse.class));
-				break;
-			case "GUILD_MEMBER_REMOVE":
-				guildMemberRemove(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberRemoveEventResponse.class));
-				break;
-			case "GUILD_MEMBER_UPDATE":
-				guildMemberUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberUpdateEventResponse.class));
-				break;
-			case "MESSAGE_UPDATE":
-				messageUpdate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class));
-				break;
-			case "MESSAGE_DELETE":
-				messageDelete(DiscordUtils.GSON.fromJson(event.get("d"), MessageDeleteEventResponse.class));
-				break;
-			case "MESSAGE_DELETE_BULK":
-				messageDeleteBulk(DiscordUtils.GSON.fromJson(event.get("d"), MessageDeleteBulkEventResponse.class));
-				break;
-			case "PRESENCE_UPDATE":
-				presenceUpdate(DiscordUtils.GSON.fromJson(event.get("d"), PresenceUpdateEventResponse.class));
-				break;
-			case "GUILD_DELETE":
-				guildDelete(DiscordUtils.GSON.fromJson(event.get("d"), GuildObject.class));
-				break;
-			case "CHANNEL_CREATE":
-				channelCreate(event.get("d").getAsJsonObject());
-				break;
-			case "CHANNEL_DELETE":
-				channelDelete(DiscordUtils.GSON.fromJson(event.get("d"), ChannelObject.class));
-				break;
-			case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */
-				break;
-			case "USER_UPDATE":
-				userUpdate(DiscordUtils.GSON.fromJson(event.get("d"), UserUpdateEventResponse.class));
-				break;
-			case "CHANNEL_UPDATE":
-				channelUpdate(DiscordUtils.GSON.fromJson(event.get("d"), ChannelObject.class));
-				break;
-			case "GUILD_MEMBERS_CHUNK":
-				guildMembersChunk(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberChunkEventResponse.class));
-				break;
-			case "GUILD_UPDATE":
-				guildUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildObject.class));
-				break;
-			case "GUILD_ROLE_CREATE":
-				guildRoleCreate(DiscordUtils.GSON.fromJson(event.get("d"), GuildRoleEventResponse.class));
-				break;
-			case "GUILD_ROLE_UPDATE":
-				guildRoleUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildRoleEventResponse.class));
-				break;
-			case "GUILD_ROLE_DELETE":
-				guildRoleDelete(DiscordUtils.GSON.fromJson(event.get("d"), GuildRoleDeleteEventResponse.class));
-				break;
-			case "GUILD_BAN_ADD":
-				guildBanAdd(DiscordUtils.GSON.fromJson(event.get("d"), GuildBanEventResponse.class));
-				break;
-			case "GUILD_BAN_REMOVE":
-				guildBanRemove(DiscordUtils.GSON.fromJson(event.get("d"), GuildBanEventResponse.class));
-				break;
-			case "GUILD_EMOJIS_UPDATE":
-				guildEmojisUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildEmojiUpdateResponse.class));
-				break;
-			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */
-				break;
-			case "VOICE_STATE_UPDATE":
-				voiceStateUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceStateObject.class));
-				break;
-			case "VOICE_SERVER_UPDATE":
-				voiceServerUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceUpdateResponse.class));
-				break;
-			case "MESSAGE_REACTION_ADD":
-				reactionAdd(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class));
-				break;
-			case "MESSAGE_REACTION_REMOVE":
-				reactionRemove(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class));
-				break;
-			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */
-				break;
+			case "RESUMED": Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]); break;
+			case "READY": ready(DiscordUtils.GSON.fromJson(event.get("d"), ReadyResponse.class)); break;
+			case "MESSAGE_CREATE": messageCreate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class)); break;
+			case "TYPING_START": typingStart(DiscordUtils.GSON.fromJson(event.get("d"), TypingEventResponse.class)); break;
+			case "GUILD_CREATE": guildCreate(DiscordUtils.GSON.fromJson(event.get("d"), GuildObject.class)); break;
+			case "GUILD_MEMBER_ADD": guildMemberAdd(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberAddEventResponse.class)); break;
+			case "GUILD_MEMBER_REMOVE": guildMemberRemove(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberRemoveEventResponse.class)); break;
+			case "GUILD_MEMBER_UPDATE": guildMemberUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberUpdateEventResponse.class)); break;
+			case "MESSAGE_UPDATE": messageUpdate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class));break;
+			case "MESSAGE_DELETE": messageDelete(DiscordUtils.GSON.fromJson(event.get("d"), MessageDeleteEventResponse.class)); break;
+			case "MESSAGE_DELETE_BULK": messageDeleteBulk(DiscordUtils.GSON.fromJson(event.get("d"), MessageDeleteBulkEventResponse.class)); break;
+			case "PRESENCE_UPDATE": presenceUpdate(DiscordUtils.GSON.fromJson(event.get("d"), PresenceUpdateEventResponse.class)); break;
+			case "GUILD_DELETE": guildDelete(DiscordUtils.GSON.fromJson(event.get("d"), GuildObject.class)); break;
+			case "CHANNEL_CREATE": channelCreate(event.get("d").getAsJsonObject()); break;
+			case "CHANNEL_DELETE": channelDelete(DiscordUtils.GSON.fromJson(event.get("d"), ChannelObject.class)); break;
+			case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */ break;
+			case "USER_UPDATE": userUpdate(DiscordUtils.GSON.fromJson(event.get("d"), UserUpdateEventResponse.class)); break;
+			case "CHANNEL_UPDATE": channelUpdate(DiscordUtils.GSON.fromJson(event.get("d"), ChannelObject.class)); break;
+			case "GUILD_MEMBERS_CHUNK": guildMembersChunk(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberChunkEventResponse.class)); break;
+			case "GUILD_UPDATE": guildUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildObject.class)); break;
+			case "GUILD_ROLE_CREATE": guildRoleCreate(DiscordUtils.GSON.fromJson(event.get("d"), GuildRoleEventResponse.class)); break;
+			case "GUILD_ROLE_UPDATE": guildRoleUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildRoleEventResponse.class)); break;
+			case "GUILD_ROLE_DELETE": guildRoleDelete(DiscordUtils.GSON.fromJson(event.get("d"), GuildRoleDeleteEventResponse.class)); break;
+			case "GUILD_BAN_ADD": guildBanAdd(DiscordUtils.GSON.fromJson(event.get("d"), GuildBanEventResponse.class)); break;
+			case "GUILD_BAN_REMOVE": guildBanRemove(DiscordUtils.GSON.fromJson(event.get("d"), GuildBanEventResponse.class)); break;
+			case "GUILD_EMOJIS_UPDATE": guildEmojisUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildEmojiUpdateResponse.class)); break;
+			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */ break;
+			case "VOICE_STATE_UPDATE": voiceStateUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceStateObject.class)); break;
+			case "VOICE_SERVER_UPDATE": voiceServerUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceUpdateResponse.class)); break;
+			case "MESSAGE_REACTION_ADD": reactionAdd(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
+			case "MESSAGE_REACTION_REMOVE": reactionRemove(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class));break;
+			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
