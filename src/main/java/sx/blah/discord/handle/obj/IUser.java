@@ -111,7 +111,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	 *
 	 * @param guild The guild to check the permissions for.
 	 * @return The permissions.
-     */
+       */
 	EnumSet<Permissions> getPermissionsForGuild(IGuild guild);
 
 	/**
