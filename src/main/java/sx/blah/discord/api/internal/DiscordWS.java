@@ -70,25 +70,26 @@ public class DiscordWS extends WebSocketAdapter {
 
 		switch (op) {
 			case HELLO:
-				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
 				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Shard {} _trace: {}", shard.getInfo()[0], d.getAsJsonObject().get("_trace"));
 
+				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
 				if (this.state != State.RESUMING) {
 					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
 				} else {
 					client.reconnectManager.onReconnectSuccess();
 					send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
 				}
-
 				break;
 			case RECONNECT:
-				keepAlive.shutdown();
 				this.state = State.RESUMING;
+				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.RECONNECT_OP, shard));
+				keepAlive.shutdown();
 				send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
 				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
 			case INVALID_SESSION:
 				this.state = State.RECONNECTING;
+				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.INVALID_SESSION_OP, shard));
 				invalidate();
 				send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
 				break;
@@ -114,6 +115,7 @@ public class DiscordWS extends WebSocketAdapter {
 		keepAlive.shutdown();
 		if (this.state != State.DISCONNECTING && statusCode != 4003 && statusCode != 4004 && statusCode != 4005 && statusCode != 4010) {
 			this.state = State.RESUMING;
+			client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.ABNORMAL_CLOSE, shard));
 			client.reconnectManager.scheduleReconnect(this);
 		}
 	}
@@ -152,17 +154,15 @@ public class DiscordWS extends WebSocketAdapter {
 		}
 	}
 
-	void disconnect(DisconnectedEvent.Reason reason) {
-		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Disconnected with reason {}", reason);
-		this.state = State.DISCONNECTING;
-
-		switch (reason) {
-			case LOGGED_OUT:
-				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, shard));
-				shutdown(reason);
-				break;
-			default:
-				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled disconnect reason: {}", reason);
+	void shutdown() {
+		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} shutting down.", shard.getInfo()[0]);
+		try {
+			keepAlive.shutdown();
+			getSession().close(1000, null); // Discord doesn't care about the reason
+			wsClient.stop();
+			this.state = State.IDLE;
+		} catch (Exception e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: {}", e);
 		}
 	}
 
@@ -180,18 +180,6 @@ public class DiscordWS extends WebSocketAdapter {
 		this.sessionId = null;
 		this.shard.guildList.clear();
 		this.shard.privateChannels.clear();
-	}
-
-	private void shutdown(DisconnectedEvent.Reason reason) {
-		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} shutting down.", shard.getInfo()[0]);
-		try {
-			keepAlive.shutdown();
-			getSession().close(1000, reason.name());
-			wsClient.stop();
-			this.state = State.IDLE;
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: {}", e);
-		}
 	}
 
 	public void send(GatewayOps op, Object payload) {

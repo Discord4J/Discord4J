@@ -182,7 +182,4 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws MissingPermissionsException
 	 */
 	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
-
-
-
 }

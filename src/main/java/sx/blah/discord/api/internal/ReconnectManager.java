@@ -1,6 +1,9 @@
 package sx.blah.discord.api.internal;
 
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.impl.events.ReconnectFailureEvent;
+import sx.blah.discord.handle.impl.events.ReconnectSuccessEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.util.Timer;
@@ -11,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ReconnectManager {
 
+	private final IDiscordClient client;
 	private final ConcurrentLinkedQueue<DiscordWS> toReconnect = new ConcurrentLinkedQueue<>();
 
 	private final Timer keepAlive = new Timer();
@@ -29,11 +33,12 @@ public class ReconnectManager {
 	private final int maxAttempts;
 	private final AtomicInteger curAttempt = new AtomicInteger(0);
 
-	public ReconnectManager(int maxAttempts) {
+	ReconnectManager(IDiscordClient client, int maxAttempts) {
+		this.client = client;
 		this.maxAttempts = maxAttempts;
 	}
 
-	public void scheduleReconnect(DiscordWS ws) {
+	void scheduleReconnect(DiscordWS ws) {
 		Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Reconnect scheduled for shard {}.", ws.shard.getInfo()[0]);
 		toReconnect.offer(ws);
 		if (toReconnect.size() == 1) { // If this is the only WS in the queue, immediately begin the reconnect process
@@ -41,8 +46,9 @@ public class ReconnectManager {
 		}
 	}
 
-	public void onReconnectSuccess() {
+	void onReconnectSuccess() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnect for shard {} succeeded.", toReconnect.peek().shard.getInfo()[0]);
+		client.getDispatcher().dispatch(new ReconnectSuccessEvent(toReconnect.peek().shard));
 		toReconnect.remove();
 		curAttempt.set(0);
 		if (toReconnect.peek() != null) {
@@ -57,7 +63,8 @@ public class ReconnectManager {
 		}
 	}
 
-	public void onReconnectError() {
+	void onReconnectError() {
+		client.getDispatcher().dispatch(new ReconnectFailureEvent(toReconnect.peek().shard, curAttempt.get()));
 		if (curAttempt.get() < maxAttempts - 1) {
 			try {
 				Thread.sleep(getReconnectDelay()); // Sleep for back off
@@ -78,7 +85,7 @@ public class ReconnectManager {
 		}
 	}
 
-	public void beginReconnect() {
+	private void beginReconnect() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Beginning reconnect for shard {}.", toReconnect.peek().shard.getInfo()[0]);
 		if (!keepAliveRunning.get()) {
 			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Scheduling reconnect keep alive.");
@@ -88,7 +95,7 @@ public class ReconnectManager {
 		doReconnect(); // Perform reconnect
 	}
 
-	public void doReconnect() {
+	private void doReconnect() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Performing reconnect attempt {}.", curAttempt.get());
 		toReconnect.peek().connect();
 	}
