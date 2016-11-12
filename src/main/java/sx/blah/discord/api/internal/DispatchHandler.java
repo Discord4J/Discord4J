@@ -44,7 +44,7 @@ public class DispatchHandler {
 			case "GUILD_MEMBER_ADD": guildMemberAdd(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberAddEventResponse.class)); break;
 			case "GUILD_MEMBER_REMOVE": guildMemberRemove(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberRemoveEventResponse.class)); break;
 			case "GUILD_MEMBER_UPDATE": guildMemberUpdate(DiscordUtils.GSON.fromJson(event.get("d"), GuildMemberUpdateEventResponse.class)); break;
-			case "MESSAGE_UPDATE": messageUpdate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class));break;
+			case "MESSAGE_UPDATE": messageUpdate(DiscordUtils.GSON.fromJson(event.get("d"), MessageObject.class)); break;
 			case "MESSAGE_DELETE": messageDelete(DiscordUtils.GSON.fromJson(event.get("d"), MessageDeleteEventResponse.class)); break;
 			case "MESSAGE_DELETE_BULK": messageDeleteBulk(DiscordUtils.GSON.fromJson(event.get("d"), MessageDeleteBulkEventResponse.class)); break;
 			case "PRESENCE_UPDATE": presenceUpdate(DiscordUtils.GSON.fromJson(event.get("d"), PresenceUpdateEventResponse.class)); break;
@@ -66,7 +66,7 @@ public class DispatchHandler {
 			case "VOICE_STATE_UPDATE": voiceStateUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceStateObject.class)); break;
 			case "VOICE_SERVER_UPDATE": voiceServerUpdate(DiscordUtils.GSON.fromJson(event.get("d"), VoiceUpdateResponse.class)); break;
 			case "MESSAGE_REACTION_ADD": reactionAdd(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
-			case "MESSAGE_REACTION_REMOVE": reactionRemove(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class));break;
+			case "MESSAGE_REACTION_REMOVE": reactionRemove(DiscordUtils.GSON.fromJson(event.get("d"), ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
 
 			default:
