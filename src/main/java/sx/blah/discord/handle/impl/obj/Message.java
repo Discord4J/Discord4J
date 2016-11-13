@@ -435,8 +435,8 @@ public class Message implements IMessage {
 	public IReaction getReactionByIEmoji(IEmoji emoji) {
 		if (emoji == null)
 			return null;
-		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji().equals(emoji))
-				.findFirst().orElse(null);
+		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji() != null &&
+				r.getCustomEmoji().equals(emoji)).findFirst().orElse(null);
 	}
 
 	@Override
