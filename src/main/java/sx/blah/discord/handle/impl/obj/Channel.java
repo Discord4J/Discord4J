@@ -88,10 +88,6 @@ public class Channel implements IChannel {
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
-	/**
-	 * Cached value of isDeleted()
-	 */
-	private volatile boolean deleted = false;
 
 	public Channel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
@@ -417,15 +413,6 @@ public class Channel implements IChannel {
 		roleOverrides.put(roleId, override);
 	}
 
-	/**
-	 * Sets the CACHED value of isDeleted()
-	 *
-	 * @param deleted The value to assign to isDeleted()
-	 */
-	public void setDeleted(boolean deleted){
-		this.deleted = deleted;
-	}
-
 	@Override
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
@@ -529,7 +516,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return deleted;
+		return getClient().getChannelByID(id) != this;
 	}
 
 	@Override

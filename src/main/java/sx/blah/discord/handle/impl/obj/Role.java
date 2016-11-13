@@ -71,10 +71,6 @@ public class Role implements IRole {
 	 * The guild this role belongs to
 	 */
 	protected volatile IGuild guild;
-	/**
-	 * Cached value of isDeleted()
-	 */
-	private volatile boolean deleted = false;
 
 	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, boolean mentionable, IGuild guild) {
 		this.position = position;
@@ -263,7 +259,7 @@ public class Role implements IRole {
 
 	@Override
 	public boolean isDeleted() {
-		return deleted;
+		return getClient().getRoleByID(id) != this;
 	}
 
 	@Override
@@ -287,9 +283,5 @@ public class Role implements IRole {
 			return false;
 
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IRole) other).getID().equals(getID());
-	}
-
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
 	}
 }

@@ -351,7 +351,6 @@ public class DispatchHandler {
 
 	private void guildDelete(GuildObject json) {
 		Guild guild = (Guild) client.getGuildByID(json.id);
-		guild.setDeleted(true);
 		client.getGuilds().remove(guild);
 		if (json.unavailable) { //Guild can't be reached
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Guild with id {} is unavailable, is there an outage?", json.id);
@@ -405,7 +404,6 @@ public class DispatchHandler {
 					channel.getGuild().getChannels().remove(channel);
 				else
 					shard.privateChannels.remove(channel);
-				channel.setDeleted(true);
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
 		} else if (json.type.equalsIgnoreCase("voice")) {
@@ -505,7 +503,6 @@ public class DispatchHandler {
 			IRole role = guild.getRoleByID(event.role_id);
 			if (role != null) {
 				guild.getRoles().remove(role);
-				((Role) role).setDeleted(true);
 				client.dispatcher.dispatch(new RoleDeleteEvent(role, guild));
 			}
 		}

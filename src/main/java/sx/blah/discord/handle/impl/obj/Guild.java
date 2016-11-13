@@ -115,10 +115,6 @@ public class Guild implements IGuild {
 	 * The list of emojis.
 	 */
 	protected final List<IEmoji> emojis;
-	/**
-	 * Cached value of isDeleted()
-	 */
-	private volatile boolean deleted = false;
 
 	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int verification) {
 		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
@@ -669,7 +665,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public boolean isDeleted() {
-		return deleted;
+		return getClient().getGuildByID(id) != this;
 	}
 
 	@Override
@@ -711,10 +707,6 @@ public class Guild implements IGuild {
 		}
 
 		return message;
-	}
-
-	public void setDeleted(boolean deleted){
-		this.deleted = deleted;
 	}
 
 	@Override
