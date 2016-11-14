@@ -516,7 +516,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return getClient().getChannelByID(id) != this;
+		return getGuild().getChannelByID(id) != this;
 	}
 
 	@Override

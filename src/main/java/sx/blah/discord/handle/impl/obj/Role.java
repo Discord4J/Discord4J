@@ -259,7 +259,7 @@ public class Role implements IRole {
 
 	@Override
 	public boolean isDeleted() {
-		return getClient().getRoleByID(id) != this;
+		return getGuild().getRoleByID(id) != this;
 	}
 
 	@Override
