@@ -194,7 +194,7 @@ public class DiscordWS extends WebSocketAdapter {
 		if (getSession() != null && getSession().isOpen()) {
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
-			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session.");
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session: {}", message);
 		}
 	}
 

@@ -435,8 +435,8 @@ public class Message implements IMessage {
 	public IReaction getReactionByIEmoji(IEmoji emoji) {
 		if (emoji == null)
 			return null;
-		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji().equals(emoji))
-				.findFirst().orElse(null);
+		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji() != null &&
+				r.getCustomEmoji().equals(emoji)).findFirst().orElse(null);
 	}
 
 	@Override
@@ -488,8 +488,7 @@ public class Message implements IMessage {
 		}
 
 		if (this.getReactionByName(emoji) == null)
-			DiscordUtils
-					.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
+			DiscordUtils.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
@@ -508,8 +507,7 @@ public class Message implements IMessage {
 			throw new DiscordException("Reaction argument's message does not match this one.");
 
 		if (!user.equals(client.getOurUser())) {
-			DiscordUtils
-					.checkPermissions(client.getOurUser(), message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+			DiscordUtils.checkPermissions(client.getOurUser(), message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		}
 
 		try {
