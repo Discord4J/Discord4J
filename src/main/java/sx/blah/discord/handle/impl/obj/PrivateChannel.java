@@ -167,4 +167,9 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	public IPrivateChannel copy() {
 		return new PrivateChannel(client, recipient, id);
 	}
+
+	@Override
+	public boolean isDeleted() {
+		return getClient().getChannelByID(id) != this;
+	}
 }
