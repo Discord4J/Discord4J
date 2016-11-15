@@ -4,7 +4,7 @@ import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IWebhook;
 
 /**
- * This event is dispatched whenever a webhook is deleted.
+ * This event is dispatched whenever a webhook is deleted, or access to it is lost.
  */
 public class WebhookDeleteEvent extends Event {
 

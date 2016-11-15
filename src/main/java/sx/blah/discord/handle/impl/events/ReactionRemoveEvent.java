@@ -5,6 +5,9 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
 
+/**
+ * Fired when a reaction gets removed from a message.
+ */
 public class ReactionRemoveEvent extends Event {
 
 	private IMessage message;

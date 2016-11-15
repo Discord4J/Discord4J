@@ -1,8 +1,11 @@
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.RateLimitException;
 
 import java.util.*;
 
@@ -147,7 +150,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public WebhookList getWebhooks() {
+	public List<IWebhook> getWebhooks() {
 		throw new UnsupportedOperationException();
 	}
 

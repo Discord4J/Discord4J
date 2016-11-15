@@ -13,6 +13,7 @@ public class ClientBuilder {
 	private String botToken;
 	private boolean isDaemon = false;
 	private int shardCount = 1;
+	private int maxReconnectAttempts = 5;
 
 	/**
 	 * Provides the login info for the client.
@@ -79,6 +80,18 @@ public class ClientBuilder {
 	}
 
 	/**
+	 * Sets the max amount of attempts shards managed by this client will make to reconnect in the event of an
+	 * unexpected disconnection.
+	 *
+	 * @param maxReconnectAttempts The max amount of attempts before the shard is abandoned.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder setMaxReconnectAttempts(int maxReconnectAttempts) {
+		this.maxReconnectAttempts = maxReconnectAttempts;
+		return this;
+	}
+
+	/**
 	 * Creates the discord instance with the desired features
 	 *
 	 * @return The discord instance
@@ -89,7 +102,7 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shardCount);
+		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shardCount, maxReconnectAttempts);
 	}
 
 	/**

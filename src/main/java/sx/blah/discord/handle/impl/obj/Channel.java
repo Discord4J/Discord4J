@@ -15,6 +15,9 @@ import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
 import sx.blah.discord.api.internal.json.requests.WebhookCreateRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
+import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
+import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
@@ -22,6 +25,7 @@ import sx.blah.discord.util.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -85,7 +89,7 @@ public class Channel implements IChannel {
 	/**
 	 * The webhooks for this channel.
 	 */
-	protected final WebhookList webhooks;
+	protected final List<IWebhook> webhooks;
 
 	/**
 	 * The client that created this object.
@@ -103,11 +107,10 @@ public class Channel implements IChannel {
 		this.userOverrides = userOverrides;
 		if (!(this instanceof IVoiceChannel)) {
 			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
-			this.webhooks = new WebhookList(client, this);
 		} else {
 			this.messages = null;
-			this.webhooks = null;
 		}
+		this.webhooks = new CopyOnWriteArrayList<>();
 	}
 
 
@@ -520,23 +523,19 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public WebhookList getWebhooks() {
+	public List<IWebhook> getWebhooks() {
 		return webhooks;
 	}
 
 	@Override
 	public IWebhook getWebhookByID(String id) {
-		if (webhooks == null)
-			return null;
-
-		return webhooks.get(id);
+		return webhooks.stream()
+				.filter(w -> w.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
 	}
 
 	@Override
 	public List<IWebhook> getWebhooksByName(String name) {
-		if (webhooks == null)
-			return null;
-
 		return webhooks.stream()
 				.filter(w -> w.getName().equals(name))
 				.collect(Collectors.toList());
@@ -596,6 +595,45 @@ public class Channel implements IChannel {
 	public void removeWebhook(IWebhook webhook) {
 		if (this.webhooks != null && this.webhooks.contains(webhook))
 			this.webhooks.remove(webhook);
+	}
+
+	public void loadWebhooks() {
+		RequestBuffer.request(() -> {
+			try {
+				List<IWebhook> oldList = getWebhooks()
+						.stream()
+						.map(IWebhook::copy)
+						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
+				WebhookObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+						DiscordEndpoints.CHANNELS + getID() + "/webhooks"),
+						WebhookObject[].class);
+
+				if (response != null)
+					for (WebhookObject webhookObject : response) {
+						if (getWebhookByID(webhookObject.id) == null) {
+							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(this, webhookObject);
+							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
+							addWebhook(newWebhook);
+						} else {
+							IWebhook toUpdate = getWebhookByID(webhookObject.id);
+							IWebhook oldWebhook = toUpdate.copy();
+							toUpdate = DiscordUtils.getWebhookFromJSON(this, webhookObject);
+							if (!oldWebhook.getName().equals(toUpdate.getName()) || !String.valueOf(oldWebhook.getAvatar()).equals(String.valueOf(toUpdate.getAvatar())))
+								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, this));
+
+							oldList.remove(oldWebhook);
+						}
+					}
+
+				oldList.forEach(webhook -> {
+					removeWebhook(webhook);
+					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
+				});
+			} catch (Exception e) {
+				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Discord4J Internal Exception", e);
+			}
+		});
 	}
 
 	@Override

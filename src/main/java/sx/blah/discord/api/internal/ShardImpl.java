@@ -69,7 +69,8 @@ public class ShardImpl implements IShard {
 				});
 				request.get();
 			});
-			ws.disconnect(DisconnectedEvent.Reason.LOGGED_OUT);
+			getClient().getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, this));
+			ws.shutdown();
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to logout before bot has logged in!");
 		}

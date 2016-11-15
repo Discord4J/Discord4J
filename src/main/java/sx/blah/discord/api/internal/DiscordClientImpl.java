@@ -51,6 +51,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected volatile EventDispatcher dispatcher;
 
 	/**
+	 * Reconnect manager.
+	 */
+	protected volatile ReconnectManager reconnectManager;
+
+	/**
 	 * The module loader for this client.
 	 */
 	protected volatile ModuleLoader loader;
@@ -90,13 +95,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount) {
+	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
 		this.maxMissedPingCount = maxMissedPingCount;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
 		this.dispatcher = new EventDispatcher(this);
+		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
 	}
 
@@ -281,7 +287,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 				getShards().add(shardNum, shard);
 				shard.login();
 
-				getDispatcher().waitFor((ShardReadyEvent e) -> true, 10, TimeUnit.SECONDS, () ->
+				getDispatcher().waitFor((ShardReadyEvent e) -> true, 1, TimeUnit.MINUTES, () ->
 					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
 				);
 

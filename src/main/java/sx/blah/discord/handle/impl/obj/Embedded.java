@@ -31,27 +31,48 @@ public class Embedded implements IEmbedded {
 	protected final String url;
 
 	/**
-	 * The url link to the embedded media's thumbnail thumbnail.
+	 * The object containing the image for the thumbnail for the embedded media.
 	 */
-	protected final String thumbnail;
+	protected final IEmbedImage thumbnail;
 
 	/**
 	 * The object containing information about the provider of the embedded media.
 	 */
 	protected final IEmbedProvider provider;
 
+	/**
+	 * The timestamp for the embedded media.
+	 */
 	protected final LocalDateTime timestamp;
 
+	/**
+	 * The colored strip for the embedded media.
+	 */
 	protected final Color color;
 
+	/**
+	 * The object containing information about the footer of the embedded media.
+	 */
 	protected final IEmbedFooter footer;
 
-	protected final String image;
+	/**
+	 * The object containing information about the image of the embedded media.
+	 */
+	protected final IEmbedImage image;
 
-	protected final String video;
+	/**
+	 * The object containing information about the video of the embedded media.
+	 */
+	protected final IEmbedVideo video;
 
+	/**
+	 * The object containing information about the author for the embedded media.
+	 */
 	protected final IEmbedAuthor author;
 
+	/**
+	 * A lost of objects containing information about fields in the embedded media
+	 */
 	protected final List<IEmbedField> embedFields;
 
 	public Embedded(String title, String type, String description, String url, EmbedObject.ThumbnailObject thumbnail, EmbedObject.ProviderObject provider, LocalDateTime timestamp, Color color, EmbedObject.FooterObject footer, EmbedObject.ImageObject image, EmbedObject.VideoObject video, EmbedObject.AuthorObject author, EmbedObject.EmbedFieldObject[] embedFields) {
@@ -62,7 +83,7 @@ public class Embedded implements IEmbedded {
 		if (thumbnail == null) {
 			this.thumbnail = null;
 		} else {
-			this.thumbnail = thumbnail.url;
+			this.thumbnail = new EmbedImage(thumbnail.url, thumbnail.height, thumbnail.width);
 		}
 		if (provider == null) {
 			this.provider = null;
@@ -78,11 +99,11 @@ public class Embedded implements IEmbedded {
 		if (image == null)
 			this.image = null;
 		else
-			this.image = image.url;
+			this.image = new EmbedImage(image.url, image.height, image.width);
 		if (video == null)
 			this.video = null;
 		else
-			this.video = video.url;
+			this.video = new EmbedVideo(video.url, video.height, video.width);
 		if (author == null)
 			this.author = null;
 		else
@@ -103,13 +124,13 @@ public class Embedded implements IEmbedded {
 		this.type = type;
 		this.description = description;
 		this.url = url;
-		this.thumbnail = thumbnailUrl;
+		this.thumbnail = new EmbedImage(thumbnailUrl, 0, 0);
 		this.provider = provider;
 		this.timestamp = timestamp;
 		this.color = color;
 		this.footer = footer;
-		this.image = imageUrl;
-		this.video = videoUrl;
+		this.image = new EmbedImage(imageUrl, 0, 0);
+		this.video = null;
 		this.author = author;
 
 		if (embedFields == null || embedFields.length == 0)
@@ -173,7 +194,7 @@ public class Embedded implements IEmbedded {
 	}
 
 	@Override
-	public String getImage() {
+	public IEmbedImage getImage() {
 		return image;
 	}
 
@@ -182,12 +203,12 @@ public class Embedded implements IEmbedded {
 	 *
 	 * @return An object containing information about the embedded media's thumbnail. Can be null.
 	 */
-	public String getThumbnail() {
+	public IEmbedImage getThumbnail() {
 		return thumbnail;
 	}
 
 	@Override
-	public String getVideo() {
+	public IEmbedVideo getVideo() {
 		return video;
 	}
 
@@ -208,6 +229,62 @@ public class Embedded implements IEmbedded {
 	@Override
 	public List<IEmbedField> getEmbeddedFields() {
 		return embedFields;
+	}
+
+	public static class EmbedImage implements IEmbedImage{
+
+		protected String url;
+		protected int height;
+		protected int width;
+
+		public EmbedImage(String url, int height, int width) {
+			this.url = url;
+			this.height = height;
+			this.width = width;
+		}
+
+		@Override
+		public String getUrl() {
+			return url;
+		}
+
+		@Override
+		public int getHeight() {
+			return height;
+		}
+
+		@Override
+		public int getWidth() {
+			return width;
+		}
+	}
+
+	public static class EmbedVideo implements IEmbedVideo{
+
+		protected String url;
+		protected int height;
+		protected int width;
+
+		public EmbedVideo(String url, int height, int width) {
+			this.url = url;
+			this.height = height;
+			this.width = width;
+		}
+
+		@Override
+		public String getUrl() {
+			return url;
+		}
+
+		@Override
+		public int getHeight() {
+			return height;
+		}
+
+		@Override
+		public int getWidth() {
+			return width;
+		}
 	}
 
 	public static class EmbedFooter implements IEmbedFooter {

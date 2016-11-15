@@ -29,7 +29,12 @@ public class VoiceDisconnectedEvent extends Event {
 		/**
 		 * The user left the voice channel.
 		 */
-		LEFT_CHANNEL
+		LEFT_CHANNEL,
+
+		/**
+		 * Something unknown caused the websocket to close. The connection will be abandoned.
+		 */
+		ABNORMAL_CLOSE
 	}
 }
 

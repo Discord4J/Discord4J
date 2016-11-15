@@ -208,7 +208,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public WebhookList getWebhooks() {
+	public List<IWebhook> getWebhooks() {
 		throw new UnsupportedOperationException();
 	}
 

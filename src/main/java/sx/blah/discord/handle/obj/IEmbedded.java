@@ -1,7 +1,8 @@
 package sx.blah.discord.handle.obj;
 
-import java.awt.Color;
+import java.awt.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Represents a discord embedded object.
@@ -55,42 +56,100 @@ public interface IEmbedded {
     /**
      * Gets the image in the embedded media.
      *
-     * @return A url pointing to the image. Can be null.
+     * @return An object containing information about the image. Can be null.
      */
-    String getImage();
+    IEmbedImage getImage();
 
     /**
      * Gets the thumbnail of the embedded media.
      *
      * @return An object containing information about the embedded media's thumbnail. Can be null.
      */
-    String getThumbnail();
+    IEmbedImage getThumbnail();
 
     /**
      * Gets the video url for the embedded media.
      *
      * @return A url pointing to the video. Can be null.
      */
-    String getVideo();
+    IEmbedVideo getVideo();
 
     /**
      * Gets the provider of the embedded media.
      *
      * @return An object containing information about the embedded media's provider. <b>Can Be Null!</b>
      */
-    IEmbedded.IEmbedProvider getEmbedProvider();
+    IEmbedProvider getEmbedProvider();
 
     /**
      * Gets the author for this embedded media.
      *
-     * @return An object containing information about the author for the embedded media. Cna be null.
+     * @return An object containing information about the author for the embedded media. Can be null.
      */
-    IEmbedded.IEmbedAuthor getAuthor();
-
-    java.util.List<IEmbedField> getEmbeddedFields();
+    IEmbedAuthor getAuthor();
 
     /**
-     * Represents an embedded footer object
+     * Gets the list of embedded fields for this embedded media.
+     *
+     * @return A list containing objects with information about fields. Can be null.
+     */
+    List<IEmbedField> getEmbeddedFields();
+
+
+    /**
+     * Represents an embedded image object.
+     */
+    interface IEmbedImage {
+        /**
+         * Gets the image's url
+         *
+         * @return The image's url
+         */
+        String getUrl();
+
+        /**
+         * Gets the image's height
+         *
+         * @return The image's height
+         */
+        int getHeight();
+
+        /**
+         * Gets the image's width
+         *
+         * @return The image's width
+         */
+        int getWidth();
+    }
+
+    /**
+     * Represents an embedded video object.
+     */
+    interface IEmbedVideo {
+        /**
+         * Gets the video's url
+         *
+         * @return The video's url
+         */
+        String getUrl();
+
+        /**
+         * Gets the video's height
+         *
+         * @return The video's height
+         */
+        int getHeight();
+
+        /**
+         * Gets the video's width
+         *
+         * @return The video's width
+         */
+        int getWidth();
+    }
+
+    /**
+     * Represents an embedded footer object.
      */
     interface IEmbedFooter {
         /**
@@ -109,21 +168,54 @@ public interface IEmbedded {
     }
 
     /**
-     * Represents the author for an embedded object
+     * Represents the author for an embedded object.
      */
     interface IEmbedAuthor {
+        /**
+         * Gets the author's name
+         *
+         * @return The author's name
+         */
         String getName();
 
+        /**
+         * Gets the url for this author
+         *
+         * @return The author's url
+         */
         String getUrl();
 
+        /**
+         * Gets the icon url for this author
+         *
+         * @return The icon url
+         */
         String getIconUrl();
     }
 
+    /**
+     * Represents a field in the embedded object.
+     */
     interface IEmbedField {
+        /**
+         * Gets the field's name
+         *
+         * @return The field's name
+         */
         String getName();
 
+        /**
+         * Gets the field's value
+         *
+         * @return The field's value
+         */
         String getValue();
 
+        /**
+         * Gets if the field is inline or not
+         *
+         * @return If the field is inline or not
+         */
         boolean isInline();
     }
 

@@ -11,15 +11,14 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
+import sx.blah.discord.api.internal.json.requests.ResumeRequest;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,17 +28,18 @@ import java.util.zip.InflaterInputStream;
 
 public class DiscordWS extends WebSocketAdapter {
 
+	State state;
 	private WebSocketClient wsClient;
 
 	private DiscordClientImpl client;
-	private ShardImpl shard;
+	ShardImpl shard;
 	private String gateway;
+
+	private long seq = 0;
+	String sessionId;
 
 	private DispatchHandler dispatchHandler;
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
-
-	private long seq = 0;
-	protected String sessionId;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -51,22 +51,13 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	public DiscordWS(IShard shard, String gateway) {
+	DiscordWS(IShard shard, String gateway) {
 		this.client = (DiscordClientImpl) shard.getClient();
 		this.shard = (ShardImpl) shard;
 		this.gateway = gateway;
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
-
-		try {
-			wsClient = new WebSocketClient(new SslContextFactory());
-			wsClient.setDaemon(true);
-			wsClient.getPolicy().setMaxBinaryMessageSize(Integer.MAX_VALUE);
-			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
-			wsClient.start();
-			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while initializing websocket: {}", e);
-		}
+		this.state = State.CONNECTING;
+		connect();
 	}
 
 	@Override
@@ -79,20 +70,29 @@ public class DiscordWS extends WebSocketAdapter {
 
 		switch (op) {
 			case HELLO:
-				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
 				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Shard {} _trace: {}", shard.getInfo()[0], d.getAsJsonObject().get("_trace"));
-				send(new GatewayPayload(GatewayOps.IDENTIFY, new IdentifyRequest(client.token, shard.getInfo())));
-				break;
-			case RECONNECT:
-				try {
-					disconnect(DisconnectedEvent.Reason.RECONNECT_OP);
-					wsClient.connect(this, new URI(this.gateway), new ClientUpgradeRequest());
-				} catch (IOException | URISyntaxException e) {
-					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while handling RECONNECT op, REPORT THIS TO THE DISCORD4J DEV! {}", e);
+
+				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
+				if (this.state != State.RESUMING) {
+					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+				} else {
+					client.reconnectManager.onReconnectSuccess();
+					send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
 				}
 				break;
+			case RECONNECT:
+				this.state = State.RESUMING;
+				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.RECONNECT_OP, shard));
+				keepAlive.shutdown();
+				send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
+				break;
 			case DISPATCH: dispatchHandler.handle(payload); break;
-			case INVALID_SESSION: disconnect(DisconnectedEvent.Reason.INVALID_SESSION_OP); break;
+			case INVALID_SESSION:
+				this.state = State.RECONNECTING;
+				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.INVALID_SESSION_OP, shard));
+				invalidate();
+				send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+				break;
 			case HEARTBEAT: send(GatewayOps.HEARTBEAT, seq);
 			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
 			case UNKNOWN:
@@ -103,17 +103,20 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketConnect(Session sess) {
-		super.onWebSocketConnect(sess);
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket Connected.");
+		super.onWebSocketConnect(sess);
 	}
 
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket disconnected with status code {} and reason \"{}\".", statusCode, reason);
+		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} websocket disconnected with status code {} and reason \"{}\".", shard.getInfo()[0], statusCode, reason);
 
-		if (statusCode == 1006 || statusCode == 1001) { // Which status codes represent errors? All but 1000?
-			disconnect(DisconnectedEvent.Reason.ABNORMAL_CLOSE);
+		keepAlive.shutdown();
+		if (this.state != State.DISCONNECTING && statusCode != 4003 && statusCode != 4004 && statusCode != 4005 && statusCode != 4010) {
+			this.state = State.RESUMING;
+			client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.ABNORMAL_CLOSE, shard));
+			client.reconnectManager.scheduleReconnect(this);
 		}
 	}
 
@@ -125,6 +128,58 @@ public class DiscordWS extends WebSocketAdapter {
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: {}", cause);
 		}
+
+		if (this.state == State.RESUMING) {
+			client.reconnectManager.onReconnectError();
+		}
+	}
+
+	@Override
+	public void onWebSocketBinary(byte[] payload, int offset, int len) {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new InflaterInputStream(new ByteArrayInputStream(payload))));
+		String message = reader.lines().collect(Collectors.joining());
+		this.onWebSocketText(message);
+	}
+
+	void connect() {
+		try {
+			wsClient = new WebSocketClient(new SslContextFactory());
+			wsClient.setDaemon(true);
+			wsClient.getPolicy().setMaxBinaryMessageSize(Integer.MAX_VALUE);
+			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
+			wsClient.start();
+			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
+		} catch (Exception e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: {}", e);
+		}
+	}
+
+	void shutdown() {
+		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} shutting down.", shard.getInfo()[0]);
+		try {
+			keepAlive.shutdown();
+			getSession().close(1000, null); // Discord doesn't care about the reason
+			wsClient.stop();
+			this.state = State.IDLE;
+		} catch (Exception e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: {}", e);
+		}
+	}
+
+	private void beginHeartbeat(long interval) {
+		if (keepAlive.isShutdown()) keepAlive = Executors.newSingleThreadScheduledExecutor();
+
+		keepAlive.scheduleAtFixedRate(() -> {
+			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Sending heartbeat on shard {}", shard.getInfo()[0]);
+			send(GatewayOps.HEARTBEAT, seq);
+		}, 0, interval, TimeUnit.MILLISECONDS);
+	}
+
+	private void invalidate() {
+		this.seq = 0;
+		this.sessionId = null;
+		this.shard.guildList.clear();
+		this.shard.privateChannels.clear();
 	}
 
 	public void send(GatewayOps op, Object payload) {
@@ -139,45 +194,16 @@ public class DiscordWS extends WebSocketAdapter {
 		if (getSession() != null && getSession().isOpen()) {
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
-			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session.");
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session: {}", message);
 		}
 	}
 
-	protected void beginHeartbeat(long interval) {
-		if (keepAlive.isShutdown()) keepAlive = Executors.newSingleThreadScheduledExecutor();
-
-		keepAlive.scheduleAtFixedRate(() -> {
-			send(GatewayOps.HEARTBEAT, seq);
-		}, 0, interval, TimeUnit.MILLISECONDS);
-	}
-
-	protected void disconnect(DisconnectedEvent.Reason reason) {
-		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Disconnected with reason {}", reason);
-
-		switch (reason) {
-			case LOGGED_OUT:
-				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, shard));
-				shutdown();
-				break;
-			default:
-				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unhandled disconnect reason: {}", reason);
-		}
-	}
-
-	private void shutdown() {
-		try {
-			keepAlive.shutdown();
-			getSession().close(1000, "Logout");
-			wsClient.stop();
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: {}", e);
-		}
-	}
-
-	@Override
-	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new InflaterInputStream(new ByteArrayInputStream(payload))));
-		String message = reader.lines().collect(Collectors.joining());
-		this.onWebSocketText(message);
+	enum State {
+		IDLE,
+		CONNECTING,
+		READY,
+		RECONNECTING,
+		RESUMING,
+		DISCONNECTING
 	}
 }

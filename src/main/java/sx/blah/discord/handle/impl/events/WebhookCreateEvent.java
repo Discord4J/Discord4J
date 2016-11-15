@@ -4,7 +4,7 @@ import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IWebhook;
 
 /**
- * This event is dispatched whenever a webhook is created.
+ * This event is dispatched whenever a webhook is created or discovered.
  */
 public class WebhookCreateEvent extends Event {
 

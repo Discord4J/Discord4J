@@ -344,7 +344,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @return The webhooks.
 	 */
-	WebhookList getWebhooks();
+	List<IWebhook> getWebhooks();
 
 	/**
 	 * This gets a webhook by its id.

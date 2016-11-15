@@ -534,4 +534,11 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The webhooks with a matching name.
 	 */
 	List<IWebhook> getWebhooksByName(String name);
+
+	/**
+	 * This returns all the webhooks for this guild.
+	 *
+	 * @return All webhooks for this guild.
+	 */
+	List<IWebhook> getWebhooks();
 }

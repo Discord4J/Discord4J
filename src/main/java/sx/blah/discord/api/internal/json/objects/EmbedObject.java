@@ -56,15 +56,15 @@ public class EmbedObject {
         if (embed.getImage() == null)
             this.image = null;
         else
-            this.image = new ImageObject(embed.getImage(), null, 0, 0);
+            this.image = new ImageObject(embed.getImage().getUrl(), null, embed.getImage().getHeight(), embed.getImage().getWidth());
         if (embed.getThumbnail() == null)
             this.thumbnail = null;
         else
-            this.thumbnail = new ThumbnailObject(embed.getThumbnail(), null, 0, 0);
+            this.thumbnail = new ThumbnailObject(embed.getThumbnail().getUrl(), null, embed.getThumbnail().getHeight(), embed.getThumbnail().getWidth());
         if (embed.getVideo() == null)
             this.video = null;
         else
-            this.video = new VideoObject(embed.getVideo(), 0, 0);
+            this.video = new VideoObject(embed.getVideo().getUrl(), embed.getVideo().getHeight(), embed.getVideo().getWidth());
         if (embed.getEmbedProvider() == null)
             this.provider = null;
         else

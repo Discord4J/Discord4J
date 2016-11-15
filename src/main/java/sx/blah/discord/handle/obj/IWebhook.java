@@ -5,10 +5,6 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
 /**
  * Defines a Discord webhook for a channel.
  */
