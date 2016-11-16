@@ -57,7 +57,6 @@ public class DiscordWS extends WebSocketAdapter {
 		this.gateway = gateway;
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
 		this.state = State.CONNECTING;
-		connect();
 	}
 
 	@Override
@@ -103,7 +102,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketConnect(Session sess) {
-		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket Connected.");
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Websocket Connected.");
 		super.onWebSocketConnect(sess);
 	}
 

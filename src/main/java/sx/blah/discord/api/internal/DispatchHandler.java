@@ -79,6 +79,8 @@ class DispatchHandler {
 	}
 
 	private void ready(ReadyResponse ready) {
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to Discord Gateway v{}. Receiving {} guilds.", ready.v, ready.guilds.length);
+
 		ws.state = DiscordWS.State.READY;
 		ws.hasReceivedReady = true; // Websocket received actual ready event
 		client.getDispatcher().dispatch(new LoginEvent(shard));

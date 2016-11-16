@@ -19,6 +19,7 @@ import sx.blah.discord.util.*;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -270,19 +271,25 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return gateway;
 	}
 
+	private void validateToken() throws DiscordException, RateLimitException {
+		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me");
+	}
+
 	// Sharding delegation
 
 	@Override
-	public void login() {
+	public void login() throws DiscordException, RateLimitException {
 		if (!getShards().isEmpty()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to login client more than once.");
-			return;
+			throw new DiscordException("Attempt to login client more than once.");
 		}
+
+		validateToken();
 
 		String gateway = obtainGateway();
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
 			for (int i = 0; i < shardCount; i++) {
 				final int shardNum = i;
+				final AtomicBoolean doSleep = new AtomicBoolean(i != shardCount - 1);
 				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount}, isDaemon);
 				getShards().add(shardNum, shard);
 				shard.login();
@@ -301,7 +308,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}).build();
 
 		if (!isDaemon) {
-			new Timer().scheduleAtFixedRate(new TimerTask() {
+			new Timer("DiscordClientImpl Login Keepalive").scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
 					if (getShards().stream().anyMatch(IShard::isLoggedIn)) {
