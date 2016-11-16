@@ -740,21 +740,11 @@ public class Guild implements IGuild {
 
 	@Override
 	public IWebhook getWebhookByID(String id) {
-		IWebhook webhook = channels.stream()
+		return channels.stream()
 				.map(IChannel::getWebhooks)
 				.flatMap(List::stream)
-				.filter(hook -> hook.getID().equalsIgnoreCase(id))
+				.filter(hook -> hook.getID().equals(id))
 				.findAny().orElse(null);
-
-		if (webhook == null) {
-			for (IChannel channel : channels) {
-				webhook = channel.getWebhookByID(id);
-				if (webhook != null)
-					return webhook;
-			}
-		}
-
-		return webhook;
 	}
 
 	@Override
@@ -762,7 +752,7 @@ public class Guild implements IGuild {
 		return channels.stream()
 				.map(IChannel::getWebhooks)
 				.flatMap(List::stream)
-				.filter(hook -> hook.getName().equals(name))
+				.filter(hook -> hook.getDefaultName().equals(name))
 				.collect(Collectors.toList());
 	}
 
@@ -786,7 +776,7 @@ public class Guild implements IGuild {
 						DiscordEndpoints.GUILDS + getID() + "/webhooks"),
 						WebhookObject[].class);
 
-				if (response != null)
+				if (response != null) {
 					for (WebhookObject webhookObject : response) {
 						Channel channel = (Channel) getChannelByID(webhookObject.channel_id);
 						if (getWebhookByID(webhookObject.id) == null) {
@@ -797,19 +787,20 @@ public class Guild implements IGuild {
 							IWebhook toUpdate = channel.getWebhookByID(webhookObject.id);
 							IWebhook oldWebhook = toUpdate.copy();
 							toUpdate = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
-							if (!oldWebhook.getName().equals(toUpdate.getName()) || !String.valueOf(oldWebhook.getAvatar()).equals(String.valueOf(toUpdate.getAvatar())))
+							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
 								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, channel));
 
 							oldList.remove(oldWebhook);
 						}
 					}
+				}
 
 				oldList.forEach(webhook -> {
 					((Channel) webhook.getChannel()).removeWebhook(webhook);
 					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
 				});
 			} catch (Exception e) {
-				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Discord4J Internal Exception", e);
+				Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 			}
 		});
 	}

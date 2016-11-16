@@ -163,11 +163,11 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The embedded messages.
 	 */
-	public static List<Embedded> getEmbedsFromJSON(MessageObject json) {
-		List<Embedded> embeds = new ArrayList<>();
+	public static List<Embed> getEmbedsFromJSON(MessageObject json) {
+		List<Embed> embeds = new ArrayList<>();
 		if (json.embeds != null)
 			for (EmbedObject response : json.embeds) {
-				embeds.add(new Embedded(response.title, response.type, response.description, response.url,
+				embeds.add(new Embed(response.title, response.type, response.description, response.url,
 						response.thumbnail, response.provider, convertFromTimestamp(response.timestamp),
 						new Color(response.color), response.footer, response.image, response.video,
 						response.author, response.fields));
@@ -417,18 +417,19 @@ public class DiscordUtils {
 	 * Creates a webhook object from a json response.
 	 *
 	 * @param channel The webhook.
-	 * @param json    The json response.
+	 * @param json The json response.
 	 * @return The message object.
 	 */
 	public static IWebhook getWebhookFromJSON(IChannel channel, WebhookObject json) {
-		if (channel.getWebhooks() != null && channel.getWebhooks().contains(json.id)) {
+		if (channel.getWebhookByID(json.id) != null) {
 			Webhook webhook = (Webhook) channel.getWebhookByID(json.id);
 			webhook.setName(json.name);
 			webhook.setAvatar(json.avatar);
 
 			return webhook;
-		} else
+		} else {
 			return new Webhook(channel.getClient(), json.name, json.id, channel, getUserFromJSON(channel.getShard(), json.user), json.avatar, json.token);
+		}
 	}
 
 	/**

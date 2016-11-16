@@ -75,7 +75,7 @@ public class Message implements IMessage {
 	/**
 	 * The Embeds, if any, on the message.
 	 */
-	protected volatile List<Embedded> embedded;
+	protected volatile List<Embed> embedded;
 
 	/**
 	 * Whether the message mentions everyone.
@@ -131,7 +131,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embedded> embedded, List<IReaction> reactions, String webhookID) {
+				   boolean pinned, List<Embed> embedded, List<IReaction> reactions, String webhookID) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -216,7 +216,7 @@ public class Message implements IMessage {
 	 *
 	 * @param attachments The new attachements.
 	 */
-	public void setEmbedded(List<Embedded> attachments) {
+	public void setEmbedded(List<Embed> attachments) {
 		this.embedded = attachments;
 	}
 
@@ -276,9 +276,9 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public List<IEmbedded> getEmbedded() {
-		List<IEmbedded> interfaces = new ArrayList<>();
-		for(Embedded embed : embedded)
+	public List<IEmbed> getEmbedded() {
+		List<IEmbed> interfaces = new ArrayList<>();
+		for(Embed embed : embedded)
 			interfaces.add(embed);
 		return interfaces;
 	}

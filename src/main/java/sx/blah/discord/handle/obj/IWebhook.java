@@ -46,7 +46,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @return The default name.
 	 */
 
-	String getName();
+	String getDefaultName();
 
 	/**
 	 * Gets the default avatar of this webhook.
@@ -54,7 +54,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @return The default avatar.
 	 */
 
-	String getAvatar();
+	String getDefaultAvatar();
 
 	/**
 	 * Gets the secure token of the webhook.
@@ -73,7 +73,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws MissingPermissionsException
 	 */
 
-	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeDefaultName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the default avatar of the user this webhook posts as.
@@ -83,7 +83,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeDefaultAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Changes the default avatar of the user this webhook posts as.
@@ -94,7 +94,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws MissingPermissionsException
 	 */
 
-	void changeAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeDefaultAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Deletes this webhook.

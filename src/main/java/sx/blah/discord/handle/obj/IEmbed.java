@@ -5,28 +5,28 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Represents a discord embedded object.
+ * Represents a discord embed object.
  */
-public interface IEmbedded {
+public interface IEmbed {
 
     /**
-     * Gets the title of the embedded media.
+     * Gets the title of the embed media.
      *
-     * @return The title of the embedded media. Can be null.
+     * @return The title of the embed media. Can be null.
      */
     String getTitle();
 
     /**
-     * Gets the type of embedded media.
+     * Gets the type of embed media.
      *
-     * @return The type of embedded media as a string.
+     * @return The type of embed media as a string.
      */
     String getType();
 
     /**
-     * Gets a description of the embedded media.
+     * Gets a description of the embed media.
      *
-     * @return A description of the embedded media. Can be null.
+     * @return A description of the embed media. Can be null.
      */
     String getDescription();
 
@@ -51,53 +51,57 @@ public interface IEmbedded {
      */
     Color getColor();
 
+    /**
+     * Gets the footer of the embed media.
+     * 
+     * @return An object containing information about the embed media's footer. Can be null.
+     */
     IEmbedFooter getFooter();
 
     /**
-     * Gets the image in the embedded media.
+     * Gets the image in the embed media.
      *
      * @return An object containing information about the image. Can be null.
      */
     IEmbedImage getImage();
 
     /**
-     * Gets the thumbnail of the embedded media.
+     * Gets the thumbnail of the embed media.
      *
-     * @return An object containing information about the embedded media's thumbnail. Can be null.
+     * @return An object containing information about the embed media's thumbnail. Can be null.
      */
     IEmbedImage getThumbnail();
 
     /**
-     * Gets the video url for the embedded media.
+     * Gets the video url for the embed media.
      *
      * @return A url pointing to the video. Can be null.
      */
     IEmbedVideo getVideo();
 
     /**
-     * Gets the provider of the embedded media.
+     * Gets the provider of the embed media.
      *
-     * @return An object containing information about the embedded media's provider. <b>Can Be Null!</b>
+     * @return An object containing information about the embed media's provider. <b>Can Be Null!</b>
      */
     IEmbedProvider getEmbedProvider();
 
     /**
-     * Gets the author for this embedded media.
+     * Gets the author for this embed media.
      *
-     * @return An object containing information about the author for the embedded media. Can be null.
+     * @return An object containing information about the author for the embed media. Can be null.
      */
     IEmbedAuthor getAuthor();
 
     /**
-     * Gets the list of embedded fields for this embedded media.
+     * Gets the list of embed fields for this embed media.
      *
      * @return A list containing objects with information about fields. Can be null.
      */
-    List<IEmbedField> getEmbeddedFields();
-
+    List<IEmbedField> getEmbedFields();
 
     /**
-     * Represents an embedded image object.
+     * Represents an embed image object.
      */
     interface IEmbedImage {
         /**
@@ -123,7 +127,7 @@ public interface IEmbedded {
     }
 
     /**
-     * Represents an embedded video object.
+     * Represents an embed video object.
      */
     interface IEmbedVideo {
         /**
@@ -149,7 +153,7 @@ public interface IEmbedded {
     }
 
     /**
-     * Represents an embedded footer object.
+     * Represents an embed footer object.
      */
     interface IEmbedFooter {
         /**
@@ -168,7 +172,7 @@ public interface IEmbedded {
     }
 
     /**
-     * Represents the author for an embedded object.
+     * Represents the author for an embed object.
      */
     interface IEmbedAuthor {
         /**
@@ -194,7 +198,7 @@ public interface IEmbedded {
     }
 
     /**
-     * Represents a field in the embedded object.
+     * Represents a field in the embed object.
      */
     interface IEmbedField {
         /**
@@ -220,7 +224,7 @@ public interface IEmbedded {
     }
 
     /**
-     * Represents a site that provides media which is embedded in chat. Eg. Youtube, Imgur.
+     * Represents a site that provides media which is embed in chat. Eg. Youtube, Imgur.
      */
     interface IEmbedProvider {
         /**

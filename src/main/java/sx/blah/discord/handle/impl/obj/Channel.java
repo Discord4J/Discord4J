@@ -537,7 +537,7 @@ public class Channel implements IChannel {
 	@Override
 	public List<IWebhook> getWebhooksByName(String name) {
 		return webhooks.stream()
-				.filter(w -> w.getName().equals(name))
+				.filter(w -> w.getDefaultName().equals(name))
 				.collect(Collectors.toList());
 	}
 
@@ -593,8 +593,7 @@ public class Channel implements IChannel {
 	 * @param webhook The webhook.
 	 */
 	public void removeWebhook(IWebhook webhook) {
-		if (this.webhooks != null && this.webhooks.contains(webhook))
-			this.webhooks.remove(webhook);
+		this.webhooks.remove(webhook);
 	}
 
 	public void loadWebhooks() {
@@ -609,7 +608,7 @@ public class Channel implements IChannel {
 						DiscordEndpoints.CHANNELS + getID() + "/webhooks"),
 						WebhookObject[].class);
 
-				if (response != null)
+				if (response != null) {
 					for (WebhookObject webhookObject : response) {
 						if (getWebhookByID(webhookObject.id) == null) {
 							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(this, webhookObject);
@@ -619,19 +618,20 @@ public class Channel implements IChannel {
 							IWebhook toUpdate = getWebhookByID(webhookObject.id);
 							IWebhook oldWebhook = toUpdate.copy();
 							toUpdate = DiscordUtils.getWebhookFromJSON(this, webhookObject);
-							if (!oldWebhook.getName().equals(toUpdate.getName()) || !String.valueOf(oldWebhook.getAvatar()).equals(String.valueOf(toUpdate.getAvatar())))
+							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
 								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, this));
 
 							oldList.remove(oldWebhook);
 						}
 					}
+				}
 
 				oldList.forEach(webhook -> {
 					removeWebhook(webhook);
 					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
 				});
 			} catch (Exception e) {
-				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Discord4J Internal Exception", e);
+				Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 			}
 		});
 	}

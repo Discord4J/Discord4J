@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.IEmbedded;
+import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.Color;
 import java.time.LocalDateTime;
@@ -9,73 +9,73 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Embedded implements IEmbedded {
+public class Embed implements IEmbed {
 	/**
-	 * The title of the embedded media.
+	 * The title of the embed.
 	 */
 	protected final String title;
 
 	/**
-	 * The type of embedded media.
+	 * The type of embed.
 	 */
 	protected final String type;
 
 	/**
-	 * The description of the embedded media.
+	 * The description of the embed.
 	 */
 	protected final String description;
 
 	/**
-	 * The download link for the embedded media.
+	 * The download link for the embed.
 	 */
 	protected final String url;
 
 	/**
-	 * The object containing the image for the thumbnail for the embedded media.
+	 * The object containing the image for the thumbnail for the embed.
 	 */
 	protected final IEmbedImage thumbnail;
 
 	/**
-	 * The object containing information about the provider of the embedded media.
+	 * The object containing information about the provider of the embed.
 	 */
 	protected final IEmbedProvider provider;
 
 	/**
-	 * The timestamp for the embedded media.
+	 * The timestamp for the embed.
 	 */
 	protected final LocalDateTime timestamp;
 
 	/**
-	 * The colored strip for the embedded media.
+	 * The colored strip for the embed.
 	 */
 	protected final Color color;
 
 	/**
-	 * The object containing information about the footer of the embedded media.
+	 * The object containing information about the footer of the embed.
 	 */
 	protected final IEmbedFooter footer;
 
 	/**
-	 * The object containing information about the image of the embedded media.
+	 * The object containing information about the image of the embed.
 	 */
 	protected final IEmbedImage image;
 
 	/**
-	 * The object containing information about the video of the embedded media.
+	 * The object containing information about the video of the embed.
 	 */
 	protected final IEmbedVideo video;
 
 	/**
-	 * The object containing information about the author for the embedded media.
+	 * The object containing information about the author for the embed.
 	 */
 	protected final IEmbedAuthor author;
 
 	/**
-	 * A lost of objects containing information about fields in the embedded media
+	 * A list of objects containing information about fields in the embed
 	 */
 	protected final List<IEmbedField> embedFields;
 
-	public Embedded(String title, String type, String description, String url, EmbedObject.ThumbnailObject thumbnail, EmbedObject.ProviderObject provider, LocalDateTime timestamp, Color color, EmbedObject.FooterObject footer, EmbedObject.ImageObject image, EmbedObject.VideoObject video, EmbedObject.AuthorObject author, EmbedObject.EmbedFieldObject[] embedFields) {
+	public Embed(String title, String type, String description, String url, EmbedObject.ThumbnailObject thumbnail, EmbedObject.ProviderObject provider, LocalDateTime timestamp, Color color, EmbedObject.FooterObject footer, EmbedObject.ImageObject image, EmbedObject.VideoObject video, EmbedObject.AuthorObject author, EmbedObject.EmbedFieldObject[] embedFields) {
 		this.title = title;
 		this.type = type;
 		this.description = description;
@@ -109,9 +109,9 @@ public class Embedded implements IEmbedded {
 		else
 			this.author = new EmbedAuthor(author.name, author.url, author.icon_url);
 
-		if (embedFields == null || embedFields.length == 0)
+		if (embedFields == null || embedFields.length == 0) {
 			this.embedFields = null;
-		else {
+		} else {
 			this.embedFields = new CopyOnWriteArrayList<>();
 
 			for (EmbedObject.EmbedFieldObject embedField : embedFields)
@@ -119,7 +119,7 @@ public class Embedded implements IEmbedded {
 		}
 	}
 
-	public Embedded(String title, String type, String description, String url, String thumbnailUrl, IEmbedProvider provider, LocalDateTime timestamp, Color color, IEmbedFooter footer, String imageUrl, String videoUrl, IEmbedAuthor author, IEmbedField[] embedFields) {
+	public Embed(String title, String type, String description, String url, String thumbnailUrl, IEmbedProvider provider, LocalDateTime timestamp, Color color, IEmbedFooter footer, String imageUrl, String videoUrl, IEmbedAuthor author, IEmbedField[] embedFields) {
 		this.title = title;
 		this.type = type;
 		this.description = description;
@@ -133,9 +133,9 @@ public class Embedded implements IEmbedded {
 		this.video = null;
 		this.author = author;
 
-		if (embedFields == null || embedFields.length == 0)
+		if (embedFields == null || embedFields.length == 0) {
 			this.embedFields = null;
-		else {
+		} else {
 			this.embedFields = new CopyOnWriteArrayList<>();
 
 			Collections.addAll(this.embedFields, embedFields);
@@ -143,27 +143,27 @@ public class Embedded implements IEmbedded {
 	}
 
 	/**
-	 * Gets the title of the embedded media.
+	 * Gets the title of the embed.
 	 *
-	 * @return The title of the embedded media. Can be null.
+	 * @return The title of the embed. Can be null.
 	 */
 	public String getTitle() {
 		return title;
 	}
 
 	/**
-	 * Gets the type of embedded media.
+	 * Gets the type of embed.
 	 *
-	 * @return The type of embedded media as a string.
+	 * @return The type of embed as a string.
 	 */
 	public String getType() {
 		return type;
 	}
 
 	/**
-	 * Gets a description of the embedded media.
+	 * Gets a description of the embed.
 	 *
-	 * @return A description of the embedded media. Can be null.
+	 * @return A description of the embed. Can be null.
 	 */
 	public String getDescription() {
 		return description;
@@ -199,9 +199,9 @@ public class Embedded implements IEmbedded {
 	}
 
 	/**
-	 * Gets the thumbnail of the embedded media.
+	 * Gets the thumbnail of the embed.
 	 *
-	 * @return An object containing information about the embedded media's thumbnail. Can be null.
+	 * @return An object containing information about the embed's thumbnail. Can be null.
 	 */
 	public IEmbedImage getThumbnail() {
 		return thumbnail;
@@ -213,9 +213,9 @@ public class Embedded implements IEmbedded {
 	}
 
 	/**
-	 * Gets the provider of the embedded media.
+	 * Gets the provider of the embed.
 	 *
-	 * @return An object containing information about the embedded media's provider. <b>Can Be Null!</b>
+	 * @return An object containing information about the embed's provider. <b>Can Be Null!</b>
 	 */
 	public IEmbedProvider getEmbedProvider() {
 		return provider;
@@ -227,7 +227,7 @@ public class Embedded implements IEmbedded {
 	}
 
 	@Override
-	public List<IEmbedField> getEmbeddedFields() {
+	public List<IEmbedField> getEmbedFields() {
 		return embedFields;
 	}
 

@@ -74,12 +74,12 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public String getName() {
+	public String getDefaultName() {
 		return name;
 	}
 
 	@Override
-	public String getAvatar() {
+	public String getDefaultAvatar() {
 		return avatar;
 	}
 
@@ -107,17 +107,17 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.of(name), Optional.empty());
 	}
 
 	@Override
-	public void changeAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.of(avatar));
 	}
 
 	@Override
-	public void changeAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
 		edit(Optional.empty(), Optional.of(avatar.getData()));
 	}
 

@@ -79,7 +79,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @return The attachments.
 	 */
-	List<IEmbedded> getEmbedded();
+	List<IEmbed> getEmbedded();
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message

@@ -1,6 +1,6 @@
 package sx.blah.discord.api.internal.json.objects;
 
-import sx.blah.discord.handle.obj.IEmbedded;
+import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.*;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ public class EmbedObject {
         this.fields = fields;
     }
 
-    public EmbedObject(IEmbedded embed) {
+    public EmbedObject(IEmbed embed) {
         this.title = embed.getTitle();
         this.type = embed.getType();
         this.description = embed.getDescription();
@@ -73,10 +73,10 @@ public class EmbedObject {
             this.author = null;
         else
             this.author = new AuthorObject(embed.getAuthor().getName(), embed.getAuthor().getUrl(), embed.getAuthor().getIconUrl(), null);
-        if (embed.getEmbeddedFields() == null)
+        if (embed.getEmbedFields() == null)
             this.fields = null;
         else
-            this.fields = embed.getEmbeddedFields()
+            this.fields = embed.getEmbedFields()
                     .stream()
                     .map(field -> new EmbedFieldObject(field.getName(), field.getValue(), field.isInline()))
                     .collect(Collectors.toList())

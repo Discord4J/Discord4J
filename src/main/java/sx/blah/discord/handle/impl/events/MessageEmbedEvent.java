@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.api.events.Event;
-import sx.blah.discord.handle.obj.IEmbedded;
+import sx.blah.discord.handle.obj.IEmbed;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
@@ -14,12 +14,12 @@ public class MessageEmbedEvent extends Event {
 
 	private final IMessage message;
 
-	private final List<IEmbedded> newEmbed;
+	private final List<IEmbed> newEmbed;
 
-	public MessageEmbedEvent (IMessage message, List<IEmbedded> oldEmbed) {
+	public MessageEmbedEvent (IMessage message, List<IEmbed> oldEmbed) {
 		this.message = message;
-		List<IEmbedded> tempArray = new ArrayList<>();
-		for (IEmbedded attachment : message.getEmbedded()) {
+		List<IEmbed> tempArray = new ArrayList<>();
+		for (IEmbed attachment : message.getEmbedded()) {
 			if (!oldEmbed.contains(attachment)) {
 				tempArray.add(attachment);
 			}
@@ -41,7 +41,7 @@ public class MessageEmbedEvent extends Event {
 	 *
 	 * @return An array of the new embedded media.
 	 */
-	public List<IEmbedded> getNewEmbed() {
+	public List<IEmbed> getNewEmbed() {
 		return newEmbed;
 	}
 
