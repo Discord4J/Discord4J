@@ -11,19 +11,21 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.objects.ChannelObject;
-import sx.blah.discord.api.internal.json.objects.MessageObject;
-import sx.blah.discord.api.internal.json.objects.OverwriteObject;
+import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
+import sx.blah.discord.api.internal.json.requests.WebhookCreateRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
+import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
+import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
-import sx.blah.discord.api.internal.json.objects.ExtendedInviteObject;
 import sx.blah.discord.util.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -85,6 +87,11 @@ public class Channel implements IChannel {
 	protected final Map<String, PermissionOverride> roleOverrides;
 
 	/**
+	 * The webhooks for this channel.
+	 */
+	protected final List<IWebhook> webhooks;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
@@ -103,6 +110,7 @@ public class Channel implements IChannel {
 		} else {
 			this.messages = null;
 		}
+		this.webhooks = new CopyOnWriteArrayList<>();
 	}
 
 
@@ -512,6 +520,120 @@ public class Channel implements IChannel {
 			throw new DiscordException("Message already unpinned!");
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID());
+	}
+
+	@Override
+	public List<IWebhook> getWebhooks() {
+		return webhooks;
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		return webhooks.stream()
+				.filter(w -> w.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		return webhooks.stream()
+				.filter(w -> w.getName().equals(name))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		return createWebhook(name, Image.defaultAvatar());
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		return createWebhook(name, avatar.getData());
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
+
+		if (!client.isReady()) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create webhook before bot is ready!");
+			return null;
+		}
+
+		if (name == null || name.length() < 2 || name.length() > 32)
+			throw new DiscordException("Webhook name can only be between 2 and 32 characters!");
+		try {
+			WebhookObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/webhooks",
+					new StringEntity(DiscordUtils.GSON.toJson(new WebhookCreateRequest(name, avatar)))),
+					WebhookObject.class);
+
+			IWebhook webhook = DiscordUtils.getWebhookFromJSON(this, response);
+			addWebhook(webhook);
+
+			return webhook;
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	/**
+	 * CACHES a webhook to the channel.
+	 *
+	 * @param webhook The webhook.
+	 */
+	public void addWebhook(IWebhook webhook) {
+		if (!this.webhooks.contains(webhook))
+			this.webhooks.add(webhook);
+	}
+
+	/**
+	 * Removes a webhook from the CACHE of the channel.
+	 *
+	 * @param webhook The webhook.
+	 */
+	public void removeWebhook(IWebhook webhook) {
+		if (this.webhooks != null && this.webhooks.contains(webhook))
+			this.webhooks.remove(webhook);
+	}
+
+	public void loadWebhooks() {
+		RequestBuffer.request(() -> {
+			try {
+				List<IWebhook> oldList = getWebhooks()
+						.stream()
+						.map(IWebhook::copy)
+						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
+				WebhookObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+						DiscordEndpoints.CHANNELS + getID() + "/webhooks"),
+						WebhookObject[].class);
+
+				if (response != null)
+					for (WebhookObject webhookObject : response) {
+						if (getWebhookByID(webhookObject.id) == null) {
+							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(this, webhookObject);
+							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
+							addWebhook(newWebhook);
+						} else {
+							IWebhook toUpdate = getWebhookByID(webhookObject.id);
+							IWebhook oldWebhook = toUpdate.copy();
+							toUpdate = DiscordUtils.getWebhookFromJSON(this, webhookObject);
+							if (!oldWebhook.getName().equals(toUpdate.getName()) || !String.valueOf(oldWebhook.getAvatar()).equals(String.valueOf(toUpdate.getAvatar())))
+								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, this));
+
+							oldList.remove(oldWebhook);
+						}
+					}
+
+				oldList.forEach(webhook -> {
+					removeWebhook(webhook);
+					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
+				});
+			} catch (Exception e) {
+				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Discord4J Internal Exception", e);
+			}
+		});
 	}
 
 	@Override

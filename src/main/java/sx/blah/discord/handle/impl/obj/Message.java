@@ -119,6 +119,11 @@ public class Message implements IMessage {
 	protected volatile List<IReaction> reactions;
 
 	/**
+	 * The ID of the webhook that sent this message
+	 */
+	protected final String webhookID;
+
+	/**
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
@@ -126,7 +131,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embedded> embedded, List<IReaction> reactions) {
+				   boolean pinned, List<Embedded> embedded, List<IReaction> reactions, String webhookID) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -142,6 +147,7 @@ public class Message implements IMessage {
 		this.embedded = embedded;
 		this.everyoneMentionIsValid = mentionsEveryone;
 		this.reactions = reactions;
+		this.webhookID = webhookID;
 
 		setChannelMentions();
 	}
@@ -390,7 +396,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embedded, reactions);
+				mentions, roleMentions, attachments, isPinned, embedded, reactions, webhookID);
 	}
 
 	@Override
@@ -526,6 +532,11 @@ public class Message implements IMessage {
 	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
 			DiscordException {
 		removeReaction(client.getOurUser(), reaction);
+	}
+
+	@Override
+	public String getWebhookID(){
+		return webhookID;
 	}
 
 	@Override

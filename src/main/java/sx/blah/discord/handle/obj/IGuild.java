@@ -518,4 +518,27 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The emoji.
 	 */
 	IEmoji getEmojiByName(String name);
+
+	/**
+	 * This gets a webhook by its id.
+	 *
+	 * @param id The webhook id.
+	 * @return The webhook or null if not found.
+	 */
+	IWebhook getWebhookByID(String id);
+
+	/**
+	 * This finds all the webhooks which have the same name as the provided one.
+	 *
+	 * @param name The name to search for.
+	 * @return The webhooks with a matching name.
+	 */
+	List<IWebhook> getWebhooksByName(String name);
+
+	/**
+	 * This returns all the webhooks for this guild.
+	 *
+	 * @return All webhooks for this guild.
+	 */
+	List<IWebhook> getWebhooks();
 }
