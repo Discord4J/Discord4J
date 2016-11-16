@@ -170,6 +170,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return getClient().getChannelByID(id) != this;
+		return false;
 	}
 }
