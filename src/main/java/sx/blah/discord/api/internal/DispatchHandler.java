@@ -40,7 +40,7 @@ class DispatchHandler {
 		String type = event.get("t").getAsString();
 		JsonElement json = event.get("d");
 		switch (type) {
-			case "RESUMED": Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]); break;
+			case "RESUMED": resumed(); break;
 			case "READY": ready(GSON.fromJson(json, ReadyResponse.class)); break;
 			case "MESSAGE_CREATE": messageCreate(GSON.fromJson(json, MessageObject.class)); break;
 			case "TYPING_START": typingStart(GSON.fromJson(json, TypingEventResponse.class)); break;
@@ -118,6 +118,11 @@ class DispatchHandler {
 			client.getDispatcher().dispatch(new ShardReadyEvent(shard)); // All information for this shard has been received
 			return true;
 		}).execute();
+	}
+
+	private void resumed() {
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]);
+		client.getDispatcher().dispatch(new ResumedEvent(shard));
 	}
 
 	private void messageCreate(MessageObject json) {
