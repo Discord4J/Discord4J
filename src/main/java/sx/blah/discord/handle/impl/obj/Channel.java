@@ -515,6 +515,11 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public boolean isDeleted() {
+		return getGuild().getChannelByID(id) != this;
+	}
+
+	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 		channel.isTyping.set(isTyping.get());

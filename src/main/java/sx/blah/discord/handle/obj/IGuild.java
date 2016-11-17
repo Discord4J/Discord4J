@@ -472,6 +472,13 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	int pruneUsers(int days) throws DiscordException, RateLimitException;
 
 	/**
+	 * Checks to see if the this guild is deleted.
+	 *
+	 * @return True if this guild is deleted.
+	 */
+	boolean isDeleted();
+
+	/**
 	 * Gets the {@link AudioManager} instance for this guild.
 	 *
 	 * @return The audio manager for this guild.

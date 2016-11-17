@@ -122,7 +122,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
-	 * 
+	 *
 	 * @param content The content of the attached message.
 	 * @param tts Whether the message should use tts or not.
 	 * @param file The input stream to upload.
@@ -341,6 +341,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 */
 	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
+	 * Checks to see if the this channel is deleted.
+	 *
+	 * @return True if this channel is deleted.
+	 */
+	boolean isDeleted();
 
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.

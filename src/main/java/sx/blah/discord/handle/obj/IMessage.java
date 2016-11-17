@@ -97,7 +97,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @param content The new content for the message to contain.
 	 * @return The new message (this).
-	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
@@ -163,6 +162,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 
 	/**
 	 * Gets a reaction by the IEmoji object.
+	 *
 	 * @param emoji The emoji
 	 * @return The reaction, or null if there aren't any that match
 	 */
@@ -199,7 +199,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Adds your reaction as a custom emoji
 	 *
-	 * @param emoji   The custom emoji
+	 * @param emoji The custom emoji
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
@@ -210,7 +210,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;:name:id&gt;)
 	 *
-	 * @param emoji   The string emoji
+	 * @param emoji The string emoji
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
@@ -221,8 +221,8 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Removes a reaction for a user.
 	 *
-	 * @[param user The user
 	 * @param reaction The reaction to remove from
+	 * @param user The user
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
@@ -238,6 +238,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws DiscordException
 	 */
 	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Checks to see is this message deleted.
+	 *
+	 * @return True if this message is deleted
+	 */
+	boolean isDeleted();
 
 	/**
 	 * Represents an attachment included in the message.
@@ -307,6 +314,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 			return url;
 		}
 	}
+
 	interface IEmbedded {
 
 		/**
