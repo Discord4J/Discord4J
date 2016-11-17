@@ -88,13 +88,12 @@ public class Webhook implements IWebhook {
 		return token;
 	}
 
-	private void edit(Optional<String> name, Optional<String> avatar) throws MissingPermissionsException, RateLimitException, DiscordException {
+	private void edit(String name, String avatar) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
 
 		try {
 			WebhookObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.WEBHOOKS + id,
-					new StringEntity(DiscordUtils.GSON.toJson(new WebhookEditRequest(name.orElse(this.name),
-							avatar == null ? this.avatar : (avatar.isPresent() ? avatar.get() : null))))),
+					new StringEntity(DiscordUtils.GSON.toJson(new WebhookEditRequest(name, avatar)))),
 					WebhookObject.class);
 
 			IWebhook oldWebhook = copy();
@@ -108,17 +107,17 @@ public class Webhook implements IWebhook {
 
 	@Override
 	public void changeDefaultName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.of(name), Optional.empty());
+		edit(name, null);
 	}
 
 	@Override
 	public void changeDefaultAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(avatar));
+		edit(this.name, avatar);
 	}
 
 	@Override
 	public void changeDefaultAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(avatar.getData()));
+		edit(this.name, avatar.getData());
 	}
 
 	/**

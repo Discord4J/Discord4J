@@ -11,13 +11,6 @@ import sx.blah.discord.util.RateLimitException;
 public interface IWebhook extends IDiscordObject<IWebhook> {
 
 	/**
-	 * Gets the ID of this webhook.
-	 *
-	 * @return The webhook ID.
-	 */
-	String getID();
-
-	/**
 	 * Gets the guild/server this webhook belongs to.
 	 *
 	 * @return The guild.

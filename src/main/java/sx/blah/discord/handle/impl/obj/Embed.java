@@ -142,38 +142,22 @@ public class Embed implements IEmbed {
 		}
 	}
 
-	/**
-	 * Gets the title of the embed.
-	 *
-	 * @return The title of the embed. Can be null.
-	 */
+	@Override
 	public String getTitle() {
 		return title;
 	}
 
-	/**
-	 * Gets the type of embed.
-	 *
-	 * @return The type of embed as a string.
-	 */
+	@Override
 	public String getType() {
 		return type;
 	}
 
-	/**
-	 * Gets a description of the embed.
-	 *
-	 * @return A description of the embed. Can be null.
-	 */
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
-	/**
-	 * Gets the direct link to the media.
-	 *
-	 * @return The download link for the attachment.
-	 */
+	@Override
 	public String getUrl() {
 		return url;
 	}
@@ -198,11 +182,7 @@ public class Embed implements IEmbed {
 		return image;
 	}
 
-	/**
-	 * Gets the thumbnail of the embed.
-	 *
-	 * @return An object containing information about the embed's thumbnail. Can be null.
-	 */
+	@Override
 	public IEmbedImage getThumbnail() {
 		return thumbnail;
 	}
@@ -212,11 +192,7 @@ public class Embed implements IEmbed {
 		return video;
 	}
 
-	/**
-	 * Gets the provider of the embed.
-	 *
-	 * @return An object containing information about the embed's provider. <b>Can Be Null!</b>
-	 */
+	@Override
 	public IEmbedProvider getEmbedProvider() {
 		return provider;
 	}
@@ -231,7 +207,7 @@ public class Embed implements IEmbed {
 		return embedFields;
 	}
 
-	public static class EmbedImage implements IEmbedImage{
+	public static class EmbedImage implements IEmbedImage {
 
 		protected String url;
 		protected int height;
@@ -259,7 +235,7 @@ public class Embed implements IEmbed {
 		}
 	}
 
-	public static class EmbedVideo implements IEmbedVideo{
+	public static class EmbedVideo implements IEmbedVideo {
 
 		protected String url;
 		protected int height;
@@ -332,6 +308,12 @@ public class Embed implements IEmbed {
 		protected String url;
 		protected String icon_url;
 
+		public EmbedAuthor(String name, String url, String icon_url) {
+			this.name = name;
+			this.url = url;
+			this.icon_url = icon_url;
+		}
+
 		public String getName() {
 			return name;
 		}
@@ -342,12 +324,6 @@ public class Embed implements IEmbed {
 
 		public String getIconUrl() {
 			return icon_url;
-		}
-
-		public EmbedAuthor(String name, String url, String icon_url) {
-			this.name = name;
-			this.url = url;
-			this.icon_url = icon_url;
 		}
 	}
 
