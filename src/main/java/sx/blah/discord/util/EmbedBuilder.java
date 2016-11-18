@@ -133,7 +133,7 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder image(String imageUrl) {
-		embed.image = new EmbedObject.ImageObject(null, null, 0, 0);
+		embed.image = new EmbedObject.ImageObject(imageUrl, null, 0, 0);
 		return this;
 	}
 
