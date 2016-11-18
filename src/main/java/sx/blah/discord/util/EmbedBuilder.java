@@ -37,7 +37,7 @@ public class EmbedBuilder {
 	 * @param title The title
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder title(String title) {
+	public EmbedBuilder withTitle(String title) {
 		embed.title = title;
 		return this;
 	}
@@ -47,7 +47,7 @@ public class EmbedBuilder {
 	 * @param desc The description
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder description(String desc) {
+	public EmbedBuilder withDescription(String desc) {
 		embed.description = desc;
 		return this;
 	}
@@ -57,8 +57,8 @@ public class EmbedBuilder {
 	 * @param desc The description
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder desc(String desc) {
-		return description(desc);
+	public EmbedBuilder withDesc(String desc) {
+		return withDescription(desc);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class EmbedBuilder {
 	 * @param ldt The local date-time
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder timestamp(LocalDateTime ldt) {
+	public EmbedBuilder withTimestamp(LocalDateTime ldt) {
 		embed.timestamp = ldt.atZone(ZoneId.of("Z")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		return this;
 	}
@@ -76,8 +76,8 @@ public class EmbedBuilder {
 	 * @param color The color
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder color(Color color) {
-		return color(((color.getRed() & 0xFF) << 16) | ((color.getGreen() & 0xFF) << 8) | (color.getBlue() & 0xFF));
+	public EmbedBuilder withColor(Color color) {
+		return withColor(((color.getRed() & 0xFF) << 16) | ((color.getGreen() & 0xFF) << 8) | (color.getBlue() & 0xFF));
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class EmbedBuilder {
 	 * @param color The RGB int
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder color(int color) {
+	public EmbedBuilder withColor(int color) {
 		embed.color = color;
 		return this;
 	}
@@ -97,8 +97,8 @@ public class EmbedBuilder {
 	 * @param b The blue byte
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder color(int r, int g, int b) {
-		return color(new Color(r, g, b));
+	public EmbedBuilder withColor(int r, int g, int b) {
+		return withColor(new Color(r, g, b));
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class EmbedBuilder {
 	 * @param footer The text
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder footerText(String footer) {
+	public EmbedBuilder withFooterText(String footer) {
 		if (embed.footer == null)
 			embed.footer = new EmbedObject.FooterObject(null, null, null);
 
@@ -119,7 +119,7 @@ public class EmbedBuilder {
 	 * @param iconUrl The icon URL
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder footerIcon(String iconUrl) {
+	public EmbedBuilder withFooterIcon(String iconUrl) {
 		if (embed.footer == null)
 			embed.footer = new EmbedObject.FooterObject(null, null, null);
 
@@ -132,7 +132,7 @@ public class EmbedBuilder {
 	 * @param imageUrl The image URL
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder image(String imageUrl) {
+	public EmbedBuilder withImage(String imageUrl) {
 		embed.image = new EmbedObject.ImageObject(imageUrl, null, 0, 0);
 		return this;
 	}
@@ -142,7 +142,7 @@ public class EmbedBuilder {
 	 * @param url The thumbnail URL
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder thumbnail(String url) {
+	public EmbedBuilder withThumbnail(String url) {
 		embed.thumbnail = new EmbedObject.ThumbnailObject(url, null, 0, 0);
 		return this;
 	}
@@ -152,7 +152,7 @@ public class EmbedBuilder {
 	 * @param url The icon URL
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder authorIcon(String url) {
+	public EmbedBuilder withAuthorIcon(String url) {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
 
@@ -165,7 +165,7 @@ public class EmbedBuilder {
 	 * @param name The name
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder authorName(String name) {
+	public EmbedBuilder withAuthorName(String name) {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
 
@@ -178,7 +178,7 @@ public class EmbedBuilder {
 	 * @param url The URL
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder authorUrl(String url) {
+	public EmbedBuilder withAuthorUrl(String url) {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
 
@@ -193,7 +193,7 @@ public class EmbedBuilder {
 	 * @param inline If it should be inline (side-by-side)
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder addField(String title, String content, boolean inline) {
+	public EmbedBuilder appendField(String title, String content, boolean inline) {
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
 	}
