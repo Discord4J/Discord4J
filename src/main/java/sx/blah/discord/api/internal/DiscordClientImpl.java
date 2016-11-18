@@ -5,6 +5,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -468,6 +469,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IInvite getInviteForCode(String code) {
-		return null;
+		if (!isReady()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite before bot is ready!");
+			return null;
+		}
+
+		InviteObject invite;
+		try {
+			invite = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
+		} catch (DiscordException | RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite {}", e);
+			return null;
+		}
+
+		return DiscordUtils.getInviteFromJSON(this, invite);
 	}
 }

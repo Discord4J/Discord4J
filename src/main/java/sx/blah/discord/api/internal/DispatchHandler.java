@@ -10,9 +10,7 @@ import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.RequestBuilder;
+import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -156,17 +154,10 @@ class DispatchHandler {
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
-				List<String> invites = DiscordUtils.getInviteCodesFromMessage(json.content);
-				if (invites.size() > 0) {
-					String[] inviteCodes = invites.toArray(new String[invites.size()]);
-					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Received invite codes \"{}\"", (Object) inviteCodes);
-					List<IInvite> inviteObjects = new ArrayList<>();
-					for (int i = 0; i < inviteCodes.length; i++) {
-						IInvite invite = client.getInviteForCode(inviteCodes[i]);
-						if (invite != null)
-							inviteObjects.add(invite);
-					}
-					client.dispatcher.dispatch(new InviteReceivedEvent(inviteObjects.toArray(new IInvite[inviteObjects.size()]), message));
+				List<String> inviteCodes = DiscordUtils.getInviteCodesFromMessage(json.content);
+				if (!inviteCodes.isEmpty()) {
+					List<IInvite> invites = inviteCodes.stream().map(s -> client.getInviteForCode(s)).collect(Collectors.toList());
+					client.getDispatcher().dispatch(new InviteReceivedEvent(invites.toArray(new IInvite[invites.size()]), message));
 				}
 
 				if (mentioned) {
