@@ -7,6 +7,7 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
@@ -127,10 +128,6 @@ public class Message implements IMessage {
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
-	/**
-	 * Cached value of isDeleted()
-	 */
-	private volatile boolean deleted = false;
 
 	/**
 	 * Cached value of isDeleted()
@@ -285,26 +282,32 @@ public class Message implements IMessage {
 	}
 
 	@Override
-<<<<<<< HEAD
 	public List<IEmbed> getEmbedded() {
 		List<IEmbed> interfaces = new ArrayList<>();
-		for(Embed embed : embedded)
-=======
-	public List<IEmbedded> getEmbedded() {
-		List<IEmbedded> interfaces = new ArrayList<>();
-		for (Embedded embed : embedded)
->>>>>>> austinv11/websocket-rewrite
+		for (Embed embed : embedded)
 			interfaces.add(embed);
 		return interfaces;
 	}
 
 	@Override
 	public void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
-		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
+		reply(content, null);
+	}
+
+	@Override
+	public void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
 	}
 
 	@Override
 	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
+		return edit(content, null);
+	}
+
+	@Override
+	public IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
 		if (isDeleted())
@@ -313,7 +316,7 @@ public class Message implements IMessage {
 //			content = DiscordUtils.escapeString(content);
 
 			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, false)), "UTF-8")),
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, embed, false)), "UTF-8")),
 					MessageObject.class);
 
 			IMessage oldMessage = copy();
@@ -552,19 +555,15 @@ public class Message implements IMessage {
 	}
 
 	@Override
-<<<<<<< HEAD
 	public String getWebhookID(){
 		return webhookID;
 	}
 
 	@Override
-=======
->>>>>>> austinv11/websocket-rewrite
 	public boolean isDeleted() {
 		return deleted;
 	}
 
-<<<<<<< HEAD
 	/**
 	 * Sets the CACHED deleted value.
 	 *
@@ -574,8 +573,6 @@ public class Message implements IMessage {
 		this.deleted = deleted;
 	}
 
-=======
->>>>>>> austinv11/websocket-rewrite
 	@Override
 	public IDiscordClient getClient() {
 		return client;
@@ -599,14 +596,5 @@ public class Message implements IMessage {
 	@Override
 	public boolean equals(Object other) {
 		return other != null && this.getClass().isAssignableFrom(other.getClass()) && ((IMessage) other).getID().equals(getID());
-	}
-
-	/**
-	 * Sets the CACHED deleted value.
-	 *
-	 * @param deleted The value to assign into the cache.
-	 */
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
 	}
 }

@@ -1,6 +1,8 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
@@ -93,6 +95,20 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
+	 * Adds an "@mention," to the author of the referenced Message
+	 * object before your content.
+	 *
+	 * @param content Message content to send.
+	 * @param embed The embed object
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
 	 *
 	 * @param content The new content for the message to contain.
@@ -101,6 +117,19 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws DiscordException
 	 */
 	IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Edits the message with an embed object. NOTE: Discord only supports editing YOUR OWN messages!
+	 *
+	 * @param content The new content for the message to contain.
+	 * @param embed The embed object
+	 * @return The new message (this).
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Returns whether this message mentions everyone through @everyone.
@@ -247,7 +276,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	boolean isDeleted();
 
 	/**
-<<<<<<< HEAD
 	 * Gets the ID of the webhook that sent this message. May be null.
 	 *
 	 * @return The webhook ID.
@@ -255,8 +283,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	String getWebhookID();
 
 	/**
-=======
->>>>>>> austinv11/websocket-rewrite
 	 * Represents an attachment included in the message.
 	 */
 	class Attachment {

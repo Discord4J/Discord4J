@@ -2,6 +2,7 @@ package sx.blah.discord.util;
 
 import org.apache.commons.lang3.ArrayUtils;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -14,6 +15,7 @@ public class MessageBuilder {
 	private IChannel channel;
 	private IDiscordClient client;
 	private boolean tts = false;
+	private EmbedObject embed;
 
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
@@ -149,6 +151,17 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * Sets the embed to be used (can be null).
+	 * @param embed The embed object (build with EmbedBuilder)
+	 * @return The message builder instance.
+	 * @see EmbedBuilder
+	 */
+	public MessageBuilder withEmbed(EmbedObject embed) {
+		this.embed = embed;
+		return this;
+	}
+
+	/**
 	 * This gets the content of the message in its current form.
 	 *
 	 * @return The current content of the message.
@@ -156,7 +169,7 @@ public class MessageBuilder {
 	public String getContent() {
 		return content;
 	}
-	
+
 	/**
 	 * This gets the channel the message will be sent to.
 	 *
@@ -181,7 +194,7 @@ public class MessageBuilder {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
-			return channel.sendMessage(content, tts);
+			return channel.sendMessage(content, embed, tts);
 		}
 	}
 

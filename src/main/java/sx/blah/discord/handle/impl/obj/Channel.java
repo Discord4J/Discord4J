@@ -182,13 +182,19 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException {
+		return sendMessage(content, null, tts);
+	}
+
+	@Override
+	public IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws RateLimitException,
+			DiscordException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 
 			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, tts)), "UTF-8")), MessageObject.class);
+					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, embed, tts)), "UTF-8")), MessageObject.class);
 
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
@@ -523,7 +529,6 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-<<<<<<< HEAD
 	public List<IWebhook> getWebhooks() {
 		return webhooks;
 	}
@@ -638,8 +643,6 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-=======
->>>>>>> austinv11/websocket-rewrite
 	public boolean isDeleted() {
 		return getGuild().getChannelByID(id) != this;
 	}

@@ -20,6 +20,10 @@ public class EmbedObject {
     public AuthorObject author;
     public EmbedFieldObject[] fields;
 
+	/**
+	 * Please use EmbedBuilder to build these objects.
+	 * @see sx.blah.discord.util.EmbedBuilder
+	 */
     public EmbedObject(String title, String type, String description, String url, String timestamp, int color, FooterObject footer, ImageObject image, ThumbnailObject thumbnail, VideoObject video, ProviderObject provider, AuthorObject author, EmbedFieldObject[] fields) {
         this.title = title;
         this.type = type;
@@ -36,6 +40,10 @@ public class EmbedObject {
         this.fields = fields;
     }
 
+	/**
+	 * Please use EmbedBuilder to build these objects.
+	 * @see sx.blah.discord.util.EmbedBuilder
+	 */
     public EmbedObject(IEmbed embed) {
         this.title = embed.getTitle();
         this.type = embed.getType();

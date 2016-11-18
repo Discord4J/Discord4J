@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
 import sx.blah.discord.util.*;
 
@@ -88,7 +89,23 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException, MissingPermissionsException;
+	IMessage sendMessage(String content, boolean tts) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
+	 * Sends a message to the desired channel.
+	 *
+	 * @param content The content of the message.
+	 * @param embed The embed object
+	 * @param tts Whether the message should use tts or not.
+	 * @return The message object representing the sent message
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
 	 * Uploads a file to the channel.
