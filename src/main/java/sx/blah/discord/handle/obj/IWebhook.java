@@ -71,7 +71,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	/**
 	 * Changes the default avatar of the user this webhook posts as.
 	 *
-	 * @param avatar The default avatar, as encoded in base64. For URLs, use {@link Image#forUrl(String, String)} and {@link #changeAvatar(Image)}
+	 * @param avatar The default avatar, as encoded in base64. For URLs, use {@link Image#forUrl(String, String)} and {@link #changeDefaultAvatar(Image)}
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
@@ -97,4 +97,11 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws DiscordException
 	 */
 	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Checks to see if this webhook is deleted.
+	 *
+	 * @return True if this webhook is deleted.
+	 */
+	boolean isDeleted();
 }

@@ -146,6 +146,11 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
+	public boolean isDeleted(){
+		return getChannel().getWebhookByID(id) != this;
+	}
+
+	@Override
 	public String toString() {
 		return name;
 	}

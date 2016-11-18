@@ -128,6 +128,11 @@ public class Message implements IMessage {
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
 
+	/**
+	 * Cached value of isDeleted()
+	 */
+	private volatile boolean deleted = false;
+
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
@@ -292,6 +297,8 @@ public class Message implements IMessage {
 	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
+		if (isDeleted())
+			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 
@@ -537,6 +544,20 @@ public class Message implements IMessage {
 	@Override
 	public String getWebhookID(){
 		return webhookID;
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	/**
+	 * Sets the CACHED deleted value.
+	 *
+	 * @param deleted The value to assign into the cache.
+	 */
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	@Override

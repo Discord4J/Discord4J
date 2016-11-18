@@ -240,6 +240,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
+	 * Checks to see is this message deleted.
+	 *
+	 * @return True if this message is deleted
+	 */
+	boolean isDeleted();
+
+	/**
 	 * Gets the ID of the webhook that sent this message. May be null.
 	 *
 	 * @return The webhook ID.

@@ -389,6 +389,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
+	 * Checks to see if the this channel is deleted.
+	 *
+	 * @return True if this channel is deleted.
+	 */
+	boolean isDeleted();
+
+	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
 	class PermissionOverride {
