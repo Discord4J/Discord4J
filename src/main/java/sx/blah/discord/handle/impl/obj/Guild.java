@@ -770,6 +770,12 @@ public class Guild implements IGuild {
 	}
 
 	public void loadWebhooks() {
+		try {
+			DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
+		} catch (MissingPermissionsException ignored) {
+			return;
+		}
+
 		RequestBuffer.request(() -> {
 			try {
 				List<IWebhook> oldList = getWebhooks()
