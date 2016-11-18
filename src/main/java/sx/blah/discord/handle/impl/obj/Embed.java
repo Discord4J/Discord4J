@@ -280,20 +280,12 @@ public class Embed implements IEmbed {
 			this.iconUrl = iconUrl;
 		}
 
-		/**
-		 * Gets the footer's text
-		 *
-		 * @return The footer's text
-		 */
+		@Override
 		public String getText() {
 			return text;
 		}
 
-		/**
-		 * Gets the footer's icon URL
-		 *
-		 * @return A url link as a string
-		 */
+		@Override
 		public String getIconUrl() {
 			return iconUrl;
 		}
@@ -314,14 +306,17 @@ public class Embed implements IEmbed {
 			this.icon_url = icon_url;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public String getUrl() {
 			return url;
 		}
 
+		@Override
 		public String getIconUrl() {
 			return icon_url;
 		}
@@ -333,22 +328,25 @@ public class Embed implements IEmbed {
 		protected String value;
 		protected boolean inline;
 
-		public String getName() {
-			return name;
-		}
-
-		public String getValue() {
-			return value;
-		}
-
-		public boolean isInline() {
-			return inline;
-		}
-
 		public EmbedField(String name, String value, boolean inline) {
 			this.name = name;
 			this.value = value;
 			this.inline = inline;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+
+		@Override
+		public boolean isInline() {
+			return inline;
 		}
 	}
 
@@ -372,20 +370,12 @@ public class Embed implements IEmbed {
 			this.url = url;
 		}
 
-		/**
-		 * Gets the Embedded Media Provider's Name
-		 *
-		 * @return The Embedded Media Provider's Name
-		 */
+		@Override
 		public String getName() {
 			return name;
 		}
 
-		/**
-		 * Gets the Embedded Media Provider's Url
-		 *
-		 * @return A url link to the Embedded Media Provider as a String
-		 */
+		@Override
 		public String getUrl() {
 			return url;
 		}
