@@ -324,8 +324,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 			return url;
 		}
 	}
-<<<<<<< HEAD
-=======
 
 	interface IEmbedded {
 
@@ -390,5 +388,4 @@ public interface IMessage extends IDiscordObject<IMessage> {
 			public String getUrl();
 		}
 	}
->>>>>>> austinv11/websocket-rewrite
 }
