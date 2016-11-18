@@ -72,6 +72,7 @@ class DispatchHandler {
 			case "MESSAGE_REACTION_ADD": reactionAdd(GSON.fromJson(json, ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE": reactionRemove(GSON.fromJson(json, ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
+			case "WEBHOOKS_UPDATE": webhookUpdate(GSON.fromJson(json, WebhookObject.class)); break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
@@ -209,6 +210,7 @@ class DispatchHandler {
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
 		shard.guildList.add(guild);
+		guild.loadWebhooks();
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
 		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
 	}
@@ -269,6 +271,9 @@ class DispatchHandler {
 				user.addRole(guild.getID(), guild.getEveryoneRole());
 
 				client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
+
+				if (user.equals(client.getOurUser()))
+					guild.loadWebhooks();
 			}
 
 			if (!user.getNicknameForGuild(guild).equals(Optional.ofNullable(event.nick))) {
@@ -444,6 +449,8 @@ class DispatchHandler {
 
 					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(toUpdate.getGuild(), json);
 
+					toUpdate.loadWebhooks();
+
 					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 				}
 			} else if (json.type.equalsIgnoreCase("voice")) {
@@ -504,6 +511,9 @@ class DispatchHandler {
 				IRole oldRole = toUpdate.copy();
 				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
 				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
+
+				if (guild.getRolesForUser(client.getOurUser()).contains(toUpdate))
+					((Guild) guild).loadWebhooks();
 			}
 		}
 	}
@@ -664,4 +674,9 @@ class DispatchHandler {
 		}
 	}
 
+	private void webhookUpdate(WebhookObject event) {
+		Channel channel = (Channel) client.getChannelByID(event.channel_id);
+		if (channel != null)
+			channel.loadWebhooks();
+	}
 }

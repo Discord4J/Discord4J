@@ -79,7 +79,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @return The attachments.
 	 */
-	List<IEmbedded> getEmbedded();
+	List<IEmbed> getEmbedded();
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
@@ -247,6 +247,16 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	boolean isDeleted();
 
 	/**
+<<<<<<< HEAD
+	 * Gets the ID of the webhook that sent this message. May be null.
+	 *
+	 * @return The webhook ID.
+	 */
+	String getWebhookID();
+
+	/**
+=======
+>>>>>>> austinv11/websocket-rewrite
 	 * Represents an attachment included in the message.
 	 */
 	class Attachment {
@@ -314,6 +324,8 @@ public interface IMessage extends IDiscordObject<IMessage> {
 			return url;
 		}
 	}
+<<<<<<< HEAD
+=======
 
 	interface IEmbedded {
 
@@ -378,4 +390,5 @@ public interface IMessage extends IDiscordObject<IMessage> {
 			public String getUrl();
 		}
 	}
+>>>>>>> austinv11/websocket-rewrite
 }

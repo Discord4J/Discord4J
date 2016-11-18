@@ -1,10 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -343,6 +340,58 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
+<<<<<<< HEAD
+	 * Gets the webhooks for this channel.
+	 *
+	 * @return The webhooks.
+	 */
+	List<IWebhook> getWebhooks();
+
+	/**
+	 * This gets a webhook by its id.
+	 *
+	 * @param id The webhook id.
+	 * @return The webhook or null if not found.
+	 */
+	IWebhook getWebhookByID(String id);
+
+	/**
+	 * This finds all the webhooks which have the same name as the provided one.
+	 *
+	 * @param name The name to search for.
+	 * @return The webhooks with a matching name.
+	 */
+	List<IWebhook> getWebhooksByName(String name);
+
+	/**
+	 * This creates a webhook for this channel with the provided name and the default avatar
+	 *
+	 * @param name The default name for the webhook.
+	 * @return The created webhook.
+	 */
+	IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
+	 * This creates a webhook for this channel with the provided name and the provided avatar
+	 *
+	 * @param name   The default name for the webhook.
+	 * @param avatar The default avatar for the webhook.
+	 * @return The created webhook.
+	 */
+	IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
+	 * This creates a webhook for this channel with the provided name and the provided avatar
+	 *
+	 * @param name   The default name for the webhook.
+	 * @param avatar The default avatar for the webhook.
+	 * @return The created webhook.
+	 */
+	IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
+=======
+>>>>>>> austinv11/websocket-rewrite
 	 * Checks to see if the this channel is deleted.
 	 *
 	 * @return True if this channel is deleted.

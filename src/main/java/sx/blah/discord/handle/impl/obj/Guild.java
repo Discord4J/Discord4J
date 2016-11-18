@@ -16,6 +16,9 @@ import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
+import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
+import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
+import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
@@ -738,6 +741,73 @@ public class Guild implements IGuild {
 	@Override
 	public IEmoji getEmojiByName(String name) {
 		return emojis.stream().filter(iemoji -> iemoji.getName().equals(name)).findFirst().orElse(null);
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		return channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.filter(hook -> hook.getID().equals(id))
+				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		return channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.filter(hook -> hook.getDefaultName().equals(name))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IWebhook> getWebhooks() {
+		return channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	public void loadWebhooks() {
+		RequestBuffer.request(() -> {
+			try {
+				List<IWebhook> oldList = getWebhooks()
+						.stream()
+						.map(IWebhook::copy)
+						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
+				WebhookObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+						DiscordEndpoints.GUILDS + getID() + "/webhooks"),
+						WebhookObject[].class);
+
+				if (response != null) {
+					for (WebhookObject webhookObject : response) {
+						Channel channel = (Channel) getChannelByID(webhookObject.channel_id);
+						if (getWebhookByID(webhookObject.id) == null) {
+							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
+							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
+							channel.addWebhook(newWebhook);
+						} else {
+							IWebhook toUpdate = channel.getWebhookByID(webhookObject.id);
+							IWebhook oldWebhook = toUpdate.copy();
+							toUpdate = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
+							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
+								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, channel));
+
+							oldList.remove(oldWebhook);
+						}
+					}
+				}
+
+				oldList.forEach(webhook -> {
+					((Channel) webhook.getChannel()).removeWebhook(webhook);
+					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
+				});
+			} catch (Exception e) {
+				Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+			}
+		});
 	}
 
 	@Override
