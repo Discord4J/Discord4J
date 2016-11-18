@@ -57,7 +57,6 @@ public class DiscordWS extends WebSocketAdapter {
 		this.gateway = gateway;
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
 		this.state = State.CONNECTING;
-		connect();
 	}
 
 	@Override
@@ -103,14 +102,14 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketConnect(Session sess) {
-		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Websocket Connected.");
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Websocket Connected.");
 		super.onWebSocketConnect(sess);
 	}
 
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} websocket disconnected with status code {} and reason \"{}\".", shard.getInfo()[0], statusCode, reason);
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Shard {} websocket disconnected with status code {} and reason \"{}\".", shard.getInfo()[0], statusCode, reason);
 
 		keepAlive.shutdown();
 		if (this.state != State.DISCONNECTING && statusCode != 4003 && statusCode != 4004 && statusCode != 4005 && statusCode != 4010) {

@@ -4,6 +4,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.ReconnectFailureEvent;
 import sx.blah.discord.handle.impl.events.ReconnectSuccessEvent;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 
 import java.util.Timer;
@@ -17,7 +18,7 @@ public class ReconnectManager {
 	private final IDiscordClient client;
 	private final ConcurrentLinkedQueue<DiscordWS> toReconnect = new ConcurrentLinkedQueue<>();
 
-	private final Timer keepAlive = new Timer();
+	private Timer keepAlive = new Timer("ReconnectManager Keepalive");;
 	private final TimerTask keepAliveTask = new TimerTask() {
 		@Override
 		public void run() {

@@ -119,7 +119,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
-	 * 
+	 *
 	 * @param content The content of the attached message.
 	 * @param tts Whether the message should use tts or not.
 	 * @param file The input stream to upload.
@@ -340,6 +340,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
+<<<<<<< HEAD
 	 * Gets the webhooks for this channel.
 	 *
 	 * @return The webhooks.
@@ -389,6 +390,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
+=======
+>>>>>>> austinv11/websocket-rewrite
 	 * Checks to see if the this channel is deleted.
 	 *
 	 * @return True if this channel is deleted.

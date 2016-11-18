@@ -667,6 +667,11 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public boolean isDeleted() {
+		return getClient().getGuildByID(id) != this;
+	}
+
+	@Override
 	public IAudioManager getAudioManager() {
 		return audioManager;
 	}

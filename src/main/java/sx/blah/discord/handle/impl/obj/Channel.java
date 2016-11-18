@@ -523,6 +523,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+<<<<<<< HEAD
 	public List<IWebhook> getWebhooks() {
 		return webhooks;
 	}
@@ -637,6 +638,8 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+=======
+>>>>>>> austinv11/websocket-rewrite
 	public boolean isDeleted() {
 		return getGuild().getChannelByID(id) != this;
 	}

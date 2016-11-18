@@ -40,7 +40,7 @@ class DispatchHandler {
 		String type = event.get("t").getAsString();
 		JsonElement json = event.get("d");
 		switch (type) {
-			case "RESUMED": Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]); break;
+			case "RESUMED": resumed(); break;
 			case "READY": ready(GSON.fromJson(json, ReadyResponse.class)); break;
 			case "MESSAGE_CREATE": messageCreate(GSON.fromJson(json, MessageObject.class)); break;
 			case "TYPING_START": typingStart(GSON.fromJson(json, TypingEventResponse.class)); break;
@@ -80,6 +80,8 @@ class DispatchHandler {
 	}
 
 	private void ready(ReadyResponse ready) {
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to Discord Gateway v{}. Receiving {} guilds.", ready.v, ready.guilds.length);
+
 		ws.state = DiscordWS.State.READY;
 		ws.hasReceivedReady = true; // Websocket received actual ready event
 		client.getDispatcher().dispatch(new LoginEvent(shard));
@@ -117,6 +119,11 @@ class DispatchHandler {
 			client.getDispatcher().dispatch(new ShardReadyEvent(shard)); // All information for this shard has been received
 			return true;
 		}).execute();
+	}
+
+	private void resumed() {
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]);
+		client.getDispatcher().dispatch(new ResumedEvent(shard));
 	}
 
 	private void messageCreate(MessageObject json) {
@@ -310,13 +317,13 @@ class DispatchHandler {
 		Channel channel = (Channel) client.getChannelByID(channelID);
 
 		if (channel != null) {
-			IMessage message = channel.getMessageByID(id);
+			Message message = (Message) channel.getMessageByID(id);
 			if (message != null) {
 				if (message.isPinned()) {
-					((Message) message).setPinned(false); //For consistency with the event
+					message.setPinned(false); //For consistency with the event
 					client.dispatcher.dispatch(new MessageUnpinEvent(message));
 				}
-
+				message.setDeleted(true);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}
@@ -413,7 +420,6 @@ class DispatchHandler {
 					channel.getGuild().getChannels().remove(channel);
 				else
 					shard.privateChannels.remove(channel);
-
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
 		} else if (json.type.equalsIgnoreCase("voice")) {
