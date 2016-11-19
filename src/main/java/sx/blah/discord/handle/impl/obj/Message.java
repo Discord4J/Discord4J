@@ -315,8 +315,12 @@ public class Message implements IMessage {
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 
+			if (embed != null) {
+				DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
+			}
+
 			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, embed, false)), "UTF-8")),
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)), "UTF-8")),
 					MessageObject.class);
 
 			IMessage oldMessage = copy();
