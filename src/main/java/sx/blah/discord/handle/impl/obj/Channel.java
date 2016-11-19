@@ -464,7 +464,7 @@ public class Channel implements IChannel {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new OverwriteObject(type, id,
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new OverwriteObject(type, null,
 							Permissions.generatePermissionsNumber(toRemove), Permissions.generatePermissionsNumber(toAdd)))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
