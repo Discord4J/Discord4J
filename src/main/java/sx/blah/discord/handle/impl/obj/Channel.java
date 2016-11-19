@@ -190,6 +190,10 @@ public class Channel implements IChannel {
 			DiscordException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 
+		if (embed != null) {
+			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.EMBED_LINKS));
+		}
+
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 
