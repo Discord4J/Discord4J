@@ -6,7 +6,10 @@ public class OverwriteObject {
 	public int allow;
 	public int deny;
 
-	public OverwriteObject(String id, String type, int allow, int deny) {
-
+	public OverwriteObject(String type, String id, int allow, int deny) {
+		this.id = id;
+		this.type = type;
+		this.allow = allow;
+		this.deny = deny;
 	}
 }
