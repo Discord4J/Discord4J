@@ -362,13 +362,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IUser> getBannedUsers() throws RateLimitException, DiscordException {
-		UserObject[] users = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans"),
-				UserObject[].class);
-		List<IUser> banned = new ArrayList<>();
-		for (UserObject user : users) {
-			banned.add(DiscordUtils.getUserFromJSON(getShard(), user));
-		}
-		return banned;
+		BanObject[] bans = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans"), BanObject[].class);
+		return Arrays.stream(bans).map(b -> DiscordUtils.getUserFromJSON(getShard(), b.user)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -378,21 +373,30 @@ public class Guild implements IGuild {
 
 	@Override
 	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.BAN));
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays);
+		DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
+		banUser(user.getID(), deleteMessagesForDays);
+	}
+
+	@Override
+	public void banUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		banUser(userID, 0);
+	}
+
+	@Override
+	public void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException {
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + userID + "?delete-message-days=" + deleteMessagesForDays);
 	}
 
 	@Override
 	public void pardonUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
-
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID);
 	}
 
 	@Override
 	public void kickUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
-
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID());
 	}
 

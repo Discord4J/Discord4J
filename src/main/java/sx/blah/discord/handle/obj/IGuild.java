@@ -235,6 +235,29 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
 	 * This removes a ban on a user.
 	 *
 	 * @param userID The user to unban.
