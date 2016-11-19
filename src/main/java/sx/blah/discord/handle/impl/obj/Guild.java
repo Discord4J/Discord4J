@@ -379,7 +379,13 @@ public class Guild implements IGuild {
 
 	@Override
 	public void banUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		IUser user = getUserByID(userID);
+		if (getUserByID(userID) == null) {
+			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		} else {
+			DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
+		}
+
 		banUser(userID, 0);
 	}
 
