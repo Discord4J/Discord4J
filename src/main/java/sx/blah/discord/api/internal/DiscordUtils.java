@@ -22,10 +22,8 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
@@ -747,26 +745,17 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * This checks if user1 can interact with the set of provided roles by checking their role hierarchies.
+	 * This checks if user can interact with the set of provided roles by checking their role hierarchies.
 	 *
 	 * @param guild The guild to check from.
-	 * @param user1 The first user to check.
+	 * @param user The first user to check.
 	 * @param roles The roles to check.
-	 * @return True if user1's role hierarchy position > provided roles hierarchy.
+	 * @return True if user's role hierarchy position > provided roles hierarchy.
 	 */
-	public static boolean isUserHigher(IGuild guild, IUser user1, List<IRole> roles) {
-		List<IRole> user1Roles = guild.getRolesForUser(user1);
-		int user1Position = 0;
-		int rolesPosition = 0;
-		for (IRole role : user1Roles)
-			if (user1Position < role.getPosition())
-				user1Position = role.getPosition();
-
-		for (IRole role : roles)
-			if (rolesPosition < role.getPosition())
-				rolesPosition = role.getPosition();
-
-		return user1Position > rolesPosition;
+	public static boolean isUserHigher(IGuild guild, IUser user, List<IRole> roles) {
+		OptionalInt userPos = user.getRolesForGuild(guild).stream().mapToInt(IRole::getPosition).max();
+		OptionalInt rolesPos = roles.stream().mapToInt(IRole::getPosition).max();
+		return (userPos.isPresent() ? userPos.getAsInt() : 0) > (rolesPos.isPresent() ? rolesPos.getAsInt() : 0);
 	}
 
 	/**
