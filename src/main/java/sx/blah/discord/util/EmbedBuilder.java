@@ -18,6 +18,11 @@ public class EmbedBuilder {
 			null, null);
 	private final List<EmbedObject.EmbedFieldObject> fields = new ArrayList<>();
 
+	/**
+	 * If true, this will not throw an IllegalArgumentException if you pass null/empty values to appendField.
+	 */
+	private boolean ignoreEmptyNullFields = false;
+
 	public EmbedBuilder() {
 
 	}
@@ -187,13 +192,34 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Add a title-content field.
+	 * Sets the builder to ignore null/empty values passed in EmbedBuilder#appendField(). Useful if you don't want
+	 * IllegalArgumentExceptions being thrown.
+	 *
+	 * @return Itself for chaining
+	 * @see #appendField(String, String, boolean)
+	 */
+	public EmbedBuilder ignoreNullEmptyFields() {
+		ignoreEmptyNullFields = true;
+		return this;
+	}
+
+	/**
+	 * Add a title-content field. Note: if a null or empty title or content is passed, this will throw an
+	 * IllegalArgumentException. If you want the builder to safely ignore fields with null/empty values, use
+	 * EmbedBuilder#ignoreEmptyNullFields().
 	 * @param title The title
 	 * @param content The content
 	 * @param inline If it should be inline (side-by-side)
 	 * @return Itself for chaining
+	 * @see #ignoreNullEmptyFields()
 	 */
 	public EmbedBuilder appendField(String title, String content, boolean inline) {
+		if (((title == null || title.isEmpty()) || (content == null || content.isEmpty()))) {
+			if (ignoreEmptyNullFields)
+				return this;
+			throw new IllegalArgumentException("Title or content cannot be null/empty.");
+		}
+
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
 	}
