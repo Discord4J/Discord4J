@@ -3,6 +3,7 @@ package sx.blah.discord.util;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 
 import java.awt.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -74,6 +75,15 @@ public class EmbedBuilder {
 	public EmbedBuilder withTimestamp(LocalDateTime ldt) {
 		embed.timestamp = ldt.atZone(ZoneId.of("Z")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		return this;
+	}
+
+	/**
+	 * Set the timestamp for the embed.
+	 * @param millis The ms time
+	 * @return Itself for chaining
+	 */
+	public EmbedBuilder withTimestamp(long millis) {
+		return withTimestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()));
 	}
 
 	/**
