@@ -396,18 +396,13 @@ public class User implements IUser {
 
 	@Override
 	public void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
-		IGuild guild = role.getGuild();
-		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
-		roleList.add(role);
-		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}
 
 	@Override
 	public void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
-		IGuild guild = role.getGuild();
-		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
-		roleList.remove(role);
-		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}
-
 }

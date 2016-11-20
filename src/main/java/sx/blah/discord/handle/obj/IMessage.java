@@ -1,6 +1,8 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
@@ -79,7 +81,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @return The attachments.
 	 */
-	List<IEmbedded> getEmbedded();
+	List<IEmbed> getEmbedded();
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
@@ -93,15 +95,41 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
+	 * Adds an "@mention," to the author of the referenced Message
+	 * object before your content.
+	 *
+	 * @param content Message content to send.
+	 * @param embed The embed object
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
 	 *
 	 * @param content The new content for the message to contain.
 	 * @return The new message (this).
-	 *
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
 	IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Edits the message with an embed object. NOTE: Discord only supports editing YOUR OWN messages!
+	 *
+	 * @param content The new content for the message to contain.
+	 * @param embed The embed object
+	 * @return The new message (this).
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Returns whether this message mentions everyone through @everyone.
@@ -163,6 +191,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 
 	/**
 	 * Gets a reaction by the IEmoji object.
+	 *
 	 * @param emoji The emoji
 	 * @return The reaction, or null if there aren't any that match
 	 */
@@ -199,7 +228,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Adds your reaction as a custom emoji
 	 *
-	 * @param emoji   The custom emoji
+	 * @param emoji The custom emoji
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
@@ -210,7 +239,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;:name:id&gt;)
 	 *
-	 * @param emoji   The string emoji
+	 * @param emoji The string emoji
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
@@ -221,8 +250,8 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Removes a reaction for a user.
 	 *
-	 * @[param user The user
 	 * @param reaction The reaction to remove from
+	 * @param user The user
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
@@ -238,6 +267,20 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws DiscordException
 	 */
 	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Checks to see is this message deleted.
+	 *
+	 * @return True if this message is deleted
+	 */
+	boolean isDeleted();
+
+	/**
+	 * Gets the ID of the webhook that sent this message. May be null.
+	 *
+	 * @return The webhook ID.
+	 */
+	String getWebhookID();
 
 	/**
 	 * Represents an attachment included in the message.
@@ -307,67 +350,5 @@ public interface IMessage extends IDiscordObject<IMessage> {
 			return url;
 		}
 	}
-	interface IEmbedded {
 
-		/**
-		 * Gets the title of the embedded media.
-		 *
-		 * @return The title of the embedded media. Can be null.
-		 */
-		public String getTitle();
-
-		/**
-		 * Gets the type of embedded media.
-		 *
-		 * @return The type of embedded media as a string.
-		 */
-		public String getType();
-
-		/**
-		 * Gets a description of the embedded media.
-		 *
-		 * @return A description of the embedded media. Can be null.
-		 */
-		public String getDescription();
-
-		/**
-		 * Gets the direct link to the media.
-		 *
-		 * @return The download link for the attachment.
-		 */
-		public String getUrl();
-
-		/**
-		 * Gets the thumbnail of the embedded media.
-		 *
-		 * @return An object containing information about the embedded media's thumbnail. Can be null.
-		 */
-		public String getThumbnail();
-
-		/**
-		 * Gets the provider of the embedded media.
-		 *
-		 * @return An object containing information about the embedded media's provider. <b>Can Be Null!</b>
-		 */
-		public IEmbedded.IEmbedProvider getEmbedProvider();
-
-		/**
-		 * Represents a site that provides media which is embedded in chat. Eg. Youtube, Imgur.
-		 */
-		interface IEmbedProvider {
-			/**
-			 * Gets the Embedded Media Provider's Name
-			 *
-			 * @return The Embedded Media Provider's Name
-			 */
-			public String getName();
-
-			/**
-			 * Gets the Embedded Media Provider's Url
-			 *
-			 * @return A url link to the Embedded Media Provider as a String
-			 */
-			public String getUrl();
-		}
-	}
 }

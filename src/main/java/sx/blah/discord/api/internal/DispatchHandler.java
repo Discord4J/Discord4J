@@ -10,9 +10,7 @@ import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.RequestBuilder;
+import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,7 +38,7 @@ class DispatchHandler {
 		String type = event.get("t").getAsString();
 		JsonElement json = event.get("d");
 		switch (type) {
-			case "RESUMED": Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]); break;
+			case "RESUMED": resumed(); break;
 			case "READY": ready(GSON.fromJson(json, ReadyResponse.class)); break;
 			case "MESSAGE_CREATE": messageCreate(GSON.fromJson(json, MessageObject.class)); break;
 			case "TYPING_START": typingStart(GSON.fromJson(json, TypingEventResponse.class)); break;
@@ -72,6 +70,7 @@ class DispatchHandler {
 			case "MESSAGE_REACTION_ADD": reactionAdd(GSON.fromJson(json, ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE": reactionRemove(GSON.fromJson(json, ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
+			case "WEBHOOKS_UPDATE": webhookUpdate(GSON.fromJson(json, WebhookObject.class)); break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
@@ -79,6 +78,8 @@ class DispatchHandler {
 	}
 
 	private void ready(ReadyResponse ready) {
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Connected to Discord Gateway v{}. Receiving {} guilds.", ready.v, ready.guilds.length);
+
 		ws.state = DiscordWS.State.READY;
 		ws.hasReceivedReady = true; // Websocket received actual ready event
 		client.getDispatcher().dispatch(new LoginEvent(shard));
@@ -118,6 +119,11 @@ class DispatchHandler {
 		}).execute();
 	}
 
+	private void resumed() {
+		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]);
+		client.getDispatcher().dispatch(new ResumedEvent(shard));
+	}
+
 	private void messageCreate(MessageObject json) {
 		boolean mentioned = json.mention_everyone;
 
@@ -148,17 +154,10 @@ class DispatchHandler {
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
-				List<String> invites = DiscordUtils.getInviteCodesFromMessage(json.content);
-				if (invites.size() > 0) {
-					String[] inviteCodes = invites.toArray(new String[invites.size()]);
-					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Received invite codes \"{}\"", (Object) inviteCodes);
-					List<IInvite> inviteObjects = new ArrayList<>();
-					for (int i = 0; i < inviteCodes.length; i++) {
-						IInvite invite = client.getInviteForCode(inviteCodes[i]);
-						if (invite != null)
-							inviteObjects.add(invite);
-					}
-					client.dispatcher.dispatch(new InviteReceivedEvent(inviteObjects.toArray(new IInvite[inviteObjects.size()]), message));
+				List<String> inviteCodes = DiscordUtils.getInviteCodesFromMessage(json.content);
+				if (!inviteCodes.isEmpty()) {
+					List<IInvite> invites = inviteCodes.stream().map(s -> client.getInviteForCode(s)).collect(Collectors.toList());
+					client.getDispatcher().dispatch(new InviteReceivedEvent(invites.toArray(new IInvite[invites.size()]), message));
 				}
 
 				if (mentioned) {
@@ -202,6 +201,7 @@ class DispatchHandler {
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
 		shard.guildList.add(guild);
+		guild.loadWebhooks();
 		client.dispatcher.dispatch(new GuildCreateEvent(guild));
 		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
 	}
@@ -262,6 +262,9 @@ class DispatchHandler {
 				user.addRole(guild.getID(), guild.getEveryoneRole());
 
 				client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
+
+				if (user.equals(client.getOurUser()))
+					guild.loadWebhooks();
 			}
 
 			if (!user.getNicknameForGuild(guild).equals(Optional.ofNullable(event.nick))) {
@@ -305,13 +308,13 @@ class DispatchHandler {
 		Channel channel = (Channel) client.getChannelByID(channelID);
 
 		if (channel != null) {
-			IMessage message = channel.getMessageByID(id);
+			Message message = (Message) channel.getMessageByID(id);
 			if (message != null) {
 				if (message.isPinned()) {
-					((Message) message).setPinned(false); //For consistency with the event
+					message.setPinned(false); //For consistency with the event
 					client.dispatcher.dispatch(new MessageUnpinEvent(message));
 				}
-
+				message.setDeleted(true);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}
@@ -408,7 +411,6 @@ class DispatchHandler {
 					channel.getGuild().getChannels().remove(channel);
 				else
 					shard.privateChannels.remove(channel);
-
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
 		} else if (json.type.equalsIgnoreCase("voice")) {
@@ -437,6 +439,8 @@ class DispatchHandler {
 					IChannel oldChannel = toUpdate.copy();
 
 					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(toUpdate.getGuild(), json);
+
+					toUpdate.loadWebhooks();
 
 					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 				}
@@ -498,6 +502,9 @@ class DispatchHandler {
 				IRole oldRole = toUpdate.copy();
 				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
 				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
+
+				if (guild.getRolesForUser(client.getOurUser()).contains(toUpdate))
+					((Guild) guild).loadWebhooks();
 			}
 		}
 	}
@@ -658,4 +665,9 @@ class DispatchHandler {
 		}
 	}
 
+	private void webhookUpdate(WebhookObject event) {
+		Channel channel = (Channel) client.getChannelByID(event.channel_id);
+		if (channel != null)
+			channel.loadWebhooks();
+	}
 }

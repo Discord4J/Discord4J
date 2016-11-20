@@ -1,19 +1,21 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.*;
 import sx.blah.discord.api.internal.json.objects.ChannelObject;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceChannelJoinRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.util.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -208,6 +210,41 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
+	public List<IWebhook> getWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void loadWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public IVoiceChannel copy() {
 		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
 	}
@@ -225,5 +262,10 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public String toString(){
 		return getName();
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return getGuild().getVoiceChannelByID(getID()) != this;
 	}
 }

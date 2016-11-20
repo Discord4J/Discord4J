@@ -17,14 +17,13 @@ import sx.blah.discord.util.MissingPermissionsException;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import java.awt.*;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
@@ -162,12 +161,14 @@ public class DiscordUtils {
 	 * @param json The json response to use.
 	 * @return The embedded messages.
 	 */
-	public static List<Embedded> getEmbedsFromJSON(MessageObject json) {
-		List<Embedded> embeds = new ArrayList<>();
+	public static List<Embed> getEmbedsFromJSON(MessageObject json) {
+		List<Embed> embeds = new ArrayList<>();
 		if (json.embeds != null)
-			for (MessageObject.EmbedObject response : json.embeds) {
-				embeds.add(new Embedded(response.title, response.type, response.description, response.url,
-						response.thumbnail, response.provider));
+			for (EmbedObject response : json.embeds) {
+				embeds.add(new Embed(response.title, response.type, response.description, response.url,
+						response.thumbnail, response.provider, convertFromTimestamp(response.timestamp),
+						new Color(response.color), response.footer, response.image, response.video,
+						response.author, response.fields));
 			}
 
 		return embeds;
@@ -400,13 +401,32 @@ public class DiscordUtils {
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json),
-					getReactionsFromJson(channel.getShard(), json.reactions));
+					getReactionsFromJson(channel.getShard(), json.reactions), json.webhook_id);
 
 			for (IReaction reaction : message.getReactions()) {
 				((Reaction) reaction).setMessage(message);
 			}
 
 			return message;
+		}
+	}
+
+	/**
+	 * Creates a webhook object from a json response.
+	 *
+	 * @param channel The webhook.
+	 * @param json The json response.
+	 * @return The message object.
+	 */
+	public static IWebhook getWebhookFromJSON(IChannel channel, WebhookObject json) {
+		if (channel.getWebhookByID(json.id) != null) {
+			Webhook webhook = (Webhook) channel.getWebhookByID(json.id);
+			webhook.setName(json.name);
+			webhook.setAvatar(json.avatar);
+
+			return webhook;
+		} else {
+			return new Webhook(channel.getClient(), json.name, json.id, channel, getUserFromJSON(channel.getShard(), json.user), json.avatar, json.token);
 		}
 	}
 
@@ -725,26 +745,17 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * This checks if user1 can interact with the set of provided roles by checking their role hierarchies.
+	 * This checks if user can interact with the set of provided roles by checking their role hierarchies.
 	 *
 	 * @param guild The guild to check from.
-	 * @param user1 The first user to check.
+	 * @param user The first user to check.
 	 * @param roles The roles to check.
-	 * @return True if user1's role hierarchy position > provided roles hierarchy.
+	 * @return True if user's role hierarchy position > provided roles hierarchy.
 	 */
-	public static boolean isUserHigher(IGuild guild, IUser user1, List<IRole> roles) {
-		List<IRole> user1Roles = guild.getRolesForUser(user1);
-		int user1Position = 0;
-		int rolesPosition = 0;
-		for (IRole role : user1Roles)
-			if (user1Position < role.getPosition())
-				user1Position = role.getPosition();
-
-		for (IRole role : roles)
-			if (rolesPosition < role.getPosition())
-				rolesPosition = role.getPosition();
-
-		return user1Position > rolesPosition;
+	public static boolean isUserHigher(IGuild guild, IUser user, List<IRole> roles) {
+		OptionalInt userPos = user.getRolesForGuild(guild).stream().mapToInt(IRole::getPosition).max();
+		OptionalInt rolesPos = roles.stream().mapToInt(IRole::getPosition).max();
+		return (userPos.isPresent() ? userPos.getAsInt() : 0) > (rolesPos.isPresent() ? rolesPos.getAsInt() : 0);
 	}
 
 	/**

@@ -238,7 +238,7 @@ public interface IDiscordClient {
 	/**
 	 * Gets the invite for a code.
 	 *
-	 * @param code The invite code or xkcd pass.
+	 * @param code The invite code.
 	 * @return The invite, or null if it doesn't exist.
 	 */
 	IInvite getInviteForCode(String code);

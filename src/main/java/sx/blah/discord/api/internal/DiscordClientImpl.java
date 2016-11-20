@@ -5,6 +5,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -19,6 +20,7 @@ import sx.blah.discord.util.*;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -270,14 +272,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return gateway;
 	}
 
+	private void validateToken() throws DiscordException, RateLimitException {
+		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me");
+	}
+
 	// Sharding delegation
 
 	@Override
-	public void login() {
+	public void login() throws DiscordException, RateLimitException {
 		if (!getShards().isEmpty()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to login client more than once.");
-			return;
+			throw new DiscordException("Attempt to login client more than once.");
 		}
+
+		validateToken();
 
 		String gateway = obtainGateway();
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
@@ -301,7 +308,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}).build();
 
 		if (!isDaemon) {
-			new Timer().scheduleAtFixedRate(new TimerTask() {
+			new Timer("DiscordClientImpl Login Keepalive").scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
 					if (getShards().stream().anyMatch(IShard::isLoggedIn)) {
@@ -462,6 +469,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IInvite getInviteForCode(String code) {
-		return null;
+		if (!isReady()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite before bot is ready!");
+			return null;
+		}
+
+		InviteObject invite;
+		try {
+			invite = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
+		} catch (DiscordException | RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite {}", e);
+			return null;
+		}
+
+		return DiscordUtils.getInviteFromJSON(this, invite);
 	}
 }

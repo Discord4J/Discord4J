@@ -46,6 +46,11 @@ public final class DiscordEndpoints {
 	public static final String CHANNELS = APIBASE+"/channels/";
 
 	/**
+	 * Webhooks URL
+	 */
+	public static final String WEBHOOKS = APIBASE+"/webhooks/";
+
+	/**
 	 * Used for accepting invites
 	 */
 	public static final String INVITE = APIBASE+"/invite/";

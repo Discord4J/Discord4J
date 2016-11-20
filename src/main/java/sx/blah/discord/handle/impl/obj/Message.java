@@ -7,6 +7,7 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
@@ -75,7 +76,7 @@ public class Message implements IMessage {
 	/**
 	 * The Embeds, if any, on the message.
 	 */
-	protected volatile List<Embedded> embedded;
+	protected volatile List<Embed> embedded;
 
 	/**
 	 * Whether the message mentions everyone.
@@ -119,14 +120,24 @@ public class Message implements IMessage {
 	protected volatile List<IReaction> reactions;
 
 	/**
+	 * The ID of the webhook that sent this message
+	 */
+	protected final String webhookID;
+
+	/**
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
 
+	/**
+	 * Cached value of isDeleted()
+	 */
+	private volatile boolean deleted = false;
+
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embedded> embedded, List<IReaction> reactions) {
+				   boolean pinned, List<Embed> embedded, List<IReaction> reactions, String webhookID) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -142,6 +153,7 @@ public class Message implements IMessage {
 		this.embedded = embedded;
 		this.everyoneMentionIsValid = mentionsEveryone;
 		this.reactions = reactions;
+		this.webhookID = webhookID;
 
 		setChannelMentions();
 	}
@@ -169,7 +181,7 @@ public class Message implements IMessage {
 	/**
 	 * Sets the CACHED mentions in this message.
 	 *
-	 * @param mentions The new user mentions.
+	 * @param mentions     The new user mentions.
 	 * @param roleMentions The new role mentions.
 	 */
 	public void setMentions(List<String> mentions, List<String> roleMentions) {
@@ -210,7 +222,7 @@ public class Message implements IMessage {
 	 *
 	 * @param attachments The new attachements.
 	 */
-	public void setEmbedded(List<Embedded> attachments) {
+	public void setEmbedded(List<Embed> attachments) {
 		this.embedded = attachments;
 	}
 
@@ -270,27 +282,45 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public List<IEmbedded> getEmbedded() {
-		List<IEmbedded> interfaces = new ArrayList<>();
-		for(Embedded embed : embedded)
+	public List<IEmbed> getEmbedded() {
+		List<IEmbed> interfaces = new ArrayList<>();
+		for (Embed embed : embedded)
 			interfaces.add(embed);
 		return interfaces;
 	}
 
 	@Override
 	public void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
-		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
+		reply(content, null);
+	}
+
+	@Override
+	public void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
 	}
 
 	@Override
 	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
+		return edit(content, null);
+	}
+
+	@Override
+	public IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!");
+		if (isDeleted())
+			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 
-			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, false)), "UTF-8")),
+			if (embed != null) {
+				DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
+			}
+
+			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)), "UTF-8")),
 					MessageObject.class);
 
 			IMessage oldMessage = copy();
@@ -353,7 +383,7 @@ public class Message implements IMessage {
 		}
 
 		if (client.isReady()) {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id);
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id);
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to delete message before bot is ready!");
 		}
@@ -390,7 +420,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embedded, reactions);
+				mentions, roleMentions, attachments, isPinned, embedded, reactions, webhookID);
 	}
 
 	@Override
@@ -526,6 +556,25 @@ public class Message implements IMessage {
 	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
 			DiscordException {
 		removeReaction(client.getOurUser(), reaction);
+	}
+
+	@Override
+	public String getWebhookID(){
+		return webhookID;
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	/**
+	 * Sets the CACHED deleted value.
+	 *
+	 * @param deleted The value to assign into the cache.
+	 */
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	@Override

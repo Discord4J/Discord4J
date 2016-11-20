@@ -235,6 +235,29 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
 	 * This removes a ban on a user.
 	 *
 	 * @param userID The user to unban.
@@ -472,6 +495,13 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	int pruneUsers(int days) throws DiscordException, RateLimitException;
 
 	/**
+	 * Checks to see if the this guild is deleted.
+	 *
+	 * @return True if this guild is deleted.
+	 */
+	boolean isDeleted();
+
+	/**
 	 * Gets the {@link AudioManager} instance for this guild.
 	 *
 	 * @return The audio manager for this guild.
@@ -518,4 +548,27 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The emoji.
 	 */
 	IEmoji getEmojiByName(String name);
+
+	/**
+	 * This gets a webhook by its id.
+	 *
+	 * @param id The webhook id.
+	 * @return The webhook or null if not found.
+	 */
+	IWebhook getWebhookByID(String id);
+
+	/**
+	 * This finds all the webhooks which have the same name as the provided one.
+	 *
+	 * @param name The name to search for.
+	 * @return The webhooks with a matching name.
+	 */
+	List<IWebhook> getWebhooksByName(String name);
+
+	/**
+	 * This returns all the webhooks for this guild.
+	 *
+	 * @return All webhooks for this guild.
+	 */
+	List<IWebhook> getWebhooks();
 }

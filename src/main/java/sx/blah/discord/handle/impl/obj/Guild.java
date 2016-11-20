@@ -16,6 +16,9 @@ import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
+import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
+import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
+import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
@@ -359,13 +362,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IUser> getBannedUsers() throws RateLimitException, DiscordException {
-		UserObject[] users = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans"),
-				UserObject[].class);
-		List<IUser> banned = new ArrayList<>();
-		for (UserObject user : users) {
-			banned.add(DiscordUtils.getUserFromJSON(getShard(), user));
-		}
-		return banned;
+		BanObject[] bans = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans"), BanObject[].class);
+		return Arrays.stream(bans).map(b -> DiscordUtils.getUserFromJSON(getShard(), b.user)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -375,21 +373,36 @@ public class Guild implements IGuild {
 
 	@Override
 	public void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.BAN));
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+user.getID()+"?delete-message-days="+deleteMessagesForDays);
+		DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
+		banUser(user.getID(), deleteMessagesForDays);
+	}
+
+	@Override
+	public void banUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
+		IUser user = getUserByID(userID);
+		if (getUserByID(userID) == null) {
+			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+		} else {
+			DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
+		}
+
+		banUser(userID, 0);
+	}
+
+	@Override
+	public void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException {
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + userID + "?delete-message-days=" + deleteMessagesForDays);
 	}
 
 	@Override
 	public void pardonUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
-
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID);
 	}
 
 	@Override
 	public void kickUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
-
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID());
 	}
 
@@ -664,6 +677,11 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public boolean isDeleted() {
+		return getClient().getGuildByID(id) != this;
+	}
+
+	@Override
 	public IAudioManager getAudioManager() {
 		return audioManager;
 	}
@@ -733,6 +751,79 @@ public class Guild implements IGuild {
 	@Override
 	public IEmoji getEmojiByName(String name) {
 		return emojis.stream().filter(iemoji -> iemoji.getName().equals(name)).findFirst().orElse(null);
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		return channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.filter(hook -> hook.getID().equals(id))
+				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		return channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.filter(hook -> hook.getDefaultName().equals(name))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IWebhook> getWebhooks() {
+		return channels.stream()
+				.map(IChannel::getWebhooks)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	public void loadWebhooks() {
+		try {
+			DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
+		} catch (MissingPermissionsException ignored) {
+			return;
+		}
+
+		RequestBuffer.request(() -> {
+			try {
+				List<IWebhook> oldList = getWebhooks()
+						.stream()
+						.map(IWebhook::copy)
+						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
+				WebhookObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+						DiscordEndpoints.GUILDS + getID() + "/webhooks"),
+						WebhookObject[].class);
+
+				if (response != null) {
+					for (WebhookObject webhookObject : response) {
+						Channel channel = (Channel) getChannelByID(webhookObject.channel_id);
+						if (getWebhookByID(webhookObject.id) == null) {
+							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
+							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
+							channel.addWebhook(newWebhook);
+						} else {
+							IWebhook toUpdate = channel.getWebhookByID(webhookObject.id);
+							IWebhook oldWebhook = toUpdate.copy();
+							toUpdate = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
+							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
+								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, channel));
+
+							oldList.remove(oldWebhook);
+						}
+					}
+				}
+
+				oldList.forEach(webhook -> {
+					((Channel) webhook.getChannel()).removeWebhook(webhook);
+					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
+				});
+			} catch (Exception e) {
+				Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+			}
+		});
 	}
 
 	@Override

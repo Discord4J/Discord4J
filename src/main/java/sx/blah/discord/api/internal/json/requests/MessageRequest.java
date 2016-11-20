@@ -1,5 +1,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+
 /**
  * This request is sent to send a message
  */
@@ -20,8 +22,11 @@ public class MessageRequest {
 	 */
 	public boolean tts = false;
 
-	public MessageRequest(String content, boolean tts) {
+	public EmbedObject embed;
+
+	public MessageRequest(String content, EmbedObject embed, boolean tts) {
 		this.content = content;
 		this.tts = tts;
+		this.embed = embed;
 	}
 }

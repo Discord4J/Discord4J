@@ -115,7 +115,11 @@ public enum Permissions {
 	/**
 	 * Allows the user to manage permissions.
 	 */
-	MANAGE_PERMISSIONS(28);
+	MANAGE_PERMISSIONS(28),
+	/**
+	 * Allows the user to manage webhooks.
+	 */
+	MANAGE_WEBHOOKS(29);
 
 	/**
 	 * The bit offset in the permissions number

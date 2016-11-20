@@ -74,7 +74,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketConnect(Session sess) {
 		super.onWebSocketConnect(sess);
-		Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Voice websocket connected.");
+		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Voice websocket connected.");
 
 		VoiceIdentifyRequest request = new VoiceIdentifyRequest(guild.getID(), client.getOurUser().getID(), shard.ws.sessionId, token);
 		send(VoiceOps.IDENTIFY, request);
