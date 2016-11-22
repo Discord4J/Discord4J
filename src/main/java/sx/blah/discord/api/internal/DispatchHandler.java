@@ -10,13 +10,12 @@ import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -156,7 +155,10 @@ class DispatchHandler {
 
 				List<String> inviteCodes = DiscordUtils.getInviteCodesFromMessage(json.content);
 				if (!inviteCodes.isEmpty()) {
-					List<IInvite> invites = inviteCodes.stream().map(s -> client.getInviteForCode(s)).collect(Collectors.toList());
+					List<IInvite> invites = inviteCodes.stream()
+							.map(s -> client.getInviteForCode(s))
+							.filter(Objects::nonNull)
+							.collect(Collectors.toList());
 					client.getDispatcher().dispatch(new InviteReceivedEvent(invites.toArray(new IInvite[invites.size()]), message));
 				}
 
