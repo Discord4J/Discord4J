@@ -132,7 +132,7 @@ public class DiscordWS extends WebSocketAdapter {
 		if (cause instanceof UnresolvedAddressException) {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UnresolvedAddressException. Internet outage?");
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: {}", cause);
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", cause);
 		}
 
 		if (this.state == State.RESUMING) {
@@ -156,7 +156,7 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.start();
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
 		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: {}", e);
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: ", e);
 		}
 	}
 
@@ -170,7 +170,7 @@ public class DiscordWS extends WebSocketAdapter {
 			isReady = false;
 			this.state = State.IDLE;
 		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: {}", e);
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: ", e);
 		}
 	}
 

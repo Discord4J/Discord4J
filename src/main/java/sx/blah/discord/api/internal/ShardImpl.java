@@ -63,6 +63,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public void logout() throws DiscordException {
 		if (isLoggedIn()) {
+			Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
 			getConnectedVoiceChannels().forEach(channel -> {
 				RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
 					channel.leave();
