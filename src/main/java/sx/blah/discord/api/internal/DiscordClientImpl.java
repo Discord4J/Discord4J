@@ -482,6 +482,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return null;
 		}
 
-		return DiscordUtils.getInviteFromJSON(this, invite);
+		return invite == null ? null : DiscordUtils.getInviteFromJSON(this, invite);
 	}
 }
