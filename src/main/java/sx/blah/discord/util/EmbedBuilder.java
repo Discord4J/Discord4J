@@ -83,7 +83,7 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withTimestamp(long millis) {
-		return withTimestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault()));
+		return withTimestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.of("Z")));
 	}
 
 	/**
