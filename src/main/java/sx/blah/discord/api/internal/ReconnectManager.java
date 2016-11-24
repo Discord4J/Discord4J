@@ -18,19 +18,6 @@ public class ReconnectManager {
 	private final IDiscordClient client;
 	private final ConcurrentLinkedQueue<DiscordWS> toReconnect = new ConcurrentLinkedQueue<>();
 
-	private Timer keepAlive = new Timer("ReconnectManager Keepalive");
-	private final TimerTask keepAliveTask = new TimerTask() {
-		@Override
-		public void run() {
-			if (toReconnect.size() == 0) {
-				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Canceling reconnect keep alive.");
-				keepAliveRunning.set(false);
-				this.cancel();
-			}
-		}
-	};
-	private final AtomicBoolean keepAliveRunning = new AtomicBoolean(false);
-
 	private final int maxAttempts;
 	private final AtomicInteger curAttempt = new AtomicInteger(0);
 
@@ -59,8 +46,6 @@ public class ReconnectManager {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else {
-			keepAlive.cancel(); // Kill the keep alive. It's no longer needed
 		}
 	}
 
@@ -80,30 +65,18 @@ public class ReconnectManager {
 			toReconnect.remove(); // Remove the current ws from the queue. We've given up trying to reconnect it
 			if (toReconnect.peek() != null)  {
 				beginReconnect(); // Start process for next in queue
-			} else {
-				keepAlive.cancel(); // Kill the keep alive. It's no longer needed. We're probably exiting
 			}
 		}
 	}
 
 	private void beginReconnect() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Beginning reconnect for shard {}.", toReconnect.peek().shard.getInfo()[0]);
-		if (!keepAliveRunning.get()) {
-			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Scheduling reconnect keep alive.");
-			keepAlive.scheduleAtFixedRate(keepAliveTask, 0, 10000); // Begin keep alive so program doesn't exit while we attempt reconnects
-			keepAliveRunning.set(true);
-		}
 		doReconnect(); // Perform reconnect
 	}
 
 	private void doReconnect() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Performing reconnect attempt {}.", curAttempt.get());
 		toReconnect.peek().connect();
-	}
-
-	void shutdown() {
-		keepAlive.cancel();
-		keepAliveRunning.set(false);
 	}
 
 	private long getReconnectDelay() {

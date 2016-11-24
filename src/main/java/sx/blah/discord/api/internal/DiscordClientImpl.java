@@ -97,6 +97,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
+	/**
+	 * Timer to keep the program alive if the client is not daemon
+	 */
+	private Timer keepAlive;
+
 	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
@@ -308,14 +313,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}).build();
 
 		if (!isDaemon) {
-			new Timer("DiscordClientImpl Login Keepalive").scheduleAtFixedRate(new TimerTask() {
+			if (keepAlive == null) keepAlive = new Timer("DiscordClientImpl Keep Alive");
+			keepAlive.scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
-					if (getShards().stream().anyMatch(IShard::isLoggedIn)) {
-						this.cancel();
-					}
+					Discord4J.LOGGER.trace(LogMarkers.API, "DiscordClientImpl Keep Alive");
 				}
-			}, 0, 1000);
+			}, 0, 10000);
 		}
 	}
 
@@ -325,7 +329,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			shard.logout();
 		}
 		getShards().clear();
-		reconnectManager.shutdown();
+		keepAlive.cancel();
 	}
 
 	@Override
