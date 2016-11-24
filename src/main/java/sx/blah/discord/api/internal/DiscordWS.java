@@ -85,7 +85,13 @@ public class DiscordWS extends WebSocketAdapter {
 				keepAlive.shutdown();
 				send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
 				break;
-			case DISPATCH: dispatchHandler.handle(payload); break;
+			case DISPATCH:
+				try {
+					dispatchHandler.handle(payload);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				break;
 			case INVALID_SESSION:
 				this.state = State.RECONNECTING;
 				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.INVALID_SESSION_OP, shard));
@@ -98,6 +104,7 @@ public class DiscordWS extends WebSocketAdapter {
 				Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Received unknown opcode, {}", message);
 				break;
 		}
+
 	}
 
 	@Override
