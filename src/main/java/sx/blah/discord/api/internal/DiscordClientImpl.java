@@ -325,6 +325,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			shard.logout();
 		}
 		getShards().clear();
+		reconnectManager.shutdown();
 	}
 
 	@Override
@@ -478,10 +479,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			invite = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
 		} catch (DiscordException | RateLimitException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite {}", e);
+			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite: ", e);
 			return null;
 		}
 
-		return DiscordUtils.getInviteFromJSON(this, invite);
+		return invite == null ? null : DiscordUtils.getInviteFromJSON(this, invite);
 	}
 }

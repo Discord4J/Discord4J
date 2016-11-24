@@ -63,6 +63,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public void logout() throws DiscordException {
 		if (isLoggedIn()) {
+			Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
 			getConnectedVoiceChannels().forEach(channel -> {
 				RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
 					channel.leave();
@@ -276,23 +277,5 @@ public class ShardImpl implements IShard {
 		}
 
 		return null;
-	}
-
-	@Override
-	public IInvite getInviteForCode(String code) {
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite code before bot has logged in!");
-			return null;
-		}
-
-		try {
-			InviteObject response = DiscordUtils.GSON.fromJson(
-					client.REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+code),
-					InviteObject.class);
-
-			return DiscordUtils.getInviteFromJSON(getClient(), response);
-		} catch (Exception e) {
-			return null;
-		}
 	}
 }

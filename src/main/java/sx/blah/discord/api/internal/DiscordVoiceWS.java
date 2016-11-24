@@ -207,7 +207,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
-		Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error on voice websocket: {}", cause);
+		Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error on voice websocket: ", cause);
 	}
 
 	@Override

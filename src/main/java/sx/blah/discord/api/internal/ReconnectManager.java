@@ -18,7 +18,7 @@ public class ReconnectManager {
 	private final IDiscordClient client;
 	private final ConcurrentLinkedQueue<DiscordWS> toReconnect = new ConcurrentLinkedQueue<>();
 
-	private Timer keepAlive = new Timer("ReconnectManager Keepalive");;
+	private Timer keepAlive = new Timer("ReconnectManager Keepalive");
 	private final TimerTask keepAliveTask = new TimerTask() {
 		@Override
 		public void run() {
@@ -99,6 +99,11 @@ public class ReconnectManager {
 	private void doReconnect() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Performing reconnect attempt {}.", curAttempt.get());
 		toReconnect.peek().connect();
+	}
+
+	void shutdown() {
+		keepAlive.cancel();
+		keepAliveRunning.set(false);
 	}
 
 	private long getReconnectDelay() {
