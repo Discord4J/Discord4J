@@ -54,7 +54,7 @@ public class DiscordUtils {
 	/**
 	 * Used in order to find the invite code from a passed message.
 	 */
-	public static final Pattern INVITE_PATTERN = Pattern.compile("(?:discord\\.gg/)(\\S+)");
+	public static final Pattern INVITE_PATTERN = Pattern.compile("(?:discord\\.gg/)([\\w-]+)");
 
 	/**
 	 * Used to determine age based on discord ids
