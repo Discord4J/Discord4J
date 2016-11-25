@@ -31,15 +31,15 @@ public class DiscordWS extends WebSocketAdapter {
 	State state;
 	private WebSocketClient wsClient;
 
-	private DiscordClientImpl client;
+	DiscordClientImpl client;
 	ShardImpl shard;
 	private String gateway;
 
-	private long seq = 0;
+	long seq = 0;
 	String sessionId;
 
 	private DispatchHandler dispatchHandler;
-	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
+	private HeartbeatHandler heartbeatHandler;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -51,11 +51,12 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	DiscordWS(IShard shard, String gateway) {
+	DiscordWS(IShard shard, String gateway, int maxMissedPings) {
 		this.client = (DiscordClientImpl) shard.getClient();
 		this.shard = (ShardImpl) shard;
 		this.gateway = gateway;
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
+		this.heartbeatHandler = new HeartbeatHandler(this, maxMissedPings);
 		this.state = State.CONNECTING;
 	}
 
@@ -71,7 +72,7 @@ public class DiscordWS extends WebSocketAdapter {
 			case HELLO:
 				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Shard {} _trace: {}", shard.getInfo()[0], d.getAsJsonObject().get("_trace"));
 
-				beginHeartbeat(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
+				heartbeatHandler.begin(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
 				if (this.state != State.RESUMING) {
 					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
 				} else {
@@ -82,7 +83,7 @@ public class DiscordWS extends WebSocketAdapter {
 			case RECONNECT:
 				this.state = State.RESUMING;
 				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.RECONNECT_OP, shard));
-				keepAlive.shutdown();
+				heartbeatHandler.shutdown();
 				send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
 				break;
 			case DISPATCH:
@@ -99,12 +100,13 @@ public class DiscordWS extends WebSocketAdapter {
 				send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
 				break;
 			case HEARTBEAT: send(GatewayOps.HEARTBEAT, seq);
-			case HEARTBEAT_ACK: /* TODO: Handle missed pings */ break;
+			case HEARTBEAT_ACK:
+				heartbeatHandler.ack();
+				break;
 			case UNKNOWN:
 				Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Received unknown opcode, {}", message);
 				break;
 		}
-
 	}
 
 	@Override
@@ -118,7 +120,7 @@ public class DiscordWS extends WebSocketAdapter {
 		super.onWebSocketClose(statusCode, reason);
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Shard {} websocket disconnected with status code {} and reason \"{}\".", shard.getInfo()[0], statusCode, reason);
 
-		keepAlive.shutdown();
+		heartbeatHandler.shutdown();
 		if (this.state != State.DISCONNECTING && statusCode != 4003 && statusCode != 4004 && statusCode != 4005 && statusCode != 4010) {
 			this.state = State.RESUMING;
 			client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.ABNORMAL_CLOSE, shard));
@@ -163,7 +165,7 @@ public class DiscordWS extends WebSocketAdapter {
 	void shutdown() {
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} shutting down.", shard.getInfo()[0]);
 		try {
-			keepAlive.shutdown();
+			heartbeatHandler.shutdown();
 			getSession().close(1000, null); // Discord doesn't care about the reason
 			wsClient.stop();
 			hasReceivedReady = false;
@@ -172,15 +174,6 @@ public class DiscordWS extends WebSocketAdapter {
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: ", e);
 		}
-	}
-
-	private void beginHeartbeat(long interval) {
-		if (keepAlive.isShutdown()) keepAlive = Executors.newSingleThreadScheduledExecutor();
-
-		keepAlive.scheduleAtFixedRate(() -> {
-			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Sending heartbeat on shard {}", shard.getInfo()[0]);
-			send(GatewayOps.HEARTBEAT, seq);
-		}, 0, interval, TimeUnit.MILLISECONDS);
 	}
 
 	private void invalidate() {

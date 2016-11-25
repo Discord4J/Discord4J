@@ -56,7 +56,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public void login() throws DiscordException {
 		Discord4J.LOGGER.trace(LogMarkers.API, "Shard logging in.");
-		this.ws = new DiscordWS(this, gateway);
+		this.ws = new DiscordWS(this, gateway, client.maxMissedPings);
 		this.ws.connect();
 	}
 

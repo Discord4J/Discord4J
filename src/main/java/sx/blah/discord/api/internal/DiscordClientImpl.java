@@ -8,8 +8,8 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
+import sx.blah.discord.handle.impl.events.LoginEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.*;
@@ -20,7 +20,6 @@ import sx.blah.discord.util.*;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -78,9 +77,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected final long timeoutTime;
 
 	/**
-	 * The maximum amount of pings discord can miss.
+	 * The maximum amount of pings discord can miss before a new session is created.
 	 */
-	protected final int maxMissedPingCount;
+	protected final int maxMissedPings;
 
 	/**
 	 * Whether the websocket should act as a daemon.
@@ -102,10 +101,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	private Timer keepAlive;
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int shardCount, int maxReconnectAttempts) {
+	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, long timeoutTime, int maxMissedPings, int maxReconnectAttempts) {
 		this.token = "Bot " + token;
 		this.timeoutTime = timeoutTime;
-		this.maxMissedPingCount = maxMissedPingCount;
+		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
 		this.dispatcher = new EventDispatcher(this);
@@ -299,7 +298,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 				getShards().add(shardNum, shard);
 				shard.login();
 
-				getDispatcher().waitFor((ShardReadyEvent e) -> true, 1, TimeUnit.MINUTES, () ->
+				getDispatcher().waitFor((LoginEvent e) -> true, 1, TimeUnit.MINUTES, () ->
 					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
 				);
 
@@ -329,7 +328,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			shard.logout();
 		}
 		getShards().clear();
-		keepAlive.cancel();
+		if (keepAlive != null) keepAlive.cancel();
 	}
 
 	@Override

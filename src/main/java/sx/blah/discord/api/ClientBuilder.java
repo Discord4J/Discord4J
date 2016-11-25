@@ -9,7 +9,7 @@ import sx.blah.discord.util.DiscordException;
 public class ClientBuilder {
 
 	private long timeoutTime = -1L;
-	private int maxMissedPingCount = -1;
+	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
 	private int shardCount = 1;
@@ -49,11 +49,11 @@ public class ClientBuilder {
 	/**
 	 * Makes the client have a ping timeout.
 	 *
-	 * @param maxMissedPings The maximum amount of pings that discord can not respond to before disconnecting.
+	 * @param maxMissedPings The maximum amount of pings that discord can not respond to before a new session is created.
 	 * @return The instance of the builder.
 	 */
 	public ClientBuilder withPingTimeout(int maxMissedPings) {
-		this.maxMissedPingCount = maxMissedPings;
+		this.maxMissedPings = maxMissedPings;
 		return this;
 	}
 
@@ -102,7 +102,7 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		return new DiscordClientImpl(botToken, timeoutTime, maxMissedPingCount, isDaemon, shardCount, maxReconnectAttempts);
+		return new DiscordClientImpl(botToken, shardCount, isDaemon, timeoutTime, maxMissedPings, maxReconnectAttempts);
 	}
 
 	/**
