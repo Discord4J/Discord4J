@@ -89,6 +89,11 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
+	public long getResponseTime() {
+		return ws.heartbeatHandler.getAckResponseTime();
+	}
+
+	@Override
 	public void changePresence(boolean isIdle) {
 		updatePresence(isIdle, getClient().getOurUser().getStatus());
 	}

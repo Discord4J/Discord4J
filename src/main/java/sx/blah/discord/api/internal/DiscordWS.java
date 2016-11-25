@@ -39,7 +39,7 @@ public class DiscordWS extends WebSocketAdapter {
 	String sessionId;
 
 	private DispatchHandler dispatchHandler;
-	private HeartbeatHandler heartbeatHandler;
+	HeartbeatHandler heartbeatHandler;
 
 	/**
 	 * When the bot has received all available guilds.

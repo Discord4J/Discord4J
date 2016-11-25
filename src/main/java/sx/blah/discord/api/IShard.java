@@ -50,6 +50,13 @@ public interface IShard {
 	boolean isLoggedIn();
 
 	/**
+	 * Gets the last time it took for Discord to acknowledge a heartbeat.
+	 *
+	 * @return The time it took.
+	 */
+	long getResponseTime();
+
+	/**
 	 * Changes this user's presence.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.

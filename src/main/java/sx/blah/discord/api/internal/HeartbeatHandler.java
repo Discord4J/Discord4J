@@ -18,8 +18,10 @@ class HeartbeatHandler {
 	private final AtomicBoolean waitingForAck = new AtomicBoolean(false);
 
 	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
-
 	private final Runnable heartbeatTask;
+
+	private long sentHeartbeatAt;
+	private long ackResponseTime;
 
 	HeartbeatHandler(DiscordWS ws, int maxMissedPings) {
 		this.ws = ws;
@@ -41,6 +43,7 @@ class HeartbeatHandler {
 
 			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Sending heartbeat on shard {}", ws.shard.getInfo()[0]);
 			ws.send(GatewayOps.HEARTBEAT, ws.seq);
+			sentHeartbeatAt = System.currentTimeMillis();
 			waitingForAck.set(true);
 		};
 	}
@@ -55,10 +58,15 @@ class HeartbeatHandler {
 		if (!waitingForAck.get()) {
 			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Received heartbeat ack without sending a heartbeat. Is the websocket out of sync?");
 		}
+		ackResponseTime = System.currentTimeMillis() - sentHeartbeatAt;
 		waitingForAck.set(false);
 	}
 
 	void shutdown() {
 		keepAlive.shutdown();
+	}
+
+	long getAckResponseTime() {
+		return ackResponseTime;
 	}
 }
