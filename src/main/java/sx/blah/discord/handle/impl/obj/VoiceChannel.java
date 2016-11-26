@@ -6,7 +6,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.*;
 import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
-import sx.blah.discord.api.internal.json.requests.voice.VoiceChannelJoinRequest;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
@@ -118,7 +118,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 					}
 				}
 
-				((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceChannelJoinRequest(parent.getID(), id, false, false));
+				((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), id, false, false));
 			} else {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
@@ -130,7 +130,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void leave() {
 		if (client.getConnectedVoiceChannels().contains(this)) {
-			((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceChannelJoinRequest(parent.getID(), null, false, false));
+			((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), null, false, false));
 			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
 				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 			}

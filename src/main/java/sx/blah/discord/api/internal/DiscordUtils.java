@@ -8,6 +8,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -250,8 +251,12 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateObject voiceState : json.voice_states) {
-					((User) guild.getUserByID(voiceState.user_id)).getConnectedVoiceChannels()
-							.add(guild.getVoiceChannelByID(voiceState.channel_id));
+					IUser user = guild.getUserByID(voiceState.user_id);
+					if (user.equals(guild.getClient().getOurUser())) {
+						((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(guild.getID(), voiceState.channel_id, false, false));
+					} else {
+						user.getConnectedVoiceChannels().add(guild.getVoiceChannelByID(voiceState.channel_id));
+					}
 				}
 			}
 		}

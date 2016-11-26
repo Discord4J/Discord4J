@@ -399,10 +399,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getShards().stream()
-				.map(IShard::getConnectedVoiceChannels)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
+		return getOurUser().getConnectedVoiceChannels();
 	}
 
 	@Override

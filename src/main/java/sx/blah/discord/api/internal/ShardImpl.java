@@ -163,7 +163,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getClient().getOurUser().getConnectedVoiceChannels();
+		return getClient().getOurUser().getConnectedVoiceChannels().stream().filter(vc -> vc.getShard().equals(this)).collect(Collectors.toList());
 	}
 
 	@Override
