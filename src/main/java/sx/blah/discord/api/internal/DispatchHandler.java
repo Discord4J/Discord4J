@@ -358,7 +358,7 @@ class DispatchHandler {
 
 	private void guildDelete(GuildObject json) {
 		Guild guild = (Guild) client.getGuildByID(json.id);
-		client.getGuilds().remove(guild);
+		guild.getShard().getGuilds().remove(guild);
 		if (json.unavailable) { //Guild can't be reached
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Guild with id {} is unavailable, is there an outage?", json.id);
 			client.dispatcher.dispatch(new GuildUnavailableEvent(json.id));
