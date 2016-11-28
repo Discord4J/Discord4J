@@ -10,6 +10,7 @@ import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.handle.impl.events.LoginEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.*;
@@ -298,7 +299,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 				getShards().add(shardNum, shard);
 				shard.login();
 
-				getDispatcher().waitFor((LoginEvent e) -> true, 1, TimeUnit.MINUTES, () ->
+				getDispatcher().waitFor((ShardReadyEvent e) -> true, 1, TimeUnit.MINUTES, () ->
 					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
 				);
 
