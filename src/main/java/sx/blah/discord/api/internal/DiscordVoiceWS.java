@@ -128,12 +128,17 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	}
 
 	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
-		client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
-		client.voiceConnections.remove(guild);
-		keepAlive.shutdownNow();
-		sendHandler.shutdownNow();
-		udpSocket.close();
-		if (getSession() != null) getSession().close();
+		try {
+			client.dispatcher.dispatch(new VoiceDisconnectedEvent(reason));
+			client.voiceConnections.remove(guild);
+			keepAlive.shutdownNow();
+			sendHandler.shutdownNow();
+			udpSocket.close();
+			if (getSession() != null) getSession().close(1000, null); // Discord doesn't care about the reason
+			wsClient.stop();
+		} catch (Exception e) {
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error while shutting down voice websocket: ", e);
+		}
 	}
 
 	private void setupSendThread() {
