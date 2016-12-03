@@ -257,11 +257,13 @@ public class DiscordVoiceWS {
 	 * Sets up the thread for receiving audio packets from the Discord UDP Socket.
 	 */
 	private void setupReceiveThread() {
-		Runnable receiveThread = () -> {
+		(new Thread((Runnable) () -> {
+                    while(true)
 			if (isConnected.get()) {
 				DatagramPacket receivedPacket = new DatagramPacket(new byte[1920], 1920);
 				try {
 					udpSocket.receive(receivedPacket); // This blocks the thread until a packet is received.
+                                        
 					AudioPacket packet = AudioPacket.fromUdpPacket(receivedPacket);
 					try {
 						packet = packet.decrypt(secret);
@@ -280,8 +282,7 @@ public class DiscordVoiceWS {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
 				}
 			}
-		};
-		executorService.scheduleAtFixedRate(receiveThread, 0, OpusUtil.OPUS_FRAME_TIME_AMOUNT, TimeUnit.MILLISECONDS);
+		})).start();
 	}
 
 	/**
