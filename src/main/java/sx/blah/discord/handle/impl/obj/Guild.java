@@ -119,6 +119,11 @@ public class Guild implements IGuild {
 	 */
 	protected final List<IEmoji> emojis;
 
+	/**
+	 * The total number of members in this guild
+	 */
+	public int member_count;
+
 	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int verification) {
 		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
