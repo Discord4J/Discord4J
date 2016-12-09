@@ -212,7 +212,7 @@ class DispatchHandler {
 		if (guild != null) {
 			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(guild, new MemberObject(event.user, event.roles));
 			guild.addUser(user);
-			guild.member_count++;
+			guild.setTotalMemberCount(guild.getTotalMemberCount() + 1);
 			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
 			client.dispatcher.dispatch(new UserJoinEvent(guild, user, timestamp));
@@ -227,7 +227,7 @@ class DispatchHandler {
 			if (user != null) {
 				guild.getUsers().remove(user);
 				guild.getJoinTimes().remove(user);
-				guild.member_count--;
+				guild.setTotalMemberCount(guild.getTotalMemberCount() - 1);
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
 				client.dispatcher.dispatch(new UserLeaveEvent(guild, user));
 			}
@@ -470,8 +470,8 @@ class DispatchHandler {
 			IUser user = DiscordUtils.getUserFromGuildMemberResponse(guildToUpdate, member);
 			guildToUpdate.addUser(user);
 		}
-		if (guildToUpdate.getUsers().size() >= guildToUpdate.member_count) {
-			client.getDispatcher().dispatch(new GuildMemberChunkReadyEvent(guildToUpdate));
+		if (guildToUpdate.getUsers().size() == guildToUpdate.getTotalMemberCount()) {
+			client.getDispatcher().dispatch(new AllUsersReceivedEvent(guildToUpdate));
 		}
 	}
 
