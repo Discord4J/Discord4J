@@ -51,6 +51,7 @@ class DispatchHandler {
 			case "CHANNEL_CREATE": channelCreate(json.getAsJsonObject()); break;
 			case "CHANNEL_DELETE": channelDelete(GSON.fromJson(json, ChannelObject.class)); break;
 			case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */ break;
+			case "CHANNEL_PINS_ACK": /* Ignored */ break;
 			case "USER_UPDATE": userUpdate(GSON.fromJson(json, UserUpdateEventResponse.class)); break;
 			case "CHANNEL_UPDATE": channelUpdate(GSON.fromJson(json, ChannelObject.class)); break;
 			case "GUILD_MEMBERS_CHUNK": guildMembersChunk(GSON.fromJson(json, GuildMemberChunkEventResponse.class)); break;
