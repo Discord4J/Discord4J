@@ -31,6 +31,7 @@
 * @nija123098 - Added incomplete request count tracking
 * @Masterzach32 - Added IGuild utilities
 * @UnderMybrella - Added webhook support
+* @BloodShura - AudioPlayer::queue(IAudioProvider) now calls the correct constructor for AudioInputStreamProvider instances; Track(AudioInputStream) constructor no longer declares IOException as being throwable
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
