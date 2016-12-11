@@ -377,13 +377,7 @@ public class Channel implements IChannel {
 			return EnumSet.allOf(Permissions.class);
 
 		List<IRole> roles = user.getRolesForGuild(parent);
-		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
-
-		roles.stream()
-				.map(this::getModifiedPermissions)
-				.flatMap(EnumSet::stream)
-				.filter(p -> !permissions.contains(p))
-				.forEach(permissions::add);
+		EnumSet<Permissions> permissions = user.getPermissionsForGuild(parent);
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		List<PermissionOverride> overrideRoles = roles.stream()
