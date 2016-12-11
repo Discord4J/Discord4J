@@ -119,6 +119,11 @@ public class Guild implements IGuild {
 	 */
 	protected final List<IEmoji> emojis;
 
+	/**
+	 * The total number of members in this guild
+	 */
+	private int totalMemberCount;
+
 	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int verification) {
 		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
 	}
@@ -837,5 +842,14 @@ public class Guild implements IGuild {
 			return false;
 
 		return this.getClass().isAssignableFrom(other.getClass()) && ((IGuild) other).getID().equals(getID());
+	}
+
+	@Override
+	public int getTotalMemberCount() {
+		return totalMemberCount;
+	}
+
+	public void setTotalMemberCount(int totalMemberCount){
+		this.totalMemberCount = totalMemberCount;
 	}
 }
