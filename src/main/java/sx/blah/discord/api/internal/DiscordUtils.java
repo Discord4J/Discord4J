@@ -191,6 +191,7 @@ public class DiscordUtils {
 			guild.setAfkTimeout(json.afk_timeout);
 			guild.setRegion(json.region);
 			guild.setVerificationLevel(json.verification_level);
+			guild.setTotalMemberCount(json.member_count);
 
 			List<IRole> newRoles = new ArrayList<>();
 			for (RoleObject roleResponse : json.roles) {
@@ -215,6 +216,7 @@ public class DiscordUtils {
 					getRoleFromJSON(guild, roleResponse); //Implicitly adds the role to the guild.
 				}
 
+			guild.setTotalMemberCount(json.member_count);
 			if (json.members != null)
 				for (MemberObject member : json.members) {
 					IUser user = getUserFromGuildMemberResponse(guild, member);

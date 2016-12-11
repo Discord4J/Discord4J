@@ -571,4 +571,11 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return All webhooks for this guild.
 	 */
 	List<IWebhook> getWebhooks();
+
+	/**
+	 * Get the total amount of members on the guild
+	 *
+	 * @return The count of members on the guild
+	 */
+	int getTotalMemberCount();
 }

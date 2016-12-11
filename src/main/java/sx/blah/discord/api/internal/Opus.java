@@ -33,7 +33,7 @@ public interface Opus extends Library {
 		} else if (lib.contains("win")) {
 			if (lib.endsWith("x86"))
 				lib += "-32";
-			lib += "/opus.dll";
+			lib += "/libopus.dll";
         } else if (lib.contains("linux")) {
 			if (lib.endsWith("x86"))
 				lib += "-32";

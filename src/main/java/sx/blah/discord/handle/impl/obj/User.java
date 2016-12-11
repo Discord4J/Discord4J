@@ -211,6 +211,13 @@ public class User implements IUser {
 	}
 
 	@Override
+	public EnumSet<Permissions> getPermissionsForGuild(IGuild guild){
+		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
+		getRolesForGuild(guild).forEach(iRole -> permissions.addAll(iRole.getPermissions()));
+		return permissions;
+	}
+
+	@Override
 	public Optional<String> getNicknameForGuild(IGuild guild) {
 		return Optional.ofNullable(nicks.containsKey(guild.getID()) ? nicks.get(guild.getID()) : null);
 	}

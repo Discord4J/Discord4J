@@ -558,6 +558,9 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public void bulkDelete(List<IMessage> messages) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
+		if (channel.isPrivate())
+			throw new UnsupportedOperationException("Cannot bulk delete in private channels!");
+
 		if (messages.size() > 100)
 			throw new DiscordException("You can only delete 100 messages at a time!");
 
