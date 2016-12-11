@@ -137,7 +137,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 			if (getSession() != null) getSession().close(1000, null); // Discord doesn't care about the reason
 			wsClient.stop();
 		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error while shutting down voice websocket: ", e);
+			if (!(e instanceof InterruptedException)) Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error while shutting down voice websocket: ", e);
 		}
 	}
 
@@ -149,21 +149,23 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 			@Override
 			public void run() {
 				try {
-					byte[] data = guild.getAudioManager().getAudio();
-					if (data != null && data.length > 0 && !Discord4J.audioDisabled.get()) {
-						AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
-						if (!isSpeaking) setSpeaking(true);
-						udpSocket.send(packet.asUdpPacket(address));
+					if (!udpSocket.isClosed()) {
+						byte[] data = guild.getAudioManager().getAudio();
+						if (data != null && data.length > 0 && !Discord4J.audioDisabled.get()) {
+							AudioPacket packet = new AudioPacket(seq, timestamp, ssrc, data, secret);
+							if (!isSpeaking) setSpeaking(true);
+							udpSocket.send(packet.asUdpPacket(address));
 
-						if (seq + 1 > Character.MAX_VALUE) {
-							seq = 0;
-						} else {
-							seq++;
+							if (seq + 1 > Character.MAX_VALUE) {
+								seq = 0;
+							} else {
+								seq++;
+							}
+
+							timestamp += AudioManager.OPUS_FRAME_SIZE;
+						} else if (isSpeaking) {
+							setSpeaking(false);
 						}
-
-						timestamp += AudioManager.OPUS_FRAME_SIZE;
-					} else if (isSpeaking) {
-						setSpeaking(false);
 					}
 				} catch (Exception e) {
 					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord Internal Exception", e);
