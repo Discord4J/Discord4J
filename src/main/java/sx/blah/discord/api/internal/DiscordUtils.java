@@ -253,12 +253,7 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateObject voiceState : json.voice_states) {
-					IUser user = guild.getUserByID(voiceState.user_id);
-					if (user.equals(guild.getClient().getOurUser())) {
-						((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(guild.getID(), voiceState.channel_id, false, false));
-					} else {
-						user.getConnectedVoiceChannels().add(guild.getVoiceChannelByID(voiceState.channel_id));
-					}
+					guild.getUserByID(voiceState.user_id).getConnectedVoiceChannels().add(guild.getVoiceChannelByID(voiceState.channel_id));
 				}
 			}
 		}
