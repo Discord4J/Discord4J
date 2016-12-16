@@ -260,7 +260,7 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns the next scustom emoji, stepping forward the tokenizer to the end of the emoji (exclusive).
+	 * Returns the next custom emoji, stepping forward the tokenizer to the end of the emoji (exclusive).
 	 *
 	 * @return The next custom emoji token
 	 * @see CustomEmojiToken
