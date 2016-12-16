@@ -12,6 +12,11 @@ public class MissingPermissionsException extends Exception {
 
 	private final EnumSet<Permissions> missing;
 
+	public MissingPermissionsException(String reason, EnumSet<Permissions> missing) {
+		super(reason);
+		this.missing = missing;
+	}
+
 	public MissingPermissionsException(EnumSet<Permissions> permissionsMissing) {
 		super(getMessage(permissionsMissing));
 		missing = permissionsMissing;
@@ -30,7 +35,7 @@ public class MissingPermissionsException extends Exception {
 	 *
 	 * @return The permissions.
 	 */
-	public EnumSet<Permissions> getMissing() {
+	public EnumSet<Permissions> getMissingPermissions() {
 		return missing;
 	}
 

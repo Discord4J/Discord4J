@@ -309,7 +309,7 @@ public class Message implements IMessage {
 	public IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
 			DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
-			throw new MissingPermissionsException("Cannot edit other users' messages!");
+			throw new MissingPermissionsException("Cannot edit other users' messages!", EnumSet.noneOf(Permissions.class));
 		if (isDeleted())
 			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
