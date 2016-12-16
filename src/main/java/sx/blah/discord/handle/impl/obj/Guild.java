@@ -517,7 +517,7 @@ public class Guild implements IGuild {
 	@Override
 	public void deleteGuild() throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (!ownerID.equals(client.getOurUser().getID()))
-			throw new MissingPermissionsException("You must be the guild owner to delete guilds!");
+			throw new MissingPermissionsException("You must be the guild owner to delete guilds!", EnumSet.noneOf(Permissions.class));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id);
 	}
@@ -651,7 +651,7 @@ public class Guild implements IGuild {
 					}
 				}).findFirst().orElse(null);
 				if (highest != null && highest.getPosition() <= position)
-					throw new MissingPermissionsException("Cannot edit the position of a role with a higher/equal position as your user's highest role.");
+					throw new MissingPermissionsException("Cannot edit the position of a role with a higher/equal position as your user's highest role.", EnumSet.noneOf(Permissions.class));
 			}
 			request[i] = new ReorderRolesRequest(rolesInOrder[i].getID(), position);
 		}

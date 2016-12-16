@@ -8,7 +8,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
-import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -23,8 +22,11 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
@@ -572,7 +574,7 @@ public class DiscordUtils {
 										EnumSet<Permissions> required) throws MissingPermissionsException {
 		try {
 			if (!isUserHigher(guild, user, roles))
-				throw new MissingPermissionsException("Edited roles hierarchy is too high.");
+				throw new MissingPermissionsException("Edited roles hierarchy is too high.", EnumSet.noneOf(Permissions.class));
 
 			checkPermissions(user, guild, required);
 		} catch (UnsupportedOperationException e) {
@@ -593,7 +595,7 @@ public class DiscordUtils {
 										EnumSet<Permissions> required) throws MissingPermissionsException {
 		try {
 			if (!isUserHigher(channel.getGuild(), user, roles))
-				throw new MissingPermissionsException("Edited roles hierarchy is too high.");
+				throw new MissingPermissionsException("Edited roles hierarchy is too high.", EnumSet.noneOf(Permissions.class));
 
 			checkPermissions(user, channel, required);
 		} catch (UnsupportedOperationException e) {

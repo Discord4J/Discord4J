@@ -140,9 +140,16 @@ public class MessageTokenizer {
 		if (!hasNextWord())
 			throw new IllegalStateException("No more words found!");
 
-		int indexOfSpace = Math.min(remaining.indexOf(' '), remaining.indexOf('\n'));
-		if (indexOfSpace == -1) {
+		int spaceIndex = remaining.indexOf(' ');
+		int nlIndex = remaining.indexOf('\n');
+
+		int indexOfSpace = -1;
+		if (spaceIndex == -1 && nlIndex == -1) {
 			indexOfSpace = content.length() - currentPosition;
+		} else if (spaceIndex == -1) {
+			indexOfSpace = nlIndex;
+		} else if (nlIndex == -1) {
+			indexOfSpace = spaceIndex;
 		}
 		Token token = new Token(this, currentPosition, currentPosition + indexOfSpace);
 
@@ -260,7 +267,7 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns the next scustom emoji, stepping forward the tokenizer to the end of the emoji (exclusive).
+	 * Returns the next custom emoji, stepping forward the tokenizer to the end of the emoji (exclusive).
 	 *
 	 * @return The next custom emoji token
 	 * @see CustomEmojiToken
