@@ -273,7 +273,7 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void unregisterListener(Object listener) {
-		for (Method method : listener.getClass().getMethods()) {
+		for (Method method : (listener instanceof Class ? ((Class) listener) :listener.getClass()).getMethods()) {
 			if (method.getParameterCount() == 1) {
 				Class<?> eventClass = method.getParameterTypes()[0];
 				if (Event.class.isAssignableFrom(eventClass)) {
@@ -285,6 +285,15 @@ public class EventDispatcher {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Unregisters a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * @param clazz The listener class with static methods.
+	 */
+	public void unregisterListener(Class<?> clazz) {
+		unregisterListener((Object) clazz);
 	}
 
 	/**
