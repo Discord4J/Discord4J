@@ -127,13 +127,19 @@ public class ModuleLoader {
 				return false;
 			}
 		}
-		boolean enabled = module.enable(client);
-		if (enabled) {
-			client.getDispatcher().registerListener(module);
-			if (!loadedModules.contains(module))
-				loadedModules.add(module);
+		try {
+			boolean enabled = module.enable(client);
+			if (enabled) {
+				client.getDispatcher().registerListener(module);
+				if (!loadedModules.contains(module))
+					loadedModules.add(module);
 
-			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
+				client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
+			}
+		} catch (Exception e){
+			Discord4J.LOGGER.error(LogMarkers.MODULES,
+					String.format("Coult not load module %s v%s", module.getName(), module.getVersion()), e);
+			return false;
 		}
 
 		return true;
@@ -236,7 +242,7 @@ public class ModuleLoader {
 							addModuleClass(classInstance);
 					}
 				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
+			} catch (NoClassDefFoundError | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + file.getName() + "!", e);
 			}
 		}
