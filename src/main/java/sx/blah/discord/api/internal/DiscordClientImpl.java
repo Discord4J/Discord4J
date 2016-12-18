@@ -8,19 +8,22 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
-import sx.blah.discord.handle.impl.events.LoginEvent;
+import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
+import sx.blah.discord.api.internal.json.responses.AccountInfoChangeResponse;
+import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
+import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.*;
-import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -151,9 +154,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(username, avatar))));
 			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(json, AccountInfoChangeResponse.class);
 
-			if (!this.getToken().equals(response.token)) {
+			if (!this.getToken().equals("Bot " + response.token)) {
 				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
-				this.token = response.token;
+				this.token = "Bot " + response.token;
 			}
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
