@@ -288,6 +288,26 @@ public class EventDispatcher {
 	}
 
 	/**
+	 * Unregisters a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * @param clazz The listener class with static methods.
+	 */
+	public void unregisterListener(Class<?> clazz) {
+		for (Method method : clazz.getMethods()) {
+			if (method.getParameterCount() == 1) {
+				Class<?> eventClass = method.getParameterTypes()[0];
+				if (Event.class.isAssignableFrom(eventClass)) {
+					if (methodListeners.containsKey(eventClass))
+						if (methodListeners.get(eventClass).containsKey(method)) {
+							methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == null); // null for static listener
+							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered class method listener {}", clazz.getSimpleName(), method.toString());
+						}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Unregisters a single event listener.
 	 *
 	 * @param listener The listener.
