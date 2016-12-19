@@ -147,14 +147,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		try {
-			String json = REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
+			REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
 					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(username, avatar))));
-			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(json, AccountInfoChangeResponse.class);
-
-			if (!this.getToken().equals(response.token)) {
-				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
-				this.token = response.token;
-			}
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
