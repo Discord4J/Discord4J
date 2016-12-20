@@ -9,7 +9,7 @@ import sx.blah.discord.api.events.Event;
  */
 public class ReconnectSuccessEvent extends Event {
 
-	protected IShard shard;
+	protected final IShard shard;
 
 	public ReconnectSuccessEvent(IShard shard) {
 		this.shard = shard;

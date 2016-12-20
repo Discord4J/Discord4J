@@ -7,7 +7,7 @@ import sx.blah.discord.api.events.Event;
  * This event is dispatched when a shard is ready to interact with the api.
  */
 public class ShardReadyEvent extends Event {
-	protected IShard shard;
+	protected final IShard shard;
 
 	public ShardReadyEvent(IShard shard) {
 		this.shard = shard;

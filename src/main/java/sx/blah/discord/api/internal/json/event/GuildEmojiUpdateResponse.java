@@ -17,5 +17,4 @@ public class GuildEmojiUpdateResponse {
 	 */
 	public EmojiObject[] emojis;
 
-
 }

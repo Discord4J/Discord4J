@@ -8,7 +8,6 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
-import sx.blah.discord.handle.impl.events.LoginEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
@@ -35,12 +34,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * The shards this client controls.
 	 */
-	protected final List<IShard> shards = new CopyOnWriteArrayList<>();
+	private final List<IShard> shards = new CopyOnWriteArrayList<>();
 
 	/**
 	 * User we are logged in as
 	 */
-	protected volatile User ourUser;
+	volatile User ourUser;
 
 	/**
 	 * Our token, so we can send XHR to Discord.
@@ -50,22 +49,22 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Event dispatcher.
 	 */
-	protected volatile EventDispatcher dispatcher;
+	volatile EventDispatcher dispatcher;
 
 	/**
 	 * Reconnect manager.
 	 */
-	protected volatile ReconnectManager reconnectManager;
+	volatile ReconnectManager reconnectManager;
 
 	/**
 	 * The module loader for this client.
 	 */
-	protected volatile ModuleLoader loader;
+	private volatile ModuleLoader loader;
 
 	/**
 	 * Caches the available regions for discord.
 	 */
-	protected final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
+	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Holds the active connections to voice sockets.
@@ -73,19 +72,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
 
 	/**
-	 * The time for the client to timeout.
-	 */
-	protected final long timeoutTime;
-
-	/**
 	 * The maximum amount of pings discord can miss before a new session is created.
 	 */
-	protected final int maxMissedPings;
+	final int maxMissedPings;
 
 	/**
 	 * Whether the websocket should act as a daemon.
 	 */
-	protected final boolean isDaemon;
+	private final boolean isDaemon;
 
 	/**
 	 * The total number of shards this client manages.
@@ -102,9 +96,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	private Timer keepAlive;
 
-	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, long timeoutTime, int maxMissedPings, int maxReconnectAttempts) {
+	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts) {
 		this.token = "Bot " + token;
-		this.timeoutTime = timeoutTime;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
@@ -289,7 +282,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
 			for (int i = 0; i < shardCount; i++) {
 				final int shardNum = i;
-				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount}, isDaemon);
+				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount});
 				getShards().add(shardNum, shard);
 				shard.login();
 

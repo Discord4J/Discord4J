@@ -9,7 +9,7 @@ import sx.blah.discord.api.events.Event;
  * Wait for {@link ReadyEvent} to do so.
  */
 public class LoginEvent extends Event {
-	protected IShard shard;
+	protected final IShard shard;
 
 	public LoginEvent(IShard shard) {
 		this.shard = shard;

@@ -28,18 +28,16 @@ public class ShardImpl implements IShard {
 
 	public volatile DiscordWS ws;
 
-	private String gateway;
-	private boolean isDaemon;
-	private int[] info;
+	private final String gateway;
+	private final int[] info;
 
 	private final DiscordClientImpl client;
-	protected List<IGuild> guildList = new CopyOnWriteArrayList<>();
-	protected List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
+	final List<IGuild> guildList = new CopyOnWriteArrayList<>();
+	final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
 
-	public ShardImpl(IDiscordClient client, String gateway, int[] info, boolean isDaemon) {
+	ShardImpl(IDiscordClient client, String gateway, int[] info) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
-		this.isDaemon = isDaemon;
 		this.info = info;
 	}
 

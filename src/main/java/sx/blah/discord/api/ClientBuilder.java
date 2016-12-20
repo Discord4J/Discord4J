@@ -8,7 +8,6 @@ import sx.blah.discord.util.DiscordException;
  */
 public class ClientBuilder {
 
-	private long timeoutTime = -1L;
 	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
@@ -33,17 +32,6 @@ public class ClientBuilder {
 	 */
 	public String getToken() {
 		return botToken;
-	}
-
-	/**
-	 * Makes the client have a timeout.
-	 *
-	 * @param timeoutDelay The timeout delay (in ms).
-	 * @return The instance of the builder.
-	 */
-	public ClientBuilder withTimeout(long timeoutDelay) {
-		this.timeoutTime = timeoutDelay;
-		return this;
 	}
 
 	/**
@@ -102,7 +90,7 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		return new DiscordClientImpl(botToken, shardCount, isDaemon, timeoutTime, maxMissedPings, maxReconnectAttempts);
+		return new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings, maxReconnectAttempts);
 	}
 
 	/**

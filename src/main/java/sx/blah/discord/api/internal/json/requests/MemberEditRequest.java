@@ -19,12 +19,12 @@ public class MemberEditRequest {
 	/**
 	 * Whether to mute the user.
 	 */
-	public boolean mute;
+	public Boolean mute;
 
 	/**
 	 * Whether to deafen the user.
 	 */
-	public boolean deaf;
+	public Boolean deaf;
 
 	/**
 	 * The voice channel to move the user to.
