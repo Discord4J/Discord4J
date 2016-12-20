@@ -5,19 +5,61 @@ import sx.blah.discord.handle.obj.IEmbed;
 import java.awt.*;
 import java.util.stream.Collectors;
 
+/**
+ * Represents a json embed object.
+ */
 public class EmbedObject {
+	/**
+	 * Title of the embed.
+	 */
     public String title;
-    public String type;
+	/**
+	 * The type of the embed.
+	 */
+	public String type;
+	/**
+	 * The description of the embed.
+	 */
     public String description;
-    public String url;
+	/**
+	 * The URL of the embed.
+	 */
+	public String url;
+	/**
+	 * The timestamp of the embed.
+	 */
     public String timestamp;
-    public int color;
+	/**
+	 * The side color of the embed.
+	 */
+	public int color;
+	/**
+	 * The footer of the embed.
+	 */
     public FooterObject footer;
-    public ImageObject image;
+	/**
+	 * The image of the embed.
+	 */
+	public ImageObject image;
+	/**
+	 * The thumbnail of the embed.
+	 */
     public ThumbnailObject thumbnail;
-    public VideoObject video;
+	/**
+	 * The video of the embed.
+	 */
+	public VideoObject video;
+	/**
+	 * The provider of the embed.
+	 */
     public ProviderObject provider;
-    public AuthorObject author;
+	/**
+	 * The author of the embed.
+	 */
+	public AuthorObject author;
+	/**
+	 * The fields of the embed.
+	 */
     public EmbedFieldObject[] fields;
 
 	/**
@@ -91,11 +133,26 @@ public class EmbedObject {
                     .toArray(new EmbedFieldObject[0]);
     }
 
-    public static class ThumbnailObject {
+	/**
+	 * Represents a json thumbnail object.
+	 */
+	public static class ThumbnailObject {
+		/**
+		 * The url of the thumbnail.
+		 */
         public String url;
-        public String proxy_url;
+		/**
+		 * The proxied url of the thumbnail.
+		 */
+		public String proxy_url;
+		/**
+		 * The height of the thumbnail.
+		 */
         public int height;
-        public int width;
+		/**
+		 * The width of the thumbnail.
+		 */
+		public int width;
 
         public ThumbnailObject(String url, String proxy_url, int height, int width) {
             this.url = url;
@@ -105,9 +162,21 @@ public class EmbedObject {
         }
     }
 
-    public static class VideoObject {
+	/**
+	 * Represents a json video object.
+	 */
+	public static class VideoObject {
+		/**
+		 * The url of the video.
+		 */
         public String url;
-        public int height;
+		/**
+		 * The height of the video.
+		 */
+		public int height;
+		/**
+		 * The width of the video.
+		 */
         public int width;
 
         public VideoObject(String url, int height, int width) {
@@ -117,11 +186,26 @@ public class EmbedObject {
         }
     }
 
-    public static class ImageObject {
+	/**
+	 * Represents a json image object.
+	 */
+	public static class ImageObject {
+		/**
+		 * The url of the image.
+		 */
         public String url;
-        public String proxy_url;
+		/**
+		 * The proxied url of the image.
+		 */
+		public String proxy_url;
+		/**
+		 * The height of the image.
+		 */
         public int height;
-        public int width;
+		/**
+		 * The width of the image.
+		 */
+		public int width;
 
         public ImageObject(String url, String proxy_url, int height, int width) {
             this.url = url;
@@ -131,9 +215,18 @@ public class EmbedObject {
         }
     }
 
-    public static class ProviderObject {
+	/**
+	 * Represents a json provider object.
+	 */
+	public static class ProviderObject {
+		/**
+		 * The name of the provider.
+		 */
         public String name;
-        public String url;
+		/**
+		 * The url of the provider.
+		 */
+		public String url;
 
         public ProviderObject(String name, String url) {
             this.name = name;
@@ -141,11 +234,26 @@ public class EmbedObject {
         }
     }
 
-    public static class AuthorObject {
+	/**
+	 * Represents a json author object.
+	 */
+	public static class AuthorObject {
+		/**
+		 * The name of the author.
+		 */
         public String name;
-        public String url;
+		/**
+		 * The url of the author.
+		 */
+		public String url;
+		/**
+		 * The url of the author icon.
+		 */
         public String icon_url;
-        public String proxy_icon_url;
+		/**
+		 * The proxied url of the author icon.
+		 */
+		public String proxy_icon_url;
 
         public AuthorObject(String name, String url, String icon_url, String proxy_icon_url) {
             this.name = name;
@@ -155,9 +263,21 @@ public class EmbedObject {
         }
     }
 
-    public static class FooterObject {
+	/**
+	 * Represents a json footer object.
+	 */
+	public static class FooterObject {
+		/**
+		 * The text in the footer.
+		 */
         public String text;
-        public String icon_url;
+		/**
+		 * The url of the icon in the footer.
+		 */
+		public String icon_url;
+		/**
+		 * The proxied url of the icon in the footer.
+		 */
         public String proxy_icon_url;
 
         public FooterObject(String text, String icon_url, String proxy_icon_url) {
@@ -167,9 +287,21 @@ public class EmbedObject {
         }
     }
 
-    public static class EmbedFieldObject {
+	/**
+	 * Represents a json field object.
+	 */
+	public static class EmbedFieldObject {
+		/**
+		 * The name of the field.
+		 */
         public String name;
-        public String value;
+		/**
+		 * The content in the field.
+		 */
+		public String value;
+		/**
+		 * Whether the field should be displayed inline.
+		 */
         public boolean inline;
 
         public EmbedFieldObject(String name, String value, boolean inline) {

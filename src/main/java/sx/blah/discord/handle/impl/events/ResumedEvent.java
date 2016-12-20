@@ -8,7 +8,7 @@ import sx.blah.discord.api.events.Event;
  * Missed events should replay after this.
  */
 public class ResumedEvent extends Event {
-	private IShard shard;
+	private final IShard shard;
 
 	public ResumedEvent(IShard shard) {
 		this.shard = shard;

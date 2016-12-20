@@ -11,8 +11,8 @@ import sx.blah.discord.api.internal.ReconnectManager;
  */
 public class ReconnectFailureEvent extends Event {
 
-	protected IShard shard;
-	protected int curAttempt;
+	protected final IShard shard;
+	protected final int curAttempt;
 
 	public ReconnectFailureEvent(IShard shard, int curAttempt) {
 		this.shard = shard;

@@ -64,7 +64,7 @@ public class AudioPacket {
 		this(Arrays.copyOf(packet.getData(), packet.getLength()));
 	}
 
-	public AudioPacket(byte[] rawPacket) { //FIXME: Support mono & decryption
+	private AudioPacket(byte[] rawPacket) { //FIXME: Support mono & decryption
 		this.rawPacket = rawPacket;
 
 		ByteBuffer buffer = ByteBuffer.wrap(rawPacket);
@@ -78,7 +78,7 @@ public class AudioPacket {
 		this.rawAudio = decodeToPCM(encodedAudio);
 	}
 
-	public AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, byte[] secret) {
+	AudioPacket(char seq, int timestamp, int ssrc, byte[] rawAudio, byte[] secret) {
 		this.seq = seq;
 		this.ssrc = ssrc;
 		this.timestamp = timestamp;
@@ -101,15 +101,15 @@ public class AudioPacket {
 		this.rawPacket = packet;
 	}
 
-	public byte[] getRawPacket() {
+	private byte[] getRawPacket() {
 		return Arrays.copyOf(rawPacket, rawPacket.length);
 	}
 
-	public DatagramPacket asUdpPacket(InetSocketAddress address) {
+	private DatagramPacket asUdpPacket(InetSocketAddress address) {
 		return new DatagramPacket(getRawPacket(), rawPacket.length, address);
 	}
 
-	public byte[] decodeToPCM(byte[] opusAudio) {
+	private byte[] decodeToPCM(byte[] opusAudio) {
 		ByteBuffer nonEncodedBuffer = ByteBuffer.allocate(opusAudio.length);
 
 		ShortBuffer shortBuffer = nonEncodedBuffer.asShortBuffer();
