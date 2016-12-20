@@ -10,9 +10,9 @@ import sx.blah.discord.handle.obj.IUser;
  */
 public class ReactionRemoveEvent extends Event {
 
-	private IMessage message;
-	private IReaction reaction;
-	private IUser user;
+	private final IMessage message;
+	private final IReaction reaction;
+	private final IUser user;
 
 	public ReactionRemoveEvent(IMessage message, IReaction reaction, IUser user) {
 		this.message = message;
