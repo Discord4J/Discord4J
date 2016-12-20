@@ -105,7 +105,7 @@ public class AudioPacket {
 		return Arrays.copyOf(rawPacket, rawPacket.length);
 	}
 
-	private DatagramPacket asUdpPacket(InetSocketAddress address) {
+	DatagramPacket asUdpPacket(InetSocketAddress address) {
 		return new DatagramPacket(getRawPacket(), rawPacket.length, address);
 	}
 

@@ -282,7 +282,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
 			for (int i = 0; i < shardCount; i++) {
 				final int shardNum = i;
-				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount}, isDaemon);
+				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount});
 				getShards().add(shardNum, shard);
 				shard.login();
 
