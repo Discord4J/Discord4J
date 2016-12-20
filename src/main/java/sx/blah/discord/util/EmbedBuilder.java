@@ -202,6 +202,16 @@ public class EmbedBuilder {
 	}
 
 	/**
+	 * Set the title's URL. This is the link for when someone clicks the title.
+	 * @param url The URL
+	 * @return Itself for chaining
+	 */
+	public EmbedBuilder withUrl(String url) {
+		embed.url = url;
+		return this;
+	}
+
+	/**
 	 * Sets the builder to ignore null/empty values passed in EmbedBuilder#appendField(). Useful if you don't want
 	 * IllegalArgumentExceptions being thrown.
 	 *
