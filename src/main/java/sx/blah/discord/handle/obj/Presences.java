@@ -23,5 +23,17 @@ public enum Presences {
 	/**
 	 * Represents that the user is in 'do not disturb' mode.
 	 */
-	DND
+	DND,
+	/**
+	 * Unknown presence.
+	 */
+	UNKNOWN;
+
+	public static Presences get(String name) {
+		try {
+			return valueOf(name.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			return UNKNOWN;
+		}
+	}
 }

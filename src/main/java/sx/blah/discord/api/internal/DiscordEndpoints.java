@@ -46,6 +46,11 @@ public final class DiscordEndpoints {
 	public static final String CHANNELS = APIBASE+"/channels/";
 
 	/**
+	 * Webhooks URL
+	 */
+	public static final String WEBHOOKS = APIBASE+"/webhooks/";
+
+	/**
 	 * Used for accepting invites
 	 */
 	public static final String INVITE = APIBASE+"/invite/";
@@ -94,4 +99,26 @@ public final class DiscordEndpoints {
 	 * The OAuth2 authorization url.
 	 */
 	public static final String AUTHORIZE = "https://discordapp.com/oauth2/authorize";
+
+	/**
+	 * The emoji image URL.
+	 */
+	public static final String EMOJI_IMAGE = "https://cdn.discordapp.com/emojis/%s.png";
+
+	/**
+	 * The reactions list url for a message. Replacements in order: channel ID, message ID
+	 */
+	public static final String REACTIONS = CHANNELS + "%s/messages/%s/reactions";
+
+	/**
+	 * The reactions user list url. Replacements in order: channel ID, message ID, emoji (emoji or name:id)
+	 */
+	public static final String REACTIONS_USER_LIST = REACTIONS + "/%s";
+
+	/**
+	 * The reactions url for a specific user. Used for deleting/putting a reaction. Replacements in order: channel ID,
+	 * message ID, emoji (emoji or name:id), user (@me or ID)
+	 */
+	public static final String REACTIONS_USER = REACTIONS_USER_LIST + "/%s";
+
 }

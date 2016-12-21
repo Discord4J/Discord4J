@@ -1,35 +1,29 @@
 package sx.blah.discord.api.internal;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
-import sx.blah.discord.handle.impl.events.StatusChangeEvent;
+import sx.blah.discord.api.internal.json.objects.InviteObject;
+import sx.blah.discord.api.internal.json.objects.UserObject;
+import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
- * Defines the client.
- * This class receives and
- * sends messages, as well
- * as holds our user data.
+ * Defines the client. This class receives and sends messages, as well as holds our user data.
  */
 public final class DiscordClientImpl implements IDiscordClient {
 
@@ -38,16 +32,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	/**
-	 * Used for keep alive. Keeps last time (in ms)
-	 * that we sent the keep alive so we can accurately
-	 * time our keep alive messages.
+	 * The shards this client controls.
 	 */
-	protected volatile long timer = System.currentTimeMillis();
+	private final List<IShard> shards = new CopyOnWriteArrayList<>();
 
 	/**
 	 * User we are logged in as
 	 */
-	protected volatile User ourUser;
+	volatile User ourUser;
 
 	/**
 	 * Our token, so we can send XHR to Discord.
@@ -55,30 +47,24 @@ public final class DiscordClientImpl implements IDiscordClient {
 	protected volatile String token;
 
 	/**
-	 * Time (in ms) between keep alive
-	 * messages.
+	 * Event dispatcher.
 	 */
-	protected volatile long heartbeat;
+	volatile EventDispatcher dispatcher;
 
 	/**
-	 * Local copy of all guilds/servers.
+	 * Reconnect manager.
 	 */
-	protected final List<IGuild> guildList = new CopyOnWriteArrayList<>();
+	volatile ReconnectManager reconnectManager;
 
 	/**
-	 * Private copy of the email you logged in with.
+	 * The module loader for this client.
 	 */
-	protected volatile String email;
+	private volatile ModuleLoader loader;
 
 	/**
-	 * Private copy of the password you used to log in.
+	 * Caches the available regions for discord.
 	 */
-	protected volatile String password;
-
-	/**
-	 * WebSocket over which to communicate with Discord.
-	 */
-	public volatile DiscordWS ws;
+	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Holds the active connections to voice sockets.
@@ -86,208 +72,76 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
 
 	/**
-	 * Event dispatcher.
+	 * The maximum amount of pings discord can miss before a new session is created.
 	 */
-	protected volatile EventDispatcher dispatcher;
-
-	/**
-	 * All of the private message channels that the bot is connected to.
-	 */
-	protected final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
-
-	/**
-	 * Whether the api is logged in.
-	 */
-	protected volatile boolean isReady = false;
-
-	/**
-	 * The websocket session id.
-	 */
-	protected volatile String sessionId;
-
-	/**
-	 * Caches the last operation done by the websocket, required for handling redirects.
-	 */
-	protected volatile long lastSequence = 0;
-
-	/**
-	 * Caches the available regions for discord.
-	 */
-	protected final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
-
-	/**
-	 * The module loader for this client.
-	 */
-	protected volatile ModuleLoader loader;
-
-	/**
-	 * The time for the client to timeout.
-	 */
-	protected final long timeoutTime;
-
-	/**
-	 * The maximum amount of pings discord can miss.
-	 */
-	protected final int maxMissedPingCount;
+	final int maxMissedPings;
 
 	/**
 	 * Whether the websocket should act as a daemon.
 	 */
-	protected final boolean isDaemon;
+	private final boolean isDaemon;
 
 	/**
-	 * Whether this client represents a bot.
+	 * The total number of shards this client manages.
 	 */
-	protected volatile boolean isBot;
-
-	/**
-	 * The maximum amount of attempts before reconnections are aborted.
-	 */
-	protected final int reconnectAttempts;
-
-	/**
-	 * When this client was logged into. Useful for determining uptime.
-	 */
-	protected volatile LocalDateTime launchTime;
+	private int shardCount;
 
 	/**
 	 * The requests holder object.
 	 */
 	public final Requests REQUESTS = new Requests(this);
 
-	private DiscordClientImpl(long timeoutTime, int maxMissedPingCount, boolean isDaemon, boolean isBot, int reconnectAttempts) {
-		this.timeoutTime = timeoutTime;
-		this.maxMissedPingCount = maxMissedPingCount;
+	/**
+	 * Timer to keep the program alive if the client is not daemon
+	 */
+	private Timer keepAlive;
+
+	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts) {
+		this.token = "Bot " + token;
+		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
-		this.isBot = isBot;
-		this.reconnectAttempts = reconnectAttempts;
+		this.shardCount = shardCount;
 		this.dispatcher = new EventDispatcher(this);
+		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
 	}
 
-	public DiscordClientImpl(String email, String password, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, false, reconnectAttempts);
-		this.email = email;
-		this.password = password;
+	@Override
+	public List<IShard> getShards() {
+		return this.shards;
 	}
 
-	public DiscordClientImpl(String token, long timeoutTime, int maxMissedPingCount, boolean isDaemon, int reconnectAttempts) {
-		this(timeoutTime, maxMissedPingCount, isDaemon, true, reconnectAttempts);
-		this.token = isBot ? "Bot " + token : token;
+	@Override
+	public int getShardCount() {
+		return this.shardCount;
 	}
 
 	@Override
 	public EventDispatcher getDispatcher() {
-		return dispatcher;
+		return this.dispatcher;
 	}
 
 	@Override
 	public ModuleLoader getModuleLoader() {
-		return loader;
+		return this.loader;
 	}
 
 	@Override
 	public String getToken() {
-		return token;
+		return this.token;
 	}
 
-	@Override
-	public void login(boolean async) throws DiscordException {
-		try {
-			if (ws != null) {
-				ws.disconnect(DiscordDisconnectedEvent.Reason.RECONNECTING);
-
-				lastSequence = 0;
-				sessionId = null; //Prevents the websocket from sending a resume request.
-			}
-
-			if (!isBot) {
-				LoginResponse response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.LOGIN,
-						new StringEntity(DiscordUtils.GSON.toJson(new LoginRequest(email, password))),
-						new BasicNameValuePair("content-type", "application/json")), LoginResponse.class);
-				this.token = response.token;
-			} else {
-				if (!validateToken())
-					throw new DiscordException("Invalid token!");
-			}
-
-			this.ws = new DiscordWS(this, obtainGateway(getToken()), timeoutTime, maxMissedPingCount, isDaemon,
-					reconnectAttempts, async);
-
-			launchTime = LocalDateTime.now();
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Exception caught, logging in!", e);
-			throw new DiscordException("Login error occurred! Are your login details correct?");
-		}
-	}
-
-	@Override
-	public void login() throws DiscordException {
-		login(false);
-	}
-
-	private boolean validateToken() {
-		try {
-			REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me/guilds",
-					new BasicNameValuePair("authorization", getToken()));
-			return true;
-		} catch (RateLimitException | DiscordException e) {
-			return false;
-		}
-	}
-
-	@Override
-	public void logout() throws RateLimitException, DiscordException {
-		if (isReady()) {
-			if (!isBot())
-				REQUESTS.POST.makeRequest(DiscordEndpoints.LOGOUT,
-						new BasicNameValuePair("authorization", getToken()));
-
-			ws.disconnect(DiscordDisconnectedEvent.Reason.LOGGED_OUT);
-		} else
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
-	}
-
-	/**
-	 * Gets the WebSocket gateway
-	 *
-	 * @param token Our login token
-	 * @return the WebSocket URL of which to connect
-	 */
-	private String obtainGateway(String token) {
-		String gateway = null;
-		try {
-			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY,
-					new BasicNameValuePair("authorization", token)), GatewayResponse.class);
-			gateway = response.url;//.replaceAll("wss", "ws");
-		} catch (RateLimitException | DiscordException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
-		return gateway;
-	}
-
-	private void changeAccountInfo(Optional<String> username, Optional<String> email, Optional<String> password, Optional<Image> avatar) throws RateLimitException, DiscordException {
+	private void changeAccountInfo(String username, String avatar) throws RateLimitException, DiscordException {
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
+		if (!isLoggedIn()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to change account info before bot has logged in!");
 			return;
 		}
 
 		try {
-			AccountInfoChangeResponse response = DiscordUtils.GSON.fromJson(REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
-					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(email.orElse(this.email),
-							this.password, password.orElse(this.password), username.orElse(getOurUser().getName()),
-							avatar == null ? Image.forUser(ourUser).getData() :
-									(avatar.isPresent() ? avatar.get().getData() : Image.defaultAvatar().getData())))),
-					new BasicNameValuePair("Authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json; charset=UTF-8")), AccountInfoChangeResponse.class);
-
-			if (!this.getToken().equals(response.token)) {
-				Discord4J.LOGGER.debug(LogMarkers.API, "Token changed, updating it.");
-				this.token = response.token;
-			}
+			REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
+					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(username, avatar))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
@@ -295,246 +149,25 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public void changeUsername(String username) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.of(username), Optional.empty(), Optional.empty(), null);
-	}
-
-	@Override
-	public void changeEmail(String email) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.empty(), Optional.of(email), Optional.empty(), null);
-	}
-
-	@Override
-	public void changePassword(String password) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.of(password), null);
+		changeAccountInfo(username, Image.forUser(ourUser).getData());
 	}
 
 	@Override
 	public void changeAvatar(Image avatar) throws DiscordException, RateLimitException {
-		changeAccountInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(avatar));
-	}
-
-	private void updatePresence(boolean isIdle, Status status) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
-			return;
-		}
-
-		if (!status.equals(getOurUser().getStatus())) {
-			Status oldStatus = getOurUser().getStatus();
-			((User) getOurUser()).setStatus(status);
-			dispatcher.dispatch(new StatusChangeEvent(getOurUser(), oldStatus, status));
-		}
-
-		if ((getOurUser().getPresence() != Presences.IDLE && isIdle)
-				|| (getOurUser().getPresence() == Presences.IDLE && !isIdle)
-				|| (getOurUser().getPresence() != Presences.STREAMING && status.getType() == Status.StatusType.STREAM)) {
-			Presences oldPresence = getOurUser().getPresence();
-			Presences newPresence = isIdle ? Presences.IDLE :
-					(status.getType() == Status.StatusType.STREAM ? Presences.STREAMING : Presences.ONLINE);
-			((User) getOurUser()).setPresence(newPresence);
-			dispatcher.dispatch(new PresenceUpdateEvent(getOurUser(), oldPresence, newPresence));
-		}
-
-		ws.send(DiscordUtils.GSON.toJson(new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status)));
-	}
-
-	@Override
-	public void changePresence(boolean isIdle) {
-		updatePresence(isIdle, getOurUser().getStatus());
-	}
-
-	@Override
-	public void changeStatus(Status status) {
-		updatePresence(getOurUser().getPresence() == Presences.IDLE, status);
-	}
-
-	@Override
-	public boolean isReady() {
-		return isReady && ws != null && ws.isConnected.get() && !ws.isReconnecting.get();
+		changeAccountInfo(ourUser.getName(), avatar.getData());
 	}
 
 	@Override
 	public IUser getOurUser() {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
-			return null;
-		}
 		return ourUser;
-	}
-
-	@Override
-	public List<IChannel> getChannels(boolean priv) {
-		List<IChannel> channels = guildList.stream()
-				.map(IGuild::getChannels)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-		if (priv)
-			channels.addAll(privateChannels);
-		return channels;
-	}
-
-	@Override
-	public List<IChannel> getChannels() {
-		return getChannels(false);
-	}
-
-	@Override
-	public IChannel getChannelByID(String id) {
-		return getChannels(true).stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IVoiceChannel> getVoiceChannels() {
-		return guildList.stream()
-				.map(IGuild::getVoiceChannels)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public IVoiceChannel getVoiceChannelByID(String id) {
-		return getVoiceChannels().stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IGuild> getGuilds() {
-		return guildList;
-	}
-
-	@Override
-	public IGuild getGuildByID(String guildID) {
-		return guildList.stream()
-				.filter(g -> g.getID().equalsIgnoreCase(guildID))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IUser> getUsers() {
-		return guildList.stream()
-				.map(IGuild::getUsers)
-				.flatMap(List::stream)
-				.distinct()
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public IUser getUserByID(String userID) {
-		IGuild guild = guildList.stream()
-				.filter(g -> g.getUserByID(userID) != null)
-				.findFirst()
-				.orElse(null);
-
-		IUser user = guild != null ? guild.getUserByID(userID) : null;
-
-		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
-	}
-
-	@Override
-	public List<IRole> getRoles() {
-		return guildList.stream()
-				.map(IGuild::getRoles)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public IRole getRoleByID(String roleID) {
-		return getRoles().stream()
-				.filter(r -> r.getID().equalsIgnoreCase(roleID))
-				.findAny().orElse(null);
-	}
-
-	@Override
-	public List<IMessage> getMessages(boolean includePrivate) {
-		return getChannels(includePrivate).stream()
-				.map(IChannel::getMessages)
-				.flatMap(List::stream)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public List<IMessage> getMessages() {
-		return getMessages(false);
-	}
-
-	@Override
-	public IMessage getMessageByID(String messageID) {
-		for (IGuild guild : guildList) {
-			IMessage message = guild.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		for (IPrivateChannel privateChannel : privateChannels) {
-			IMessage message = privateChannel.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		return null;
-	}
-
-	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
-			return null;
-		}
-
-		if (user.equals(getOurUser()))
-			throw new DiscordException("Cannot PM yourself!");
-
-		Optional<IPrivateChannel> opt = privateChannels.stream()
-				.filter(c -> c.getRecipient().getID().equalsIgnoreCase(user.getID()))
-				.findAny();
-		if (opt.isPresent())
-			return opt.get();
-
-		PrivateChannelResponse response = null;
-		try {
-			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+this.ourUser.getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelRequest(user.getID()))),
-					new BasicNameValuePair("authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json")), PrivateChannelResponse.class);
-
-			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, response);
-			privateChannels.add(channel);
-			return channel;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Error creating creating a private channel!", e);
-		}
-
-		return null;
-	}
-
-	@Override
-	public IInvite getInviteForCode(String code) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Bot has not signed in yet!");
-			return null;
-		}
-
-		try {
-			InviteJSONResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+code,
-					new BasicNameValuePair("authorization", getToken())), InviteJSONResponse.class);
-
-			return DiscordUtils.getInviteFromJSON(this, response);
-		} catch (Exception e) {
-			return null;
-		}
 	}
 
 	@Override
 	public List<IRegion> getRegions() throws RateLimitException, DiscordException {
 		if (REGIONS.isEmpty()) {
-			RegionResponse[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
-					DiscordEndpoints.VOICE+"regions",
-					new BasicNameValuePair("authorization", getToken())),
-					RegionResponse[].class);
+			VoiceRegionObject[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
+					DiscordEndpoints.VOICE+"regions"),
+					VoiceRegionObject[].class);
 
 			Arrays.stream(regions)
 					.map(DiscordUtils::getRegionFromJSON)
@@ -556,112 +189,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return null;
 	}
 
-	@Override
-	public IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException {
-		return createGuild(name, region, (Image) null);
-	}
-
-	@Override
-	public IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException {
-		if (isBot())
-			throw new DiscordException("This action can only be performed by as user");
-
-		try {
-			GuildResponse guildResponse = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APIBASE+"/guilds",
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
-							new CreateGuildRequest(name, region.getID(), icon))),
-					new BasicNameValuePair("authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json")), GuildResponse.class);
-			IGuild guild = DiscordUtils.getGuildFromJSON(this, guildResponse);
-			guildList.add(guild);
-			return guild;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-		return null;
-	}
-
-	@Override
-	public long getResponseTime() {
-		return ws.getResponseTime();
-	}
-
-	@Override
-	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return ourUser.getConnectedVoiceChannels();
-	}
-
-	@Override
-	public boolean isBot() {
-		return isBot;
-	}
-
-	/**
-	 * FOR INTERNAL USE ONLY: Converts this user client to a bot client.
-	 *
-	 * @param token The bot's new token.
-	 */
-	public void convert(String token) {
-		isBot = true;
-		email = null;
-		password = null;
-		this.token = token;
-
-		if (isReady()) {
-			((User) getOurUser()).convertToBot();
-		}
-	}
-
-	@Override
-	public List<IApplication> getApplications() throws RateLimitException, DiscordException {
-		if (isBot())
-			throw new DiscordException("This action can only be performed by a user");
-
-		List<IApplication> applications = new ArrayList<>();
-
-		ApplicationResponse[] responses = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS,
-				new BasicNameValuePair("authorization", getToken()),
-				new BasicNameValuePair("content-type", "application/json")), ApplicationResponse[].class);
-
-		for (ApplicationResponse response : responses)
-			applications.add(DiscordUtils.getApplicationFromJSON(this, response));
-
-		return applications;
-	}
-
-	@Override
-	public IApplication createApplication(String name) throws DiscordException, RateLimitException {
-		if (isBot())
-			throw new DiscordException("This action can only be performed by a user");
-
-		ApplicationResponse response = null;
-		try {
-			response = DiscordUtils.GSON.fromJson(REQUESTS.POST.makeRequest(DiscordEndpoints.APPLICATIONS,
-					new StringEntity(DiscordUtils.GSON.toJson(new ApplicationCreateRequest(name))),
-					new BasicNameValuePair("authorization", getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ApplicationResponse.class);
-			return DiscordUtils.getApplicationFromJSON(this, response);
-
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-
-		return null;
-	}
-
-	@Override
-	public LocalDateTime getLaunchTime() {
-		return launchTime;
-	}
-
 	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
-		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me",
-				new BasicNameValuePair("authorization", getToken()),
-				new BasicNameValuePair("content-type", "application/json")), ApplicationInfoResponse.class);
+		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me"),
+				ApplicationInfoResponse.class);
 	}
 
 	@Override
-	public String getDescription() throws DiscordException {
+	public String getApplicationDescription() throws DiscordException {
 		try {
 			return getApplicationInfo().description;
 		} catch (RateLimitException e) {
@@ -704,16 +238,239 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IUser getApplicationOwner() throws DiscordException {
 		try {
-			UserResponse owner = getApplicationInfo().owner;
+			UserObject owner = getApplicationInfo().owner;
 
 			IUser user = getUserByID(owner.id);
 			if (user == null)
-				user = DiscordUtils.getUserFromJSON(this, owner);
+				user = DiscordUtils.getUserFromJSON(getShards().get(0), owner);
 
 			return user;
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
 		return null;
+	}
+
+	private String obtainGateway() {
+		String gateway = null;
+		try {
+			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY),
+					GatewayResponse.class);
+			gateway = response.url + "?encoding=json&v=5";
+		} catch (RateLimitException | DiscordException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		}
+		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
+		return gateway;
+	}
+
+	private void validateToken() throws DiscordException, RateLimitException {
+		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me");
+	}
+
+	// Sharding delegation
+
+	@Override
+	public void login() throws DiscordException, RateLimitException {
+		if (!getShards().isEmpty()) {
+			throw new DiscordException("Attempt to login client more than once.");
+		}
+
+		validateToken();
+
+		String gateway = obtainGateway();
+		new RequestBuilder(this).setAsync(true).doAction(() -> {
+			for (int i = 0; i < shardCount; i++) {
+				final int shardNum = i;
+				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount});
+				getShards().add(shardNum, shard);
+				shard.login();
+
+				getDispatcher().waitFor((ShardReadyEvent e) -> true, 1, TimeUnit.MINUTES, () ->
+					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
+				);
+
+				if (i != shardCount - 1) { // all but last
+					Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
+					Thread.sleep(5000);
+				}
+			}
+			getDispatcher().dispatch(new ReadyEvent());
+			return true;
+		}).build();
+
+		if (!isDaemon) {
+			if (keepAlive == null) keepAlive = new Timer("DiscordClientImpl Keep Alive");
+			keepAlive.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					Discord4J.LOGGER.trace(LogMarkers.API, "DiscordClientImpl Keep Alive");
+				}
+			}, 0, 10000);
+		}
+	}
+
+	@Override
+	public void logout() throws DiscordException {
+		for (IShard shard : getShards()) {
+			shard.logout();
+		}
+		getShards().clear();
+		if (keepAlive != null) keepAlive.cancel();
+	}
+
+	@Override
+	public boolean isLoggedIn() {
+		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
+	}
+
+	@Override
+	public boolean isReady() {
+		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
+	}
+
+	@Override
+	public void changeStatus(Status status) {
+		getShards().forEach(shard -> shard.changeStatus(status));
+	}
+
+	@Override
+	public void changePresence(boolean isIdle) {
+		getShards().forEach(shard -> shard.changePresence(isIdle));
+	}
+
+	@Override
+	public List<IGuild> getGuilds() {
+		return getShards().stream()
+				.map(IShard::getGuilds)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IGuild getGuildByID(String guildID) {
+		return getGuilds().stream()
+				.filter(g -> g.getID().equals(guildID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IChannel> getChannels(boolean includePrivate) {
+		return getShards().stream()
+				.map(c -> c.getChannels(includePrivate))
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IChannel> getChannels() {
+		return getShards().stream()
+				.map(IShard::getChannels)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IChannel getChannelByID(String channelID) {
+		return getChannels(true).stream()
+				.filter(c -> c.getID().equals(channelID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IVoiceChannel> getVoiceChannels() {
+		return getShards().stream()
+				.map(IShard::getVoiceChannels)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IVoiceChannel> getConnectedVoiceChannels() {
+		return getOurUser().getConnectedVoiceChannels();
+	}
+
+	@Override
+	public IVoiceChannel getVoiceChannelByID(String id) {
+		return getVoiceChannels().stream()
+				.filter(vc -> vc.getID().equals(id))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IUser> getUsers() {
+		return getShards().stream()
+				.map(IShard::getUsers)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IUser getUserByID(String userID) {
+		return getUsers().stream()
+				.filter(u -> u.getID().equals(userID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IRole> getRoles() {
+		return getShards().stream()
+				.map(IShard::getRoles)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IRole getRoleByID(String roleID) {
+		return getRoles().stream()
+				.filter(r -> r.getID().equals(roleID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public List<IMessage> getMessages(boolean includePrivate) {
+		return getShards().stream()
+				.map(c -> c.getMessages(includePrivate))
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<IMessage> getMessages() {
+		return getShards().stream()
+				.map(IShard::getMessages)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IMessage getMessageByID(String messageID) {
+		return getMessages(true).stream()
+				.filter(m -> m.getID().equals(messageID))
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
+		IShard shard = getShards().stream().filter(s -> s.getUserByID(user.getID()) != null).findFirst().get();
+		return shard.getOrCreatePMChannel(user);
+	}
+
+	@Override
+	public IInvite getInviteForCode(String code) {
+		if (!isReady()) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite before bot is ready!");
+			return null;
+		}
+
+		InviteObject invite;
+		try {
+			invite = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
+		} catch (DiscordException | RateLimitException e) {
+			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite: ", e);
+			return null;
+		}
+
+		return invite == null ? null : DiscordUtils.getInviteFromJSON(this, invite);
 	}
 }

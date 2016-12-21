@@ -1,18 +1,16 @@
 package sx.blah.discord.util;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.api.internal.json.objects.MessageObject;
+import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
-import sx.blah.discord.api.internal.json.responses.MessageResponse;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -102,7 +100,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
-		RequestBuffer.request(() -> load(initialContents));
+		if (loadInitialMessages)
+			RequestBuffer.request(() -> load(initialContents));
 	}
 
 	/**
@@ -162,20 +161,19 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (initialSize != 0)
 			queryParams += "&before="+messageCache.getLast().getID();
 
-		String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams,
-				new BasicNameValuePair("authorization", client.getToken()));
+		String response = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams);
 
 		if (response == null)
 			return false;
 
-		MessageResponse[] messages = DiscordUtils.GSON.fromJson(response, MessageResponse[].class);
+		MessageObject[] messages = DiscordUtils.GSON.fromJson(response, MessageObject[].class);
 
 		if (messages.length == 0) {
 			return false;
 		}
 
-		for (MessageResponse messageResponse : messages) {
-			if (!add(DiscordUtils.getMessageFromJSON(client, channel, messageResponse), true))
+		for (MessageObject messageResponse : messages) {
+			if (!add(DiscordUtils.getMessageFromJSON(channel, messageResponse), true))
 				return false;
 		}
 
@@ -223,7 +221,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		return cacheChanged;
 	}
-	
+
 	/**
 	 * This checks if a message with the provided id is cached my this list.
 	 *
@@ -335,18 +333,14 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 */
 	public IMessage get(String id) {
 		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
-		
+
 		if (message == null && hasPermission && client.isReady())
 			try {
-				return DiscordUtils.getMessageFromJSON(client, channel,
-						DiscordUtils.GSON.fromJson(
-								client.REQUESTS.GET.makeRequest(
-										DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-										new BasicNameValuePair("content-type", "application/json"),
-										new BasicNameValuePair("authorization", client.getToken())),
-								MessageResponse.class));
+				return DiscordUtils.getMessageFromJSON(channel,
+						DiscordUtils.GSON.fromJson(client.REQUESTS.GET.makeRequest(
+								DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id), MessageObject.class));
 			} catch (Exception e) {}
-		
+
 		return message;
 	}
 
@@ -564,17 +558,15 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public void bulkDelete(List<IMessage> messages) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
-		if (!client.isBot())
-			throw new DiscordException("You must be a bot to bulk delete!");
+		if (channel.isPrivate())
+			throw new UnsupportedOperationException("Cannot bulk delete in private channels!");
 
 		if (messages.size() > 100)
 			throw new DiscordException("You can only delete 100 messages at a time!");
 
 		try {
-			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk_delete",
-					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))),
-					new BasicNameValuePair("content-type", "application/json"),
-					new BasicNameValuePair("authorization", client.getToken()));
+			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk-delete",
+					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 		}

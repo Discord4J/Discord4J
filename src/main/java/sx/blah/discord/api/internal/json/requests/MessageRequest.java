@@ -1,5 +1,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+
 /**
  * This request is sent to send a message
  */
@@ -16,19 +18,15 @@ public class MessageRequest {
 	public String content;
 
 	/**
-	 * The users mentioned in the message TODO: Remove
-	 */
-	@Deprecated
-	public String[] mentions;
-
-	/**
 	 * Whether or not the message should use tts.
 	 */
 	public boolean tts = false;
 
-	public MessageRequest(String content, String[] mentions, boolean tts) {
+	public EmbedObject embed;
+
+	public MessageRequest(String content, EmbedObject embed, boolean tts) {
 		this.content = content;
-		this.mentions = mentions;
 		this.tts = tts;
+		this.embed = embed;
 	}
 }

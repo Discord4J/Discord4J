@@ -7,23 +7,25 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
+import sx.blah.discord.api.internal.json.requests.WebhookCreateRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
-import sx.blah.discord.handle.impl.events.MessageSendEvent;
+import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
+import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
+import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.generic.PermissionOverwrite;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
-import sx.blah.discord.api.internal.json.requests.InviteRequest;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
-import sx.blah.discord.api.internal.json.responses.ChannelResponse;
-import sx.blah.discord.api.internal.json.responses.ExtendedInviteResponse;
-import sx.blah.discord.api.internal.json.responses.MessageResponse;
 import sx.blah.discord.util.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -43,11 +45,6 @@ public class Channel implements IChannel {
 	 * Messages that have been sent into this channel
 	 */
 	protected final MessageList messages;
-
-	/**
-	 * Indicates whether or not this channel is a PM channel.
-	 */
-	protected volatile boolean isPrivate;
 
 	/**
 	 * The guild this channel belongs to.
@@ -90,6 +87,11 @@ public class Channel implements IChannel {
 	protected final Map<String, PermissionOverride> roleOverrides;
 
 	/**
+	 * The webhooks for this channel.
+	 */
+	protected final List<IWebhook> webhooks;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
@@ -99,15 +101,16 @@ public class Channel implements IChannel {
 		this.name = name;
 		this.id = id;
 		this.parent = parent;
-		this.isPrivate = false;
 		this.topic = topic;
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
-		if (!(this instanceof IVoiceChannel))
+		if (!(this instanceof IVoiceChannel)) {
 			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
-		else
+		} else {
 			this.messages = null;
+		}
+		this.webhooks = new CopyOnWriteArrayList<>();
 	}
 
 
@@ -150,7 +153,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isPrivate() {
-		return isPrivate;
+		return this instanceof PrivateChannel;
 	}
 
 	@Override
@@ -179,86 +182,76 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException {
+		return sendMessage(content, null, tts);
+	}
+
+	@Override
+	public IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws RateLimitException,
+			DiscordException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
+
+		if (embed != null) {
+			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.EMBED_LINKS));
+		}
 
 		if (client.isReady()) {
 //            content = DiscordUtils.escapeString(content);
 
-			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], tts)), "UTF-8"),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, tts)), "UTF-8")), MessageObject.class);
 
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
-			return DiscordUtils.getMessageFromJSON(client, this, response);
+			return DiscordUtils.getMessageFromJSON(this, response);
 
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to send message before bot is ready!");
 			return null;
 		}
 	}
 
 	@Override
-	public IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
-
-		if (client.isReady()) {
-			InputStream is = new BufferedInputStream(stream);
-			MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-					.addBinaryBody("file", is, ContentType.APPLICATION_OCTET_STREAM, filename);
-
-			if (content != null)
-				builder.addTextBody("content", content);
-
-			HttpEntity fileEntity = builder.build();
-			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-					DiscordEndpoints.CHANNELS + id + "/messages",
-					fileEntity, new BasicNameValuePair("authorization", client.getToken())), MessageResponse.class);
-
-			if (response == null || response.id == null) //Message didn't send
-				throw new DiscordException("Message was unable to be sent.");
-
-			IMessage message = DiscordUtils.getMessageFromJSON(client, this, response);
-			client.getDispatcher().dispatch(new MessageSendEvent(message));
-			return message;
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
-			return null;
-		}
+	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException, MissingPermissionsException {
+		return sendFile(null, file);
 	}
 
 	@Override
-	public IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		return sendFile(stream, filename, null);
+	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFile(content, false, new FileInputStream(file), file.getName());
 	}
 
 	@Override
-	public IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		InputStream stream = new FileInputStream(file);
-		return sendFile(stream, file.getName(), content);
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
+
+		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+		if (content != null) builder.addTextBody("content", content, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+		builder.addTextBody("tts", String.valueOf(tts));
+		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
+
+		HttpEntity fileEntity = builder.build();
+		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages"
+				, fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data"));
+		MessageObject messageObject = DiscordUtils.GSON.fromJson(response, MessageObject.class);
+
+		return DiscordUtils.getMessageFromJSON(this, messageObject);
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException {
-		return sendFile(file, null);
-	}
-
-	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
 		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create invite before bot is ready!");
 			return null;
 		}
 
 		try {
-			ExtendedInviteResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
-					new StringEntity(DiscordUtils.GSON.toJson(new InviteRequest(maxAge, maxUses, temporary))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse.class);
+			ExtendedInviteObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
+					new StringEntity(DiscordUtils.GSON.toJson(new InviteCreateRequest(maxAge, maxUses, temporary, unique)))),
+					ExtendedInviteObject.class);
 
 			return DiscordUtils.getInviteFromJSON(client, response);
 		} catch (UnsupportedEncodingException e) {
@@ -286,8 +279,7 @@ public class Channel implements IChannel {
 						return;
 					}
 					try {
-						((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/typing",
-								new BasicNameValuePair("authorization", client.getToken()));
+						((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/typing");
 					} catch (RateLimitException | DiscordException e) {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 					}
@@ -311,13 +303,12 @@ public class Channel implements IChannel {
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);
+			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic)))),
+					ChannelObject.class);
 
 			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
+			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
 
 			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 		} catch (UnsupportedEncodingException e) {
@@ -342,7 +333,16 @@ public class Channel implements IChannel {
 
 	@Override
 	public int getPosition() {
-		return position;
+		getGuild().getChannels().sort((c1, c2) -> {
+			int originalPos1 = ((Channel) c1).position;
+			int originalPos2 = ((Channel) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return getGuild().getChannels().indexOf(this);
 	}
 
 	/**
@@ -358,8 +358,7 @@ public class Channel implements IChannel {
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id,
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id);
 	}
 
 	@Override
@@ -374,17 +373,11 @@ public class Channel implements IChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
-		if (isPrivate || getGuild().getOwnerID().equals(user.getID()))
+		if (isPrivate() || getGuild().getOwnerID().equals(user.getID()))
 			return EnumSet.allOf(Permissions.class);
 
 		List<IRole> roles = user.getRolesForGuild(parent);
-		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
-
-		roles.stream()
-				.map(this::getModifiedPermissions)
-				.flatMap(EnumSet::stream)
-				.filter(p -> !permissions.contains(p))
-				.forEach(permissions::add);
+		EnumSet<Permissions> permissions = user.getPermissionsForGuild(parent);
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		List<PermissionOverride> overrideRoles = roles.stream()
@@ -445,8 +438,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID(),
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID());
 
 		userOverrides.remove(user.getID());
 	}
@@ -455,8 +447,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID(),
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID());
 
 		roleOverrides.remove(role.getID());
 	}
@@ -476,10 +467,8 @@ public class Channel implements IChannel {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new PermissionOverwrite(type, id,
-							Permissions.generatePermissionsNumber(toRemove), Permissions.generatePermissionsNumber(toAdd)))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json"));
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new OverwriteObject(type, null,
+							Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -488,13 +477,12 @@ public class Channel implements IChannel {
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
-		ExtendedInviteResponse[] response = DiscordUtils.GSON.fromJson(
-				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites",
-						new BasicNameValuePair("authorization", client.getToken()),
-						new BasicNameValuePair("content-type", "application/json")), ExtendedInviteResponse[].class);
+		ExtendedInviteObject[] response = DiscordUtils.GSON.fromJson(
+				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites"),
+				ExtendedInviteObject[].class);
 
 		List<IInvite> invites = new ArrayList<>();
-		for (ExtendedInviteResponse inviteResponse : response)
+		for (ExtendedInviteObject inviteResponse : response)
 			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
 
 		return invites;
@@ -511,12 +499,12 @@ public class Channel implements IChannel {
 	@Override
 	public List<IMessage> getPinnedMessages() throws RateLimitException, DiscordException {
 		List<IMessage> messages = new ArrayList<>();
-		MessageResponse[] pinnedMessages = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins",
-				new BasicNameValuePair("authorization", client.getToken()),
-				new BasicNameValuePair("content-type", "application/json")), MessageResponse[].class);
+		MessageObject[] pinnedMessages = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.CHANNELS + id + "/pins"),
+				MessageObject[].class);
 
-		for (MessageResponse message : pinnedMessages)
-			messages.add(DiscordUtils.getMessageFromJSON(client, this, message));
+		for (MessageObject message : pinnedMessages)
+			messages.add(DiscordUtils.getMessageFromJSON(this, message));
 
 		return messages;
 	}
@@ -531,8 +519,7 @@ public class Channel implements IChannel {
 		if (message.isPinned())
 			throw new DiscordException("Message already pinned!");
 
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID());
 	}
 
 	@Override
@@ -545,8 +532,132 @@ public class Channel implements IChannel {
 		if (!message.isPinned())
 			throw new DiscordException("Message already unpinned!");
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID(),
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getID());
+	}
+
+	@Override
+	public List<IWebhook> getWebhooks() {
+		return webhooks;
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		return webhooks.stream()
+				.filter(w -> w.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		return webhooks.stream()
+				.filter(w -> w.getDefaultName().equals(name))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		return createWebhook(name, Image.defaultAvatar());
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		return createWebhook(name, avatar.getData());
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
+
+		if (!client.isReady()) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create webhook before bot is ready!");
+			return null;
+		}
+
+		if (name == null || name.length() < 2 || name.length() > 32)
+			throw new DiscordException("Webhook name can only be between 2 and 32 characters!");
+		try {
+			WebhookObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/webhooks",
+					new StringEntity(DiscordUtils.GSON.toJson(new WebhookCreateRequest(name, avatar)))),
+					WebhookObject.class);
+
+			IWebhook webhook = DiscordUtils.getWebhookFromJSON(this, response);
+			addWebhook(webhook);
+
+			return webhook;
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+		return null;
+	}
+
+	/**
+	 * CACHES a webhook to the channel.
+	 *
+	 * @param webhook The webhook.
+	 */
+	public void addWebhook(IWebhook webhook) {
+		if (!this.webhooks.contains(webhook))
+			this.webhooks.add(webhook);
+	}
+
+	/**
+	 * Removes a webhook from the CACHE of the channel.
+	 *
+	 * @param webhook The webhook.
+	 */
+	public void removeWebhook(IWebhook webhook) {
+		this.webhooks.remove(webhook);
+	}
+
+	public void loadWebhooks() {
+		try {
+			DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
+		} catch (MissingPermissionsException ignored) {
+			return;
+		}
+
+		RequestBuffer.request(() -> {
+			try {
+				List<IWebhook> oldList = getWebhooks()
+						.stream()
+						.map(IWebhook::copy)
+						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+
+				WebhookObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+						DiscordEndpoints.CHANNELS + getID() + "/webhooks"),
+						WebhookObject[].class);
+
+				if (response != null) {
+					for (WebhookObject webhookObject : response) {
+						if (getWebhookByID(webhookObject.id) == null) {
+							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(this, webhookObject);
+							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
+							addWebhook(newWebhook);
+						} else {
+							IWebhook toUpdate = getWebhookByID(webhookObject.id);
+							IWebhook oldWebhook = toUpdate.copy();
+							toUpdate = DiscordUtils.getWebhookFromJSON(this, webhookObject);
+							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
+								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, this));
+
+							oldList.remove(oldWebhook);
+						}
+					}
+				}
+
+				oldList.forEach(webhook -> {
+					removeWebhook(webhook);
+					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
+				});
+			} catch (Exception e) {
+				Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+			}
+		});
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return getGuild().getChannelByID(id) != this;
 	}
 
 	@Override
@@ -561,6 +672,12 @@ public class Channel implements IChannel {
 	@Override
 	public IDiscordClient getClient() {
 		return client;
+	}
+
+	@Override
+	public IShard getShard() {
+		if (isPrivate()) return getClient().getShards().get(0);
+		return getGuild().getShard();
 	}
 
 	@Override

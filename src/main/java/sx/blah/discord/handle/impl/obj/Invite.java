@@ -5,10 +5,10 @@ import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.api.internal.json.responses.InviteJSONResponse;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 
@@ -36,44 +36,23 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public InviteResponse accept() throws DiscordException, RateLimitException {
-		if (client.isBot())
-			throw new DiscordException("This action can only be performed by a user");
-
-		if (client.isReady()) {
-			String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.INVITE+inviteCode,
-					new BasicNameValuePair("authorization", client.getToken()));
-
-			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
-
-			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
-					inviteResponse.channel.id, inviteResponse.channel.name);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
-			return null;
-		}
-	}
-
-	@Override
 	public InviteResponse details() throws DiscordException, RateLimitException {
 		if (client.isReady()) {
-			String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode,
-					new BasicNameValuePair("authorization", client.getToken()));
+			String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode);
 
-			InviteJSONResponse inviteResponse = new Gson().fromJson(response, InviteJSONResponse.class);
+			InviteObject inviteResponse = new Gson().fromJson(response, InviteObject.class);
 
 			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
 					inviteResponse.channel.id, inviteResponse.channel.name);
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to get invite details before bot is ready!");
 			return null;
 		}
 	}
 
 	@Override
 	public void delete() throws RateLimitException, DiscordException {
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode,
-				new BasicNameValuePair("authorization", client.getToken()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode);
 	}
 
 	@Override

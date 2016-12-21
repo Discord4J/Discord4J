@@ -34,11 +34,11 @@ import java.util.zip.ZipEntry;
 /**
  * Internal class used to load the Java Service Provider Interfaces used by JDA.
  */
-public class ServiceUtil {
-    public static final Map<Class, List<String>> SERVICES;  //Populated at the bottom of this file.
-    public static final String SERVICES_DIRECTORY = "META-INF/services/";
+class ServiceUtil {
+    private static final Map<Class, List<String>> SERVICES;  //Populated at the bottom of this file.
+	private static final String SERVICES_DIRECTORY = "META-INF/services/";
 
-    public static void loadServices() {
+    static void loadServices() {
         File servicesJar = null;
         FileOutputStream fos = null;
         JarOutputStream zos = null;

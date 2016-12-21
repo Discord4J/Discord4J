@@ -221,6 +221,17 @@ public class RequestBuilder {
 	}
 
 	/**
+	 * This creates a handler for when the current action times out on doActionBefore or doActionAfter
+	 *
+	 * @param timeoutProcedure The timeout handler.
+	 * @return The builder instance.
+	 */
+	public RequestBuilder onTimeout(Procedure timeoutProcedure) {
+		activeAction.timeoutHandler = timeoutProcedure;
+		return this;
+	}
+
+	/**
 	 * This creates a new active action which will be executed after the current one succeeds.
 	 *
 	 * @param action The action to run.
@@ -330,6 +341,7 @@ public class RequestBuilder {
 		private volatile Consumer<RateLimitException> rateLimitHandler = (RateLimitException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
 		private volatile Consumer<MissingPermissionsException> missingPermissionHandler = (MissingPermissionsException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
 		private volatile Consumer<DiscordException> discordExceptionHandler = (DiscordException e) -> Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught executing action!", e);
+		private volatile Procedure timeoutHandler = () -> Discord4J.LOGGER.debug(LogMarkers.UTIL, "Action timed out.");
 		private volatile ActionMode mode = ActionMode.ALWAYS;
 
 		/**
@@ -345,7 +357,7 @@ public class RequestBuilder {
 
 			try {
 				if (waitBefore != null)
-					client.getDispatcher().waitFor(waitBefore, waitBeforeTimeout);
+					client.getDispatcher().waitFor(waitBefore, waitBeforeTimeout, TimeUnit.MILLISECONDS, timeoutHandler);
 
 				if (bufferRequests) {
 					Future<Boolean> futureResult = RequestBuffer.request(() -> {
@@ -369,7 +381,7 @@ public class RequestBuilder {
 				}
 
 				if (waitAfter != null)
-					client.getDispatcher().waitFor(waitAfter, waitAfterTimeout);
+					client.getDispatcher().waitFor(waitAfter, waitAfterTimeout, TimeUnit.MILLISECONDS, timeoutHandler);
 
 			} catch (RateLimitException e) {
 				rateLimitHandler.accept(e);

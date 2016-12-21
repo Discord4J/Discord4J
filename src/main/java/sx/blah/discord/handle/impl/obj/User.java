@@ -1,9 +1,9 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
@@ -41,6 +41,10 @@ public class User implements IUser {
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
+	/**
+	 * The shard this object belongs to.
+	 */
+	protected final IShard shard;
 	/**
 	 * The muted status of this user. (Key = guild id).
 	 */
@@ -88,9 +92,9 @@ public class User implements IUser {
 	 */
 	private volatile boolean isDeafLocally;
 
-	public User(IDiscordClient client, String name, String id, String discriminator, String avatar, Presences presence,
-				boolean isBot) {
-		this.client = client;
+	public User(IShard shard, String name, String id, String discriminator, String avatar, Presences presence, boolean isBot) {
+		this.shard = shard;
+		this.client = shard.getClient();
 		this.id = id;
 		this.name = name;
 		this.discriminator = discriminator;
@@ -207,6 +211,13 @@ public class User implements IUser {
 	}
 
 	@Override
+	public EnumSet<Permissions> getPermissionsForGuild(IGuild guild){
+		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
+		getRolesForGuild(guild).forEach(iRole -> permissions.addAll(iRole.getPermissions()));
+		return permissions;
+	}
+
+	@Override
 	public Optional<String> getNicknameForGuild(IGuild guild) {
 		return Optional.ofNullable(nicks.containsKey(guild.getID()) ? nicks.get(guild.getID()) : null);
 	}
@@ -242,7 +253,7 @@ public class User implements IUser {
 
 	@Override
 	public IUser copy() {
-		User newUser = new User(client, name, id, discriminator, avatar, presence, isBot);
+		User newUser = new User(shard, name, id, discriminator, avatar, presence, isBot);
 		newUser.setStatus(this.status);
 		for (String key : isMuted.keySet())
 			newUser.setIsMute(key, isMuted.get(key));
@@ -288,10 +299,7 @@ public class User implements IUser {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH
 					.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-							new StringEntity(
-									DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))),
-							new BasicNameValuePair("authorization", client.getToken()),
-							new BasicNameValuePair("content-type", "application/json"));
+							new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -371,6 +379,11 @@ public class User implements IUser {
 	}
 
 	@Override
+	public IShard getShard() {
+		return shard;
+	}
+
+	@Override
 	public String toString() {
 		return mention();
 	}
@@ -390,17 +403,13 @@ public class User implements IUser {
 
 	@Override
 	public void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
-		IGuild guild = role.getGuild();
-		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
-		roleList.add(role);
-		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}
 
 	@Override
 	public void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
-		IGuild guild = role.getGuild();
-		List<IRole> roleList = new ArrayList<>(getRolesForGuild(guild));
-		roleList.remove(role);
-		guild.editUserRoles(this, roleList.toArray(new IRole[roleList.size()]));
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}
 }

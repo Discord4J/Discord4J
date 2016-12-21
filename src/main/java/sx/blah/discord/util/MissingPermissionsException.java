@@ -10,23 +10,33 @@ import java.util.StringJoiner;
  */
 public class MissingPermissionsException extends Exception {
 
-	private EnumSet<Permissions> missing;
+	private final EnumSet<Permissions> missing;
+
+	public MissingPermissionsException(String reason, EnumSet<Permissions> missing) {
+		super(reason);
+		this.missing = missing;
+	}
 
 	public MissingPermissionsException(EnumSet<Permissions> permissionsMissing) {
 		super(getMessage(permissionsMissing));
 		missing = permissionsMissing;
 	}
 
-	public MissingPermissionsException(String message) {
-		super(message);
-	}
-
 	private static String getMessage(EnumSet<Permissions> permissions) {
 		StringJoiner joiner = new StringJoiner(", ");
 		permissions.stream()
-				.map(p -> p.name())
-				.forEach(p -> joiner.add(p));
-		return "Missing permissions: "+joiner.toString()+"!";
+				.map(Enum::name)
+				.forEach(joiner::add);
+		return "Missing permissions: " + joiner.toString() + "!";
+	}
+
+	/**
+	 * Gets the missing permissions.
+	 *
+	 * @return The permissions.
+	 */
+	public EnumSet<Permissions> getMissingPermissions() {
+		return missing;
 	}
 
 	/**

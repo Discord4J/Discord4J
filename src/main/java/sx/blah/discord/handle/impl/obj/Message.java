@@ -1,14 +1,15 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
-import sx.blah.discord.api.internal.json.responses.MessageResponse;
 import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
@@ -16,6 +17,8 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -73,12 +76,22 @@ public class Message implements IMessage {
 	/**
 	 * The Embeds, if any, on the message.
 	 */
-	protected volatile List<Embedded> embedded;
+	protected volatile List<Embed> embedded;
 
 	/**
 	 * Whether the message mentions everyone.
 	 */
 	protected volatile boolean mentionsEveryone;
+
+	/**
+	 * Whether the message mentions all online users.
+	 */
+	protected volatile boolean mentionsHere;
+
+	/**
+	 * Whether the everyone mention is valid (has permission).
+	 */
+	protected volatile boolean everyoneMentionIsValid;
 
 	/**
 	 * Whether the message has been pinned to its channel or not.
@@ -96,17 +109,38 @@ public class Message implements IMessage {
 	protected final IDiscordClient client;
 
 	/**
+	 * The formatted content. It's cached until the content changes, and this gets re-set to null. This is
+	 * only made when a call to getFormattedContent is made.
+	 */
+	protected volatile String formattedContent = null;
+
+	/**
+	 * The list of reactions
+	 */
+	protected volatile List<IReaction> reactions;
+
+	/**
+	 * The ID of the webhook that sent this message
+	 */
+	protected final String webhookID;
+
+	/**
 	 * The pattern for matching channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
 
+	/**
+	 * Cached value of isDeleted()
+	 */
+	private volatile boolean deleted = false;
+
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embedded> embedded) {
+				   boolean pinned, List<Embed> embedded, List<IReaction> reactions, String webhookID) {
 		this.client = client;
 		this.id = id;
-		this.content = content;
+		setContent(content);
 		this.author = (User) user;
 		this.channel = (Channel) channel;
 		this.timestamp = timestamp;
@@ -114,10 +148,12 @@ public class Message implements IMessage {
 		this.mentions = mentions;
 		this.roleMentions = roleMentions;
 		this.attachments = attachments;
-		this.mentionsEveryone = mentionsEveryone;
 		this.isPinned = pinned;
 		this.channelMentions = new ArrayList<>();
 		this.embedded = embedded;
+		this.everyoneMentionIsValid = mentionsEveryone;
+		this.reactions = reactions;
+		this.webhookID = webhookID;
 
 		setChannelMentions();
 	}
@@ -134,12 +170,18 @@ public class Message implements IMessage {
 	 */
 	public void setContent(String content) {
 		this.content = content;
+		this.formattedContent = null; // Force re-update later
+
+		if (content != null) {
+			this.mentionsEveryone = content.contains("@everyone");
+			this.mentionsHere = content.contains("@here");
+		}
 	}
 
 	/**
 	 * Sets the CACHED mentions in this message.
 	 *
-	 * @param mentions The new user mentions.
+	 * @param mentions     The new user mentions.
 	 * @param roleMentions The new role mentions.
 	 */
 	public void setMentions(List<String> mentions, List<String> roleMentions) {
@@ -180,7 +222,7 @@ public class Message implements IMessage {
 	 *
 	 * @param attachments The new attachements.
 	 */
-	public void setEmbedded(List<Embedded> attachments) {
+	public void setEmbedded(List<Embed> attachments) {
 		this.embedded = attachments;
 	}
 
@@ -240,39 +282,56 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public List<IEmbedded> getEmbedded() {
-		List<IEmbedded> interfaces = new ArrayList<>();
-		for(Embedded embed : embedded)
+	public List<IEmbed> getEmbedded() {
+		List<IEmbed> interfaces = new ArrayList<>();
+		for (Embed embed : embedded)
 			interfaces.add(embed);
 		return interfaces;
 	}
 
 	@Override
 	public void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
-		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content));
+		reply(content, null);
+	}
+
+	@Override
+	public void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
 	}
 
 	@Override
 	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
+		return edit(content, null);
+	}
+
+	@Override
+	public IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
 		if (!this.getAuthor().equals(client.getOurUser()))
-			throw new MissingPermissionsException("Cannot edit other users' messages!");
+			throw new MissingPermissionsException("Cannot edit other users' messages!", EnumSet.noneOf(Permissions.class));
+		if (isDeleted())
+			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
 //			content = DiscordUtils.escapeString(content);
 
-			MessageResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new MessageRequest(content, new String[0], false)), "UTF-8"),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), MessageResponse.class);
+			if (embed != null) {
+				DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
+			}
+
+			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)), "UTF-8")),
+					MessageObject.class);
 
 			IMessage oldMessage = copy();
-			DiscordUtils.getMessageFromJSON(client, channel, response);
+			DiscordUtils.getMessageFromJSON(channel, response);
 			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
 			// the event chain goes like this:
 			//Original message edited to null, then the null message edited to the new content
 			client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
 
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to edit message before bot is ready!");
 		}
 		return this;
 	}
@@ -297,7 +356,12 @@ public class Message implements IMessage {
 
 	@Override
 	public boolean mentionsEveryone() {
-		return mentionsEveryone;
+		return everyoneMentionIsValid && mentionsEveryone;
+	}
+
+	@Override
+	public boolean mentionsHere() {
+		return everyoneMentionIsValid && mentionsHere;
 	}
 
 	/**
@@ -319,10 +383,9 @@ public class Message implements IMessage {
 		}
 
 		if (client.isReady()) {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages/"+id,
-					new BasicNameValuePair("authorization", client.getToken()));
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id);
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to delete message before bot is ready!");
 		}
 	}
 
@@ -356,8 +419,8 @@ public class Message implements IMessage {
 
 	@Override
 	public IMessage copy() {
-		return new Message(client, id, content, author, channel, timestamp, editedTimestamp,
-				mentionsEveryone, mentions, roleMentions, attachments, isPinned, embedded);
+		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
+				mentions, roleMentions, attachments, isPinned, embedded, reactions, webhookID);
 	}
 
 	@Override
@@ -366,8 +429,162 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public String getFormattedContent() {
+		if (content == null)
+			return null;
+
+		if (formattedContent == null) {
+			String currentContent = content;
+
+			for (IUser u : getMentions())
+				currentContent = currentContent.replace(u.mention(false), "@" + u.getName())
+						.replace(u.mention(true), "@" + u.getDisplayName(getGuild()));
+
+			for (IChannel ch : getChannelMentions())
+				currentContent = currentContent.replace(ch.mention(), "#" + ch.getName());
+
+			for (IRole r : getRoleMentions())
+				currentContent = currentContent.replace(r.mention(), "@" + r.getName());
+
+			formattedContent = currentContent;
+		}
+
+		return formattedContent;
+	}
+
+	public void setReactions(List<IReaction> reactions) {
+		this.reactions = reactions;
+	}
+
+	@Override
+	public List<IReaction> getReactions() {
+		return reactions;
+	}
+
+	@Override
+	public IReaction getReactionByIEmoji(IEmoji emoji) {
+		if (emoji == null)
+			return null;
+		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji() != null &&
+				r.getCustomEmoji().equals(emoji)).findFirst().orElse(null);
+	}
+
+	@Override
+	public IReaction getReactionByName(String name) {
+		if (name == null)
+			return null;
+		return reactions.stream().filter(r -> r != null && !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
+				.orElse(null);
+	}
+
+	@Override
+	public void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException {
+		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+
+		((DiscordClientImpl) client).REQUESTS.DELETE
+				.makeRequest(String.format(DiscordEndpoints.REACTIONS, this.getChannel().getID(), this.getID()));
+	}
+
+	@Override
+	public void addReaction(IReaction reaction) throws MissingPermissionsException,
+			RateLimitException, DiscordException {
+		if (reaction == null)
+			throw new NullPointerException("Reaction argument cannot be null.");
+
+		if (!reaction.getMessage().equals(this))
+			throw new DiscordException("Reaction argument's message does not match this one.");
+
+		if (reaction.isCustomEmoji())
+			addReaction(reaction.getCustomEmoji());
+		else
+			addReaction(reaction.toString());
+	}
+
+	@Override
+	public void addReaction(IEmoji emoji) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		addReaction(emoji.toString());
+	}
+
+	@Override
+	public void addReaction(String emoji) throws MissingPermissionsException, RateLimitException, DiscordException {
+		emoji = emoji.replace("<:", "").replace(">", "");
+
+		if (emoji.matches("\\d+")) {
+			IEmoji em = getGuild().getEmojiByID(emoji);
+			if (em != null) {
+				emoji = em.getName() + ":" + em.getID();
+			}
+		}
+
+		if (this.getReactionByName(emoji) == null)
+			DiscordUtils.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getID(), getID(),
+							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		IMessage message = reaction.getMessage();
+		if (!this.equals(message))
+			throw new DiscordException("Reaction argument's message does not match this one.");
+
+		if (!user.equals(client.getOurUser())) {
+			DiscordUtils.checkPermissions(client.getOurUser(), message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+		}
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS_USER, message.getChannel().getID(), message.getID(),
+							reaction.isCustomEmoji()
+									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getID())
+									: URLEncoder.encode(reaction.toString(), "UTF-8").replace("+", "%20"),
+							user.equals(client.getOurUser()) ? "@me" : getID()));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
+			DiscordException {
+		removeReaction(client.getOurUser(), reaction);
+	}
+
+	@Override
+	public String getWebhookID(){
+		return webhookID;
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	/**
+	 * Sets the CACHED deleted value.
+	 *
+	 * @param deleted The value to assign into the cache.
+	 */
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+
+	@Override
 	public IDiscordClient getClient() {
 		return client;
+	}
+
+	@Override
+	public IShard getShard() {
+		return getChannel().getShard();
 	}
 
 	@Override

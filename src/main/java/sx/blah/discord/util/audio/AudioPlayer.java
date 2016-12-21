@@ -21,6 +21,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -248,7 +249,13 @@ public class AudioPlayer implements IAudioProvider {
 	 * @return The {@link Track} object representing this audio provider.
 	 */
 	public Track queue(IAudioProvider provider) {
-		Track track = new Track(provider);
+		Track track;
+
+		if (provider instanceof AudioInputStreamProvider)
+			track = new Track((AudioInputStreamProvider) provider);
+		else
+			track = new Track(provider);
+
 		queue(track);
 		return track;
 	}
@@ -313,16 +320,20 @@ public class AudioPlayer implements IAudioProvider {
 	 * This shuffles the playlist in the queue.
 	 */
 	public synchronized void shuffle() {
-		getCurrentTrack().rewindTo(0);
-		Collections.shuffle(trackQueue);
+		if (trackQueue.size() > 0) {
+			getCurrentTrack().rewindTo(0);
+			Collections.shuffle(trackQueue);
 
-		client.getDispatcher().dispatch(new ShuffleEvent(this));
+			client.getDispatcher().dispatch(new ShuffleEvent(this));
+		}
 	}
 
 	/**
 	 * This skips the current track.
+	 *
+	 * @return The track skipped. (null if the playlist is empty)
 	 */
-	public void skip() {
+	public Track skip() {
 		if (trackQueue.size() > 0) {
 			Track track = trackQueue.remove(0);
 
@@ -336,18 +347,23 @@ public class AudioPlayer implements IAudioProvider {
 			} else {
 				track.close();
 			}
+			return track;
 		}
+		return null;
 	}
 
 	/**
 	 * This skips until the playlist is playing the specified track.
 	 *
 	 * @param desiredPosition The playlist spot to skip to.
+	 * @return A list of all tracks skipped (if any)
 	 */
-	public void skipTo(int desiredPosition) {
+	public List<Track> skipTo(int desiredPosition) {
 		desiredPosition = Math.max(0, desiredPosition);
+		List<Track> skipped = new ArrayList<>();
 		for (int i = 0; i < desiredPosition; i++)
-			skip();
+			skipped.add(skip());
+		return skipped;
 	}
 
 	/**
@@ -465,11 +481,11 @@ public class AudioPlayer implements IAudioProvider {
 			stream = null;
 		}
 
-		public Track(AudioInputStreamProvider provider) throws IOException {
+		public Track(AudioInputStreamProvider provider) {
 			this(provider.getStream());
 		}
 
-		public Track(AudioInputStream stream) throws IOException {
+		public Track(AudioInputStream stream) {
 			this.stream = new AmplitudeAudioInputStream(DiscordUtils.getPCMStream(stream));
 			this.provider = new AudioInputStreamProvider(this.stream);
 

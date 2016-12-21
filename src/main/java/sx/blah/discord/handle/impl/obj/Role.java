@@ -1,22 +1,22 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.RoleObject;
+import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.handle.impl.events.RoleUpdateEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.api.internal.json.generic.RoleResponse;
-import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
 import java.io.UnsupportedEncodingException;
@@ -86,7 +86,16 @@ public class Role implements IRole {
 
 	@Override
 	public int getPosition() {
-		return position;
+		getGuild().getRoles().sort((r1, r2) -> {
+			int originalPos1 = ((Role) r1).position;
+			int originalPos2 = ((Role) r2).position;
+			if (originalPos1 == originalPos2) {
+				return r2.getCreationDate().compareTo(r1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return getGuild().getRoles().indexOf(this);
 	}
 
 	/**
@@ -187,13 +196,12 @@ public class Role implements IRole {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
-			RoleResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
+			RoleObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
 					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
 							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions()),
-							isMentionable.orElse(isMentionable())))),
-					new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), RoleResponse.class);
+							isMentionable.orElse(isMentionable()))))),
+					RoleObject.class);
 
 			IRole oldRole = copy();
 			IRole newRole = DiscordUtils.getRoleFromJSON(guild, response);
@@ -233,8 +241,7 @@ public class Role implements IRole {
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		((DiscordClientImpl) guild.getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
-				new BasicNameValuePair("authorization", ((Guild) guild).client.getToken()));
+		((DiscordClientImpl) guild.getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);
 	}
 
 	@Override
@@ -246,12 +253,22 @@ public class Role implements IRole {
 
 	@Override
 	public IDiscordClient getClient() {
-		return guild.getClient();
+		return getGuild().getClient();
+	}
+
+	@Override
+	public IShard getShard() {
+		return getGuild().getShard();
 	}
 
 	@Override
 	public boolean isEveryoneRole() {
 		return guild.getEveryoneRole().equals(this);
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return getGuild().getRoleByID(id) != this;
 	}
 
 	@Override

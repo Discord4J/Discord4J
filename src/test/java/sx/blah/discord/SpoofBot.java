@@ -104,7 +104,7 @@ public class SpoofBot {
 												try {
 													invite = client.getGuilds().get(0).getChannels().get(
 															rng.nextInt(client.getGuilds().get(0).getChannels().size()))
-															.createInvite(18000, 1, false);
+															.createInvite(18000, 1, false, false);
 												} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 													e.printStackTrace();
 												}

@@ -1,5 +1,7 @@
 package sx.blah.discord.api.internal.json.responses;
 
+import sx.blah.discord.api.internal.json.objects.UserObject;
+
 /**
  * This is received in response to a request to discord regarding the bot's application information.
  */
@@ -28,5 +30,5 @@ public class ApplicationInfoResponse {
 	/**
 	 * The application's owner.
 	 */
-	public UserResponse owner;
+	public UserObject owner;
 }

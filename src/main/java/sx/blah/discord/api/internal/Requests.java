@@ -169,6 +169,16 @@ public class Requests {
 		}
 
 		private String request(HttpUriRequest request) throws DiscordException, RateLimitException {
+			request.addHeader("Authorization", client.getToken());
+
+			if (request.containsHeader("Content-Type")) {
+				if (request.getFirstHeader("Content-Type").getValue().equals("multipart/form-data")) {
+					request.removeHeaders("Content-Type");
+				}
+			} else {
+				request.addHeader("Content-Type", "application/json");
+			}
+
 			if (globalRetryAfter.get() != -1) {
 				if (System.currentTimeMillis() > globalRetryAfter.get())
 					globalRetryAfter.set(-1);
@@ -204,7 +214,7 @@ public class Requests {
 					message = EntityUtils.toString(response.getEntity());
 
 				if (responseCode == 404) {
-					if (!request.getURI().toString().contains("invite"))
+					if (!request.getURI().toString().contains("invite") && !request.getURI().toString().contains("messages")) //Suppresses common 404s which are a result on queries to verify if something exists or not
 					    LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
 					return null;
 				} else if (responseCode == 403) {

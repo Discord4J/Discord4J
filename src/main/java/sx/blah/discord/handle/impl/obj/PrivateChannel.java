@@ -2,6 +2,7 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.RateLimitException;
@@ -18,7 +19,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
 		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
 		this.recipient = recipient;
-		this.isPrivate = true;
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -150,6 +150,41 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
+	public List<IWebhook> getWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void loadWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public List<IUser> getUsersHere() {
 		return Collections.singletonList(recipient);
 	}
@@ -167,5 +202,10 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	@Override
 	public IPrivateChannel copy() {
 		return new PrivateChannel(client, recipient, id);
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return false;
 	}
 }

@@ -1,48 +1,25 @@
 package sx.blah.discord.api.internal.json.requests;
 
-/**
- * This request is sent to resume a connection after being redirected.
- */
 public class ResumeRequest {
 
 	/**
-	 * The payload for this request.
+	 * The session token
 	 */
-	public ResumeObject d;
+	public String token;
 
 	/**
-	 * 6 is the opcode for resumes.
+	 * The session id to resume.
 	 */
-	public int op = 6;
-
-	public ResumeRequest(String session_id, long seq, String token) {
-		d = new ResumeObject(session_id, seq, token);
-	}
+	public String session_id;
 
 	/**
-	 * The payload to send regarding resume info.
+	 * This is the last cached value of {@link sx.blah.discord.api.internal.json.GatewayPayload#s}
 	 */
-	public static class ResumeObject {
+	public long seq;
 
-		/**
-		 * The session id to resume.
-		 */
-		public String session_id;
-
-		/**
-		 * This is the last cached value of {@link sx.blah.discord.api.internal.json.responses.EventResponse#s}.
-		 */
-		public long seq;
-
-		/**
-		 * The session token
-		 */
-		public String token;
-
-		public ResumeObject(String session_id, long seq, String token) {
-			this.session_id = session_id;
-			this.seq = seq;
-			this.token = token;
-		}
+	public ResumeRequest(String token, String session_id, long seq) {
+		this.token = token;
+		this.session_id = session_id;
+		this.seq = seq;
 	}
 }

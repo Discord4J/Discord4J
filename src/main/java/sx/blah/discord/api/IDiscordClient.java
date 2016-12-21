@@ -1,6 +1,5 @@
 package sx.blah.discord.api;
 
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
@@ -9,10 +8,8 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents the main discord api.
@@ -34,6 +31,18 @@ public interface IDiscordClient {
 	ModuleLoader getModuleLoader();
 
 	/**
+	 * Gets the list of shards this client manages.
+	 * @return The shards.
+	 */
+	List<IShard> getShards();
+
+	/**
+	 * Gets the total number of shards this client manages. Purely for convenience.
+	 * @return The shard count.
+	 */
+	int getShardCount();
+
+	/**
 	 * Gets the authorization token for this client.
 	 *
 	 * @return The authorization token.
@@ -41,27 +50,18 @@ public interface IDiscordClient {
 	String getToken();
 
 	/**
-	 * Logs the client in as the provided account.
-	 *
-	 * @param async Whether to wait for all guilds before dispatching the {@link sx.blah.discord.handle.impl.events.ReadyEvent}.
+	 * Logs in every shard this client manages.
 	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
-	void login(boolean async) throws DiscordException;
+	void login() throws DiscordException, RateLimitException;
 
 	/**
-	 * Logs the client in as the provided account.
+	 * Logs out every shard this client manages.
 	 *
-	 * @throws DiscordException This is thrown if there is an error logging in.
+	 * @throws DiscordException
 	 */
-	void login() throws DiscordException;
-
-	/**
-	 * Logs out the client.
-	 *
-	 * @throws RateLimitException
-	 */
-	void logout() throws RateLimitException, DiscordException;
+	void logout() throws DiscordException;
 
 	/**
 	 * Changes this client's account's username.
@@ -73,24 +73,6 @@ public interface IDiscordClient {
 	void changeUsername(String username) throws DiscordException, RateLimitException;
 
 	/**
-	 * Changes this client's account's email.
-	 *
-	 * @param email The new email.
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	void changeEmail(String email) throws DiscordException, RateLimitException;
-
-	/**
-	 * Changes this client's account's password.
-	 *
-	 * @param password The new password.
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	void changePassword(String password) throws DiscordException, RateLimitException;
-
-	/**
 	 * Changes this client's account's avatar.
 	 *
 	 * @param avatar The new avatar.
@@ -100,25 +82,34 @@ public interface IDiscordClient {
 	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
 
 	/**
-	 * Changes this user's presence.
+	 * Changes this user's presence on all shards.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.
 	 */
 	void changePresence(boolean isIdle);
 
 	/**
-	 * Changes the status of the bot user.
+	 * Changes the status of the bot user on all shards.
 	 *
 	 * @param status The new status to use.
 	 */
 	void changeStatus(Status status);
 
 	/**
-	 * Checks if the api is ready to be interacted with (if it is logged in).
+	 * Checks if the api is ready to be interacted with on all shards.
+	 * @see IShard#isReady()
 	 *
 	 * @return True if ready, false if otherwise.
 	 */
 	boolean isReady();
+
+	/**
+	 * Checks if the api has established a connection with the Discord gateway on all shards.
+	 * @see IShard#isLoggedIn()
+	 *
+	 * @return True if logged in, false if otherwise.
+	 */
+	boolean isLoggedIn();
 
 	/**
 	 * Gets the {@link User} this bot is representing.
@@ -126,7 +117,6 @@ public interface IDiscordClient {
 	 * @return The user object.
 	 */
 	IUser getOurUser();
-
 
 	/**
 	 * Gets a set of all channels visible to the bot user.
@@ -248,7 +238,7 @@ public interface IDiscordClient {
 	/**
 	 * Gets the invite for a code.
 	 *
-	 * @param code The invite code or xkcd pass.
+	 * @param code The invite code.
 	 * @return The invite, or null if it doesn't exist.
 	 */
 	IInvite getInviteForCode(String code);
@@ -272,79 +262,11 @@ public interface IDiscordClient {
 	IRegion getRegionByID(String regionID);
 
 	/**
-	 * Creates a new guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param region The region for the guild.
-	 * @return The new guild's id.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	IGuild createGuild(String name, IRegion region) throws RateLimitException, DiscordException;
-
-	/**
-	 * Creates a new guild.
-	 *
-	 * @param name The name of the guild.
-	 * @param region The region for the guild.
-	 * @param icon The icon for the guild.
-	 * @return The new guild's id.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	IGuild createGuild(String name, IRegion region, Image icon) throws RateLimitException, DiscordException;
-
-	/**
-	 * Gets the latest response time by the discord websocket to a ping.
-	 *
-	 * @return The response time (in ms).
-	 */
-	long getResponseTime();
-
-	/**
 	 * Gets the connected voice channels.
 	 *
 	 * @return The voice channels.
 	 */
 	List<IVoiceChannel> getConnectedVoiceChannels();
-
-	/**
-	 * Gets whether or not this client represents a bot account.
-	 *
-	 * @return True if a bot, false if otherwise.
-	 */
-	boolean isBot();
-
-	/**
-	 * Gets the applications owned by this user.
-	 *
-	 * @return The list of owned applications.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	List<IApplication> getApplications() throws RateLimitException, DiscordException;
-
-	/**
-	 * Creates a new application for this user.
-	 *
-	 * @param name The name of the application.
-	 * @return The application object.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 */
-	IApplication createApplication(String name) throws DiscordException, RateLimitException;
-
-	/**
-	 * Gets the time when this client was last logged into. Useful for keeping track of uptime.
-	 * Note: See {@link Discord4J#getLaunchTime()} for uptime of the bot application as a whole.
-	 *
-	 * @return The launch time.
-	 */
-	LocalDateTime getLaunchTime();
 
 	/**
 	 * Gets the application description for this bot.
@@ -353,7 +275,7 @@ public interface IDiscordClient {
 	 *
 	 * @throws DiscordException
 	 */
-	String getDescription() throws DiscordException;
+	String getApplicationDescription() throws DiscordException;
 
 	/**
 	 * Gets the url leading to this bot's application's icon.

@@ -1,9 +1,10 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,6 +87,14 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return The roles.
 	 */
 	List<IRole> getRolesForGuild(IGuild guild);
+
+	/**
+	 * Gets the permissions the user has on the guild.
+	 *
+	 * @param guild The guild to check the permissions for.
+	 * @return The permissions.
+       */
+	EnumSet<Permissions> getPermissionsForGuild(IGuild guild);
 
 	/**
 	 * Gets the nickname for this user in this guild.
@@ -182,5 +191,4 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws MissingPermissionsException
 	 */
 	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
-
 }

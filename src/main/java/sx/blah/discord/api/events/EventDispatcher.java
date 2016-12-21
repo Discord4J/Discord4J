@@ -3,13 +3,17 @@ package sx.blah.discord.api.events;
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.api.IShard;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -165,7 +169,23 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit) throws InterruptedException {
-		waitFor((T event) -> true, time, unit);
+		waitFor((T event) -> true, time, unit, () -> {});
+	}
+
+	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched.
+	 *
+	 * @param eventClass The class of the event to wait for.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
+	 * event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param onTimeout The procedure to execute when the timeout is reached.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
+		waitFor((T event) -> true, time, unit, onTimeout);
 	}
 
 	/**
@@ -193,7 +213,23 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Predicate<T> filter, long time) throws InterruptedException {
-		waitFor(filter, time, TimeUnit.MILLISECONDS);
+		waitFor(filter, time, TimeUnit.MILLISECONDS, () -> {});
+	}
+
+	/**
+	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
+	 * {@link Predicate} returns true.
+	 *
+	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
+	 * of whether the event fired.
+	 * @param unit The unit for the time parameter.
+	 * @param <T> The event type to wait for.
+	 *
+	 * @throws InterruptedException
+	 */
+	public <T extends Event> void waitFor(Predicate<T> filter, long time, TimeUnit unit) throws InterruptedException {
+		waitFor(filter, time, unit, () -> {});
 	}
 
 	/**
@@ -204,12 +240,15 @@ public class EventDispatcher {
 	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
 	 * event fired.
 	 * @param unit The unit for the time parameter.
+	 * @param onTimeout The procedure to execute when the timeout is reached.
 	 * @param <T> The event type to wait for.
 	 *
 	 * @throws InterruptedException
 	 */
-	public <T extends Event> void waitFor(Predicate<T> filter, long time, TimeUnit unit) throws InterruptedException {
+	public <T extends Event> void waitFor(Predicate<T> filter, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
 		final Thread currentThread = Thread.currentThread();
+		final AtomicBoolean timedOut = new AtomicBoolean(true);
+
 		synchronized (currentThread) {
 			registerListener(new IListener<T>() {
 				@Override
@@ -217,12 +256,14 @@ public class EventDispatcher {
 					if (filter.test(event)) {
 						client.getDispatcher().unregisterListener(this);
 						synchronized (currentThread) {
+							timedOut.set(false);
 							currentThread.notify();
 						}
 					}
 				}
 			});
 			currentThread.wait(unit.toMillis(time));
+			if (timedOut.get()) onTimeout.invoke();
 		}
 	}
 
@@ -240,6 +281,26 @@ public class EventDispatcher {
 						if (methodListeners.get(eventClass).containsKey(method)) {
 							methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == listener); //Yes, the == is intentional. We want the exact same instance.
 							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered method listener {}", listener.getClass().getSimpleName(), method.toString());
+						}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Unregisters a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * @param clazz The listener class with static methods.
+	 */
+	public void unregisterListener(Class<?> clazz) {
+		for (Method method : clazz.getMethods()) {
+			if (method.getParameterCount() == 1) {
+				Class<?> eventClass = method.getParameterTypes()[0];
+				if (Event.class.isAssignableFrom(eventClass)) {
+					if (methodListeners.containsKey(eventClass))
+						if (methodListeners.get(eventClass).containsKey(method)) {
+							methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == null); // null for static listener
+							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered class method listener {}", clazz.getSimpleName(), method.toString());
 						}
 				}
 			}
@@ -267,14 +328,14 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public synchronized void dispatch(Event event) {
-		if (client.isReady() || event instanceof DiscordDisconnectedEvent) {
+		if (client.getShards().stream().anyMatch(IShard::isLoggedIn) || event instanceof DisconnectedEvent) {
 			eventExecutor.submit(() -> {
 				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 				event.client = client;
 
 				methodListeners.entrySet().stream()
 						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(e -> e.getValue())
+						.map(Map.Entry::getValue)
 						.forEach(m ->
 								m.forEach((k, v) ->
 										v.forEach(o -> {
@@ -293,7 +354,7 @@ public class EventDispatcher {
 
 				classListeners.entrySet().stream()
 						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(e -> e.getValue())
+						.map(Map.Entry::getValue)
 						.forEach(s -> s.forEach(l -> {
 							try {
 								l.listener.handle(event);

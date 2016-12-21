@@ -1,22 +1,20 @@
 package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordClientImpl;
-import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.*;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
-import sx.blah.discord.api.internal.json.requests.VoiceChannelRequest;
-import sx.blah.discord.api.internal.json.responses.ChannelResponse;
 import sx.blah.discord.util.*;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,13 +90,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 			throw new DiscordException("Channel user limit can only be between 0 and 99!");
 
 		try {
-			ChannelResponse response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit))),
-					new BasicNameValuePair("authorization", client.getToken()),
-					new BasicNameValuePair("content-type", "application/json")), ChannelResponse.class);
+			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit)))),
+					ChannelObject.class);
 
 			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(client, getGuild(), response);
+			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
 
 			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 		} catch (UnsupportedEncodingException e) {
@@ -119,24 +116,24 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
 						return;
 					}
-				} else if (!client.isBot() && client.getConnectedVoiceChannels().size() > 0)
-					throw new UnsupportedOperationException("Must be a bot account to have multi-server voice support!");
+				}
 
-				((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), id, false, false)));
+				((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), id, false, false));
 			} else {
 				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
 			}
 		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Bot has not signed in yet!");
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to join voice channel before bot is ready!");
 		}
 	}
 
 	@Override
 	public void leave() {
 		if (client.getConnectedVoiceChannels().contains(this)) {
-			((DiscordClientImpl) client).ws.send(DiscordUtils.GSON.toJson(new VoiceChannelRequest(parent.getID(), null, false, false)));
-			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent))
+			((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), null, false, false));
+			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
 				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
+			}
 		} else {
 			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave a non-joined voice channel! Ignoring the method call...");
 		}
@@ -178,7 +175,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws IOException {
+	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -203,6 +210,41 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
+	public List<IWebhook> getWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook getWebhookByID(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IWebhook> getWebhooksByName(String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void loadWebhooks() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public IVoiceChannel copy() {
 		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
 	}
@@ -220,5 +262,10 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public String toString(){
 		return getName();
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return getGuild().getVoiceChannelByID(getID()) != this;
 	}
 }

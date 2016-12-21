@@ -1,13 +1,11 @@
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.*;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
@@ -91,62 +89,65 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendMessage(String content, boolean tts) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
-	 * Sends a file to the channel with a message attached.
+	 * Sends a message to the desired channel.
 	 *
-	 * @param file The file to send.
-	 * @param content The message to be sent with the file.
-	 * @return The message sent.
+	 * @param content The content of the message.
+	 * @param embed The embed object
+	 * @param tts Whether the message should use tts or not.
+	 * @return The message object representing the sent message
 	 *
-	 * @throws IOException
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
 	 */
-	IMessage sendFile(File file, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws RateLimitException, DiscordException, MissingPermissionsException;
 
 	/**
-	 * Sends a file to the channel.
+	 * Uploads a file to the channel.
 	 *
-	 * @param file The file to send.
-	 * @return The message sent.
+	 * @param file The file to upload.
+	 * @return The message created by this action.
 	 *
-	 * @throws IOException
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
+	 * @throws FileNotFoundException
 	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(File file) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
-	 * Sends a file to the channel.
+	 * Uploads a file to the channel with a message attached.
 	 *
-	 * @param stream The input stream to send.
-	 * @param filename The name of the file to send.
-	 * @param content The message to be sent with the file.
-	 * @return The message sent.
+	 * @param content The content of the attached message.
+	 * @param file The file to upload.
+	 * @return The message created by this action.
 	 *
-	 * @throws IOException
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
+	 * @throws FileNotFoundException
 	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(InputStream stream, String filename, String content) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
-	 * Sends a file to the channel.
+	 * Uploads an InputStream to the channel with an attached message and option for tts.
 	 *
-	 * @param stream The input stream to send.
-	 * @param filename The name of the file to send.
-	 * @return The message sent.
+	 * @param content The content of the attached message.
+	 * @param tts Whether the message should use tts or not.
+	 * @param file The input stream to upload.
+	 * @param fileName The name of the file that should be shown in Discord.
 	 *
-	 * @throws IOException
-	 * @throws MissingPermissionsException
+	 * @return
+	 * @throws DiscordException
 	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(InputStream stream, String filename) throws IOException, MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Generates an invite for this channel.
@@ -160,7 +161,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException;
 
 	/**
 	 * Toggles whether the bot is "typing".
@@ -354,6 +355,65 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 */
 	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
+<<<<<<< HEAD
+	 * Gets the webhooks for this channel.
+	 *
+	 * @return The webhooks.
+	 */
+	List<IWebhook> getWebhooks();
+
+	/**
+	 * This gets a webhook by its id.
+	 *
+	 * @param id The webhook id.
+	 * @return The webhook or null if not found.
+	 */
+	IWebhook getWebhookByID(String id);
+
+	/**
+	 * This finds all the webhooks which have the same name as the provided one.
+	 *
+	 * @param name The name to search for.
+	 * @return The webhooks with a matching name.
+	 */
+	List<IWebhook> getWebhooksByName(String name);
+
+	/**
+	 * This creates a webhook for this channel with the provided name and the default avatar
+	 *
+	 * @param name The default name for the webhook.
+	 * @return The created webhook.
+	 */
+	IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
+	 * This creates a webhook for this channel with the provided name and the provided avatar
+	 *
+	 * @param name   The default name for the webhook.
+	 * @param avatar The default avatar for the webhook.
+	 * @return The created webhook.
+	 */
+	IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
+	 * This creates a webhook for this channel with the provided name and the provided avatar
+	 *
+	 * @param name   The default name for the webhook.
+	 * @param avatar The default avatar for the webhook.
+	 * @return The created webhook.
+	 */
+	IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
+=======
+>>>>>>> austinv11/websocket-rewrite
+	 * Checks to see if the this channel is deleted.
+	 *
+	 * @return True if this channel is deleted.
+	 */
+	boolean isDeleted();
 
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.

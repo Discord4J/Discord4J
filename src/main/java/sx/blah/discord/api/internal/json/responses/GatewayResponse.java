@@ -1,7 +1,7 @@
 package sx.blah.discord.api.internal.json.responses;
 
 /**
- * The response received when obtaining a websocket
+ * The response received when obtaining a websocket url
  */
 public class GatewayResponse {
 
