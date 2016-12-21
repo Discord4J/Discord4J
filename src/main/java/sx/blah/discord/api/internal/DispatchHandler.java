@@ -95,7 +95,9 @@ class DispatchHandler {
 			ArrayList<UnavailableGuildObject> waitingGuilds = new ArrayList<>(Arrays.asList(ready.guilds));
 			for (int i = 0; i < ready.guilds.length; i++) {
 				client.getDispatcher().waitFor((GuildCreateEvent e) -> {
-					waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getID()));
+					synchronized (waitingGuilds) {
+						waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getID()));
+					}
 					return true;
 				}, 10, TimeUnit.SECONDS);
 			}
