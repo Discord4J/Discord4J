@@ -15,7 +15,13 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -99,7 +105,8 @@ public class User implements IUser {
 		this.name = name;
 		this.discriminator = discriminator;
 		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
+		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
+				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
 		this.presence = presence;
 		this.roles = new ConcurrentHashMap<>();
 		this.nicks = new ConcurrentHashMap<>();
@@ -151,7 +158,8 @@ public class User implements IUser {
 	 */
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
+		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
+				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
 	}
 
 	@Override
