@@ -11,6 +11,7 @@ import sx.blah.discord.util.Procedure;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,6 +61,33 @@ public class EventDispatcher {
 	 */
 	public void registerListener(IListener listener) {
 		registerListener(listener, false);
+	}
+	
+	/**
+	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 *
+	 * @param listeners The listeners.
+	 */
+	public void registerListeners(Object... listeners) {
+		Arrays.stream(listeners).forEach(this::registerListener);
+	}
+	
+	/**
+	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 *
+	 * @param listeners The listeners.
+	 */
+	public void registerListeners(Class<?>... listeners) {
+		Arrays.stream(listeners).forEach(this::registerListener);
+	}
+	
+	/**
+	 * Registers a set of single event listeners.
+	 *
+	 * @param listeners The listeners.
+	 */
+	public void registerListeners(IListener... listeners) {
+		Arrays.stream(listeners).forEach(this::registerListener);
 	}
 
 	private void registerListener(Class<?> listenerClass, Object listener, boolean isTemporary) {

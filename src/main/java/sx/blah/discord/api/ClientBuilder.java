@@ -1,6 +1,5 @@
 package sx.blah.discord.api;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -22,7 +21,7 @@ public class ClientBuilder {
 	private int maxReconnectAttempts = 5;
 	
 	//Early registered listeners:
-	private final List<IListener<? extends Event>> iListeners = new ArrayList<>();
+	private final List<IListener> iListeners = new ArrayList<>();
 	private final List<Object> listeners = new ArrayList<>();
 	private final List<Class<?>> listenerClasses = new ArrayList<>();
 	
@@ -97,8 +96,7 @@ public class ClientBuilder {
 	 * @param listeners The listeners to register.
 	 * @return The instance of the builder.
 	 */
-	@SafeVarargs
-	public final ClientBuilder registerListeners(IListener<? extends Event>... listeners) {
+	public final ClientBuilder registerListeners(IListener... listeners) {
 		iListeners.addAll(Arrays.asList(listeners));
 		return this;
 	}
@@ -131,7 +129,7 @@ public class ClientBuilder {
 	 * @param listener The listener to register.
 	 * @return The instance of the builder.
 	 */
-	public ClientBuilder registerListener(IListener<? extends Event> listener) {
+	public ClientBuilder registerListener(IListener listener) {
 		return registerListeners(listener);
 	}
 	
