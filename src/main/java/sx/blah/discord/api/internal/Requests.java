@@ -176,7 +176,7 @@ public class Requests {
 					request.removeHeaders("Content-Type");
 				}
 			} else {
-				request.addHeader("Content-Type", "application/json");
+				request.addHeader("Content-Type", "application/json; charset=utf-8");
 			}
 
 			if (globalRetryAfter.get() != -1) {

@@ -302,18 +302,14 @@ public class Channel implements IChannel {
 		if (newName == null || newName.length() < 2 || newName.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
-		try {
-			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic)))),
-					ChannelObject.class);
+		ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
+				new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic)), "UTF-8")),
+				ChannelObject.class);
 
-			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
+		IChannel oldChannel = copy();
+		IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
 
-			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
 	}
 
 	@Override
