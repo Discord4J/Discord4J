@@ -292,39 +292,31 @@ public class Channel implements IChannel {
 		return isTyping.get();
 	}
 
-	private void edit(Optional<String> name, Optional<Integer> position, Optional<String> topic) throws DiscordException, MissingPermissionsException, RateLimitException {
+	@Override
+	public void edit(String name, int position, String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
-		String newName = name.orElse(this.name);
-		int newPosition = position.orElse(this.position);
-		String newTopic = topic.orElse(this.topic);
+		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
-		if (newName == null || newName.length() < 2 || newName.length() > 100)
-			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-
-		ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
-				new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newTopic)), "UTF-8")),
-				ChannelObject.class);
-
-		IChannel oldChannel = copy();
-		IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
-
-		client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id,
+				new StringEntity(DiscordUtils.GSON.toJson(
+						new ChannelEditRequest(name, position, topic)), "UTF-8"));
 	}
 
 	@Override
 	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.of(name), Optional.empty(), Optional.empty());
+		edit(name, getPosition(), getTopic());
 	}
 
 	@Override
 	public void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(position), Optional.empty());
+		edit(getName(), position, getTopic());
 	}
 
 	@Override
 	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(topic));
+		edit(getName(), getPosition(), topic);
 	}
 
 	@Override

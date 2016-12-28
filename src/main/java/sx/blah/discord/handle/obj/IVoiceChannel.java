@@ -25,6 +25,20 @@ public interface IVoiceChannel extends IChannel {
 	int getBitrate();
 
 	/**
+	 * Edits all properties of this voice channel.
+	 *
+	 * @param name The new name of the channel.
+	 * @param position The new position of the channel.
+	 * @param bitrate The new bitrate of the channel (in bits).
+	 * @param userLimit The new user limit of the channel.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 */
+	void edit(String name, int position, int bitrate, int userLimit) throws MissingPermissionsException, DiscordException, RateLimitException;
+
+	/**
 	 * Changes the bitrate of the channel
 	 *
 	 * @param bitrate The new bitrate of the channel (in bits).

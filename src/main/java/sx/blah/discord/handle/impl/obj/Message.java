@@ -313,22 +313,13 @@ public class Message implements IMessage {
 		if (isDeleted())
 			throw new DiscordException("Cannot edit deleted messages!");
 		if (client.isReady()) {
-//			content = DiscordUtils.escapeString(content);
-
 			if (embed != null) {
 				DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
 			}
 
-			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)), "UTF-8")),
-					MessageObject.class);
-
-			IMessage oldMessage = copy();
-			DiscordUtils.getMessageFromJSON(channel, response);
-			//Event dispatched here because otherwise there'll be an NPE as for some reason when the bot edits a message,
-			// the event chain goes like this:
-			//Original message edited to null, then the null message edited to the new content
-			client.getDispatcher().dispatch(new MessageUpdateEvent(oldMessage, this));
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
+							new MessageRequest(content, embed, false)), "UTF-8"));
 
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to edit message before bot is ready!");

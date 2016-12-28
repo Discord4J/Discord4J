@@ -69,6 +69,21 @@ public interface IRole extends IDiscordObject<IRole> {
 	IGuild getGuild();
 
 	/**
+	 * Edits all properties of this role.
+	 *
+	 * @param color The new color of the role.
+	 * @param hoist Whether the role should be displayed separately from others.
+	 * @param name The new name of the role.
+	 * @param permissions The new permissions set of the role.
+	 * @param isMentionable Whether the role can be mentioned.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
 	 * Changes the color of the role.
 	 *
 	 * @param color The new color for the role.

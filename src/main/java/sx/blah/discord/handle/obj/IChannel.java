@@ -183,6 +183,19 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	boolean getTypingStatus();
 
 	/**
+	 * Edits all properties of this channel.
+	 *
+	 * @param name The new name of the channel.
+	 * @param position The new position of the channel.
+	 * @param topic The new topic of the channel.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @throws MissingPermissionsException
+	 */
+	void edit(String name, int position, String topic) throws RateLimitException, DiscordException, MissingPermissionsException;
+
+	/**
 	 * Changes the name of the channel
 	 *
 	 * @param name The new name of the channel.
@@ -407,8 +420,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
-=======
->>>>>>> austinv11/websocket-rewrite
 	 * Checks to see if the this channel is deleted.
 	 *
 	 * @return True if this channel is deleted.

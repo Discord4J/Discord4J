@@ -221,7 +221,7 @@ public class User implements IUser {
 	@Override
 	public EnumSet<Permissions> getPermissionsForGuild(IGuild guild){
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
-		getRolesForGuild(guild).forEach(iRole -> permissions.addAll(iRole.getPermissions()));
+		getRolesForGuild(guild).forEach(role -> permissions.addAll(role.getPermissions()));
 		return permissions;
 	}
 

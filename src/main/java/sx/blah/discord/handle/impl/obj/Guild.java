@@ -9,13 +9,12 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
-import sx.blah.discord.api.internal.json.requests.EditGuildRequest;
+import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
-import sx.blah.discord.handle.impl.events.GuildUpdateEvent;
 import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
@@ -464,54 +463,57 @@ public class Guild implements IGuild {
 		}
 	}
 
-	private void edit(Optional<String> name, Optional<String> regionID, Optional<Integer> verificationLevel, Optional<Image> icon, Optional<String> afkChannelID, Optional<Integer> afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
+	@Override
+	public void edit(String name, IRegion region, VerificationLevel level, Image icon, IVoiceChannel afkChannel, int afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
-		try {
-			GuildObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new EditGuildRequest(name.orElse(this.name), regionID.orElse(this.regionID),
-							verificationLevel.orElse(this.verification.ordinal()),
-							icon == null ? this.icon : (icon.isPresent() ? icon.get().getData() : null),
-							afkChannelID == null ? this.afkChannel : afkChannelID.orElse(null), afkTimeout.orElse(this.afkTimeout))))),
-					GuildObject.class);
+		if (name == null || name.length() < 2 || name.length() > 100)
+			throw new IllegalArgumentException("Guild name must be between 2 and 100 characters!");
+		if (region == null)
+			throw new IllegalArgumentException("Region must not be null.");
+		if (level == null)
+			throw new IllegalArgumentException("Verification level must not be null.");
+		if (icon == null)
+			throw new IllegalArgumentException("Icon must not be null.");
+		if (afkChannel != null && !getVoiceChannels().contains(afkChannel))
+			throw new IllegalArgumentException("Invalid AFK voice channel.");
+		if (afkTimeout != 60 && afkTimeout != 300 && afkTimeout != 900 && afkTimeout != 1800 && afkTimeout != 3600)
+			throw new IllegalArgumentException("AFK timeout must be one of (60, 300, 900, 1800, 3600).");
 
-			IGuild oldGuild = copy();
-			IGuild newGuild = DiscordUtils.getGuildFromJSON(shard, response);
-
-			client.getDispatcher().dispatch(new GuildUpdateEvent(oldGuild, newGuild));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + id,
+				new StringEntity(DiscordUtils.GSON.toJson(
+						new GuildEditRequest(name, region.getID(), level.ordinal(), icon.getData(), afkChannel == null ? null : afkChannel.getID(), afkTimeout)),
+						"UTF-8"));
 	}
 
 	@Override
 	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.of(name), Optional.empty(), Optional.empty(), null, null, Optional.empty());
+		edit(name, getRegion(), getVerificationLevel(), this::getIcon, getAFKChannel(), getAFKTimeout());
 	}
 
 	@Override
 	public void changeRegion(IRegion region) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(region.getID()), Optional.empty(), null, null, Optional.empty());
+		edit(getName(), region, getVerificationLevel(), this::getIcon, getAFKChannel(), getAFKTimeout());
 	}
 
 	@Override
-	public void changeVerificationLevel(VerificationLevel verification) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(verification.ordinal()), null, null, Optional.empty());
+	public void changeVerificationLevel(VerificationLevel verificationLevel) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(getName(), getRegion(), verificationLevel, this::getIcon, getAFKChannel(), getAFKTimeout());
 	}
 
+	@Override
 	public void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.ofNullable(icon), null, Optional.empty());
+		edit(getName(), getRegion(), getVerificationLevel(), icon, getAFKChannel(), getAFKTimeout());
 	}
 
 	@Override
-	public void changeAFKChannel(IVoiceChannel channel) throws RateLimitException, DiscordException, MissingPermissionsException {
-		String id = channel != null ? channel.getID() : null;
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), null, Optional.ofNullable(id), Optional.empty());
+	public void changeAFKChannel(IVoiceChannel afkChannel) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(getName(), getRegion(), getVerificationLevel(), this::getIcon, afkChannel, getAFKTimeout());
 	}
 
 	@Override
 	public void changeAFKTimeout(int timeout) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), null, null, Optional.of(timeout));
+		edit(getName(), getRegion(), getVerificationLevel(), this::getIcon, getAFKChannel(), timeout);
 	}
 
 	@Override

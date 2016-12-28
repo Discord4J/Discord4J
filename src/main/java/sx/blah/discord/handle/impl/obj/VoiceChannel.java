@@ -4,10 +4,8 @@ import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.*;
-import sx.blah.discord.api.internal.json.objects.ChannelObject;
-import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
-import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
@@ -15,7 +13,6 @@ import sx.blah.discord.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,52 +52,39 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void setBitrate(int bitrate) { this.bitrate = bitrate; }
 
 	@Override
-	public void changeName(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.of(name), Optional.empty(), Optional.empty(), Optional.empty());
+	public void edit(String name, int position, int bitrate, int userLimit) throws MissingPermissionsException, DiscordException, RateLimitException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
+
+		if (name == null || name.length() < 2 || name.length() > 100)
+			throw new IllegalArgumentException("Channel name must be between 2 and 100 characters!");
+		if (bitrate < 8000 || bitrate > 128000)
+			throw new IllegalArgumentException("Channel bitrate must be between 8 and 128 kbps!");
+		if (userLimit < 0 || userLimit > 99)
+			throw new IllegalArgumentException("Channel user limit must be between 0 and 99!");
+
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id,
+				new StringEntity(DiscordUtils.GSON.toJson(
+						new VoiceChannelEditRequest(name, position, bitrate, userLimit)), "UTF-8"));
 	}
 
 	@Override
-	public void changePosition(int position) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.empty(), Optional.of(position), Optional.empty(), Optional.empty());
+	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(name, getPosition(), getBitrate(), getUserLimit());
 	}
 
 	@Override
-	public void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(limit));
+	public void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(getName(), position, getBitrate(), getUserLimit());
 	}
 
 	@Override
 	public void changeBitrate(int bitrate) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(bitrate), Optional.empty());
+		edit(getName(), getPosition(), bitrate, getUserLimit());
 	}
 
-	private void edit(Optional<String> name, Optional<Integer> position, Optional<Integer> bitrate, Optional<Integer> userLimit) throws MissingPermissionsException, DiscordException, RateLimitException {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
-
-		String newName = name.orElse(this.name);
-		int newPosition = position.orElse(this.position);
-		int newBitrate = bitrate.orElse(this.bitrate);
-		int newUserLimit = userLimit.orElse(this.userLimit);
-
-		if (newName == null || newName.length() < 2 || newName.length() > 100)
-			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-		if (newBitrate < 8000 || newBitrate > 128000)
-			throw new DiscordException("Channel bitrate can only be between 8 and 128 kbps!");
-		if (newUserLimit < 0 || newUserLimit > 99)
-			throw new DiscordException("Channel user limit can only be between 0 and 99!");
-
-		try {
-			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit)))),
-					ChannelObject.class);
-
-			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
-
-			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+	@Override
+	public void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException {
+		edit(getName(), getPosition(), getBitrate(), limit);
 	}
 
 	@Override
@@ -201,6 +185,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void edit(String name, int position, String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 

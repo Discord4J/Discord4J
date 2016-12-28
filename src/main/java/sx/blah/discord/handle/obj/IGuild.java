@@ -328,6 +328,22 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, RateLimitException;
 
 	/**
+	 * Edits all properties of this guild.
+	 *
+	 * @param name The new name of the guild.
+	 * @param region The new region of the guild.
+	 * @param level The new verification level of the guild.
+	 * @param icon The new icon of the guild.
+	 * @param afkChannel The new afk channel of the guild.
+	 * @param afkTimeout The new afk timeout of the guild.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void edit(String name, IRegion region, VerificationLevel level, Image icon, IVoiceChannel afkChannel, int afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException;
+
+	/**
 	 * Changes the name of the guild.
 	 *
 	 * @param name The new name of the guild.

@@ -192,56 +192,52 @@ public class Role implements IRole {
 		return guild;
 	}
 
-	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
+	@Override
+	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
+		DiscordUtils.checkPermissions(getClient(), guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		try {
-			RoleObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
-							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions()),
-							isMentionable.orElse(isMentionable()))))),
-					RoleObject.class);
+		if (color == null)
+			throw new IllegalArgumentException("Color must not be null.");
+		if (name == null || name.length() < 1 || name.length() > 32)
+			throw new IllegalArgumentException("Role name must be between 1 and 32 characters!");
+		if (permissions == null)
+			throw new IllegalArgumentException("Permissions set must not be null.");
 
-			IRole oldRole = copy();
-			IRole newRole = DiscordUtils.getRoleFromJSON(guild, response);
-
-			getClient().getDispatcher().dispatch(new RoleUpdateEvent(oldRole, newRole, guild));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
+				new StringEntity(DiscordUtils.GSON.toJson(
+						new RoleEditRequest(color, hoist, name, permissions, isMentionable)), "UTF-8"));
 	}
 
 	@Override
 	public void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+		edit(color, isHoisted(), getName(), getPermissions(), isMentionable());
 	}
 
 	@Override
 	public void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty(), Optional.empty());
+		edit(getColor(), hoist, getName(), getPermissions(), isMentionable());
 	}
 
 	@Override
 	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty(), Optional.empty());
+		edit(getColor(), isHoisted(), name, getPermissions(), isMentionable());
 	}
 
 	@Override
 	public void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions), Optional.empty());
+		edit(getColor(), isHoisted(), getName(), permissions, isMentionable());
 	}
 
 	@Override
-	public void changeMentionable(boolean isMentionable) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(isMentionable));
+	public void changeMentionable(boolean mentionable) throws RateLimitException, DiscordException, MissingPermissionsException {
+		edit(getColor(), isHoisted(), getName(), getPermissions(), mentionable);
 	}
 
 	@Override
 	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		((DiscordClientImpl) guild.getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);
 	}
 
 	@Override
