@@ -1,8 +1,10 @@
 package sx.blah.discord.util;
 
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.obj.IChannel;
 
 import java.awt.*;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -143,7 +145,11 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the image.
+	 * Set the image. If you're using this with
+	 * {@link IChannel#sendFile(String, boolean, InputStream, String, EmbedObject)},
+	 * you can specify this imageUrl as attachment://fileName.png to have the attachment image embedded.
+	 * <br>
+	 * Only supported image types work.
 	 * @param imageUrl The image URL
 	 * @return Itself for chaining
 	 */
