@@ -409,7 +409,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
+	 *
+	 * @deprecated Marked for removal. Can never succeed as a bot cannot own a guild.
 	 */
+	@Deprecated
 	void deleteGuild() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
@@ -418,8 +421,19 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @throws DiscordException
 	 * @throws RateLimitException
+	 *
+	 * @deprecated Use {@link #leave()} instead.
 	 */
+	@Deprecated
 	void leaveGuild() throws DiscordException, RateLimitException;
+
+	/**
+	 * Leaves the guild.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 */
+	void leave() throws DiscordException, RateLimitException;
 
 	/**
 	 * Creates a new channel.

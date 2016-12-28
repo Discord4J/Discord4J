@@ -517,6 +517,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	@Deprecated
 	public void deleteGuild() throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (!ownerID.equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("You must be the guild owner to delete guilds!", EnumSet.noneOf(Permissions.class));
@@ -525,10 +526,16 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	@Deprecated
 	public void leaveGuild() throws DiscordException, RateLimitException {
 		if (ownerID.equals(client.getOurUser().getID()))
 			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
 
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id);
+	}
+
+	@Override
+	public void leave() throws DiscordException, RateLimitException {
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id);
 	}
 
