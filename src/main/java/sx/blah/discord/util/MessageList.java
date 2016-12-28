@@ -14,6 +14,7 @@ import sx.blah.discord.handle.obj.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -38,10 +39,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * Represents a maximum message capacity which will be unlimited (-1). Yay, no magic numbers!
 	 */
 	public static final int UNLIMITED_CAPACITY = -1;
-
+	
 	/**
 	 * This is the max number of guild before the list stops automatically loading its history.
 	 */
+	@Deprecated
 	public static final int MAX_GUILD_COUNT = 10;
 
 	/**
@@ -60,21 +62,16 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	private final MessageListEventListener listener;
 
 	/**
-	 * This is true if the client object has permission to read this channel's messages.
-	 */
-	private volatile boolean hasPermission;
-
-	/**
 	 * This is the maximum amount of messages that will be cached by this list. If negative, it'll store unlimited
 	 * messages.
 	 */
 	private volatile int capacity = 256;
 
 	/**
-	 * This determines whether message history is automatically loaded.
+	 * This determines how efficiently MessageLists run.
 	 */
-	private static volatile boolean loadInitialMessages = true;
-
+	private static final Map<IDiscordClient, EfficiencyLevel> efficiencies = new ConcurrentHashMap<>();
+	
 	/**
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
@@ -86,10 +83,17 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		this.client = (DiscordClientImpl) client;
 		this.channel = channel;
 
-		updatePermissions();
-
-		listener = new MessageListEventListener(this);
-		client.getDispatcher().registerListener(listener);
+		if (getEfficiency() != EfficiencyLevel.HIGH) {
+			listener = new MessageListEventListener(this);
+			client.getDispatcher().registerListener(listener);
+			
+			if (getEfficiency() == EfficiencyLevel.MEDIUM) {
+				capacity /= 2;
+			}
+		} else {
+			listener = null;
+			capacity = 0;
+		}
 	}
 
 	/**
@@ -100,7 +104,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
-		if (loadInitialMessages)
+		if (getEfficiency() == EfficiencyLevel.NONE)
 			RequestBuffer.request(() -> load(initialContents));
 	}
 
@@ -152,7 +156,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	}
 
 	private boolean queryMessages(int messageCount) throws DiscordException, RateLimitException {
-		if (!hasPermission)
+		if (!hasPermissions())
 			return false;
 
 		int initialSize = size();
@@ -334,7 +338,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public IMessage get(String id) {
 		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
 
-		if (message == null && hasPermission && client.isReady())
+		if (message == null && hasPermissions() && client.isReady())
 			try {
 				return DiscordUtils.getMessageFromJSON(channel,
 						DiscordUtils.GSON.fromJson(client.REQUESTS.GET.makeRequest(
@@ -577,9 +581,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
 	 *
 	 * @param download Whether to automatically download history.
+	 * @deprecated Use {@link #setEfficiency(EfficiencyLevel)} instead.
 	 */
+	@Deprecated
 	public static void shouldDownloadHistoryAutomatically(boolean download) {
-		loadInitialMessages = download;
+		//shh bby is ok
 	}
 
 	/**
@@ -587,19 +593,61 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
 	 *
 	 * @return  Whether it'll automatically download history.
+	 * @deprecated Use {@link #getEfficiency()} instead.
 	 */
+	@Deprecated
 	public static boolean downloadsHistoryAutomatically() {
-		return loadInitialMessages;
+		return new Random().nextBoolean();
+	}
+	
+	/**
+	 * This sets how efficiently MessageLists run.
+	 *
+	 * @param level The new efficiency level.
+	 */
+	public static void setEfficiency(IDiscordClient client, EfficiencyLevel level) {
+		efficiencies.put(client, level);
+	}
+	
+	/**
+	 * This gets the efficiency level that MessageLists run at.
+	 *
+	 * @return The current efficiency level.
+	 */
+	public static EfficiencyLevel getEfficiency(IDiscordClient client) {
+		if (!efficiencies.containsKey(client)) {
+			return null;
+		}
+		
+		return efficiencies.get(client);
+	}
+	
+	/**
+	 * This sets how efficiently MessageLists run.
+	 *
+	 * @param level The new efficiency level.
+	 */
+	public void setEfficiency(EfficiencyLevel level) {
+		setEfficiency(client, level);
+	}
+	
+	/**
+	 * This gets the efficiency level that MessageLists run at.
+	 *
+	 * @return The current efficiency level.
+	 */
+	public EfficiencyLevel getEfficiency() {
+		return getEfficiency(client);
 	}
 
-	private void updatePermissions() {
+	private boolean hasPermissions() {
 		try {
 			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
-			hasPermission = true;
+			return true;
 		} catch (MissingPermissionsException e) {
 			if (!Discord4J.ignoreChannelWarnings.get())
 				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
-			hasPermission = false;
+			return false;
 		}
 	}
 
@@ -650,39 +698,62 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 				list.client.getDispatcher().unregisterListener(this);
 			}
 		}
-
-		//The following are to update the hasPermission boolean
-
-		@EventSubscriber
-		public void onRoleUpdate(RoleUpdateEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild()) &&
-					list.client.getOurUser().getRolesForGuild(list.channel.getGuild()).contains(event.getNewRole()))
-				list.updatePermissions();
+	}
+	
+	/**
+	 * This enum represents how efficient a MessageList is. By lowering efficiency, more data is cached but can hurt bot
+	 * performance.
+	 */
+	public enum EfficiencyLevel {
+		
+		/**
+		 * At this level, the message list caches the default amount of messages (256) and past message history is
+		 * requested up to {@link #MESSAGE_CHUNK_COUNT} messages.
+		 */
+		NONE(-1),
+		/**
+		 * At this level, the message list caches the default amount of messages (256) and past message history is NOT
+		 * requested on initialization.
+		 */
+		LOW(10),
+		/**
+		 * At this level, the message list caches the half the default amount of messages (128) and past message history
+		 * is NOT requested on initialization.
+		 */
+		MEDIUM(25),
+		/**
+		 * At this level, the message list does NOT cache any messages and past message history is NOT requested on
+		 * initialization. Additionally, the MessageList's built-in event listener is never registered.
+		 */
+		HIGH(50);
+		
+		private int guildsRequired;
+		
+		EfficiencyLevel(int guildsRequired) {
+			this.guildsRequired = guildsRequired;
 		}
-
-		@EventSubscriber
-		public void onGuildUpdate(GuildUpdateEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getNewGuild().equals(list.channel.getGuild()))
-				list.updatePermissions();
+		
+		/**
+		 * This is the number of guilds required for this efficiency level to be automatically used.
+		 *
+		 * @return The minimum number of guilds required.
+		 */
+		public int getGuildsRequired() {
+			return guildsRequired;
 		}
-
-		@EventSubscriber
-		public void onUserRoleUpdate(UserRoleUpdateEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getUser().equals(list.client.getOurUser()) && event.getGuild().equals(list.channel.getGuild()))
-				list.updatePermissions();
-		}
-
-		@EventSubscriber
-		public void onGuildTransferOwnership(GuildTransferOwnershipEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild())) {
-				list.updatePermissions();
-			}
-		}
-
-		@EventSubscriber
-		public void onChannelUpdateEvent(ChannelUpdateEvent event) {
-			if (event.getNewChannel().equals(list.channel))
-				list.updatePermissions();
+		
+		/**
+		 * This retrieves the correct efficiency level for a given number of joined guilds.
+		 *
+		 * @param guildNumber The number of joined guilds..
+		 * @return The proper efficiency.
+		 */
+		public static EfficiencyLevel getEfficiencyForGuilds(int guildNumber) {
+			return Arrays.stream(EfficiencyLevel.values())
+					.filter((EfficiencyLevel level) -> level.getGuildsRequired() <= guildNumber)
+					.max((EfficiencyLevel obj1, EfficiencyLevel obj2) ->
+							obj1.guildsRequired < obj2.guildsRequired ? -1 : (obj1.guildsRequired > obj2.guildsRequired ? 1 : 0))
+					.orElse(HIGH);
 		}
 	}
 }

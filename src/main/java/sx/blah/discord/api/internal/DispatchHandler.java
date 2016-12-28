@@ -87,10 +87,11 @@ class DispatchHandler {
 					ready.user.discriminator, ready.user.avatar, Presences.OFFLINE, ready.user.bot);
 
 			ws.sessionId = ready.session_id;
-
-			//Disable initial caching for performance
-			if (ready.guilds.length > MessageList.MAX_GUILD_COUNT)
-				MessageList.shouldDownloadHistoryAutomatically(false);
+			
+			if (MessageList.getEfficiency(client) == null) //User did not manually set the efficiency
+				MessageList.setEfficiency(client, MessageList.EfficiencyLevel.getEfficiencyForGuilds(ready.guilds.length));
+			
+			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "MessageList efficiency set to {}.", MessageList.getEfficiency(client));
 
 			ArrayList<UnavailableGuildObject> waitingGuilds = new ArrayList<>(Arrays.asList(ready.guilds));
 			for (int i = 0; i < ready.guilds.length; i++) {

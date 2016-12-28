@@ -5,20 +5,20 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.api.internal.DiscordClientImpl;
-import sx.blah.discord.api.internal.json.responses.RateLimitResponse;
-import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.impl.obj.Invite;
+import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.util.*;
+import java.util.StringJoiner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -296,9 +296,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new MessageOutputStream(message.getChannel())));
-						writer.write(message.getContent());
-						writer.close();
+						message.reply(String.valueOf(message.getChannel().getMessages().size()));
 					}
 				});
 
