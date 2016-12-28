@@ -180,6 +180,15 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * This gets the embed object for the message. May be null.
+	 *
+	 * @return The embed object.
+	 */
+	public EmbedObject getEmbedObject() {
+		return embed;
+	}
+
+	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
 	 * Sends and creates the message object.
