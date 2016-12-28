@@ -217,11 +217,16 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
-		return sendFile(content, false, new FileInputStream(file), file.getName());
+		return sendFile(content, false, new FileInputStream(file), file.getName(), null);
 	}
 
 	@Override
 	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFile(content, tts, file, fileName, null);
+	}
+
+	@Override
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -229,10 +234,11 @@ public class Channel implements IChannel {
 		if (content != null) builder.addTextBody("content", content, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
 		builder.addTextBody("tts", String.valueOf(tts));
 		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
+		if (embed != null) builder.addTextBody("payload_json", "{\"embed\":" + DiscordUtils.GSON_NO_NULLS.toJson(embed) + "}");
 
 		HttpEntity fileEntity = builder.build();
-		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages"
-				, fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data"));
+		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
+				fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data"));
 		MessageObject messageObject = DiscordUtils.GSON.fromJson(response, MessageObject.class);
 
 		return DiscordUtils.getMessageFromJSON(this, messageObject);

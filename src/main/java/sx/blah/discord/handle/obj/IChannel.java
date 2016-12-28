@@ -141,13 +141,29 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param tts Whether the message should use tts or not.
 	 * @param file The input stream to upload.
 	 * @param fileName The name of the file that should be shown in Discord.
+	 * @return The message created by this action.
 	 *
-	 * @return
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
 	IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
+	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 *
+	 * @param content The content of the attached message.
+	 * @param tts Whether the message should use tts or not.
+	 * @param file The input stream to upload.
+	 * @param fileName The name of the file that should be shown in Discord.
+	 * @param embed An optional embed object to send with the file.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Generates an invite for this channel.
