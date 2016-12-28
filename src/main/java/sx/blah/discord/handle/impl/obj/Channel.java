@@ -230,11 +230,9 @@ public class Channel implements IChannel {
 		DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-
-		if (content != null) builder.addTextBody("content", content, ContentType.TEXT_PLAIN.withCharset("UTF-8"));
-		builder.addTextBody("tts", String.valueOf(tts));
 		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
-		if (embed != null) builder.addTextBody("payload_json", "{\"embed\":" + DiscordUtils.GSON_NO_NULLS.toJson(embed) + "}");
+		builder.addTextBody("payload_json", DiscordUtils.GSON_NO_NULLS.toJson(new FilePayloadObject(content, tts, embed)));
+
 
 		HttpEntity fileEntity = builder.build();
 		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
