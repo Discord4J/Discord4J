@@ -36,7 +36,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	void edit(String name, int position, int bitrate, int userLimit) throws MissingPermissionsException, DiscordException, RateLimitException;
+	void edit(String name, int position, int bitrate, int userLimit) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the bitrate of the channel
@@ -46,7 +46,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeBitrate(int bitrate) throws MissingPermissionsException, DiscordException, RateLimitException;
+	void changeBitrate(int bitrate) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the user limit of the channel
@@ -56,7 +56,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException;
+	void changeUserLimit(int limit) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Makes the bot user join this voice channel.

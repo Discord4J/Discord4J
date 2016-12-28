@@ -80,7 +80,7 @@ public class RoleBuilder {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public IRole build() throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IRole build() throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (guild == null)
 			throw new RuntimeException("A guild must be set to create a role.");
 

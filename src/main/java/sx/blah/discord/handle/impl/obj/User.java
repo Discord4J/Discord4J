@@ -286,8 +286,7 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException,
-			MissingPermissionsException {
+	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException {
 		// can this user go to this channel?
 		DiscordUtils.checkPermissions(this, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
 
@@ -319,7 +318,7 @@ public class User implements IUser {
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel() throws RateLimitException, DiscordException {
+	public IPrivateChannel getOrCreatePMChannel() throws DiscordException, RateLimitException {
 		return client.getOrCreatePMChannel(this);
 	}
 
@@ -410,13 +409,13 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void addRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
 		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}
 
 	@Override
-	public void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void removeRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}

@@ -51,7 +51,7 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public void delete() throws RateLimitException, DiscordException {
+	public void delete() throws DiscordException, RateLimitException {
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode);
 	}
 

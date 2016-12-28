@@ -193,7 +193,7 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(getClient(), guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		if (color == null)
@@ -209,32 +209,32 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeColor(Color color) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(color, isHoisted(), getName(), getPermissions(), isMentionable());
 	}
 
 	@Override
-	public void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeHoist(boolean hoist) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getColor(), hoist, getName(), getPermissions(), isMentionable());
 	}
 
 	@Override
-	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getColor(), isHoisted(), name, getPermissions(), isMentionable());
 	}
 
 	@Override
-	public void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changePermissions(EnumSet<Permissions> permissions) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getColor(), isHoisted(), getName(), permissions, isMentionable());
 	}
 
 	@Override
-	public void changeMentionable(boolean mentionable) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeMentionable(boolean mentionable) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getColor(), isHoisted(), getName(), getPermissions(), mentionable);
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void delete() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);

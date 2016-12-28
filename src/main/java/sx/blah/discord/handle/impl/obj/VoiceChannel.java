@@ -52,7 +52,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void setBitrate(int bitrate) { this.bitrate = bitrate; }
 
 	@Override
-	public void edit(String name, int position, int bitrate, int userLimit) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public void edit(String name, int position, int bitrate, int userLimit) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
 		if (name == null || name.length() < 2 || name.length() > 100)
@@ -68,22 +68,22 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(name, getPosition(), getBitrate(), getUserLimit());
 	}
 
 	@Override
-	public void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changePosition(int position) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getName(), position, getBitrate(), getUserLimit());
 	}
 
 	@Override
-	public void changeBitrate(int bitrate) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public void changeBitrate(int bitrate) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getName(), getPosition(), bitrate, getUserLimit());
 	}
 
 	@Override
-	public void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public void changeUserLimit(int limit) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getName(), getPosition(), getBitrate(), limit);
 	}
 
@@ -159,7 +159,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException {
+	public IMessage sendFile(File file) throws FileNotFoundException, DiscordException, RateLimitException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -184,12 +184,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeTopic(String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void edit(String name, int position, String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -214,17 +214,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 

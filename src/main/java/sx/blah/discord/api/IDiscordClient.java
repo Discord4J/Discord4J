@@ -251,7 +251,7 @@ public interface IDiscordClient {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IRegion> getRegions() throws RateLimitException, DiscordException;
+	List<IRegion> getRegions() throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets the corresponding region for a given id.

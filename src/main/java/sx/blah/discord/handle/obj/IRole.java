@@ -81,7 +81,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the color of the role.
@@ -92,7 +92,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeColor(Color color) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes whether to hoist the role.
@@ -103,7 +103,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeHoist(boolean hoist) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the role.
@@ -114,7 +114,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the permissions of the role.
@@ -125,7 +125,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changePermissions(EnumSet<Permissions> permissions) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes whether this role is mentionable.
@@ -136,7 +136,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeMentionable(boolean isMentionable) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeMentionable(boolean isMentionable) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Attempts to delete this role.
@@ -145,7 +145,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+	void delete() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This checks if the role is the @everyone role.

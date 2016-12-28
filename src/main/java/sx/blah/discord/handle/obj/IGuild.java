@@ -199,7 +199,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IRole createRole() throws MissingPermissionsException, RateLimitException, DiscordException;
+	IRole createRole() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Retrieves the list of banned users from this guild.
@@ -209,7 +209,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IUser> getBannedUsers() throws RateLimitException, DiscordException;
+	List<IUser> getBannedUsers() throws DiscordException, RateLimitException;
 
 	/**
 	 * Bans a user from this guild.
@@ -220,7 +220,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void banUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void banUser(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Bans a user from this guild.
@@ -232,7 +232,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void banUser(IUser user, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void banUser(IUser user, int deleteMessagesForDays) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Bans a user from this guild.
@@ -243,7 +243,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void banUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void banUser(String userID) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Bans a user from this guild.
@@ -255,7 +255,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void banUser(String userID, int deleteMessagesForDays) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void banUser(String userID, int deleteMessagesForDays) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This removes a ban on a user.
@@ -266,7 +266,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void pardonUser(String userID) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void pardonUser(String userID) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Kicks a user from the guild.
@@ -277,7 +277,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void kickUser(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void kickUser(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Edits the roles a user is a part of.
@@ -289,7 +289,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void editUserRoles(IUser user, IRole[] roles) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void editUserRoles(IUser user, IRole[] roles) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Sets whether a user should be deafened.
@@ -301,7 +301,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	void setDeafenUser(IUser user, boolean deafen) throws MissingPermissionsException, DiscordException, RateLimitException;
+	void setDeafenUser(IUser user, boolean deafen) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Sets whether a user should be muted.
@@ -325,7 +325,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	void setUserNickname(IUser user, String nick) throws MissingPermissionsException, DiscordException, RateLimitException;
+	void setUserNickname(IUser user, String nick) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Edits all properties of this guild.
@@ -341,7 +341,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void edit(String name, IRegion region, VerificationLevel level, Image icon, IVoiceChannel afkChannel, int afkTimeout) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void edit(String name, IRegion region, VerificationLevel level, Image icon, IVoiceChannel afkChannel, int afkTimeout) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the guild.
@@ -351,7 +351,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the region of the guild.
@@ -361,7 +361,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeRegion(IRegion region) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeRegion(IRegion region) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the verification level of the guild.
@@ -371,7 +371,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeVerificationLevel(VerificationLevel verification) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeVerificationLevel(VerificationLevel verification) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the guild.
@@ -381,7 +381,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeIcon(Image icon) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeIcon(Image icon) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK voice channel of the guild.
@@ -391,7 +391,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeAFKChannel(IVoiceChannel channel) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeAFKChannel(IVoiceChannel channel) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the AFK timeout for the guild.
@@ -401,7 +401,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeAFKTimeout(int timeout) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeAFKTimeout(int timeout) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This deletes this guild if and only if you are its owner, otherwise it throws a {@link MissingPermissionsException}.
@@ -445,7 +445,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 */
-	IChannel createChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException;
+	IChannel createChannel(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Creates a new voice channel.
@@ -457,7 +457,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 */
-	IVoiceChannel createVoiceChannel(String name) throws DiscordException, MissingPermissionsException, RateLimitException;
+	IVoiceChannel createVoiceChannel(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Gets the region this guild is located in.

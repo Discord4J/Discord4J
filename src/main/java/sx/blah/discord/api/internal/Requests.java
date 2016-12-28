@@ -123,7 +123,7 @@ public class Requests {
 		 * @throws RateLimitException
 		 * @throws DiscordException
 		 */
-		public String makeRequest(String url, BasicNameValuePair... headers) throws RateLimitException, DiscordException {
+		public String makeRequest(String url, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
 			try {
 				HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 				for (BasicNameValuePair header : headers) {
@@ -148,7 +148,7 @@ public class Requests {
 		 * @throws RateLimitException
 		 * @throws DiscordException
 		 */
-		public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws RateLimitException, DiscordException {
+		public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
 			try {
 				if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 					HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)

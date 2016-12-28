@@ -31,7 +31,7 @@ public interface IInvite {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws RateLimitException, DiscordException;
+	void delete() throws DiscordException, RateLimitException;
 
 	/**
 	 * This gets the client that this object is tied to.

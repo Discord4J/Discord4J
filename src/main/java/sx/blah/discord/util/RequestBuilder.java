@@ -432,8 +432,7 @@ public class RequestBuilder {
 		 * @throws RateLimitException
 		 * @throws MissingPermissionsException
 		 * @throws DiscordException
-		 * @throws Exception
 		 */
-		boolean execute() throws RateLimitException, MissingPermissionsException, DiscordException, Exception;
+		boolean execute() throws Exception;
 	}
 }

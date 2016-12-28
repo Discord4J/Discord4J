@@ -290,24 +290,22 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void reply(String content) throws DiscordException, RateLimitException, MissingPermissionsException {
 		reply(content, null);
 	}
 
 	@Override
-	public void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
+	public void reply(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
 	}
 
 	@Override
-	public IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IMessage edit(String content) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return edit(content, null);
 	}
 
 	@Override
-	public IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
+	public IMessage edit(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!", EnumSet.noneOf(Permissions.class));
 		if (isDeleted())
@@ -365,7 +363,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void delete() throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (!getAuthor().equals(client.getOurUser())) {
 			if (channel.isPrivate())
 				throw new DiscordException("Cannot delete the other person's message in a private channel!");
@@ -469,7 +467,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException {
+	public void removeAllReactions() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE
@@ -477,8 +475,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void addReaction(IReaction reaction) throws MissingPermissionsException,
-			RateLimitException, DiscordException {
+	public void addReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (reaction == null)
 			throw new NullPointerException("Reaction argument cannot be null.");
 
@@ -492,13 +489,12 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void addReaction(IEmoji emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
+	public void addReaction(IEmoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
 		addReaction(emoji.toString());
 	}
 
 	@Override
-	public void addReaction(String emoji) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
 		emoji = emoji.replace("<:", "").replace(">", "");
 
 		if (emoji.matches("\\d+")) {
@@ -521,8 +517,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
+	public void removeReaction(IUser user, IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException {
 		IMessage message = reaction.getMessage();
 		if (!this.equals(message))
 			throw new DiscordException("Reaction argument's message does not match this one.");
@@ -544,8 +539,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
-			DiscordException {
+	public void removeReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException {
 		removeReaction(client.getOurUser(), reaction);
 	}
 

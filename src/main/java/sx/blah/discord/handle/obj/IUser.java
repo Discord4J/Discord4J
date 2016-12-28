@@ -137,7 +137,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	IPrivateChannel getOrCreatePMChannel() throws RateLimitException, DiscordException;
+	IPrivateChannel getOrCreatePMChannel() throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets whether this user is deafened in the given guild.
@@ -178,7 +178,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void addRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 
 	/**
@@ -190,5 +190,5 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException;
 }

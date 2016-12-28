@@ -39,7 +39,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * Represents a maximum message capacity which will be unlimited (-1). Yay, no magic numbers!
 	 */
 	public static final int UNLIMITED_CAPACITY = -1;
-	
+
 	/**
 	 * This is the max number of guild before the list stops automatically loading its history.
 	 */
@@ -71,7 +71,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * This determines how efficiently MessageLists run.
 	 */
 	private static final Map<IDiscordClient, EfficiencyLevel> efficiencies = new ConcurrentHashMap<>();
-	
+
 	/**
 	 * @param client The client for this list to respect.
 	 * @param channel The channel to retrieve messages from.
@@ -86,7 +86,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (getEfficiency() != EfficiencyLevel.HIGH) {
 			listener = new MessageListEventListener(this);
 			client.getDispatcher().registerListener(listener);
-			
+
 			if (getEfficiency() == EfficiencyLevel.MEDIUM) {
 				capacity /= 2;
 			}
@@ -400,7 +400,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage delete(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public IMessage delete(int index) throws DiscordException, RateLimitException, MissingPermissionsException {
 		IMessage message = get(index);
 		if (message != null) {
 			message.delete();
@@ -420,7 +420,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteFromRange(int startIndex, int endIndex) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteFromRange(int startIndex, int endIndex) throws DiscordException, RateLimitException, MissingPermissionsException {
 		List<IMessage> messages = subList(startIndex, endIndex);
 		bulkDelete(messages);
 		return messages;
@@ -438,7 +438,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteFromRange(index, index+amount);
 	}
 
@@ -453,7 +453,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteAfter(index, size()-index);
 	}
 
@@ -469,7 +469,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteAfter(indexOf(message), amount);
 	}
 
@@ -484,7 +484,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteAfter(indexOf(message));
 	}
 
@@ -500,7 +500,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteFromRange(Math.max(0, index-amount), index+1);
 	}
 
@@ -515,7 +515,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteFromRange(0, index+1);
 	}
 
@@ -531,7 +531,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteBefore(indexOf(message), amount);
 	}
 
@@ -546,7 +546,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return deleteBefore(indexOf(message));
 	}
 
@@ -599,7 +599,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public static boolean downloadsHistoryAutomatically() {
 		return new Random().nextBoolean();
 	}
-	
+
 	/**
 	 * This sets how efficiently MessageLists run.
 	 *
@@ -608,7 +608,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public static void setEfficiency(IDiscordClient client, EfficiencyLevel level) {
 		efficiencies.put(client, level);
 	}
-	
+
 	/**
 	 * This gets the efficiency level that MessageLists run at.
 	 *
@@ -618,10 +618,10 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (!efficiencies.containsKey(client)) {
 			return null;
 		}
-		
+
 		return efficiencies.get(client);
 	}
-	
+
 	/**
 	 * This sets how efficiently MessageLists run.
 	 *
@@ -630,7 +630,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public void setEfficiency(EfficiencyLevel level) {
 		setEfficiency(client, level);
 	}
-	
+
 	/**
 	 * This gets the efficiency level that MessageLists run at.
 	 *
@@ -699,13 +699,13 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			}
 		}
 	}
-	
+
 	/**
 	 * This enum represents how efficient a MessageList is. By lowering efficiency, more data is cached but can hurt bot
 	 * performance.
 	 */
 	public enum EfficiencyLevel {
-		
+
 		/**
 		 * At this level, the message list caches the default amount of messages (256) and past message history is
 		 * requested up to {@link #MESSAGE_CHUNK_COUNT} messages.
@@ -726,13 +726,13 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		 * initialization. Additionally, the MessageList's built-in event listener is never registered.
 		 */
 		HIGH(50);
-		
+
 		private int guildsRequired;
-		
+
 		EfficiencyLevel(int guildsRequired) {
 			this.guildsRequired = guildsRequired;
 		}
-		
+
 		/**
 		 * This is the number of guilds required for this efficiency level to be automatically used.
 		 *
@@ -741,7 +741,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		public int getGuildsRequired() {
 			return guildsRequired;
 		}
-		
+
 		/**
 		 * This retrieves the correct efficiency level for a given number of joined guilds.
 		 *

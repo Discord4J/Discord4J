@@ -55,22 +55,22 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void removePermissionsOverride(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void removePermissionsOverride(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -95,17 +95,17 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changePosition(int position) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeTopic(String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -115,7 +115,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -165,17 +165,17 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		throw new UnsupportedOperationException();
 	}
 

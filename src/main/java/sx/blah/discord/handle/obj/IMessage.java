@@ -92,7 +92,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void reply(String content) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
@@ -106,7 +106,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void reply(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -116,7 +116,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
-	IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage edit(String content) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Edits the message with an embed object. NOTE: Discord only supports editing YOUR OWN messages!
@@ -129,7 +129,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage edit(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Returns whether this message mentions everyone through @everyone.
@@ -152,7 +152,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+	void delete() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Gets the time that this message was last edited.
@@ -212,7 +212,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see Permissions#MANAGE_MESSAGES
 	 */
-	void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException;
+	void removeAllReactions() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Adds your reaction to an existing one.
@@ -222,8 +222,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
+	void addReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Adds your reaction as a custom emoji
@@ -233,8 +232,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(IEmoji emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
+	void addReaction(IEmoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;:name:id&gt;)
@@ -244,8 +242,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(String emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
+	void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Removes a reaction for a user.
@@ -256,7 +253,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeReaction(IUser user, IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Removes a reaction for yourself.
@@ -266,7 +263,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Checks to see is this message deleted.

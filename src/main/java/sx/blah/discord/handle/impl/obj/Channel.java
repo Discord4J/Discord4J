@@ -176,18 +176,17 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage sendMessage(String content) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IMessage sendMessage(String content) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendMessage(content, false);
 	}
 
 	@Override
-	public IMessage sendMessage(String content, boolean tts) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IMessage sendMessage(String content, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendMessage(content, null, tts);
 	}
 
 	@Override
-	public IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws RateLimitException,
-			DiscordException, MissingPermissionsException {
+	public IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 
 		if (embed != null) {
@@ -212,7 +211,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException, MissingPermissionsException {
+	public IMessage sendFile(File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(null, file);
 	}
 
@@ -240,7 +239,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
 		if (!client.isReady()) {
@@ -293,7 +292,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void edit(String name, int position, String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
 		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
@@ -305,17 +304,17 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(name, getPosition(), getTopic());
 	}
 
 	@Override
-	public void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changePosition(int position) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getName(), position, getTopic());
 	}
 
 	@Override
-	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeTopic(String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(getName(), getPosition(), topic);
 	}
 
@@ -343,7 +342,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void delete() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id);
@@ -423,7 +422,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void removePermissionsOverride(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID());
@@ -432,7 +431,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void removePermissionsOverride(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+role.getID());
@@ -441,16 +440,16 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException {
 		overridePermissions("role", role.getID(), toAdd, toRemove);
 	}
 
 	@Override
-	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException {
 		overridePermissions("member", user.getID(), toAdd, toRemove);
 	}
 
-	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
+	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		try {
@@ -485,7 +484,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public List<IMessage> getPinnedMessages() throws RateLimitException, DiscordException {
+	public List<IMessage> getPinnedMessages() throws DiscordException, RateLimitException {
 		List<IMessage> messages = new ArrayList<>();
 		MessageObject[] pinnedMessages = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
 				DiscordEndpoints.CHANNELS + id + "/pins"),
@@ -498,7 +497,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void pin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void pin(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (!message.getChannel().equals(this))
@@ -511,7 +510,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void unpin(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (!message.getChannel().equals(this))
@@ -543,17 +542,17 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return createWebhook(name, Image.defaultAvatar());
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return createWebhook(name, avatar.getData());
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
 
 		if (!client.isReady()) {

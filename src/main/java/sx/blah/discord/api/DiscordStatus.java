@@ -76,7 +76,7 @@ public class DiscordStatus {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public static Maintenance[] getActiveMaintenances() throws RateLimitException, DiscordException {
+	public static Maintenance[] getActiveMaintenances() throws DiscordException, RateLimitException {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "active")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
@@ -98,7 +98,7 @@ public class DiscordStatus {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public static Maintenance[] getUpcomingMaintenances() throws RateLimitException, DiscordException {
+	public static Maintenance[] getUpcomingMaintenances() throws DiscordException, RateLimitException {
 		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "upcoming")), StatusResponse.class);
 		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];

@@ -88,7 +88,7 @@ public class Webhook implements IWebhook {
 		return token;
 	}
 
-	private void edit(String name, String avatar) throws MissingPermissionsException, RateLimitException, DiscordException {
+	private void edit(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
 
 		try {
@@ -106,17 +106,17 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public void changeDefaultName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(name, null);
 	}
 
 	@Override
-	public void changeDefaultAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultAvatar(String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(this.name, avatar);
 	}
 
 	@Override
-	public void changeDefaultAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultAvatar(Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		edit(this.name, avatar.getData());
 	}
 
@@ -139,7 +139,7 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void delete() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.WEBHOOKS + id);

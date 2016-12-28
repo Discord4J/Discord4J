@@ -76,7 +76,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage sendMessage(String content) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Sends a message to the desired channel.
@@ -89,7 +89,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content, boolean tts) throws RateLimitException, DiscordException, MissingPermissionsException;
+	IMessage sendMessage(String content, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Sends a message to the desired channel.
@@ -105,7 +105,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws RateLimitException, DiscordException, MissingPermissionsException;
+	IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Uploads a file to the channel.
@@ -161,7 +161,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Toggles whether the bot is "typing".
@@ -193,7 +193,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void edit(String name, int position, String topic) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the name of the channel
@@ -203,7 +203,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the position of the channel
@@ -213,7 +213,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changePosition(int position) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Changes the topic of the channel
@@ -223,7 +223,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeTopic(String topic) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Gets the position of the channel on the channel list.
@@ -239,7 +239,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+	void delete() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Gets the permissions overrides for users. (Key = User id).
@@ -280,7 +280,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removePermissionsOverride(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Removes a permissions override on this channel.
@@ -291,7 +291,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removePermissionsOverride(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -304,7 +304,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -317,7 +317,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This gets all the currently available invites for this channel.
@@ -345,7 +345,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IMessage> getPinnedMessages() throws RateLimitException, DiscordException;
+	List<IMessage> getPinnedMessages() throws DiscordException, RateLimitException;
 
 	/**
 	 * This pins the provided message to this channel.
@@ -356,7 +356,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void pin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void pin(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This unpins the provided message from this channel.
@@ -367,7 +367,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void unpin(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void unpin(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 <<<<<<< HEAD
@@ -399,7 +399,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param name The default name for the webhook.
 	 * @return The created webhook.
 	 */
-	IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException;
+	IWebhook createWebhook(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This creates a webhook for this channel with the provided name and the provided avatar
@@ -408,7 +408,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param avatar The default avatar for the webhook.
 	 * @return The created webhook.
 	 */
-	IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
+	IWebhook createWebhook(String name, Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * This creates a webhook for this channel with the provided name and the provided avatar
@@ -417,7 +417,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param avatar The default avatar for the webhook.
 	 * @return The created webhook.
 	 */
-	IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException;
+	IWebhook createWebhook(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Checks to see if the this channel is deleted.

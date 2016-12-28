@@ -190,7 +190,7 @@ public class MessageBuilder {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage build() throws RateLimitException, DiscordException, MissingPermissionsException {
+	public IMessage build() throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
@@ -207,7 +207,7 @@ public class MessageBuilder {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage send() throws RateLimitException, DiscordException, MissingPermissionsException {
+	public IMessage send() throws DiscordException, RateLimitException, MissingPermissionsException {
 		return build();
 	}
 

@@ -131,7 +131,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return this.token;
 	}
 
-	private void changeAccountInfo(String username, String avatar) throws RateLimitException, DiscordException {
+	private void changeAccountInfo(String username, String avatar) throws DiscordException, RateLimitException {
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
 
 		if (!isLoggedIn()) {
@@ -163,7 +163,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IRegion> getRegions() throws RateLimitException, DiscordException {
+	public List<IRegion> getRegions() throws DiscordException, RateLimitException {
 		if (REGIONS.isEmpty()) {
 			VoiceRegionObject[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
 					DiscordEndpoints.VOICE+"regions"),
