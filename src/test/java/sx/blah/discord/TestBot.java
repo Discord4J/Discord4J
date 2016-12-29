@@ -5,13 +5,18 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
@@ -54,7 +59,7 @@ public class TestBot {
 
 			IDiscordClient client = new ClientBuilder().withToken(args[0]).build();
 
-			client.getDispatcher().registerListener((IListener<DiscordDisconnectedEvent>) (event) -> {
+			client.getDispatcher().registerListener((IListener<DisconnectedEvent>) (event) -> {
 				Discord4J.LOGGER.warn("Client disconnected for reason: {}", event.getReason());
 			});
 
@@ -313,7 +318,7 @@ public class TestBot {
 								}
 								return "end";
 							}
-							
+
 							@Override
 							public void onRetry(RequestBuffer.RequestFuture<String> future) {
 								ref.get().cancel(false);
