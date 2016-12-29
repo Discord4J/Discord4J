@@ -289,21 +289,26 @@ public class RequestBuffer {
 		public void run() {
 			synchronized (requests) {
 				List<RequestFuture> futures = requests.get(bucket);
-				List<RequestFuture> futuresToRetry = new CopyOnWriteArrayList<>();
-
-				futures.forEach((RequestFuture future) -> {
-					if (!future.tryAgain()) {
-						futuresToRetry.add(future);
+				
+				if (futures != null) {
+					List<RequestFuture> futuresToRetry = new CopyOnWriteArrayList<>();
+					
+					futures.forEach((RequestFuture future) -> {
+						if (!future.tryAgain()) {
+							futuresToRetry.add(future);
+						}
+					});
+					
+					long delay = Math.max(0, futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
+					
+					if (futuresToRetry.size() > 0) {
+						requests.replace(bucket, futuresToRetry);
+						synchronized (requestTimer) {
+							requestTimer.schedule(new RequestTimerTask(bucket), delay);
+						}
+					} else {
+						requests.remove(bucket);
 					}
-				});
-
-				if (futuresToRetry.size() > 0 && futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS) > 0) {
-					requests.replace(bucket, futuresToRetry);
-					synchronized (requestTimer) {
-						requestTimer.schedule(new RequestTimerTask(bucket), futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
-					}
-				} else {
-					requests.remove(bucket);
 				}
 			}
 		}
