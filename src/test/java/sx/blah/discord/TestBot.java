@@ -20,6 +20,8 @@ import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * General testing bot. Also a demonstration of how to use the bot.
@@ -296,7 +298,28 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.reply(String.valueOf(message.getChannel().getMessages().size()));
+						final AtomicInteger count = new AtomicInteger(0);
+						final AtomicReference<RequestBuffer.RequestFuture<String>> ref = new AtomicReference<>(null);
+						ref.set(RequestBuffer.request(new RequestBuffer.IRequest<String>() {
+							@Override
+							public String request() throws RateLimitException {
+								int i;
+								while ((i = count.getAndIncrement()) < 10) {
+									try {
+										message.reply(""+i);
+									} catch (DiscordException | MissingPermissionsException e) {
+										e.printStackTrace();
+									}
+								}
+								return "end";
+							}
+							
+							@Override
+							public void onRetry(RequestBuffer.RequestFuture<String> future) {
+								ref.get().cancel(false);
+							}
+						}));
+						message.reply(ref.get().get());
 					}
 				});
 

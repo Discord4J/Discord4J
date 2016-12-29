@@ -46,9 +46,10 @@ public class RequestBuffer {
 	 * continence.
 	 *
 	 * @param request The request to be carried out.
+	 * @return The request future.
 	 */
-	public static void request(IVoidRequest request) {
-		request((IRequest) request);
+	public static RequestFuture<Void> request(IVoidRequest request) {
+		return request((IRequest<Void>) request); //Casted to use the correct request() method
 	}
 
 	/**
@@ -89,6 +90,13 @@ public class RequestBuffer {
 		 * @throws RateLimitException
 		 */
 		T request() throws RateLimitException;
+		
+		/**
+		 * This is called when this request is retried. This should NOT block.
+		 *
+		 * @param requestFuture The future managing this request.
+		 */
+		default void onRetry(RequestFuture<T> requestFuture) {}
 	}
 
 	/**
@@ -96,9 +104,9 @@ public class RequestBuffer {
 	 * to use lambdas!
 	 */
 	@FunctionalInterface
-	public interface IVoidRequest extends IRequest<Object> {
+	public interface IVoidRequest extends IRequest<Void> {
 
-		default Object request() throws RateLimitException {
+		default Void request() throws RateLimitException {
 			doRequest();
 			return null;
 		}
@@ -120,10 +128,12 @@ public class RequestBuffer {
 
 		private volatile boolean isDone = false;
 		private volatile boolean cancelled = false;
+		private volatile boolean firstAttempt = true;
 		private volatile T value = null;
 		private volatile long timeForNextRequest;
 		private volatile String bucket;
 		private final IRequest<T> request;
+		private final CountDownLatch latch = new CountDownLatch(1);
 
 		public RequestFuture(IRequest<T> request) {
 			this.request = request;
@@ -139,8 +149,12 @@ public class RequestBuffer {
 		 */
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
-			if (!isDone())
-				cancelled = true;
+			if (!isDone()) {
+				if ((latch.getCount() != 0 && mayInterruptIfRunning) || latch.getCount() == 0) {
+					latch.countDown();
+					cancelled = true;
+				}
+			}
 			return isCancelled();
 		}
 
@@ -165,21 +179,42 @@ public class RequestBuffer {
 		}
 
 		/**
-		 * Gets the request return value.
+		 * Gets the request return value or blocks until the request is completed.
 		 *
-		 * @return The value, or null if it hasn't been executed yet.
+		 * @return The value.
 		 */
 		@Override
 		public T get() {
+			if (!isDone() && !isCancelled()) {
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					Discord4J.LOGGER.error(LogMarkers.UTIL, "RequestFuture unexpectedly interrupted!", e);
+				}
+			}
+			
 			return value;
 		}
 
 		/**
-		 * NO-OP
+		 * Gets the request return value if present, otherwise it blocks until the request is completed or the timeout
+		 * is reached.
+		 *
+		 * @param timeout The timeout value.
+		 * @param unit The timeout unit.
+		 * @return The value.
+		 *
+		 * @throws InterruptedException
+		 * @throws ExecutionException
+		 * @throws TimeoutException
 		 */
 		@Override
 		public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-			throw new UnsupportedOperationException();
+			if (!isDone() && !isCancelled())
+				if (!latch.await(timeout, unit))
+					throw new TimeoutException();
+			
+			return value;
 		}
 
 		/**
@@ -220,15 +255,20 @@ public class RequestBuffer {
 		 * @return True if successful, false if otherwise.
 		 */
 		protected boolean tryAgain() {
-			if (!isCancelled()) {
-				try {
+			try {
+				if (!firstAttempt)
+					request.onRetry(this);
+				
+				if (!isCancelled()) {
 					value = request.request();
 					timeForNextRequest = -1;
 					isDone = true;
-				} catch (RateLimitException e) {
-					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
-					bucket = e.getMethod();
+					latch.countDown();
 				}
+			} catch (RateLimitException e) {
+				firstAttempt = false;
+				timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
+				bucket = e.getMethod();
 			}
 			return isDone() || isCancelled();
 		}
