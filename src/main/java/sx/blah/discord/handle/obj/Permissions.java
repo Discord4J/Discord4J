@@ -119,7 +119,11 @@ public enum Permissions {
 	/**
 	 * Allows the user to manage webhooks.
 	 */
-	MANAGE_WEBHOOKS(29);
+	MANAGE_WEBHOOKS(29),
+	/**
+	 * Allows the user to manage server emojis.
+	 */
+	MANAGE_EMOJIS(30);
 
 	/**
 	 * The bit offset in the permissions number
