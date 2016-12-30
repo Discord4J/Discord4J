@@ -31,12 +31,15 @@ public class RequestBuffer {
 			Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
 					future.getDelay(TimeUnit.MILLISECONDS));
 
-			if (!requests.containsKey(future.getBucket())) {
-				requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
-				requestTimer.schedule(new RequestTimerTask(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS));
+			synchronized (requests) {
+				
+				if (!requests.containsKey(future.getBucket())) {
+					requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
+					requestTimer.schedule(new RequestTimerTask(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS));
+				}
+				
+				requests.get(future.getBucket()).add(future);
 			}
-
-			requests.get(future.getBucket()).add(future);
 		}
 		return future;
 	}
