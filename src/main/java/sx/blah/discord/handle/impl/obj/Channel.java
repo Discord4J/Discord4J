@@ -11,19 +11,33 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.api.internal.json.objects.ExtendedInviteObject;
+import sx.blah.discord.api.internal.json.objects.FilePayloadObject;
+import sx.blah.discord.api.internal.json.objects.MessageObject;
+import sx.blah.discord.api.internal.json.objects.OverwriteObject;
+import sx.blah.discord.api.internal.json.objects.WebhookObject;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
+import sx.blah.discord.api.internal.json.requests.MessageRequest;
 import sx.blah.discord.api.internal.json.requests.WebhookCreateRequest;
-import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
-import sx.blah.discord.api.internal.json.requests.MessageRequest;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -231,8 +245,7 @@ public class Channel implements IChannel {
 
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
-		builder.addTextBody("payload_json", DiscordUtils.GSON_NO_NULLS.toJson(new FilePayloadObject(content, tts, embed)), ContentType.APPLICATION_FORM_URLENCODED.withCharset("UTF-8"));
-
+		builder.addTextBody("payload_json", DiscordUtils.GSON_NO_NULLS.toJson(new FilePayloadObject(content, tts, embed)), ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
 
 		HttpEntity fileEntity = builder.build();
 		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
