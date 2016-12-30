@@ -231,7 +231,7 @@ public class Channel implements IChannel {
 
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
-		builder.addTextBody("payload_json", DiscordUtils.GSON_NO_NULLS.toJson(new FilePayloadObject(content, tts, embed)));
+		builder.addTextBody("payload_json", DiscordUtils.GSON_NO_NULLS.toJson(new FilePayloadObject(content, tts, embed)), ContentType.APPLICATION_FORM_URLENCODED.withCharset("UTF-8"));
 
 
 		HttpEntity fileEntity = builder.build();
