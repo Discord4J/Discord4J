@@ -147,7 +147,7 @@ public class RequestBuffer {
 		/**
 		 * Cancels the request if it hasn't been executed.
 		 *
-		 * @param mayInterruptIfRunning Non-applicable.
+		 * @param mayInterruptIfRunning Whether the future should be cancelled regardless of whether its running or not.
 		 * @return True if cancelled, false if otherwise (like if the request was already executed).
 		 */
 		@Override
