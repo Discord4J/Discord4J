@@ -12,6 +12,7 @@ import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import javax.sound.sampled.AudioFormat;
@@ -53,11 +54,6 @@ public class DiscordUtils {
 			"(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)" + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*" +
 					"[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
 			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-
-	/**
-	 * Used in order to find the invite code from a passed message.
-	 */
-	public static final Pattern INVITE_PATTERN = Pattern.compile("(?:discord\\.gg/)([\\w-]+)");
 
 	/**
 	 * Used to determine age based on discord ids
@@ -736,11 +732,11 @@ public class DiscordUtils {
 	 * @return The codes or empty if none are found.
 	 */
 	public static List<String> getInviteCodesFromMessage(String message) {
-		Matcher matcher = INVITE_PATTERN.matcher(message);
+		Matcher matcher = MessageTokenizer.INVITE_PATTERN.matcher(message);
 		List<String> strings = new ArrayList<>();
 		while (matcher.find()) {
 			strings.add(matcher.group(1));
-			matcher = INVITE_PATTERN.matcher(matcher.replaceFirst(""));
+			matcher = MessageTokenizer.INVITE_PATTERN.matcher(matcher.replaceFirst(""));
 		}
 		return strings;
 	}

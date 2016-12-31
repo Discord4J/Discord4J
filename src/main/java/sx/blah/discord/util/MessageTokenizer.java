@@ -1,5 +1,6 @@
 package sx.blah.discord.util;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
@@ -20,11 +21,13 @@ public class MessageTokenizer {
 
 	public static final String ANY_MENTION_REGEX = "<((@[!&]?)|#)\\d+>";
 	public static final String CUSTOM_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
+	public static final String INVITE_REGEX = "(?:discord\\.gg/)([\\w-]+)";
+	public static final Pattern ANY_MENTION_PATTERN = Pattern.compile(ANY_MENTION_REGEX);
+	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile(CUSTOM_EMOJI_REGEX);
+	public static final Pattern INVITE_PATTERN = Pattern.compile(INVITE_REGEX);
 
 	private final String content;
 	private final IDiscordClient client;
-	private final Pattern anyMentionPattern = Pattern.compile(ANY_MENTION_REGEX);
-	private final Pattern customEmojiPattern = Pattern.compile(CUSTOM_EMOJI_REGEX);
 	private int currentPosition = 0;
 	/**
 	 * The remaining substring.
@@ -207,7 +210,7 @@ public class MessageTokenizer {
 		if (!hasNextRegex(pattern))
 			throw new IllegalStateException("No more occurrences found!");
 
-		Matcher matcher = anyMentionPattern.matcher(remaining);
+		Matcher matcher = ANY_MENTION_PATTERN.matcher(remaining);
 		if (!matcher.find())
 			throw new IllegalStateException("Couldn't find any matches!");
 		final int start = currentPosition + matcher.start();
@@ -219,12 +222,36 @@ public class MessageTokenizer {
 	}
 
 	/**
+	 * Returns true if there is an invite to go to.
+	 *
+	 * @return True if there is an invite to go to.
+	 */
+	public boolean hasNextInvite() {
+		return hasNextRegex(INVITE_PATTERN);
+	}
+
+	public InviteToken nextInvite() {
+		if (!hasNextInvite())
+			throw new IllegalStateException("No more invites found!");
+
+		Matcher matcher = INVITE_PATTERN.matcher(remaining);
+		if (!matcher.find())
+			throw new IllegalStateException("Couldn't find any matches!");
+		final int start = currentPosition + matcher.start();
+		final int end = currentPosition + matcher.end();
+
+		stepTo(end);
+
+		return new InviteToken(this, start, end);
+	}
+
+	/**
 	 * Returns true if there is a mention to go to.
 	 *
 	 * @return True if there is a mention to go to.
 	 */
 	public boolean hasNextMention() {
-		return hasNextRegex(anyMentionPattern);
+		return hasNextRegex(ANY_MENTION_PATTERN);
 	}
 
 	/**
@@ -237,7 +264,7 @@ public class MessageTokenizer {
 		if (!hasNextMention())
 			throw new IllegalStateException("No more mentions found!");
 
-		Token t = nextRegex(anyMentionPattern);
+		Token t = nextRegex(ANY_MENTION_PATTERN);
 		final int lessThan = t.getStartIndex();
 		final int greaterThan = t.getEndIndex();
 		final String matched = t.getContent();
@@ -263,7 +290,7 @@ public class MessageTokenizer {
 	 * @return True if there is another custom emoji.
 	 */
 	public boolean hasNextEmoji() {
-		return hasNextRegex(customEmojiPattern);
+		return hasNextRegex(CUSTOM_EMOJI_PATTERN);
 	}
 
 	/**
@@ -276,7 +303,7 @@ public class MessageTokenizer {
 		if (!hasNextEmoji())
 			throw new IllegalStateException("No more custom server emojis found!");
 
-		Token t = nextRegex(customEmojiPattern);
+		Token t = nextRegex(CUSTOM_EMOJI_PATTERN);
 		final int lessThan = t.getStartIndex();
 		final int greaterThan = t.getEndIndex();
 
@@ -512,6 +539,44 @@ public class MessageTokenizer {
 		 */
 		public IEmoji getEmoji() {
 			return emoji;
+		}
+	}
+
+	public static class InviteToken extends Token {
+
+		/**
+		 * The invite.
+		 */
+		private final IInvite invite;
+
+		/**
+		 * An invite link from a message with content and position.
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private InviteToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex);
+
+			invite = RequestBuffer.request(() -> {
+				try {
+					return tokenizer.getClient().getInviteForCode(getContent().substring(getContent().lastIndexOf("/")));
+				} catch (DiscordException e) {
+					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+				}
+
+				return null;
+			}).get();
+		}
+
+		/**
+		 * Return the invite.
+		 *
+		 * @return The invite.
+		 */
+		public IInvite getInvite() {
+			return invite;
 		}
 	}
 
