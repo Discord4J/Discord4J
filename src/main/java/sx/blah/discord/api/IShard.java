@@ -42,12 +42,32 @@ public interface IShard {
 	boolean isReady();
 
 	/**
-	 * Checks if the api has established a connection with the Discord gateway. This means the Ready payload has been received.
+	 * Ensures the shard is ready to interact with the api.
+	 *
+	 * @param action The action that is being attempted. (i.e. "send message")
+	 * @throws DiscordException
+	 */
+	default void checkReady(String action) throws DiscordException {
+		if (!isReady()) throw new DiscordException("Attempt to " + action + " before shard is ready!");
+	}
+
+	/**
+	 * Checks if the shard has established a connection with the Discord gateway. This means the Ready payload has been received.
 	 * Note: This is most likely only useful to advanced users.
 	 *
 	 * @return True if logged in, false if otherwise.
 	 */
 	boolean isLoggedIn();
+
+	/**
+	 * Ensures that the shard has established a connection with the Discord gateway.
+	 *
+	 * @param action The action that is being attempted. (i.e. "send message")
+	 * @throws DiscordException
+	 */
+	default void checkLoggedIn(String action) throws DiscordException {
+		if (!isLoggedIn()) throw new DiscordException("Attempt to " + action + " before shard has logged in!");
+	}
 
 	/**
 	 * Gets the last time it took for Discord to acknowledge a heartbeat.

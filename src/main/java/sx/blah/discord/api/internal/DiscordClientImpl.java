@@ -132,13 +132,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	private void changeAccountInfo(String username, String avatar) throws DiscordException, RateLimitException {
+		checkLoggedIn("change account info");
+
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
-
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to change account info before bot has logged in!");
-			return;
-		}
-
 		REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me", new AccountInfoChangeRequest(username, avatar));
 	}
 

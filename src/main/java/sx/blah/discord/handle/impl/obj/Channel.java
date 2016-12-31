@@ -201,26 +201,22 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException {
+		getShard().checkReady("send message");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.SEND_MESSAGES));
 
 		if (embed != null) {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.EMBED_LINKS));
 		}
 
-		if (client.isReady()) {
-			MessageObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-					DiscordEndpoints.CHANNELS+id+"/messages",
-					DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, tts)),
-					MessageObject.class);
+		MessageObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.CHANNELS+id+"/messages",
+				DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, tts)),
+				MessageObject.class);
 
-			if (response == null || response.id == null) //Message didn't send
-				throw new DiscordException("Message was unable to be sent.");
+		if (response == null || response.id == null) //Message didn't send
+			throw new DiscordException("Message was unable to be sent.");
 
-			return DiscordUtils.getMessageFromJSON(this, response);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to send message before bot is ready!");
-			return null;
-		}
+		return DiscordUtils.getMessageFromJSON(this, response);
 	}
 
 	@Override
@@ -256,12 +252,8 @@ public class Channel implements IChannel {
 
 	@Override
 	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws DiscordException, RateLimitException, MissingPermissionsException {
+		getShard().checkReady("create invite");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
-
-		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create invite before bot is ready!");
-			return null;
-		}
 
 		ExtendedInviteObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.CHANNELS+getID()+"/invites",
@@ -560,12 +552,8 @@ public class Channel implements IChannel {
 
 	@Override
 	public IWebhook createWebhook(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
+		getShard().checkReady("create webhook");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
-
-		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create webhook before bot is ready!");
-			return null;
-		}
 
 		if (name == null || name.length() < 2 || name.length() > 32)
 			throw new DiscordException("Webhook name can only be between 2 and 32 characters!");

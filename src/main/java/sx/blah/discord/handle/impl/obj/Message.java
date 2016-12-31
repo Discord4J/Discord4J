@@ -306,21 +306,20 @@ public class Message implements IMessage {
 
 	@Override
 	public IMessage edit(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
+		getShard().checkReady("edit message");
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!", EnumSet.noneOf(Permissions.class));
 		if (isDeleted())
 			throw new DiscordException("Cannot edit deleted messages!");
-		if (client.isReady()) {
-			if (embed != null) {
-				DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
-			}
 
-			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-					DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)));
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to edit message before bot is ready!");
+		if (embed != null) {
+			DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
 		}
+
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+				DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)));
+
 		return this;
 	}
 
@@ -363,6 +362,7 @@ public class Message implements IMessage {
 
 	@Override
 	public void delete() throws DiscordException, RateLimitException, MissingPermissionsException {
+		getShard().checkReady("delete message");
 		if (!getAuthor().equals(client.getOurUser())) {
 			if (channel.isPrivate())
 				throw new DiscordException("Cannot delete the other person's message in a private channel!");
@@ -370,11 +370,7 @@ public class Message implements IMessage {
 			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 		}
 
-		if (client.isReady()) {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to delete message before bot is ready!");
-		}
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id);
 	}
 
 	@Override

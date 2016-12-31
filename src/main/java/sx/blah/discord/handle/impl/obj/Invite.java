@@ -37,14 +37,10 @@ public class Invite implements IInvite {
 
 	@Override
 	public InviteResponse details() throws DiscordException, RateLimitException {
-		if (client.isReady()) {
-			InviteObject response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode, InviteObject.class);
+		client.checkReady("get invite details");
+		InviteObject response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode, InviteObject.class);
 
-			return new InviteResponse(response.guild.id, response.guild.name, response.channel.id, response.channel.name);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to get invite details before bot is ready!");
-			return null;
-		}
+		return new InviteResponse(response.guild.id, response.guild.name, response.channel.id, response.channel.name);
 	}
 
 	@Override

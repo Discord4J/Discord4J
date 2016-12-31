@@ -104,12 +104,33 @@ public interface IDiscordClient {
 	boolean isReady();
 
 	/**
-	 * Checks if the api has established a connection with the Discord gateway on all shards.
+	 * Ensures the client is ready to interact with the api.
+	 *
+	 * @param action The action that is being attempted. (i.e. "send message")
+	 * @throws DiscordException
+	 */
+	default void checkReady(String action) throws DiscordException {
+		if (!isReady()) throw new DiscordException("Attempt to " + action + " before client is ready!");
+	}
+
+	/**
+	 * Checks if the client has established a connection with the Discord gateway on all shards.
 	 * @see IShard#isLoggedIn()
 	 *
 	 * @return True if logged in, false if otherwise.
 	 */
 	boolean isLoggedIn();
+
+	/**
+	 * Ensures that the client has established a connection with the Discord gateway on all shards.
+	 *
+	 * @param action The action that is being attempted. (i.e. "send message")
+	 * @throws DiscordException
+	 */
+	default void checkLoggedIn(String action) throws DiscordException {
+		if (!isLoggedIn()) throw new DiscordException("Attempt to " + action + " before client has logged in!");
+	}
+
 
 	/**
 	 * Gets the {@link User} this bot is representing.

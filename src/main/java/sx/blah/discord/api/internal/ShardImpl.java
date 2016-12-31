@@ -18,7 +18,6 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -60,20 +59,18 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void logout() throws DiscordException {
-		if (isLoggedIn()) {
-			Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
-			getConnectedVoiceChannels().forEach(channel -> {
-				RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
-					channel.leave();
-					return channel;
-				});
-				request.get();
+		checkLoggedIn("logout");
+
+		Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
+		getConnectedVoiceChannels().forEach(channel -> {
+			RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
+				channel.leave();
+				return channel;
 			});
-			getClient().getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, this));
-			ws.shutdown();
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to logout before bot has logged in!");
-		}
+			request.get();
+		});
+		getClient().getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, this));
+		ws.shutdown();
 	}
 
 	@Override
@@ -102,11 +99,6 @@ public class ShardImpl implements IShard {
 	}
 
 	private void updatePresence(boolean isIdle, Status status) {
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to change presence before bot has logged in!");
-			return;
-		}
-
 		IUser ourUser = getClient().getOurUser();
 
 		if (!status.equals(ourUser.getStatus())) {
@@ -252,10 +244,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get PM channel before bot is ready!");
-			return null;
-		}
+		checkReady("get PM channel");
 
 		if (user.equals(getClient().getOurUser()))
 			throw new DiscordException("Cannot PM yourself!");

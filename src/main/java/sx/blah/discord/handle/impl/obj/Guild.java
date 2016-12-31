@@ -532,12 +532,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public IChannel createChannel(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+		shard.checkReady("create channel");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
-
-		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create channel before bot is ready!");
-			return null;
-		}
 
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
@@ -555,12 +551,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+		getShard().checkReady("create voice channel");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
-
-		if (!client.isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to create voice channel before bot is ready!");
-			return null;
-		}
 
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
