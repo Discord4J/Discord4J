@@ -16,6 +16,15 @@ public class DiscordException extends Exception {
 	}
 
 	/**
+	 * @param message The error message
+	 * @param cause The cause
+	 */
+	public DiscordException(String message, Throwable cause) {
+		super(message, cause);
+		this.message = message;
+	}
+
+	/**
 	 * This gets the error message sent by Discord.
 	 *
 	 * @return The error message.
