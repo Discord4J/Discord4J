@@ -303,13 +303,9 @@ public class User implements IUser {
 					EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 		}
 
-		try {
-			((DiscordClientImpl) client).REQUESTS.PATCH
-					.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-							new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
+				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID())));
 	}
 
 	@Override

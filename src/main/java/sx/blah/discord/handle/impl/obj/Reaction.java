@@ -100,16 +100,13 @@ public class Reaction implements IReaction {
 			users.clear();
 
 			int gottenSoFar = 0;
-			String emoji = isCustomEmoji() ? (getCustomEmoji().getName() + ":" + getCustomEmoji().getID()) : this
-					.emoji;
+			String emoji = isCustomEmoji() ? (getCustomEmoji().getName() + ":" + getCustomEmoji().getID()) : this.emoji;
 			String userAfter = null;
-			DiscordClientImpl clientImpl = ((DiscordClientImpl) getClient());
 			while (gottenSoFar < count) {
-				String response = clientImpl.REQUESTS.GET.makeRequest(
-						String.format(DiscordEndpoints.REACTIONS_USER_LIST, message.getChannel().getID(),
-								message.getID(), emoji), new BasicNameValuePair("after", userAfter));
-
-				ReactionUserObject[] userObjs = DiscordUtils.GSON.fromJson(response, ReactionUserObject[].class);
+				ReactionUserObject[] userObjs = ((DiscordClientImpl) getClient()).REQUESTS.GET.makeRequest(
+						String.format(DiscordEndpoints.REACTIONS_USER_LIST, message.getChannel().getID(), message.getID(), emoji),
+						ReactionUserObject[].class,
+						new BasicNameValuePair("after", userAfter));
 
 				if (userObjs.length == 0)
 					break;

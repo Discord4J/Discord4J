@@ -359,14 +359,17 @@ public class Guild implements IGuild {
 	public IRole createRole() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
-		RoleObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+id+"/roles"),
+		RoleObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS+id+"/roles",
 				RoleObject.class);
 		return DiscordUtils.getRoleFromJSON(this, response);
 	}
 
 	@Override
 	public List<IUser> getBannedUsers() throws DiscordException, RateLimitException {
-		BanObject[] bans = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+id+"/bans"), BanObject[].class);
+		BanObject[] bans = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.GUILDS+id+"/bans",
+				BanObject[].class);
 		return Arrays.stream(bans).map(b -> DiscordUtils.getUserFromJSON(getShard(), b.user)).collect(Collectors.toList());
 	}
 
@@ -414,36 +417,28 @@ public class Guild implements IGuild {
 	public void editUserRoles(IUser user, IRole[] roles) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		try {
-			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(roles))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(roles)));
+
 	}
 
 	@Override
 	public void setDeafenUser(IUser user, boolean deafen) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
 
-		try {
-			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(deafen))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(deafen)));
 	}
 
 	@Override
 	public void setMuteUser(IUser user, boolean mute) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
 
-		try {
-			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(mute, true))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(mute, true)));
 	}
 
 	@Override
@@ -455,12 +450,9 @@ public class Guild implements IGuild {
 			DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.MANAGE_NICKNAMES));
 		}
 
-		try {
-			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(nick == null ? "" : nick, true))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
+				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(nick == null ? "" : nick, true)));
 	}
 
 	@Override
@@ -480,10 +472,9 @@ public class Guild implements IGuild {
 		if (afkTimeout != 60 && afkTimeout != 300 && afkTimeout != 900 && afkTimeout != 1800 && afkTimeout != 3600)
 			throw new IllegalArgumentException("AFK timeout must be one of (60, 300, 900, 1800, 3600).");
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + id,
-				new StringEntity(DiscordUtils.GSON.toJson(
-						new GuildEditRequest(name, region.getID(), level.ordinal(), icon.getData(), afkChannel == null ? null : afkChannel.getID(), afkTimeout)),
-						"UTF-8"));
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS + id, new GuildEditRequest(name, region.getID(), level.ordinal(), icon.getData(),
+						afkChannel == null ? null : afkChannel.getID(), afkTimeout));
 	}
 
 	@Override
@@ -550,19 +541,16 @@ public class Guild implements IGuild {
 
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-		try {
-			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text")))),
-					ChannelObject.class);
 
-			IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
-			addChannel(channel);
+		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS+getID()+"/channels",
+				DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text")),
+				ChannelObject.class);
 
-			return channel;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-		return null;
+		IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
+		addChannel(channel);
+
+		return channel;
 	}
 
 	@Override
@@ -576,19 +564,16 @@ public class Guild implements IGuild {
 
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-		try {
-			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS+getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "voice")))),
-					ChannelObject.class);
 
-			IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
-			addVoiceChannel(channel);
+		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS+getID()+"/channels",
+				DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "voice")),
+				ChannelObject.class);
 
-			return channel;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-		return null;
+		IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
+		addVoiceChannel(channel);
+
+		return channel;
 	}
 
 	@Override
@@ -627,8 +612,8 @@ public class Guild implements IGuild {
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
-		ExtendedInviteObject[] response = DiscordUtils.GSON.fromJson(
-				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS+ id + "/invites"),
+		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.GUILDS+ id + "/invites",
 				ExtendedInviteObject[].class);
 
 		List<IInvite> invites = new ArrayList<>();
@@ -665,27 +650,21 @@ public class Guild implements IGuild {
 			request[i] = new ReorderRolesRequest(rolesInOrder[i].getID(), position);
 		}
 
-		try {
-			RoleObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS + id + "/roles", new StringEntity(DiscordUtils.GSON.toJson(request))),
-					RoleObject[].class);
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + id + "/roles", request);
 	}
 
 	@Override
 	public int getUsersToBePruned(int days) throws DiscordException, RateLimitException {
-		PruneResponse response = DiscordUtils.GSON.fromJson(
-				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days),
+		PruneResponse response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 				PruneResponse.class);
 		return response.pruned;
 	}
 
 	@Override
 	public int pruneUsers(int days) throws DiscordException, RateLimitException {
-		PruneResponse response = DiscordUtils.GSON.fromJson(
-				((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + id + "/prune?days=" + days),
+		PruneResponse response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 				PruneResponse.class);
 		return response.pruned;
 	}
@@ -807,8 +786,8 @@ public class Guild implements IGuild {
 						.map(IWebhook::copy)
 						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
-				WebhookObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-						DiscordEndpoints.GUILDS + getID() + "/webhooks"),
+				WebhookObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+						DiscordEndpoints.GUILDS + getID() + "/webhooks",
 						WebhookObject[].class);
 
 				if (response != null) {

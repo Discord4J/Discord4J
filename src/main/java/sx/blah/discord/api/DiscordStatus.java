@@ -22,15 +22,10 @@ public class DiscordStatus {
 	 *
 	 * @return The mean response time (in milliseconds).
 	 */
-	public static double getAPIResponseTimeForDay() {
-		MetricsResponse response = null;
-		try {
-			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-					String.format(DiscordEndpoints.METRICS, "day")), MetricsResponse.class);
-		} catch (RateLimitException | DiscordException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-			return -1;
-		}
+	public static double getAPIResponseTimeForDay() throws DiscordException, RateLimitException {
+		MetricsResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
+				String.format(DiscordEndpoints.METRICS, "day"), MetricsResponse.class);
+
 		return response.summary.mean;
 	}
 
@@ -39,15 +34,10 @@ public class DiscordStatus {
 	 *
 	 * @return The mean response time (in milliseconds).
 	 */
-	public static double getAPIResponseTimeForWeek() {
-		MetricsResponse response = null;
-		try {
-			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-					String.format(DiscordEndpoints.METRICS, "week")), MetricsResponse.class);
-		} catch (DiscordException | RateLimitException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-			return -1;
-		}
+	public static double getAPIResponseTimeForWeek() throws DiscordException, RateLimitException {
+		MetricsResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
+				String.format(DiscordEndpoints.METRICS, "week"), MetricsResponse.class);
+
 		return response.summary.mean;
 	}
 
@@ -56,15 +46,10 @@ public class DiscordStatus {
 	 *
 	 * @return The mean response time (in milliseconds).
 	 */
-	public static double getAPIResponseTimeForMonth() {
-		MetricsResponse response = null;
-		try {
-			response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-					String.format(DiscordEndpoints.METRICS, "month")), MetricsResponse.class);
-		} catch (RateLimitException | DiscordException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-			return -1;
-		}
+	public static double getAPIResponseTimeForMonth() throws DiscordException, RateLimitException {
+		MetricsResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
+				String.format(DiscordEndpoints.METRICS, "month"), MetricsResponse.class);
+
 		return response.summary.mean;
 	}
 
@@ -77,10 +62,10 @@ public class DiscordStatus {
 	 * @throws DiscordException
 	 */
 	public static Maintenance[] getActiveMaintenances() throws DiscordException, RateLimitException {
-		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-				String.format(DiscordEndpoints.STATUS, "active")), StatusResponse.class);
-		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
+		StatusResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
+				String.format(DiscordEndpoints.STATUS, "active"), StatusResponse.class);
 
+		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
 		for (int i = 0; i < maintenances.length; i++) {
 			StatusResponse.MaintenanceResponse maintenanceResponse = response.scheduled_maintenances[i];
 			maintenances[i] = new Maintenance(maintenanceResponse.name, maintenanceResponse.incident_updates[0].body,
@@ -99,10 +84,10 @@ public class DiscordStatus {
 	 * @throws DiscordException
 	 */
 	public static Maintenance[] getUpcomingMaintenances() throws DiscordException, RateLimitException {
-		StatusResponse response = DiscordUtils.GSON.fromJson(Requests.GENERAL_REQUESTS.GET.makeRequest(
-				String.format(DiscordEndpoints.STATUS, "upcoming")), StatusResponse.class);
-		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
+		StatusResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
+				String.format(DiscordEndpoints.STATUS, "upcoming"), StatusResponse.class);
 
+		Maintenance[] maintenances = new Maintenance[response.scheduled_maintenances.length];
 		for (int i = 0; i < maintenances.length; i++) {
 			StatusResponse.MaintenanceResponse maintenanceResponse = response.scheduled_maintenances[i];
 			maintenances[i] = new Maintenance(maintenanceResponse.name, maintenanceResponse.incident_updates[0].body,

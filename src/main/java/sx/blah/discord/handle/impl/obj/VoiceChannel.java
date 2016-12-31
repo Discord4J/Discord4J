@@ -62,9 +62,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		if (userLimit < 0 || userLimit > 99)
 			throw new IllegalArgumentException("Channel user limit must be between 0 and 99!");
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id,
-				new StringEntity(DiscordUtils.GSON.toJson(
-						new VoiceChannelEditRequest(name, position, bitrate, userLimit)), "UTF-8"));
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.CHANNELS + id,
+				new VoiceChannelEditRequest(name, position, bitrate, userLimit));
 	}
 
 	@Override

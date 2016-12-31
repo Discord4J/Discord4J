@@ -266,19 +266,12 @@ public class ShardImpl implements IShard {
 		if (opt.isPresent())
 			return opt.get();
 
-		PrivateChannelObject pmChannel;
-		try {
-			pmChannel = DiscordUtils.GSON.fromJson(client.REQUESTS.POST.makeRequest(DiscordEndpoints.USERS+getClient().getOurUser().getID()+"/channels",
-					new StringEntity(DiscordUtils.GSON.toJson(new PrivateChannelCreateRequest(user.getID())))),
-					PrivateChannelObject.class);
-
-			IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
-			privateChannels.add(channel);
-			return channel;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Error creating creating a private channel!", e);
-		}
-
-		return null;
+		PrivateChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
+				DiscordEndpoints.USERS+getClient().getOurUser().getID()+"/channels",
+				new PrivateChannelCreateRequest(user.getID()),
+				PrivateChannelObject.class);
+		IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
+		privateChannels.add(channel);
+		return channel;
 	}
 }

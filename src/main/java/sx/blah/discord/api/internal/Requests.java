@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.*;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -80,6 +81,7 @@ public class Requests {
 		 * The user-agent, as per @Jake's request
 		 */
 		private final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
+
 		/**
 		 * The client used for these requests.
 		 */
@@ -88,12 +90,16 @@ public class Requests {
 		//Same as HttpClients.createDefault() but with the proper user-agent
 		private final CloseableHttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
 
+		/**
+		 * The class of the request type used for the request
+		 */
 		final Class<? extends HttpUriRequest> requestClass;
 
 		/**
 		 * Keeps track of the time when the global rate limit retry-after interval is over
 		 */
 		private final AtomicLong globalRetryAfter = new AtomicLong(-1);
+
 		/**
 		 * Keeps track of per-method rate limits. Pair is method, path
 		 */
@@ -105,12 +111,70 @@ public class Requests {
 		}
 
 		/**
-		 * Gets the HttpRequest.class represented by the enum.
+		 * Makes a request.
 		 *
-		 * @return The Http request class.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
+		 * @param clazz The class of the object to transform the json response into.
+		 * @param headers The headers to include in the response.
+		 * @param <T> The type of the object to transform the json response into.
+		 * @return The transformed object.
+		 *
+		 * @throws DiscordException
+		 * @throws RateLimitException
 		 */
-		public Class<? extends HttpUriRequest> getRequestClass() {
-			return requestClass;
+		public <T> T makeRequest(String url, Object entity, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+			return makeRequest(url, DiscordUtils.GSON.toJson(entity), clazz, headers);
+		}
+
+		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+			return DiscordUtils.GSON.fromJson(makeRequest(url, entity, headers), clazz);
+		}
+
+		/**
+		 * Makes a request.
+		 *
+		 * @param url The url to make the request to.
+		 * @param clazz The class of the object to transform the json response into.
+		 * @param headers The headers to include in the response.
+		 * @param <T> The type of the object to transform the json response into.
+		 * @return The transformed object.
+		 *
+		 * @throws DiscordException
+		 * @throws RateLimitException
+		 */
+		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+			return DiscordUtils.GSON.fromJson(makeRequest(url, headers), clazz);
+		}
+
+		/**
+		 * Makes a request.
+		 *
+		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
+		 * @param headers The headers to include in the response.
+		 * @return The result (if any) returned by the request.
+		 *
+		 * @throws DiscordException
+		 * @throws RateLimitException
+		 */
+		public String makeRequest(String url, Object entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+			return makeRequest(url, DiscordUtils.GSON.toJson(entity), headers);
+		}
+
+		/**
+		 * Makes a request.
+		 *
+		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
+		 * @param headers The headers to include in the response.
+		 * @return The result (if any) returned by the request.
+		 *
+		 * @throws DiscordException
+		 * @throws RateLimitException
+		 */
+		public String makeRequest(String url, String entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+			return makeRequest(url, new StringEntity(entity, "UTF-8"), headers);
 		}
 
 		/**
@@ -140,8 +204,8 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param entity Any data to send with the request.
 		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
 		 * @param headers The headers to include in the request.
 		 * @return The result (if any) returned by the request.
 		 *
@@ -159,8 +223,7 @@ public class Requests {
 					request.setEntity(entity);
 					return request(request);
 				} else {
-					LOGGER.error(LogMarkers.API, "Tried to attach HTTP entity to invalid type! ({})",
-							this.requestClass.getSimpleName());
+					LOGGER.error(LogMarkers.API, "Tried to attach HTTP entity to invalid type! ({})", this.requestClass.getSimpleName());
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
 				Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);

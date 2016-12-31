@@ -742,7 +742,6 @@ public class DiscordUtils {
 			strings.add(matcher.group(1));
 			matcher = INVITE_PATTERN.matcher(matcher.replaceFirst(""));
 		}
-
 		return strings;
 	}
 

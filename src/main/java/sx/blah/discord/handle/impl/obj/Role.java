@@ -203,9 +203,9 @@ public class Role implements IRole {
 		if (permissions == null)
 			throw new IllegalArgumentException("Permissions set must not be null.");
 
-		((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
-				new StringEntity(DiscordUtils.GSON.toJson(
-						new RoleEditRequest(color, hoist, name, permissions, isMentionable)), "UTF-8"));
+		((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
+				new RoleEditRequest(color, hoist, name, permissions, isMentionable));
 	}
 
 	@Override
@@ -242,9 +242,8 @@ public class Role implements IRole {
 
 	@Override
 	public IRole copy() {
-		Role role = new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
+		return new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
 				color.getRGB(), mentionable, guild);
-		return role;
 	}
 
 	@Override

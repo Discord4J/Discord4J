@@ -340,10 +340,10 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		if (message == null && hasPermissions() && client.isReady())
 			try {
-				return DiscordUtils.getMessageFromJSON(channel,
-						DiscordUtils.GSON.fromJson(client.REQUESTS.GET.makeRequest(
-								DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id), MessageObject.class));
-			} catch (Exception e) {}
+				return DiscordUtils.getMessageFromJSON(channel, client.REQUESTS.GET.makeRequest(
+						DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+						MessageObject.class));
+			} catch (Exception ignored) {}
 
 		return message;
 	}
@@ -568,12 +568,9 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (messages.size() > 100)
 			throw new DiscordException("You can only delete 100 messages at a time!");
 
-		try {
-			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk-delete",
-					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
-		}
+		client.REQUESTS.POST.makeRequest(
+				DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk-delete",
+				new BulkDeleteRequest(messages));
 	}
 
 	/**

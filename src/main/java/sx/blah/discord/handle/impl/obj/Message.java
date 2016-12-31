@@ -315,10 +315,9 @@ public class Message implements IMessage {
 				DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
 			}
 
-			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(
-							new MessageRequest(content, embed, false)), "UTF-8"));
-
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+					DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)));
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to edit message before bot is ready!");
 		}
@@ -470,8 +469,8 @@ public class Message implements IMessage {
 	public void removeAllReactions() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE
-				.makeRequest(String.format(DiscordEndpoints.REACTIONS, this.getChannel().getID(), this.getID()));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
+				String.format(DiscordEndpoints.REACTIONS, this.getChannel().getID(), this.getID()));
 	}
 
 	@Override

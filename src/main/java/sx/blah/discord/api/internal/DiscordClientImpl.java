@@ -139,12 +139,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			return;
 		}
 
-		try {
-			REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
-					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(username, avatar))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
+		REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me", new AccountInfoChangeRequest(username, avatar));
 	}
 
 	@Override
@@ -165,9 +160,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public List<IRegion> getRegions() throws DiscordException, RateLimitException {
 		if (REGIONS.isEmpty()) {
-			VoiceRegionObject[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
-					DiscordEndpoints.VOICE+"regions"),
-					VoiceRegionObject[].class);
+			VoiceRegionObject[] regions = REQUESTS.GET.makeRequest(
+					DiscordEndpoints.VOICE+"regions", VoiceRegionObject[].class);
 
 			Arrays.stream(regions)
 					.map(DiscordUtils::getRegionFromJSON)
@@ -190,8 +184,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
-		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me"),
-				ApplicationInfoResponse.class);
+		return REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me", ApplicationInfoResponse.class);
 	}
 
 	@Override
@@ -254,8 +247,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private String obtainGateway() {
 		String gateway = null;
 		try {
-			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY),
-					GatewayResponse.class);
+			GatewayResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY, GatewayResponse.class);
 			gateway = response.url + "?encoding=json&v=5";
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);

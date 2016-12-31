@@ -241,7 +241,7 @@ public interface IDiscordClient {
 	 * @param code The invite code.
 	 * @return The invite, or null if it doesn't exist.
 	 */
-	IInvite getInviteForCode(String code);
+	IInvite getInviteForCode(String code) throws DiscordException, RateLimitException;
 
 	/**
 	 * Gets the regions available for discord.

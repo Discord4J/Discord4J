@@ -208,16 +208,15 @@ public class Channel implements IChannel {
 		}
 
 		if (client.isReady()) {
-//            content = DiscordUtils.escapeString(content);
-
-			MessageObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, tts)), "UTF-8")), MessageObject.class);
+			MessageObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+					DiscordEndpoints.CHANNELS+id+"/messages",
+					DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, tts)),
+					MessageObject.class);
 
 			if (response == null || response.id == null) //Message didn't send
 				throw new DiscordException("Message was unable to be sent.");
 
 			return DiscordUtils.getMessageFromJSON(this, response);
-
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to send message before bot is ready!");
 			return null;
@@ -264,17 +263,12 @@ public class Channel implements IChannel {
 			return null;
 		}
 
-		try {
-			ExtendedInviteObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/invites",
-					new StringEntity(DiscordUtils.GSON.toJson(new InviteCreateRequest(maxAge, maxUses, temporary, unique)))),
-					ExtendedInviteObject.class);
+		ExtendedInviteObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.CHANNELS+getID()+"/invites",
+				new InviteCreateRequest(maxAge, maxUses, temporary, unique),
+				ExtendedInviteObject.class);
 
-			return DiscordUtils.getInviteFromJSON(client, response);
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-
-		return null;
+		return DiscordUtils.getInviteFromJSON(client, response);
 	}
 
 	@Override
@@ -315,9 +309,9 @@ public class Channel implements IChannel {
 		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
 			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS + id,
-				new StringEntity(DiscordUtils.GSON.toJson(
-						new ChannelEditRequest(name, position, topic)), "UTF-8"));
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.CHANNELS + id,
+				new ChannelEditRequest(name, position, topic));
 	}
 
 	@Override
@@ -469,20 +463,16 @@ public class Channel implements IChannel {
 	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		try {
-			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
-					new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new OverwriteObject(type, null,
-							Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+				DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
+				DiscordUtils.GSON_NO_NULLS.toJson(new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove))));
 	}
 
 	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
-		ExtendedInviteObject[] response = DiscordUtils.GSON.fromJson(
-				((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/invites"),
+		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.CHANNELS + id + "/invites",
 				ExtendedInviteObject[].class);
 
 		List<IInvite> invites = new ArrayList<>();
@@ -503,8 +493,8 @@ public class Channel implements IChannel {
 	@Override
 	public List<IMessage> getPinnedMessages() throws DiscordException, RateLimitException {
 		List<IMessage> messages = new ArrayList<>();
-		MessageObject[] pinnedMessages = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-				DiscordEndpoints.CHANNELS + id + "/pins"),
+		MessageObject[] pinnedMessages = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.CHANNELS + id + "/pins",
 				MessageObject[].class);
 
 		for (MessageObject message : pinnedMessages)
@@ -579,19 +569,16 @@ public class Channel implements IChannel {
 
 		if (name == null || name.length() < 2 || name.length() > 32)
 			throw new DiscordException("Webhook name can only be between 2 and 32 characters!");
-		try {
-			WebhookObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getID() + "/webhooks",
-					new StringEntity(DiscordUtils.GSON.toJson(new WebhookCreateRequest(name, avatar)))),
-					WebhookObject.class);
 
-			IWebhook webhook = DiscordUtils.getWebhookFromJSON(this, response);
-			addWebhook(webhook);
+		WebhookObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.CHANNELS + getID() + "/webhooks",
+				new WebhookCreateRequest(name, avatar),
+				WebhookObject.class);
 
-			return webhook;
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-		return null;
+		IWebhook webhook = DiscordUtils.getWebhookFromJSON(this, response);
+		addWebhook(webhook);
+
+		return webhook;
 	}
 
 	/**
@@ -627,8 +614,8 @@ public class Channel implements IChannel {
 						.map(IWebhook::copy)
 						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
-				WebhookObject[] response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-						DiscordEndpoints.CHANNELS + getID() + "/webhooks"),
+				WebhookObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+						DiscordEndpoints.CHANNELS + getID() + "/webhooks",
 						WebhookObject[].class);
 
 				if (response != null) {

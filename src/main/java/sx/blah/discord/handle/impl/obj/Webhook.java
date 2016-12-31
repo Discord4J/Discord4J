@@ -91,18 +91,15 @@ public class Webhook implements IWebhook {
 	private void edit(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
 
-		try {
-			WebhookObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.WEBHOOKS + id,
-					new StringEntity(DiscordUtils.GSON.toJson(new WebhookEditRequest(name, avatar)))),
-					WebhookObject.class);
+		WebhookObject response = ((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.WEBHOOKS + id,
+				new WebhookEditRequest(name, avatar),
+				WebhookObject.class);
 
-			IWebhook oldWebhook = copy();
-			IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, response);
+		IWebhook oldWebhook = copy();
+		IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, response);
 
-			client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, newWebhook, oldWebhook.getChannel()));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, newWebhook, oldWebhook.getChannel()));
 	}
 
 	@Override
