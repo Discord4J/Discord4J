@@ -87,10 +87,10 @@ class DispatchHandler {
 					ready.user.discriminator, ready.user.avatar, Presences.OFFLINE, ready.user.bot);
 
 			ws.sessionId = ready.session_id;
-			
+
 			if (MessageList.getEfficiency(client) == null) //User did not manually set the efficiency
 				MessageList.setEfficiency(client, MessageList.EfficiencyLevel.getEfficiencyForGuilds(ready.guilds.length));
-			
+
 			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "MessageList efficiency set to {}.", MessageList.getEfficiency(client));
 
 			ArrayList<UnavailableGuildObject> waitingGuilds = new ArrayList<>(Arrays.asList(ready.guilds));
@@ -205,9 +205,22 @@ class DispatchHandler {
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
 		shard.guildList.add(guild);
-		guild.loadWebhooks();
-		client.dispatcher.dispatch(new GuildCreateEvent(guild));
-		Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
+
+		new RequestBuilder(client).setAsync(true).doAction(() -> {
+			try {
+				guild.loadWebhooks();
+				if (json.large) {
+					client.getDispatcher().waitFor((AllUsersReceivedEvent e) ->
+							e.getGuild().getID().equals(guild.getID())
+					);
+				}
+				client.dispatcher.dispatch(new GuildCreateEvent(guild));
+				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
+			} catch (InterruptedException e) {
+				Discord4J.LOGGER.error(LogMarkers.EVENTS, "Wait for AllUsersReceivedEvent on guild create was interrupted.", e);
+			}
+			return true;
+		}).execute();
 	}
 
 	private void guildMemberAdd(GuildMemberAddEventResponse event) {
