@@ -4,10 +4,9 @@ import sx.blah.discord.Discord4J;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This is utility class intended to help with dealing with {@link RateLimitException}s by queueing rate-limited
@@ -15,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RequestBuffer {
 
-	private static final Timer requestTimer = new Timer("Request Buffer Timer", true);
+	private static final AtomicReference<ScheduledExecutorService> requestService = new AtomicReference<>(Executors.newScheduledThreadPool(0));
 	private static final Map<String, List<RequestFuture>> requests = new ConcurrentHashMap<>();
 
 	/**
@@ -27,20 +26,23 @@ public class RequestBuffer {
 	 */
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
 		final RequestFuture<T> future = new RequestFuture<>(request);
-		if (!future.isDone()) {
-			Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
-					future.getDelay(TimeUnit.MILLISECONDS));
-
-			synchronized (requests) {
+		requestService.get().execute(() -> {
+			future.tryAgain();
+			if (!future.isDone()) {
+				Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
+						future.getDelay(TimeUnit.MILLISECONDS));
 				
-				if (!requests.containsKey(future.getBucket())) {
-					requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
-					requestTimer.schedule(new RequestTimerTask(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS));
+				synchronized (requests) {
+					
+					if (!requests.containsKey(future.getBucket())) {
+						requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
+						requestService.get().schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+					}
+					
+					requests.get(future.getBucket()).add(future);
 				}
-				
-				requests.get(future.getBucket()).add(future);
 			}
-		}
+		});
 		return future;
 	}
 
@@ -74,7 +76,9 @@ public class RequestBuffer {
 	 * @return The number of requests killed.
 	 */
 	public static int killAllRequests() {
-		return requestTimer.purge();
+		synchronized (requestService) {
+			return requestService.getAndSet(Executors.newScheduledThreadPool(0)).shutdownNow().size();
+		}
 	}
 
 	/**
@@ -138,10 +142,8 @@ public class RequestBuffer {
 		private final IRequest<T> request;
 		private final CountDownLatch latch = new CountDownLatch(1);
 
-		public RequestFuture(IRequest<T> request) {
+		RequestFuture(IRequest<T> request) {
 			this.request = request;
-
-			tryAgain();
 		}
 
 		/**
@@ -257,7 +259,7 @@ public class RequestBuffer {
 		 *
 		 * @return True if successful, false if otherwise.
 		 */
-		protected boolean tryAgain() {
+		boolean tryAgain() {
 			try {
 				if (!firstAttempt)
 					request.onRetry(this);
@@ -280,11 +282,11 @@ public class RequestBuffer {
 	/**
 	 * Manages request futures to ensure it executes the request eventually.
 	 */
-	private static class RequestTimerTask extends TimerTask {
+	private static class RequestRunnable implements Runnable {
 
 		private final String bucket;
 
-		private RequestTimerTask(String bucket) {
+		private RequestRunnable(String bucket) {
 			this.bucket = bucket;
 		}
 
@@ -306,8 +308,8 @@ public class RequestBuffer {
 					
 					if (futuresToRetry.size() > 0) {
 						requests.replace(bucket, futuresToRetry);
-						synchronized (requestTimer) {
-							requestTimer.schedule(new RequestTimerTask(bucket), delay);
+						synchronized (requestService) {
+							requestService.get().schedule(new RequestRunnable(bucket), delay, TimeUnit.MILLISECONDS);
 						}
 					} else {
 						requests.remove(bucket);
