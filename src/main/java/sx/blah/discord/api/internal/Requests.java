@@ -285,6 +285,8 @@ public class Requests {
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
 				} else if (responseCode >= 500 && responseCode < 600) {
+					if(retry == 0)
+						throw new DiscordException("Failed to make a 5xx failed request after a few tries!");
 					try {
 						Thread.sleep(sleepTime);
 					} catch (InterruptedException e) {
