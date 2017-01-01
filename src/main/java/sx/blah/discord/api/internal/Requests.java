@@ -12,7 +12,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.responses.RateLimitResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
@@ -61,9 +60,9 @@ public class Requests {
 	/**
 	 * The client used for these requests.
 	 */
-	private final IDiscordClient client;
+	private final DiscordClientImpl client;
 
-	public Requests(IDiscordClient client) {
+	public Requests(DiscordClientImpl client) {
 		this.client = client;
 
 		POST = new Request(HttpPost.class, client);
@@ -85,7 +84,7 @@ public class Requests {
 		/**
 		 * The client used for these requests.
 		 */
-		private final IDiscordClient client;
+		private final DiscordClientImpl client;
 
 		//Same as HttpClients.createDefault() but with the proper user-agent
 		private final CloseableHttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
@@ -105,7 +104,7 @@ public class Requests {
 		 */
 		private final Map<Pair<String, String>, Long> retryAfters = new ConcurrentHashMap<>();
 
-		private Request(Class<? extends HttpUriRequest> clazz, IDiscordClient client) {
+		private Request(Class<? extends HttpUriRequest> clazz, DiscordClientImpl client) {
 			this.requestClass = clazz;
 			this.client = client;
 		}
@@ -227,7 +226,7 @@ public class Requests {
 		}
 
 		private String request(HttpUriRequest request) throws RateLimitException, DiscordException {
-			return request(request, 1, 5);
+			return request(request, 1, client.getRetryCount());
 		}
 
 		private String request(HttpUriRequest request, long sleepTime, int retry) throws DiscordException, RateLimitException {
@@ -286,7 +285,8 @@ public class Requests {
 					return null;
 				} else if (responseCode >= 500 && responseCode < 600) {
 					if(retry == 0)
-						throw new DiscordException("Failed to make a 5xx failed request after a few tries!");
+						throw new DiscordException(String.format("Failed to make a 5xx failed request after %s tries!",
+								client.getRetryCount()));
 					try {
 						Thread.sleep(sleepTime);
 					} catch (InterruptedException e) {

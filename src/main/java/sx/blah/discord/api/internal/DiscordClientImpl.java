@@ -1,6 +1,5 @@
 package sx.blah.discord.api.internal;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -8,18 +7,20 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
+import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
+import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
+import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.*;
-import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -95,9 +96,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Timer to keep the program alive if the client is not daemon
 	 */
 	private Timer keepAlive;
+	private int retryCount;
 
-	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts) {
+	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
+							 int retryCount) {
 		this.token = "Bot " + token;
+		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
@@ -460,5 +464,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		return invite == null ? null : DiscordUtils.getInviteFromJSON(this, invite);
+	}
+
+	public int getRetryCount() {
+		return retryCount;
 	}
 }
