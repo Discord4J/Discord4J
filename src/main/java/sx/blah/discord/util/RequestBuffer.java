@@ -27,8 +27,7 @@ public class RequestBuffer {
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
 		final RequestFuture<T> future = new RequestFuture<>(request);
 		requestService.get().execute(() -> {
-			future.tryAgain();
-			if (!future.isDone()) {
+			if (!future.tryAgain()) {
 				Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
 						future.getDelay(TimeUnit.MILLISECONDS));
 				
@@ -304,9 +303,8 @@ public class RequestBuffer {
 						}
 					});
 					
-					long delay = Math.max(0, futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
-					
 					if (futuresToRetry.size() > 0) {
+						long delay = Math.max(0, futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
 						requests.replace(bucket, futuresToRetry);
 						synchronized (requestService) {
 							requestService.get().schedule(new RequestRunnable(bucket), delay, TimeUnit.MILLISECONDS);

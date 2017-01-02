@@ -11,12 +11,7 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.RequestBuffer;
+import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
@@ -25,8 +20,6 @@ import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * General testing bot. Also a demonstration of how to use the bot.
@@ -303,28 +296,16 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						final AtomicInteger count = new AtomicInteger(0);
-						final AtomicReference<RequestBuffer.RequestFuture<String>> ref = new AtomicReference<>(null);
-						ref.set(RequestBuffer.request(new RequestBuffer.IRequest<String>() {
-							@Override
-							public String request() throws RateLimitException {
-								int i;
-								while ((i = count.getAndIncrement()) < 10) {
-									try {
-										message.reply(""+i);
-									} catch (DiscordException | MissingPermissionsException e) {
-										e.printStackTrace();
-									}
+						for (int i = 1; i < 11; i++) {
+							int finalI = i;
+							RequestBuffer.request(() -> {
+								try {
+									message.reply(finalI+"");
+								} catch (DiscordException | MissingPermissionsException e) {
+									e.printStackTrace();
 								}
-								return "end";
-							}
-
-							@Override
-							public void onRetry(RequestBuffer.RequestFuture<String> future) {
-								ref.get().cancel(false);
-							}
-						}));
-						message.reply(ref.get().get());
+							});
+						}
 					}
 				});
 
