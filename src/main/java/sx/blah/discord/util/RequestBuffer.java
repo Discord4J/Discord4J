@@ -76,6 +76,9 @@ public class RequestBuffer {
 	 */
 	public static int killAllRequests() {
 		synchronized (requestService) {
+			synchronized (requests) {
+				requests.clear();
+			}
 			return requestService.getAndSet(Executors.newScheduledThreadPool(0)).shutdownNow().size();
 		}
 	}
