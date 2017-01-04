@@ -1,7 +1,5 @@
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -11,12 +9,13 @@ import sx.blah.discord.api.internal.json.objects.WebhookObject;
 import sx.blah.discord.api.internal.json.requests.WebhookEditRequest;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
-import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Webhook implements IWebhook {
 
@@ -99,7 +98,7 @@ public class Webhook implements IWebhook {
 		IWebhook oldWebhook = copy();
 		IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, response);
 
-		client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, newWebhook, oldWebhook.getChannel()));
+		client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, newWebhook));
 	}
 
 	@Override

@@ -280,7 +280,7 @@ class DispatchHandler {
 
 				user.addRole(guild.getID(), guild.getEveryoneRole());
 
-				client.dispatcher.dispatch(new UserRoleUpdateEvent(oldRoles, user.getRolesForGuild(guild), user, guild));
+				client.dispatcher.dispatch(new UserRoleUpdateEvent(guild, user, oldRoles, user.getRolesForGuild(guild)));
 
 				if (user.equals(client.getOurUser()))
 					guild.loadWebhooks();
@@ -521,7 +521,7 @@ class DispatchHandler {
 		IGuild guild = client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			IRole role = DiscordUtils.getRoleFromJSON(guild, event.role);
-			client.dispatcher.dispatch(new RoleCreateEvent(role, guild));
+			client.dispatcher.dispatch(new RoleCreateEvent(role));
 		}
 	}
 
@@ -532,7 +532,7 @@ class DispatchHandler {
 			if (toUpdate != null) {
 				IRole oldRole = toUpdate.copy();
 				toUpdate = DiscordUtils.getRoleFromJSON(guild, event.role);
-				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate, guild));
+				client.dispatcher.dispatch(new RoleUpdateEvent(oldRole, toUpdate));
 
 				if (guild.getRolesForUser(client.getOurUser()).contains(toUpdate))
 					((Guild) guild).loadWebhooks();
@@ -546,7 +546,7 @@ class DispatchHandler {
 			IRole role = guild.getRoleByID(event.role_id);
 			if (role != null) {
 				guild.getRoles().remove(role);
-				client.dispatcher.dispatch(new RoleDeleteEvent(role, guild));
+				client.dispatcher.dispatch(new RoleDeleteEvent(role));
 			}
 		}
 	}
@@ -560,7 +560,7 @@ class DispatchHandler {
 				((Guild) guild).getJoinTimes().remove(user);
 			}
 
-			client.dispatcher.dispatch(new UserBanEvent(user, guild));
+			client.dispatcher.dispatch(new UserBanEvent(guild, user));
 		}
 	}
 
@@ -569,7 +569,7 @@ class DispatchHandler {
 		if (guild != null) {
 			IUser user = DiscordUtils.getUserFromJSON(shard, event.user);
 
-			client.dispatcher.dispatch(new UserPardonEvent(user, guild));
+			client.dispatcher.dispatch(new UserPardonEvent(guild, user));
 		}
 	}
 
@@ -597,7 +597,7 @@ class DispatchHandler {
 							.orElse(null);
 				if (channel != oldChannel) {
 					if (channel == null) {
-						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(user, oldChannel));
+						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
 						user.getConnectedVoiceChannels().remove(oldChannel);
 					} else if (oldChannel != null && oldChannel.getGuild().equals(channel.getGuild())) {
 						client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
@@ -605,7 +605,7 @@ class DispatchHandler {
 						if (!user.getConnectedVoiceChannels().contains(channel))
 							user.getConnectedVoiceChannels().add(channel);
 					} else {
-						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(user, channel));
+						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(channel, user));
 						if (!user.getConnectedVoiceChannels().contains(channel))
 							user.getConnectedVoiceChannels().add(channel);
 					}

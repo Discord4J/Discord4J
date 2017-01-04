@@ -1,0 +1,15 @@
+package sx.blah.discord.handle.impl.events.guild.channel.message.reaction;
+
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IReaction;
+import sx.blah.discord.handle.obj.IUser;
+
+/**
+ * Fired when a reaction gets removed from a message.
+ */
+public class ReactionRemoveEvent extends ReactionEvent {
+	
+	public ReactionRemoveEvent(IMessage message, IReaction reaction, IUser user) {
+		super(message, reaction, user);
+	}
+}

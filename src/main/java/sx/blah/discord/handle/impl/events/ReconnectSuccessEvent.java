@@ -1,25 +1,16 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.events.Event;
 
 /**
  * Fired when a shard has succeeded in connecting to the gateway.
  * Either {@link LoginEvent} or {@link ResumedEvent} should follow shortly.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.shard.ReconnectSuccessEvent} instead.
  */
-public class ReconnectSuccessEvent extends Event {
-
-	protected final IShard shard;
-
+@Deprecated
+public class ReconnectSuccessEvent extends sx.blah.discord.handle.impl.events.shard.ReconnectSuccessEvent {
+	
 	public ReconnectSuccessEvent(IShard shard) {
-		this.shard = shard;
-	}
-
-	/**
-	 * Gets the shard that this event was fired for.
-	 * @return The shard that has logged in.
-	 */
-	public IShard getShard() {
-		return this.shard;
+		super(shard);
 	}
 }

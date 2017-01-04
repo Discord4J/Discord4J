@@ -1,35 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IGuild;
 
 /**
  * This event is dispatched when a guild is edited by its owner.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.GuildUpdateEvent} instead.
  */
-public class GuildUpdateEvent extends Event {
-
-	private final IGuild oldGuild, newGuild;
-
+@Deprecated
+public class GuildUpdateEvent extends sx.blah.discord.handle.impl.events.guild.GuildUpdateEvent {
+	
 	public GuildUpdateEvent(IGuild oldGuild, IGuild newGuild) {
-		this.oldGuild = oldGuild;
-		this.newGuild = newGuild;
-	}
-
-	/**
-	 * Gets the unupdated guild.
-	 *
-	 * @return The old guild.
-	 */
-	public IGuild getOldGuild() {
-		return oldGuild;
-	}
-
-	/**
-	 * Gets the updated guild.
-	 *
-	 * @return The new guild.
-	 */
-	public IGuild getNewGuild() {
-		return newGuild;
+		super(oldGuild, newGuild);
 	}
 }

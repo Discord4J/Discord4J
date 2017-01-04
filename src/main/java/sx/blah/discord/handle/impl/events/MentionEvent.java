@@ -1,25 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * This event is dispatched whenever the bot is @mentioned.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.channel.message.MentionEvent} instead.
  */
-public class MentionEvent extends Event {
-
-	private final IMessage message;
-
+@Deprecated
+public class MentionEvent extends sx.blah.discord.handle.impl.events.guild.channel.message.MentionEvent {
+	
 	public MentionEvent(IMessage message) {
-		this.message = message;
-	}
-
-	/**
-	 * Gets the messaged which @mention'd the bot.
-	 *
-	 * @return The message.
-	 */
-	public IMessage getMessage() {
-		return message;
+		super(message);
 	}
 }

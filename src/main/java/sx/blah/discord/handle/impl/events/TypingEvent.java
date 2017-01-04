@@ -1,37 +1,16 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
  * This event is dispatched if a user is typing.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.channel.TypingEvent} instead.
  */
-public class TypingEvent extends Event {
-
-	private final IUser user;
-	private final IChannel channel;
-
+@Deprecated
+public class TypingEvent extends sx.blah.discord.handle.impl.events.guild.channel.TypingEvent {
+	
 	public TypingEvent(IUser user, IChannel channel) {
-		this.user = user;
-		this.channel = channel;
-	}
-
-	/**
-	 * The user involved.
-	 *
-	 * @return The user.
-	 */
-	public IUser getUser() {
-		return user;
-	}
-
-	/**
-	 * The channel involved.
-	 *
-	 * @return The channel.
-	 */
-	public IChannel getChannel() {
-		return channel;
+		super(user, channel);
 	}
 }

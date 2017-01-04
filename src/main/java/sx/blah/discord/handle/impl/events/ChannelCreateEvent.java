@@ -1,25 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**
  * This event is dispatched when a channel is created.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent} instead.
  */
-public class ChannelCreateEvent extends Event {
-
-	private final IChannel channel;
-
+@Deprecated
+public class ChannelCreateEvent extends sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent {
+	
 	public ChannelCreateEvent(IChannel channel) {
-		this.channel = channel;
-	}
-
-	/**
-	 * Gets the channel involved.
-	 *
-	 * @return The channel.
-	 */
-	public IChannel getChannel() {
-		return channel;
+		super(channel);
 	}
 }

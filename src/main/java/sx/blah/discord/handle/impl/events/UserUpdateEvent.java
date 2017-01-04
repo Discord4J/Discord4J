@@ -1,35 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
  * This is dispatched whenever a user updates his/her info
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.user.UserUpdateEvent} instead.
  */
-public class UserUpdateEvent extends Event {
-
-	private IUser oldUser, newUser;
-
+@Deprecated
+public class UserUpdateEvent extends sx.blah.discord.handle.impl.events.user.UserUpdateEvent {
+	
 	public UserUpdateEvent(IUser oldUser, IUser newUser) {
-		this.oldUser = oldUser;
-		this.newUser = newUser;
-	}
-
-	/**
-	 * Gets the old user info
-	 *
-	 * @return The old user object
-	 */
-	public IUser getOldUser() {
-		return oldUser;
-	}
-
-	/**
-	 * Gets the new user info
-	 *
-	 * @return The new user object
-	 */
-	public IUser getNewUser() {
-		return newUser;
+		super(oldUser, newUser);
 	}
 }

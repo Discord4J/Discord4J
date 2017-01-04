@@ -1,40 +1,21 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
  * This event is dispatched when either the client loses connection to discord or is logged out.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent} instead.
  */
-public class VoiceDisconnectedEvent extends Event {
-
-	private final Reason reason;
-
-	public VoiceDisconnectedEvent(Reason reason) {
-		this.reason = reason;
+@Deprecated
+public class VoiceDisconnectedEvent extends sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent {
+	
+	public VoiceDisconnectedEvent(IVoiceChannel channel, Reason reason) {
+		super(channel, reason);
 	}
-
-	/**
-	 * Gets the reason this client disconnected.
-	 *
-	 * @return The reason.
-	 */
-	public Reason getReason() {
-		return reason;
-	}
-
-	/**
-	 * This enum represents the possible reasons for discord being disconnected.
-	 */
-	public enum Reason {
-		/**
-		 * The user left the voice channel.
-		 */
-		LEFT_CHANNEL,
-
-		/**
-		 * Something unknown caused the websocket to close. The connection will be abandoned.
-		 */
-		ABNORMAL_CLOSE
+	
+	public VoiceDisconnectedEvent(IGuild guild, Reason reason) {
+		super(guild, reason);
 	}
 }
 

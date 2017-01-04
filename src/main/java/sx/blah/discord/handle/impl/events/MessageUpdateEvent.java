@@ -1,35 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * This event is dispatched whenever a message is edited.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.channel.message.MessageUpdateEvent} instead.
  */
-public class MessageUpdateEvent extends Event {
-
-	private final IMessage oldMessage, newMessage;
-
+@Deprecated
+public class MessageUpdateEvent extends sx.blah.discord.handle.impl.events.guild.channel.message.MessageUpdateEvent {
+	
 	public MessageUpdateEvent(IMessage oldMessage, IMessage newMessage) {
-		this.oldMessage = oldMessage;
-		this.newMessage = newMessage;
-	}
-
-	/**
-	 * The original message.
-	 *
-	 * @return The message.
-	 */
-	public IMessage getOldMessage() {
-		return oldMessage;
-	}
-
-	/**
-	 * The new message.
-	 *
-	 * @return The message.
-	 */
-	public IMessage getNewMessage() {
-		return newMessage;
+		super(oldMessage, newMessage);
 	}
 }

@@ -794,7 +794,7 @@ public class Guild implements IGuild {
 							IWebhook oldWebhook = toUpdate.copy();
 							toUpdate = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
 							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
-								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, channel));
+								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate));
 
 							oldList.remove(oldWebhook);
 						}

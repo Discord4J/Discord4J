@@ -1,25 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IWebhook;
 
 /**
  * This event is dispatched whenever a webhook is created or discovered.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookCreateEvent} instead.
  */
-public class WebhookCreateEvent extends Event {
-
-	private final IWebhook webhook;
-
+@Deprecated
+public class WebhookCreateEvent extends sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookCreateEvent {
+	
 	public WebhookCreateEvent(IWebhook webhook) {
-		this.webhook = webhook;
-	}
-
-	/**
-	 * Gets the newly created webhook.
-	 *
-	 * @return The webhook.
-	 */
-	public IWebhook getWebhook() {
-		return webhook;
+		super(webhook);
 	}
 }

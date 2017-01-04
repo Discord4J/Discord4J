@@ -1,37 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
-import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 
 /**
  * This event is dispatched after a role has been deleted from a guild.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.role.RoleDeleteEvent} instead.
  */
-public class RoleDeleteEvent extends Event {
-
-	private final IRole role;
-	private final IGuild guild;
-
-	public RoleDeleteEvent(IRole role, IGuild guild) {
-		this.role = role;
-		this.guild = guild;
-	}
-
-	/**
-	 * Gets the role that was deleted.
-	 *
-	 * @return The deleted role.
-	 */
-	public IRole getRole() {
-		return role;
-	}
-
-	/**
-	 * Gets the guild the role was from.
-	 *
-	 * @return The guild.
-	 */
-	public IGuild getGuild() {
-		return guild;
+@Deprecated
+public class RoleDeleteEvent extends sx.blah.discord.handle.impl.events.guild.role.RoleDeleteEvent {
+	
+	public RoleDeleteEvent(IRole role) {
+		super(role);
 	}
 }

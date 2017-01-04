@@ -1,48 +1,16 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
-import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Presences;
 
 /**
  * This event is dispatched when a user changes his/her presence.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent} instead.
  */
-public class PresenceUpdateEvent extends Event {
-
-	private final IUser user;
-	private final Presences oldPresence, newPresence;
-
+@Deprecated
+public class PresenceUpdateEvent extends sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent {
+	
 	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence) {
-		this.user = user;
-		this.oldPresence = oldPresence;
-		this.newPresence = newPresence;
-	}
-
-	/**
-	 * Gets the user's new presence.
-	 *
-	 * @return The presence.
-	 */
-	public Presences getNewPresence() {
-		return newPresence;
-	}
-
-	/**
-	 * Gets the user's old presence.
-	 *
-	 * @return The presence.
-	 */
-	public Presences getOldPresence() {
-		return oldPresence;
-	}
-
-	/**
-	 * Gets the user involved.
-	 *
-	 * @return The user.
-	 */
-	public IUser getUser() {
-		return user;
+		super(user, oldPresence, newPresence);
 	}
 }

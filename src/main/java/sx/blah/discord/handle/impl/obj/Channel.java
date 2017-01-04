@@ -2,7 +2,6 @@ package sx.blah.discord.handle.impl.obj;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
@@ -11,12 +10,7 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.api.internal.json.objects.ExtendedInviteObject;
-import sx.blah.discord.api.internal.json.objects.FilePayloadObject;
-import sx.blah.discord.api.internal.json.objects.MessageObject;
-import sx.blah.discord.api.internal.json.objects.OverwriteObject;
-import sx.blah.discord.api.internal.json.objects.WebhookObject;
+import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
@@ -25,19 +19,12 @@ import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.RequestBuffer;
+import sx.blah.discord.util.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -617,7 +604,7 @@ public class Channel implements IChannel {
 							IWebhook oldWebhook = toUpdate.copy();
 							toUpdate = DiscordUtils.getWebhookFromJSON(this, webhookObject);
 							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
-								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate, this));
+								client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, toUpdate));
 
 							oldList.remove(oldWebhook);
 						}

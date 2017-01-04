@@ -1,37 +1,15 @@
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * This event is fired when a message is pinned to a channel.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.channel.message.MessagePinEvent} instead.
  */
-public class MessagePinEvent extends Event {
-
-	private final IChannel channel;
-	private final IMessage message;
-
+@Deprecated
+public class MessagePinEvent extends sx.blah.discord.handle.impl.events.guild.channel.message.MessagePinEvent {
+	
 	public MessagePinEvent(IMessage message) {
-		this.message = message;
-		this.channel = message.getChannel();
-	}
-
-	/**
-	 * Gets the channel the message was pinned to.
-	 *
-	 * @return The channel.
-	 */
-	public IChannel getChannel() {
-		return channel;
-	}
-
-	/**
-	 * Gets the message pinned.
-	 *
-	 * @return The message.
-	 */
-	public IMessage getMessage() {
-		return message;
+		super(message);
 	}
 }
