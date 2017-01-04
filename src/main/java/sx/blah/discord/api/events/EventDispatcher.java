@@ -42,7 +42,10 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void registerListener(Object listener) {
-		registerListener(listener.getClass(), listener, false);
+		if (listener instanceof IListener)
+			registerListener((IListener) listener);
+		else
+			registerListener(listener.getClass(), listener, false);
 	}
 
 	/**
@@ -136,7 +139,10 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void registerTemporaryListener(Object listener) {
-		registerListener(listener.getClass(), listener, true);
+		if (listener instanceof IListener)
+			registerTemporaryListener((IListener<? extends Event>) listener);
+		else
+			registerListener(listener.getClass(), listener, true);
 	}
 
 	/**
@@ -301,15 +307,19 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void unregisterListener(Object listener) {
-		for (Method method : listener.getClass().getMethods()) {
-			if (method.getParameterCount() == 1) {
-				Class<?> eventClass = method.getParameterTypes()[0];
-				if (Event.class.isAssignableFrom(eventClass)) {
-					if (methodListeners.containsKey(eventClass))
-						if (methodListeners.get(eventClass).containsKey(method)) {
-							methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == listener); //Yes, the == is intentional. We want the exact same instance.
-							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered method listener {}", listener.getClass().getSimpleName(), method.toString());
-						}
+		if (listener instanceof IListener) {
+			unregisterListener((IListener) listener);
+		} else {
+			for (Method method : listener.getClass().getMethods()) {
+				if (method.getParameterCount() == 1) {
+					Class<?> eventClass = method.getParameterTypes()[0];
+					if (Event.class.isAssignableFrom(eventClass)) {
+						if (methodListeners.containsKey(eventClass))
+							if (methodListeners.get(eventClass).containsKey(method)) {
+								methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == listener); //Yes, the == is intentional. We want the exact same instance.
+								Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered method listener {}", listener.getClass().getSimpleName(), method.toString());
+							}
+					}
 				}
 			}
 		}
