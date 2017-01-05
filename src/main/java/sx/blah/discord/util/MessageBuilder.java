@@ -189,6 +189,15 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * This gets if the builder will have TTS enabled.
+	 *
+	 * @return If TTS will be used
+	 */
+	public boolean isUsingTTS() {
+		return tts;
+	}
+
+	/**
 	 * Galactic law requires I have a build() method in
 	 * my builder classes.
 	 * Sends and creates the message object.
