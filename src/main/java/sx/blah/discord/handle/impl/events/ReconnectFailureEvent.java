@@ -12,8 +12,8 @@ import sx.blah.discord.api.internal.ReconnectManager;
 @Deprecated
 public class ReconnectFailureEvent extends sx.blah.discord.handle.impl.events.shard.ReconnectFailureEvent {
 	
-	public ReconnectFailureEvent(IShard shard, int curAttempt) {
-		super(shard, curAttempt);
+	public ReconnectFailureEvent(IShard shard, int curAttempt, int maxAttempts) {
+		super(shard, curAttempt, maxAttempts);
 	}
 	
 	/**

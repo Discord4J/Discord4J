@@ -4,13 +4,10 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.ReconnectFailureEvent;
 import sx.blah.discord.handle.impl.events.ReconnectSuccessEvent;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ReconnectManager {
@@ -50,8 +47,8 @@ public class ReconnectManager {
 	}
 
 	void onReconnectError() {
-		client.getDispatcher().dispatch(new ReconnectFailureEvent(toReconnect.peek().shard, curAttempt.get()));
-		if (curAttempt.get() < maxAttempts - 1) {
+		client.getDispatcher().dispatch(new ReconnectFailureEvent(toReconnect.peek().shard, curAttempt.get(), maxAttempts));
+		if (curAttempt.get() <= maxAttempts) {
 			try {
 				Thread.sleep(getReconnectDelay()); // Sleep for back off
 				incrementAttempt();
