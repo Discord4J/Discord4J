@@ -216,7 +216,7 @@ public class Channel implements IChannel {
 				MessageObject.class);
 
 		if (response == null || response.id == null) //Message didn't send
-			throw new DiscordException("Message was unable to be sent.");
+			throw new DiscordException("Message was unable to be sent (Discord didn't return a response).");
 
 		return DiscordUtils.getMessageFromJSON(this, response);
 	}
