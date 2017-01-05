@@ -28,11 +28,11 @@ public class MessageTokenizer {
 
 	private final String content;
 	private final IDiscordClient client;
-	private int currentPosition = 0;
+	private volatile int currentPosition = 0;
 	/**
 	 * The remaining substring.
 	 */
-	private String remaining;
+	private volatile String remaining;
 
 	/**
 	 * Initializes using the message contents and client.
@@ -335,6 +335,15 @@ public class MessageTokenizer {
 	 */
 	public int getCurrentPosition() {
 		return currentPosition;
+	}
+
+	/**
+	 * Returns the internal substring based on the current position.
+	 *
+	 * @return The remaining content
+	 */
+	public String getRemainingContent() {
+		return remaining;
 	}
 
 	/**
