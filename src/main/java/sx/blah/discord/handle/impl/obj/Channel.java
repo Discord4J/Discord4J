@@ -10,7 +10,12 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.api.internal.json.objects.ExtendedInviteObject;
+import sx.blah.discord.api.internal.json.objects.FilePayloadObject;
+import sx.blah.discord.api.internal.json.objects.MessageObject;
+import sx.blah.discord.api.internal.json.objects.OverwriteObject;
+import sx.blah.discord.api.internal.json.objects.WebhookObject;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
@@ -240,7 +245,8 @@ public class Channel implements IChannel {
 	@Override
 	public IMessage sendFile(MessageBuilder builder, InputStream file, String fileName) throws DiscordException,
 			RateLimitException, MissingPermissionsException {
-		return sendFile(builder.getContent(), builder.isUsingTTS(), file, fileName, builder.getEmbedObject());
+		return sendFile(builder.getContent() != null && builder.getContent().isEmpty() ? null : builder.getContent(),
+				builder.isUsingTTS(), file, fileName, builder.getEmbedObject());
 	}
 
 	@Override
