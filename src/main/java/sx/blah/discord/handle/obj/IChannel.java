@@ -166,6 +166,20 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
+	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 *
+	 * @param builder The MessageBuilder to use
+	 * @param file The input stream to upload.
+	 * @param fileName The name of the file that should be shown in Discord.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	IMessage sendFile(MessageBuilder builder, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
 	 * Generates an invite for this channel.
 	 *
 	 * @param maxAge How long the invite should be valid, setting it to 0 makes it last forever.

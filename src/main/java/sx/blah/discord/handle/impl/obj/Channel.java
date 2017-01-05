@@ -238,6 +238,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public IMessage sendFile(MessageBuilder builder, InputStream file, String fileName) throws DiscordException,
+			RateLimitException, MissingPermissionsException {
+		return sendFile(builder.getContent(), builder.isUsingTTS(), file, fileName, builder.getEmbedObject());
+	}
+
+	@Override
 	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws DiscordException, RateLimitException, MissingPermissionsException {
 		getShard().checkReady("create invite");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
