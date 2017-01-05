@@ -77,7 +77,21 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 */
 	IMessage sendMessage(String content) throws DiscordException, RateLimitException, MissingPermissionsException;
-
+	
+	/**
+	 * Sends a message to the desired channel.
+	 *
+	 * @param embed The embed object
+	 * @return The message object representing the sent message
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage sendMessage(EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	
 	/**
 	 * Sends a message to the desired channel.
 	 *
@@ -90,7 +104,22 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 */
 	IMessage sendMessage(String content, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException;
-
+	
+	/**
+	 * Sends a message to the desired channel.
+	 *
+	 * @param content The content of the message.
+	 * @param embed The embed object
+	 * @return The message object representing the sent message
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage sendMessage(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	
 	/**
 	 * Sends a message to the desired channel.
 	 *
@@ -133,7 +162,52 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 */
 	IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
-
+	
+	/**
+	 * Uploads a file to the channel with an attached message and option for tts.
+	 *
+	 * @param file The input stream to upload.
+	 * @param embed An optional embed object to send with the file.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage sendFile(EmbedObject embed, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+	
+	/**
+	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 *
+	 * @param content The content of the attached message.
+	 * @param file The input stream to upload.
+	 * @param fileName The name of the file that should be shown in Discord.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	IMessage sendFile(String content, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+	
+	/**
+	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 *
+	 * @param file The input stream to upload.
+	 * @param fileName The name of the file that should be shown in Discord.
+	 * @param embed An optional embed object to send with the file.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage sendFile(EmbedObject embed, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+	
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
 	 *
@@ -162,6 +236,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
+	 *
+	 * @see EmbedBuilder
 	 */
 	IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
 
