@@ -1,10 +1,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -264,7 +261,14 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws DiscordException
 	 */
 	void removeReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
-
+	
+	/**
+	 * This creates a new {@link MessageTokenizer} instance with this message instance.
+	 *
+	 * @return A new tokenizer.
+	 */
+	MessageTokenizer tokenize();
+	
 	/**
 	 * Checks to see is this message deleted.
 	 *

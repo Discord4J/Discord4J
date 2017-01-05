@@ -1,6 +1,5 @@
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -8,14 +7,9 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
-import sx.blah.discord.handle.impl.events.MessageUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -541,6 +535,11 @@ public class Message implements IMessage {
 	@Override
 	public String getWebhookID(){
 		return webhookID;
+	}
+	
+	@Override
+	public MessageTokenizer tokenize() {
+		return new MessageTokenizer(this);
 	}
 
 	@Override
