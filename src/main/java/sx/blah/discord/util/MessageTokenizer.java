@@ -2,7 +2,13 @@ package sx.blah.discord.util;
 
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IDiscordObject;
+import sx.blah.discord.handle.obj.IEmoji;
+import sx.blah.discord.handle.obj.IInvite;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,9 +28,11 @@ public class MessageTokenizer {
 	public static final String ANY_MENTION_REGEX = "<((@[!&]?)|#)\\d+>";
 	public static final String CUSTOM_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
 	public static final String INVITE_REGEX = "(?:discord\\.gg/)([\\w-]+)";
+	public static final String WORD_REGEX = "(?:\\s|\\n)+";
 	public static final Pattern ANY_MENTION_PATTERN = Pattern.compile(ANY_MENTION_REGEX);
 	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile(CUSTOM_EMOJI_REGEX);
 	public static final Pattern INVITE_PATTERN = Pattern.compile(INVITE_REGEX);
+	public static final Pattern WORD_PATTERN = Pattern.compile(WORD_REGEX);
 
 	private final String content;
 	private final IDiscordClient client;
@@ -79,6 +87,19 @@ public class MessageTokenizer {
 	}
 
 	/**
+	 * Steps to the position provided and updates the internal remaining string.
+	 *
+	 * @param index The index to step to
+	 * @return The new current position
+	 */
+	public int stepForwardTo(int index) {
+		currentPosition = Math.max(0, Math.min(index, content.length()));
+		remaining = content.substring(currentPosition);
+
+		return currentPosition;
+	}
+
+	/**
 	 * Steps to the desired index.
 	 *
 	 * @param index The index to step to
@@ -124,18 +145,17 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is another word to go to. A word is delimited by a space.
+	 * Returns true if there is another word to go to. A word is delimited by whitespace or newlines.
 	 *
 	 * @return True if there is another word to step to
 	 */
 	public boolean hasNextWord() {
-		int index = remaining.indexOf(' ');
-		return hasNext() && index < remaining.length() - 1;
+		return hasNext();
 	}
 
 	/**
 	 * Returns the next word, stepping forward the tokenizer to the next non-space character. A word is delimited by
-	 * a space.
+	 * whitespace/newlines.
 	 *
 	 * @return The next word
 	 */
@@ -143,22 +163,30 @@ public class MessageTokenizer {
 		if (!hasNextWord())
 			throw new IllegalStateException("No more words found!");
 
-		int spaceIndex = remaining.indexOf(' ');
-		int nlIndex = remaining.indexOf('\n');
-
-		int indexOfSpace;
-		if (spaceIndex == -1 && nlIndex == -1) {
-			indexOfSpace = content.length() - currentPosition;
-		} else if (spaceIndex == -1) {
-			indexOfSpace = nlIndex;
-		} else if (nlIndex == -1) {
-			indexOfSpace = spaceIndex;
-		} else {
-			indexOfSpace = Math.max(spaceIndex, nlIndex);
+		{
+			Matcher matcher = WORD_PATTERN.matcher(remaining);
+			if (matcher.find()) {
+				if (matcher.start() == 0) {
+					stepForwardTo(currentPosition + matcher.end());
+				}
+			}
 		}
-		Token token = new Token(this, currentPosition, currentPosition + indexOfSpace);
 
-		stepForward(indexOfSpace + 1);
+		Matcher matcher = WORD_PATTERN.matcher(remaining);
+		final int end;
+		boolean found = true;
+		if (!matcher.find()) {
+			end = content.length();
+			found = false;
+		} else {
+			end = currentPosition + matcher.start();
+		}
+
+		System.out.println(currentPosition + ", " + end + ", " + content.length() + ", " + found);
+
+		Token token = new Token(this, currentPosition, end);
+
+		stepForwardTo(found ? (currentPosition + matcher.end()) : content.length());
 
 		return token;
 	}
@@ -572,7 +600,8 @@ public class MessageTokenizer {
 
 			invite = RequestBuffer.request(() -> {
 				try {
-					return tokenizer.getClient().getInviteForCode(getContent().substring(getContent().lastIndexOf("/")));
+					return tokenizer.getClient()
+							.getInviteForCode(getContent().substring(getContent().lastIndexOf("/")));
 				} catch (DiscordException e) {
 					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
 				}
