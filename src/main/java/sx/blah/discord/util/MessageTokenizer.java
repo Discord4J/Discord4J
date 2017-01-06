@@ -182,8 +182,6 @@ public class MessageTokenizer {
 			end = currentPosition + matcher.start();
 		}
 
-		System.out.println(currentPosition + ", " + end + ", " + content.length() + ", " + found);
-
 		Token token = new Token(this, currentPosition, end);
 
 		stepForwardTo(found ? (currentPosition + matcher.end()) : content.length());
