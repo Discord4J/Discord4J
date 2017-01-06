@@ -146,13 +146,15 @@ public class MessageTokenizer {
 		int spaceIndex = remaining.indexOf(' ');
 		int nlIndex = remaining.indexOf('\n');
 
-		int indexOfSpace = -1;
+		int indexOfSpace;
 		if (spaceIndex == -1 && nlIndex == -1) {
 			indexOfSpace = content.length() - currentPosition;
 		} else if (spaceIndex == -1) {
 			indexOfSpace = nlIndex;
 		} else if (nlIndex == -1) {
 			indexOfSpace = spaceIndex;
+		} else {
+			indexOfSpace = Math.max(spaceIndex, nlIndex);
 		}
 		Token token = new Token(this, currentPosition, currentPosition + indexOfSpace);
 
