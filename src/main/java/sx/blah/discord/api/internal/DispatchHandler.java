@@ -80,12 +80,10 @@ class DispatchHandler {
 
 		ws.state = DiscordWS.State.READY;
 		ws.hasReceivedReady = true; // Websocket received actual ready event
+		if (client.ourUser == null) client.ourUser = DiscordUtils.getUserFromJSON(shard, ready.user);
 		client.getDispatcher().dispatch(new LoginEvent(shard));
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
-			if (client.ourUser == null) client.ourUser = new User(shard, ready.user.username, ready.user.id,
-					ready.user.discriminator, ready.user.avatar, Presences.OFFLINE, ready.user.bot);
-
 			ws.sessionId = ready.session_id;
 
 			if (MessageList.getEfficiency(client) == null) //User did not manually set the efficiency
