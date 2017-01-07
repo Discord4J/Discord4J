@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This is utility class intended to help with dealing with {@link RateLimitException}s by queueing rate-limited
+ * This is a utility class intended to help with dealing with {@link RateLimitException}s by queueing rate-limited
  * operations until they can be sent.
  */
 public class RequestBuffer {
