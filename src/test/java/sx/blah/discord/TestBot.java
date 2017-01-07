@@ -296,7 +296,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						for (int i = 1; i < 11; i++) {
+						for (int i = 1; i < 21; i++) {
 							int finalI = i;
 							RequestBuffer.request(() -> {
 								try {
@@ -304,6 +304,7 @@ public class TestBot {
 								} catch (DiscordException | MissingPermissionsException e) {
 									e.printStackTrace();
 								}
+								return finalI;
 							});
 						}
 					}

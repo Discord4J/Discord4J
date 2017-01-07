@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This is utility class intended to help with dealing with {@link RateLimitException}s by queueing rate-limited
@@ -14,7 +13,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RequestBuffer {
 
-	private static final AtomicReference<ScheduledExecutorService> requestService = new AtomicReference<>(Executors.newScheduledThreadPool(0));
+	private static final ExecutorService initialExecutor = Executors.newSingleThreadExecutor();
+	private static final Map<String, ScheduledExecutorService> requestServices = new ConcurrentHashMap<>();
 	private static final Map<String, List<RequestFuture>> requests = new ConcurrentHashMap<>();
 
 	/**
@@ -26,7 +26,7 @@ public class RequestBuffer {
 	 */
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
 		final RequestFuture<T> future = new RequestFuture<>(request);
-		requestService.get().execute(() -> {
+		initialExecutor.execute(() -> {
 			if (!future.tryAgain()) {
 				Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
 						future.getDelay(TimeUnit.MILLISECONDS));
@@ -35,7 +35,8 @@ public class RequestBuffer {
 					
 					if (!requests.containsKey(future.getBucket())) {
 						requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
-						requestService.get().schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+						requestServices.put(future.getBucket(), Executors.newSingleThreadScheduledExecutor());
+						requestServices.get(future.getBucket()).schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
 					}
 					
 					requests.get(future.getBucket()).add(future);
@@ -64,7 +65,7 @@ public class RequestBuffer {
 	public static int getIncompleteRequestCount() {
 		final AtomicInteger count = new AtomicInteger();
 		synchronized (requests) {
-			requests.forEach((s, requestFutures) -> count.addAndGet(requestFutures.size()));
+			requests.values().parallelStream().forEach((requestFutures) -> count.addAndGet(requestFutures.size()));
 		}
 		return count.get();
 	}
@@ -75,12 +76,19 @@ public class RequestBuffer {
 	 * @return The number of requests killed.
 	 */
 	public static int killAllRequests() {
-		synchronized (requestService) {
-			synchronized (requests) {
-				requests.clear();
-			}
-			return requestService.getAndSet(Executors.newScheduledThreadPool(0)).shutdownNow().size();
+		final int toKill = getIncompleteRequestCount();
+		//We are ignoring the initialExecutor because those requests haven't been ratelimited (yet)
+		synchronized (requestServices) {
+			requestServices.keySet().parallelStream().distinct().forEach(bucket -> {
+				requestServices.get(bucket).shutdownNow();
+				requestServices.remove(bucket);
+			});
 		}
+		synchronized (requests) {
+			requests.values().forEach(futures -> futures.forEach(future -> future.cancel(true)));
+			requests.clear();
+		}
+		return toKill;
 	}
 
 	/**
@@ -309,11 +317,12 @@ public class RequestBuffer {
 					if (futuresToRetry.size() > 0) {
 						long delay = Math.max(0, futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
 						requests.replace(bucket, futuresToRetry);
-						synchronized (requestService) {
-							requestService.get().schedule(new RequestRunnable(bucket), delay, TimeUnit.MILLISECONDS);
+						synchronized (requestServices) {
+							requestServices.get(bucket).schedule(new RequestRunnable(bucket), delay, TimeUnit.MILLISECONDS);
 						}
 					} else {
 						requests.remove(bucket);
+						requestServices.remove(bucket).shutdownNow();
 					}
 				}
 			}
