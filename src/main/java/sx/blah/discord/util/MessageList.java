@@ -717,12 +717,12 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		 * At this level, the message list caches the half the default amount of messages (128) and past message history
 		 * is NOT requested on initialization.
 		 */
-		MEDIUM(25),
+		MEDIUM(50),
 		/**
 		 * At this level, the message list does NOT cache any messages and past message history is NOT requested on
 		 * initialization. Additionally, the MessageList's built-in event listener is never registered.
 		 */
-		HIGH(50);
+		HIGH(100);
 
 		private int guildsRequired;
 

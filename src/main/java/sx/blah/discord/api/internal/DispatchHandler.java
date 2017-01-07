@@ -302,20 +302,18 @@ class DispatchHandler {
 			return;
 
 		Message toUpdate = (Message) channel.getMessageByID(id);
-		if (toUpdate != null) {
-			IMessage oldMessage = toUpdate.copy();
+		IMessage oldMessage = toUpdate != null ? toUpdate.copy() : null;
 
-			toUpdate = (Message) DiscordUtils.getMessageFromJSON(channel, json);
+		toUpdate = (Message) DiscordUtils.getMessageFromJSON(channel, json);
 
-			if (oldMessage.isPinned() && !json.pinned) {
-				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
-			} else if (!oldMessage.isPinned() && json.pinned) {
-				client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
-			} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
-				client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
-			} else {
-				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
-			}
+		if (oldMessage != null && oldMessage.isPinned() && !json.pinned) {
+			client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
+		} else if (oldMessage != null && !oldMessage.isPinned() && json.pinned) {
+			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
+		} else if (oldMessage != null && oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
+			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
+		} else {
+			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		}
 	}
 
