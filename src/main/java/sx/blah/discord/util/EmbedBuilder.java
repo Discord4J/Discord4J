@@ -4,6 +4,7 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 
 import java.awt.*;
+import java.io.File;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -14,6 +15,10 @@ import java.util.List;
 
 /**
  * Builds an EmbedObject for use in sending messages.
+ *
+ * @see IChannel#sendMessage(String, EmbedObject)
+ * @see IChannel#sendFile(EmbedObject, File)
+ * @see sx.blah.discord.handle.obj.IMessage#edit(String, EmbedObject)
  */
 public class EmbedBuilder {
 
@@ -95,7 +100,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the sidebar color with an object.
+	 * Set the sidebar color with a Color object.
 	 *
 	 * @param color The color
 	 * @return Itself for chaining
@@ -144,7 +149,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the footer icon.
+	 * Set the footer icon. You need footer text present for this to appear.
 	 *
 	 * @param iconUrl The icon URL
 	 * @return Itself for chaining
@@ -185,7 +190,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the author icon.
+	 * Set the author icon. Note that you need an author name for this to show up.
 	 *
 	 * @param url The icon URL
 	 * @return Itself for chaining
@@ -213,7 +218,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the author's URL. This is the link for when someone clicks the name.
+	 * Set the author's URL. This is the link for when someone clicks the name. You need a name for this to work.
 	 *
 	 * @param url The URL
 	 * @return Itself for chaining
@@ -227,7 +232,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the title's URL. This is the link for when someone clicks the title.
+	 * Set the title's URL. This is the link for when someone clicks the title. You need a title for this to work.
 	 *
 	 * @param url The URL
 	 * @return Itself for chaining
@@ -252,7 +257,7 @@ public class EmbedBuilder {
 	/**
 	 * Add a title-content field. Note: if a null or empty title or content is passed, this will throw an
 	 * IllegalArgumentException. If you want the builder to safely ignore fields with null/empty values, use
-	 * EmbedBuilder#ignoreEmptyNullFields().
+	 * {@link #ignoreEmptyNullFields}.
 	 *
 	 * @param title   The title
 	 * @param content The content
