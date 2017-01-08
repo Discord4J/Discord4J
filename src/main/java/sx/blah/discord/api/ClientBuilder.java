@@ -19,12 +19,12 @@ public class ClientBuilder {
 	private boolean isDaemon = false;
 	private int shardCount = 1;
 	private int maxReconnectAttempts = 5;
+	private int retryCount = 5;
 
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
 	private final List<Object> listeners = new ArrayList<>();
 	private final List<Class<?>> listenerClasses = new ArrayList<>();
-	private int retryCount = 5;
 
 	/**
 	 * Provides the login info for the client.

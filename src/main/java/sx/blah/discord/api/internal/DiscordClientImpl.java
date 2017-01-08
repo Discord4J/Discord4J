@@ -96,7 +96,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Timer to keep the program alive if the client is not daemon
 	 */
 	private Timer keepAlive;
-	private int retryCount;
+	private final int retryCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
 							 int retryCount) {

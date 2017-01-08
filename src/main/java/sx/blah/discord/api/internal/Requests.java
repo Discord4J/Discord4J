@@ -112,11 +112,11 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to send with the request.
-		 * @param clazz   The class of the object to transform the json response into.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
+		 * @param clazz The class of the object to transform the json response into.
 		 * @param headers The headers to include in the response.
-		 * @param <T>     The type of the object to transform the json response into.
+		 * @param <T> The type of the object to transform the json response into.
 		 * @return The transformed object.
 		 * @throws DiscordException
 		 * @throws RateLimitException
@@ -132,10 +132,10 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param clazz   The class of the object to transform the json response into.
+		 * @param url The url to make the request to.
+		 * @param clazz The class of the object to transform the json response into.
 		 * @param headers The headers to include in the response.
-		 * @param <T>     The type of the object to transform the json response into.
+		 * @param <T> The type of the object to transform the json response into.
 		 * @return The transformed object.
 		 * @throws DiscordException
 		 * @throws RateLimitException
@@ -147,8 +147,8 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to send with the request.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
 		 * @param headers The headers to include in the response.
 		 * @return The result (if any) returned by the request.
 		 * @throws DiscordException
@@ -161,8 +161,8 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to send with the request.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
 		 * @param headers The headers to include in the response.
 		 * @return The result (if any) returned by the request.
 		 * @throws DiscordException
@@ -175,7 +175,7 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
+		 * @param url The url to make the request to.
 		 * @param headers The headers to include in the request.
 		 * @return The result (if any) returned by the request.
 		 * @throws RateLimitException
@@ -199,8 +199,8 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to send with the request.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to send with the request.
 		 * @param headers The headers to include in the request.
 		 * @return The result (if any) returned by the request.
 		 * @throws RateLimitException
