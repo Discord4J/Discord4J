@@ -521,7 +521,7 @@ public class Message implements IMessage {
 							reaction.isCustomEmoji()
 									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getID())
 									: URLEncoder.encode(reaction.toString(), "UTF-8").replace("+", "%20"),
-							user.equals(client.getOurUser()) ? "@me" : getID()));
+							user.equals(client.getOurUser()) ? "@me" : user.getID()));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
