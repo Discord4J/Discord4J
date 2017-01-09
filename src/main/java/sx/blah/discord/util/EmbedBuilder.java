@@ -77,6 +77,27 @@ public class EmbedBuilder {
 	public EmbedBuilder withDesc(String desc) {
 		return withDescription(desc);
 	}
+	
+	/**
+	 * Appends to the description for the embed.
+	 *
+	 * @param desc The description
+	 * @return Itself for chaining
+	 */
+	public EmbedBuilder appendDescription(String desc) {
+		embed.description += desc;
+		return this;
+	}
+	
+	/**
+	 * Appends to the description for the embed.
+	 *
+	 * @param desc The description
+	 * @return Itself for chaining
+	 */
+	public EmbedBuilder appendDesc(String desc) {
+		return appendDescription(desc);
+	}
 
 	/**
 	 * Set the timestamp for the embed. It is in the system's local time (and will be converted appropriately).
