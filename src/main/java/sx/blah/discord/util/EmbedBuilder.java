@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,7 +22,28 @@ import java.util.List;
  * @see sx.blah.discord.handle.obj.IMessage#edit(String, EmbedObject)
  */
 public class EmbedBuilder {
-
+	
+	/**
+	 * The max amount of fields an embed can contain.
+	 */
+	public static final int FIELD_COUNT_LIMIT = 25;
+	/**
+	 * The max length of embed or field titles.
+	 */
+	public static final int TITLE_LENGTH_LIMIT = 256;
+	/**
+	 * The max length of field content.
+	 */
+	public static final int FIELD_CONTENT_LIMIT = 1024;
+	/**
+	 * The max length of embed descriptions.
+	 */
+	public static final int DESCRIPTION_CONTENT_LIMIT = 2048;
+	/**
+	 * The max length of footer text.
+	 */
+	public static final int FOOTER_CONTENT_LIMIT = DESCRIPTION_CONTENT_LIMIT;
+	
 	private final EmbedObject embed = new EmbedObject(null, "rich", null, null, null, 0, null, null, null, null, null,
 			null, null);
 	private final List<EmbedObject.EmbedFieldObject> fields = new ArrayList<>();
@@ -33,17 +55,6 @@ public class EmbedBuilder {
 
 	public EmbedBuilder() {
 
-	}
-
-	/**
-	 * Builds the EmbedObject.
-	 *
-	 * @return A newly built EmbedObject (calling this multiple times results in new objects)
-	 */
-	public EmbedObject build() {
-		return new EmbedObject(embed.title, "rich", embed.description, embed.url, embed.timestamp, embed.color,
-				embed.footer, embed.image, embed.thumbnail, embed.video, embed.provider, embed.author,
-				fields.toArray(new EmbedObject.EmbedFieldObject[fields.size()]));
 	}
 
 	/**
@@ -296,5 +307,30 @@ public class EmbedBuilder {
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
 	}
-
+	
+	/**
+	 * Builds the EmbedObject.
+	 *
+	 * @return A newly built EmbedObject (calling this multiple times results in new objects)
+	 *
+	 * @throws DiscordException
+	 */
+	public EmbedObject build() throws DiscordException {
+		if (embed.fields != null && embed.fields.length > FIELD_COUNT_LIMIT)
+			throw new DiscordException("Embed cannot have more than "+FIELD_COUNT_LIMIT+" fields");
+		if (embed.title != null && embed.title.length() > TITLE_LENGTH_LIMIT)
+			throw new DiscordException("Embed title cannot have more than "+TITLE_LENGTH_LIMIT+" characters");
+		if (embed.fields != null && embed.fields.length > 0 && Arrays.stream(embed.fields).filter((field) -> field.name.length() > TITLE_LENGTH_LIMIT).count() > 0)
+			throw new DiscordException("Embed field titles cannot have more than "+TITLE_LENGTH_LIMIT+" characters");
+		if (embed.fields != null && embed.fields.length > 0 && Arrays.stream(embed.fields).filter((field) -> field.value.length() > FIELD_CONTENT_LIMIT).count() > 0)
+			throw new DiscordException("Embed field values cannot have more than "+FIELD_CONTENT_LIMIT+" characters");
+		if (embed.description != null && embed.description.length() > DESCRIPTION_CONTENT_LIMIT)
+			throw new DiscordException("Embed description cannot have more than "+DESCRIPTION_CONTENT_LIMIT+" characters");
+		if (embed.footer != null && embed.footer.text.length() > FOOTER_CONTENT_LIMIT)
+			throw new DiscordException("Embed footer text cannot have more than "+FOOTER_CONTENT_LIMIT+" characters");
+		
+		return new EmbedObject(embed.title, "rich", embed.description, embed.url, embed.timestamp, embed.color,
+				embed.footer, embed.image, embed.thumbnail, embed.video, embed.provider, embed.author,
+				fields.toArray(new EmbedObject.EmbedFieldObject[fields.size()]));
+	}
 }
