@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -780,5 +782,30 @@ public class DiscordUtils {
 				toPCM.getSampleSizeInBits(), toPCM.getChannels(), toPCM.getFrameSize(), toPCM.getFrameRate(), true);
 
 		return AudioSystem.getAudioInputStream(audioFormat, pcmStream);
+	}
+	
+	/**
+	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
+	 *
+	 * @return The new thread factory.
+	 */
+	public static ThreadFactory createDaemonThreadFactory() {
+		return createDaemonThreadFactory(null);
+	}
+	
+	/**
+	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
+	 *
+	 * @param threadName The name to place on created threads.
+	 * @return The new thread factory.
+	 */
+	public static ThreadFactory createDaemonThreadFactory(String threadName) {
+		return (runnable) -> { //Ensures all threads are daemons
+			Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+			if (threadName != null)
+				thread.setName(threadName);
+			thread.setDaemon(true);
+			return thread;
+		};
 	}
 }

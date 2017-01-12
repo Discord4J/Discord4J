@@ -20,9 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.channels.UnresolvedAddressException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 

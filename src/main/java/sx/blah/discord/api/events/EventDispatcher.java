@@ -4,6 +4,7 @@ import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.Procedure;
@@ -24,12 +25,7 @@ public class EventDispatcher {
 
 	private final ConcurrentHashMap<Class<?>, ConcurrentHashMap<Method, CopyOnWriteArrayList<ListenerPair<Object>>>> methodListeners = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<Class<?>, CopyOnWriteArrayList<ListenerPair<IListener>>> classListeners = new ConcurrentHashMap<>();
-	private final ExecutorService eventExecutor = Executors.newCachedThreadPool(runnable -> { //Ensures all threads are daemons
-		Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-		thread.setName("Event Dispatch Thread");
-		thread.setDaemon(true);
-		return thread;
-	});
+	private final ExecutorService eventExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"));
 	private final IDiscordClient client;
 
 	public EventDispatcher(IDiscordClient client) {

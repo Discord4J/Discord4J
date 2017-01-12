@@ -9,7 +9,6 @@ import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
@@ -297,16 +296,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.getClient().getDispatcher().waitFor((ReactionAddEvent e) -> {
-							try {
-								e.getMessage().removeReaction(e.getAuthor(), e.getReaction());
-							} catch (DiscordException | RateLimitException e1) {
-								e1.printStackTrace();
-							} catch (MissingPermissionsException e1) {
-								e1.printStackTrace();
-							}
-							return true;
-						});
+						message.getClient().logout();
 					}
 				});
 

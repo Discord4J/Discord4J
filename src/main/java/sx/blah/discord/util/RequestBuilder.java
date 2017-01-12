@@ -3,6 +3,7 @@ package sx.blah.discord.util;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.DiscordUtils;
 
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -32,12 +33,7 @@ public class RequestBuilder {
 	private volatile boolean isCancelled = false;
 	private volatile Action activeAction = new Action();
 	private final ConcurrentLinkedQueue<Action> actions = new ConcurrentLinkedQueue<>();
-	private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor(runnable -> { //Ensures all threads are daemons
-		Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-		thread.setName("Request Builder Async Executor");
-		thread.setDaemon(true);
-		return thread;
-	});
+	private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuilder Async Executor"));
 
 	public RequestBuilder(IDiscordClient client) {
 		this.client = client;

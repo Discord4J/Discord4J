@@ -17,7 +17,7 @@ class HeartbeatHandler {
 	private final AtomicInteger missedPings = new AtomicInteger(0);
 	private final AtomicBoolean waitingForAck = new AtomicBoolean(false);
 
-	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
+	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Keep-Alive Handler"));
 	private final Runnable heartbeatTask;
 
 	private long sentHeartbeatAt;
@@ -49,7 +49,7 @@ class HeartbeatHandler {
 	}
 
 	void begin(long interval) {
-		if (keepAlive.isShutdown()) keepAlive = Executors.newSingleThreadScheduledExecutor();
+		if (keepAlive.isShutdown()) keepAlive = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Keep-Alive Handler"));
 
 		keepAlive.scheduleAtFixedRate(heartbeatTask, 0, interval, TimeUnit.MILLISECONDS);
 	}

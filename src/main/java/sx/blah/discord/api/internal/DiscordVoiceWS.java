@@ -51,8 +51,8 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	private byte[] secret;
 	private boolean isSpeaking = false;
 
-	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor();
-	private ScheduledExecutorService sendHandler = Executors.newSingleThreadScheduledExecutor();
+	private ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Voice Keep-Alive Handler"));
+	private ScheduledExecutorService sendHandler = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Voice Send Handler"));
 
 	public DiscordVoiceWS(VoiceUpdateResponse response, ShardImpl shard) {
 		this.shard = shard;

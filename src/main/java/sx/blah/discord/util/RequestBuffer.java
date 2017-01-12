@@ -1,6 +1,7 @@
 package sx.blah.discord.util;
 
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.internal.DiscordUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RequestBuffer {
 
-	private static final ExecutorService initialExecutor = Executors.newSingleThreadExecutor();
+	private static final ExecutorService initialExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuffer Initial Executor"));
 	private static final Map<String, ScheduledExecutorService> requestServices = new ConcurrentHashMap<>();
 	private static final Map<String, List<RequestFuture>> requests = new ConcurrentHashMap<>();
 
@@ -35,7 +36,7 @@ public class RequestBuffer {
 					
 					if (!requests.containsKey(future.getBucket())) {
 						requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
-						requestServices.put(future.getBucket(), Executors.newSingleThreadScheduledExecutor());
+						requestServices.put(future.getBucket(), Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuffer Retry Handler")));
 						requestServices.get(future.getBucket()).schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
 					}
 					
