@@ -10,12 +10,13 @@ import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -100,7 +101,7 @@ class DispatchHandler {
 					waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getID()));
 				}
 				return loadedGuilds.incrementAndGet() >= ready.guilds.length;
-			}, 10 * ready.guilds.length, TimeUnit.SECONDS);
+			}); //TODO: Figure out some kind of timeout mechanism
 
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id)));
 			return true;
