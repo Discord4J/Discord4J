@@ -1,5 +1,6 @@
 package sx.blah.discord.util;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -11,7 +12,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,7 +22,7 @@ import java.util.List;
  * @see sx.blah.discord.handle.obj.IMessage#edit(String, EmbedObject)
  */
 public class EmbedBuilder {
-	
+
 	/**
 	 * The max amount of fields an embed can contain.
 	 */
@@ -43,16 +43,20 @@ public class EmbedBuilder {
 	 * The max length of footer text.
 	 */
 	public static final int FOOTER_CONTENT_LIMIT = DESCRIPTION_CONTENT_LIMIT;
-	
+
 	private final EmbedObject embed = new EmbedObject(null, "rich", null, null, null, 0, null, null, null, null, null,
 			null, null);
 	private final List<EmbedObject.EmbedFieldObject> fields = new ArrayList<>();
+	private volatile Color color = new Color(0);
 
 	/**
 	 * If true, this will not throw an IllegalArgumentException if you pass null/empty values to appendField.
 	 */
 	private boolean ignoreEmptyNullFields = false;
 
+	/**
+	 * Create a new EmbedBuilder. Set what you want with the withX/appendX methods, and call {@link #build()}.
+	 */
 	public EmbedBuilder() {
 
 	}
@@ -64,6 +68,10 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withTitle(String title) {
+		if (title.length() > TITLE_LENGTH_LIMIT)
+			throw new IllegalArgumentException(
+					"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
+
 		embed.title = title;
 		return this;
 	}
@@ -75,6 +83,10 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withDescription(String desc) {
+		if (desc.length() > DESCRIPTION_CONTENT_LIMIT)
+			throw new IllegalArgumentException(
+					"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
+
 		embed.description = desc;
 		return this;
 	}
@@ -88,7 +100,7 @@ public class EmbedBuilder {
 	public EmbedBuilder withDesc(String desc) {
 		return withDescription(desc);
 	}
-	
+
 	/**
 	 * Appends to the description for the embed.
 	 *
@@ -96,10 +108,14 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder appendDescription(String desc) {
+		if ((embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT)
+			throw new IllegalArgumentException(
+					"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
+
 		embed.description += desc;
 		return this;
 	}
-	
+
 	/**
 	 * Appends to the description for the embed.
 	 *
@@ -138,8 +154,8 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withColor(Color color) {
-		return withColor(((color.getRed() & 0xFF) << 16) | ((color.getGreen() & 0xFF) << 8) | (color.getBlue() &
-				0xFF));
+		this.color = color;
+		return this;
 	}
 
 	/**
@@ -149,13 +165,11 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withColor(int color) {
-		embed.color = color;
-		return this;
+		return withColor(new Color(color));
 	}
 
 	/**
-	 * Set the sidebar color with bytes for red, green, and blue. The values are not clamped, and is up to the
-	 * developer to keep betwen 0-255 (inclusive).
+	 * Set the sidebar color with bytes (0-255 inclusive) for red, green, and blue.
 	 *
 	 * @param r The red byte
 	 * @param g The green byte
@@ -175,6 +189,10 @@ public class EmbedBuilder {
 	public EmbedBuilder withFooterText(String footer) {
 		if (embed.footer == null)
 			embed.footer = new EmbedObject.FooterObject(null, null, null);
+
+		if (footer.length() > FOOTER_CONTENT_LIMIT)
+			throw new IllegalArgumentException(
+					"Embed footer text cannot have more than " + FOOTER_CONTENT_LIMIT + " characters");
 
 		embed.footer.text = footer;
 		return this;
@@ -250,7 +268,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the author's URL. This is the link for when someone clicks the name. You need a name for this to work.
+	 * Set the author's URL. This is the link for when someone clicks the name. You need a name for this to be active.
 	 *
 	 * @param url The URL
 	 * @return Itself for chaining
@@ -264,7 +282,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Set the title's URL. This is the link for when someone clicks the title. You need a title for this to work.
+	 * Set the title's URL. This is the link for when someone clicks the title. You need a title for this to active.
 	 *
 	 * @param url The URL
 	 * @return Itself for chaining
@@ -276,7 +294,7 @@ public class EmbedBuilder {
 
 	/**
 	 * Sets the builder to ignore null/empty values passed in EmbedBuilder#appendField(). Useful if you don't want
-	 * IllegalArgumentExceptions being thrown.
+	 * IllegalArgumentExceptions being thrown for that method.
 	 *
 	 * @return Itself for chaining
 	 * @see #appendField(String, String, boolean)
@@ -304,33 +322,70 @@ public class EmbedBuilder {
 			throw new IllegalArgumentException("Title or content cannot be null/empty.");
 		}
 
+		if (fields.size() >= FIELD_COUNT_LIMIT)
+			throw new IllegalArgumentException("Embed cannot have more than " + FIELD_COUNT_LIMIT + " fields");
+
+		if (title.length() > TITLE_LENGTH_LIMIT)
+			throw new IllegalArgumentException(
+					"Embed field title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
+
+		if (content.length() > FIELD_CONTENT_LIMIT)
+			throw new IllegalArgumentException(
+					"Embed field content cannot have more than " + FIELD_COUNT_LIMIT + " characters");
+
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
 	}
-	
+
+	/**
+	 * Returns the number of fields in the builder.
+	 *
+	 * @return The number of fields in the builder.
+	 * @see #FIELD_COUNT_LIMIT
+	 */
+	public int getFieldCount() {
+		return fields.size();
+	}
+
 	/**
 	 * Builds the EmbedObject.
 	 *
 	 * @return A newly built EmbedObject (calling this multiple times results in new objects)
-	 *
-	 * @throws DiscordException
 	 */
-	public EmbedObject build() throws DiscordException {
-		if (embed.fields != null && embed.fields.length > FIELD_COUNT_LIMIT)
-			throw new DiscordException("Embed cannot have more than "+FIELD_COUNT_LIMIT+" fields");
-		if (embed.title != null && embed.title.length() > TITLE_LENGTH_LIMIT)
-			throw new DiscordException("Embed title cannot have more than "+TITLE_LENGTH_LIMIT+" characters");
-		if (embed.fields != null && embed.fields.length > 0 && Arrays.stream(embed.fields).filter((field) -> field.name.length() > TITLE_LENGTH_LIMIT).count() > 0)
-			throw new DiscordException("Embed field titles cannot have more than "+TITLE_LENGTH_LIMIT+" characters");
-		if (embed.fields != null && embed.fields.length > 0 && Arrays.stream(embed.fields).filter((field) -> field.value.length() > FIELD_CONTENT_LIMIT).count() > 0)
-			throw new DiscordException("Embed field values cannot have more than "+FIELD_CONTENT_LIMIT+" characters");
-		if (embed.description != null && embed.description.length() > DESCRIPTION_CONTENT_LIMIT)
-			throw new DiscordException("Embed description cannot have more than "+DESCRIPTION_CONTENT_LIMIT+" characters");
-		if (embed.footer != null && embed.footer.text.length() > FOOTER_CONTENT_LIMIT)
-			throw new DiscordException("Embed footer text cannot have more than "+FOOTER_CONTENT_LIMIT+" characters");
-		
-		return new EmbedObject(embed.title, "rich", embed.description, embed.url, embed.timestamp, embed.color,
+	public EmbedObject build() {
+		generateWarnings();
+
+		return new EmbedObject(embed.title, "rich", embed.description, embed.url, embed.timestamp, color == null
+				? embed.color
+				: ((color.getRed() & 0xFF) << 16) | ((color.getGreen() & 0xFF) << 8) | (color.getBlue() & 0xFF),
 				embed.footer, embed.image, embed.thumbnail, embed.video, embed.provider, embed.author,
 				fields.toArray(new EmbedObject.EmbedFieldObject[fields.size()]));
+	}
+
+	private void generateWarnings() {
+		if (embed.footer != null) {
+			// footer warnings
+			if (embed.footer.icon_url != null && (embed.footer.text == null || embed.footer.text.isEmpty())) {
+				Discord4J.LOGGER
+						.warn("Embed object warning - footer icon without footer text - footer icon will not be " +
+								"visible");
+			}
+		}
+
+		if (embed.author != null) {
+			if (embed.author.name == null || embed.author.name.isEmpty()) {
+				if (embed.author.icon_url != null) {
+					Discord4J.LOGGER
+							.warn("Embed object warning - author icon without author name - author icon will not be " +
+									"visible");
+				}
+				if (embed.author.url != null) {
+					Discord4J.LOGGER
+							.warn("Embed object warning - author URL without author name - URL is useless and cannot" +
+									" " +
+									"be clicked");
+				}
+			}
+		}
 	}
 }
