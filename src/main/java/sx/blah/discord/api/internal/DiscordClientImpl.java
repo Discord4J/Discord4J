@@ -95,7 +95,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Timer to keep the program alive if the client is not daemon
 	 */
-	private Timer keepAlive;
+	volatile Timer keepAlive;
 	private final int retryCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
@@ -108,6 +108,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
+		
+		final DiscordClientImpl instance = this;
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if (instance.keepAlive != null)
+				instance.keepAlive.cancel();
+		}));
 	}
 
 	@Override
