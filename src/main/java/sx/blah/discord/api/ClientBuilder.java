@@ -13,18 +13,19 @@ import java.util.List;
  * Use this as a factory to create {@link IDiscordClient} instances
  */
 public class ClientBuilder {
-	
+
 	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
 	private int shardCount = 1;
 	private int maxReconnectAttempts = 5;
-	
+	private int retryCount = 5;
+
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
 	private final List<Object> listeners = new ArrayList<>();
 	private final List<Class<?>> listenerClasses = new ArrayList<>();
-	
+
 	/**
 	 * Provides the login info for the client.
 	 *
@@ -35,7 +36,7 @@ public class ClientBuilder {
 		this.botToken = token;
 		return this;
 	}
-	
+
 	/**
 	 * Gets the provided token.
 	 *
@@ -44,7 +45,7 @@ public class ClientBuilder {
 	public String getToken() {
 		return botToken;
 	}
-	
+
 	/**
 	 * Makes the client have a ping timeout.
 	 *
@@ -55,7 +56,7 @@ public class ClientBuilder {
 		this.maxMissedPings = maxMissedPings;
 		return this;
 	}
-	
+
 	/**
 	 * Sets whether the client should act as a daemon (it is NOT a daemon by default).
 	 *
@@ -67,7 +68,7 @@ public class ClientBuilder {
 		this.isDaemon = isDaemon;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the sharding information for the client.
 	 * @param shardCount The total number of shards that will be created.
@@ -77,7 +78,7 @@ public class ClientBuilder {
 		this.shardCount = shardCount;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the max amount of attempts shards managed by this client will make to reconnect in the event of an
 	 * unexpected disconnection.
@@ -89,7 +90,7 @@ public class ClientBuilder {
 		this.maxReconnectAttempts = maxReconnectAttempts;
 		return this;
 	}
-	
+
 	/**
 	 * This registers event listeners before the client is logged in.
 	 *
@@ -100,7 +101,7 @@ public class ClientBuilder {
 		iListeners.addAll(Arrays.asList(listeners));
 		return this;
 	}
-	
+
 	/**
 	 * This registers event listeners before the client is logged in.
 	 *
@@ -111,7 +112,7 @@ public class ClientBuilder {
 		this.listeners.addAll(Arrays.asList(listeners));
 		return this;
 	}
-	
+
 	/**
 	 * This registers event listeners before the client is logged in.
 	 *
@@ -122,7 +123,7 @@ public class ClientBuilder {
 		listenerClasses.addAll(Arrays.asList(listeners));
 		return this;
 	}
-	
+
 	/**
 	 * This registers an event listeners before the client is logged in.
 	 *
@@ -132,7 +133,7 @@ public class ClientBuilder {
 	public ClientBuilder registerListener(IListener listener) {
 		return registerListeners(listener);
 	}
-	
+
 	/**
 	 * This registers an event listeners before the client is logged in.
 	 *
@@ -142,7 +143,7 @@ public class ClientBuilder {
 	public ClientBuilder registerListener(Object listener) {
 		return registerListeners(listener);
 	}
-	
+
 	/**
 	 * This registers an event listeners before the client is logged in.
 	 *
@@ -152,7 +153,18 @@ public class ClientBuilder {
 	public ClientBuilder registerListener(Class<?> listener) {
 		return registerListeners(listener);
 	}
-	
+
+	/**
+	 * Sets the 5xx retry count. Default: 5
+	 *
+	 * @param retryCount The new retry count.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder set5xxRetryCount(int retryCount) {
+		this.retryCount = retryCount;
+		return this;
+	}
+
 	/**
 	 * Creates the discord instance with the desired features
 	 *
@@ -163,18 +175,18 @@ public class ClientBuilder {
 	public IDiscordClient build() throws DiscordException {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
-		
-		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings, maxReconnectAttempts);
-		
+
+		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings, maxReconnectAttempts, retryCount);
+
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();
 		iListeners.forEach(dispatcher::registerListener);
 		listeners.forEach(dispatcher::registerListener);
 		listenerClasses.forEach(dispatcher::registerListener);
-		
+
 		return client;
 	}
-	
+
 	/**
 	 * Performs {@link #build()} and logs in automatically
 	 *
