@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static sx.blah.discord.api.internal.DiscordUtils.GSON;
@@ -92,18 +93,16 @@ class DispatchHandler {
 			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "MessageList efficiency set to {}.", MessageList.getEfficiency(client));
 
 			ArrayList<UnavailableGuildObject> waitingGuilds = new ArrayList<>(Arrays.asList(ready.guilds));
-			for (int i = 0; i < ready.guilds.length; i++) {
-				client.getDispatcher().waitFor((GuildCreateEvent e) -> {
-					synchronized (waitingGuilds) {
-						waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getID()));
-					}
-					return true;
-				}, 10, TimeUnit.SECONDS);
-			}
+			
+			final AtomicInteger loadedGuilds = new AtomicInteger(0);
+			client.getDispatcher().waitFor((GuildCreateEvent e) -> {
+				synchronized (waitingGuilds) {
+					waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getID()));
+				}
+				return loadedGuilds.incrementAndGet() >= ready.guilds.length;
+			}, 10 * ready.guilds.length, TimeUnit.SECONDS);
 
-			waitingGuilds.forEach(guild ->
-					client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id))
-			);
+			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id)));
 			return true;
 		}).andThen(() -> {
 			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard one
