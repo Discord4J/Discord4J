@@ -28,20 +28,24 @@ public class RequestBuffer {
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
 		final RequestFuture<T> future = new RequestFuture<>(request);
 		initialExecutor.execute(() -> {
-			if (!future.tryAgain()) {
-				Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
-						future.getDelay(TimeUnit.MILLISECONDS));
-				
-				synchronized (requests) {
+			try {
+				if (!future.tryAgain()) {
+					Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
+							future.getDelay(TimeUnit.MILLISECONDS));
 					
-					if (!requests.containsKey(future.getBucket())) {
-						requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
-						requestServices.put(future.getBucket(), Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuffer Retry Handler")));
-						requestServices.get(future.getBucket()).schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+					synchronized (requests) {
+						
+						if (!requests.containsKey(future.getBucket())) {
+							requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
+							requestServices.put(future.getBucket(), Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuffer Retry Handler")));
+							requestServices.get(future.getBucket()).schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+						}
+						
+						requests.get(future.getBucket()).add(future);
 					}
-					
-					requests.get(future.getBucket()).add(future);
 				}
+			} catch (Throwable e) {
+				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught while attempting to execute a request", e);
 			}
 		});
 		return future;
@@ -304,27 +308,35 @@ public class RequestBuffer {
 		@Override
 		public void run() {
 			synchronized (requests) {
-				List<RequestFuture> futures = requests.get(bucket);
-				
-				if (futures != null) {
-					List<RequestFuture> futuresToRetry = new CopyOnWriteArrayList<>();
+				try {
+					List<RequestFuture> futures = requests.get(bucket);
 					
-					futures.forEach((RequestFuture future) -> {
-						if (!future.tryAgain()) {
-							futuresToRetry.add(future);
+					if (futures != null) {
+						List<RequestFuture> futuresToRetry = new CopyOnWriteArrayList<>();
+						
+						futures.forEach((RequestFuture future) -> {
+							try {
+								if (!future.tryAgain()) {
+									futuresToRetry.add(future);
+								}
+							} catch (Throwable e) {
+								Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught while attempting to execute a request", e);
+							}
+						});
+						
+						if (futuresToRetry.size() > 0) {
+							long delay = Math.max(0, futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
+							requests.replace(bucket, futuresToRetry);
+							synchronized (requestServices) {
+								requestServices.get(bucket).schedule(new RequestRunnable(bucket), delay, TimeUnit.MILLISECONDS);
+							}
+						} else {
+							requests.remove(bucket);
+							requestServices.remove(bucket).shutdownNow();
 						}
-					});
-					
-					if (futuresToRetry.size() > 0) {
-						long delay = Math.max(0, futuresToRetry.get(0).getDelay(TimeUnit.MILLISECONDS));
-						requests.replace(bucket, futuresToRetry);
-						synchronized (requestServices) {
-							requestServices.get(bucket).schedule(new RequestRunnable(bucket), delay, TimeUnit.MILLISECONDS);
-						}
-					} else {
-						requests.remove(bucket);
-						requestServices.remove(bucket).shutdownNow();
 					}
+				} catch (Throwable e) {
+					Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught while attempting to retry requests", e);
 				}
 			}
 		}
