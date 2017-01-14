@@ -45,7 +45,7 @@ public class RequestBuffer {
 						requests.get(future.getBucket()).add(future);
 					}
 				}
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught while attempting to execute a request", e);
 			}
 		});
@@ -298,7 +298,7 @@ public class RequestBuffer {
 									future.backing = new FutureTask<>(future.callable);
 									futuresToRetry.add(future);
 								}
-							} catch (Throwable e) {
+							} catch (Exception e) {
 								Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught while attempting to execute a request", e);
 							}
 						});
@@ -314,7 +314,7 @@ public class RequestBuffer {
 							requestServices.remove(bucket).shutdownNow();
 						}
 					}
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught while attempting to retry requests", e);
 				}
 			}
