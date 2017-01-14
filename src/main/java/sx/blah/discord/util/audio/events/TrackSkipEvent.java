@@ -7,11 +7,13 @@ import sx.blah.discord.util.audio.AudioPlayer;
  */
 public class TrackSkipEvent extends AudioPlayerEvent {
 	
-	private final AudioPlayer.Track track;
+	private final AudioPlayer.Track oldTrack;
+	private final AudioPlayer.Track newTrack;
 	
-	public TrackSkipEvent(AudioPlayer player, AudioPlayer.Track track) {
+	public TrackSkipEvent(AudioPlayer player, AudioPlayer.Track oldTrack, AudioPlayer.Track newTrack) {
 		super(player);
-		this.track = track;
+		this.oldTrack = oldTrack;
+		this.newTrack = newTrack;
 	}
 	
 	/**
@@ -20,6 +22,15 @@ public class TrackSkipEvent extends AudioPlayerEvent {
 	 * @return The skipped track.
 	 */
 	public AudioPlayer.Track getTrack() {
-		return track;
+		return oldTrack;
+	}
+	
+	/**
+	 * This gets the track that is now queued due to the previous track being skipped.
+	 *
+	 * @return The next track or null if there are none.
+	 */
+	public AudioPlayer.Track getNextTrack() {
+		return newTrack;
 	}
 }

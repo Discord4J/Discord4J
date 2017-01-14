@@ -338,7 +338,7 @@ public class AudioPlayer implements IAudioProvider {
 			Track track = trackQueue.remove(0);
 
 			if (track.isReady() && track.getCurrentTrackTime() == track.getTotalTrackTime()) { //The track was actually skipped, not skipped due to the way my logic works
-				client.getDispatcher().dispatch(new TrackSkipEvent(this, track));
+				client.getDispatcher().dispatch(new TrackSkipEvent(this, track, trackQueue.size() > 0 ? trackQueue.get(0) : null));
 			}
 
 			if (isLooping()) {
