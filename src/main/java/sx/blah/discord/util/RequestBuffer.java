@@ -29,7 +29,8 @@ public class RequestBuffer {
 		final RequestFuture<T> future = new RequestFuture<>(request);
 		initialExecutor.execute(() -> {
 			try {
-				if (!future.tryAgain()) {
+				future.run();
+				if (!future.callable.successful) {
 					Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
 							future.getDelay(TimeUnit.MILLISECONDS));
 					
@@ -141,102 +142,18 @@ public class RequestBuffer {
 		void doRequest() throws RateLimitException;
 	}
 
-	/**
-	 * This represents a future request which may or may not have been executed at the time of construction.
-	 *
-	 * @param <T> The request return type.
-	 */
 	public static class RequestFuture<T> implements Future<T>, Delayed {
-
-		private volatile boolean isDone = false;
-		private volatile boolean cancelled = false;
-		private volatile boolean firstAttempt = true;
-		private volatile T value = null;
-		private volatile long timeForNextRequest;
-		private volatile String bucket;
+		
 		private final IRequest<T> request;
-		private final CountDownLatch latch = new CountDownLatch(1);
-
+		private final RequestCallable<T> callable;
+		private volatile FutureTask<T> backing;
+		
 		RequestFuture(IRequest<T> request) {
 			this.request = request;
+			this.callable = new RequestCallable<>(request, this);
+			backing = new FutureTask<>(callable);
 		}
-
-		/**
-		 * Cancels the request if it hasn't been executed.
-		 *
-		 * @param mayInterruptIfRunning Whether the future should be cancelled regardless of whether its running or not.
-		 * @return True if cancelled, false if otherwise (like if the request was already executed).
-		 */
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			if (!isDone()) {
-				if ((latch.getCount() != 0 && mayInterruptIfRunning) || latch.getCount() == 0) {
-					latch.countDown();
-					cancelled = true;
-				}
-			}
-			return isCancelled();
-		}
-
-		/**
-		 * Returns whether this request has been cancelled or not.
-		 *
-		 * @return True if cancelled, false if otherwise.
-		 */
-		@Override
-		public boolean isCancelled() {
-			return cancelled;
-		}
-
-		/**
-		 * Returns whether or not the request has been executed.
-		 *
-		 * @return True if executed, false if otherwise.
-		 */
-		@Override
-		public boolean isDone() {
-			return isDone;
-		}
-
-		/**
-		 * Gets the request return value or blocks until the request is completed.
-		 *
-		 * @return The value.
-		 */
-		@Override
-		public T get() {
-			if (!isDone() && !isCancelled()) {
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					Discord4J.LOGGER.error(LogMarkers.UTIL, "RequestFuture unexpectedly interrupted!", e);
-				}
-			}
-			
-			return value;
-		}
-
-		/**
-		 * Gets the request return value if present, otherwise it blocks until the request is completed or the timeout
-		 * is reached.
-		 *
-		 * @param timeout The timeout value.
-		 * @param unit The timeout unit.
-		 * @return The value.
-		 *
-		 * @throws InterruptedException
-		 * @throws ExecutionException
-		 * @throws TimeoutException
-		 */
-		@Override
-		public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-			if (!isDone() && !isCancelled())
-				if (!latch.await(timeout, unit))
-					throw new TimeoutException();
-			
-			return value;
-		}
-
+		
 		/**
 		 * Gets the delay until the next request is attempted.
 		 *
@@ -245,18 +162,21 @@ public class RequestBuffer {
 		 */
 		@Override
 		public long getDelay(TimeUnit unit) {
-			return unit.convert(timeForNextRequest-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+			if (isDone())
+				return 0;
+			
+			return unit.convert(callable.timeForNextRequest-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 		}
-
+		
 		/**
 		 * Gets the bucket this request was ratelimited for.
 		 *
 		 * @return The bucket.
 		 */
 		public String getBucket() {
-			return bucket;
+			return callable.bucket;
 		}
-
+		
 		/**
 		 * Compares this to another delayed object.
 		 *
@@ -268,29 +188,86 @@ public class RequestBuffer {
 		public int compareTo(Delayed o) {
 			return (int) (getDelay(TimeUnit.MILLISECONDS)-o.getDelay(TimeUnit.MILLISECONDS));
 		}
-
-		/**
-		 * Attempts to execute the request. Queues it again if unable.
-		 *
-		 * @return True if successful, false if otherwise.
-		 */
-		boolean tryAgain() {
+		
+		@Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			return backing.cancel(mayInterruptIfRunning);
+		}
+		
+		@Override
+		public boolean isCancelled() {
+			return backing.isCancelled();
+		}
+		
+		@Override
+		public boolean isDone() {
+			return backing.isDone();
+		}
+		
+		@Override
+		public T get() {
 			try {
-				if (!firstAttempt)
-					request.onRetry(this);
-				
-				if (!isCancelled()) {
-					value = request.request();
-					timeForNextRequest = -1;
-					isDone = true;
-					latch.countDown();
-				}
-			} catch (RateLimitException e) {
-				firstAttempt = false;
-				timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
-				bucket = e.getMethod();
+				return backing.get();
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
 			}
-			return isDone() || isCancelled();
+			
+			return null;
+		}
+		
+		@Override
+		public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+			try {
+				return backing.get();
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
+			}
+			
+			return null;
+		}
+		
+		/**
+		 * Wrapper for the backing {@link FutureTask}'s run method.
+		 */
+		private void run() {
+			backing.run();
+		}
+		
+		private static class RequestCallable <T> implements Callable<T> {
+			
+			final IRequest<T> request;
+			final RequestFuture<T> future;
+			
+			volatile boolean firstAttempt = true;
+			volatile long timeForNextRequest = -1;
+			volatile String bucket = null;
+			volatile boolean successful = false;
+			
+			RequestCallable(IRequest<T> request, RequestFuture<T> future) {
+				this.request = request;
+				this.future = future;
+			}
+			
+			@Override
+			public T call() throws Exception {
+				try {
+					if (!firstAttempt)
+						request.onRetry(future);
+					
+					if (!future.isCancelled()) {
+						T value = request.request();
+						timeForNextRequest = -1;
+						successful = true;
+						return value;
+					}
+				} catch (RateLimitException e) {
+					firstAttempt = false;
+					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
+					bucket = e.getMethod();
+				}
+				
+				return null;
+			}
 		}
 	}
 
@@ -316,7 +293,9 @@ public class RequestBuffer {
 						
 						futures.forEach((RequestFuture future) -> {
 							try {
-								if (!future.tryAgain()) {
+								future.run();
+								if (!future.callable.successful) {
+									future.backing = new FutureTask<>(future.callable);
 									futuresToRetry.add(future);
 								}
 							} catch (Throwable e) {

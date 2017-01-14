@@ -298,7 +298,16 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.getClient().logout();
+						for (int i = 1; i <= 20; i++) {
+							int finalI = i;
+							RequestBuffer.request(() -> {
+								try {
+									message.reply(finalI+"");
+								} catch (DiscordException | MissingPermissionsException e) {
+									e.printStackTrace();
+								}
+							}).get();
+						}
 					}
 				});
 			}
