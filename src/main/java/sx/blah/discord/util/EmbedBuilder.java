@@ -331,7 +331,7 @@ public class EmbedBuilder {
 
 		if (content.length() > FIELD_CONTENT_LIMIT)
 			throw new IllegalArgumentException(
-					"Embed field content cannot have more than " + FIELD_COUNT_LIMIT + " characters");
+					"Embed field content cannot have more than " + FIELD_CONTENT_LIMIT + " characters");
 
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
