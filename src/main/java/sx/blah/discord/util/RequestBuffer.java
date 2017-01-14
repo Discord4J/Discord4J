@@ -162,7 +162,7 @@ public class RequestBuffer {
 		 */
 		@Override
 		public long getDelay(TimeUnit unit) {
-			if (isDone())
+			if (isDone() && callable.successful)
 				return 0;
 			
 			return unit.convert(callable.timeForNextRequest-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
