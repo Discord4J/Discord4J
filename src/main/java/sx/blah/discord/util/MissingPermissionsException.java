@@ -8,7 +8,7 @@ import java.util.StringJoiner;
 /**
  * This exception is thrown when a user is missing the required permissions to perform an action.
  */
-public class MissingPermissionsException extends Exception {
+public class MissingPermissionsException extends RuntimeException {
 
 	private final EnumSet<Permissions> missing;
 

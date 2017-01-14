@@ -3,7 +3,7 @@ package sx.blah.discord.util;
 /**
  * This represents an exception thrown when there is a miscellaneous error doing a discord operation.
  */
-public class DiscordException extends Exception {
+public class DiscordException extends RuntimeException {
 
 	private String message;
 
