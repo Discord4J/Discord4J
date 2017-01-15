@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RequestBuffer {
 
-	private static final ExecutorService initialExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuffer Initial Executor"));
+	private static final ExecutorService initialExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("RequestBuffer Initial Executor"));
 	private static final Map<String, ScheduledExecutorService> requestServices = new ConcurrentHashMap<>();
 	private static final Map<String, List<RequestFuture>> requests = new ConcurrentHashMap<>();
 

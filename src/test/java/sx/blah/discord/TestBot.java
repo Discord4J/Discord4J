@@ -298,15 +298,16 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						for (int i = 1; i <= 20; i++) {
+						for (int i = 1;i < Integer.MAX_VALUE; i++) {
 							int finalI = i;
 							RequestBuffer.request(() -> {
 								try {
+									System.out.println(finalI);
 									message.reply(finalI+"");
 								} catch (DiscordException | MissingPermissionsException e) {
 									e.printStackTrace();
 								}
-							}).get();
+							});
 						}
 					}
 				});
