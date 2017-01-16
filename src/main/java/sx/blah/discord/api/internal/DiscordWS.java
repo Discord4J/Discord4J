@@ -161,13 +161,14 @@ public class DiscordWS extends WebSocketAdapter {
 
 	void shutdown() {
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} shutting down.", shard.getInfo()[0]);
+		this.state = State.DISCONNECTING;
+
 		try {
 			heartbeatHandler.shutdown();
 			getSession().close(1000, null); // Discord doesn't care about the reason
 			wsClient.stop();
 			hasReceivedReady = false;
 			isReady = false;
-			this.state = State.IDLE;
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while shutting down websocket: ", e);
 		}
