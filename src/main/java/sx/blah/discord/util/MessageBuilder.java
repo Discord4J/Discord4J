@@ -165,7 +165,7 @@ public class MessageBuilder {
 	 * This gets the content of the message in its current form.
 	 *
 	 * @return The current content of the message.
-     */
+         */
 	public String getContent() {
 		return content;
 	}
