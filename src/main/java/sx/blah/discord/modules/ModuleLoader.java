@@ -12,6 +12,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -120,6 +121,9 @@ public class ModuleLoader {
 	 * @return true if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
 	 */
 	public boolean loadModule(IModule module) {
+                if (!loadedModules.contains(module) && !canModuleLoad(module)) {
+			return false;
+                }
 		Class<? extends IModule> clazz = module.getClass();
 		if (clazz.isAnnotationPresent(Requires.class)) {
 			Requires annotation = clazz.getAnnotation(Requires.class);
@@ -319,7 +323,7 @@ public class ModuleLoader {
 				return loaded;
 			}));
 
-			if (dependents.size() == 0)
+			if (dependents.isEmpty())
 				break;
 		}
 
@@ -357,6 +361,10 @@ public class ModuleLoader {
 	 * @param clazz The module class.
 	 */
 	public static void addModuleClass(Class<? extends IModule> clazz) {
-		modules.add(clazz);
+                if (!Modifier.isAbstract(clazz.getModifiers())
+                        && !Modifier.isInterface(clazz.getModifiers())
+                        && !modules.contains(clazz)) {
+                        modules.add(clazz);
+                }
 	}
 }

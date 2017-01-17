@@ -271,7 +271,7 @@ public class DiscordUtils {
 	 *
 	 * @param guild The guild.
 	 * @param json  The json object data.
-	 * @return
+	 * @return The emoji object.
 	 */
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
 		Emoji emoji = new Emoji(guild, json.id, json.name, json.require_colons, json.managed, json.roles);

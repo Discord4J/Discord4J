@@ -36,9 +36,6 @@ import sx.blah.discord.util.LogMarkers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Properties;
@@ -75,7 +72,7 @@ public class Discord4J {
 	protected static final LocalDateTime launchTime = LocalDateTime.now();
 	/**
 	 * Whether to log when the user doesn't have the permissions to view a channel.
-     */
+         */
 	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
 	 * Whether to allow for audio to be used.
@@ -145,7 +142,7 @@ public class Discord4J {
 		public void ignore(Throwable ignored) {}
 	};
 
-	//Dynamically getting various information from maven
+	// Dynamically getting various information from maven
 	static {
 		InputStream stream = Discord4J.class.getClassLoader().getResourceAsStream("app.properties");
 		Properties properties = new Properties();
@@ -170,7 +167,7 @@ public class Discord4J {
 	/**
 	 * This is used to run Discord4J independent of any bot, making it module dependent.
 	 *
-	 * @param args The args should be either email/password or just the bot token
+	 * @param args The args should only include the bot token.
 	 */
 	public static void main(String[] args) {
 		//This functionality is dependent on these options being true
@@ -209,7 +206,7 @@ public class Discord4J {
 
 	/**
 	 * This disables logging for when the user doesn't have the required permissions to view a channel.
-     */
+         */
 	public static void disableChannelWarnings() {
 		ignoreChannelWarnings.set(true);
 	}
