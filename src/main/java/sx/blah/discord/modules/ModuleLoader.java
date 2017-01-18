@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -34,11 +36,10 @@ public class ModuleLoader {
 	 * This is the directory external modules are located in
 	 */
 	public static final String MODULE_DIR = "modules";
-	protected static final List<Class<? extends IModule>> modules = new CopyOnWriteArrayList<>();
-
-	private IDiscordClient client;
-	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
-
+        
+	private final static Map<IDiscordClient, ModuleLoader> INSTANCES = new ConcurrentHashMap<>();
+	private static final List<Class<? extends IModule>> MODULE_CLASSES = new CopyOnWriteArrayList<>();
+        
 	static {
 		// Yay! Proprietary hooks. This is used for ModuleLoader+ (https://github.com/Discord4J-Addons/Module-Loader-Plus)
 		// to be able to load internal modules automagically. This is not in Discord4J by default due to the massive
@@ -66,33 +67,49 @@ public class ModuleLoader {
 			}
 		}
 	}
+        
+        /**
+         * Gets or creates the unique ModuleLoader instance specific to the requested client.
+         * 
+         * @param client The client whose loader to return.
+         * @return The clients unique ModuleLoader.
+         */
+        public static ModuleLoader getForClient(IDiscordClient client){
+                if (!INSTANCES.containsKey(client)) {
+                        ModuleLoader loader = new ModuleLoader(client);
+                        INSTANCES.put(client, loader);
+                        
+                        // It is now safe to enable modules automatically
+                        if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
+                                List<IModule> toEnable = new CopyOnWriteArrayList<>(loader.getLoadedModules());
+                                while (!toEnable.isEmpty()) {
+                                        toEnable.removeIf(module -> {
+                                                return loader.loadModule(module);
+                                        });
+                                }
+                        }
+                }
+                return INSTANCES.get(client);
+        }
+        
+	private final IDiscordClient client;
+	private final List<IModule> loadedModules = new CopyOnWriteArrayList<>();
 
-	public ModuleLoader(IDiscordClient client) {
+	private ModuleLoader(IDiscordClient client) {
 		this.client = client;
-
-		for (Class<? extends IModule> clazz : modules) {
-			try {
-				IModule module = clazz.newInstance();
-				Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading module {} v{} by {}", module.getName(), module.getVersion(), module.getAuthor());
-				if (canModuleLoad(module)) {
-					loadedModules.add(module);
-				} else {
-					Discord4J.LOGGER.warn(LogMarkers.MODULES, "Skipped loading of module {} (expected Discord4J v{} instead of v{})", module.getName(), module.getMinimumDiscord4JVersion(), Discord4J.VERSION);
-				}
-			} catch (InstantiationException | IllegalAccessException e) {
-				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + clazz.getName() + "!", e);
-			}
-		}
-
-		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
-			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
-			while (toLoad.size() > 0) {
-				for (IModule module : toLoad) {
-					if (loadModule(module))
-						toLoad.remove(module);
-				}
-			}
-		}
+                MODULE_CLASSES.forEach(clazz -> {
+                    try {
+                            IModule module = clazz.newInstance();
+                            Discord4J.LOGGER.info(LogMarkers.MODULES, "Loading module {} v{} by {}", module.getName(), module.getVersion(), module.getAuthor());
+                            if (canModuleLoad(module)) {
+                                    loadedModules.add(module);
+                            } else {
+                                    Discord4J.LOGGER.warn(LogMarkers.MODULES, "Skipped loading of module {} (expected Discord4J v{} instead of v{})", module.getName(), module.getMinimumDiscord4JVersion(), Discord4J.VERSION);
+                            }
+                    } catch (InstantiationException | IllegalAccessException e) {
+                            Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + clazz.getName() + "!", e);
+                    }
+                });
 	}
 
 	/**
@@ -111,9 +128,9 @@ public class ModuleLoader {
 	 * @see #getLoadedModules()
 	 */
 	public static List<Class<? extends IModule>> getModules() {
-		return modules;
+		return MODULE_CLASSES;
 	}
-
+        
 	/**
 	 * Manually loads a module.
 	 *
@@ -121,9 +138,12 @@ public class ModuleLoader {
 	 * @return true if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
 	 */
 	public boolean loadModule(IModule module) {
+                if  (!MODULE_CLASSES.contains(module.getClass())) {
+                    ModuleLoader.addModuleClass(module.getClass());
+                }
                 if (!loadedModules.contains(module) && !canModuleLoad(module)) {
 			return false;
-                }
+                } 
 		Class<? extends IModule> clazz = module.getClass();
 		if (clazz.isAnnotationPresent(Requires.class)) {
 			Requires annotation = clazz.getAnnotation(Requires.class);
@@ -183,8 +203,9 @@ public class ModuleLoader {
 			discord4jVersion = Discord4J.VERSION.toLowerCase(Locale.ROOT).replace("-snapshot", "").split("\\.");
 
 			for (int i = 0; i < Math.min(versions.length, 2); i++) { // We only care about major.minor, the revision change should not be big enough to care about
-				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i]))
+				if (Integer.parseInt(versions[i]) > Integer.parseInt(discord4jVersion[i])){
 					return false;
+                                }
 			}
 		} catch (NumberFormatException e) {
 			Discord4J.LOGGER.error(LogMarkers.MODULES, "Module {} has incorrect minimum Discord4J version syntax! ({})", module.getName(), module.getMinimumDiscord4JVersion());
@@ -359,12 +380,15 @@ public class ModuleLoader {
 	 * Manually adds a module class to be considered for loading.
 	 *
 	 * @param clazz The module class.
+         * @return True if the class was added, false otherwise.
 	 */
-	public static void addModuleClass(Class<? extends IModule> clazz) {
+	public static boolean addModuleClass(Class<? extends IModule> clazz) {
                 if (!Modifier.isAbstract(clazz.getModifiers())
                         && !Modifier.isInterface(clazz.getModifiers())
-                        && !modules.contains(clazz)) {
-                        modules.add(clazz);
+                        && !MODULE_CLASSES.contains(clazz)) {
+                        MODULE_CLASSES.add(clazz);
+                        return true;
                 }
+                return false;
 	}
 }

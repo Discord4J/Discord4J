@@ -8,6 +8,8 @@ import sx.blah.discord.util.DiscordException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.modules.ModuleLoader;
 
 /**
  * Use this as a factory to create {@link IDiscordClient} instances
@@ -245,6 +247,9 @@ public class ClientBuilder {
 			throw new DiscordException("No login info present!");
 
 		final IDiscordClient client = new DiscordClientImpl(this);
+                if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Need to be sure a module instance is create.
+                    ModuleLoader.getForClient(client);
+                }
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();

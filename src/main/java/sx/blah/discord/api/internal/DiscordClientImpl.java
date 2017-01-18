@@ -60,11 +60,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	volatile ReconnectManager reconnectManager;
 
 	/**
-	 * The module loader for this client.
-	 */
-	private volatile ModuleLoader loader;
-
-	/**
 	 * Caches the available regions for discord.
 	 */
 	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
@@ -113,7 +108,6 @@ public final class DiscordClientImpl implements IDiscordClient {
                 this.recommendShardCount = false;
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
-		this.loader = new ModuleLoader(this);
 		
 		final DiscordClientImpl instance = this;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -131,7 +125,6 @@ public final class DiscordClientImpl implements IDiscordClient {
                 this.recommendShardCount = builder.isRecommendingShardCount();
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, builder.getMaxReconnectAttempts());
-		this.loader = new ModuleLoader(this);
 		
 		final DiscordClientImpl instance = this;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -160,7 +153,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public ModuleLoader getModuleLoader() {
-		return this.loader;
+		return ModuleLoader.getForClient(this);
 	}
 
 	@Override
