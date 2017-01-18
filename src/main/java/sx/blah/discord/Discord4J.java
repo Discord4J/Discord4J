@@ -177,10 +177,10 @@ public class Discord4J {
 			throw new RuntimeException("Invalid configuration!");
 		try {
 			ClientBuilder builder = new ClientBuilder();
-			IDiscordClient client = builder.withToken(args[0]).login();
-			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
-				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
+			builder.registerListener((IListener<ReadyEvent>) event -> {
+				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", event.getClient().getOurUser().getName());
 			});
+			builder.withToken(args[0]).login();
 			//The modules should handle the rest
 		} catch (DiscordException e) {
 			LOGGER.error(LogMarkers.MAIN, "There was an error initializing the client", e);
