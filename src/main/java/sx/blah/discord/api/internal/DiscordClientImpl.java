@@ -9,6 +9,7 @@ import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
 import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
+import sx.blah.discord.api.internal.json.responses.GatewayBotResponse;
 import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
@@ -22,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import sx.blah.discord.api.ClientBuilder;
 
 /**
  * Defines the client. This class receives and sends messages, as well as holds our user data.
@@ -81,6 +83,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Whether the websocket should act as a daemon.
 	 */
 	private final boolean isDaemon;
+        
+        
+        private final boolean recommendShardCount;
 
 	/**
 	 * The total number of shards this client manages.
@@ -105,6 +110,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
+                this.recommendShardCount = false;
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
@@ -116,6 +122,24 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}));
 	}
 
+        public DiscordClientImpl(ClientBuilder builder) {
+		this.token = "Bot " + builder.getToken();
+		this.retryCount = builder.get5xxRetryCount();
+		this.maxMissedPings = builder.getPingTimeout();
+		this.isDaemon = builder.isDaemon();
+		this.shardCount = builder.getShardCount();
+                this.recommendShardCount = builder.isRecommendingShardCount();
+		this.dispatcher = new EventDispatcher(this);
+		this.reconnectManager = new ReconnectManager(this, builder.getMaxReconnectAttempts());
+		this.loader = new ModuleLoader(this);
+		
+		final DiscordClientImpl instance = this;
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if (instance.keepAlive != null)
+				instance.keepAlive.cancel();
+		}));
+        }
+
 	@Override
 	public List<IShard> getShards() {
 		return this.shards;
@@ -123,6 +147,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public int getShardCount() {
+                if (recommendShardCount) {
+            		checkLoggedIn("get shard count");
+                }
 		return this.shardCount;
 	}
 
@@ -253,12 +280,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private String obtainGateway() {
 		String gateway = null;
 		try {
-			GatewayResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY, GatewayResponse.class);
-			gateway = response.url + "?encoding=json&v=5";
+                        if (recommendShardCount) {
+                                GatewayBotResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY_BOT, GatewayBotResponse.class);
+                                gateway = response.url + "?encoding=json&v=5";
+                                this.shardCount = response.shards;
+                                Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {} and recommended shard count {}.", gateway, shardCount);
+                        } else {
+                                GatewayResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY, GatewayResponse.class);
+                                gateway = response.url + "?encoding=json&v=5";
+                                Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
+                        }
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
-		Discord4J.LOGGER.debug(LogMarkers.API, "Obtained gateway {}.", gateway);
 		return gateway;
 	}
 
@@ -319,12 +353,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public boolean isLoggedIn() {
-		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
+		return !getShards().isEmpty()
+                        && getShards().size() == getShardCount()
+                        && getShards().stream().map(IShard::isLoggedIn).allMatch(bool -> bool);
 	}
 
 	@Override
 	public boolean isReady() {
-		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
+		return !getShards().isEmpty()
+                        && getShards().size() == getShardCount()
+                        && getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
 	}
 
 	@Override

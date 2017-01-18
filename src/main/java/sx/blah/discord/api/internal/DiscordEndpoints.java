@@ -26,9 +26,11 @@ public final class DiscordEndpoints {
 	public static final String APIBASE = BASE+"api";
 
 	public static final String GATEWAY = APIBASE+"/gateway";
+        
+	public static final String GATEWAY_BOT = GATEWAY+"/bot";
 
 	public static final String USERS = APIBASE+"/users/";
-
+        
 	/**
 	 * Used for logging in.
 	 */
