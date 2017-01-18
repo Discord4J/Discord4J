@@ -82,11 +82,16 @@ public class ModuleLoader {
                         // It is now safe to enable modules automatically
                         if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
                                 List<IModule> toEnable = new CopyOnWriteArrayList<>(loader.getLoadedModules());
-                                while (!toEnable.isEmpty()) {
+                                int lastSize = toEnable.size() + 1;
+                                while (toEnable.size() < lastSize) {
+                                        lastSize = toEnable.size();
                                         toEnable.removeIf(module -> {
                                                 return loader.loadModule(module);
                                         });
                                 }
+                                toEnable.stream().forEach(module -> {
+                                    Discord4J.LOGGER.warn(LogMarkers.MODULES, "Skipped enabling module {} because of missing dependency ({})", module.getName(), module.getClass().getAnnotation(Requires.class).value());
+                                });
                         }
                 }
                 return INSTANCES.get(client);
@@ -143,7 +148,7 @@ public class ModuleLoader {
                 }
                 if (!loadedModules.contains(module) && !canModuleLoad(module)) {
 			return false;
-                } 
+                }
 		Class<? extends IModule> clazz = module.getClass();
 		if (clazz.isAnnotationPresent(Requires.class)) {
 			Requires annotation = clazz.getAnnotation(Requires.class);
