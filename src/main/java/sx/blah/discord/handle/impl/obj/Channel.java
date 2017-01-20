@@ -185,17 +185,17 @@ public class Channel implements IChannel {
 	public IMessage sendMessage(String content) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendMessage(content, false);
 	}
-	
+
 	@Override
 	public IMessage sendMessage(EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendMessage(null, embed);
 	}
-	
+
 	@Override
 	public IMessage sendMessage(String content, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendMessage(content, null, tts);
 	}
-	
+
 	@Override
 	public IMessage sendMessage(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendMessage(content, embed, false);
@@ -230,17 +230,17 @@ public class Channel implements IChannel {
 	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(content, false, new FileInputStream(file), file.getName(), null);
 	}
-	
+
 	@Override
 	public IMessage sendFile(EmbedObject embed, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(null, false, new FileInputStream(file), file.getName(), embed);
 	}
-	
+
 	@Override
 	public IMessage sendFile(String content, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(content, false, file, fileName, null);
 	}
-	
+
 	@Override
 	public IMessage sendFile(EmbedObject embed, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(null, false, file, fileName, embed);
@@ -300,7 +300,7 @@ public class Channel implements IChannel {
 			typingTimer.scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
-					if (!isTyping.get()) {
+					if (!isTyping.get() || Channel.this.isDeleted()) {
 						this.cancel();
 						return;
 					}
