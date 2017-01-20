@@ -236,7 +236,7 @@ public class Discord4J {
 		if (!isSLF4JImplementationPresent()) {
 			System.err.println("Discord4J: ERROR INITIALIZING LOGGER!");
 			System.err.println("Discord4J: No SLF4J implementation found, reverting to the internal implementation ("+Discord4JLogger.class.getName()+")");
-			System.err.println("Discord4J: It is *highly* recommended to use an full featured implementation like logback!");
+			System.err.println("Discord4J: It is *highly* recommended to use a fully featured implementation like logback!");
 			return new Discord4JLogger(Discord4J.class.getName());
 		} else {
 			return LoggerFactory.getLogger(Discord4J.class);
