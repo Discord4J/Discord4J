@@ -8,12 +8,15 @@ import sx.blah.discord.util.DiscordException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.modules.ModuleLoader;
 
 /**
  * Use this as a factory to create {@link IDiscordClient} instances
  */
 public class ClientBuilder {
 
+        private boolean recommendShardCount = false;
 	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
@@ -56,6 +59,15 @@ public class ClientBuilder {
 		this.maxMissedPings = maxMissedPings;
 		return this;
 	}
+        
+        /**
+         * Gets the current ping timeout.
+         * 
+         * @return The ping timeout.
+         */
+        public int getPingTimeout() {
+                return maxMissedPings;
+        }
 
 	/**
 	 * Sets whether the client should act as a daemon (it is NOT a daemon by default).
@@ -68,9 +80,19 @@ public class ClientBuilder {
 		this.isDaemon = isDaemon;
 		return this;
 	}
+        
+        /**
+         * Gets the current daemon state.
+         * 
+         * @return The daemon state.
+         */
+        public boolean isDaemon() {
+                return isDaemon;
+        }
 
 	/**
-	 * Sets the sharding information for the client.
+	 * Sets the number of shards to use when the client logs in.
+         * 
 	 * @param shardCount The total number of shards that will be created.
 	 * @return The instance of the builder.
 	 */
@@ -78,6 +100,36 @@ public class ClientBuilder {
 		this.shardCount = shardCount;
 		return this;
 	}
+        
+        /**
+         * Gets the current shard count.
+         * 
+         * @return The shard count.
+         */
+        public int getShardCount() {
+                return shardCount;
+        }
+        
+        /**
+         * Sets whether the client should use the recommended shard count received when logging in. Note: enabling this
+         * option will ignore the shard count set with {@link #withShards(int shardCount)}. This is false by default.
+         * 
+         * @param recommendShardCount True to use to recommended shard count, false otherwise.
+         * @return The instance of the builder.
+         */
+        public ClientBuilder useRecommendedShardCount(boolean recommendShardCount) {
+                this.recommendShardCount = recommendShardCount;
+                return this;
+        }
+        
+        /**
+         * Gets the current state of using a recommended shard count.
+         * 
+         * @return True if using recommended shard count, false otherwise.
+         */
+        public boolean isRecommendingShardCount() {
+                return recommendShardCount;
+        }
 
 	/**
 	 * Sets the max amount of attempts shards managed by this client will make to reconnect in the event of an
@@ -90,6 +142,15 @@ public class ClientBuilder {
 		this.maxReconnectAttempts = maxReconnectAttempts;
 		return this;
 	}
+        
+        /**
+         * Gets the current maximum reconnect attempts.
+         * 
+         * @return The maximum reconnect attempts.
+         */
+        public int getMaxReconnectAttempts() {
+                return maxReconnectAttempts;
+        }
 
 	/**
 	 * This registers event listeners before the client is logged in.
@@ -164,19 +225,31 @@ public class ClientBuilder {
 		this.retryCount = retryCount;
 		return this;
 	}
+        
+        /**
+         * Gets the current 5xx retry count.
+         * 
+         * @return The 5xx retry count.
+         */
+        public int get5xxRetryCount() {
+                return retryCount;
+        }
 
 	/**
-	 * Creates the discord instance with the desired features
+	 * Creates the discord instance with the desired features.
 	 *
-	 * @return The discord instance
+	 * @return The discord instance.
 	 *
-	 * @throws DiscordException Thrown if the instance isn't built correctly
+	 * @throws DiscordException Thrown if the instance isn't built correctly.
 	 */
 	public IDiscordClient build() throws DiscordException {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings, maxReconnectAttempts, retryCount);
+		final IDiscordClient client = new DiscordClientImpl(this);
+                if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Need to be sure a module instance is create.
+                    ModuleLoader.getForClient(client);
+                }
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();
@@ -188,11 +261,11 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Performs {@link #build()} and logs in automatically
+	 * Performs {@link #build()} and logs in automatically.
 	 *
-	 * @return The discord instance
+	 * @return The discord instance.
 	 *
-	 * @throws DiscordException Thrown if the instance isn't built correctly
+	 * @throws DiscordException Thrown if the instance isn't built correctly.
 	 */
 	public IDiscordClient login() throws DiscordException {
 		IDiscordClient client = build();
