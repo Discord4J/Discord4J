@@ -565,9 +565,9 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (channel.isPrivate())
 			throw new UnsupportedOperationException("Cannot bulk delete in private channels!");
 
-		if (messages.size() > 100)
-			throw new DiscordException("You can only delete 100 messages at a time!");
-		
+		if (messages.size() < 2 || messages.size() > 100)
+			throw new DiscordException("Must provide at least 2 and fewer than 100 messages to delete.");
+
 		long invalidCount = messages.stream()
 				.mapToLong(it -> Long.parseLong(it.getID()))
 				.filter(id -> id > ((long) ((System.currentTimeMillis() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000L) << 22)) //Taken from Jake
