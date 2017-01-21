@@ -17,6 +17,7 @@ import sx.blah.discord.util.RequestBuilder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -94,14 +95,14 @@ class DispatchHandler {
 			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "MessageList efficiency set to {}.", MessageList.getEfficiency(client));
 
 			ArrayList<UnavailableGuildObject> waitingGuilds = new ArrayList<>(Arrays.asList(ready.guilds));
-			
+
 			final AtomicInteger loadedGuilds = new AtomicInteger(0);
 			client.getDispatcher().waitFor((GuildCreateEvent e) -> {
 				synchronized (waitingGuilds) {
 					waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getID()));
 				}
 				return loadedGuilds.incrementAndGet() >= ready.guilds.length;
-			}); //TODO: Figure out some kind of timeout mechanism
+			}, 10, TimeUnit.SECONDS);
 
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id)));
 			return true;

@@ -61,7 +61,7 @@ public class EventDispatcher {
 	public void registerListener(IListener listener) {
 		registerListener(listener, false);
 	}
-	
+
 	/**
 	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
 	 *
@@ -70,7 +70,7 @@ public class EventDispatcher {
 	public void registerListeners(Object... listeners) {
 		Arrays.stream(listeners).forEach(this::registerListener);
 	}
-	
+
 	/**
 	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
 	 *
@@ -79,7 +79,7 @@ public class EventDispatcher {
 	public void registerListeners(Class<?>... listeners) {
 		Arrays.stream(listeners).forEach(this::registerListener);
 	}
-	
+
 	/**
 	 * Registers a set of single event listeners.
 	 *
@@ -170,7 +170,7 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Class<T> eventClass) throws InterruptedException {
-		waitFor((T event) -> true);
+		waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()));
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Class<T> eventClass, long time) throws InterruptedException {
-		waitFor((T event) -> true, time);
+		waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time);
 	}
 
 	/**
@@ -199,7 +199,7 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit) throws InterruptedException {
-		waitFor((T event) -> true, time, unit, () -> {});
+		waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time, unit, () -> {});
 	}
 
 	/**
@@ -215,7 +215,7 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
-		waitFor((T event) -> true, time, unit, onTimeout);
+		waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time, unit, onTimeout);
 	}
 
 	/**

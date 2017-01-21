@@ -108,7 +108,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
-		
+
 		final DiscordClientImpl instance = this;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			if (instance.keepAlive != null)
@@ -284,9 +284,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 				getShards().add(shardNum, shard);
 				shard.login();
 
-				getDispatcher().waitFor((ShardReadyEvent e) -> true, 1, TimeUnit.MINUTES, () ->
-					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
-				);
+				getDispatcher().waitFor(ShardReadyEvent.class);
 
 				if (i != shardCount - 1) { // all but last
 					Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
