@@ -68,7 +68,7 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withTitle(String title) {
-		if (title.length() > TITLE_LENGTH_LIMIT)
+		if (title != null && title.length() > TITLE_LENGTH_LIMIT)
 			throw new IllegalArgumentException(
 					"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
 
@@ -83,7 +83,7 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withDescription(String desc) {
-		if (desc.length() > DESCRIPTION_CONTENT_LIMIT)
+		if (desc != null && desc.length() > DESCRIPTION_CONTENT_LIMIT)
 			throw new IllegalArgumentException(
 					"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 
@@ -108,7 +108,9 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder appendDescription(String desc) {
-		if ((embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT)
+		if (embed.description == null)
+			embed.description = "";
+		if (desc != null && (embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT)
 			throw new IllegalArgumentException(
 					"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 
