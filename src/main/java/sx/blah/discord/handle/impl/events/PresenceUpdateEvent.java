@@ -1,7 +1,7 @@
 package sx.blah.discord.handle.impl.events;
 
+import sx.blah.discord.handle.obj.IPresence;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Presences;
 
 /**
  * This event is dispatched when a user changes his/her presence.
@@ -9,8 +9,8 @@ import sx.blah.discord.handle.obj.Presences;
  */
 @Deprecated
 public class PresenceUpdateEvent extends sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent {
-	
-	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence) {
+
+	public PresenceUpdateEvent(IUser user, IPresence oldPresence, IPresence newPresence) {
 		super(user, oldPresence, newPresence);
 	}
 }

@@ -1,14 +1,10 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * <b>DEPRECATED</b> - use {@link StatusType} instead.
- * <br><br>
- * Represents presences that a user can have.
- *
- * @deprecated Use {@link StatusType}
+ * The online statuses a user can be, such as ONLINE or IDLE.
  */
-@Deprecated
-public enum Presences {
+public enum StatusType {
+
 	/**
 	 * Represents that the user is online.
 	 */
@@ -34,11 +30,12 @@ public enum Presences {
 	 */
 	UNKNOWN;
 
-	public static Presences get(String name) {
+	public static StatusType get(String name) {
 		try {
 			return valueOf(name.toUpperCase());
 		} catch (IllegalArgumentException e) {
 			return UNKNOWN;
 		}
 	}
+
 }

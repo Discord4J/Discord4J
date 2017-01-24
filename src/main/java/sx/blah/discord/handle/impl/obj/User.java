@@ -1,7 +1,5 @@
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -10,11 +8,9 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -68,10 +64,6 @@ public class User implements IUser {
 	 */
 	protected volatile String avatar;
 	/**
-	 * The user's status.
-	 */
-	protected volatile Status status = Status.empty();
-	/**
 	 * User discriminator.
 	 * Distinguishes users with the same name.
 	 */
@@ -82,9 +74,8 @@ public class User implements IUser {
 	protected volatile boolean isBot;
 	/**
 	 * This user's presence.
-	 * One of [online/idle/offline].
 	 */
-	protected volatile Presences presence;
+	protected volatile IPresence presence;
 	/**
 	 * The user's avatar in URL form.
 	 */
@@ -98,7 +89,7 @@ public class User implements IUser {
 	 */
 	private volatile boolean isDeafLocally;
 
-	public User(IShard shard, String name, String id, String discriminator, String avatar, Presences presence, boolean isBot) {
+	public User(IShard shard, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this.shard = shard;
 		this.client = shard.getClient();
 		this.id = id;
@@ -133,17 +124,9 @@ public class User implements IUser {
 	}
 
 	@Override
+	@Deprecated
 	public Status getStatus() {
-		return status;
-	}
-
-	/**
-	 * Sets the user's CACHED status.
-	 *
-	 * @param status The status.
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
+		return null;
 	}
 
 	@Override
@@ -168,7 +151,7 @@ public class User implements IUser {
 	}
 
 	@Override
-	public Presences getPresence() {
+	public IPresence getPresence() {
 		return presence;
 	}
 
@@ -177,7 +160,7 @@ public class User implements IUser {
 	 *
 	 * @param presence The new presence.
 	 */
-	public void setPresence(Presences presence) {
+	public void setPresence(IPresence presence) {
 		this.presence = presence;
 	}
 
@@ -262,7 +245,7 @@ public class User implements IUser {
 	@Override
 	public IUser copy() {
 		User newUser = new User(shard, name, id, discriminator, avatar, presence, isBot);
-		newUser.setStatus(this.status);
+		newUser.setPresence(presence.copy());
 		for (String key : isMuted.keySet())
 			newUser.setIsMute(key, isMuted.get(key));
 		for (String key : isDeaf.keySet())

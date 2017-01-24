@@ -21,13 +21,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	String getName();
 
 	/**
-	 * Gets the status for this user.
-	 *
-	 * @return The user's status.
-	 */
-	Status getStatus();
-
-	/**
 	 * Gets the user's avatar id.
 	 *
 	 * @return The avatar id.
@@ -46,7 +39,16 @@ public interface IUser extends IDiscordObject<IUser> {
 	 *
 	 * @return The user's presence.
 	 */
-	Presences getPresence();
+	IPresence getPresence();
+
+	/**
+	 * Gets the status for this user.
+	 *
+	 * @return The user's status.
+	 * @deprecated Use {@link #getPresence()}
+	 */
+	@Deprecated
+	Status getStatus();
 
 	/**
 	 * Gets the name displayed to a guild for this user.

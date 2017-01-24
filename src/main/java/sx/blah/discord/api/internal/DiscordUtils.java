@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -92,7 +94,7 @@ public class DiscordUtils {
 				user.convertToBot();
 		} else {
 			user = new User(shard, response.username, response.id, response.discriminator, response.avatar,
-					Presences.OFFLINE, response.bot);
+					new PresenceImpl(Optional.empty(), Optional.empty(), StatusType.OFFLINE), response.bot);
 		}
 		return user;
 	}
@@ -231,13 +233,8 @@ public class DiscordUtils {
 				for (PresenceObject presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
 					if (user != null) {
-						Status status = getStatusFromJSON(presence.game);
-						if (status.getType() == Status.StatusType.STREAM) {
-							user.setPresence(Presences.STREAMING);
-						} else {
-							user.setPresence(Presences.get(presence.status));
-						}
-						user.setStatus(status);
+						user.setPresence(
+								DiscordUtils.getPresenceFromJSON(presence));
 					}
 				}
 
@@ -301,24 +298,6 @@ public class DiscordUtils {
 		}
 
 		return reactions;
-	}
-
-	/**
-	 * Creates a {@link Status} object from a json response.
-	 *
-	 * @param json The json status object.
-	 * @return The Status instance.
-	 */
-	public static Status getStatusFromJSON(GameObject json) {
-		if (json == null) {
-			return Status.empty();
-		} else if (json.type == 0) {
-			return Status.game(json.name);
-		} else if (json.type == 1) {
-			return Status.stream(json.name, json.url);
-		} else {
-			return Status.empty();
-		}
 	}
 
 	/**
@@ -558,6 +537,27 @@ public class DiscordUtils {
 		return channel;
 	}
 
+	public static IPresence getPresenceFromJSON(PresenceObject presence) {
+		return new PresenceImpl(Optional.ofNullable(presence.game == null ? null : presence.game.name),
+				Optional.ofNullable(presence.game == null ? null : presence.game.url),
+				// are you ready for a really big ternary..............?
+				// READY AS I CAN BE
+				// (it actually was a lot smaller than I thought)
+				// ARE YOU READY?!?!
+				// READYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYAAAAYAYAYY
+				((presence.game != null && presence.game.type == GameObject.STREAMING)
+						? StatusType.STREAMING
+						: (StatusType.get(presence.status))));
+	}
+
+	public static IPresence getPresenceFromJSON(PresenceUpdateEventResponse response) {
+		// hacky
+		PresenceObject obj = new PresenceObject();
+		obj.game = response.game;
+		obj.status = response.status;
+		return getPresenceFromJSON(obj);
+	}
+
 	/**
 	 * Checks a set of permissions provided by a guild against required permissions and a user's role hierarchy
 	 * position.
@@ -783,7 +783,7 @@ public class DiscordUtils {
 
 		return AudioSystem.getAudioInputStream(audioFormat, pcmStream);
 	}
-	
+
 	/**
 	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
 	 *
@@ -792,7 +792,7 @@ public class DiscordUtils {
 	public static ThreadFactory createDaemonThreadFactory() {
 		return createDaemonThreadFactory(null);
 	}
-	
+
 	/**
 	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
 	 *
