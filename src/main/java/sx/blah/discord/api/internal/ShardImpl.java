@@ -132,7 +132,7 @@ public class ShardImpl implements IShard {
 		IUser ourUser = getClient().getOurUser();
 
 		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new PresenceImpl(Optional.of(playing), Optional.of(streamUrl), status);
+		IPresence newPresence = new PresenceImpl(Optional.ofNullable(playing), Optional.ofNullable(streamUrl), status);
 
 		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
