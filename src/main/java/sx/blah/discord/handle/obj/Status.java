@@ -39,7 +39,9 @@ public class Status {
 	 * Creates an empty status (i.e. one with no message shown for the user).
 	 *
 	 * @return An empty status.
+	 * @deprecated Use {@link sx.blah.discord.api.IDiscordClient#changePlayingText(String)}
 	 */
+	@Deprecated
 	public static Status empty() {
 		return NONE;
 	}
@@ -49,7 +51,9 @@ public class Status {
 	 *
 	 * @param game The game being played.
 	 * @return A game status.
+	 * @deprecated Use {@link sx.blah.discord.api.IDiscordClient#changePlayingText(String)}
 	 */
+	@Deprecated
 	public static Status game(String game) {
 		return new Status(StatusType.GAME, game);
 	}
@@ -60,7 +64,9 @@ public class Status {
 	 * @param message The stream message.
 	 * @param url The stream url.
 	 * @return The stream status.
+	 * @deprecated Use {@link sx.blah.discord.api.IDiscordClient#streaming(String, String)}
 	 */
+	@Deprecated
 	public static Status stream(String message, String url) {
 		return new Status(StatusType.STREAM, message, url);
 	}
@@ -120,7 +126,9 @@ public class Status {
 
 	/**
 	 * This represents the types of statuses that exist.
+	 * @deprecated Use {@link IPresence}
 	 */
+	@Deprecated
 	public enum StatusType {
 		/**
 		 * This represents a game playing status.
