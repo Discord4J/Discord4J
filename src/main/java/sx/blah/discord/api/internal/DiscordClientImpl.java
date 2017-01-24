@@ -335,13 +335,15 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	@Deprecated
 	public void changeStatus(Status status) {
-		// NO-OP
+		// old functionality just in case
+		getShards().forEach(s -> s.changeStatus(status));
 	}
 
 	@Override
 	@Deprecated
 	public void changePresence(boolean isIdle) {
-		// NO-OP
+		// old functionality just in case
+		getShards().forEach(s -> s.changePresence(isIdle));
 	}
 
 	@Override
