@@ -1,12 +1,16 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.handle.impl.obj.*;
+import sx.blah.discord.handle.impl.obj.Channel;
+import sx.blah.discord.handle.impl.obj.Guild;
+import sx.blah.discord.handle.impl.obj.Role;
+import sx.blah.discord.handle.impl.obj.User;
+import sx.blah.discord.handle.impl.obj.VoiceChannel;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.RateLimitException;
 
 import java.util.Collection;
 import java.util.List;
@@ -85,15 +89,51 @@ public interface IDiscordClient {
 	 * Changes this user's presence on all shards.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.
+	 * @deprecated Use {@link #online()} or {@link #idle()}
 	 */
+	@Deprecated
 	void changePresence(boolean isIdle);
 
 	/**
 	 * Changes the status of the bot user on all shards.
 	 *
 	 * @param status The new status to use.
+	 * @deprecated Use {@link #streaming(String, String)} or the online/idle methods with the playing text
 	 */
+	@Deprecated
 	void changeStatus(Status status);
+
+	/**
+	 * Set this user/all shards' presences to be online, with the playing text.
+	 *
+	 * @param playingText The game playing text
+	 */
+	void online(String playingText);
+
+	/**
+	 * Set this user/all shards' presences to be online, retaining the original playing text (if any).
+	 */
+	void online();
+
+	/**
+	 * Set this user/all shards' presences to be idle, with the playing text.
+	 *
+	 * @param playingText The game playing text
+	 */
+	void idle(String playingText);
+
+	/**
+	 * Set this user/all shards' presences to be idle, retaining the original playing text (if any).
+	 */
+	void idle();
+
+	/**
+	 * Set this user/all shards' presences to be streaming, using the provided game playing text and streaming URL.
+	 *
+	 * @param playingText The game playing text
+	 * @param streamingUrl The streaming URL (Twitch, YouTube Gaming, etc.)
+	 */
+	void streaming(String playingText, String streamingUrl);
 
 	/**
 	 * Checks if the api is ready to be interacted with on all shards.

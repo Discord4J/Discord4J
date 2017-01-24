@@ -3,8 +3,13 @@ package sx.blah.discord.handle.obj;
 import java.util.Optional;
 
 /**
- * This represent's a user's "status" i.e. game or streaming.
+ * <b>DEPRECATED</b> - Use {@link IPresence#getPlayingText()} and {@link IPresence#getStreamingUrl()} instead
+ * <br><br>
+ * This represent's a user's "online status" i.e. game or streaming.
+ *
+ * @deprecated Use {@link IPresence#getPlayingText()} and {@link IPresence#getStreamingUrl()}
  */
+@Deprecated
 public class Status {
 
 	/**

@@ -1,16 +1,16 @@
 package sx.blah.discord.handle.impl.events.user;
 
+import sx.blah.discord.handle.obj.IPresence;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Presences;
 
 /**
  * This event is dispatched when a user changes his/her presence.
  */
 public class PresenceUpdateEvent extends UserEvent {
 
-	private final Presences oldPresence, newPresence;
+	private final IPresence oldPresence, newPresence;
 
-	public PresenceUpdateEvent(IUser user, Presences oldPresence, Presences newPresence) {
+	public PresenceUpdateEvent(IUser user, IPresence oldPresence, IPresence newPresence) {
 		super(user);
 		this.oldPresence = oldPresence;
 		this.newPresence = newPresence;
@@ -21,7 +21,7 @@ public class PresenceUpdateEvent extends UserEvent {
 	 *
 	 * @return The presence.
 	 */
-	public Presences getNewPresence() {
+	public IPresence getNewPresence() {
 		return newPresence;
 	}
 
@@ -30,7 +30,7 @@ public class PresenceUpdateEvent extends UserEvent {
 	 *
 	 * @return The presence.
 	 */
-	public Presences getOldPresence() {
+	public IPresence getOldPresence() {
 		return oldPresence;
 	}
 }

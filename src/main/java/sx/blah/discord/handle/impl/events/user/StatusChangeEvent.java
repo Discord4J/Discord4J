@@ -5,7 +5,9 @@ import sx.blah.discord.handle.obj.Status;
 
 /**
  * This event is dispatched when a user's status changes.
+ * @deprecated Use {@link PresenceUpdateEvent}
  */
+@Deprecated
 public class StatusChangeEvent extends UserEvent {
 
 	private final Status oldStatus, newStatus;

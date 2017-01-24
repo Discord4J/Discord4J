@@ -1,6 +1,10 @@
 package sx.blah.discord.api;
 
-import sx.blah.discord.handle.impl.obj.*;
+import sx.blah.discord.handle.impl.obj.Channel;
+import sx.blah.discord.handle.impl.obj.Guild;
+import sx.blah.discord.handle.impl.obj.Role;
+import sx.blah.discord.handle.impl.obj.User;
+import sx.blah.discord.handle.impl.obj.VoiceChannel;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
@@ -77,17 +81,74 @@ public interface IShard {
 	long getResponseTime();
 
 	/**
+	 * Set this shard's presence to be online, with the playing text.
+	 *
+	 * @param playingText The game playing text
+	 */
+	void online(String playingText);
+
+	/**
+	 * Set this shard's presence to be online, retaining the original playing text (if any).
+	 */
+	void online();
+
+	/**
+	 * Set this shard's presence to be idle, with the playing text.
+	 *
+	 * @param playingText The game playing text
+	 */
+	void idle(String playingText);
+
+	/**
+	 * Set this shard's presence to be idle, retaining the original playing text (if any).
+	 */
+	void idle();
+
+	/**
+	 * Set this shard's presence to be streaming, using the provided game playing text and streaming URL.
+	 *
+	 * @param playingText The game playing text
+	 * @param streamingUrl The streaming URL (Twitch, YouTube Gaming, etc.)
+	 */
+	void streaming(String playingText, String streamingUrl);
+
+	// Future presences
+
+//	/**
+//	 * Set this shard's presence to be in do not disturb mode, using the provided playing text.
+//	 * Note that this doesn't stop events from occurring.
+//	 *
+//	 * @param playingText The game playing text
+//	 */
+//	void dnd(String playingText);
+//
+//	/**
+//	 * Set this shard's presence to be in do not disturb mode, using the original playing text (if any).
+//	 * Note that this doesn't stop events from occurring.
+//	 */
+//	void dnd();
+//
+//	/**
+//	 * Set this shard's presence to be invisible (appear offline to others).
+//	 */
+//	void invisible();
+
+	/**
 	 * Changes this user's presence.
 	 *
 	 * @param isIdle If true, this user becomes idle, or online if false.
+	 * @deprecated Use {@link #online()} or {@link #idle()}
 	 */
+	@Deprecated
 	void changePresence(boolean isIdle);
 
 	/**
 	 * Changes the status of the bot user.
 	 *
 	 * @param status The new status to use.
+	 * @deprecated Use {@link #streaming(String, String)} or the online/idle methods with the playing text
 	 */
+	@Deprecated
 	void changeStatus(Status status);
 
 	/**

@@ -1,16 +1,14 @@
 package sx.blah.discord.api.internal;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
-import sx.blah.discord.handle.impl.events.StatusChangeEvent;
+import sx.blah.discord.handle.impl.obj.PresenceImpl;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
@@ -89,35 +87,60 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public void changePresence(boolean isIdle) {
-		updatePresence(isIdle, getClient().getOurUser().getStatus());
+	public void online(String playingText) {
+		updatePresence(StatusType.ONLINE, playingText);
 	}
 
 	@Override
-	public void changeStatus(Status status) {
-		updatePresence(getClient().getOurUser().getPresence() == Presences.IDLE, status);
+	public void online() {
+		online(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
 	}
 
-	private void updatePresence(boolean isIdle, Status status) {
+	@Override
+	public void idle(String playingText) {
+		updatePresence(StatusType.IDLE, playingText);
+	}
+
+	@Override
+	public void idle() {
+		idle(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+	}
+
+	@Override
+	public void streaming(String playingText, String streamingUrl) {
+		updatePresence(StatusType.STREAMING, playingText, streamingUrl);
+	}
+
+	@Override
+	@Deprecated
+	public void changePresence(boolean isIdle) {
+		// NO-OP
+	}
+
+	@Override
+	@Deprecated
+	public void changeStatus(Status status) {
+		// NO-OP
+	}
+
+	private void updatePresence(StatusType status, String playing) {
+		updatePresence(status, playing, null);
+	}
+
+	private void updatePresence(StatusType status, String playing, String streamUrl) {
+		final boolean isIdle = status == StatusType.IDLE; // temporary until v6
 		IUser ourUser = getClient().getOurUser();
 
-		if (!status.equals(ourUser.getStatus())) {
-			Status oldStatus = ourUser.getStatus();
-			((User) ourUser).setStatus(status);
-			getClient().getDispatcher().dispatch(new StatusChangeEvent(ourUser, oldStatus, status));
-		}
+		IPresence oldPresence = ourUser.getPresence();
+		IPresence newPresence = new PresenceImpl(Optional.of(playing), Optional.of(streamUrl), status);
 
-		if ((ourUser.getPresence() != Presences.IDLE && isIdle)
-				|| (ourUser.getPresence() == Presences.IDLE && !isIdle)
-				|| (ourUser.getPresence() != Presences.STREAMING && status.getType() == Status.StatusType.STREAM)) {
-			Presences oldPresence = ourUser.getPresence();
-			Presences newPresence = isIdle ? Presences.IDLE :
-					(status.getType() == Status.StatusType.STREAM ? Presences.STREAMING : Presences.ONLINE);
+		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
-		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, status));
+		ws.send(GatewayOps.STATUS_UPDATE,
+				new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, ourUser.getPresence()));
 	}
 
 	@Override

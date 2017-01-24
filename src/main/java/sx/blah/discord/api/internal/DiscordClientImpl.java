@@ -15,12 +15,19 @@ import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuilder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -326,13 +333,40 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	@Deprecated
 	public void changeStatus(Status status) {
-		getShards().forEach(shard -> shard.changeStatus(status));
+		// NO-OP
 	}
 
 	@Override
+	@Deprecated
 	public void changePresence(boolean isIdle) {
-		getShards().forEach(shard -> shard.changePresence(isIdle));
+		// NO-OP
+	}
+
+	@Override
+	public void online(String playingText) {
+		getShards().forEach(s -> s.online(playingText));
+	}
+
+	@Override
+	public void online() {
+		getShards().forEach(IShard::online);
+	}
+
+	@Override
+	public void idle(String playingText) {
+		getShards().forEach(s -> s.idle(playingText));
+	}
+
+	@Override
+	public void idle() {
+		getShards().forEach(IShard::idle);
+	}
+
+	@Override
+	public void streaming(String playingText, String streamingUrl) {
+		getShards().forEach(s -> s.streaming(playingText, streamingUrl));
 	}
 
 	@Override

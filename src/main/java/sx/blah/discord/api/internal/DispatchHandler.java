@@ -343,9 +343,7 @@ class DispatchHandler {
 	}
 
 	private void presenceUpdate(PresenceUpdateEventResponse event) {
-		Status status = DiscordUtils.getStatusFromJSON(event.game);
-		Presences presence = status.getType() == Status.StatusType.STREAM ?
-				Presences.STREAMING : Presences.get(event.status);
+		IPresence presence = DiscordUtils.getPresenceFromJSON(event);
 		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			User user = (User) guild.getUserByID(event.user.id);
@@ -357,16 +355,10 @@ class DispatchHandler {
 				}
 
 				if (!user.getPresence().equals(presence)) {
-					Presences oldPresence = user.getPresence();
+					IPresence oldPresence = user.getPresence();
 					user.setPresence(presence);
 					client.dispatcher.dispatch(new PresenceUpdateEvent(user, oldPresence, presence));
 					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed presence to {}", user.getName(), user.getPresence());
-				}
-				if (!user.getStatus().equals(status)) {
-					Status oldStatus = user.getStatus();
-					user.setStatus(status);
-					client.dispatcher.dispatch(new StatusChangeEvent(user, oldStatus, status));
-					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed status to {}.", user.getName(), status);
 				}
 			}
 		}
