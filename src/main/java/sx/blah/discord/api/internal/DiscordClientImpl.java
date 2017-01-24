@@ -345,6 +345,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	public void changePlayingText(String playingText) {
+		getShards().forEach(s -> s.changePlayingText(playingText));
+	}
+
+	@Override
 	public void online(String playingText) {
 		getShards().forEach(s -> s.online(playingText));
 	}

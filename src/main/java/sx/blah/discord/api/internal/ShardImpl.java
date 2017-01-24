@@ -87,6 +87,12 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
+	public void changePlayingText(String playingText) {
+		updatePresence(getClient().getOurUser().getPresence().getStatus(), playingText,
+				getClient().getOurUser().getPresence().getStreamingUrl().orElse(null));
+	}
+
+	@Override
 	public void online(String playingText) {
 		updatePresence(StatusType.ONLINE, playingText);
 	}

@@ -104,6 +104,13 @@ public interface IDiscordClient {
 	void changeStatus(Status status);
 
 	/**
+	 * Set this user/all shards' presence to have this playing text while retaining the status. Can be null.
+	 *
+	 * @param playingText The (nullable) playing text
+	 */
+	void changePlayingText(String playingText);
+
+	/**
 	 * Set this user/all shards' presences to be online, with the playing text.
 	 *
 	 * @param playingText The game playing text

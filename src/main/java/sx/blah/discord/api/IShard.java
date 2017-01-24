@@ -81,6 +81,13 @@ public interface IShard {
 	long getResponseTime();
 
 	/**
+	 * Set this shard's presence to have this playing text while retaining the status. Can be null.
+	 *
+	 * @param playingText The (nullable) playing text
+	 */
+	void changePlayingText(String playingText);
+
+	/**
 	 * Set this shard's presence to be online, with the playing text.
 	 *
 	 * @param playingText The game playing text
