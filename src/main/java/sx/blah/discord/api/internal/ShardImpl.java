@@ -119,14 +119,23 @@ public class ShardImpl implements IShard {
 
 	@Override
 	@Deprecated
-	public void changePresence(boolean isIdle) {
-		// NO-OP
+	public void changeStatus(Status status) {
+		// old functionality just in case
+		if (status.getType() == Status.StatusType.STREAM) {
+			streaming(status.getStatusMessage(), status.getUrl().orElse(null));
+		} else {
+			changePlayingText(status.getStatusMessage());
+		}
 	}
 
 	@Override
 	@Deprecated
-	public void changeStatus(Status status) {
-		// NO-OP
+	public void changePresence(boolean isIdle) {
+		// old functionality just in case
+		if (isIdle)
+			idle();
+		else
+			online();
 	}
 
 	private void updatePresence(StatusType status, String playing) {
