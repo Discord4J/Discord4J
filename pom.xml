@@ -4,7 +4,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>sx.blah</groupId>
+	<groupId>com.github.austinv11</groupId>
 	<artifactId>Discord4J</artifactId>
 	<version>2.7.1-SNAPSHOT</version>
 	<description>A Java binding for the official Discord API, forked from the inactive https://github.com/nerd/Discord4J. Copyright (c) 2017, Licensed under GNU GPLv2</description>
