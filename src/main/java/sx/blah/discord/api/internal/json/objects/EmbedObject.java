@@ -6,7 +6,8 @@ import java.awt.*;
 import java.util.stream.Collectors;
 
 /**
- * Represents a json embed object.
+ * Represents a json embed object. Use {@link sx.blah.discord.util.EmbedBuilder} to build these objects.
+ * @see sx.blah.discord.util.EmbedBuilder
  */
 public class EmbedObject {
 	/**

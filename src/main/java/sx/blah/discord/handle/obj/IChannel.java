@@ -81,7 +81,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	/**
 	 * Sends a message to the desired channel.
 	 *
-	 * @param embed The embed object
+	 * @param embed The embed object, built with {@link EmbedBuilder}
 	 * @return The message object representing the sent message
 	 *
 	 * @throws MissingPermissionsException
@@ -109,7 +109,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Sends a message to the desired channel.
 	 *
 	 * @param content The content of the message.
-	 * @param embed The embed object
+	 * @param embed The embed object, built with {@link EmbedBuilder}
 	 * @return The message object representing the sent message
 	 *
 	 * @throws MissingPermissionsException
@@ -124,7 +124,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Sends a message to the desired channel.
 	 *
 	 * @param content The content of the message.
-	 * @param embed The embed object
+	 * @param embed The embed object, built with {@link EmbedBuilder}
 	 * @param tts Whether the message should use tts or not.
 	 * @return The message object representing the sent message
 	 *
@@ -197,7 +197,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @param file The input stream to upload.
 	 * @param fileName The name of the file that should be shown in Discord.
-	 * @param embed An optional embed object to send with the file.
+	 * @param embed An optional embed object to send with the file. Build embed objects with {@link EmbedBuilder}.
 	 * @return The message created by this action.
 	 *
 	 * @throws DiscordException
@@ -230,7 +230,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param tts Whether the message should use tts or not.
 	 * @param file The input stream to upload.
 	 * @param fileName The name of the file that should be shown in Discord.
-	 * @param embed An optional embed object to send with the file.
+	 * @param embed An optional embed object to send with the file. Build embed objects with {@link EmbedBuilder}.
 	 * @return The message created by this action.
 	 *
 	 * @throws DiscordException
