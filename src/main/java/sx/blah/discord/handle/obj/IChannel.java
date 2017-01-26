@@ -2,7 +2,13 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -261,6 +267,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxAge How long the invite should be valid, setting it to 0 makes it last forever.
 	 * @param maxUses The maximum uses for the invite, setting it to 0 makes the invite have unlimited uses.
 	 * @param temporary Whether users admitted with this invite are temporary.
+	 * @param unique If the invite should be unique (Discord will sometimes group "similar", infinite use invites together)
 	 * @return The newly generated invite.
 	 *
 	 * @throws MissingPermissionsException
