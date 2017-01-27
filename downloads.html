@@ -26,7 +26,7 @@
             if(rawFile.readyState === 4) {
                 if(rawFile.status === 200 || rawFile.status == 0) {
                     var snapshotBtn = document.createElement("li");
-                    snapshotBtn.innerHTML = "<a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT.jar>Latest Development (Unstable) Build</a> (<a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-shaded.jar>Shaded</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-javadoc.jar>Javadoc</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-sources.jar>Source</a>)"
+                    snapshotBtn.innerHTML = "<a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT.jar>Latest Development (Unstable) Build</a> (<strong><a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-shaded.jar>Shaded</a></strong>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-javadoc.jar>Javadoc</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/dev-SNAPSHOT/Discord4j-dev-SNAPSHOT-sources.jar>Source</a>)"
                     list.appendChild(snapshotBtn);
 
                     var releases = JSON.parse(rawFile.responseText)
@@ -34,7 +34,7 @@
                         var release = releases[i]
                         var version = release.tag_name
                         var btn = document.createElement("li");
-                        btn.innerHTML = "<a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+".jar>"+version+"</a> (<a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+"-shaded.jar>Shaded</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+"-javadoc.jar>Javadoc</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+"-sources.jar>Source</a>)"
+                        btn.innerHTML = "<a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+".jar>"+version+"</a> (<strong><a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+"-shaded.jar>Shaded</a></strong>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+"-javadoc.jar>Javadoc</a>, <a href=https://jitpack.io/com/github/austinv11/Discord4j/"+version+"/Discord4j-"+version+"-sources.jar>Source</a>)"
                         list.appendChild(btn);
                     }
                 }
