@@ -88,6 +88,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public void join() throws DiscordException, RateLimitException, MissingPermissionsException {
 		getShard().checkReady("join voice channel");
+
+		if (isConnected()) return;
 		DiscordUtils.checkPermissions(getClient().getOurUser(), this, EnumSet.of(Permissions.VOICE_CONNECT));
 
 		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
