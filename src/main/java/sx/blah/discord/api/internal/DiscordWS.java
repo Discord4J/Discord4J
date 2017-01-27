@@ -59,6 +59,8 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketText(String message) {
+		Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Received: " + message);
+
 		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
 		GatewayOps op = GatewayOps.get(payload.get("op").getAsInt());
 		JsonElement d = payload.has("d") && !payload.get("d").isJsonNull() ? payload.get("d") : null;
@@ -192,6 +194,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	public void send(String message) {
 		if (getSession() != null && getSession().isOpen()) {
+			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Sending: " + message);
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session: {}", message);

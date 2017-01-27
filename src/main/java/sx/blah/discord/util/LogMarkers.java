@@ -46,6 +46,11 @@ public enum LogMarkers implements Marker {
 	 */
 	WEBSOCKET(API),
 	/**
+	 * The marker for messages being sent and received on the websocket.
+	 * It is a child of {@link #WEBSOCKET}
+	 */
+	WEBSOCKET_TRAFFIC(WEBSOCKET),
+	/**
 	 * The marker for all voice-related logging.
 	 * It is a child of {@link #API}.
 	 */
