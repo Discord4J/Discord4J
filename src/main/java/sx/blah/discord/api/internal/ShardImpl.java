@@ -17,7 +17,9 @@ import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ public class ShardImpl implements IShard {
 	private final DiscordClientImpl client;
 	final List<IGuild> guildList = new CopyOnWriteArrayList<>();
 	final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
+	public final Map<IGuild, DiscordVoiceWS> voiceWebSockets = new ConcurrentHashMap<>();
 
 	ShardImpl(IDiscordClient client, String gateway, int[] info) {
 		this.client = (DiscordClientImpl) client;
@@ -191,7 +194,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getClient().getOurUser().getConnectedVoiceChannels().stream().filter(vc -> vc.getShard().equals(this)).collect(Collectors.toList());
+		return getClient().getConnectedVoiceChannels().stream().filter(vc -> vc.getShard().equals(this)).collect(Collectors.toList());
 	}
 
 	@Override

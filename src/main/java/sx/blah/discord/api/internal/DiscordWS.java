@@ -17,6 +17,7 @@ import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.channels.UnresolvedAddressException;
@@ -87,7 +88,7 @@ public class DiscordWS extends WebSocketAdapter {
 				try {
 					dispatchHandler.handle(payload);
 				} catch (Exception e) {
-					e.printStackTrace();
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered exception handling websocket event: ", e);
 				}
 				break;
 			case INVALID_SESSION:
@@ -129,6 +130,7 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
+
 		if (cause instanceof UnresolvedAddressException) {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UnresolvedAddressException. Internet outage?");
 		} else {

@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public final class DiscordClientImpl implements IDiscordClient {
 
 	static {
-		ServiceUtil.loadServices();
+		if (!Discord4J.audioDisabled.get()) Services.load();
 	}
 
 	/**
@@ -73,11 +73,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Caches the available regions for discord.
 	 */
 	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
-
-	/**
-	 * Holds the active connections to voice sockets.
-	 */
-	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
 
 	/**
 	 * The maximum amount of pings discord can miss before a new session is created.
@@ -424,7 +419,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getOurUser().getConnectedVoiceChannels();
+		return getOurUser().getVoiceStates().values().stream().map(IVoiceState::getChannel).collect(Collectors.toList());
 	}
 
 	@Override

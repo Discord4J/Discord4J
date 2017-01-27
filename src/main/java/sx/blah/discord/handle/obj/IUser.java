@@ -6,6 +6,7 @@ import sx.blah.discord.util.RateLimitException;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -104,7 +105,22 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @param guild The guild to get the nickname for.
 	 * @return The nickname (if it exists in this guild).
 	 */
-	Optional<String> getNicknameForGuild(IGuild guild);
+	String getNicknameForGuild(IGuild guild);
+
+	/**
+	 * Gets the user's voice states for the given guild.
+	 *
+	 * @param guild The guild to check.
+	 * @return The voice state.
+	 */
+	IVoiceState getVoiceStateForGuild(IGuild guild);
+
+	/**
+	 * Gets all of the user's voice states.
+	 *
+	 * @return All of the user's voice states.
+	 */
+	Map<String, IVoiceState> getVoiceStates();
 
 	/**
 	 * Gets whether or not this user is a bot.
@@ -112,24 +128,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return True if a bot, false if otherwise.
 	 */
 	boolean isBot();
-
-	/**
-	 * Moves this user to a different voice channel.
-	 *
-	 * @param newChannel The new channel the user should move to.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
-	 */
-	void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException;
-
-	/**
-	 * Gets the voice channels this user is connected to.
-	 *
-	 * @return The voice channels.
-	 */
-	List<IVoiceChannel> getConnectedVoiceChannels();
 
 	/**
 	 * Gets a {@link IPrivateChannel} for this user.
@@ -142,36 +140,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	IPrivateChannel getOrCreatePMChannel() throws DiscordException, RateLimitException;
 
 	/**
-	 * Gets whether this user is deafened in the given guild.
-	 *
-	 * @param guild The guild to check the status for.
-	 * @return True if deafened, false if otherwise.
-	 */
-	boolean isDeaf(IGuild guild);
-
-	/**
-	 * Gets whether this user is muted in the given guild.
-	 *
-	 * @param guild The guild to check the status for.
-	 * @return True if muted, false if otherwise.
-	 */
-	boolean isMuted(IGuild guild);
-
-	/**
-	 * Gets whether this user is deafened locally (meaning they deafened themselves).
-	 *
-	 * @return True if deafened, false if otherwise.
-     */
-	boolean isDeafLocally();
-
-	/**
-	 * Gets whether this user is muted locally (meaning they muted themselves).
-	 *
-	 * @return True if muted, false if otherwise.
-     */
-	boolean isMutedLocally();
-
-	/**
 	 * Adds a Role to this user.
 	 *
 	 * @param role The role to add to the User
@@ -181,7 +149,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws MissingPermissionsException
 	 */
 	void addRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException;
-
 
 	/**
 	 * Removes a Role from this user.

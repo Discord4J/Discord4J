@@ -9,7 +9,6 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
-import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
@@ -24,13 +23,12 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -90,8 +88,6 @@ public class DiscordUtils {
 			user.setAvatar(response.avatar);
 			user.setName(response.username);
 			user.setDiscriminator(response.discriminator);
-			if (response.bot && !user.isBot())
-				user.convertToBot();
 		} else {
 			user = new User(shard, response.username, response.id, response.discriminator, response.avatar,
 					new PresenceImpl(Optional.empty(), Optional.empty(), StatusType.OFFLINE), response.bot);
@@ -219,11 +215,12 @@ public class DiscordUtils {
 				}
 
 			guild.setTotalMemberCount(json.member_count);
-			if (json.members != null)
+			if (json.members != null) {
 				for (MemberObject member : json.members) {
 					IUser user = getUserFromGuildMemberResponse(guild, member);
 					guild.addUser(user);
 				}
+			}
 
 			if (json.large) { //The guild is large, we have to send a request to get the offline users
 				((ShardImpl) shard).ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
@@ -250,7 +247,8 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateObject voiceState : json.voice_states) {
-					guild.getUserByID(voiceState.user_id).getConnectedVoiceChannels().add(guild.getVoiceChannelByID(voiceState.channel_id));
+					guild.getUserByID(voiceState.user_id).getVoiceStates().put(
+							guild.getID(), DiscordUtils.getVoiceStateFromJson(guild, voiceState));
 				}
 			}
 		}
@@ -315,11 +313,11 @@ public class DiscordUtils {
 				user.addRole(guild.getID(), roleObj);
 		}
 		user.addRole(guild.getID(), guild.getRoleByID(guild.getID())); //@everyone role
-
 		user.addNick(guild.getID(), json.nick);
 
-		user.setIsDeaf(guild.getID(), json.deaf);
-		user.setIsMute(guild.getID(), json.mute);
+		VoiceState voiceState = (VoiceState) user.getVoiceStateForGuild(guild);
+		voiceState.setDeafened(json.deaf);
+		voiceState.setMuted(json.mute);
 
 		((Guild) guild).getJoinTimes().put(user, convertFromTimestamp(json.joined_at));
 		return user;
@@ -448,8 +446,7 @@ public class DiscordUtils {
 	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
 	 */
 	public static Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>>
-	getPermissionOverwritesFromJSONs(
-			OverwriteObject[] overwrites) {
+	getPermissionOverwritesFromJSONs(OverwriteObject[] overwrites) {
 		Map<String, IChannel.PermissionOverride> userOverrides = new ConcurrentHashMap<>();
 		Map<String, IChannel.PermissionOverride> roleOverrides = new ConcurrentHashMap<>();
 
@@ -537,21 +534,27 @@ public class DiscordUtils {
 		return channel;
 	}
 
+	/**
+	 * Creates a voice state object from a json response.
+	 *
+	 * @param guild The guild the voice state is in.
+	 * @param json The json response.
+	 * @return The voice state object.
+	 */
+	public static IVoiceState getVoiceStateFromJson(IGuild guild, VoiceStateObject json) {
+		return new VoiceState(guild, guild.getVoiceChannelByID(json.channel_id), guild.getUserByID(json.user_id),
+				json.session_id, json.deaf, json.mute, json.self_deaf, json.self_mute, json.suppress);
+	}
+
 	public static IPresence getPresenceFromJSON(PresenceObject presence) {
 		return new PresenceImpl(Optional.ofNullable(presence.game == null ? null : presence.game.name),
 				Optional.ofNullable(presence.game == null ? null : presence.game.url),
-				// are you ready for a really big ternary..............?
-				// READY AS I CAN BE
-				// (it actually was a lot smaller than I thought)
-				// ARE YOU READY?!?!
-				// READYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYAAAAYAYAYY
 				((presence.game != null && presence.game.type == GameObject.STREAMING)
 						? StatusType.STREAMING
 						: (StatusType.get(presence.status))));
 	}
 
 	public static IPresence getPresenceFromJSON(PresenceUpdateEventResponse response) {
-		// hacky
 		PresenceObject obj = new PresenceObject();
 		obj.game = response.game;
 		obj.status = response.status;
@@ -778,7 +781,7 @@ public class DiscordUtils {
 		AudioInputStream pcmStream = AudioSystem.getAudioInputStream(toPCM, stream);
 
 		//Then resamples to a sample rate of 48000hz and ensures that data is Big Endian.
-		AudioFormat audioFormat = new AudioFormat(toPCM.getEncoding(), AudioManager.OPUS_SAMPLE_RATE,
+		AudioFormat audioFormat = new AudioFormat(toPCM.getEncoding(), OpusUtil.OPUS_SAMPLE_RATE,
 				toPCM.getSampleSizeInBits(), toPCM.getChannels(), toPCM.getFrameSize(), toPCM.getFrameRate(), true);
 
 		return AudioSystem.getAudioInputStream(audioFormat, pcmStream);

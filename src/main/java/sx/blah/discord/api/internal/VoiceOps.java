@@ -10,7 +10,7 @@ public enum VoiceOps {
 	/**
 	 * Used to select the voice protocol
 	 */
-	SELECT_PAYLOAD,
+	SELECT_PROTOCOL,
 
 	/**
 	 * Used to complete the websocket handshake

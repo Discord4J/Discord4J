@@ -230,8 +230,8 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IUser> getUsersByName(String name, boolean includeNicknames) {
-		return users.stream().filter((user) -> user.getName().equals(name)
-				|| (includeNicknames && user.getNicknameForGuild(this).orElse("").equals(name)))
+		return users.stream()
+				.filter(u -> includeNicknames ? u.getDisplayName(this).equals(name) : u.getName().equals(name))
 				.collect(Collectors.toList());
 	}
 

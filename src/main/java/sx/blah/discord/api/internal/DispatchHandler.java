@@ -8,6 +8,10 @@ import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.events.guild.voice.user.*;
+import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
@@ -42,7 +46,7 @@ class DispatchHandler {
 			case "READY": ready(GSON.fromJson(json, ReadyResponse.class)); break;
 			case "MESSAGE_CREATE": messageCreate(GSON.fromJson(json, MessageObject.class)); break;
 			case "TYPING_START": typingStart(GSON.fromJson(json, TypingEventResponse.class)); break;
-			case "GUILD_CREATE": guildCreate(GSON.fromJson(json, GuildObject.class)); break;
+			case "GUILD_CREATE":guildCreate(GSON.fromJson(json, GuildObject.class)); break;
 			case "GUILD_MEMBER_ADD": guildMemberAdd(GSON.fromJson(json, GuildMemberAddEventResponse.class)); break;
 			case "GUILD_MEMBER_REMOVE": guildMemberRemove(GSON.fromJson(json, GuildMemberRemoveEventResponse.class)); break;
 			case "GUILD_MEMBER_UPDATE": guildMemberUpdate(GSON.fromJson(json, GuildMemberUpdateEventResponse.class)); break;
@@ -285,8 +289,8 @@ class DispatchHandler {
 					guild.loadWebhooks();
 			}
 
-			if (!user.getNicknameForGuild(guild).equals(Optional.ofNullable(event.nick))) {
-				String oldNick = user.getNicknameForGuild(guild).orElse(null);
+			if (!user.getNicknameForGuild(guild).equals(event.nick)) {
+				String oldNick = user.getNicknameForGuild(guild);
 				user.addNick(guild.getID(), event.nick);
 
 				client.dispatcher.dispatch(new NickNameChangeEvent(guild, user, oldNick, event.nick));
@@ -369,11 +373,11 @@ class DispatchHandler {
 
 		// Clean up cache
 		guild.getShard().getGuilds().remove(guild);
-		client.getOurUser().getConnectedVoiceChannels().removeAll(guild.getVoiceChannels());
-		DiscordVoiceWS vWS = client.voiceConnections.get(guild);
+		client.getOurUser().getVoiceStates().remove(guild.getID());
+		DiscordVoiceWS vWS = shard.voiceWebSockets.get(guild);
 		if (vWS != null) {
 			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
-			client.voiceConnections.remove(guild);
+			shard.voiceWebSockets.remove(guild);
 		}
 
 		if (json.unavailable) { //Guild can't be reached
@@ -563,53 +567,29 @@ class DispatchHandler {
 	}
 
 	private void voiceStateUpdate(VoiceStateObject json) {
-		IGuild guild = client.getGuildByID(json.guild_id);
+		IUser user = shard.getUserByID(json.user_id);
+		IVoiceState curVoiceState = user.getVoiceStates().get(json.guild_id);
 
-		if (guild != null) {
-			IVoiceChannel channel = guild.getVoiceChannelByID(json.channel_id);
-			User user = (User) guild.getUserByID(json.user_id);
-			if (user != null) {
-				user.setIsDeaf(guild.getID(), json.deaf);
-				user.setIsMute(guild.getID(), json.mute);
-				user.setIsDeafLocally(json.self_deaf);
-				user.setIsMutedLocally(json.self_mute);
+		IVoiceChannel channel = shard.getVoiceChannelByID(json.channel_id);
+		IVoiceChannel oldChannel = curVoiceState == null ? null : curVoiceState.getChannel();
 
-				IVoiceChannel oldChannel = user.getConnectedVoiceChannels()
-						.stream()
-						.filter(vChannel -> vChannel.getGuild().getID().equals(json.guild_id))
-						.findFirst()
-						.orElse(null);
-				if (oldChannel == null)
-					oldChannel = user.getConnectedVoiceChannels()
-							.stream()
-							.findFirst()
-							.orElse(null);
-				if (channel != oldChannel) {
-					if (channel == null) {
-						client.dispatcher.dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
-						user.getConnectedVoiceChannels().remove(oldChannel);
-					} else if (oldChannel != null && oldChannel.getGuild().equals(channel.getGuild())) {
-						client.dispatcher.dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
-						user.getConnectedVoiceChannels().remove(oldChannel);
-						if (!user.getConnectedVoiceChannels().contains(channel))
-							user.getConnectedVoiceChannels().add(channel);
-					} else {
-						client.dispatcher.dispatch(new UserVoiceChannelJoinEvent(channel, user));
-						if (!user.getConnectedVoiceChannels().contains(channel))
-							user.getConnectedVoiceChannels().add(channel);
-					}
-				}
+		user.getVoiceStates().put(json.guild_id, DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
+
+		if (oldChannel != channel) {
+			if (channel == null) {
+				client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
+			} else if (oldChannel == null) {
+				client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));
+			} else if (oldChannel.getGuild().equals(channel.getGuild())) {
+				client.getDispatcher().dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
 			}
 		}
 	}
 
 	private void voiceServerUpdate(VoiceUpdateResponse event) {
-		try {
-			event.endpoint = event.endpoint.substring(0, event.endpoint.indexOf(":"));
-			client.voiceConnections.put(client.getGuildByID(event.guild_id), new DiscordVoiceWS(event, shard));
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
-		}
+		DiscordVoiceWS vWS = new DiscordVoiceWS(shard, event);
+		shard.voiceWebSockets.put(shard.getGuildByID(event.guild_id), vWS);
+		vWS.connect();
 	}
 
 	private void guildEmojisUpdate(GuildEmojiUpdateResponse event) {
