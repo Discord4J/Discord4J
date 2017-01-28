@@ -8,16 +8,16 @@ import java.util.Optional;
 /**
  * This is fired once a nickname is changed.
  */
-public class NickNameChangeEvent extends GuildMemberEvent {
-	
+public class NicknameChangedEvent extends GuildMemberEvent {
+
 	private final String oldNickname, newNickname;
-	
-	public NickNameChangeEvent(IGuild guild, IUser user, String oldNickname, String newNickname) {
+
+	public NicknameChangedEvent(IGuild guild, IUser user, String oldNickname, String newNickname) {
 		super(guild, user);
 		this.oldNickname = oldNickname;
 		this.newNickname = newNickname;
 	}
-	
+
 	/**
 	 * This gets the old nickname.
 	 *
@@ -26,7 +26,7 @@ public class NickNameChangeEvent extends GuildMemberEvent {
 	public Optional<String> getOldNickname() {
 		return Optional.ofNullable(oldNickname);
 	}
-	
+
 	/**
 	 * This gets the new nickname.
 	 *
