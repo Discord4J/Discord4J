@@ -13,6 +13,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Builds an EmbedObject for use in sending messages.
@@ -46,19 +47,32 @@ public class EmbedBuilder {
 
 	private final EmbedObject embed = new EmbedObject(null, "rich", null, null, null, 0, null, null, null, null, null,
 			null, null);
-	private final List<EmbedObject.EmbedFieldObject> fields = new ArrayList<>();
+	private volatile List<EmbedObject.EmbedFieldObject> fields = new CopyOnWriteArrayList<>();
 	private volatile Color color = new Color(0);
 
 	/**
-	 * If true, this will not throw an IllegalArgumentException if you pass null/empty values to appendField.
+	 * If true, the builder will sanitize input to prevent errors automatically.
 	 */
-	private boolean ignoreEmptyNullFields = false;
+	private volatile boolean lenient = false;
 
 	/**
 	 * Create a new EmbedBuilder. Set what you want with the withX/appendX methods, and call {@link #build()}.
 	 */
 	public EmbedBuilder() {
 
+	}
+
+	/**
+	 * This configures if the builder is lenient. When lenient, the builder will truncate strings in order to fit in an
+	 * embed and ignore empty/null fields.
+	 *
+	 * @param lenient True to make the builder lenient, false for the opposite.
+	 * @return Itself for chaining.
+	 */
+	public EmbedBuilder setLenient(boolean lenient) {
+		this.lenient = lenient;
+
+		return this;
 	}
 
 	/**
@@ -83,9 +97,13 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withDescription(String desc) {
-		if (desc != null && desc.length() > DESCRIPTION_CONTENT_LIMIT)
-			throw new IllegalArgumentException(
+		if (desc != null && desc.length() > DESCRIPTION_CONTENT_LIMIT) {
+			if (lenient)
+				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT);
+			else
+				throw new IllegalArgumentException(
 					"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
+		}
 
 		embed.description = desc;
 		return this;
@@ -110,9 +128,13 @@ public class EmbedBuilder {
 	public EmbedBuilder appendDescription(String desc) {
 		if (embed.description == null)
 			embed.description = "";
-		if (desc != null && (embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT)
-			throw new IllegalArgumentException(
-					"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
+		if (desc != null && (embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT) {
+			if (lenient)
+				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT-embed.description.length());
+			else
+				throw new IllegalArgumentException(
+						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
+		}
 
 		embed.description += desc;
 		return this;
@@ -192,9 +214,13 @@ public class EmbedBuilder {
 		if (embed.footer == null)
 			embed.footer = new EmbedObject.FooterObject(null, null, null);
 
-		if (footer.length() > FOOTER_CONTENT_LIMIT)
-			throw new IllegalArgumentException(
-					"Embed footer text cannot have more than " + FOOTER_CONTENT_LIMIT + " characters");
+		if (footer.length() > FOOTER_CONTENT_LIMIT) {
+			if (lenient)
+				footer = footer.substring(0, FOOTER_CONTENT_LIMIT);
+			else
+				throw new IllegalArgumentException(
+						"Embed footer text cannot have more than " + FOOTER_CONTENT_LIMIT + " characters");
+		}
 
 		embed.footer.text = footer;
 		return this;
@@ -300,40 +326,54 @@ public class EmbedBuilder {
 	 *
 	 * @return Itself for chaining
 	 * @see #appendField(String, String, boolean)
+	 * @deprecated See {@link #setLenient(boolean)}
 	 */
+	@Deprecated
 	public EmbedBuilder ignoreNullEmptyFields() {
-		ignoreEmptyNullFields = true;
+		lenient = true;
 		return this;
 	}
 
 	/**
 	 * Add a title-content field. Note: if a null or empty title or content is passed, this will throw an
 	 * IllegalArgumentException. If you want the builder to safely ignore fields with null/empty values, use
-	 * {@link #ignoreEmptyNullFields}.
+	 * {@link #setLenient(boolean)}.
 	 *
 	 * @param title   The title
 	 * @param content The content
 	 * @param inline  If it should be inline (side-by-side)
 	 * @return Itself for chaining
-	 * @see #ignoreNullEmptyFields()
+	 * @see #setLenient(boolean)
 	 */
 	public EmbedBuilder appendField(String title, String content, boolean inline) {
 		if (((title == null || title.isEmpty()) || (content == null || content.isEmpty()))) {
-			if (ignoreEmptyNullFields)
+			if (lenient)
 				return this;
 			throw new IllegalArgumentException("Title or content cannot be null/empty.");
 		}
 
-		if (fields.size() >= FIELD_COUNT_LIMIT)
-			throw new IllegalArgumentException("Embed cannot have more than " + FIELD_COUNT_LIMIT + " fields");
+		if (fields.size() >= FIELD_COUNT_LIMIT) {
+			if (lenient)
+				fields = fields.subList(0, FIELD_COUNT_LIMIT);
+			else
+				throw new IllegalArgumentException("Embed cannot have more than " + FIELD_COUNT_LIMIT + " fields");
+		}
 
-		if (title.length() > TITLE_LENGTH_LIMIT)
-			throw new IllegalArgumentException(
-					"Embed field title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
+		if (title.length() > TITLE_LENGTH_LIMIT) {
+			if (lenient)
+				title = title.substring(0, TITLE_LENGTH_LIMIT);
+			else
+				throw new IllegalArgumentException(
+						"Embed field title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
+		}
 
-		if (content.length() > FIELD_CONTENT_LIMIT)
-			throw new IllegalArgumentException(
-					"Embed field content cannot have more than " + FIELD_CONTENT_LIMIT + " characters");
+		if (content.length() > FIELD_CONTENT_LIMIT) {
+			if (lenient)
+				content = content.substring(0, FIELD_CONTENT_LIMIT);
+			else
+				throw new IllegalArgumentException(
+						"Embed field content cannot have more than " + FIELD_CONTENT_LIMIT + " characters");
+		}
 
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
