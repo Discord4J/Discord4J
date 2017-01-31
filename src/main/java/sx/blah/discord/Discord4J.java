@@ -160,7 +160,7 @@ public class Discord4J {
 		jettyLogger = Log.getLog();
 		Log.setLog(ignoredJettyLogger);
 
-		LOGGER.info(LogMarkers.MAIN, "{} v{}", NAME, VERSION);
+		LOGGER.info(LogMarkers.MAIN, "{} v{} ({})", NAME, VERSION, URL);
 		LOGGER.info(LogMarkers.MAIN, "{}", DESCRIPTION);
 	}
 
