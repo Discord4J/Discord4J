@@ -76,7 +76,8 @@ public class Example {
       		return clientBuilder.build(); // Creates the client instance but it doesn't log the client in yet, you would have to call client.login() yourself
     	}
 	} catch (DiscordException e) { // This is thrown if there was a problem building the client
-		e.printStackTrace()
+		e.printStackTrace();
+		return null;
 	}
   }
 }
