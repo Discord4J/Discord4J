@@ -121,6 +121,8 @@ class DispatchHandler {
 
 	private void resumed() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Session resumed on shard " + shard.getInfo()[0]);
+		ws.hasReceivedReady = true; // Technically a lie but irrelevant in the case of a resume.
+		ws.isReady = true;          //
 		client.getDispatcher().dispatch(new ResumedEvent(shard));
 	}
 
