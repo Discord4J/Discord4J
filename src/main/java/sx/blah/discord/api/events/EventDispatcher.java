@@ -362,47 +362,45 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public synchronized void dispatch(Event event) {
-		if (client.getShards().stream().anyMatch(IShard::isLoggedIn) || event instanceof DisconnectedEvent) {
-			eventExecutor.submit(() -> {
-				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
-				event.client = client;
+		eventExecutor.submit(() -> {
+			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
+			event.client = client;
 
-				methodListeners.entrySet().stream()
-						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(Map.Entry::getValue)
-						.forEach(m ->
-								m.forEach((k, v) ->
-										v.forEach(o -> {
-											try {
-												k.invoke(o.listener, event);
-												if (o.isTemporary)
-													unregisterListener(o.listener);
-											} catch (IllegalAccessException e) {
-												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event " + event.getClass().getSimpleName(), e);
-											} catch(InvocationTargetException e) {
-												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e.getCause());
-											} catch (Exception e) {
-												Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
-											}
-										})));
+			methodListeners.entrySet().stream()
+					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
+					.map(Map.Entry::getValue)
+					.forEach(m ->
+							m.forEach((k, v) ->
+									v.forEach(o -> {
+										try {
+											k.invoke(o.listener, event);
+											if (o.isTemporary)
+												unregisterListener(o.listener);
+										} catch (IllegalAccessException e) {
+											Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event " + event.getClass().getSimpleName(), e);
+										} catch(InvocationTargetException e) {
+											Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e.getCause());
+										} catch (Exception e) {
+											Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
+										}
+									})));
 
-				classListeners.entrySet().stream()
-						.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-						.map(Map.Entry::getValue)
-						.forEach(s -> s.forEach(l -> {
-							try {
-								l.listener.handle(event);
+			classListeners.entrySet().stream()
+					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
+					.map(Map.Entry::getValue)
+					.forEach(s -> s.forEach(l -> {
+						try {
+							l.listener.handle(event);
 
-								if (l.isTemporary)
-									unregisterListener(l.listener);
-							} catch (ClassCastException e) {
-								//FIXME: This occurs when a lambda expression is used to create an IListener leading it to be registered under the type 'Event'. This is due to a bug in TypeTools: https://github.com/jhalterman/typetools/issues/14
-						 	} catch (Exception e) {
-								Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
-							}
-						}));
-			});
-		}
+							if (l.isTemporary)
+								unregisterListener(l.listener);
+						} catch (ClassCastException e) {
+							//FIXME: This occurs when a lambda expression is used to create an IListener leading it to be registered under the type 'Event'. This is due to a bug in TypeTools: https://github.com/jhalterman/typetools/issues/14
+					    } catch (Exception e) {
+							Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
+						}
+					}));
+		});
 	}
 
 	/**
