@@ -81,11 +81,20 @@ public class MessageTokenizer {
 	 * @return The new current position
 	 */
 	public int stepForward(int amount) {
-		currentPosition += amount;
-		currentPosition = Math.max(0, Math.min(currentPosition, content.length()));
-		remaining = content.substring(currentPosition);
+		return stepTo(currentPosition + amount);
+	}
 
-		return currentPosition;
+	/**
+	 * Steps to the position provided and updates the internal remaining string.
+	 *
+	 * @param index The index to step to
+	 * @return The new current position
+	 * * @see MessageTokenizer#stepTo(int)
+	 * @deprecated Use {@link #stepTo(int)}
+	 */
+	@Deprecated
+	public int stepForwardTo(int index) {
+		return stepTo(index);
 	}
 
 	/**
@@ -94,24 +103,11 @@ public class MessageTokenizer {
 	 * @param index The index to step to
 	 * @return The new current position
 	 */
-	public int stepForwardTo(int index) {
+	public int stepTo(int index) {
 		currentPosition = Math.max(0, Math.min(index, content.length()));
 		remaining = content.substring(currentPosition);
 
 		return currentPosition;
-	}
-
-	/**
-	 * Steps to the desired index.
-	 *
-	 * @param index The index to step to
-	 * @return The new current position
-	 * @see MessageTokenizer#stepForwardTo(int)
-	 * @deprecated Use {@link #stepForwardTo(int)}
-	 */
-	@Deprecated
-	public int stepTo(int index) {
-		return stepForwardTo(index);
 	}
 
 	/**
@@ -197,7 +193,7 @@ public class MessageTokenizer {
 			Matcher matcher = WORD_PATTERN.matcher(remaining);
 			if (matcher.find()) {
 				if (matcher.start() == 0) {
-					stepForwardTo(currentPosition + matcher.end());
+					stepTo(currentPosition + matcher.end());
 				}
 			}
 		}
@@ -214,7 +210,7 @@ public class MessageTokenizer {
 
 		Token token = new Token(this, currentPosition, end);
 
-		stepForwardTo(found ? (currentPosition + matcher.end()) : content.length());
+		stepTo(found ? (currentPosition + matcher.end()) : content.length());
 
 		return token;
 	}
@@ -274,7 +270,7 @@ public class MessageTokenizer {
 		final int start = currentPosition + matcher.start();
 		final int end = currentPosition + matcher.end();
 
-		stepForwardTo(end);
+		stepTo(end);
 
 		return new Token(this, start, end);
 	}
@@ -298,7 +294,7 @@ public class MessageTokenizer {
 		final int start = currentPosition + matcher.start();
 		final int end = currentPosition + matcher.end();
 
-		stepForwardTo(end);
+		stepTo(end);
 
 		return new InviteToken(this, start, end);
 	}
