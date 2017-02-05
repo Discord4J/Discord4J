@@ -486,13 +486,6 @@ public class Message implements IMessage {
 	public void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
 		emoji = emoji.replace("<:", "").replace(">", "");
 
-		if (emoji.matches("\\d+")) {
-			IEmoji em = getGuild().getEmojiByID(emoji);
-			if (em != null) {
-				emoji = em.getName() + ":" + em.getID();
-			}
-		}
-
 		if (this.getReactionByName(emoji) == null)
 			DiscordUtils.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
 
@@ -536,7 +529,7 @@ public class Message implements IMessage {
 	public String getWebhookID(){
 		return webhookID;
 	}
-	
+
 	@Override
 	public MessageTokenizer tokenize() {
 		return new MessageTokenizer(this);
