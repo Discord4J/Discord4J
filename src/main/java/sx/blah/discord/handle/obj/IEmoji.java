@@ -2,6 +2,11 @@ package sx.blah.discord.handle.obj;
 
 import java.util.List;
 
+/**
+ * Represents a guild's <b>custom</b> emoji, not a Unicode one. This can be used for reactions. If you need the
+ * Unicode type emojis, use {@link com.vdurmont.emoji.EmojiManager#getForAlias(String)} to get
+ * an {@link com.vdurmont.emoji.Emoji}.
+ */
 public interface IEmoji extends IDiscordObject<IEmoji> {
 
 	/**

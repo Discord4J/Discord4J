@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Emoji implements IEmoji {
+public class EmojiImpl implements IEmoji {
 
 	/**
 	 * The guild.
@@ -39,11 +39,11 @@ public class Emoji implements IEmoji {
 	 */
 	protected volatile boolean isManaged;
 
-	public Emoji(IGuild guild, String id, String name, boolean requiresColons, boolean isManaged, IRole[] roles) {
+	public EmojiImpl(IGuild guild, String id, String name, boolean requiresColons, boolean isManaged, IRole[] roles) {
 		this(guild, id, name, requiresColons, isManaged, convertRolesToIDs(roles));
 	}
 
-	public Emoji(IGuild guild, String id, String name, boolean requiresColons, boolean isManaged, String[] roleIds) {
+	public EmojiImpl(IGuild guild, String id, String name, boolean requiresColons, boolean isManaged, String[] roleIds) {
 		this.guild = guild;
 		this.id = id;
 		this.name = name;
@@ -85,7 +85,7 @@ public class Emoji implements IEmoji {
 
 	@Override
 	public IEmoji copy() {
-		Emoji copy = new Emoji(guild, id, name, requiresColons, isManaged, roles.toArray(new IRole[roles.size()]));
+		EmojiImpl copy = new EmojiImpl(guild, id, name, requiresColons, isManaged, roles.toArray(new IRole[roles.size()]));
 
 		return copy;
 	}

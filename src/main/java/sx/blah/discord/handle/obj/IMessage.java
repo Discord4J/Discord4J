@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import com.vdurmont.emoji.Emoji;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.util.*;
 
@@ -242,6 +243,17 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
+	 * Adds your reaction as a Unicode one. Use {@link com.vdurmont.emoji.EmojiManager#getForAlias(String)}
+	 * to retrieve an Emoji object.
+	 *
+	 * @param emoji The string emoji
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void addReaction(Emoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
 	 * Removes a reaction for a user.
 	 *
 	 * @param reaction The reaction to remove from
@@ -261,14 +273,14 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws DiscordException
 	 */
 	void removeReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
-	
+
 	/**
 	 * This creates a new {@link MessageTokenizer} instance with this message instance.
 	 *
 	 * @return A new tokenizer.
 	 */
 	MessageTokenizer tokenize();
-	
+
 	/**
 	 * Checks to see is this message deleted.
 	 *
