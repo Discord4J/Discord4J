@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -83,8 +82,11 @@ public class EmbedBuilder {
 	 */
 	public EmbedBuilder withTitle(String title) {
 		if (title != null && title.length() > TITLE_LENGTH_LIMIT)
-			throw new IllegalArgumentException(
-					"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
+			if (lenient)
+				title = title.substring(0, TITLE_LENGTH_LIMIT);
+			else
+				throw new IllegalArgumentException(
+						"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
 
 		embed.title = title;
 		return this;
@@ -130,7 +132,7 @@ public class EmbedBuilder {
 			embed.description = "";
 		if (desc != null && (embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT) {
 			if (lenient)
-				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT-embed.description.length());
+				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT - embed.description.length());
 			else
 				throw new IllegalArgumentException(
 						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
