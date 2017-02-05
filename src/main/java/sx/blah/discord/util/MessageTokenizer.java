@@ -1,5 +1,7 @@
 package sx.blah.discord.util;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -104,10 +106,12 @@ public class MessageTokenizer {
 	 *
 	 * @param index The index to step to
 	 * @return The new current position
-	 * @see MessageTokenizer#stepForward(int)
+	 * @see MessageTokenizer#stepForwardTo(int)
+	 * @deprecated Use {@link #stepForwardTo(int)}
 	 */
+	@Deprecated
 	public int stepTo(int index) {
-		return stepForward(index - currentPosition);
+		return stepForwardTo(index);
 	}
 
 	/**
@@ -142,6 +146,32 @@ public class MessageTokenizer {
 		char c = content.charAt(currentPosition);
 		stepForward(1);
 		return c;
+	}
+
+	/**
+	 * Returns true if the tokenizer has the sequence provided.
+	 * @param sequence The string sequence to look for
+	 * @return True if it contains the sequence
+	 */
+	public boolean hasNextSequence(String sequence) {
+		return remaining.contains(sequence);
+	}
+
+	/**
+	 * Returns a Token of the following sequence.
+	 * @param sequence The string sequence to look for
+	 * @return The token
+	 */
+	public Token nextSequence(String sequence) {
+		if (!hasNextSequence(sequence))
+			throw new IllegalStateException("The sequence \"" + sequence + "\" was not found!");
+
+		final int index = remaining.indexOf(sequence);
+
+		Token t = new Token(this, currentPosition + index, currentPosition + index + sequence.length());
+
+		stepForward(index + sequence.length());
+		return t;
 	}
 
 	/**
@@ -244,7 +274,7 @@ public class MessageTokenizer {
 		final int start = currentPosition + matcher.start();
 		final int end = currentPosition + matcher.end();
 
-		stepTo(end);
+		stepForwardTo(end);
 
 		return new Token(this, start, end);
 	}
@@ -268,7 +298,7 @@ public class MessageTokenizer {
 		final int start = currentPosition + matcher.start();
 		final int end = currentPosition + matcher.end();
 
-		stepTo(end);
+		stepForwardTo(end);
 
 		return new InviteToken(this, start, end);
 	}
@@ -336,6 +366,21 @@ public class MessageTokenizer {
 		final int greaterThan = t.getEndIndex();
 
 		return new CustomEmojiToken(this, lessThan, greaterThan);
+	}
+
+	/**
+	 * Returns true if there is a Unicode emoji that is the same as the provided one to go to.
+	 *
+	 * @param emoji The emoji to look for
+	 * @return True if there is another custom emoji.
+	 */
+	public boolean hasNextUnicodeEmoji(Emoji emoji) {
+		return hasNextSequence(emoji.getUnicode());
+	}
+
+	public UnicodeEmojiToken nextUnicodeEmoji(Emoji emoji) {
+		Token t = nextSequence(emoji.getUnicode());
+		return new UnicodeEmojiToken(this, t.startIndex, t.endIndex);
 	}
 
 	/**
@@ -615,6 +660,39 @@ public class MessageTokenizer {
 		 */
 		public IInvite getInvite() {
 			return invite;
+		}
+	}
+
+	public static class UnicodeEmojiToken extends Token {
+
+		/**
+		 * The {@link Emoji}.
+		 */
+		private final Emoji emoji;
+
+		/**
+		 * A Unicode {@link Emoji} from a message with content and position.
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private UnicodeEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex);
+
+			String content = getContent();
+			boolean isUnicode = EmojiManager.isEmoji(content);
+			emoji = isUnicode ? EmojiManager.getByUnicode(content) : EmojiManager.getForAlias(content);
+		}
+
+		/**
+		 * Return the emoji object.
+		 *
+		 * @return The emoji.
+		 * @see Emoji
+		 */
+		public Emoji getEmoji() {
+			return emoji;
 		}
 	}
 
