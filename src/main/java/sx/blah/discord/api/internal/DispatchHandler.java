@@ -589,8 +589,13 @@ class DispatchHandler {
 	}
 
 	private void voiceServerUpdate(VoiceUpdateResponse event) {
+		IGuild guild = shard.getGuildByID(event.guild_id);
+		if (shard.voiceWebSockets.containsKey(guild)) {
+			shard.voiceWebSockets.remove(guild);
+		}
+
 		DiscordVoiceWS vWS = new DiscordVoiceWS(shard, event);
-		shard.voiceWebSockets.put(shard.getGuildByID(event.guild_id), vWS);
+		shard.voiceWebSockets.put(guild, vWS);
 		vWS.connect();
 	}
 
