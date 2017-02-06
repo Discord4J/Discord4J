@@ -172,9 +172,9 @@ public class Discord4J {
 	public static void main(String[] args) {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
-			throw new RuntimeException("Invalid configuration!");
+			throw new RuntimeException("Invalid configuration! Must have auto-enabling of modules + loading of external modules enabled.");
 		if (args.length == 0)
-			throw new RuntimeException("Invalid configuration!");
+			throw new RuntimeException("Invalid configuration! No arguments passed in.");
 		try {
 			ClientBuilder builder = new ClientBuilder();
 			IDiscordClient client = builder.withToken(args[0]).login();
