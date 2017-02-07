@@ -9,7 +9,7 @@ For the latest dev builds, use the short commit hash or `dev-SNAPSHOT` as your v
 ## Adding Discord4J as a dependency for a project
 Given that `@VERSION@` = the version of Discord4J (this can either be a release version, the short commit hash or `dev-SNAPSHOT`).
 ### With Maven
-In your `pom.xml` add:
+In your `pom.xml` add (without the ellipses):
 ```xml
 ...
 <repositories>
@@ -36,7 +36,7 @@ In your `pom.xml` add:
 ...
 ```
 ### With Gradle
-In your `build.gradle` add:
+In your `build.gradle` add (without the ellipses): 
 ```groovy
 ...
 repositories {
@@ -54,6 +54,13 @@ dependencies {
 }
 ...
 ```
+### Manually with the shaded jar
+If you don't use Maven nor Gradle (which you really should, because it's a lot more flexible and allows you to update easily), you can always [grab the shaded jar file](http://austinv11.github.io/Discord4J/downloads.html) (which has all the D4J dependencies inside), and link it in your IntelliJ or Eclipse project.
+#### IntelliJ
+Module Settings > Dependencies > click the + > JARs or directories > Select your JAR file
+#### Eclipse
+Project Properties > Java Build Path > Add the jar file
+
 ## So, how do I use this?
 ### Tutorials/Resources
 * A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by @oopsjpeg
@@ -61,7 +68,7 @@ dependencies {
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
 
 ### Starting with the API
-The very first thing you need to do is obtain a "DiscordClient" object. This can be done by using the `ClientBuilder`.
+The very first thing you need to do is obtain an `IDiscordClient` object. This can be done by using the `ClientBuilder`.
 Example:
 ```java
 public class Example {
