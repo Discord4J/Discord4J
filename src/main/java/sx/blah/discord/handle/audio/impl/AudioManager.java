@@ -7,16 +7,22 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.Opus;
 import sx.blah.discord.api.internal.OpusUtil;
-import sx.blah.discord.handle.audio.IAudioManager;
-import sx.blah.discord.handle.audio.IAudioProcessor;
-import sx.blah.discord.handle.audio.IAudioProvider;
+import sx.blah.discord.handle.audio.*;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.Lazy;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AudioManager implements IAudioManager {
 
 	private final IGuild guild;
 	private final IDiscordClient client;
+	private final Map<IUser, List<IAudioReceiver>> userReceivers = new ConcurrentHashMap<>();
+	private final List<IAudioReceiver> generalReceivers = new CopyOnWriteArrayList<>();
 	private volatile IAudioProvider provider = new DefaultProvider();
 	private volatile IAudioProcessor processor = new DefaultProcessor();
 	private volatile boolean useProcessor = true;
@@ -59,12 +65,60 @@ public class AudioManager implements IAudioManager {
 	}
 
 	@Override
-	public byte[] getAudio() { //TODO: Audio padding
+	public synchronized void subscribeReceiver(IAudioReceiver receiver) {
+		subscribeReceiver(receiver, null);
+	}
+
+	@Override
+	public synchronized void subscribeReceiver(IAudioReceiver receiver, IUser user) {
+		if (user == null) {
+			generalReceivers.add(receiver);
+		} else {
+			userReceivers.computeIfAbsent(user, u -> new CopyOnWriteArrayList<>()).add(receiver);
+		}
+	}
+
+	@Override
+	public synchronized void unsubscribeReceiver(IAudioReceiver receiver) {
+		// Check general receivers
+		generalReceivers.removeIf(r -> r.equals(receiver));
+		// Check user receivers
+		userReceivers.values().forEach(list -> list.removeIf(r -> r.equals(receiver)));
+	}
+
+	public byte[] sendAudio() { //TODO: Audio padding
 		IAudioProcessor processor = getAudioProcessor();
 		IAudioProvider provider = useProcessor ? processor : getAudioProvider();
 
 		return getAudioDataForProvider(provider);
 	}
+
+	public void receiveAudio(byte[] opusAudio, IUser user) {
+		byte[] pcm = OpusUtil.decode(stereoDecoder.get(), opusAudio);
+		receiveAudio(opusAudio, pcm, user);
+	}
+
+	public void receiveAudio(byte[] opusAudio, byte[] pcmAudio, IUser user) {
+		generalReceivers.parallelStream().forEach(r -> {
+			if (r.getAudioEncodingType() == AudioEncodingType.OPUS) {
+				r.receive(opusAudio, user);
+			} else {
+				r.receive(pcmAudio, user);
+			}
+		});
+
+		if (userReceivers.containsKey(user)) {
+			userReceivers.get(user).parallelStream().forEach(r -> {
+				if (r.getAudioEncodingType() == AudioEncodingType.OPUS) {
+					r.receive(opusAudio, user);
+				} else {
+					r.receive(pcmAudio, user);
+				}
+			});
+		}
+	}
+
+
 
 	@Override
 	public IGuild getGuild() {
@@ -73,13 +127,13 @@ public class AudioManager implements IAudioManager {
 
 	private byte[] getAudioDataForProvider(IAudioProvider provider) {
 		if (provider.isReady() && !Discord4J.audioDisabled.get()) {
-			IAudioProvider.AudioEncodingType type = provider.getAudioEncodingType();
+			AudioEncodingType type = provider.getAudioEncodingType();
 			int channels = provider.getChannels();
 			byte[] data = provider.provide();
 			if (data == null)
 				data = new byte[0];
 
-			if (type != IAudioProvider.AudioEncodingType.OPUS) {
+			if (type != AudioEncodingType.OPUS) {
 				data = OpusUtil.encode(channels == 1 ? monoEncoder.get() : stereoEncoder.get(), data);
 			}
 

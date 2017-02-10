@@ -1,6 +1,7 @@
 package sx.blah.discord.util.audio.providers;
 
 import sx.blah.discord.api.internal.OpusUtil;
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.util.TimedValue;
 import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.handle.audio.impl.DefaultProvider;

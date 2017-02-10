@@ -4,6 +4,7 @@ import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;

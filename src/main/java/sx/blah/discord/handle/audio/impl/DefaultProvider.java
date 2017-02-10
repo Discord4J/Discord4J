@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.audio.impl;
 
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioProvider;
 
 /**

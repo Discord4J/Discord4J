@@ -9,10 +9,16 @@ import java.util.Arrays;
 
 public class OpusPacket {
 
-	private RTPHeader header;
+	final RTPHeader header;
 	private byte[] audio;
 
 	private boolean isEncrypted = false;
+
+	OpusPacket(DatagramPacket udpPacket) {
+		this.header = new RTPHeader(Arrays.copyOf(udpPacket.getData(), RTPHeader.LENGTH));
+		this.audio = Arrays.copyOfRange(udpPacket.getData(), RTPHeader.LENGTH, udpPacket.getData().length);
+		this.isEncrypted = true;
+	}
 
 	OpusPacket(char sequence, int timestamp, int ssrc, byte[] audio) {
 		this(new RTPHeader(sequence, timestamp, ssrc), audio);
@@ -26,6 +32,7 @@ public class OpusPacket {
 	void encrypt(byte[] secret) {
 		if (isEncrypted) throw new IllegalStateException("Attempt to encrypt already-encrypted audio packet.");
 
+		//audio = new TweetNaclFast.SecretBox(secret).box(audio, getNonce());
 		audio = TweetNaCl.secretbox(audio, getNonce(), secret);
 		isEncrypted = true;
 	}
@@ -33,7 +40,9 @@ public class OpusPacket {
 	void decrypt(byte[] secret) {
 		if (!isEncrypted) throw new IllegalStateException("Attempt to decrypt unencrypted audio packet.");
 
+		//audio = new TweetNaclFast.SecretBox(secret).open(audio);
 		audio = TweetNaCl.secretbox_open(audio, getNonce(), secret);
+		System.out.println(Arrays.toString(audio));
 		isEncrypted = false;
 	}
 
@@ -49,11 +58,18 @@ public class OpusPacket {
 
 		static final int LENGTH = 12;
 
-		private byte type = (byte) 0x80;
-		private byte version = (byte) 0x78;
-		private char sequence;
-		private int timestamp;
-		private int ssrc;
+		final byte type = (byte) 0x80;
+		final byte version = (byte) 0x78;
+		final char sequence;
+		final int timestamp;
+		final int ssrc;
+
+		RTPHeader(byte[] header) {
+			ByteBuffer buf = ByteBuffer.wrap(header);
+			this.sequence = buf.getChar(2);
+			this.timestamp = buf.getInt(4);
+			this.ssrc = buf.getInt(8);
+		}
 
 		RTPHeader(char sequence, int timestamp, int ssrc) {
 			this.sequence = sequence;

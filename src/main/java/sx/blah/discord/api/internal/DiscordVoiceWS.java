@@ -14,9 +14,12 @@ import sx.blah.discord.api.internal.json.requests.voice.SelectProtocolRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceIdentifyRequest;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceDescriptionResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceReadyResponse;
+import sx.blah.discord.api.internal.json.responses.voice.VoiceSpeakingResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.user.UserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
@@ -26,9 +29,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.*;
 
 public class DiscordVoiceWS extends WebSocketAdapter {
 
@@ -40,6 +42,8 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	private final String endpoint;
 	private final String token;
 	private final IGuild guild;
+
+	final Map<Integer, IUser> users = new ConcurrentHashMap<>();
 
 	DiscordVoiceWS(IShard shard, VoiceUpdateResponse event) {
 		this.shard = (ShardImpl) shard;
@@ -91,6 +95,10 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 
 				break;
 			case SPEAKING:
+				VoiceSpeakingResponse response = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceSpeakingResponse.class);
+				IUser user = getGuild().getUserByID(response.user_id);
+				users.put(response.ssrc, user);
+				guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.isSpeaking));
 				break;
 		}
 	}
