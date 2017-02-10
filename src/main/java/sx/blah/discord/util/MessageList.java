@@ -657,7 +657,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			return true;
 		} catch (MissingPermissionsException e) {
 			if (!Discord4J.ignoreChannelWarnings.get())
-				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
+				Discord4J.LOGGER.debug(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
 			return false;
 		}
 	}
