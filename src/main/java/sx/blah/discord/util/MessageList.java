@@ -576,7 +576,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		long invalidCount = messages.stream()
 				.mapToLong(it -> Long.parseLong(it.getID()))
-				.filter(id -> id < ((long) ((System.currentTimeMillis() - 14 * 24 * 60 * 60) - 1420070400000L) << 22)) // Taken from Jake
+				.filter(id -> id < (((System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000) - 1420070400000L) << 22)) // Taken from Jake
+				// IF THE ID IS LESS THAN TWO WEEKS AGO SUBTRACT DISCORD EPOCH BITSHIFT LEFT 22 THEN COUNT IT BECAUSE IT'S BAD
 				.count();
 		if (invalidCount > 0)
 			throw new DiscordException(String.format("%d messages cannot be bulk deleted! They are more than 2 weeks old.", invalidCount));
