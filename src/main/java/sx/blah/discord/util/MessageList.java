@@ -1,6 +1,5 @@
 package sx.blah.discord.util;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -9,10 +8,17 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
-import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.GuildLeaveEvent;
+import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.MessageSendEvent;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IPrivateChannel;
+import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.Permissions;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -570,7 +576,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		long invalidCount = messages.stream()
 				.mapToLong(it -> Long.parseLong(it.getID()))
-				.filter(id -> id > ((long) ((System.currentTimeMillis() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000L) << 22)) //Taken from Jake
+				.filter(id -> id > ((long) ((System.currentTimeMillis() - 14 * 24 * 60 * 60) - 1420070400000L) << 22)) // Taken from Jake
 				.count();
 		if (invalidCount > 0)
 			throw new DiscordException(String.format("%d messages cannot be bulk deleted! They are more than 2 weeks old.", invalidCount));
