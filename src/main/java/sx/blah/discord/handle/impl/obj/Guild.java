@@ -602,6 +602,11 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public IChannel getGeneralChannel() {
+		return getChannelByID(this.id);
+	}
+
+	@Override
 	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
