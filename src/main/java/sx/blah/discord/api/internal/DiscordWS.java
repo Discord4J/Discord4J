@@ -2,7 +2,6 @@ package sx.blah.discord.api.internal;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -33,7 +32,6 @@ public class DiscordWS extends WebSocketAdapter {
 	DiscordClientImpl client;
 	ShardImpl shard;
 	private String gateway;
-	private HttpClient httpClient;
 
 	long seq = 0;
 	String sessionId;
@@ -58,7 +56,6 @@ public class DiscordWS extends WebSocketAdapter {
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
 		this.heartbeatHandler = new HeartbeatHandler(this, maxMissedPings);
 		this.state = State.CONNECTING;
-		this.httpClient = new HttpClient(new SslContextFactory());
 	}
 
 	@Override
@@ -156,18 +153,9 @@ public class DiscordWS extends WebSocketAdapter {
 	}
 
 	void connect() {
+		WebSocketClient previous = wsClient; // for cleanup
 		try {
-			httpClient.start();
-			if (wsClient != null) {
-				CompletableFuture.runAsync(() -> {
-					try {
-						wsClient.stop();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				});
-			}
-			wsClient = new WebSocketClient(httpClient);
+			wsClient = new WebSocketClient(new SslContextFactory());
 			wsClient.setDaemon(true);
 			wsClient.getPolicy().setMaxBinaryMessageSize(Integer.MAX_VALUE);
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
@@ -175,6 +163,16 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: ", e);
+		} finally {
+			if (previous != null) {
+				CompletableFuture.runAsync(() -> {
+					try {
+						previous.stop();
+					} catch (Exception e) {
+						Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while stopping previous websocket: ", e);
+					}
+				});
+			}
 		}
 	}
 
@@ -186,7 +184,6 @@ public class DiscordWS extends WebSocketAdapter {
 			heartbeatHandler.shutdown();
 			getSession().close(1000, null); // Discord doesn't care about the reason
 			wsClient.stop();
-			httpClient.stop();
 			hasReceivedReady = false;
 			isReady = false;
 		} catch (Exception e) {
