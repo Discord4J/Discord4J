@@ -124,7 +124,7 @@ public class DiscordWS extends WebSocketAdapter {
 		hasReceivedReady = false;
 		heartbeatHandler.shutdown();
 		if (!(this.state == State.DISCONNECTING || statusCode == 4003 || statusCode == 4004 || statusCode == 4005 ||
-				statusCode == 4010) && !(statusCode == 1001 && reason.equals("Shutdown"))) {
+				statusCode == 4010) && !(statusCode == 1001 && reason != null && reason.equals("Shutdown"))) {
 			this.state = State.RESUMING;
 			client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.ABNORMAL_CLOSE, shard));
 			client.reconnectManager.scheduleReconnect(this);
