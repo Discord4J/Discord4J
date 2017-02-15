@@ -1,5 +1,5 @@
 <img align="right" src="http://i.imgur.com/quyShBK.png" height="320" width="320">
-# Discord4J [![CircleCI](https://circleci.com/gh/austinv11/Discord4J/tree/dev.svg?style=svg)](https://circleci.com/gh/austinv11/Discord4J/tree/dev) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) [![Dependency Status](https://www.versioneye.com/user/projects/57b27840b9c824005436e491/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57b27840b9c824005436e491) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY)
+# Discord4J [![CircleCI](https://circleci.com/gh/austinv11/Discord4J/tree/dev.svg?style=svg)](https://circleci.com/gh/austinv11/Discord4J/tree/dev) [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY)
 
 Java interface for the official [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
