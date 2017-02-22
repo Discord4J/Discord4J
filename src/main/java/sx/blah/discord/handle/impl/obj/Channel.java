@@ -265,7 +265,7 @@ public class Channel implements IChannel {
 		}
 
 		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, maxCount));
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
 		else
 			return new MessageHistory(retrieved);
 	}
@@ -299,7 +299,7 @@ public class Channel implements IChannel {
 		}
 
 		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, maxCount));
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
 		else
 			return new MessageHistory(retrieved);
 	}
@@ -337,7 +337,7 @@ public class Channel implements IChannel {
 		}
 
 		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, maxCount));
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
 		else
 			return new MessageHistory(retrieved);
 	}
@@ -377,7 +377,7 @@ public class Channel implements IChannel {
 		}
 
 		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, maxCount));
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
 		else
 			return new MessageHistory(retrieved);
 	}
@@ -413,7 +413,7 @@ public class Channel implements IChannel {
 		}
 
 		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, maxCount));
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
 		else
 			return new MessageHistory(retrieved);
 	}
@@ -458,7 +458,7 @@ public class Channel implements IChannel {
 		}
 
 		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, maxCount));
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
 		else
 			return new MessageHistory(retrieved);
 	}
