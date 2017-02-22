@@ -257,7 +257,8 @@ public class Channel implements IChannel {
 
 				retrieved.addAll(toAdd);
 
-				lastID.set(chunk[chunk.length-1].getID());
+				if (chunk.length > 0)
+					lastID.set(chunk[chunk.length-1].getID());
 
 				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount);//Done when the messages retrieved are not matching the requested count
 			}).get())
@@ -328,7 +329,8 @@ public class Channel implements IChannel {
 
 					retrieved.addAll(toAdd);
 
-					lastID.set(chunk[chunk.length-1].getID());
+					if (chunk.length > 0)
+						lastID.set(chunk[chunk.length-1].getID());
 
 					return toAdd.size() != chunk.length || chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
 				}).get())
@@ -369,7 +371,8 @@ public class Channel implements IChannel {
 
 				retrieved.addAll(Arrays.asList(chunk));
 
-				lastID.set(chunk[chunk.length-1].getID());
+				if (chunk.length > 0)
+					lastID.set(chunk[chunk.length-1].getID());
 
 				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
 			}).get())
@@ -450,7 +453,8 @@ public class Channel implements IChannel {
 						return true; //Finish early
 				}
 
-				lastID.set(chunk[chunk.length-1].getID());
+				if (chunk.length > 0)
+					lastID.set(chunk[chunk.length-1].getID());
 
 				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
 			}).get())
