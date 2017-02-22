@@ -73,6 +73,7 @@ public class Discord4J {
 	/**
 	 * Whether to log when the user doesn't have the permissions to view a channel.
          */
+	@Deprecated
 	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
 	 * Whether to allow for audio to be used.
@@ -206,7 +207,9 @@ public class Discord4J {
 
 	/**
 	 * This disables logging for when the user doesn't have the required permissions to view a channel.
+	 * @deprecated This functionality isn't available in MessageHistories.
          */
+	@Deprecated
 	public static void disableChannelWarnings() {
 		ignoreChannelWarnings.set(true);
 	}

@@ -13,6 +13,7 @@ import sx.blah.discord.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int userLimit = 0;
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public VoiceChannel(DiscordClientImpl client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
@@ -131,6 +132,101 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public MessageList getMessages() {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(String id, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(String id, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(String beginID, String endID, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistory() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistory(int messageCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(String id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(String beginID, String endID) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getFullMessageHistory() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IMessage> bulkDelete() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IMessage> bulkDelete(List<IMessage> messages) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getMaxInternalCacheCount() {
+		return 0;
+	}
+
+	@Override
+	public int getInternalCacheCount() {
+		return 0;
 	}
 
 	@Override

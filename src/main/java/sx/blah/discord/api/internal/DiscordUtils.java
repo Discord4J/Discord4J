@@ -346,7 +346,7 @@ public class DiscordUtils {
 			}
 		}
 		if (channel == null) {
-			channel = new PrivateChannel(shard.getClient(), recipient, id);
+			channel = new PrivateChannel((DiscordClientImpl) shard.getClient(), recipient, id);
 		}
 
 		return channel;
@@ -359,8 +359,8 @@ public class DiscordUtils {
 	 * @param json    The json response.
 	 * @return The message object.
 	 */
-	public static IMessage getMessageFromJSON(IChannel channel, MessageObject json) {
-		if (channel.getMessages() != null && channel.getMessages().contains(json.id)) {
+	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
+		if (channel.messages != null && channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setEmbedded(getEmbedsFromJSON(json));
@@ -434,7 +434,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new Channel(guild.getClient(), json.name, json.id, guild, json.topic, json.position,
+			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					roleOverrides, userOverrides);
 		}
 
@@ -530,7 +530,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new VoiceChannel(guild.getClient(), json.name, json.id, guild, json.topic, json.position,
+			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					json.user_limit, json.bitrate, roleOverrides, userOverrides);
 		}
 

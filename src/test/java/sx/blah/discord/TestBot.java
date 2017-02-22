@@ -8,6 +8,7 @@ import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.obj.Message;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
@@ -15,6 +16,7 @@ import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -88,7 +90,7 @@ public class TestBot {
 
 							//Clearing spoofbot's mess from before
 							synchronized (client) {
-								for (IMessage message : spoofChannel.getMessages()) {
+								for (IMessage message : spoofChannel.getMessageHistory()) {
 									RequestBuffer.request(() -> {
 										try {
 											message.delete();
@@ -155,7 +157,7 @@ public class TestBot {
 								} else if (m.getContent().startsWith(".clear")) {
 									IChannel c = client.getChannelByID(m.getChannel().getID());
 									if (null != c) {
-										c.getMessages().stream().filter(message -> message.getAuthor().getID()
+										c.getMessageHistory().stream().filter(message -> message.getAuthor().getID()
 												.equalsIgnoreCase(client.getOurUser().getID())).forEach(message -> {
 											try {
 												Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
@@ -262,7 +264,6 @@ public class TestBot {
 									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
 									player.shuffle();
 								} else if (m.getContent().startsWith(".spam")) {
-									m.getChannel().getMessages().setCacheCapacity(100);
 									new Timer().scheduleAtFixedRate(new TimerTask() {
 										@Override
 										public void run() {
@@ -293,22 +294,12 @@ public class TestBot {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-						
 					}
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						for (int i = 1;i < Integer.MAX_VALUE; i++) {
-							int finalI = i;
-							RequestBuffer.request(() -> {
-								try {
-									System.out.println(finalI);
-									message.reply(finalI+"");
-								} catch (DiscordException | MissingPermissionsException e) {
-									e.printStackTrace();
-								}
-							});
-						}
+						MessageHistory his = message.getChannel().getMessageHistory(100);
+						Discord4J.LOGGER.info("Early: "+his.getEarliestMessage().getTimestamp()+" Late: "+his.getLatestMessage().getTimestamp());
 					}
 				});
 			}

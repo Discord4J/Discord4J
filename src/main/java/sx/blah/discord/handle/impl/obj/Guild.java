@@ -696,7 +696,7 @@ public class Guild implements IGuild {
 	@Override
 	public IMessage getMessageByID(String id) {
 		IMessage message =  channels.stream()
-									.map(IChannel::getMessages)
+									.map(IChannel::getMessageHistory)
 									.flatMap(List::stream)
 									.filter(msg -> msg.getID().equalsIgnoreCase(id))
 									.findAny().orElse(null);

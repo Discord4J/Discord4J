@@ -104,14 +104,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	volatile Timer keepAlive;
 	private final int retryCount;
+	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount) {
+							 int retryCount, int maxCacheCount) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
+		this.maxCacheCount = maxCacheCount;
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
@@ -513,5 +515,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	public int getRetryCount() {
 		return retryCount;
+	}
+
+	public int getMaxCacheCount() {
+		return maxCacheCount;
 	}
 }

@@ -13,6 +13,7 @@ import sx.blah.discord.handle.impl.events.GuildLeaveEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.MessageSendEvent;
+import sx.blah.discord.handle.impl.obj.Channel;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IPrivateChannel;
@@ -28,7 +29,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  *
  * The list gets a message on demand, it either fetches it from the cache or it requests the message from Discord
  * if not cached.
+ *
+ * @deprecated Use {@link MessageHistory} instead, this should NOT be relied on to work properly anymore.
  */
+@Deprecated
 public class MessageList extends AbstractList<IMessage> implements List<IMessage> {
 
 	/**
@@ -183,7 +187,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		}
 
 		for (MessageObject messageResponse : messages) {
-			if (!add(DiscordUtils.getMessageFromJSON(channel, messageResponse), true))
+			if (!add(DiscordUtils.getMessageFromJSON((Channel) channel, messageResponse), true))
 				return false;
 		}
 
@@ -346,7 +350,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		if (message == null && hasPermissions() && client.isReady())
 			try {
-				return DiscordUtils.getMessageFromJSON(channel, client.REQUESTS.GET.makeRequest(
+				return DiscordUtils.getMessageFromJSON((Channel) channel, client.REQUESTS.GET.makeRequest(
 						DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
 						MessageObject.class));
 			} catch (Exception ignored) {}

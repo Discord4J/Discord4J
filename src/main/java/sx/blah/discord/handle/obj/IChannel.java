@@ -2,17 +2,12 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.obj.PrivateChannel;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +28,203 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Gets the messages in this channel.
 	 *
 	 * @return The list of messages in the channel.
+	 * @deprecated See {@link MessageHistory}
 	 */
+	@Deprecated
 	MessageList getMessages();
+
+	/**
+	 * Gets the last {@link #getMaxInternalCacheCount()} received messages since startup.
+	 *
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistory();
+
+	/**
+	 * Gets the specified number of received messages.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param messageCount The amount of messages to go back by.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistory(int messageCount);
+
+	/**
+	 * Gets the messages from a specified date to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryFrom(LocalDateTime startDate);
+
+	/**
+	 * Gets the messages from a specified date to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount);
+
+	/**
+	 * Gets the messages from now up until the specified date.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
+
+	/**
+	 * Gets the messages from now up until the specified date.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxMessageCount);
+
+	/**
+	 * Gets the messages in the specified range of dates.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+
+	/**
+	 * Gets the messages in the specified range of dates.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
+
+	/**
+	 * Gets the messages from a specified message id to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to start gathering messages from (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryFrom(String id);
+
+	/**
+	 * Gets the messages from a specified message id to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to start gathering messages from (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryFrom(String id, int maxMessageCount);
+
+	/**
+	 * Gets the messages from now up until the specified message id.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryTo(String id);
+
+	/**
+	 * Gets the messages from now up until the specified message id.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryTo(String id, int maxMessageCount);
+
+	/**
+	 * Gets the messages in the specified range of message ids.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param beginID The id to start gathering messages from (inclusive).
+	 * @param endID The id to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryIn(String beginID, String endID);
+
+	/**
+	 * Gets the messages in the specified range of message ids.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param beginID The id to start gathering messages from (inclusive).
+	 * @param endID The id to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryIn(String beginID, String endID, int maxMessageCount);
+
+	/**
+	 * This attempts to get ALL messages in the channel.
+	 * NOTE: This will usually take awhile to run, so it is recommended to only run this method if ABSOLUTELY
+	 * necessary.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @return The messages.
+	 */
+	MessageHistory getFullMessageHistory();
+
+	/**
+	 * This will attempt to bulk delete as many messages as possible in this guild.
+	 * NOTE: Bulk deletes can only be applied to messages less than 2 weeks old.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @return The messages deleted.
+	 */
+	List<IMessage> bulkDelete();
+
+	/**
+	 * This will attempt to bulk delete the specified messages in the list.
+	 * NOTE: Bulk deletes can only be applied to messages less than 2 weeks old.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param messages The messages to try and bulk delete.
+	 * @return The messages actually deleted in the bulk delete.
+	 */
+	List<IMessage> bulkDelete(List<IMessage> messages);
+
+	/**
+	 * This gets the number of messages which can be cached by this channel.
+	 *
+	 * @return The number that can be cached.
+	 */
+	int getMaxInternalCacheCount();
+
+	/**
+	 * This gets the number of messages which are currently cached by this channel.
+	 *
+	 * @return The number that can is cached.
+	 */
+	int getInternalCacheCount();
 
 	/**
 	 * Gets a specific message by its id.

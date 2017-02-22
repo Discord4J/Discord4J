@@ -93,8 +93,6 @@ class DispatchHandler {
 			if (MessageList.getEfficiency(client) == null) //User did not manually set the efficiency
 				MessageList.setEfficiency(client, MessageList.EfficiencyLevel.getEfficiencyForGuilds(ready.guilds.length));
 
-			Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "MessageList efficiency set to {}.", MessageList.getEfficiency(client));
-
 			Set<UnavailableGuildObject> waitingGuilds = ConcurrentHashMap.newKeySet(ready.guilds.length);
 			waitingGuilds.addAll(Arrays.asList(ready.guilds));
 
@@ -152,7 +150,7 @@ class DispatchHandler {
 
 			IMessage message = DiscordUtils.getMessageFromJSON(channel, json);
 
-			if (!channel.getMessages().contains(message)) {
+			if (!channel.getMessageHistory().contains(message)) {
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
@@ -168,6 +166,8 @@ class DispatchHandler {
 				if (mentioned) {
 					client.dispatcher.dispatch(new MentionEvent(message));
 				}
+
+				channel.addToCache(message);
 
 				if (message.getAuthor().equals(client.getOurUser())) {
 					client.dispatcher.dispatch(new MessageSendEvent(message));
@@ -333,6 +333,7 @@ class DispatchHandler {
 					client.dispatcher.dispatch(new MessageUnpinEvent(message));
 				}
 				message.setDeleted(true);
+				channel.messages.remove(message);
 				client.dispatcher.dispatch(new MessageDeleteEvent(message));
 			}
 		}

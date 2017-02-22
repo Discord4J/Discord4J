@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.Image;
@@ -16,7 +17,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	 */
 	protected final IUser recipient;
 
-	public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
+	public PrivateChannel(DiscordClientImpl client, IUser recipient, String id) {
 		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
 		this.recipient = recipient;
 	}
