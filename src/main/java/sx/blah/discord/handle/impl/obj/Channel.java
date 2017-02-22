@@ -203,8 +203,10 @@ public class Channel implements IChannel {
 
 	private Collection<IMessage> subDeque(int from, int end) {
 		List<IMessage> list = new ArrayList<>();
-		for (int i = from; i < end; i++)
-			list.add((IMessage) messages.toArray()[i]);
+		if (from >= 0 || end < from) { //Skip this step if the indexes are invalid
+			for (int i = from; i < end; i++)
+				list.add((IMessage) messages.toArray()[i]);
+		}
 		return list;
 	}
 
