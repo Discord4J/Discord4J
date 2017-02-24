@@ -30,7 +30,7 @@ public class RequestBuffer {
 		initialExecutor.execute(() -> {
 			try {
 				future.run();
-				if (!future.callable.successful) {
+				if (!future.callable.successful && future.getDelay(TimeUnit.MILLISECONDS) >= 0) {
 					Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
 							future.getDelay(TimeUnit.MILLISECONDS));
 
@@ -267,7 +267,7 @@ public class RequestBuffer {
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
 					bucket = e.getMethod();
 				} catch (Exception e) {
-					Discord4J.LOGGER.warn(LogMarkers.UTIL, "RequestBuffer handled an uncaught exception!");
+					Discord4J.LOGGER.warn(LogMarkers.UTIL, "RequestBuffer handled an uncaught exception!", e);
 				}
 
 				return null;
