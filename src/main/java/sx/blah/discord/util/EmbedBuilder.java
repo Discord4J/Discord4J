@@ -411,7 +411,7 @@ public class EmbedBuilder {
 			// footer warnings
 			if (embed.footer.icon_url != null && (embed.footer.text == null || embed.footer.text.isEmpty())) {
 				Discord4J.LOGGER
-						.warn("Embed object warning - footer icon without footer text - footer icon will not be " +
+						.warn(LogMarkers.UTIL, "Embed object warning - footer icon without footer text - footer icon will not be " +
 								"visible");
 			}
 		}
@@ -420,12 +420,12 @@ public class EmbedBuilder {
 			if (embed.author.name == null || embed.author.name.isEmpty()) {
 				if (embed.author.icon_url != null) {
 					Discord4J.LOGGER
-							.warn("Embed object warning - author icon without author name - author icon will not be " +
+							.warn(LogMarkers.UTIL, "Embed object warning - author icon without author name - author icon will not be " +
 									"visible");
 				}
 				if (embed.author.url != null) {
 					Discord4J.LOGGER
-							.warn("Embed object warning - author URL without author name - URL is useless and cannot" +
+							.warn(LogMarkers.UTIL, "Embed object warning - author URL without author name - URL is useless and cannot" +
 									" " +
 									"be clicked");
 				}

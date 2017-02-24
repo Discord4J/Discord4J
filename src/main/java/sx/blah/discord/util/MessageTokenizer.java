@@ -642,7 +642,7 @@ public class MessageTokenizer {
 					return tokenizer.getClient()
 							.getInviteForCode(getContent().substring(getContent().lastIndexOf("/")));
 				} catch (DiscordException e) {
-					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+					Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 				}
 
 				return null;
