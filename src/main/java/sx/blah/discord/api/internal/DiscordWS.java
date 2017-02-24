@@ -90,7 +90,7 @@ public class DiscordWS extends WebSocketAdapter {
 				try {
 					dispatchHandler.handle(payload);
 				} catch (Exception e) {
-					e.printStackTrace();
+					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
 				}
 				break;
 			case INVALID_SESSION:

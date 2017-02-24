@@ -16,6 +16,8 @@
 package sx.blah.discord.api.internal;
 
 import sun.net.spi.nameservice.dns.DNSNameService;
+import sx.blah.discord.Discord4J;
+import sx.blah.discord.util.LogMarkers;
 
 import javax.sound.sampled.spi.AudioFileReader;
 import javax.sound.sampled.spi.FormatConversionProvider;
@@ -108,22 +110,14 @@ class ServiceUtil {
                 //System.out.println(service.getCanonicalName());
                 //loader.forEach(provider -> System.out.println("  - " + provider.getClass().getName()));
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        } catch (IOException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+			Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Internal Exception", e);
         } finally {
             try {
                 if (zos != null) zos.close();
                 if (fos != null) fos.close();
             } catch (IOException e) {
-                e.printStackTrace();
+				Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Internal Exception", e);
             }
         }
     }

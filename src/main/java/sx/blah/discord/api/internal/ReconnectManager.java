@@ -41,7 +41,7 @@ public class ReconnectManager {
 				Thread.sleep(5000); // Login ratelimit
 				beginReconnect(); // Start next reconnect
 			} catch (Exception e) {
-				e.printStackTrace();
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
 			}
 		}
 	}
@@ -54,7 +54,7 @@ public class ReconnectManager {
 				incrementAttempt();
 				doReconnect(); // Attempt again
 			} catch (Exception e) {
-				e.printStackTrace();
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
 			}
 		} else {
 			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnect for shard {} failed after {} attempts.", toReconnect.peek().shard.getInfo()[0], maxAttempts);

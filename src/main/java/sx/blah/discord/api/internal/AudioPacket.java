@@ -17,7 +17,9 @@ package sx.blah.discord.api.internal;
 
 import com.sun.jna.ptr.PointerByReference;
 import org.peergos.crypto.TweetNaCl;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.audio.impl.AudioManager;
+import sx.blah.discord.util.LogMarkers;
 
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
@@ -45,7 +47,7 @@ public class AudioPacket {
 			error = IntBuffer.allocate(4);
 			monoOpusDecoder = Opus.INSTANCE.opus_decoder_create(AudioManager.OPUS_SAMPLE_RATE, AudioManager.OPUS_MONO_CHANNEL_COUNT, error);
 		} catch (UnsatisfiedLinkError e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Internal Exception", e);
 			stereoOpusEncoder = null;
 			stereoOpusDecoder = null;
 			monoOpusEncoder = null;

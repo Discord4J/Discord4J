@@ -101,7 +101,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 
 					beginHeartbeat(ready.heartbeat_interval);
 				} catch (IOException e) {
-					e.printStackTrace();
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 				}
 				break;
 			case SESSION_DESCRIPTION:
