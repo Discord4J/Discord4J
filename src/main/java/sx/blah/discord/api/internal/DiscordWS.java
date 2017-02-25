@@ -209,11 +209,13 @@ public class DiscordWS extends WebSocketAdapter {
 	}
 
 	public void send(String message) {
+		String filteredMessage = message.replace(client.getToken(), "hunter2");
+
 		if (getSession() != null && getSession().isOpen()) {
-			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Sending: " + message);
+			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Sending: " + filteredMessage);
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
-			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session: {}", message);
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session: {}", filteredMessage);
 		}
 	}
 
