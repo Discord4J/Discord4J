@@ -54,7 +54,7 @@ public class PresenceImpl implements IPresence {
 
 	@Override
 	public String toString() {
-		return status + " - playing " + getPlayingText().orElse(null) + " with streaming URL " +
-				getStreamingUrl().orElse(null);
+		return status + (getPlayingText().isPresent() ? " - playing " + getPlayingText().get() : "") +
+				(getStreamingUrl().isPresent() ? " with streaming URL " + getStreamingUrl().get() : "");
 	}
 }
