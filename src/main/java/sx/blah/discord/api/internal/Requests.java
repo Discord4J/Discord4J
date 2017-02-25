@@ -226,11 +226,12 @@ public class Requests {
 		}
 
 		private String request(HttpUriRequest request) throws RateLimitException, DiscordException {
-			return request(request, 1, client.getRetryCount());
+			return request(request, 1, client == null ? 0 : client.getRetryCount());
 		}
 
 		private String request(HttpUriRequest request, long sleepTime, int retry) throws DiscordException, RateLimitException {
-			request.addHeader("Authorization", client.getToken());
+			if (client != null)
+				request.addHeader("Authorization", client.getToken());
 
 			if (request.containsHeader("Content-Type")) {
 				if (request.getFirstHeader("Content-Type").getValue().equals("multipart/form-data")) {
@@ -286,8 +287,7 @@ public class Requests {
 				} else if (responseCode >= 500 && responseCode < 600) {
 					if (retry == 0)
 						throw new DiscordException(String.format("Failed to make a %s failed request after %s tries!",
-								responseCode,
-								client.getRetryCount()));
+								responseCode, client == null ? 0 : client.getRetryCount()));
 					try {
 						Thread.sleep(sleepTime);
 					} catch (InterruptedException e) {
