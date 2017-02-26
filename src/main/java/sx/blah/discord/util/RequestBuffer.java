@@ -209,6 +209,8 @@ public class RequestBuffer {
 		@Override
 		public T get() {
 			try {
+				while (!isDone() && !isCancelled()) {}
+
 				return backing.get();
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
@@ -219,7 +221,16 @@ public class RequestBuffer {
 
 		@Override
 		public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+			long timeoutTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
 			try {
+				while (!isDone() && !isCancelled() && System.currentTimeMillis() <= timeoutTime) {}
+
+				if (System.currentTimeMillis() > timeoutTime)
+					throw new TimeoutException();
+
+				if (isCancelled())
+					throw new InterruptedException();
+
 				return backing.get();
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
