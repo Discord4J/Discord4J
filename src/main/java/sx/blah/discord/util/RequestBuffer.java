@@ -309,10 +309,12 @@ public class RequestBuffer {
 
 						futures.forEach((RequestFuture future) -> {
 							try {
-								future.run();
-								if (future.callable.rateLimited) {
-									future.backing = new FutureTask<>(future.callable);
-									futuresToRetry.add(future);
+								if (!future.isCancelled()) {
+									future.run();
+									if (future.callable.rateLimited) {
+										future.backing = new FutureTask<>(future.callable);
+										futuresToRetry.add(future);
+									}
 								}
 							} catch (Exception e) {
 								Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught while attempting to execute a request", e);
