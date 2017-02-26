@@ -32,7 +32,7 @@ public class MemberEditRequest {
 	public String channel_id;
 
 	public MemberEditRequest(IRole[] roles, String nick, boolean mute, boolean deaf, VoiceChannel channel) {
-		this.roles = Arrays.stream(roles).map(IRole::getID).toArray(String[]::new);
+		this.roles = Arrays.stream(roles).map(IRole::getID).distinct().toArray(String[]::new);
 		this.nick = nick;
 		this.mute = mute;
 		this.deaf = deaf;
