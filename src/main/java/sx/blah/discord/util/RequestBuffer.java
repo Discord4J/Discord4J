@@ -30,7 +30,7 @@ public class RequestBuffer {
 		initialExecutor.execute(() -> {
 			try {
 				future.run();
-				if (!future.callable.successful && future.getDelay(TimeUnit.MILLISECONDS) >= 0) {
+				if (future.callable.rateLimited && future.getDelay(TimeUnit.MILLISECONDS) >= 0) {
 					Discord4J.LOGGER.debug(LogMarkers.UTIL, "Attempted request rate-limited, queueing retry in {}ms",
 							future.getDelay(TimeUnit.MILLISECONDS));
 
@@ -164,7 +164,7 @@ public class RequestBuffer {
 		 */
 		@Override
 		public long getDelay(TimeUnit unit) {
-			if (isDone() && callable.successful)
+			if (isDone() || isCancelled())
 				return 0;
 
 			return unit.convert(callable.timeForNextRequest-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
@@ -203,7 +203,7 @@ public class RequestBuffer {
 
 		@Override
 		public boolean isDone() {
-			return backing.isDone();
+			return backing.isDone() && !callable.rateLimited;
 		}
 
 		@Override
@@ -243,7 +243,7 @@ public class RequestBuffer {
 			volatile boolean firstAttempt = true;
 			volatile long timeForNextRequest = -1;
 			volatile String bucket = null;
-			volatile boolean successful = false;
+			volatile boolean rateLimited = false;
 
 			RequestCallable(IRequest<T> request, RequestFuture<T> future) {
 				this.request = request;
@@ -259,13 +259,14 @@ public class RequestBuffer {
 					if (!future.isCancelled()) {
 						T value = request.request();
 						timeForNextRequest = -1;
-						successful = true;
+						rateLimited = false;
 						return value;
 					}
 				} catch (RateLimitException e) {
 					firstAttempt = false;
 					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
 					bucket = e.getMethod();
+					rateLimited = true;
 				} catch (Exception e) {
 					Discord4J.LOGGER.warn(LogMarkers.UTIL, "RequestBuffer handled an uncaught exception!", e);
 				}
@@ -298,7 +299,7 @@ public class RequestBuffer {
 						futures.forEach((RequestFuture future) -> {
 							try {
 								future.run();
-								if (!future.callable.successful) {
+								if (future.callable.rateLimited) {
 									future.backing = new FutureTask<>(future.callable);
 									futuresToRetry.add(future);
 								}
