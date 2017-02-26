@@ -44,9 +44,7 @@ public class MemberEditRequest {
 	}
 
 	public MemberEditRequest(IRole[] roles) {
-		this.roles = new String[roles.length];
-		for (int i = 0; i < roles.length; i++)
-			this.roles[i] = roles[i].getID();
+		this.roles = Arrays.stream(roles).map(IRole::getID).distinct().toArray(String[]::new);
 	}
 
 	public MemberEditRequest(String channelID) {
