@@ -157,7 +157,9 @@ public class EmbedObject {
 		 */
 		public int width;
 
-        public ThumbnailObject(String url, String proxy_url, int height, int width) {
+		public ThumbnailObject() {}
+
+		public ThumbnailObject(String url, String proxy_url, int height, int width) {
             this.url = url;
             this.proxy_url = proxy_url;
             this.height = height;
@@ -182,8 +184,11 @@ public class EmbedObject {
 		 */
         public int width;
 
-        public VideoObject(String url, int height, int width) {
+		public VideoObject() {}
+
+		public VideoObject(String url, int height, int width) {
             this.url = url;
+
             this.height = height;
             this.width = width;
         }
@@ -210,7 +215,9 @@ public class EmbedObject {
 		 */
 		public int width;
 
-        public ImageObject(String url, String proxy_url, int height, int width) {
+		public ImageObject() {}
+
+		public ImageObject(String url, String proxy_url, int height, int width) {
             this.url = url;
             this.proxy_url = proxy_url;
             this.height = height;
@@ -231,7 +238,9 @@ public class EmbedObject {
 		 */
 		public String url;
 
-        public ProviderObject(String name, String url) {
+		public ProviderObject() {}
+
+		public ProviderObject(String name, String url) {
             this.name = name;
             this.url = url;
         }
@@ -258,7 +267,9 @@ public class EmbedObject {
 		 */
 		public String proxy_icon_url;
 
-        public AuthorObject(String name, String url, String icon_url, String proxy_icon_url) {
+		public AuthorObject() {}
+
+		public AuthorObject(String name, String url, String icon_url, String proxy_icon_url) {
             this.name = name;
             this.url = url;
             this.icon_url = icon_url;
@@ -283,7 +294,9 @@ public class EmbedObject {
 		 */
         public String proxy_icon_url;
 
-        public FooterObject(String text, String icon_url, String proxy_icon_url) {
+		public FooterObject() {}
+
+		public FooterObject(String text, String icon_url, String proxy_icon_url) {
             this.text = text;
             this.icon_url = icon_url;
             this.proxy_icon_url = proxy_icon_url;
@@ -306,6 +319,8 @@ public class EmbedObject {
 		 * Whether the field should be displayed inline.
 		 */
         public boolean inline;
+
+        public EmbedFieldObject() {}
 
         public EmbedFieldObject(String name, String value, boolean inline) {
             this.name = name;
