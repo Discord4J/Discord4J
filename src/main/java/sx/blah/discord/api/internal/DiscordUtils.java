@@ -24,12 +24,8 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
@@ -370,7 +366,7 @@ public class DiscordUtils {
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
 			message.setEditedTimestamp(
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
-			message.setPinned(json.pinned);
+			message.setPinned(Boolean.TRUE.equals(json.pinned));
 			message.setChannelMentions();
 
 			return message;
@@ -379,7 +375,7 @@ public class DiscordUtils {
 					getUserFromJSON(channel.getShard(), json.author), channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
-					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json),
+					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
 					getReactionsFromJson(channel.getShard(), json.reactions), json.webhook_id);
 
 			for (IReaction reaction : message.getReactions()) {
@@ -388,6 +384,40 @@ public class DiscordUtils {
 
 			return message;
 		}
+	}
+
+	/**
+	 * Updates a message object with the non-null or non-empty contents of a json response.
+	 *
+	 * @param toUpdate The message.
+	 * @param json     The json response.
+	 * @return The message object.
+	 */
+	public static IMessage getUpdatedMessageFromJSON(IMessage toUpdate, MessageObject json) {
+		if (toUpdate == null)
+			return null;
+
+		Message message = (Message) toUpdate;
+		List<IMessage.Attachment> attachments = getAttachmentsFromJSON(json);
+		List<Embed> embeds = getEmbedsFromJSON(json);
+		if (!attachments.isEmpty())
+			message.setAttachments(attachments);
+		if (!embeds.isEmpty())
+			message.setEmbedded(embeds);
+		if (json.content != null) {
+			message.setContent(json.content);
+			message.setMentions(getMentionsFromJSON(json), getRoleMentionsFromJSON(json));
+			message.setMentionsEveryone(json.mention_everyone);
+			message.setChannelMentions();
+		}
+		if (json.timestamp != null)
+			message.setTimestamp(convertFromTimestamp(json.timestamp));
+		if (json.edited_timestamp != null)
+			message.setEditedTimestamp(convertFromTimestamp(json.edited_timestamp));
+		if (json.pinned != null)
+			message.setPinned(json.pinned);
+
+		return message;
 	}
 
 	/**
