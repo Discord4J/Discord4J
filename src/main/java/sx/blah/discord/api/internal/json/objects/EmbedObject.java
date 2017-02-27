@@ -63,6 +63,8 @@ public class EmbedObject {
 	 */
     public EmbedFieldObject[] fields;
 
+	public EmbedObject() {}
+
 	/**
 	 * Please use EmbedBuilder to build these objects.
 	 * @see sx.blah.discord.util.EmbedBuilder

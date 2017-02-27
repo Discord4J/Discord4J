@@ -1,7 +1,7 @@
 package sx.blah.discord.api.internal;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
 import sx.blah.discord.api.internal.json.objects.*;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static sx.blah.discord.api.internal.DiscordUtils.GSON;
+import static sx.blah.discord.api.internal.DiscordUtils.MAPPER;
 
 class DispatchHandler {
 	private DiscordWS ws;
@@ -35,44 +35,44 @@ class DispatchHandler {
 		this.client = (DiscordClientImpl) shard.getClient();
 	}
 
-	public void handle(JsonObject event) {
-		String type = event.get("t").getAsString();
-		JsonElement json = event.get("d");
+	public void handle(JsonNode event) throws JsonProcessingException {
+		String type = event.get("t").asText();
+		JsonNode json = event.get("d");
 		switch (type) {
 			case "RESUMED": resumed(); break;
-			case "READY": ready(GSON.fromJson(json, ReadyResponse.class)); break;
-			case "MESSAGE_CREATE": messageCreate(GSON.fromJson(json, MessageObject.class)); break;
-			case "TYPING_START": typingStart(GSON.fromJson(json, TypingEventResponse.class)); break;
-			case "GUILD_CREATE": guildCreate(GSON.fromJson(json, GuildObject.class)); break;
-			case "GUILD_MEMBER_ADD": guildMemberAdd(GSON.fromJson(json, GuildMemberAddEventResponse.class)); break;
-			case "GUILD_MEMBER_REMOVE": guildMemberRemove(GSON.fromJson(json, GuildMemberRemoveEventResponse.class)); break;
-			case "GUILD_MEMBER_UPDATE": guildMemberUpdate(GSON.fromJson(json, GuildMemberUpdateEventResponse.class)); break;
-			case "MESSAGE_UPDATE": messageUpdate(GSON.fromJson(json, MessageObject.class)); break;
-			case "MESSAGE_DELETE": messageDelete(GSON.fromJson(json, MessageDeleteEventResponse.class)); break;
-			case "MESSAGE_DELETE_BULK": messageDeleteBulk(GSON.fromJson(json, MessageDeleteBulkEventResponse.class)); break;
-			case "PRESENCE_UPDATE": presenceUpdate(GSON.fromJson(json, PresenceUpdateEventResponse.class)); break;
-			case "GUILD_DELETE": guildDelete(GSON.fromJson(json, GuildObject.class)); break;
-			case "CHANNEL_CREATE": channelCreate(json.getAsJsonObject()); break;
-			case "CHANNEL_DELETE": channelDelete(GSON.fromJson(json, ChannelObject.class)); break;
+			case "READY": ready(MAPPER.treeToValue(json, ReadyResponse.class)); break;
+			case "MESSAGE_CREATE": messageCreate(MAPPER.treeToValue(json, MessageObject.class)); break;
+			case "TYPING_START": typingStart(MAPPER.treeToValue(json, TypingEventResponse.class)); break;
+			case "GUILD_CREATE": guildCreate(MAPPER.treeToValue(json, GuildObject.class)); break;
+			case "GUILD_MEMBER_ADD": guildMemberAdd(MAPPER.treeToValue(json, GuildMemberAddEventResponse.class)); break;
+			case "GUILD_MEMBER_REMOVE": guildMemberRemove(MAPPER.treeToValue(json, GuildMemberRemoveEventResponse.class)); break;
+			case "GUILD_MEMBER_UPDATE": guildMemberUpdate(MAPPER.treeToValue(json, GuildMemberUpdateEventResponse.class)); break;
+			case "MESSAGE_UPDATE": messageUpdate(MAPPER.treeToValue(json, MessageObject.class)); break;
+			case "MESSAGE_DELETE": messageDelete(MAPPER.treeToValue(json, MessageDeleteEventResponse.class)); break;
+			case "MESSAGE_DELETE_BULK": messageDeleteBulk(MAPPER.treeToValue(json, MessageDeleteBulkEventResponse.class)); break;
+			case "PRESENCE_UPDATE": presenceUpdate(MAPPER.treeToValue(json, PresenceUpdateEventResponse.class)); break;
+			case "GUILD_DELETE": guildDelete(MAPPER.treeToValue(json, GuildObject.class)); break;
+			case "CHANNEL_CREATE": channelCreate(json); break;
+			case "CHANNEL_DELETE": channelDelete(MAPPER.treeToValue(json, ChannelObject.class)); break;
 			case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */ break;
 			case "CHANNEL_PINS_ACK": /* Ignored */ break;
-			case "USER_UPDATE": userUpdate(GSON.fromJson(json, UserUpdateEventResponse.class)); break;
-			case "CHANNEL_UPDATE": channelUpdate(GSON.fromJson(json, ChannelObject.class)); break;
-			case "GUILD_MEMBERS_CHUNK": guildMembersChunk(GSON.fromJson(json, GuildMemberChunkEventResponse.class)); break;
-			case "GUILD_UPDATE": guildUpdate(GSON.fromJson(json, GuildObject.class)); break;
-			case "GUILD_ROLE_CREATE": guildRoleCreate(GSON.fromJson(json, GuildRoleEventResponse.class)); break;
-			case "GUILD_ROLE_UPDATE": guildRoleUpdate(GSON.fromJson(json, GuildRoleEventResponse.class)); break;
-			case "GUILD_ROLE_DELETE": guildRoleDelete(GSON.fromJson(json, GuildRoleDeleteEventResponse.class)); break;
-			case "GUILD_BAN_ADD": guildBanAdd(GSON.fromJson(json, GuildBanEventResponse.class)); break;
-			case "GUILD_BAN_REMOVE": guildBanRemove(GSON.fromJson(json, GuildBanEventResponse.class)); break;
-			case "GUILD_EMOJIS_UPDATE": guildEmojisUpdate(GSON.fromJson(json, GuildEmojiUpdateResponse.class)); break;
+			case "USER_UPDATE": userUpdate(MAPPER.treeToValue(json, UserUpdateEventResponse.class)); break;
+			case "CHANNEL_UPDATE": channelUpdate(MAPPER.treeToValue(json, ChannelObject.class)); break;
+			case "GUILD_MEMBERS_CHUNK": guildMembersChunk(MAPPER.treeToValue(json, GuildMemberChunkEventResponse.class)); break;
+			case "GUILD_UPDATE": guildUpdate(MAPPER.treeToValue(json, GuildObject.class)); break;
+			case "GUILD_ROLE_CREATE": guildRoleCreate(MAPPER.treeToValue(json, GuildRoleEventResponse.class)); break;
+			case "GUILD_ROLE_UPDATE": guildRoleUpdate(MAPPER.treeToValue(json, GuildRoleEventResponse.class)); break;
+			case "GUILD_ROLE_DELETE": guildRoleDelete(MAPPER.treeToValue(json, GuildRoleDeleteEventResponse.class)); break;
+			case "GUILD_BAN_ADD": guildBanAdd(MAPPER.treeToValue(json, GuildBanEventResponse.class)); break;
+			case "GUILD_BAN_REMOVE": guildBanRemove(MAPPER.treeToValue(json, GuildBanEventResponse.class)); break;
+			case "GUILD_EMOJIS_UPDATE": guildEmojisUpdate(MAPPER.treeToValue(json, GuildEmojiUpdateResponse.class)); break;
 			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */ break;
-			case "VOICE_STATE_UPDATE": voiceStateUpdate(GSON.fromJson(json, VoiceStateObject.class)); break;
-			case "VOICE_SERVER_UPDATE": voiceServerUpdate(GSON.fromJson(json, VoiceUpdateResponse.class)); break;
-			case "MESSAGE_REACTION_ADD": reactionAdd(GSON.fromJson(json, ReactionEventResponse.class)); break;
-			case "MESSAGE_REACTION_REMOVE": reactionRemove(GSON.fromJson(json, ReactionEventResponse.class)); break;
+			case "VOICE_STATE_UPDATE": voiceStateUpdate(MAPPER.treeToValue(json, VoiceStateObject.class)); break;
+			case "VOICE_SERVER_UPDATE": voiceServerUpdate(MAPPER.treeToValue(json, VoiceUpdateResponse.class)); break;
+			case "MESSAGE_REACTION_ADD": reactionAdd(MAPPER.treeToValue(json, ReactionEventResponse.class)); break;
+			case "MESSAGE_REACTION_REMOVE": reactionRemove(MAPPER.treeToValue(json, ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
-			case "WEBHOOKS_UPDATE": webhookUpdate(GSON.fromJson(json, WebhookObject.class)); break;
+			case "WEBHOOKS_UPDATE": webhookUpdate(MAPPER.treeToValue(json, WebhookObject.class)); break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
@@ -388,11 +388,11 @@ class DispatchHandler {
 		}
 	}
 
-	private void channelCreate(JsonObject json) {
-		boolean isPrivate = json.get("is_private").getAsBoolean();
+	private void channelCreate(JsonNode json) throws JsonProcessingException {
+		boolean isPrivate = json.get("is_private").asBoolean(false);
 
 		if (isPrivate) { // PM channel.
-			PrivateChannelObject event = GSON.fromJson(json, PrivateChannelObject.class);
+			PrivateChannelObject event = MAPPER.treeToValue(json, PrivateChannelObject.class);
 			String id = event.id;
 			boolean contained = false;
 			for (IPrivateChannel privateChannel : shard.privateChannels) {
@@ -406,7 +406,7 @@ class DispatchHandler {
 			shard.privateChannels.add(DiscordUtils.getPrivateChannelFromJSON(shard, event));
 
 		} else { // Regular channel.
-			ChannelObject event = GSON.fromJson(json, ChannelObject.class);
+			ChannelObject event = MAPPER.treeToValue(json, ChannelObject.class);
 			String type = event.type;
 			Guild guild = (Guild) client.getGuildByID(event.guild_id);
 			if (guild != null) {

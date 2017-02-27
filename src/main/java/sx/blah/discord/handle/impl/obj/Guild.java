@@ -1,6 +1,5 @@
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -21,7 +20,6 @@ import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -418,8 +416,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(roles)));
+				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(), new MemberEditRequest(roles));
 
 	}
 
@@ -428,8 +425,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(deafen)));
+				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(), new MemberEditRequest(deafen));
 	}
 
 	@Override
@@ -437,8 +433,7 @@ public class Guild implements IGuild {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(mute, true)));
+				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(), new MemberEditRequest(mute, true));
 	}
 
 	@Override
@@ -452,7 +447,7 @@ public class Guild implements IGuild {
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
-				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(nick == null ? "" : nick, true)));
+				new MemberEditRequest(nick == null ? "" : nick, true));
 	}
 
 	@Override
@@ -540,7 +535,7 @@ public class Guild implements IGuild {
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS+getID()+"/channels",
-				DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "text")),
+				new ChannelCreateRequest(name, "text"),
 				ChannelObject.class);
 
 		IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
@@ -559,7 +554,7 @@ public class Guild implements IGuild {
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS+getID()+"/channels",
-				DiscordUtils.GSON.toJson(new ChannelCreateRequest(name, "voice")),
+				new ChannelCreateRequest(name, "voice"),
 				ChannelObject.class);
 
 		IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);

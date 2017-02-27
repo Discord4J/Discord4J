@@ -21,6 +21,7 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuilder;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -504,8 +505,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		InviteObject invite;
 		try {
-			invite = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
-		} catch (DiscordException | RateLimitException e) {
+			invite = DiscordUtils.MAPPER.readValue(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
+		} catch (DiscordException | RateLimitException | IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite: ", e);
 			return null;
 		}

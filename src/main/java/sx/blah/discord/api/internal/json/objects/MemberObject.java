@@ -29,6 +29,8 @@ public class MemberObject {
 	 */
 	public boolean mute;
 
+	public MemberObject() {}
+
 	public MemberObject(UserObject user, String[] roles) {
 		this.user = user;
 		this.roles = roles;

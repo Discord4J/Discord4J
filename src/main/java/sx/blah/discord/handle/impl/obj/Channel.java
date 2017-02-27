@@ -23,10 +23,7 @@ import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -176,12 +173,7 @@ public class Channel implements IChannel {
 //			queryParams += "&after="+after;
 //		}
 
-		String response = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages" + queryParams);
-
-		if (response == null)
-			return new IMessage[0];
-
-		MessageObject[] messages = DiscordUtils.GSON.fromJson(response, MessageObject[].class);
+		MessageObject[] messages = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages" + queryParams, MessageObject[].class);
 
 		if (messages.length == 0) {
 			return new IMessage[0];
@@ -610,9 +602,9 @@ public class Channel implements IChannel {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.EMBED_LINKS));
 		}
 
-		MessageObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+		MessageObject response = client.REQUESTS.POST.makeRequest(
 				DiscordEndpoints.CHANNELS+id+"/messages",
-				DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, tts)),
+				new MessageRequest(content, embed, tts),
 				MessageObject.class);
 
 		if (response == null || response.id == null) //Message didn't send
@@ -655,16 +647,19 @@ public class Channel implements IChannel {
 	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
-		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
-		builder.addTextBody("payload_json", DiscordUtils.GSON_NO_NULLS.toJson(new FilePayloadObject(content, tts, embed)), ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
+		try {
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
+			builder.addTextBody("payload_json", DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new FilePayloadObject(content, tts, embed)), ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
 
-		HttpEntity fileEntity = builder.build();
-		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-				fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data"));
-		MessageObject messageObject = DiscordUtils.GSON.fromJson(response, MessageObject.class);
+			HttpEntity fileEntity = builder.build();
+			MessageObject messageObject = DiscordUtils.MAPPER.readValue(client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
+					fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data")), MessageObject.class);
 
-		return DiscordUtils.getMessageFromJSON(this, messageObject);
+			return DiscordUtils.getMessageFromJSON(this, messageObject);
+		} catch (IOException e) {
+			throw new DiscordException("JSON Parsing exception!", e);
+		}
 	}
 
 	@Override
@@ -881,7 +876,7 @@ public class Channel implements IChannel {
 
 		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 				DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
-				DiscordUtils.GSON_NO_NULLS.toJson(new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove))));
+				new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)));
 	}
 
 	@Override

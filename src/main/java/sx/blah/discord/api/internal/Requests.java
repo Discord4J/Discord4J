@@ -1,8 +1,6 @@
 package sx.blah.discord.api.internal;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.*;
@@ -18,6 +16,7 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.RateLimitException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -122,11 +121,19 @@ public class Requests {
 		 * @throws RateLimitException
 		 */
 		public <T> T makeRequest(String url, Object entity, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
-			return makeRequest(url, DiscordUtils.GSON.toJson(entity), clazz, headers);
+			try {
+				return makeRequest(url, DiscordUtils.MAPPER.writeValueAsString(entity), clazz, headers);
+			} catch (JsonProcessingException e) {
+				throw new DiscordException("Unable to serialize request!", e);
+			}
 		}
 
 		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
-			return DiscordUtils.GSON.fromJson(makeRequest(url, entity, headers), clazz);
+			try {
+				return DiscordUtils.MAPPER.readValue(makeRequest(url, entity, headers), clazz);
+			} catch (IOException e) {
+				throw new DiscordException("Unable to serialize request!", e);
+			}
 		}
 
 		/**
@@ -141,7 +148,11 @@ public class Requests {
 		 * @throws RateLimitException
 		 */
 		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
-			return DiscordUtils.GSON.fromJson(makeRequest(url, headers), clazz);
+			try {
+				return DiscordUtils.MAPPER.readValue(makeRequest(url, headers), clazz);
+			} catch (IOException e) {
+				throw new DiscordException("Unable to serialize request!", e);
+			}
 		}
 
 		/**
@@ -154,8 +165,12 @@ public class Requests {
 		 * @throws DiscordException
 		 * @throws RateLimitException
 		 */
-		public String makeRequest(String url, Object entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
-			return makeRequest(url, DiscordUtils.GSON.toJson(entity), headers);
+		public void makeRequest(String url, Object entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+			try {
+				makeRequest(url, DiscordUtils.MAPPER.writeValueAsString(entity), headers);
+			} catch (IOException e) {
+				throw new DiscordException("Unable to serialize request!", e);
+			}
 		}
 
 		/**
@@ -168,7 +183,7 @@ public class Requests {
 		 * @throws DiscordException
 		 * @throws RateLimitException
 		 */
-		public String makeRequest(String url, String entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public byte[] makeRequest(String url, String entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
 			return makeRequest(url, new StringEntity(entity, "UTF-8"), headers);
 		}
 
@@ -181,7 +196,7 @@ public class Requests {
 		 * @throws RateLimitException
 		 * @throws DiscordException
 		 */
-		public String makeRequest(String url, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public byte[] makeRequest(String url, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
 			try {
 				HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 				for (BasicNameValuePair header : headers) {
@@ -206,7 +221,7 @@ public class Requests {
 		 * @throws RateLimitException
 		 * @throws DiscordException
 		 */
-		public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public byte[] makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
 			try {
 				if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 					HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -225,11 +240,11 @@ public class Requests {
 			return null;
 		}
 
-		private String request(HttpUriRequest request) throws RateLimitException, DiscordException {
+		private byte[] request(HttpUriRequest request) throws RateLimitException, DiscordException {
 			return request(request, 1, client == null ? 0 : client.getRetryCount());
 		}
 
-		private String request(HttpUriRequest request, long sleepTime, int retry) throws DiscordException, RateLimitException {
+		private byte[] request(HttpUriRequest request, long sleepTime, int retry) throws DiscordException, RateLimitException {
 			if (client != null)
 				request.addHeader("Authorization", client.getToken());
 
@@ -271,10 +286,6 @@ public class Requests {
 					}
 				}
 
-				String message = "";
-				if (response.getEntity() != null)
-					message = EntityUtils.toString(response.getEntity());
-
 				if (responseCode == 404) {
 					if (!request.getURI().toString().contains("invite") && !request.getURI().toString().contains("messages")) //Suppresses common 404s which are a result on queries to verify if something exists or not
 						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
@@ -296,19 +307,15 @@ public class Requests {
 					return request(request, (long) (Math.pow(sleepTime, 2) * ThreadLocalRandom.current().nextLong(5)), retry - 1);
 
 				} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
-					throw new DiscordException("Error on request to " + request.getURI() + ". Received response code " + responseCode + ". With response text: " + message);
+					throw new DiscordException("Error on request to " + request.getURI() + ". Received response code " + responseCode + ". With response text: " + EntityUtils.toString(response.getEntity()));
 				}
 
-				JsonParser parser = new JsonParser();
-				JsonElement element;
-				try {
-					element = parser.parse(message);
-				} catch (JsonParseException e) {
-					return null;
-				}
+				byte[] data = new byte[0];
+				if (response.getEntity() != null)
+					data = EntityUtils.toByteArray(response.getEntity());
 
 				if (responseCode == 429) {
-					RateLimitResponse rateLimitResponse = DiscordUtils.GSON.fromJson(element, RateLimitResponse.class);
+					RateLimitResponse rateLimitResponse = DiscordUtils.MAPPER.readValue(data, RateLimitResponse.class);
 
 					if (rateLimitResponse.global) {
 						globalRetryAfter.set(System.currentTimeMillis() + rateLimitResponse.retry_after);
@@ -321,10 +328,7 @@ public class Requests {
 							rateLimitResponse.global);
 				}
 
-				if (element.isJsonObject() && parser.parse(message).getAsJsonObject().has("message"))
-					throw new DiscordException(element.getAsJsonObject().get("message").getAsString());
-
-				return message;
+				return data;
 			} catch (IOException e) {
 				Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 				return null;

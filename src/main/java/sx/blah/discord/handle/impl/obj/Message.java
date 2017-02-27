@@ -321,7 +321,7 @@ public class Message implements IMessage {
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
-				DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, false)));
+				new MessageRequest(content, embed, false));
 
 		return this;
 	}

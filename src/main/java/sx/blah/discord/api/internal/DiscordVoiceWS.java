@@ -1,8 +1,7 @@
 package sx.blah.discord.api.internal;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
@@ -82,42 +81,46 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketText(String message) {
-		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
-		VoiceOps op = VoiceOps.get(payload.get("op").getAsInt());
-		JsonElement d = payload.has("d") && !(payload.get("d") instanceof JsonNull) ? payload.get("d") : null;
+		try {
+			JsonNode json = DiscordUtils.MAPPER.readTree(message);
+			VoiceOps op = VoiceOps.get(json.get("op").asInt());
+			JsonNode d = json.has("d") && !json.get("d").isNull() ? json.get("d") : null;
 
-		switch (op) {
-			case READY:
-				VoiceReadyResponse ready = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceReadyResponse.class);
-				this.ssrc = ready.ssrc;
+			switch (op) {
+				case READY:
+					VoiceReadyResponse ready = DiscordUtils.MAPPER.treeToValue(d, VoiceReadyResponse.class);
+					this.ssrc = ready.ssrc;
 
-				try {
-					udpSocket = new DatagramSocket();
-					address = new InetSocketAddress(endpoint, ready.port);
-					Pair<String, Integer> ourIP = doIPDiscovery();
+					try {
+						udpSocket = new DatagramSocket();
+						address = new InetSocketAddress(endpoint, ready.port);
+						Pair<String, Integer> ourIP = doIPDiscovery();
 
-					SelectProtocolRequest request = new SelectProtocolRequest(ourIP.getLeft(), ourIP.getRight());
-					send(VoiceOps.SELECT_PAYLOAD, request);
+						SelectProtocolRequest request = new SelectProtocolRequest(ourIP.getLeft(), ourIP.getRight());
+						send(VoiceOps.SELECT_PAYLOAD, request);
 
-					beginHeartbeat(ready.heartbeat_interval);
-				} catch (IOException e) {
-					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
-				}
-				break;
-			case SESSION_DESCRIPTION:
-				VoiceDescriptionResponse description = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceDescriptionResponse.class);
-				this.secret = description.secret_key;
+						beginHeartbeat(ready.heartbeat_interval);
+					} catch (IOException e) {
+						Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
+					}
+					break;
+				case SESSION_DESCRIPTION:
+					VoiceDescriptionResponse description = DiscordUtils.MAPPER.treeToValue(d, VoiceDescriptionResponse.class);
+					this.secret = description.secret_key;
 
-				setupSendThread();
-				break;
-			case SPEAKING:
-				VoiceSpeakingResponse speaking = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceSpeakingResponse.class);
-				IUser user = client.getUserByID(speaking.user_id);
-				client.dispatcher.dispatch(new VoiceUserSpeakingEvent(guild.getConnectedVoiceChannel(), user, speaking.ssrc, speaking.isSpeaking));
-				break;
-			case UNKNOWN:
-				Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
-				break;
+					setupSendThread();
+					break;
+				case SPEAKING:
+					VoiceSpeakingResponse speaking = DiscordUtils.MAPPER.treeToValue(d, VoiceSpeakingResponse.class);
+					IUser user = client.getUserByID(speaking.user_id);
+					client.dispatcher.dispatch(new VoiceUserSpeakingEvent(guild.getConnectedVoiceChannel(), user, speaking.ssrc, speaking.isSpeaking));
+					break;
+				case UNKNOWN:
+					Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
+					break;
+			}
+		} catch (IOException e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "JSON Parsing exception!", e);
 		}
 	}
 
@@ -200,7 +203,11 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	}
 
 	private void send(GatewayPayload payload) {
-		send(DiscordUtils.GSON_NO_NULLS.toJson(payload));
+		try {
+			send(DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(payload));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "JSON Parsing exception!", e);
+		}
 	}
 
 	private void send(String message) {

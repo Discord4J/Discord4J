@@ -288,7 +288,7 @@ public class User implements IUser {
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-				DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID())));
+				new MemberEditRequest(newChannel.getID()));
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.handle.obj.Permissions;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -175,12 +176,12 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (initialSize != 0)
 			queryParams += "&before="+messageCache.getLast().getID();
 
-		String response = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams);
-
-		if (response == null)
-			return false;
-
-		MessageObject[] messages = DiscordUtils.GSON.fromJson(response, MessageObject[].class);
+		MessageObject[] messages = new MessageObject[0];
+		try {
+			messages = DiscordUtils.MAPPER.readValue(client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams), MessageObject[].class);
+		} catch (IOException e) {
+			throw new DiscordException("JSON Parsing exception!", e);
+		}
 
 		if (messages.length == 0) {
 			return false;

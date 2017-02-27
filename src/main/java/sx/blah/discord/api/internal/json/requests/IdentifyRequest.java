@@ -1,7 +1,6 @@
 package sx.blah.discord.api.internal.json.requests;
 
-
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import sx.blah.discord.Discord4J;
 
 public class IdentifyRequest {
@@ -24,15 +23,15 @@ public class IdentifyRequest {
 	}
 
 	private static class Properties {
-		@SerializedName("$os")
+		@JsonProperty("$os")
 		private final String os;
-		@SerializedName("$browser")
+		@JsonProperty("$browser")
 		private final String browser;
-		@SerializedName("$device")
+		@JsonProperty("$device")
 		private final String device;
-		@SerializedName("$referrer")
+		@JsonProperty("$referrer")
 		private final String referrer;
-		@SerializedName("$referring_domain")
+		@JsonProperty("$referring_domain")
 		private final String referring_domain;
 
 		public Properties() {

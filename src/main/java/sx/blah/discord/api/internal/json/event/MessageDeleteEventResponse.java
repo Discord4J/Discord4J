@@ -15,6 +15,8 @@ public class MessageDeleteEventResponse {
 	 */
 	public String channel_id;
 
+	public MessageDeleteEventResponse() {}
+
 	public MessageDeleteEventResponse(String id, String channel_id) {
 		this.id = id;
 		this.channel_id = channel_id;
