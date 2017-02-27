@@ -307,11 +307,11 @@ class DispatchHandler {
 		Message toUpdate = (Message) channel.getMessageByID(id);
 		IMessage oldMessage = toUpdate != null ? toUpdate.copy() : null;
 
-		toUpdate = (Message) DiscordUtils.getMessageFromJSON(channel, json);
+		toUpdate = (Message) DiscordUtils.getUpdatedMessageFromJSON(toUpdate, json);
 
-		if (oldMessage != null && oldMessage.isPinned() && !json.pinned) {
+		if (oldMessage != null && json.pinned != null && oldMessage.isPinned() && !json.pinned) {
 			client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
-		} else if (oldMessage != null && !oldMessage.isPinned() && json.pinned) {
+		} else if (oldMessage != null && json.pinned != null && !oldMessage.isPinned() && json.pinned) {
 			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
 		} else if (oldMessage != null && oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
 			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
