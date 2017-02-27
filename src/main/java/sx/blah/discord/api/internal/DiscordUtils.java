@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
@@ -55,6 +56,7 @@ public class DiscordUtils {
 	 * Re-usable instance of jackson.
 	 */
 	public static final ObjectMapper MAPPER = new ObjectMapper()
+			.registerModule(new AfterburnerModule())
 			.enable(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID)
 			.enable(SerializationFeature.WRITE_NULL_MAP_VALUES)
 			.enable(DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY)
@@ -70,6 +72,7 @@ public class DiscordUtils {
 	 * Like {@link #MAPPER} but it doesn't serialize nulls.
 	 */
 	public static final ObjectMapper MAPPER_NO_NULLS = new ObjectMapper()
+			.registerModule(new AfterburnerModule())
 			.enable(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID)
 			.disable(SerializationFeature.WRITE_NULL_MAP_VALUES)
 			.enable(DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY)
