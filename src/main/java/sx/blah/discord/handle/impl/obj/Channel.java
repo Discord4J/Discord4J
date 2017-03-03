@@ -498,12 +498,15 @@ public class Channel implements IChannel {
 				.filter(msg -> Long.parseLong(msg.getID()) >= (((System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000) - 1420070400000L) << 22)) // Taken from Jake
 				.collect(Collectors.toList());
 
-		if (toDelete.size() < 1 || toDelete.size() > 100)
-			throw new DiscordException("Must provide at least 1 and fewer than 100 valid messages to delete.");
+		if (toDelete.size() < 1)
+			throw new DiscordException("Must provide at least 1 valid message to delete.");
 
 		if (toDelete.size() == 1) { //Bulk delete is no longer valid, time for normal delete.
 			toDelete.get(0).delete();
 			return toDelete;
+		} else if (toDelete.size() > 100) { //Above the max limit, time to create a sublist
+			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "More than 100 messages requested to be bulk deleted! Bulk deleting only the first 100...");
+			toDelete = toDelete.subList(0, 100);
 		}
 
 		client.REQUESTS.POST.makeRequest(
