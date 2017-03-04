@@ -12,8 +12,10 @@ import sx.blah.discord.handle.impl.obj.Message;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
 import sx.blah.discord.util.audio.AudioPlayer;
 
+import java.awt.*;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -298,8 +300,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						MessageHistory his = message.getChannel().getMessageHistory(100);
-						Discord4J.LOGGER.info("Early: "+his.getEarliestMessage().getTimestamp()+" Late: "+his.getLatestMessage().getTimestamp());
+						new RoleBuilder(message.getGuild()).setHoist(false).setMentionable(false).withColor(new Color(0x1f3a1f)).withName("please ignore").build();
 					}
 				});
 			}
