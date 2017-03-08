@@ -252,6 +252,7 @@ public class EmbedBuilder {
 	 *
 	 * @param imageUrl The image URL
 	 * @return Itself for chaining
+	 * @see IChannel#sendFile(EmbedObject, File)
 	 */
 	public EmbedBuilder withImage(String imageUrl) {
 		embed.image = new EmbedObject.ImageObject(imageUrl, null, 0, 0);

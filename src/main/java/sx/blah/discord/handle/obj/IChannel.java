@@ -361,6 +361,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Uploads a file to the channel with an attached message and option for tts.
+	 * <br>
+	 * If you are using an image file for the upload WITH use in the embed object, name the withImage URL <code>attachment://filename.png</code>
+	 * where the filename has only alphanumerics. See {@link EmbedBuilder#withImage(String)}.
 	 *
 	 * @param file The input stream to upload.
 	 * @param embed An optional embed object to send with the file.
@@ -371,6 +374,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 *
 	 * @see EmbedBuilder
+	 * @see EmbedBuilder#withImage(String)
 	 */
 	IMessage sendFile(EmbedObject embed, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
@@ -390,6 +394,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 * <br>
+	 * If you are using an image file for the upload WITH use in the embed object, name the withImage URL <code>attachment://filename.png</code>
+	 * where the filename has only alphanumerics. See {@link EmbedBuilder#withImage(String)}.
 	 *
 	 * @param file The input stream to upload.
 	 * @param fileName The name of the file that should be shown in Discord.
@@ -401,6 +408,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 *
 	 * @see EmbedBuilder
+	 * @see EmbedBuilder#withImage(String)
 	 */
 	IMessage sendFile(EmbedObject embed, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
 
@@ -421,6 +429,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 * <br>
+	 * If you are using an image file for the upload WITH use in the embed object, name the withImage URL <code>attachment://filename.png</code>
+	 * where the filename has only alphanumerics. See {@link EmbedBuilder#withImage(String)}.
 	 *
 	 * @param content The content of the attached message.
 	 * @param tts Whether the message should use tts or not.
@@ -434,11 +445,15 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 *
 	 * @see EmbedBuilder
+	 * @see EmbedBuilder#withImage(String)
 	 */
 	IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
+	 * <br>
+	 * If you are using an image file for the upload WITH use in the embed object, name the withImage URL <code>attachment://filename.png</code>
+	 * where the filename has only alphanumerics. See {@link EmbedBuilder#withImage(String)}.
 	 *
 	 * @param builder The MessageBuilder to use
 	 * @param file The input stream to upload.
