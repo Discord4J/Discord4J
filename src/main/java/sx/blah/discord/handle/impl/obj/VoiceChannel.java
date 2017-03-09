@@ -239,7 +239,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IUser> getConnectedUsers() {
-		return guild.getUsers().stream().filter(u -> u.getVoiceStateForGuild(guild).getChannel().equals(this)).collect(Collectors.toList());
+		return guild.getUsers().stream().filter(u -> u.getVoiceStateForGuild(guild).getChannel() != null && u.getVoiceStateForGuild(guild).getChannel().equals(this)).collect(Collectors.toList());
 	}
 
 	@Override
