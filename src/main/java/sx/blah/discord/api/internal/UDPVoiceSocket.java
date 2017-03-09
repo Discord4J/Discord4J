@@ -1,11 +1,11 @@
 package sx.blah.discord.api.internal;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.peergos.crypto.TweetNaCl;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.requests.voice.SelectProtocolRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceSpeakingRequest;
 import sx.blah.discord.handle.audio.impl.AudioManager;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
@@ -62,47 +62,13 @@ public class UDPVoiceSocket {
 				DatagramPacket udpPacket = new DatagramPacket(new byte[1920], 1920);
 				udpSocket.receive(udpPacket);
 
-				/*
-				System.out.println(Arrays.toString(udpPacket.getData()));
-
 				OpusPacket opusPacket = new OpusPacket(udpPacket);
 				opusPacket.decrypt(secret);
 
-				System.out.println(Arrays.toString(opusPacket.asByteArray()));
-
 				IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
 				if (userSpeaking != null) {
-					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.asByteArray(), userSpeaking);
+					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
 				}
-				*/
-
-				System.out.println(Arrays.toString(secret));
-
-				byte[] data = udpPacket.getData();
-				byte[] nonce = new byte[24];
-				byte[] audio = new byte[data.length - 12];
-
-				System.arraycopy(data, 0, nonce, 0, 12);
-				System.arraycopy(data, 12, audio, 0, audio.length);
-
-				//byte[] decrypted = new TweetNaclFast.SecretBox(secret).open(audio, nonce);
-				byte[] decrypted = TweetNaCl.secretbox_open(audio, nonce, secret);
-				System.out.println(Arrays.toString(decrypted));
-
-				/*
-				byte[] ary = udpPacket.getData();
-				byte[] header = Arrays.copyOfRange(ary, 0, 12);
-				byte[] nonce = ArrayUtils.addAll(header, new byte[12]);
-				byte[] audio = new byte[ary.length - 12];
-				TweetNaCl.secretbox_open(audio, nonce, secret);
-				*/
-
-				/*
-				System.out.println(Arrays.toString(udpPacket.getData()));
-				System.out.println(Arrays.toString(Arrays.copyOf(udpPacket.getData(), OpusPacket.RTPHeader.LENGTH)));
-				System.out.println(Arrays.toString(Arrays.copyOfRange(udpPacket.getData(), OpusPacket.RTPHeader.LENGTH, udpPacket.getData().length)));
-				*/
-
 			}
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);

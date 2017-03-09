@@ -16,7 +16,7 @@ public class OpusPacket {
 
 	OpusPacket(DatagramPacket udpPacket) {
 		this.header = new RTPHeader(Arrays.copyOf(udpPacket.getData(), RTPHeader.LENGTH));
-		this.audio = Arrays.copyOfRange(udpPacket.getData(), RTPHeader.LENGTH, udpPacket.getData().length);
+		this.audio = Arrays.copyOfRange(udpPacket.getData(), RTPHeader.LENGTH, udpPacket.getLength());
 		this.isEncrypted = true;
 	}
 
@@ -42,12 +42,15 @@ public class OpusPacket {
 
 		//audio = new TweetNaclFast.SecretBox(secret).open(audio);
 		audio = TweetNaCl.secretbox_open(audio, getNonce(), secret);
-		System.out.println(Arrays.toString(audio));
 		isEncrypted = false;
 	}
 
 	byte[] asByteArray() {
 		return ArrayUtils.addAll(header.asByteArray(), audio);
+	}
+
+	byte[] getAudio() {
+		return ArrayUtils.clone(audio);
 	}
 
 	private byte[] getNonce() {
