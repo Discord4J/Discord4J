@@ -154,7 +154,11 @@ public class Discord4J {
 			Discord4J.LOGGER.error(LogMarkers.MAIN, "Discord4J Internal Exception", e);
 		}
 		NAME = properties.getProperty("application.name");
-		VERSION = properties.getProperty("application.version");
+		String branch = properties.getProperty("application.git.branch");
+		if (branch.equals("master"))
+			VERSION = properties.getProperty("application.version");
+		else
+			VERSION = String.format("%s (%s-%s)", properties.getProperty("application.version"), branch, properties.getProperty("application.git.commit"));
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
 
