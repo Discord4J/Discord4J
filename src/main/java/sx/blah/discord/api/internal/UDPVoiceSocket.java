@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
@@ -70,7 +71,8 @@ public class UDPVoiceSocket {
 					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
 				}
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
+			if (e instanceof SocketException) return;
 			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	};
@@ -100,6 +102,8 @@ public class UDPVoiceSocket {
 	}
 
 	void shutdown() {
+		receiveExecutor.shutdown();
+		sendExecutor.shutdown();
 		udpSocket.close();
 	}
 

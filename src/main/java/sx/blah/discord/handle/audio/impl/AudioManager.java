@@ -98,7 +98,7 @@ public class AudioManager implements IAudioManager {
 		receiveAudio(opusAudio, pcm, user);
 	}
 
-	public void receiveAudio(byte[] opusAudio, byte[] pcmAudio, IUser user) {
+	private void receiveAudio(byte[] opusAudio, byte[] pcmAudio, IUser user) {
 		generalReceivers.parallelStream().forEach(r -> {
 			if (r.getAudioEncodingType() == AudioEncodingType.OPUS) {
 				r.receive(opusAudio, user);
