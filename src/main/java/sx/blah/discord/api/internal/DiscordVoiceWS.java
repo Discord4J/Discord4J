@@ -82,7 +82,29 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 			JsonNode d = json.has("d") && !json.get("d").isNull() ? json.get("d") : null;
 
 			switch (op) {
-
+				case READY:
+					try {
+						VoiceReadyResponse ready = DiscordUtils.MAPPER.treeToValue(d, VoiceReadyResponse.class);
+						voiceSocket.setup(endpoint, ready.port, ready.ssrc);
+						beginHeartbeat(ready.heartbeat_interval);
+					} catch (IOException e) {
+						Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error handling voice ready payload: ", e);
+					}
+					break;
+				case SESSION_DESCRIPTION:
+					VoiceDescriptionResponse description = DiscordUtils.MAPPER.treeToValue(d, VoiceDescriptionResponse.class);
+					voiceSocket.setSecret(description.secret_key);
+					voiceSocket.begin();
+					break;
+				case SPEAKING:
+					VoiceSpeakingResponse response = DiscordUtils.MAPPER.treeToValue(d, VoiceSpeakingResponse.class);
+					IUser user = getGuild().getUserByID(response.user_id);
+					users.put(response.ssrc, user);
+					guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.isSpeaking));
+					break;
+				case UNKNOWN:
+					Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
+					break;
 			}
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "JSON Parsing exception!", e);
