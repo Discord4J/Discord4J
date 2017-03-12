@@ -328,16 +328,22 @@ public class ModuleLoader {
 		}
 
 		if (dependents.size() > 0)
-			Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
+			Discord4J.LOGGER.warn(LogMarkers.MODULES, "Unable to load {} modules!", dependents.size());
 	}
 
 	private static String[] getModuleRequires(File file) throws IOException {
 		JarFile jarFile = new JarFile(file);
 		Manifest manifest = jarFile.getManifest();
-		Attributes.Name moduleRequires = new Attributes.Name("module-requires");
-		if (manifest != null && manifest.getMainAttributes() != null
-				&& manifest.getMainAttributes().containsKey(moduleRequires)) {
-			String value = manifest.getMainAttributes().getValue(moduleRequires);
+		Attributes.Name moduleRequiresLower = new Attributes.Name("module-requires"); //TODO remove
+		Attributes.Name moduleRequiresUpper = new Attributes.Name("Module-Requires");
+		if (manifest != null && manifest.getMainAttributes() != null //TODO remove
+				&& manifest.getMainAttributes().containsKey(moduleRequiresLower)) {
+			String value = manifest.getMainAttributes().getValue(moduleRequiresLower);
+			Discord4J.LOGGER.warn(LogMarkers.MODULES, "File {} uses the 'module-requires' attribute instead of 'Module-Requires', please rename the attribute!", file.getName());
+			return value.contains(";") ? value.split(";") : new String[]{value};
+		} else if (manifest != null && manifest.getMainAttributes() != null
+				&& manifest.getMainAttributes().containsKey(moduleRequiresUpper)) {
+			String value = manifest.getMainAttributes().getValue(moduleRequiresUpper);
 			return value.contains(";") ? value.split(";") : new String[]{value};
 		} else {
 			return new String[0];

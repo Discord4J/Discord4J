@@ -14,12 +14,19 @@ import java.util.List;
  */
 public class ClientBuilder {
 
+	/**
+	 * This represents the default amount of messages which may be cached by channels.
+	 * @see sx.blah.discord.util.MessageHistory
+	 */
+	public static final int DEFAULT_MESSAGE_CACHE_LIMIT = 256;
+
 	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
 	private int shardCount = 1;
 	private int maxReconnectAttempts = 5;
 	private int retryCount = 5;
+	private int maxCacheCount = DEFAULT_MESSAGE_CACHE_LIMIT;
 
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
@@ -88,6 +95,19 @@ public class ClientBuilder {
 	 */
 	public ClientBuilder setMaxReconnectAttempts(int maxReconnectAttempts) {
 		this.maxReconnectAttempts = maxReconnectAttempts;
+		return this;
+	}
+
+	/**
+	 * Sets the max amount of messages which are cached from message received events (for better message history
+	 * efficiency).
+	 *
+	 * @param maxCacheCount The maximum amount of messages. Setting this to a negative number makes it infinite while
+	 *                      setting it to 0 makes it disable caching.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder setMaxMessageCacheCount(int maxCacheCount) {
+		this.maxCacheCount = maxCacheCount;
 		return this;
 	}
 
@@ -176,7 +196,8 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings, maxReconnectAttempts, retryCount);
+		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings,
+				maxReconnectAttempts, retryCount, maxCacheCount);
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();

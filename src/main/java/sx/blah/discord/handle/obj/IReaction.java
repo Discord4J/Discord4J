@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.obj;
 
+import com.vdurmont.emoji.Emoji;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.util.DiscordException;
@@ -32,6 +33,13 @@ public interface IReaction {
 	 * @return The IEmoji object or null if it's not a custom emoji
 	 */
 	IEmoji getCustomEmoji();
+
+	/**
+	 * The emoji-java Emoji object if this is a Unicode emoji reaction, or null otherwise
+	 *
+	 * @return The Emoji object or null if it's not a Unicode emoji
+	 */
+	Emoji getUnicodeEmoji();
 
 	/**
 	 * The amount of people that reacted.

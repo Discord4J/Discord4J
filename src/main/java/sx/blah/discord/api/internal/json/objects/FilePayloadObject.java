@@ -5,6 +5,8 @@ public class FilePayloadObject {
 	public boolean tts;
 	public EmbedObject embed;
 
+	public FilePayloadObject() {}
+
 	public FilePayloadObject(String content, boolean tts, EmbedObject embed) {
 		this.content = content;
 		this.tts = tts;

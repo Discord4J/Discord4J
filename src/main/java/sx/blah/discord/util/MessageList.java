@@ -1,6 +1,5 @@
 package sx.blah.discord.util;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -9,10 +8,19 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
-import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.GuildLeaveEvent;
+import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.MessageSendEvent;
+import sx.blah.discord.handle.impl.obj.Channel;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IPrivateChannel;
+import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.Permissions;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -22,7 +30,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  *
  * The list gets a message on demand, it either fetches it from the cache or it requests the message from Discord
  * if not cached.
+ *
+ * @deprecated Use {@link MessageHistory} instead, this should NOT be relied on to work properly anymore.
  */
+@Deprecated
 public class MessageList extends AbstractList<IMessage> implements List<IMessage> {
 
 	/**
@@ -165,19 +176,19 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		if (initialSize != 0)
 			queryParams += "&before="+messageCache.getLast().getID();
 
-		String response = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams);
-
-		if (response == null)
-			return false;
-
-		MessageObject[] messages = DiscordUtils.GSON.fromJson(response, MessageObject[].class);
+		MessageObject[] messages = new MessageObject[0];
+		try {
+			messages = DiscordUtils.MAPPER.readValue(client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams), MessageObject[].class);
+		} catch (IOException e) {
+			throw new DiscordException("JSON Parsing exception!", e);
+		}
 
 		if (messages.length == 0) {
 			return false;
 		}
 
 		for (MessageObject messageResponse : messages) {
-			if (!add(DiscordUtils.getMessageFromJSON(channel, messageResponse), true))
+			if (!add(DiscordUtils.getMessageFromJSON((Channel) channel, messageResponse), true))
 				return false;
 		}
 
@@ -340,7 +351,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		if (message == null && hasPermissions() && client.isReady())
 			try {
-				return DiscordUtils.getMessageFromJSON(channel, client.REQUESTS.GET.makeRequest(
+				return DiscordUtils.getMessageFromJSON((Channel) channel, client.REQUESTS.GET.makeRequest(
 						DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
 						MessageObject.class));
 			} catch (Exception ignored) {}
@@ -570,7 +581,8 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		long invalidCount = messages.stream()
 				.mapToLong(it -> Long.parseLong(it.getID()))
-				.filter(id -> id > ((long) ((System.currentTimeMillis() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000L) << 22)) //Taken from Jake
+				.filter(id -> id < (((System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000) - 1420070400000L) << 22)) // Taken from Jake
+				// IF THE ID IS LESS THAN TWO WEEKS AGO SUBTRACT DISCORD EPOCH BITSHIFT LEFT 22 THEN COUNT IT BECAUSE IT'S BAD
 				.count();
 		if (invalidCount > 0)
 			throw new DiscordException(String.format("%d messages cannot be bulk deleted! They are more than 2 weeks old.", invalidCount));
@@ -650,7 +662,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			return true;
 		} catch (MissingPermissionsException e) {
 			if (!Discord4J.ignoreChannelWarnings.get())
-				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
+				Discord4J.LOGGER.debug(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
 			return false;
 		}
 	}

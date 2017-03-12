@@ -21,6 +21,8 @@ public class OverwriteObject {
 	 */
 	public int deny;
 
+	public OverwriteObject() {}
+
 	public OverwriteObject(String type, String id, int allow, int deny) {
 		this.id = id;
 		this.type = type;

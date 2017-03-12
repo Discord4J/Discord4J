@@ -31,6 +31,8 @@ public class GameObject {
 	 */
 	public String url;
 
+	public GameObject() {}
+
 	public GameObject(String name, String url, int type) {
 		this.name = name;
 		this.url = url;

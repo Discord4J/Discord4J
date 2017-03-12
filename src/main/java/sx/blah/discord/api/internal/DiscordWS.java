@@ -1,7 +1,8 @@
 package sx.blah.discord.api.internal;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.channels.UnresolvedAddressException;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 
@@ -60,52 +62,59 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketText(String message) {
-		Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Received: " + message);
+		try {
+			if (Discord4J.LOGGER.isTraceEnabled(LogMarkers.WEBSOCKET_TRAFFIC)) {
+				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Received: " + message);
+			}
 
-		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
-		GatewayOps op = GatewayOps.get(payload.get("op").getAsInt());
-		JsonElement d = payload.has("d") && !payload.get("d").isJsonNull() ? payload.get("d") : null;
+			JsonNode json = DiscordUtils.MAPPER.readTree(message);
+			GatewayOps op = GatewayOps.get(json.get("op").asInt());
+			JsonNode d = json.has("d") && !json.get("d").isNull() ? json.get("d") : null;
 
-		if (payload.has("s") && !payload.get("s").isJsonNull()) seq = payload.get("s").getAsLong();
+			if (json.has("s") && !json.get("s").isNull()) seq = json.get("s").longValue();
 
-		switch (op) {
-			case HELLO:
-				Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Shard {} _trace: {}", shard.getInfo()[0], d.getAsJsonObject().get("_trace"));
+			switch (op) {
+				case HELLO:
+					Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Shard {} _trace: {}", shard.getInfo()[0], d.get("_trace").toString());
 
-				heartbeatHandler.begin(d.getAsJsonObject().get("heartbeat_interval").getAsInt());
-				if (this.state != State.RESUMING) {
-					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
-				} else {
-					client.reconnectManager.onReconnectSuccess();
+					heartbeatHandler.begin(d.get("heartbeat_interval").intValue());
+					if (this.state != State.RESUMING) {
+						send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+					} else {
+						client.reconnectManager.onReconnectSuccess();
+						send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
+					}
+					break;
+				case RECONNECT:
+					this.state = State.RESUMING;
+					client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.RECONNECT_OP, shard));
+					heartbeatHandler.shutdown();
 					send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
-				}
-				break;
-			case RECONNECT:
-				this.state = State.RESUMING;
-				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.RECONNECT_OP, shard));
-				heartbeatHandler.shutdown();
-				send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
-				break;
-			case DISPATCH:
-				try {
-					dispatchHandler.handle(payload);
-				} catch (Exception e) {
-					Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered exception handling websocket event: ", e);
-				}
-				break;
-			case INVALID_SESSION:
-				this.state = State.RECONNECTING;
-				client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.INVALID_SESSION_OP, shard));
-				invalidate();
-				send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
-				break;
-			case HEARTBEAT: send(GatewayOps.HEARTBEAT, seq);
-			case HEARTBEAT_ACK:
-				heartbeatHandler.ack();
-				break;
-			case UNKNOWN:
-				Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Received unknown opcode, {}", message);
-				break;
+					break;
+				case DISPATCH:
+					try {
+						dispatchHandler.handle(json);
+					} catch (Exception e) {
+						Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Discord4J Internal Exception", e);
+					}
+					break;
+				case INVALID_SESSION:
+					this.state = State.RECONNECTING;
+					client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.INVALID_SESSION_OP, shard));
+					invalidate();
+					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+					break;
+				case HEARTBEAT:
+					send(GatewayOps.HEARTBEAT, seq);
+				case HEARTBEAT_ACK:
+					heartbeatHandler.ack();
+					break;
+				case UNKNOWN:
+					Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Received unknown opcode, {}", message);
+					break;
+			}
+		} catch (IOException e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "JSON Parsing exception!", e);
 		}
 	}
 
@@ -124,7 +133,7 @@ public class DiscordWS extends WebSocketAdapter {
 		hasReceivedReady = false;
 		heartbeatHandler.shutdown();
 		if (!(this.state == State.DISCONNECTING || statusCode == 4003 || statusCode == 4004 || statusCode == 4005 ||
-				statusCode == 4010) && !(statusCode == 1001 && reason.equals("Shutdown"))) {
+				statusCode == 4010) && !(statusCode == 1001 && reason != null && reason.equals("Shutdown"))) {
 			this.state = State.RESUMING;
 			client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.ABNORMAL_CLOSE, shard));
 			client.reconnectManager.scheduleReconnect(this);
@@ -148,12 +157,17 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new InflaterInputStream(new ByteArrayInputStream(payload))));
-		String message = reader.lines().collect(Collectors.joining());
-		this.onWebSocketText(message);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new InflaterInputStream(new ByteArrayInputStream(payload, offset, len))));
+		onWebSocketText(reader.lines().collect(Collectors.joining()));
+		try {
+			reader.close();
+		} catch (IOException e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", e);
+		}
 	}
 
 	void connect() {
+		WebSocketClient previous = wsClient; // for cleanup
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
 			wsClient.setDaemon(true);
@@ -163,6 +177,16 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: ", e);
+		} finally {
+			if (previous != null) {
+				CompletableFuture.runAsync(() -> {
+					try {
+						previous.stop();
+					} catch (Exception e) {
+						Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Error while stopping previous websocket: ", e);
+					}
+				});
+			}
 		}
 	}
 
@@ -195,15 +219,21 @@ public class DiscordWS extends WebSocketAdapter {
 	}
 
 	public void send(GatewayPayload payload) {
-		send(DiscordUtils.GSON.toJson(payload));
+		try {
+			send(DiscordUtils.MAPPER.writeValueAsString(payload));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "JSON Parsing exception!", e);
+		}
 	}
 
 	public void send(String message) {
+		String filteredMessage = message.replace(client.getToken(), "hunter2");
+
 		if (getSession() != null && getSession().isOpen()) {
-			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Sending: " + message);
+			Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET_TRAFFIC, "Sending: " + filteredMessage);
 			getSession().getRemote().sendStringByFuture(message);
 		} else {
-			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session: {}", message);
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Attempt to send message on closed session: {}", filteredMessage);
 		}
 	}
 

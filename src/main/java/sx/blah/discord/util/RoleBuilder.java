@@ -1,5 +1,6 @@
 package sx.blah.discord.util;
 
+import sx.blah.discord.handle.impl.obj.Role;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
@@ -25,7 +26,7 @@ public class RoleBuilder {
 
 	/**
 	 * Sets the color of the role.
-         * 
+         *
 	 * @param color The color of the role.
 	 * @return The role builder instance
 	 */
@@ -36,7 +37,7 @@ public class RoleBuilder {
 
 	/**
 	 * Determines whether or not this role is hoisted.
-         * 
+         *
 	 * @param hoist If true, users with this role will be displayed separately from the "everyone" role.
 	 * @return The role builder instance.
 	 */
@@ -47,7 +48,7 @@ public class RoleBuilder {
 
 	/**
 	 * Determines whether or not this role is mentionable.
-         * 
+         *
 	 * @param mentionable If true, users can use a role mention for this role.
 	 * @return The role builder instance.
 	 */
@@ -58,7 +59,7 @@ public class RoleBuilder {
 
 	/**
 	 * Sets the name of the role.
-         * 
+         *
 	 * @param name The name of the role.
 	 * @return The role builder instance.
 	 */
@@ -69,7 +70,7 @@ public class RoleBuilder {
 
 	/**
 	 * Sets the permissions of the role.
-         * 
+         *
 	 * @param permissions A set of the permissions of the role.
 	 * @return The role builder instance.
 	 */
@@ -80,9 +81,9 @@ public class RoleBuilder {
 
 	/**
 	 * Creates the role in the specified guild.
-         * 
+         *
 	 * @return The {@link IRole} object representing the new role.
-         * 
+         *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
@@ -91,12 +92,12 @@ public class RoleBuilder {
 		if (guild == null)
 			throw new RuntimeException("A guild must be set to create a role.");
 
-		IRole role = guild.createRole();
-		if (color != null) role.changeColor(color);
-		if (name != null) role.changeName(name);
-		if (permissions != null) role.changePermissions(permissions);
-		role.changeHoist(hoist);
-		role.changeMentionable(mentionable);
+		Role role = (Role) guild.createRole();
+		role.edit(color != null ? color : role.getColor(),
+				hoist,
+				name != null ? name : role.getName(),
+				permissions != null ? permissions : role.getPermissions(),
+				mentionable);
 		return role;
 	}
 }

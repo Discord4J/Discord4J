@@ -256,7 +256,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public List<IMessage> getMessages(boolean includePrivate) {
 		return getChannels(includePrivate).stream()
-				.map(IChannel::getMessages)
+				.map(IChannel::getMessageHistory)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
 	}

@@ -9,9 +9,9 @@
  * will load only that class and skip the recursive search. If there is more than one IModule implementation than the
  * classes should be listed, separated by a semicolon ";". This method is recommended as it saves on loading overhead.
  * When Discord4J searches for a class implementing {@link sx.blah.discord.modules.IModule}, it will first check the
- * jar file's MANIFEST.MF for the "module-requires" property. If that property exists, Discord4J will attempt to load
+ * jar file's MANIFEST.MF for the "Module-Requires" property. If that property exists, Discord4J will attempt to load
  * a jar file containing a class which corresponds to the value of that property first, preventing any class loading
- * errors (NOTE: "module-requires" must be in the form "package.name.ClassName" and multiple classes can be specified
+ * errors (NOTE: "Module-Requires" must be in the form "package.name.ClassName" and multiple classes can be specified
  * by separating them with semi-colons).
  * <p>
  * Second, the instance loading. When a new {@link sx.blah.discord.api.IDiscordClient} is created, its

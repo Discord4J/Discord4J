@@ -73,6 +73,7 @@ public class Discord4J {
 	/**
 	 * Whether to log when the user doesn't have the permissions to view a channel.
          */
+	@Deprecated
 	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
 	 * Whether to allow for audio to be used.
@@ -153,7 +154,11 @@ public class Discord4J {
 			Discord4J.LOGGER.error(LogMarkers.MAIN, "Discord4J Internal Exception", e);
 		}
 		NAME = properties.getProperty("application.name");
-		VERSION = properties.getProperty("application.version");
+		String branch = properties.getProperty("application.git.branch");
+		if (branch.equals("master"))
+			VERSION = properties.getProperty("application.version");
+		else
+			VERSION = String.format("%s (%s-%s)", properties.getProperty("application.version"), branch, properties.getProperty("application.git.commit"));
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
 
@@ -172,9 +177,9 @@ public class Discord4J {
 	public static void main(String[] args) {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
-			throw new RuntimeException("Invalid configuration!");
+			throw new RuntimeException("Invalid configuration! Must have auto-enabling of modules + loading of external modules enabled.");
 		if (args.length == 0)
-			throw new RuntimeException("Invalid configuration!");
+			throw new RuntimeException("Invalid configuration! No arguments passed in.");
 		try {
 			ClientBuilder builder = new ClientBuilder();
 			IDiscordClient client = builder.withToken(args[0]).login();
@@ -206,7 +211,9 @@ public class Discord4J {
 
 	/**
 	 * This disables logging for when the user doesn't have the required permissions to view a channel.
+	 * @deprecated This functionality isn't available in MessageHistories.
          */
+	@Deprecated
 	public static void disableChannelWarnings() {
 		ignoreChannelWarnings.set(true);
 	}

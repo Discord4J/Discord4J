@@ -1,11 +1,12 @@
 package sx.blah.discord.handle.impl.obj;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.ReactionUserObject;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IMessage;
@@ -74,6 +75,11 @@ public class Reaction implements IReaction {
 	@Override
 	public IEmoji getCustomEmoji() {
 		return getMessage().getGuild().getEmojiByID(emoji);
+	}
+
+	@Override
+	public Emoji getUnicodeEmoji() {
+		return EmojiManager.getByUnicode(emoji);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package sx.blah.discord.util;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -79,11 +81,20 @@ public class MessageTokenizer {
 	 * @return The new current position
 	 */
 	public int stepForward(int amount) {
-		currentPosition += amount;
-		currentPosition = Math.max(0, Math.min(currentPosition, content.length()));
-		remaining = content.substring(currentPosition);
+		return stepTo(currentPosition + amount);
+	}
 
-		return currentPosition;
+	/**
+	 * Steps to the position provided and updates the internal remaining string.
+	 *
+	 * @param index The index to step to
+	 * @return The new current position
+	 * * @see MessageTokenizer#stepTo(int)
+	 * @deprecated Use {@link #stepTo(int)}
+	 */
+	@Deprecated
+	public int stepForwardTo(int index) {
+		return stepTo(index);
 	}
 
 	/**
@@ -92,22 +103,11 @@ public class MessageTokenizer {
 	 * @param index The index to step to
 	 * @return The new current position
 	 */
-	public int stepForwardTo(int index) {
+	public int stepTo(int index) {
 		currentPosition = Math.max(0, Math.min(index, content.length()));
 		remaining = content.substring(currentPosition);
 
 		return currentPosition;
-	}
-
-	/**
-	 * Steps to the desired index.
-	 *
-	 * @param index The index to step to
-	 * @return The new current position
-	 * @see MessageTokenizer#stepForward(int)
-	 */
-	public int stepTo(int index) {
-		return stepForward(index - currentPosition);
 	}
 
 	/**
@@ -145,6 +145,32 @@ public class MessageTokenizer {
 	}
 
 	/**
+	 * Returns true if the tokenizer has the sequence provided.
+	 * @param sequence The string sequence to look for
+	 * @return True if it contains the sequence
+	 */
+	public boolean hasNextSequence(String sequence) {
+		return remaining.contains(sequence);
+	}
+
+	/**
+	 * Returns a Token of the following sequence.
+	 * @param sequence The string sequence to look for
+	 * @return The token
+	 */
+	public Token nextSequence(String sequence) {
+		if (!hasNextSequence(sequence))
+			throw new IllegalStateException("The sequence \"" + sequence + "\" was not found!");
+
+		final int index = remaining.indexOf(sequence);
+
+		Token t = new Token(this, currentPosition + index, currentPosition + index + sequence.length());
+
+		stepForward(index + sequence.length());
+		return t;
+	}
+
+	/**
 	 * Returns true if there is another word to go to. A word is delimited by whitespace or newlines.
 	 *
 	 * @return True if there is another word to step to
@@ -167,7 +193,7 @@ public class MessageTokenizer {
 			Matcher matcher = WORD_PATTERN.matcher(remaining);
 			if (matcher.find()) {
 				if (matcher.start() == 0) {
-					stepForwardTo(currentPosition + matcher.end());
+					stepTo(currentPosition + matcher.end());
 				}
 			}
 		}
@@ -184,7 +210,7 @@ public class MessageTokenizer {
 
 		Token token = new Token(this, currentPosition, end);
 
-		stepForwardTo(found ? (currentPosition + matcher.end()) : content.length());
+		stepTo(found ? (currentPosition + matcher.end()) : content.length());
 
 		return token;
 	}
@@ -336,6 +362,21 @@ public class MessageTokenizer {
 		final int greaterThan = t.getEndIndex();
 
 		return new CustomEmojiToken(this, lessThan, greaterThan);
+	}
+
+	/**
+	 * Returns true if there is a Unicode emoji that is the same as the provided one to go to.
+	 *
+	 * @param emoji The emoji to look for
+	 * @return True if there is another custom emoji.
+	 */
+	public boolean hasNextUnicodeEmoji(Emoji emoji) {
+		return hasNextSequence(emoji.getUnicode());
+	}
+
+	public UnicodeEmojiToken nextUnicodeEmoji(Emoji emoji) {
+		Token t = nextSequence(emoji.getUnicode());
+		return new UnicodeEmojiToken(this, t.startIndex, t.endIndex);
 	}
 
 	/**
@@ -601,7 +642,7 @@ public class MessageTokenizer {
 					return tokenizer.getClient()
 							.getInviteForCode(getContent().substring(getContent().lastIndexOf("/")));
 				} catch (DiscordException e) {
-					Discord4J.LOGGER.error("Discord4J Internal Exception", e);
+					Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 				}
 
 				return null;
@@ -615,6 +656,39 @@ public class MessageTokenizer {
 		 */
 		public IInvite getInvite() {
 			return invite;
+		}
+	}
+
+	public static class UnicodeEmojiToken extends Token {
+
+		/**
+		 * The {@link Emoji}.
+		 */
+		private final Emoji emoji;
+
+		/**
+		 * A Unicode {@link Emoji} from a message with content and position.
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private UnicodeEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex);
+
+			String content = getContent();
+			boolean isUnicode = EmojiManager.isEmoji(content);
+			emoji = isUnicode ? EmojiManager.getByUnicode(content) : EmojiManager.getForAlias(content);
+		}
+
+		/**
+		 * Return the emoji object.
+		 *
+		 * @return The emoji.
+		 * @see Emoji
+		 */
+		public Emoji getEmoji() {
+			return emoji;
 		}
 	}
 

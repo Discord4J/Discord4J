@@ -17,6 +17,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -90,14 +91,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 */
 	volatile Timer keepAlive;
 	private final int retryCount;
+	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount) {
+							 int retryCount, int maxCacheCount) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
+		this.maxCacheCount = maxCacheCount;
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
@@ -488,8 +491,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		InviteObject invite;
 		try {
-			invite = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
-		} catch (DiscordException | RateLimitException e) {
+			invite = DiscordUtils.MAPPER.readValue(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
+		} catch (DiscordException | RateLimitException | IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite: ", e);
 			return null;
 		}
@@ -499,5 +502,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	public int getRetryCount() {
 		return retryCount;
+	}
+
+	public int getMaxCacheCount() {
+		return maxCacheCount;
 	}
 }

@@ -481,6 +481,14 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IRole getEveryoneRole();
 
 	/**
+	 * This gets the general channel for this guild. NOTE: This gets the default (general) channel created by discord,
+	 * so it may not actually be named 'general'.
+	 *
+	 * @return The default/general channel.
+	 */
+	IChannel getGeneralChannel();
+
+	/**
 	 * This gets all the currently available invites for this guild.
 	 *
 	 * @return The list of all available invites.

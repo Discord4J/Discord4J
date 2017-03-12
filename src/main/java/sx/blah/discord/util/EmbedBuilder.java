@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -83,8 +82,11 @@ public class EmbedBuilder {
 	 */
 	public EmbedBuilder withTitle(String title) {
 		if (title != null && title.length() > TITLE_LENGTH_LIMIT)
-			throw new IllegalArgumentException(
-					"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
+			if (lenient)
+				title = title.substring(0, TITLE_LENGTH_LIMIT);
+			else
+				throw new IllegalArgumentException(
+						"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
 
 		embed.title = title;
 		return this;
@@ -130,7 +132,7 @@ public class EmbedBuilder {
 			embed.description = "";
 		if (desc != null && (embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT) {
 			if (lenient)
-				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT-embed.description.length());
+				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT - embed.description.length());
 			else
 				throw new IllegalArgumentException(
 						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
@@ -250,6 +252,7 @@ public class EmbedBuilder {
 	 *
 	 * @param imageUrl The image URL
 	 * @return Itself for chaining
+	 * @see IChannel#sendFile(EmbedObject, File)
 	 */
 	public EmbedBuilder withImage(String imageUrl) {
 		embed.image = new EmbedObject.ImageObject(imageUrl, null, 0, 0);
@@ -409,7 +412,7 @@ public class EmbedBuilder {
 			// footer warnings
 			if (embed.footer.icon_url != null && (embed.footer.text == null || embed.footer.text.isEmpty())) {
 				Discord4J.LOGGER
-						.warn("Embed object warning - footer icon without footer text - footer icon will not be " +
+						.warn(LogMarkers.UTIL, "Embed object warning - footer icon without footer text - footer icon will not be " +
 								"visible");
 			}
 		}
@@ -418,12 +421,12 @@ public class EmbedBuilder {
 			if (embed.author.name == null || embed.author.name.isEmpty()) {
 				if (embed.author.icon_url != null) {
 					Discord4J.LOGGER
-							.warn("Embed object warning - author icon without author name - author icon will not be " +
+							.warn(LogMarkers.UTIL, "Embed object warning - author icon without author name - author icon will not be " +
 									"visible");
 				}
 				if (embed.author.url != null) {
 					Discord4J.LOGGER
-							.warn("Embed object warning - author URL without author name - URL is useless and cannot" +
+							.warn(LogMarkers.UTIL, "Embed object warning - author URL without author name - URL is useless and cannot" +
 									" " +
 									"be clicked");
 				}

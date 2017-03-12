@@ -63,7 +63,7 @@ public class MessageObject {
 	/**
 	 * Whether the message is pinned.
 	 */
-	public boolean pinned;
+	public Boolean pinned;
 	/**
 	 * The reactions on the message.
 	 */

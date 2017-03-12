@@ -5,6 +5,8 @@ import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.ptr.ShortByReference;
+import sx.blah.discord.Discord4J;
+import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -44,7 +46,7 @@ public interface Opus extends Library {
         try {
             NativeUtils.loadLibraryFromJar(lib);
         } catch (IOException e) {
-            e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Internal Exception", e);
         }
         return lib;
     }

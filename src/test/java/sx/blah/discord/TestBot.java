@@ -10,13 +10,17 @@ import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
+import sx.blah.discord.handle.impl.obj.Message;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
 import sx.blah.discord.util.audio.AudioPlayer;
 
+import java.awt.*;
 import java.io.File;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -90,7 +94,7 @@ public class TestBot {
 
 							//Clearing spoofbot's mess from before
 							synchronized (client) {
-								for (IMessage message : spoofChannel.getMessages()) {
+								for (IMessage message : spoofChannel.getMessageHistory()) {
 									RequestBuffer.request(() -> {
 										try {
 											message.delete();
@@ -156,7 +160,7 @@ public class TestBot {
 							} else if (m.getContent().startsWith(".clear")) {
 								IChannel c = client.getChannelByID(m.getChannel().getID());
 								if (null != c) {
-									c.getMessages().stream().filter(message -> message.getAuthor().getID()
+									c.getMessageHistory().stream().filter(message -> message.getAuthor().getID()
 											.equalsIgnoreCase(client.getOurUser().getID())).forEach(message -> {
 										try {
 											Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
@@ -234,63 +238,62 @@ public class TestBot {
 								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
 //								player.queue(new File("./test.mp3"));
 //								player.queue(new File("./test2.mp3"));
-								player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test.mp3"));
-								player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test2.mp3"));
-							} else if (m.getContent().startsWith(".pause")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.setPaused(true);
-							} else if (m.getContent().startsWith(".resume")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.setPaused(false);
-							} else if (m.getContent().startsWith(".volume")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
-							} else if (m.getContent().startsWith(".stop")) {
-								client.getConnectedVoiceChannels().stream().filter((IVoiceChannel channel)->channel.getGuild().equals(m.getGuild())).findFirst().ifPresent(IVoiceChannel::leave);
-							} else if (m.getContent().startsWith(".skip")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.skip();
-							} else if (m.getContent().startsWith(".toggleloop")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.setLoop(!player.isLooping());
-							} else if (m.getContent().startsWith(".rewind")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.getCurrentTrack().rewind(Long.parseLong(m.getContent().split(" ")[1]));
-							} else if (m.getContent().startsWith(".forward")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.getCurrentTrack().fastForward(Long.parseLong(m.getContent().split(" ")[1]));
-							} else if (m.getContent().startsWith(".shuffle")) {
-								AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-								player.shuffle();
-							} else if (m.getContent().startsWith(".spam")) {
-								m.getChannel().getMessages().setCacheCapacity(100);
-								new Timer().scheduleAtFixedRate(new TimerTask() {
-									@Override
-									public void run() {
-										RequestBuffer.request(() -> {
-											try {
-												return m.getChannel().sendMessage("spam");
-											} catch (MissingPermissionsException | DiscordException e) {
-												e.printStackTrace();
-											}
-											return null;
-										});
+									player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test.mp3"));
+									player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test2.mp3"));
+								} else if (m.getContent().startsWith(".pause")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.setPaused(true);
+								} else if (m.getContent().startsWith(".resume")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.setPaused(false);
+								} else if (m.getContent().startsWith(".volume")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.setVolume(Float.parseFloat(m.getContent().split(" ")[1]));
+								} else if (m.getContent().startsWith(".stop")) {
+									client.getConnectedVoiceChannels().stream().filter((IVoiceChannel channel) -> channel.getGuild().equals(m.getGuild())).findFirst().ifPresent(IVoiceChannel::leave);
+								} else if (m.getContent().startsWith(".skip")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.skip();
+								} else if (m.getContent().startsWith(".toggleloop")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.setLoop(!player.isLooping());
+								} else if (m.getContent().startsWith(".rewind")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.getCurrentTrack().rewind(Long.parseLong(m.getContent().split(" ")[1]));
+								} else if (m.getContent().startsWith(".forward")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.getCurrentTrack().fastForward(Long.parseLong(m.getContent().split(" ")[1]));
+								} else if (m.getContent().startsWith(".shuffle")) {
+									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
+									player.shuffle();
+								} else if (m.getContent().startsWith(".spam")) {
+
+									new Timer().scheduleAtFixedRate(new TimerTask() {
+										@Override
+										public void run() {
+											RequestBuffer.request(() -> {
+												try {
+													return m.getChannel().sendMessage("spam");
+												} catch (MissingPermissionsException | DiscordException e) {
+													e.printStackTrace();
+												}
+												return null;
+											});
+										}
+									}, 0, 50);
+								} else if (m.getContent().startsWith(".move ")) {
+									String target = m.getContent().split(" ")[1];
+								/*	try {
+										client.getOurUser().moveToVoiceChannel(m.getGuild().getVoiceChannels().stream()
+												.filter((IVoiceChannel channel) -> channel.getName().equals(target)).findFirst().orElseGet(null));
+									} catch (DiscordException | RateLimitException | MissingPermissionsException e) {
+										e.printStackTrace();
 									}
-								}, 0, 50);
-							} else if (m.getContent().startsWith(".move ")) {
-								String target = m.getContent().split(" ")[1];
-								/*
-								try {
-									client.getOurUser().moveToVoiceChannel(m.getGuild().getVoiceChannels().stream()
-											.filter((IVoiceChannel channel) -> channel.getName().equals(target)).findFirst().orElseGet(null));
-								} catch (DiscordException | RateLimitException | MissingPermissionsException e) {
-									e.printStackTrace();
-								}
-								*/
-							} else if (m.getContent().startsWith(".logout")) {
-								client.logout();
-							} else if (m.getContent().startsWith(".test")) {
-								test(m);
+								*/} else if (m.getContent().startsWith(".logout")) {
+									client.logout();
+								} else if (m.getContent().startsWith(".test")) {
+									test(m);
+
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -299,27 +302,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.getClient().getDispatcher().waitFor((ReactionAddEvent e) -> {
-							try {
-								e.getMessage().removeReaction(e.getAuthor(), e.getReaction());
-							} catch (DiscordException | RateLimitException e1) {
-								e1.printStackTrace();
-							} catch (MissingPermissionsException e1) {
-								e1.printStackTrace();
-							}
-							return true;
-						});
-					}
-				});
-
-				client.getDispatcher().registerListener(new IListener<MessageDeleteEvent>() {
-					@Override
-					public void handle(MessageDeleteEvent event) {
-						try {
-							event.getMessage().reply("you said, \""+event.getMessage().getContent()+"\"");
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						new RoleBuilder(message.getGuild()).setHoist(false).setMentionable(false).withColor(new Color(0x1f3a1f)).withName("please ignore").build();
 					}
 				});
 			}

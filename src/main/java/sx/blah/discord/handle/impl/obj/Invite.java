@@ -1,8 +1,5 @@
 package sx.blah.discord.handle.impl.obj;
 
-import com.google.gson.Gson;
-import org.apache.http.message.BasicNameValuePair;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
@@ -10,7 +7,6 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.LogMarkers;
 
 import java.util.Objects;
 

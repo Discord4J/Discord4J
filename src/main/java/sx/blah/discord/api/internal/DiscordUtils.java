@@ -1,7 +1,12 @@
 package sx.blah.discord.api.internal;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
@@ -19,6 +24,9 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -34,6 +42,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.InflaterInputStream;
 
 /**
  * Collection of internal Discord4J utilities.
@@ -41,13 +51,37 @@ import java.util.regex.Pattern;
 public class DiscordUtils {
 
 	/**
-	 * Re-usable instance of Gson.
+	 * Re-usable instance of jackson.
 	 */
-	public static final Gson GSON = new GsonBuilder().serializeNulls().create();
+	public static final ObjectMapper MAPPER = new ObjectMapper()
+			.registerModule(new AfterburnerModule())
+			.enable(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID)
+			.enable(SerializationFeature.WRITE_NULL_MAP_VALUES)
+			.enable(DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY)
+			.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.enable(JsonParser.Feature.ALLOW_COMMENTS)
+			.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
+			.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES)
+			.enable(JsonParser.Feature.ALLOW_MISSING_VALUES)
+			.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 	/**
-	 * Like {@link #GSON} but it doesn't serialize nulls.
+	 * Like {@link #MAPPER} but it doesn't serialize nulls.
 	 */
-	public static final Gson GSON_NO_NULLS = new GsonBuilder().create();
+	public static final ObjectMapper MAPPER_NO_NULLS = new ObjectMapper()
+			.registerModule(new AfterburnerModule())
+			.enable(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID)
+			.disable(SerializationFeature.WRITE_NULL_MAP_VALUES)
+			.enable(DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY)
+			.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.enable(JsonParser.Feature.ALLOW_COMMENTS)
+			.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
+			.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES)
+			.enable(JsonParser.Feature.ALLOW_MISSING_VALUES)
+			.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
 	/**
 	 * Used to find urls in order to not escape them
@@ -269,7 +303,7 @@ public class DiscordUtils {
 	 * @return The emoji object.
 	 */
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
-		Emoji emoji = new Emoji(guild, json.id, json.name, json.require_colons, json.managed, json.roles);
+		EmojiImpl emoji = new EmojiImpl(guild, json.id, json.name, json.require_colons, json.managed, json.roles);
 
 		return emoji;
 	}
@@ -344,7 +378,7 @@ public class DiscordUtils {
 			}
 		}
 		if (channel == null) {
-			channel = new PrivateChannel(shard.getClient(), recipient, id);
+			channel = new PrivateChannel((DiscordClientImpl) shard.getClient(), recipient, id);
 		}
 
 		return channel;
@@ -357,8 +391,8 @@ public class DiscordUtils {
 	 * @param json    The json response.
 	 * @return The message object.
 	 */
-	public static IMessage getMessageFromJSON(IChannel channel, MessageObject json) {
-		if (channel.getMessages() != null && channel.getMessages().contains(json.id)) {
+	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
+		if (channel.messages != null && channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setEmbedded(getEmbedsFromJSON(json));
@@ -368,7 +402,7 @@ public class DiscordUtils {
 			message.setTimestamp(convertFromTimestamp(json.timestamp));
 			message.setEditedTimestamp(
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp));
-			message.setPinned(json.pinned);
+			message.setPinned(Boolean.TRUE.equals(json.pinned));
 			message.setChannelMentions();
 
 			return message;
@@ -377,7 +411,7 @@ public class DiscordUtils {
 					getUserFromJSON(channel.getShard(), json.author), channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
-					getAttachmentsFromJSON(json), json.pinned, getEmbedsFromJSON(json),
+					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
 					getReactionsFromJson(channel.getShard(), json.reactions), json.webhook_id);
 
 			for (IReaction reaction : message.getReactions()) {
@@ -386,6 +420,40 @@ public class DiscordUtils {
 
 			return message;
 		}
+	}
+
+	/**
+	 * Updates a message object with the non-null or non-empty contents of a json response.
+	 *
+	 * @param toUpdate The message.
+	 * @param json     The json response.
+	 * @return The message object.
+	 */
+	public static IMessage getUpdatedMessageFromJSON(IMessage toUpdate, MessageObject json) {
+		if (toUpdate == null)
+			return null;
+
+		Message message = (Message) toUpdate;
+		List<IMessage.Attachment> attachments = getAttachmentsFromJSON(json);
+		List<Embed> embeds = getEmbedsFromJSON(json);
+		if (!attachments.isEmpty())
+			message.setAttachments(attachments);
+		if (!embeds.isEmpty())
+			message.setEmbedded(embeds);
+		if (json.content != null) {
+			message.setContent(json.content);
+			message.setMentions(getMentionsFromJSON(json), getRoleMentionsFromJSON(json));
+			message.setMentionsEveryone(json.mention_everyone);
+			message.setChannelMentions();
+		}
+		if (json.timestamp != null)
+			message.setTimestamp(convertFromTimestamp(json.timestamp));
+		if (json.edited_timestamp != null)
+			message.setEditedTimestamp(convertFromTimestamp(json.edited_timestamp));
+		if (json.pinned != null)
+			message.setPinned(json.pinned);
+
+		return message;
 	}
 
 	/**
@@ -432,7 +500,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new Channel(guild.getClient(), json.name, json.id, guild, json.topic, json.position,
+			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					roleOverrides, userOverrides);
 		}
 
@@ -527,7 +595,7 @@ public class DiscordUtils {
 			channel.getRoleOverrides().clear();
 			channel.getRoleOverrides().putAll(roleOverrides);
 		} else {
-			channel = new VoiceChannel(guild.getClient(), json.name, json.id, guild, json.topic, json.position,
+			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					json.user_limit, json.bitrate, roleOverrides, userOverrides);
 		}
 

@@ -4,10 +4,12 @@ import sx.blah.discord.api.internal.GatewayOps;
 import sx.blah.discord.api.internal.VoiceOps;
 
 public class GatewayPayload {
-	private final String t;
-	private final Integer s;
-	public final Integer op;
-	private final Object d;
+	public String t;
+	public Integer s;
+	public Integer op;
+	public Object d;
+
+	public GatewayPayload() {}
 
 	public GatewayPayload(GatewayOps op, Object request) {
 		this(null, null, op.ordinal(), request);

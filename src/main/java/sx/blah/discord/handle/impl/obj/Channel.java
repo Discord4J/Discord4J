@@ -16,26 +16,29 @@ import sx.blah.discord.api.internal.json.objects.FilePayloadObject;
 import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.objects.OverwriteObject;
 import sx.blah.discord.api.internal.json.objects.WebhookObject;
-import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
-import sx.blah.discord.api.internal.json.requests.InviteCreateRequest;
-import sx.blah.discord.api.internal.json.requests.MessageRequest;
-import sx.blah.discord.api.internal.json.requests.WebhookCreateRequest;
+import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
+
+	/**
+	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
+	 */
+	public static final int MESSAGE_CHUNK_COUNT = 100; //100 is the max amount discord lets you retrieve at one time
 
 	/**
 	 * User-friendly channel name (e.g. "general")
@@ -50,7 +53,7 @@ public class Channel implements IChannel {
 	/**
 	 * Messages that have been sent into this channel
 	 */
-	protected final MessageList messages;
+	public final ConcurrentLinkedDeque<IMessage> messages = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * The guild this channel belongs to.
@@ -100,9 +103,9 @@ public class Channel implements IChannel {
 	/**
 	 * The client that created this object.
 	 */
-	protected final IDiscordClient client;
+	protected final DiscordClientImpl client;
 
-	public Channel(IDiscordClient client, String name, String id, IGuild guild, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public Channel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -111,11 +114,6 @@ public class Channel implements IChannel {
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
-		if (!(this instanceof IVoiceChannel)) {
-			this.messages = new MessageList(client, this, MessageList.MESSAGE_CHUNK_COUNT);
-		} else {
-			this.messages = null;
-		}
 		this.webhooks = new CopyOnWriteArrayList<>();
 	}
 
@@ -140,16 +138,413 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	@Deprecated
 	public MessageList getMessages() {
-		return messages;
+		return new MessageList(client, this);
+	}
+
+	/**
+	 * Adds a message to the internal message CACHE.
+	 *
+	 * @param message the message.
+	 */
+	public void addToCache(IMessage message) {
+		if (getMaxInternalCacheCount() < 0) {
+			messages.addFirst(message);
+		} else if (getMaxInternalCacheCount() != 0) {
+			if (getInternalCacheCount() == getMaxInternalCacheCount())
+				messages.removeLast(); //At max so we need to make room
+
+			messages.addFirst(message);
+		}
+	}
+
+	private IMessage[] requestHistory(String before, int limit) {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
+
+		String queryParams = "?limit=" + limit;
+
+		if (before != null) {
+			queryParams += "&before=" + before;
+		}
+//		} else if (around != null) {
+//			queryParams += "&around="+around;
+//		} else if (after != null) {
+//			queryParams += "&after="+after;
+//		}
+
+		MessageObject[] messages = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages" + queryParams, MessageObject[].class);
+
+		if (messages.length == 0) {
+			return new IMessage[0];
+		}
+
+		IMessage[] messageObjs = new IMessage[messages.length];
+
+		for (int i = 0; i < messages.length; i++) {
+			messageObjs[i] = DiscordUtils.getMessageFromJSON(this, messages[i]);
+		}
+
+		return messageObjs;
+	}
+
+	@Override
+	public MessageHistory getMessageHistory() {
+		return new MessageHistory(messages);
+	}
+
+	private Collection<IMessage> subDeque(int from, int end) {
+		List<IMessage> list = new ArrayList<>();
+		if (from >= 0 || end < from) { //Skip this step if the indexes are invalid
+			for (int i = from; i < end; i++)
+				list.add((IMessage) messages.toArray()[i]);
+		}
+		return list;
+	}
+
+	@Override
+	public MessageHistory getMessageHistory(int messageCount) {
+		if (messageCount <= messages.size())
+			return new MessageHistory(subDeque(0, messageCount));
+		else {
+			final AtomicInteger remaining = new AtomicInteger(messageCount - messages.size());
+			final List<IMessage> retrieved = new ArrayList<>(messages);
+			while (remaining.get() > 0) {
+				RequestBuffer.request(() -> {
+					int requestCount = Math.min(remaining.get(), MESSAGE_CHUNK_COUNT);
+					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null, requestCount);
+
+					if (requestCount != chunk.length)
+						remaining.set(0); //Got all possible messages already
+					else
+						remaining.addAndGet(-chunk.length);
+
+					retrieved.addAll(Arrays.asList(chunk));
+				}).get();
+			}
+
+			return new MessageHistory(retrieved);
+		}
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
+		return getMessageHistoryFrom(startDate, -1);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
+		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
+				.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
+				.collect(Collectors.toList()));
+
+		final AtomicReference<String> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null);
+		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
+			if (RequestBuffer.request(() -> {
+				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+
+				List<IMessage> toAdd = Arrays.stream(chunk)
+						.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
+						.collect(Collectors.toList());
+
+				retrieved.addAll(toAdd);
+
+				if (chunk.length > 0)
+					lastID.set(chunk[chunk.length-1].getID());
+
+				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount);//Done when the messages retrieved are not matching the requested count
+			}).get())
+				break;
+		}
+
+		if (maxCount > 0)
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
+		else
+			return new MessageHistory(retrieved);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+		return getMessageHistoryTo(endDate, -1);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
+		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
+				.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
+				.collect(Collectors.toList()));
+
+		if (messages.size() == retrieved.size()) { //All elements were copied over, meaning that we're likely not done finding messages
+			while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
+				if (RequestBuffer.request(() -> {
+					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null, MESSAGE_CHUNK_COUNT);
+
+					List<IMessage> toAdd = Arrays.stream(chunk)
+							.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
+							.collect(Collectors.toList());
+
+					retrieved.addAll(toAdd);
+
+					return toAdd.size() != chunk.length || chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
+				}).get())
+					break;
+			}
+		}
+
+		if (maxCount > 0)
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
+		else
+			return new MessageHistory(retrieved);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+		return getMessageHistoryIn(startDate, endDate, -1);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
+				.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
+				.collect(Collectors.toList()));
+
+		final AtomicReference<String> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null);
+
+		if (((IMessage) messages.toArray()[messages.size()-1]).getTimestamp().compareTo(endDate) <= 0) { //When the last message cached matches the criteria there may still be more in history
+			while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
+				if (RequestBuffer.request(() -> {
+					IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+
+					List<IMessage> toAdd = Arrays.stream(chunk)
+							.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
+							.collect(Collectors.toList());
+
+					retrieved.addAll(toAdd);
+
+					if (chunk.length > 0)
+						lastID.set(chunk[chunk.length-1].getID());
+
+					return toAdd.size() != chunk.length || chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
+				}).get())
+					break;
+			}
+		}
+
+		if (maxCount > 0)
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
+		else
+			return new MessageHistory(retrieved);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(String id) {
+		return getMessageHistoryFrom(id, -1);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(String id, int maxCount) {
+		int index = -1;
+		for (int i = 0; i < messages.size(); i++) {
+			if (((IMessage) messages.toArray()[i]).getID().equals(id)) {
+				index = i;
+				break;
+			}
+		}
+
+		final List<IMessage> retrieved = new ArrayList<>(subDeque(index, messages.size()));
+
+		if (index == -1)
+			retrieved.add(RequestBuffer.request(() -> {return getMessageByID(id);}).get()); //Ignore intellij on this line, the return statement is required for the IRequest to not resolve to an IVoidRequest
+
+		final AtomicReference<String> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null);
+		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
+			if (RequestBuffer.request(() -> {
+				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+
+				retrieved.addAll(Arrays.asList(chunk));
+
+				if (chunk.length > 0)
+					lastID.set(chunk[chunk.length-1].getID());
+
+				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
+			}).get())
+				break;
+		}
+
+		if (maxCount > 0)
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
+		else
+			return new MessageHistory(retrieved);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(String id) {
+		return getMessageHistoryTo(id, -1);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(String id, int maxCount) {
+		final List<IMessage> retrieved = new ArrayList<>();
+
+		for (IMessage message : messages) {
+			retrieved.add(message);
+			if (message.getID().equals(id))
+				return new MessageHistory(retrieved); //Let's end early since we reached the target
+		}
+
+		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
+			if (RequestBuffer.request(() -> {
+				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null, MESSAGE_CHUNK_COUNT);
+
+				for (IMessage message : chunk) {
+					retrieved.add(message);
+					if (message.getID().equals(id))
+						return true; //Finish early
+				}
+
+				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
+			}).get())
+				break;
+		}
+
+		if (maxCount > 0)
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
+		else
+			return new MessageHistory(retrieved);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(String beginID, String endID) {
+		return getMessageHistoryIn(beginID, endID, -1);
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(String beginID, String endID, int maxCount) {
+		int startIndex = -1;
+		for (int i = 0; i < messages.size(); i++) {
+			if (((IMessage) messages.toArray()[i]).getID().equals(id)) {
+				startIndex = i;
+				break;
+			}
+		}
+
+		final List<IMessage> retrieved = new ArrayList<>(subDeque(startIndex, messages.size()));
+
+		if (startIndex == -1)
+			retrieved.add(RequestBuffer.request(() -> {return getMessageByID(id);}).get()); //Ignore intellij on this line, the return statement is required for the IRequest to not resolve to an IVoidRequest
+
+		final AtomicReference<String> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null);
+
+		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
+			if (RequestBuffer.request(() -> {
+				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+
+				for (IMessage message : chunk) {
+					retrieved.add(message);
+					if (message.getID().equals(id))
+						return true; //Finish early
+				}
+
+				if (chunk.length > 0)
+					lastID.set(chunk[chunk.length-1].getID());
+
+				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
+			}).get())
+				break;
+		}
+
+		if (maxCount > 0)
+			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
+		else
+			return new MessageHistory(retrieved);
+	}
+
+	@Override
+	public MessageHistory getFullMessageHistory() {
+		final List<IMessage> retrieved = new ArrayList<>(messages);
+
+		while (true) {
+			if (RequestBuffer.request(() -> {
+				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null, MESSAGE_CHUNK_COUNT);
+
+				retrieved.addAll(Arrays.asList(chunk));
+
+				return chunk.length != MESSAGE_CHUNK_COUNT; //We reached the end of the history or we reached the specified end date
+			}).get())
+				break;
+		}
+
+		return new MessageHistory(retrieved);
+	}
+
+	@Override
+	public List<IMessage> bulkDelete() {
+		return bulkDelete(getMessageHistoryTo(LocalDateTime.now().minusWeeks(2)));
+	}
+
+	@Override
+	public List<IMessage> bulkDelete(List<IMessage> messages) {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_MESSAGES));
+
+		if (isPrivate())
+			throw new UnsupportedOperationException("Cannot bulk delete in private channels!");
+
+		if (messages.size() == 1) { //Skip further processing if only one message was provided
+			messages.get(0).delete();
+			return messages;
+		}
+
+		List<IMessage> toDelete = messages.stream()
+				.filter(msg -> Long.parseLong(msg.getID()) >= (((System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000) - 1420070400000L) << 22)) // Taken from Jake
+				.collect(Collectors.toList());
+
+		if (toDelete.size() < 1)
+			throw new DiscordException("Must provide at least 1 valid message to delete.");
+
+		if (toDelete.size() == 1) { //Bulk delete is no longer valid, time for normal delete.
+			toDelete.get(0).delete();
+			return toDelete;
+		} else if (toDelete.size() > 100) { //Above the max limit, time to create a sublist
+			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "More than 100 messages requested to be bulk deleted! Bulk deleting only the first 100...");
+			toDelete = toDelete.subList(0, 100);
+		}
+
+		client.REQUESTS.POST.makeRequest(
+				DiscordEndpoints.CHANNELS + id + "/messages/bulk-delete",
+				new BulkDeleteRequest(toDelete));
+
+		return toDelete;
+	}
+
+	@Override
+	public int getMaxInternalCacheCount() {
+		return client.getMaxCacheCount();
+	}
+
+	@Override
+	public int getInternalCacheCount() {
+		synchronized (messages) {
+			return messages.size();
+		}
 	}
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		if (messages == null)
+		if (messageID == null)
 			return null;
 
-		return messages.get(messageID);
+		return messages.stream()
+				.filter(msg -> msg.getID().equals(messageID))
+				.findAny()
+				.orElseGet(() -> {
+					try {
+						return DiscordUtils.getMessageFromJSON(this, client.REQUESTS.GET.makeRequest(
+								DiscordEndpoints.CHANNELS + this.getID() + "/messages/" + messageID,
+								MessageObject.class));
+					} catch (Exception ignored) {
+						return null;
+					}
+				});
 	}
 
 	@Override
@@ -210,9 +605,9 @@ public class Channel implements IChannel {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.EMBED_LINKS));
 		}
 
-		MessageObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+		MessageObject response = client.REQUESTS.POST.makeRequest(
 				DiscordEndpoints.CHANNELS+id+"/messages",
-				DiscordUtils.GSON_NO_NULLS.toJson(new MessageRequest(content, embed, tts)),
+				new MessageRequest(content, embed, tts),
 				MessageObject.class);
 
 		if (response == null || response.id == null) //Message didn't send
@@ -255,16 +650,19 @@ public class Channel implements IChannel {
 	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
-		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-		builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
-		builder.addTextBody("payload_json", DiscordUtils.GSON_NO_NULLS.toJson(new FilePayloadObject(content, tts, embed)), ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
+		try {
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
+			builder.addTextBody("payload_json", DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new FilePayloadObject(content, tts, embed)), ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
 
-		HttpEntity fileEntity = builder.build();
-		String response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS+id+"/messages",
-				fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data"));
-		MessageObject messageObject = DiscordUtils.GSON.fromJson(response, MessageObject.class);
+			HttpEntity fileEntity = builder.build();
+			MessageObject messageObject = DiscordUtils.MAPPER.readValue(client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
+					fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data")), MessageObject.class);
 
-		return DiscordUtils.getMessageFromJSON(this, messageObject);
+			return DiscordUtils.getMessageFromJSON(this, messageObject);
+		} catch (IOException e) {
+			throw new DiscordException("JSON Parsing exception!", e);
+		}
 	}
 
 	@Override
@@ -325,7 +723,7 @@ public class Channel implements IChannel {
 		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
 			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+		client.REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.CHANNELS + id,
 				new ChannelEditRequest(name, position, topic));
 	}
@@ -481,7 +879,7 @@ public class Channel implements IChannel {
 
 		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 				DiscordEndpoints.CHANNELS+getID()+"/permissions/"+id,
-				DiscordUtils.GSON_NO_NULLS.toJson(new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove))));
+				new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)));
 	}
 
 	@Override

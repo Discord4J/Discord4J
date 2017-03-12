@@ -1,6 +1,7 @@
 package sx.blah.discord.api.internal;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
@@ -75,31 +76,16 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketText(String message) {
-		JsonObject payload = DiscordUtils.GSON.fromJson(message, JsonObject.class);
-		VoiceOps op = VoiceOps.get(payload.get("op").getAsInt());
+		try {
+			JsonNode json = DiscordUtils.MAPPER.readTree(message);
+			VoiceOps op = VoiceOps.get(json.get("op").asInt());
+			JsonNode d = json.has("d") && !json.get("d").isNull() ? json.get("d") : null;
 
-		switch (op) {
-			case READY:
-				try {
-					VoiceReadyResponse ready = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceReadyResponse.class);
-					voiceSocket.setup(endpoint, ready.port, ready.ssrc);
-					beginHeartbeat(ready.heartbeat_interval);
-				} catch (IOException e) {
-					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error handling voice ready payload: ", e);
-				}
-				break;
-			case SESSION_DESCRIPTION:
-				VoiceDescriptionResponse description = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceDescriptionResponse.class);
-				voiceSocket.setSecret(description.secret_key);
-				voiceSocket.begin();
+			switch (op) {
 
-				break;
-			case SPEAKING:
-				VoiceSpeakingResponse response = DiscordUtils.GSON.fromJson(payload.get("d"), VoiceSpeakingResponse.class);
-				IUser user = getGuild().getUserByID(response.user_id);
-				users.put(response.ssrc, user);
-				guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.isSpeaking));
-				break;
+			}
+		} catch (IOException e) {
+			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "JSON Parsing exception!", e);
 		}
 	}
 
@@ -133,8 +119,12 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 		send(new GatewayPayload(op, payload));
 	}
 
-	public void send(GatewayPayload payload) {
-		send(DiscordUtils.GSON.toJson(payload));
+	private void send(GatewayPayload payload) {
+		try {
+			send(DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(payload));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "JSON Parsing exception!", e);
+		}
 	}
 
 	public void send(String message) {
