@@ -1,8 +1,12 @@
 package sx.blah.discord.api;
 
+import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.api.internal.json.responses.GatewayBotResponse;
 import sx.blah.discord.util.DiscordException;
 
 import java.util.ArrayList;
@@ -20,6 +24,7 @@ public class ClientBuilder {
 	 */
 	public static final int DEFAULT_MESSAGE_CACHE_LIMIT = 256;
 
+	private boolean withRecomendedShardCount = false;
 	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
@@ -78,11 +83,23 @@ public class ClientBuilder {
 
 	/**
 	 * Sets the sharding information for the client.
+	 *
 	 * @param shardCount The total number of shards that will be created.
 	 * @return The instance of the builder.
 	 */
 	public ClientBuilder withShards(int shardCount) {
 		this.shardCount = shardCount;
+		return this;
+	}
+
+	/**
+	 * Sets the bot to use Discord's recommended number of shards on login.
+	 *
+	 * @param useRecommended If the bot is to use the recommended number of shards
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withRecommendedShardCount(boolean useRecommended){
+		this.withRecomendedShardCount = useRecommended;
 		return this;
 	}
 
@@ -195,6 +212,10 @@ public class ClientBuilder {
 	public IDiscordClient build() throws DiscordException {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
+		if (withRecomendedShardCount){
+			GatewayBotResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY + "/bot", GatewayBotResponse.class, new BasicNameValuePair("Authorization", "Bot " + botToken), new BasicNameValuePair("Content-Type", "application/json"));
+			shardCount = response.shards;
+		}
 
 		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings,
 				maxReconnectAttempts, retryCount, maxCacheCount);
