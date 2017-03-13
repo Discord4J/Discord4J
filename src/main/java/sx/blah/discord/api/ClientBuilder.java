@@ -24,7 +24,7 @@ public class ClientBuilder {
 	 */
 	public static final int DEFAULT_MESSAGE_CACHE_LIMIT = 256;
 
-	private boolean withRecomendedShards = false;
+	private boolean withRecomendedShardCount = false;
 	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
@@ -83,6 +83,7 @@ public class ClientBuilder {
 
 	/**
 	 * Sets the sharding information for the client.
+	 *
 	 * @param shardCount The total number of shards that will be created.
 	 * @return The instance of the builder.
 	 */
@@ -92,12 +93,13 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the bot to use Discord's recommended number of shards on login
+	 * Sets the bot to use Discord's recommended number of shards on login.
+	 *
 	 * @param useRecommended If the bot is to use the recommended number of shards
 	 * @return The instance of the builder.
 	 */
 	public ClientBuilder withRecommendedShardCount(boolean useRecommended){
-		this.withRecomendedShards = useRecommended;
+		this.withRecomendedShardCount = useRecommended;
 		return this;
 	}
 
@@ -210,7 +212,7 @@ public class ClientBuilder {
 	public IDiscordClient build() throws DiscordException {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
-		if (withRecomendedShards){
+		if (withRecomendedShardCount){
 			GatewayBotResponse ao = Requests.GENERAL_REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY + "/bot", GatewayBotResponse.class, new BasicNameValuePair("Authorization", "Bot " + botToken), new BasicNameValuePair("Content-Type", "application/json"));
 			shardCount = ao.shards;
 		}
