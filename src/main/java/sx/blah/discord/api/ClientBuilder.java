@@ -213,8 +213,8 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 		if (withRecomendedShardCount){
-			GatewayBotResponse ao = Requests.GENERAL_REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY + "/bot", GatewayBotResponse.class, new BasicNameValuePair("Authorization", "Bot " + botToken), new BasicNameValuePair("Content-Type", "application/json"));
-			shardCount = ao.shards;
+			GatewayBotResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY + "/bot", GatewayBotResponse.class, new BasicNameValuePair("Authorization", "Bot " + botToken), new BasicNameValuePair("Content-Type", "application/json"));
+			shardCount = response.shards;
 		}
 
 		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings,
