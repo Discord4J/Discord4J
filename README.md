@@ -140,7 +140,6 @@ See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/
 ## Projects using Discord4J
 * Official Discord4J Addons: A collection of official addons and modules for Discord4J (https://github.com/Discord4J-Addons)
 * D4J/JDA Player by @DV8FromTheWorld: A full-featured audio player for Discord4J and JDA (https://github.com/DV8FromTheWorld/JDA-Player)
-* Discordinator by @alpha;helix: A modularized command API (https://github.com/alphahelix00/Discordinator)
 * Instructability by @Kaioru: A simple command API (https://github.com/Kaioru/Instructability)
 
 ## Deprecation policy
