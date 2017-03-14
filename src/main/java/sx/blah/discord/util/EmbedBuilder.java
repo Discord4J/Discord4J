@@ -43,6 +43,10 @@ public class EmbedBuilder {
 	 * The max length of footer text.
 	 */
 	public static final int FOOTER_CONTENT_LIMIT = DESCRIPTION_CONTENT_LIMIT;
+	/**
+	 * The maximum character limit across all visible fields.
+	 */
+	public static final int MAX_CHAR_LIMIT = 4000;
 
 	private final EmbedObject embed = new EmbedObject(null, "rich", null, null, null, 0, null, null, null, null, null,
 			null, null);
@@ -88,6 +92,8 @@ public class EmbedBuilder {
 				throw new IllegalArgumentException(
 						"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
 
+		throwExceptionForCharacterLimit(title.length());
+
 		embed.title = title;
 		return this;
 	}
@@ -104,8 +110,10 @@ public class EmbedBuilder {
 				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT);
 			else
 				throw new IllegalArgumentException(
-					"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
+						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 		}
+
+		throwExceptionForCharacterLimit(desc.length());
 
 		embed.description = desc;
 		return this;
@@ -137,6 +145,8 @@ public class EmbedBuilder {
 				throw new IllegalArgumentException(
 						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 		}
+
+		throwExceptionForCharacterLimit(desc.length());
 
 		embed.description += desc;
 		return this;
@@ -224,6 +234,8 @@ public class EmbedBuilder {
 						"Embed footer text cannot have more than " + FOOTER_CONTENT_LIMIT + " characters");
 		}
 
+		throwExceptionForCharacterLimit(footer.length());
+
 		embed.footer.text = footer;
 		return this;
 	}
@@ -293,6 +305,8 @@ public class EmbedBuilder {
 	public EmbedBuilder withAuthorName(String name) {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
+
+		throwExceptionForCharacterLimit(name.length());
 
 		embed.author.name = name;
 		return this;
@@ -378,6 +392,8 @@ public class EmbedBuilder {
 						"Embed field content cannot have more than " + FIELD_CONTENT_LIMIT + " characters");
 		}
 
+		throwExceptionForCharacterLimit(title.length() + content.length());
+
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
 	}
@@ -399,6 +415,7 @@ public class EmbedBuilder {
 	 */
 	public EmbedObject build() {
 		generateWarnings();
+		throwExceptionForCharacterLimit(0);
 
 		return new EmbedObject(embed.title, "rich", embed.description, embed.url, embed.timestamp, color == null
 				? embed.color
@@ -407,12 +424,35 @@ public class EmbedBuilder {
 				fields.toArray(new EmbedObject.EmbedFieldObject[fields.size()]));
 	}
 
+	public int getTotalVisibleCharacters() {
+		return (embed.title == null ? 0 : embed.title.length()) +
+				(embed.description == null ? 0 : embed.description.length()) +
+				(embed.footer == null ? 0 : (embed.footer.text == null ? 0 : embed.footer.text.length())) +
+				(embed.author == null ? 0 : (embed.author.name == null ? 0 : embed.author.name.length())) +
+				(fields.stream().mapToInt(efo -> (efo.name == null ? 0 : efo.name.length()) +
+						(efo.value == null ? 0 : efo.value.length())).sum());
+	}
+
+	public boolean doesExceedCharacterLimit() {
+		return getTotalVisibleCharacters() > MAX_CHAR_LIMIT;
+	}
+
+	private void throwExceptionForCharacterLimit(int extra) {
+		if (extra < 0)
+			throw new IllegalArgumentException("Extra cannot be negative!");
+		if (!lenient && getTotalVisibleCharacters() + extra > MAX_CHAR_LIMIT)
+			throw new IllegalArgumentException(
+					"Embed " + (extra == 0 ? "exceeds" : "would exceed") + " character limit of " + MAX_CHAR_LIMIT +
+							" (" + (extra == 0 ? "has" : "would have") + " " + (getTotalVisibleCharacters() + extra) +
+							" chars)");
+	}
+
 	private void generateWarnings() {
 		if (embed.footer != null) {
 			// footer warnings
 			if (embed.footer.icon_url != null && (embed.footer.text == null || embed.footer.text.isEmpty())) {
-				Discord4J.LOGGER
-						.warn(LogMarkers.UTIL, "Embed object warning - footer icon without footer text - footer icon will not be " +
+				Discord4J.LOGGER.warn(LogMarkers.UTIL,
+						"Embed object warning - footer icon without footer text - footer icon will not be " +
 								"visible");
 			}
 		}
@@ -420,14 +460,13 @@ public class EmbedBuilder {
 		if (embed.author != null) {
 			if (embed.author.name == null || embed.author.name.isEmpty()) {
 				if (embed.author.icon_url != null) {
-					Discord4J.LOGGER
-							.warn(LogMarkers.UTIL, "Embed object warning - author icon without author name - author icon will not be " +
+					Discord4J.LOGGER.warn(LogMarkers.UTIL,
+							"Embed object warning - author icon without author name - author icon will not be " +
 									"visible");
 				}
 				if (embed.author.url != null) {
-					Discord4J.LOGGER
-							.warn(LogMarkers.UTIL, "Embed object warning - author URL without author name - URL is useless and cannot" +
-									" " +
+					Discord4J.LOGGER.warn(LogMarkers.UTIL,
+							"Embed object warning - author URL without author name - URL is useless and cannot" + " " +
 									"be clicked");
 				}
 			}
