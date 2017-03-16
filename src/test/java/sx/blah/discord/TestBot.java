@@ -8,7 +8,6 @@ import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.obj.Message;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.util.*;
@@ -17,8 +16,8 @@ import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -115,7 +114,7 @@ public class TestBot {
 											try {
 												new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
 														MessageBuilder.Styles.BOLD).build();
-											} catch (RateLimitException | MissingPermissionsException | DiscordException e) {
+											} catch (RateLimitException | MissingPermissionsException | DiscordException | FileNotFoundException e) {
 												e.printStackTrace();
 											}
 										}

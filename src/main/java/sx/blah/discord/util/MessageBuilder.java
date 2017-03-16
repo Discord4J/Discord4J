@@ -6,6 +6,10 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 /**
  * Utility class designed to make message sending easier.
  */
@@ -16,6 +20,7 @@ public class MessageBuilder {
 	private IDiscordClient client;
 	private boolean tts = false;
 	private EmbedObject embed;
+	private File file;
 
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
@@ -152,6 +157,7 @@ public class MessageBuilder {
 
 	/**
 	 * Sets the embed to be used (can be null).
+	 *
 	 * @param embed The embed object (build with EmbedBuilder)
 	 * @return The message builder instance.
 	 * @see EmbedBuilder
@@ -162,10 +168,21 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * Adds a file to be sent with the message.
+	 *
+	 * @param file The file to be sent with the message
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withFile(File file) {
+		this.file = file;
+		return this;
+	}
+
+	/**
 	 * This gets the content of the message in its current form.
 	 *
 	 * @return The current content of the message.
-         */
+	 */
 	public String getContent() {
 		return content;
 	}
@@ -207,12 +224,13 @@ public class MessageBuilder {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
+	 * @throws FileNotFoundException
 	 */
-	public IMessage build() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage build() throws DiscordException, RateLimitException, MissingPermissionsException, FileNotFoundException {
 		if (null == content || null == channel) {
 			throw new RuntimeException("You need content and a channel to send a message!");
 		} else {
-			return channel.sendMessage(content, embed, tts);
+			return channel.sendFile(content, tts, new FileInputStream(file), file.getName(), embed);
 		}
 	}
 
@@ -224,8 +242,9 @@ public class MessageBuilder {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
+	 * @throws FileNotFoundException
 	 */
-	public IMessage send() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage send() throws DiscordException, RateLimitException, MissingPermissionsException, FileNotFoundException {
 		return build();
 	}
 
