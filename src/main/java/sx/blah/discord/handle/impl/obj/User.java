@@ -1,5 +1,8 @@
 package sx.blah.discord.handle.impl.obj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.http.entity.StringEntity;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -8,9 +11,11 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -286,9 +291,13 @@ public class User implements IUser {
 					EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 		}
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-				new MemberEditRequest(newChannel.getID()));
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
+					new StringEntity(DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(newChannel.getID()))));
+		} catch (UnsupportedEncodingException | JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
 	}
 
 	@Override
