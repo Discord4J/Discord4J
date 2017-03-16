@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 public class UDPVoiceSocket {
 
+	private static final byte[] SILENCE_FRAMES = {(byte) 0xF8, (byte) 0xFF, (byte) 0xFE};
+
 	private DiscordVoiceWS voiceWS;
 	private DatagramSocket udpSocket;
 	private InetSocketAddress address;
@@ -33,6 +35,8 @@ public class UDPVoiceSocket {
 	private char sequence = 0;
 	private int timestamp = 0;
 	private int ssrc;
+
+	private int silenceToSend = 5;
 
 	private final Runnable sendRunnable = () -> {
 		try {
@@ -48,8 +52,13 @@ public class UDPVoiceSocket {
 
 					sequence++;
 					timestamp += OpusUtil.OPUS_FRAME_SIZE;
-				} else if (isSpeaking) {
-					setSpeaking(false);
+					silenceToSend = 5;
+				} else {
+					if (isSpeaking) setSpeaking(false);
+					if (silenceToSend > 0) {
+						sendSilence();
+						silenceToSend--;
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -125,6 +134,14 @@ public class UDPVoiceSocket {
 	private void setSpeaking(boolean isSpeaking) {
 		this.isSpeaking = isSpeaking;
 		voiceWS.send(VoiceOps.SPEAKING, new VoiceSpeakingRequest(isSpeaking));
+	}
+
+	private void sendSilence() throws IOException {
+		OpusPacket packet = new OpusPacket(sequence, timestamp, ssrc, SILENCE_FRAMES);
+		packet.encrypt(secret);
+		byte[] toSend = packet.asByteArray();
+
+		udpSocket.send(new DatagramPacket(toSend, toSend.length, address));
 	}
 
 	void setSecret(byte[] secret) {
