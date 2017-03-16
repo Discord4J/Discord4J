@@ -1,7 +1,6 @@
 package sx.blah.discord.api.internal;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -70,7 +69,6 @@ public class DiscordUtils {
 	 */
 	public static final ObjectMapper MAPPER_NO_NULLS = new ObjectMapper()
 			.registerModule(new AfterburnerModule())
-			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 			.enable(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID)
 			.disable(SerializationFeature.WRITE_NULL_MAP_VALUES)
 			.enable(DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY)
