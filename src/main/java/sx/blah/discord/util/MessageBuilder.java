@@ -174,6 +174,8 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withFile(File file) {
+		if (file == null)
+			throw new NullPointerException("File argument is null");
 		this.file = file;
 		return this;
 	}
@@ -224,13 +226,20 @@ public class MessageBuilder {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
-	 * @throws FileNotFoundException
 	 */
-	public IMessage build() throws DiscordException, RateLimitException, MissingPermissionsException, FileNotFoundException {
-		if (null == content || null == channel) {
+	public IMessage build() throws DiscordException, RateLimitException, MissingPermissionsException {
+		if (null == content || null == channel)
 			throw new RuntimeException("You need content and a channel to send a message!");
-		} else {
-			return channel.sendFile(content, tts, new FileInputStream(file), file.getName(), embed);
+		if (!this.file.exists())
+			throw new RuntimeException(new FileNotFoundException("File does not exist"));
+		try {
+			if (file == null) {
+				return channel.sendMessage(content, embed, tts);
+			} else {
+				return channel.sendFile(content, tts, new FileInputStream(file), file.getName(), embed);
+			}
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -242,9 +251,8 @@ public class MessageBuilder {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
-	 * @throws FileNotFoundException
 	 */
-	public IMessage send() throws DiscordException, RateLimitException, MissingPermissionsException, FileNotFoundException {
+	public IMessage send() throws DiscordException, RateLimitException, MissingPermissionsException {
 		return build();
 	}
 
