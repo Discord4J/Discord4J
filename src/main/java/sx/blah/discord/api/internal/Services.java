@@ -18,7 +18,7 @@ import java.util.zip.ZipEntry;
 public class Services {
 	static void load() {
 		try {
-			File servicesJar = Files.createTempFile("discord4j-services", "jar").toFile();
+			File servicesJar = Files.createTempFile("discord4j-services", ".jar").toFile();
 			servicesJar.deleteOnExit();
 
 			Map<Class, List<String>> services = new HashMap<>();

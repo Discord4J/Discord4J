@@ -83,14 +83,14 @@ public class AudioManager implements IAudioManager {
 		userReceivers.values().forEach(list -> list.removeIf(r -> r.equals(receiver)));
 	}
 
-	public byte[] sendAudio() { //TODO: Audio padding
+	public synchronized byte[] sendAudio() {
 		IAudioProcessor processor = getAudioProcessor();
 		IAudioProvider provider = useProcessor ? processor : getAudioProvider();
 
 		return getAudioDataForProvider(provider);
 	}
 
-	public void receiveAudio(byte[] opusAudio, IUser user) {
+	public synchronized void receiveAudio(byte[] opusAudio, IUser user) {
 		byte[] pcm = OpusUtil.decode(stereoDecoder.get(), opusAudio);
 		receiveAudio(opusAudio, pcm, user);
 	}
