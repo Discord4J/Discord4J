@@ -1,5 +1,7 @@
 package sx.blah.discord.handle.impl.obj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -8,6 +10,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
@@ -286,9 +289,13 @@ public class User implements IUser {
 					EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 		}
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-				new MemberEditRequest(newChannel.getID()));
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(newChannel.getID())));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
 	}
 
 	@Override
