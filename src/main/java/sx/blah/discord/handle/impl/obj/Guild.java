@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -415,8 +416,13 @@ public class Guild implements IGuild {
 	public void editUserRoles(IUser user, IRole[] roles) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(), new MemberEditRequest(roles));
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(roles)));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
 
 	}
 
@@ -424,16 +430,26 @@ public class Guild implements IGuild {
 	public void setDeafenUser(IUser user, boolean deafen) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(), new MemberEditRequest(deafen));
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(deafen)));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
 	}
 
 	@Override
 	public void setMuteUser(IUser user, boolean mute) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/members/"+user.getID(), new MemberEditRequest(mute, true));
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(mute, true)));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
 	}
 
 	@Override
@@ -445,9 +461,13 @@ public class Guild implements IGuild {
 			DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.MANAGE_NICKNAMES));
 		}
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
-				new MemberEditRequest(nick == null ? "" : nick, true));
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(nick == null ? "" : nick, true)));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
 	}
 
 	@Override
