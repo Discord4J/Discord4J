@@ -114,7 +114,7 @@ public class TestBot {
 											try {
 												new MessageBuilder(client).withChannel(testChannel).withContent("Success! The build is complete. See the log here: "+CI_URL+buildNumber,
 														MessageBuilder.Styles.BOLD).build();
-											} catch (RateLimitException | MissingPermissionsException | DiscordException | FileNotFoundException e) {
+											} catch (RateLimitException | MissingPermissionsException | DiscordException e) {
 												e.printStackTrace();
 											}
 										}

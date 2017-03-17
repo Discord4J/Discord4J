@@ -44,6 +44,6 @@ public class ParrotBot extends BaseBot implements IListener<MessageReceivedEvent
 		} catch (MissingPermissionsException e) { // MissingPermissionsException thrown. The bot doesn't have permission to send the message!
 			System.err.print("Missing permissions for channel!");
 			e.printStackTrace();
-		} catch (FileNotFoundException ignored) {}
+		}
 	}
 }
