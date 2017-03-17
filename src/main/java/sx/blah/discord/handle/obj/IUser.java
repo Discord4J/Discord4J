@@ -123,6 +123,13 @@ public interface IUser extends IDiscordObject<IUser> {
 	Map<String, IVoiceState> getVoiceStates();
 
 	/**
+	 * Moves the user to the given voice channel.
+	 *
+	 * @param channel The voice channel to move to.
+	 */
+	void moveToVoiceChannel(IVoiceChannel channel);
+
+	/**
 	 * Gets whether or not this user is a bot.
 	 *
 	 * @return True if a bot, false if otherwise.

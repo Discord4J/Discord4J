@@ -7,6 +7,7 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
@@ -213,6 +214,26 @@ public class User implements IUser {
 	@Override
 	public Map<String, IVoiceState> getVoiceStates() {
 		return voiceStates;
+	}
+
+	@Override
+	public void moveToVoiceChannel(IVoiceChannel channel) {
+		IVoiceChannel oldChannel = getVoiceStateForGuild(channel.getGuild()).getChannel();
+
+		if (oldChannel == null)
+			throw new DiscordException("User must already be in a voice channel before they can be moved to another.");
+
+		// client must have permission to both move members and connect to the channel.
+		DiscordUtils.checkPermissions(client.getOurUser(), channel, EnumSet.of(Permissions.VOICE_MOVE_MEMBERS, Permissions.VOICE_CONNECT));
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS + channel.getGuild().getID() + "/members/" + id,
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(channel.getID())));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+
 	}
 
 	/**
