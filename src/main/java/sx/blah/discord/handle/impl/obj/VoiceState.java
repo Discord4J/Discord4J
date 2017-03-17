@@ -1,6 +1,9 @@
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.IVoiceState;
 
 public class VoiceState implements IVoiceState {
 

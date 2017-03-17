@@ -5,7 +5,6 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.OpusUtil;
 import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioProvider;
-import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.util.LogMarkers;
 
 import javax.sound.sampled.AudioInputStream;

@@ -1,11 +1,8 @@
 package sx.blah.discord.handle.audio.impl;
 
 import com.sun.jna.ptr.PointerByReference;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.Opus;
 import sx.blah.discord.api.internal.OpusUtil;
 import sx.blah.discord.handle.audio.*;
 import sx.blah.discord.handle.obj.IGuild;

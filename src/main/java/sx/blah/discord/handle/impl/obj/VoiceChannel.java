@@ -1,6 +1,5 @@
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.*;
 import sx.blah.discord.api.internal.json.requests.VoiceChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
@@ -12,7 +11,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {

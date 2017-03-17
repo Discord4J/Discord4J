@@ -1,8 +1,8 @@
 package sx.blah.discord.util;
 
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.internal.DiscordUtils;
 
 import java.util.concurrent.*;

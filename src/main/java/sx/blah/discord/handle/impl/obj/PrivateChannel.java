@@ -1,11 +1,10 @@
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.RateLimitException;
 
 import java.util.*;

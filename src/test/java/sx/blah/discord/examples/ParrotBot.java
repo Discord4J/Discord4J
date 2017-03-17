@@ -11,8 +11,6 @@ import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
-import java.io.FileNotFoundException;
-
 /**
  * An example to demonstrate event listening and message sending.
  * It will repeat everything said in a channel.

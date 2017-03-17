@@ -7,7 +7,6 @@ import sx.blah.discord.util.RateLimitException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * This class defines the Discord user.

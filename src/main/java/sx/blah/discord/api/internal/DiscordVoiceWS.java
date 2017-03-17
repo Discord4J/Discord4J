@@ -2,7 +2,6 @@ package sx.blah.discord.api.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -11,7 +10,6 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
-import sx.blah.discord.api.internal.json.requests.voice.SelectProtocolRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceIdentifyRequest;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceDescriptionResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceReadyResponse;
@@ -24,14 +22,12 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class DiscordVoiceWS extends WebSocketAdapter {
 

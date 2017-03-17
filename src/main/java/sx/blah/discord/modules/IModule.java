@@ -1,7 +1,7 @@
 package sx.blah.discord.modules;
 
-import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.events.IListener;
 
 /**

@@ -26,11 +26,11 @@ import org.slf4j.helpers.MarkerIgnoringBase;
 import org.slf4j.helpers.MessageFormatter;
 import org.slf4j.helpers.NOPLoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;

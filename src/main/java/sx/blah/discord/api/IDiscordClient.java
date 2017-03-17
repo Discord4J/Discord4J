@@ -1,11 +1,7 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.handle.impl.obj.Channel;
-import sx.blah.discord.handle.impl.obj.Guild;
-import sx.blah.discord.handle.impl.obj.Role;
-import sx.blah.discord.handle.impl.obj.User;
-import sx.blah.discord.handle.impl.obj.VoiceChannel;
+import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;

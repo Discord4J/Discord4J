@@ -25,9 +25,6 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -35,16 +32,11 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.zip.InflaterInputStream;
 
 /**
  * Collection of internal Discord4J utilities.
@@ -841,7 +833,7 @@ public class DiscordUtils {
 
 		//Converts first to PCM data. If the data is already PCM data, this will not change anything.
 		AudioFormat toPCM = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(),
-//AudioConnection.OPUS_SAMPLE_RATE,
+				//AudioConnection.OPUS_SAMPLE_RATE,
 				baseFormat.getSampleSizeInBits() != -1 ? baseFormat.getSampleSizeInBits() : 16,
 				baseFormat.getChannels(),
 				//If we are given a frame size, use it. Otherwise, assume 16 bits (2 8bit shorts) per channel.

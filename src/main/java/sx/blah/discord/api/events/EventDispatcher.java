@@ -3,9 +3,7 @@ package sx.blah.discord.api.events;
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.Procedure;
 
