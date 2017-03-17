@@ -61,9 +61,11 @@ public interface IVoiceChannel extends IChannel {
 	/**
 	 * Makes the bot user join this voice channel.
 	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void join() throws MissingPermissionsException;
+	void join() throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Makes the bot user leave this voice channel.

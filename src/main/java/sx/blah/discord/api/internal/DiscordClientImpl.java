@@ -15,19 +15,10 @@ import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.RequestBuilder;
+import sx.blah.discord.util.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -37,7 +28,7 @@ import java.util.stream.Collectors;
 public final class DiscordClientImpl implements IDiscordClient {
 
 	static {
-		ServiceUtil.loadServices();
+		if (!Discord4J.audioDisabled.get()) Services.load();
 	}
 
 	/**
@@ -74,11 +65,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Caches the available regions for discord.
 	 */
 	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
-
-	/**
-	 * Holds the active connections to voice sockets.
-	 */
-	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
 
 	/**
 	 * The maximum amount of pings discord can miss before a new session is created.
@@ -427,7 +413,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getOurUser().getConnectedVoiceChannels();
+		return getOurUser().getVoiceStates().values().stream().map(IVoiceState::getChannel).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Override

@@ -11,12 +11,7 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.api.internal.json.objects.ExtendedInviteObject;
-import sx.blah.discord.api.internal.json.objects.FilePayloadObject;
-import sx.blah.discord.api.internal.json.objects.MessageObject;
-import sx.blah.discord.api.internal.json.objects.OverwriteObject;
-import sx.blah.discord.api.internal.json.objects.WebhookObject;
+import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
@@ -59,7 +54,7 @@ public class Channel implements IChannel {
 	/**
 	 * The guild this channel belongs to.
 	 */
-	protected final IGuild parent;
+	protected final IGuild guild;
 
 	/**
 	 * The channel's topic message.
@@ -106,11 +101,11 @@ public class Channel implements IChannel {
 	 */
 	protected final DiscordClientImpl client;
 
-	public Channel(DiscordClientImpl client, String name, String id, IGuild parent, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public Channel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
-		this.parent = parent;
+		this.guild = guild;
 		this.topic = topic;
 		this.position = position;
 		this.roleOverrides = roleOverrides;
@@ -550,7 +545,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IGuild getGuild() {
-		return parent;
+		return guild;
 	}
 
 	@Override
@@ -798,8 +793,8 @@ public class Channel implements IChannel {
 		if (isPrivate() || getGuild().getOwnerID().equals(user.getID()))
 			return EnumSet.allOf(Permissions.class);
 
-		List<IRole> roles = user.getRolesForGuild(parent);
-		EnumSet<Permissions> permissions = user.getPermissionsForGuild(parent);
+		List<IRole> roles = user.getRolesForGuild(guild);
+		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
 
 		PermissionOverride override = getUserOverrides().get(user.getID());
 		List<PermissionOverride> overrideRoles = roles.stream()
@@ -826,7 +821,7 @@ public class Channel implements IChannel {
 		PermissionOverride override = getRoleOverrides().get(role.getID());
 
 		if (override == null) {
-			if ((override = getRoleOverrides().get(parent.getEveryoneRole().getID())) == null)
+			if ((override = getRoleOverrides().get(guild.getEveryoneRole().getID())) == null)
 				return base;
 		}
 
@@ -858,7 +853,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void removePermissionsOverride(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(parent), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(guild), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getID()+"/permissions/"+user.getID());
 
@@ -908,7 +903,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IUser> getUsersHere() {
-		return parent.getUsers().stream().filter((user) -> {
+		return guild.getUsers().stream().filter((user) -> {
 			EnumSet<Permissions> permissions = getModifiedPermissions(user);
 			return Permissions.READ_MESSAGES.hasPermission(Permissions.generatePermissionsNumber(permissions), true);
 		}).collect(Collectors.toList());
@@ -1073,7 +1068,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, parent, topic, position, roleOverrides, userOverrides);
+		Channel channel = new Channel(client, name, id, guild, topic, position, roleOverrides, userOverrides);
 		channel.isTyping.set(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);

@@ -1,12 +1,9 @@
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.*;
 import sx.blah.discord.api.internal.json.requests.VoiceChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
-import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
@@ -14,7 +11,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {
@@ -22,8 +22,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int userLimit = 0;
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(DiscordClientImpl client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
-		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
+	public VoiceChannel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
 	}
@@ -89,38 +89,34 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void join() throws MissingPermissionsException {
-		if (client.isReady()) {
-			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_CONNECT));
-			if (!client.getOurUser().getConnectedVoiceChannels().contains(this)) {
-				if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
-					Discord4J.LOGGER.info(LogMarkers.HANDLE, "Attempting to join multiple channels in the same guild! Moving channels instead...");
-					try {
-						client.getOurUser().moveToVoiceChannel(this);
-					} catch (DiscordException | RateLimitException | MissingPermissionsException e) {
-						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
-						return;
-					}
-				}
+	public void join() throws DiscordException, RateLimitException, MissingPermissionsException {
+		getShard().checkReady("join voice channel");
 
-				((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), id, false, false));
-			} else {
-				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
-			}
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to join voice channel before bot is ready!");
-		}
+		if (isConnected()) return;
+		DiscordUtils.checkPermissions(getClient().getOurUser(), this, EnumSet.of(Permissions.VOICE_CONNECT));
+
+		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
+		boolean isMuted = voiceState != null && voiceState.isMuted();
+		boolean isDeafened = voiceState != null && voiceState.isDeafened();
+		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
+				new VoiceStateUpdateRequest(getGuild().getID(), getID(), isMuted, isDeafened));
 	}
 
 	@Override
 	public void leave() {
-		if (client.getConnectedVoiceChannels().contains(this)) {
-			((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), null, false, false));
-			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
-				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
-			}
-		} else {
-			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave a non-joined voice channel! Ignoring the method call...");
+		getShard().checkReady("leave voice channel");
+		if (!isConnected()) return;
+
+		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
+		boolean isMuted = voiceState != null && voiceState.isMuted();
+		boolean isDeafened = voiceState != null && voiceState.isDeafened();
+
+		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
+				new VoiceStateUpdateRequest(getGuild().getID(), null, isMuted, isDeafened));
+
+		DiscordVoiceWS vWS = ((ShardImpl) getShard()).voiceWebSockets.get(getGuild());
+		if (vWS != null) {
+			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		}
 	}
 
@@ -331,7 +327,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
+		return new VoiceChannel(client, name, id, guild, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
 	}
 
 	@Override
@@ -341,7 +337,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IUser> getConnectedUsers() {
-		return parent.getUsers().stream().filter((user) -> user.getConnectedVoiceChannels().contains(this)).collect(Collectors.toList());
+		return guild.getUsers().stream().filter(u -> this.equals(u.getVoiceStateForGuild(guild).getChannel())).collect(Collectors.toList());
 	}
 
 	@Override

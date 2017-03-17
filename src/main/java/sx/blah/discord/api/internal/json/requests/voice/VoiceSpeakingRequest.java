@@ -1,7 +1,7 @@
 package sx.blah.discord.api.internal.json.requests.voice;
 
 /**
- * Requests send to the server to tell it's about to receive audio, or telling it the client is going to stop sending audio
+ * Used to indicate whether or not the bot is transmitting audio.
  */
 public class VoiceSpeakingRequest {
 
