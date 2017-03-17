@@ -609,9 +609,9 @@ public class Channel implements IChannel {
 		MessageObject response = null;
 		try {
 			response = client.REQUESTS.POST.makeRequest(
-                    DiscordEndpoints.CHANNELS+id+"/messages",
-                    DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MessageRequest(content, embed, tts)),
-                    MessageObject.class);
+					DiscordEndpoints.CHANNELS+id+"/messages",
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MessageRequest(content, embed, tts)),
+					MessageObject.class);
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -731,8 +731,8 @@ public class Channel implements IChannel {
 
 		try {
 			client.REQUESTS.PATCH.makeRequest(
-                    DiscordEndpoints.CHANNELS + id,
-                    DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new ChannelEditRequest(name, position, topic)));
+					DiscordEndpoints.CHANNELS + id,
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new ChannelEditRequest(name, position, topic)));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
