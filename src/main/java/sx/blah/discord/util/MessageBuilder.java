@@ -6,6 +6,11 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 /**
  * Utility class designed to make message sending easier.
  */
@@ -16,6 +21,8 @@ public class MessageBuilder {
 	private IDiscordClient client;
 	private boolean tts = false;
 	private EmbedObject embed;
+	private InputStream stream;
+	private String fileName;
 
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
@@ -152,6 +159,7 @@ public class MessageBuilder {
 
 	/**
 	 * Sets the embed to be used (can be null).
+	 *
 	 * @param embed The embed object (build with EmbedBuilder)
 	 * @return The message builder instance.
 	 * @see EmbedBuilder
@@ -162,10 +170,39 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * Adds a file to be sent with the message.
+	 *
+	 * @param file The file to be sent with the message
+	 * @return The message builder instance.
+	 * 
+	 * @throws FileNotFoundException
+	 */
+	public MessageBuilder withFile(File file) throws FileNotFoundException {
+		if (file == null)
+			throw new NullPointerException("File argument is null");
+		this.stream = new FileInputStream(file);
+		this.fileName = file.getName();
+		return this;
+	}
+
+	/**
+	 * Adds a file to be sent with the message.
+	 *
+	 * @param stream the stream of data of the file
+	 * @param fileName the name of the file to be sent to Discord
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withFile(InputStream stream, String fileName) {
+		this.stream = stream;
+		this.fileName = fileName;
+		return this;
+	}
+
+	/**
 	 * This gets the content of the message in its current form.
 	 *
 	 * @return The current content of the message.
-         */
+	 */
 	public String getContent() {
 		return content;
 	}
@@ -209,10 +246,12 @@ public class MessageBuilder {
 	 * @throws MissingPermissionsException
 	 */
 	public IMessage build() throws DiscordException, RateLimitException, MissingPermissionsException {
-		if (null == content || null == channel) {
+		if (null == content || null == channel)
 			throw new RuntimeException("You need content and a channel to send a message!");
-		} else {
+		if (stream == null) {
 			return channel.sendMessage(content, embed, tts);
+		} else {
+			return channel.sendFile(content, tts, stream, fileName, embed);
 		}
 	}
 
