@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -286,9 +287,13 @@ public class User implements IUser {
 					EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
 		}
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-				new MemberEditRequest(newChannel.getID()));
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+                    DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
+                    DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(newChannel.getID())));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

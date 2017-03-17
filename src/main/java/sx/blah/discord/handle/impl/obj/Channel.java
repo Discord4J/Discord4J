@@ -1,5 +1,6 @@
 package sx.blah.discord.handle.impl.obj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -605,10 +606,15 @@ public class Channel implements IChannel {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.EMBED_LINKS));
 		}
 
-		MessageObject response = client.REQUESTS.POST.makeRequest(
-				DiscordEndpoints.CHANNELS+id+"/messages",
-				new MessageRequest(content, embed, tts),
-				MessageObject.class);
+		MessageObject response = null;
+		try {
+			response = client.REQUESTS.POST.makeRequest(
+                    DiscordEndpoints.CHANNELS+id+"/messages",
+                    DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MessageRequest(content, embed, tts)),
+                    MessageObject.class);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 
 		if (response == null || response.id == null) //Message didn't send
 			throw new DiscordException("Message was unable to be sent (Discord didn't return a response).");
@@ -723,9 +729,13 @@ public class Channel implements IChannel {
 		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
 			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
-		client.REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.CHANNELS + id,
-				new ChannelEditRequest(name, position, topic));
+		try {
+			client.REQUESTS.PATCH.makeRequest(
+                    DiscordEndpoints.CHANNELS + id,
+                    DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new ChannelEditRequest(name, position, topic)));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
