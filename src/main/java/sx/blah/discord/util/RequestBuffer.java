@@ -36,14 +36,15 @@ public class RequestBuffer {
 
 					if (future.getBucket() != null) {
 						synchronized (requests) {
+							if (future.getBucket() != null) {
+								if (!requests.containsKey(future.getBucket())) {
+									requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
+									requestServices.put(future.getBucket(), Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuffer Retry Handler")));
+									requestServices.get(future.getBucket()).schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+								}
 
-							if (!requests.containsKey(future.getBucket())) {
-								requests.put(future.getBucket(), new CopyOnWriteArrayList<>());
-								requestServices.put(future.getBucket(), Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("RequestBuffer Retry Handler")));
-								requestServices.get(future.getBucket()).schedule(new RequestRunnable(future.getBucket()), future.getDelay(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+								requests.get(future.getBucket()).add(future);
 							}
-
-							requests.get(future.getBucket()).add(future);
 						}
 					}
 				}
