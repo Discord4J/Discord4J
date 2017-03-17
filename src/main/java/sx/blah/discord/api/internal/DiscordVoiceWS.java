@@ -121,7 +121,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
 		try {
 			shard.getClient().getDispatcher().dispatch(new VoiceDisconnectedEvent(getGuild(), reason));
-			shard.voiceWebSockets.remove(guild);
+			shard.voiceWebSockets.remove(guild.getID());
 			heartbeat.shutdownNow();
 			voiceSocket.shutdown();
 			if (getSession() != null) getSession().close(1000, null); // Discord doesn't care about the reason

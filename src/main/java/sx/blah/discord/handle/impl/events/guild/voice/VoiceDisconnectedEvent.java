@@ -14,7 +14,7 @@ public class VoiceDisconnectedEvent extends VoiceChannelEvent {
 		super(channel);
 		this.reason = reason;
 	}
-	
+
 	public VoiceDisconnectedEvent(IGuild guild, Reason reason) {
 		super(guild, guild.getConnectedVoiceChannel());
 		this.reason = reason;
@@ -37,6 +37,11 @@ public class VoiceDisconnectedEvent extends VoiceChannelEvent {
 		 * The user left the voice channel.
 		 */
 		LEFT_CHANNEL,
+
+		/**
+		 * The voice server has been updated and is moving. (Most likely voice region change)
+		 */
+		SERVER_UPDATE,
 
 		/**
 		 * Something unknown caused the websocket to close. The connection will be abandoned.

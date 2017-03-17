@@ -588,8 +588,13 @@ class DispatchHandler {
 	}
 
 	private void voiceServerUpdate(VoiceUpdateResponse event) {
+		DiscordVoiceWS oldWS = shard.voiceWebSockets.get(event.guild_id);
+		if (oldWS != null) {
+			oldWS.disconnect(VoiceDisconnectedEvent.Reason.SERVER_UPDATE);
+		}
+
 		DiscordVoiceWS vWS = new DiscordVoiceWS(shard, event);
-		shard.voiceWebSockets.put(shard.getGuildByID(event.guild_id), vWS);
+		shard.voiceWebSockets.put(event.guild_id, vWS);
 		vWS.connect();
 	}
 

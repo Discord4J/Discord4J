@@ -33,7 +33,7 @@ public class ShardImpl implements IShard {
 	private final DiscordClientImpl client;
 	final List<IGuild> guildList = new CopyOnWriteArrayList<>();
 	final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
-	public final Map<IGuild, DiscordVoiceWS> voiceWebSockets = new ConcurrentHashMap<>();
+	public final Map<String, DiscordVoiceWS> voiceWebSockets = new ConcurrentHashMap<>();
 
 	ShardImpl(IDiscordClient client, String gateway, int[] info) {
 		this.client = (DiscordClientImpl) client;
