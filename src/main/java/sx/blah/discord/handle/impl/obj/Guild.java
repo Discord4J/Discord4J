@@ -8,10 +8,7 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
-import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
-import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
-import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
-import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
+import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -25,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Guild implements IGuild {
@@ -642,24 +640,23 @@ public class Guild implements IGuild {
 
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
-		ReorderRolesRequest[] request = new ReorderRolesRequest[rolesInOrder.length];
+		int usersHighest = getRolesForUser(client.getOurUser()).stream()
+				.map(IRole::getPosition)
+				.max(Comparator.comparing(Function.identity()))
+				.orElse(-1);
 
-		for (int i = 0; i < rolesInOrder.length; i++) {
-			int position = rolesInOrder[i].getName().equals("@everyone") ? -1 : i+1;
-			if (position != rolesInOrder[i].getPosition()) {
-				IRole highest = getRolesForUser(client.getOurUser()).stream().sorted((o1, o2) -> {
-					if (o1.getPosition() < o2.getPosition()) {
-						return -1;
-					} else if (o2.getPosition() < o1.getPosition()) {
-						return 1;
-					} else {
-						return 0;
-					}
-				}).findFirst().orElse(null);
-				if (highest != null && highest.getPosition() <= position)
-					throw new MissingPermissionsException("Cannot edit the position of a role with a higher/equal position as your user's highest role.", EnumSet.noneOf(Permissions.class));
+		ReorderRolesRequest[] request = new ReorderRolesRequest[roles.size()];
+
+		for (int i = 0; i < roles.size(); i++) {
+			IRole role = rolesInOrder[i];
+
+			int newPosition = role.getPosition();
+			int oldPosition = getRoleByID(role.getID()).getPosition();
+			if (newPosition != oldPosition && oldPosition >= usersHighest) { // If the position was changed and the user doesn't have permission to change it.
+				throw new MissingPermissionsException("Cannot edit the position of a role higher than or equal to your own.", EnumSet.noneOf(Permissions.class));
+			} else {
+				request[i] = new ReorderRolesRequest(role.getID(), i);
 			}
-			request[i] = new ReorderRolesRequest(rolesInOrder[i].getID(), position);
 		}
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + id + "/roles", request);
