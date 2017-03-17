@@ -9,6 +9,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  * Utility class designed to make message sending easier.
@@ -20,7 +21,8 @@ public class MessageBuilder {
 	private IDiscordClient client;
 	private boolean tts = false;
 	private EmbedObject embed;
-	private File file;
+	private InputStream stream;
+	private String fileName;
 
 	public MessageBuilder(IDiscordClient client) {
 		this.client = client;
@@ -172,11 +174,27 @@ public class MessageBuilder {
 	 *
 	 * @param file The file to be sent with the message
 	 * @return The message builder instance.
+	 * 
+	 * @throws FileNotFoundException
 	 */
-	public MessageBuilder withFile(File file) {
+	public MessageBuilder withFile(File file) throws FileNotFoundException {
 		if (file == null)
 			throw new NullPointerException("File argument is null");
-		this.file = file;
+		this.stream = new FileInputStream(file);
+		this.fileName = file.getName();
+		return this;
+	}
+
+	/**
+	 * Adds a file to be sent with the message.
+	 *
+	 * @param stream the stream of data of the file
+	 * @param fileName the name of the file to be sent to Discord
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withFile(InputStream stream, String fileName) {
+		this.stream = stream;
+		this.fileName = fileName;
 		return this;
 	}
 
@@ -230,16 +248,10 @@ public class MessageBuilder {
 	public IMessage build() throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (null == content || null == channel)
 			throw new RuntimeException("You need content and a channel to send a message!");
-		if (!this.file.exists())
-			throw new RuntimeException(new FileNotFoundException("File does not exist"));
-		try {
-			if (file == null) {
-				return channel.sendMessage(content, embed, tts);
-			} else {
-				return channel.sendFile(content, tts, new FileInputStream(file), file.getName(), embed);
-			}
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
+		if (stream == null) {
+			return channel.sendMessage(content, embed, tts);
+		} else {
+			return channel.sendFile(content, tts, stream, fileName, embed);
 		}
 	}
 
