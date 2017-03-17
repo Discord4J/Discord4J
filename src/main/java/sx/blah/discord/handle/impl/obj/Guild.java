@@ -421,7 +421,7 @@ public class Guild implements IGuild {
                     DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
                     DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(roles)));
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 
 	}
@@ -435,7 +435,7 @@ public class Guild implements IGuild {
                     DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
                     DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(deafen)));
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -448,7 +448,7 @@ public class Guild implements IGuild {
                     DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
                     DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(mute, true)));
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
@@ -466,7 +466,7 @@ public class Guild implements IGuild {
                     DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
                     DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(nick == null ? "" : nick, true)));
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 

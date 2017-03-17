@@ -613,7 +613,7 @@ public class Channel implements IChannel {
                     DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MessageRequest(content, embed, tts)),
                     MessageObject.class);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 
 		if (response == null || response.id == null) //Message didn't send
@@ -734,7 +734,7 @@ public class Channel implements IChannel {
                     DiscordEndpoints.CHANNELS + id,
                     DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new ChannelEditRequest(name, position, topic)));
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
