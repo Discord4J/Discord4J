@@ -290,10 +290,9 @@ class DispatchHandler {
 					guild.loadWebhooks();
 			}
 
-			if (!user.getNicknameForGuild(guild).equals(event.nick)) {
-				String oldNick = user.getNicknameForGuild(guild);
+			String oldNick = user.getNicknameForGuild(guild);
+			if (oldNick != null && !oldNick.equals(event.nick)) {
 				user.addNick(guild.getID(), event.nick);
-
 				client.dispatcher.dispatch(new NickNameChangeEvent(guild, user, oldNick, event.nick));
 			}
 		}

@@ -116,6 +116,7 @@ public interface IUser extends IDiscordObject<IUser> {
 
 	/**
 	 * Gets all of the user's voice states.
+	 * Key is the guild ID that the voice state is for.
 	 *
 	 * @return All of the user's voice states.
 	 */
