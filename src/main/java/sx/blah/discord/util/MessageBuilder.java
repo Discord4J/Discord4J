@@ -105,6 +105,16 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * Sets the message to have tts enabled or disabled.
+	 *
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withTTS(boolean tts) {
+		this.tts = tts;
+		return this;
+	}
+
+	/**
 	 * Sets the message to have tts enabled.
 	 *
 	 * @return The message builder instance.
@@ -174,7 +184,7 @@ public class MessageBuilder {
 	 *
 	 * @param file The file to be sent with the message
 	 * @return The message builder instance.
-	 * 
+	 *
 	 * @throws FileNotFoundException
 	 */
 	public MessageBuilder withFile(File file) throws FileNotFoundException {
