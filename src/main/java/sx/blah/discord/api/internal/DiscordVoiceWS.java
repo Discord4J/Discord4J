@@ -96,7 +96,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 					VoiceSpeakingResponse response = DiscordUtils.MAPPER.treeToValue(d, VoiceSpeakingResponse.class);
 					IUser user = getGuild().getUserByID(response.user_id);
 					users.put(response.ssrc, user);
-					guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.isSpeaking));
+					guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.speaking));
 					break;
 				case UNKNOWN:
 					Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
