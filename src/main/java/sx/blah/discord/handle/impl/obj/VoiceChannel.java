@@ -114,7 +114,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
 				new VoiceStateUpdateRequest(getGuild().getID(), null, isMuted, isDeafened));
 
-		DiscordVoiceWS vWS = ((ShardImpl) getShard()).voiceWebSockets.get(getGuild());
+		DiscordVoiceWS vWS = ((ShardImpl) getShard()).voiceWebSockets.get(getGuild().getID());
 		if (vWS != null) {
 			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		}

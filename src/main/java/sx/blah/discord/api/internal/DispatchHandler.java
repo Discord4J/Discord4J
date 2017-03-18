@@ -375,10 +375,10 @@ class DispatchHandler {
 		// Clean up cache
 		guild.getShard().getGuilds().remove(guild);
 		client.getOurUser().getVoiceStates().remove(guild.getID());
-		DiscordVoiceWS vWS = shard.voiceWebSockets.get(guild);
+		DiscordVoiceWS vWS = shard.voiceWebSockets.get(json.id);
 		if (vWS != null) {
 			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
-			shard.voiceWebSockets.remove(guild);
+			shard.voiceWebSockets.remove(json.id);
 		}
 
 		if (json.unavailable) { //Guild can't be reached
