@@ -33,6 +33,7 @@ requests)
 line if statements do not need brackets.
 * All instanced objects should have getters and setters (where reasonable)
 * All classes and methods should be documented with javadocs
+* All new files should have the same LGPL 3 boilerplate header found in existing files.
 
 ## Credit
 I won't ever take complete credit for something I didn't do or something someone helped me with. I will always credit 
