@@ -147,6 +147,18 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IMessage edit(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
+	 * Edits the message with only an embed object. NOTE: Discord only supports editing YOUR OWN messages!
+	 *
+	 * @param embed The embed object
+	 * @return The new message (this).
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage edit(EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
 	 * Returns whether this message mentions everyone through @everyone.
 	 *
 	 * @return True if it mentions everyone, false if otherwise.

@@ -317,6 +317,11 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	public IMessage edit(EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
+		return edit(null, embed);
+	}
+
+	@Override
 	public IMessage edit(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
 		getShard().checkReady("edit message");
 		if (!this.getAuthor().equals(client.getOurUser()))
