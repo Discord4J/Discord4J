@@ -58,6 +58,16 @@ public enum LogMarkers implements Marker {
 	 */
 	EVENTS(API),
 	/**
+	 * The marker for all presence-related logging.
+	 * It is a child of {@link #EVENTS}.
+	 */
+	PRESENCES(EVENTS),
+	/**
+	 * The marker for all message-related logging.
+	 * It is a child of {@link #EVENTS}.
+	 */
+	MESSAGES(EVENTS),
+	/**
 	 * The marker for all websocket-related logging.
 	 * It is a child of {@link #API}.
 	 */

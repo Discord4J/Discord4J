@@ -171,7 +171,7 @@ class DispatchHandler {
 			IMessage message = DiscordUtils.getMessageFromJSON(channel, json);
 
 			if (!channel.getMessageHistory().contains(message)) {
-				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
+				Discord4J.LOGGER.debug(LogMarkers.MESSAGES, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
 				List<String> inviteCodes = DiscordUtils.getInviteCodesFromMessage(json.content);
@@ -380,7 +380,7 @@ class DispatchHandler {
 					IPresence oldPresence = user.getPresence();
 					user.setPresence(presence);
 					client.dispatcher.dispatch(new PresenceUpdateEvent(user, oldPresence, presence));
-					Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" changed presence to {}", user.getName(), user.getPresence());
+					Discord4J.LOGGER.debug(LogMarkers.PRESENCES, "User \"{}\" changed presence to {}", user.getName(), user.getPresence());
 				}
 			}
 		}
