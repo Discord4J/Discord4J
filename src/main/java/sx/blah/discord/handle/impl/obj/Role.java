@@ -214,10 +214,10 @@ public class Role implements IRole {
 		if (permissions == null)
 			throw new IllegalArgumentException("Permissions set must not be null.");
 
-		DiscordUtils.getRoleFromJSON(getGuild(), ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+		((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
 				new RoleEditRequest(color, hoist, name, permissions, isMentionable),
-				RoleObject.class));
+				RoleObject.class);
 	}
 
 	@Override
