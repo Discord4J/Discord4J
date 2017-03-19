@@ -146,7 +146,8 @@ public class Requests {
 
 		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
 			try {
-				return DiscordUtils.MAPPER.readValue(makeRequest(url, entity, headers), clazz);
+				byte[] response = makeRequest(url, entity, headers);
+				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
 			} catch (IOException e) {
 				throw new DiscordException("Unable to serialize request!", e);
 			}
@@ -165,7 +166,8 @@ public class Requests {
 		 */
 		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
 			try {
-				return DiscordUtils.MAPPER.readValue(makeRequest(url, headers), clazz);
+				byte[] response = makeRequest(url, headers);
+				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
 			} catch (IOException e) {
 				throw new DiscordException("Unable to serialize request!", e);
 			}
