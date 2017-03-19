@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~     This file is part of Discord4J.
+  ~
+  ~     Discord4J is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Lesser General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     Discord4J is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Lesser General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Lesser General Public License
+  ~     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,12 +24,12 @@
 	<groupId>com.github.austinv11</groupId>
 	<artifactId>Discord4J</artifactId>
 	<version>2.7.1-SNAPSHOT</version>
-	<description>A Java binding for the official Discord API, forked from the inactive https://github.com/nerd/Discord4J. Copyright (c) 2017, Licensed under GNU GPLv2</description>
+	<description>A Java binding for the official Discord API, forked from the inactive https://github.com/nerd/Discord4J. Copyright (c) 2017, Licensed under GNU LGPLv3</description>
 	<url>https://github.com/austinv11/Discord4J</url>
 	<licenses>
 		<license>
-			<name>GNU GPLv2 License</name>
-			<url>http://opensource.org/licenses/GPL-2.0</url>
+			<name>GNU LGPLv3 License</name>
+			<url>https://opensource.org/licenses/LGPL-3.0</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
