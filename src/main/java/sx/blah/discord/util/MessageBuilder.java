@@ -122,13 +122,22 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * Sets the message to have tts enabled or disabled.
+	 *
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withTTS(boolean tts) {
+		this.tts = tts;
+		return this;
+	}
+
+	/**
 	 * Sets the message to have tts enabled.
 	 *
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withTTS() {
-		tts = true;
-		return this;
+		return withTTS(true);
 	}
 
 	/**
