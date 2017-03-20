@@ -120,8 +120,7 @@ public class MessageBuilder {
 	 * @return The message builder instance.
 	 */
 	public MessageBuilder withTTS() {
-		tts = true;
-		return this;
+		return withTTS(true);
 	}
 
 	/**
