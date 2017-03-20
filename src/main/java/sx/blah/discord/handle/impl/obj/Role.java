@@ -22,7 +22,6 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.api.internal.json.objects.RoleObject;
 import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -216,8 +215,7 @@ public class Role implements IRole {
 
 		((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
-				new RoleEditRequest(color, hoist, name, permissions, isMentionable),
-				RoleObject.class);
+				new RoleEditRequest(color, hoist, name, permissions, isMentionable));
 	}
 
 	@Override
