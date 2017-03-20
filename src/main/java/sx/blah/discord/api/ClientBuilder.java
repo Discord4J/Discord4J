@@ -108,16 +108,25 @@ public class ClientBuilder {
 		this.shardCount = shardCount;
 		return this;
 	}
-
+	
+	/**
+	 * Sets whether the bot should use Discord's recommended number of shards on login.
+	 *
+	 * @param useRecommended If the bot is to use the recommended number of shards.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withRecommendedShardCount(boolean useRecommended) {
+		this.withRecomendedShardCount = useRecommended;
+		return this;
+	}
+	
 	/**
 	 * Sets the bot to use Discord's recommended number of shards on login.
 	 *
-	 * @param useRecommended If the bot is to use the recommended number of shards
 	 * @return The instance of the builder.
 	 */
-	public ClientBuilder withRecommendedShardCount(boolean useRecommended){
-		this.withRecomendedShardCount = useRecommended;
-		return this;
+	public ClientBuilder withRecommendedShardCount() {
+		return withRecommendedShardCount(true);
 	}
 
 	/**
