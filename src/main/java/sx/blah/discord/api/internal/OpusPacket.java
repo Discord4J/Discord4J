@@ -49,7 +49,6 @@ public class OpusPacket {
 	void encrypt(byte[] secret) {
 		if (isEncrypted) throw new IllegalStateException("Attempt to encrypt already-encrypted audio packet.");
 
-		//audio = new TweetNaclFast.SecretBox(secret).box(audio, getNonce());
 		audio = TweetNaCl.secretbox(audio, getNonce(), secret);
 		isEncrypted = true;
 	}
@@ -57,7 +56,6 @@ public class OpusPacket {
 	void decrypt(byte[] secret) {
 		if (!isEncrypted) throw new IllegalStateException("Attempt to decrypt unencrypted audio packet.");
 
-		//audio = new TweetNaclFast.SecretBox(secret).open(audio);
 		audio = TweetNaCl.secretbox_open(audio, getNonce(), secret);
 		isEncrypted = false;
 	}

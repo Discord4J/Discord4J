@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class UDPVoiceSocket {
 
 	private static final byte[] SILENCE_FRAMES = {(byte) 0xF8, (byte) 0xFF, (byte) 0xFE};
+	private static final byte[] KEEP_ALIVE_DATA = {(byte) 0xC9, 0, 0, 0, 0, 0, 0, 0, 0};
 
 	private DiscordVoiceWS voiceWS;
 	private DatagramSocket udpSocket;
@@ -46,6 +47,7 @@ public class UDPVoiceSocket {
 
 	private final ScheduledExecutorService sendExecutor = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Audio Send Executor"));
 	private final ScheduledExecutorService receiveExecutor = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Audio Receive Executor"));
+	private final ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("UDP Voice Socket Keep Alive"));
 
 	private byte[] secret;
 	private boolean isSpeaking = false;
@@ -97,9 +99,20 @@ public class UDPVoiceSocket {
 					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			if (e instanceof SocketException) return;
 			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
+		}
+	};
+
+	private final Runnable keepAliveRunnable = () -> {
+		if (!udpSocket.isClosed()) {
+			try {
+				DatagramPacket packet = new DatagramPacket(KEEP_ALIVE_DATA, KEEP_ALIVE_DATA.length, address);
+				udpSocket.send(packet);
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Internal exception sending UDP keepalive: ", e);
+			}
 		}
 	};
 
@@ -125,6 +138,7 @@ public class UDPVoiceSocket {
 	void begin() {
 		sendExecutor.scheduleWithFixedDelay(sendRunnable, 0, OpusUtil.OPUS_FRAME_TIME - 1, TimeUnit.MILLISECONDS);
 		receiveExecutor.scheduleWithFixedDelay(receiveRunnable, 0, OpusUtil.OPUS_FRAME_TIME, TimeUnit.MILLISECONDS);
+		keepAlive.scheduleAtFixedRate(keepAliveRunnable, 0, 5, TimeUnit.SECONDS);
 	}
 
 	void shutdown() {
