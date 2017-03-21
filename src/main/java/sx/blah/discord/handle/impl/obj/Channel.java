@@ -734,8 +734,7 @@ public class Channel implements IChannel {
 		return isTyping.get();
 	}
 
-	@Override
-	public void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
+	private void edit(ChannelEditRequest request) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
 		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
@@ -744,25 +743,30 @@ public class Channel implements IChannel {
 		try {
 			client.REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.CHANNELS + id,
-					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new ChannelEditRequest(name, position, topic)));
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(request));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
+	public void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
+		edit(new ChannelEditRequest.Builder().name(name).position(position).topic(topic).build());
+	}
+
+	@Override
 	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(name, getPosition(), getTopic());
+		edit(new ChannelEditRequest.Builder().name(name).build());
 	}
 
 	@Override
 	public void changePosition(int position) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(getName(), position, getTopic());
+		edit(new ChannelEditRequest.Builder().position(position).build());
 	}
 
 	@Override
 	public void changeTopic(String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(getName(), getPosition(), topic);
+		edit(new ChannelEditRequest.Builder().topic(topic).build());
 	}
 
 	@Override

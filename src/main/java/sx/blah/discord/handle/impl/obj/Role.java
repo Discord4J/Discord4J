@@ -17,20 +17,24 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.RoleObject;
 import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
@@ -202,10 +206,22 @@ public class Role implements IRole {
 		return guild;
 	}
 
-	@Override
-	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws DiscordException, RateLimitException, MissingPermissionsException {
+	private void edit(RoleEditRequest request) {
 		DiscordUtils.checkPermissions(getClient(), guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
+		try {
+			DiscordUtils.getRoleFromJSON(guild,
+					DiscordUtils.MAPPER.readValue(
+							((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+									DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
+									DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(request)), RoleObject.class));
+		} catch (IOException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws DiscordException, RateLimitException, MissingPermissionsException {
 		if (color == null)
 			throw new IllegalArgumentException("Color must not be null.");
 		if (name == null || name.length() < 1 || name.length() > 32)
@@ -213,34 +229,41 @@ public class Role implements IRole {
 		if (permissions == null)
 			throw new IllegalArgumentException("Permissions set must not be null.");
 
-		((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
-				new RoleEditRequest(color, hoist, name, permissions, isMentionable));
+		edit(new RoleEditRequest.Builder().color(color).hoist(hoist).name(name).permissions(permissions).mentionable(isMentionable).build());
 	}
 
 	@Override
 	public void changeColor(Color color) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(color, isHoisted(), getName(), getPermissions(), isMentionable());
+		if (color == null)
+			throw new IllegalArgumentException("Color must not be null.");
+
+		edit(new RoleEditRequest.Builder().color(color).build());
 	}
 
 	@Override
 	public void changeHoist(boolean hoist) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(getColor(), hoist, getName(), getPermissions(), isMentionable());
+		edit(new RoleEditRequest.Builder().mentionable(hoist).build());
 	}
 
 	@Override
 	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(getColor(), isHoisted(), name, getPermissions(), isMentionable());
+		if (name == null || name.length() < 1 || name.length() > 32)
+			throw new IllegalArgumentException("Role name must be between 1 and 32 characters!");
+
+		edit(new RoleEditRequest.Builder().name(name).build());
 	}
 
 	@Override
 	public void changePermissions(EnumSet<Permissions> permissions) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(getColor(), isHoisted(), getName(), permissions, isMentionable());
+		if (permissions == null)
+			throw new IllegalArgumentException("Permissions set must not be null.");
+
+		edit(new RoleEditRequest.Builder().permissions(permissions).build());
 	}
 
 	@Override
 	public void changeMentionable(boolean mentionable) throws DiscordException, RateLimitException, MissingPermissionsException {
-		edit(getColor(), isHoisted(), getName(), getPermissions(), mentionable);
+		edit(new RoleEditRequest.Builder().mentionable(mentionable).build());
 	}
 
 	@Override

@@ -22,24 +22,74 @@ package sx.blah.discord.api.internal.json.requests;
  */
 public class ChannelEditRequest {
 
-	/**
-	 * The new name (2-100 characters long) of the channel.
-	 */
-	public String name;
+	public static class Builder {
 
-	/**
-	 * The new position of the channel.
-	 */
-	public int position;
+		private String name;
+		private Integer position;
+		private String topic;
 
-	/**
-	 * The new topic of the channel.
-	 */
-	public String topic;
+		/**
+		 * Sets the new name of the channel.
+		 *
+		 * @param name the new name, must be 2-100 characters long.
+		 * @return this builder, for chaining.
+		 */
+		public Builder name(String name) {
+			this.name = name;
+			return this;
+		}
 
-	public ChannelEditRequest(String name, int position, String topic) {
+		/**
+		 * Sets the new position of the channel.
+		 *
+		 * @param position the new position.
+		 * @return this builder, for chaining.
+		 */
+		public Builder position(int position) {
+			this.position = position;
+			return this;
+		}
+
+		/**
+		 * Sets the new topic of the channel.
+		 *
+		 * @param topic the new topic
+		 * @return this builder, for chaining.
+		 */
+		public Builder topic(String topic) {
+			this.topic = topic;
+			return this;
+		}
+
+		/**
+		 * Builds the channel edit request.
+		 *
+		 * @return the channel edit request.
+		 */
+		public ChannelEditRequest build() {
+			return new ChannelEditRequest(name, position, topic);
+		}
+	}
+
+	private final String name;
+	private final Integer position;
+	private final String topic;
+
+	ChannelEditRequest(String name, int position, String topic) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public Integer getPosition() {
+		return position;
+	}
+
+	public String getTopic() {
+		return topic;
 	}
 }

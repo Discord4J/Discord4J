@@ -25,7 +25,10 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
-import sx.blah.discord.api.internal.json.requests.*;
+import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
+import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
+import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
+import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -434,7 +437,7 @@ public class Guild implements IGuild {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(roles)));
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().roles(roles).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -448,7 +451,7 @@ public class Guild implements IGuild {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(deafen)));
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().deafen(deafen).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -461,7 +464,7 @@ public class Guild implements IGuild {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
-					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(mute, true)));
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().mute(mute).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -479,7 +482,7 @@ public class Guild implements IGuild {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
-					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest(nick == null ? "" : nick, true)));
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().nick(nick == null ? "" : nick).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
