@@ -737,9 +737,6 @@ public class Channel implements IChannel {
 	private void edit(ChannelEditRequest request) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
-		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
-			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
-
 		try {
 			client.REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.CHANNELS + id,
@@ -751,11 +748,17 @@ public class Channel implements IChannel {
 
 	@Override
 	public void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
+		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+
 		edit(new ChannelEditRequest.Builder().name(name).position(position).topic(topic).build());
 	}
 
 	@Override
 	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+
 		edit(new ChannelEditRequest.Builder().name(name).build());
 	}
 

@@ -75,7 +75,7 @@ public class ChannelEditRequest {
 	private final Integer position;
 	private final String topic;
 
-	ChannelEditRequest(String name, int position, String topic) {
+	ChannelEditRequest(String name, Integer position, String topic) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;

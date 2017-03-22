@@ -17,7 +17,6 @@
 
 package sx.blah.discord.api.internal.json.requests;
 
-import sx.blah.discord.handle.impl.obj.VoiceChannel;
 import sx.blah.discord.handle.obj.IRole;
 
 import java.util.Arrays;
@@ -73,17 +72,6 @@ public class MemberEditRequest {
 		 */
 		public Builder deafen(boolean deafen) {
 			this.deafen = deafen;
-			return this;
-		}
-
-		/**
-		 * Sets the voice channel to move the user to.
-		 *
-		 * @param channel the target voice channel to move the user to.
-		 * @return this builder, for chaining.
-		 */
-		public Builder channel(VoiceChannel channel) {
-			this.channelID = channel.getID();
 			return this;
 		}
 
