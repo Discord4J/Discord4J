@@ -57,6 +57,10 @@ public enum Permissions {
 	 * Allows the user to add emoji reactions.
 	 */
 	ADD_REACTIONS(6),
+	/*
+	 * Allows the user to read the audit log.
+	 */
+//	READ_AUDIT_LOG(7),
 	/**
 	 * Allows the user to read messages.
 	 */
