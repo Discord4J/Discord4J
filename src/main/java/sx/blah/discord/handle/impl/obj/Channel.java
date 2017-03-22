@@ -546,8 +546,6 @@ public class Channel implements IChannel {
 		if (messageID == null)
 			return null;
 
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
-
 		return messages.stream()
 				.filter(msg -> msg.getID().equals(messageID))
 				.findAny()
