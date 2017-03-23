@@ -20,6 +20,7 @@ package sx.blah.discord.util;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.*;
 import java.io.File;
@@ -422,7 +423,7 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 * @see #setLenient(boolean)
 	 */
-	public EmbedBuilder appendField(IEmbedField field) {
+	public EmbedBuilder appendField(IEmbed.IEmbedField field) {
 		if (field == null) {
 			if (lenient)
 				return this;
