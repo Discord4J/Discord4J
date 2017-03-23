@@ -416,7 +416,7 @@ public class EmbedBuilder {
 	}
 
 	/**
-	 * Copys the information of an IEmbedField.
+	 * Copies the information of an IEmbedField and appends it onto the EmbedBuilder.
 	 *
 	 * @param field The field to copy
 	 * @return Itself for chaining
