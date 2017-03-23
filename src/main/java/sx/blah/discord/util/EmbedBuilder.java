@@ -416,6 +416,22 @@ public class EmbedBuilder {
 	}
 
 	/**
+	 * Copys the information of an IEmbedField.
+	 *
+	 * @param field   The field to copy
+	 * @return Itself for chaining
+	 * @see #setLenient(boolean)
+	 */
+	public EmbedBuilder appendField(IEmbedField field) {
+		if (field == null)
+			if (lenient)
+				return this;
+			else
+				throw new IllegalArgumentException("Field can not be null!");
+		return appendField(field.getName(), field.getValue(), field.isInline());
+	}
+
+	/**
 	 * Returns the number of fields in the builder.
 	 *
 	 * @return The number of fields in the builder.
