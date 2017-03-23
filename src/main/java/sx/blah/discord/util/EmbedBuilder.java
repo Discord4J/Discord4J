@@ -423,11 +423,12 @@ public class EmbedBuilder {
 	 * @see #setLenient(boolean)
 	 */
 	public EmbedBuilder appendField(IEmbedField field) {
-		if (field == null)
+		if (field == null) {
 			if (lenient)
 				return this;
 			else
 				throw new IllegalArgumentException("Field can not be null!");
+		}
 		return appendField(field.getName(), field.getValue(), field.isInline());
 	}
 
