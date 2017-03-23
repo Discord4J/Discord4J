@@ -417,7 +417,8 @@ public class EmbedBuilder {
 
 	/**
 	 * Copys the information of an IEmbedField.
-	 * @param field   The field to copy
+	 *
+	 * @param field The field to copy
 	 * @return Itself for chaining
 	 * @see #setLenient(boolean)
 	 */
