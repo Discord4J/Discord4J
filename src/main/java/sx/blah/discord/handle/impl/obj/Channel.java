@@ -707,7 +707,7 @@ public class Channel implements IChannel {
 
 		try {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			if(entries.length == 1) {
+			if (entries.length == 1) {
 				builder.addBinaryBody("file", entries[0].getFileData(), ContentType.APPLICATION_OCTET_STREAM, entries[0].getFileName());
 			} else {
 				for (int i = 0; i < entries.length; i++) {
