@@ -642,8 +642,18 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public IMessage sendFiles(File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFiles((String) null, files);
+	}
+
+	@Override
 	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(content, false, new FileInputStream(file), file.getName(), null);
+	}
+
+	@Override
+	public IMessage sendFiles(String content, File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFiles(content, false, AttachmentPartEntry.from(files));
 	}
 
 	@Override
@@ -652,8 +662,18 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public IMessage sendFiles(EmbedObject embed, File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFiles(null, false, embed, AttachmentPartEntry.from(files));
+	}
+
+	@Override
 	public IMessage sendFile(String content, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(content, false, file, fileName, null);
+	}
+
+	@Override
+	public IMessage sendFiles(String content, AttachmentPartEntry... entry) throws DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFiles(content, false, null, entry);
 	}
 
 	@Override
@@ -662,18 +682,41 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public IMessage sendFiles(EmbedObject embed, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFiles(null, false, embed, entries);
+	}
+
+	@Override
 	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException {
 		return sendFile(content, tts, file, fileName, null);
 	}
 
 	@Override
+	public IMessage sendFiles(String content, boolean tts, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFiles(content, tts, null, entries);
+	}
+
+	@Override
 	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
+		return sendFiles(content, tts, embed, new AttachmentPartEntry(fileName, file));
+	}
+
+	@Override
+	public IMessage sendFiles(String content, boolean tts, EmbedObject embed, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException {
 		DiscordUtils.checkPermissions(getClient(), this, EnumSet.of(Permissions.SEND_MESSAGES, Permissions.ATTACH_FILES));
 
 		try {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			builder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, fileName);
-			builder.addTextBody("payload_json", DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new FilePayloadObject(content, tts, embed)), ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
+			if(entries.length == 1)
+				builder.addBinaryBody("file", entries[0].getFileData(), ContentType.APPLICATION_OCTET_STREAM, entries[0].getFileName());
+			else {
+				for (int i = 0; i < entries.length; i++) {
+					builder.addBinaryBody("file" + i, entries[i].getFileData(), ContentType.APPLICATION_OCTET_STREAM, entries[i].getFileName());
+				}
+			}
+
+			builder.addTextBody("payload_json", DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new FilePayloadObject(content, tts, embed)),
+						ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
 
 			HttpEntity fileEntity = builder.build();
 			MessageObject messageObject = DiscordUtils.MAPPER.readValue(client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",

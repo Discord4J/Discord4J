@@ -363,6 +363,18 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IMessage sendFile(File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
+	 * Uploads multiple files to the channel.
+	 *
+	 * @param files The files to upload.
+	 * @return The message created by this action.
+	 * @throws FileNotFoundException
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	IMessage sendFiles(File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
 	 * Uploads a file to the channel with a message attached.
 	 *
 	 * @param content The content of the attached message.
@@ -375,6 +387,19 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 */
 	IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
+	 * Uploads multiple files to the channel with a message attached.
+	 *
+	 * @param content The content of the attached message.
+	 * @param files The files to upload.
+	 * @return The message created by this action.
+	 * @throws FileNotFoundException
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	IMessage sendFiles(String content, File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Uploads a file to the channel with an attached message and option for tts.
@@ -396,6 +421,25 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IMessage sendFile(EmbedObject embed, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
+	 * Uploads files to the channel with an attached message and option for tts.
+	 * <br>
+	 * If you are using an image file for the upload WITH use in the embed object, name the withImage URL <code>attachment://filename.png</code>
+	 * where the filename has only alphanumerics. See {@link EmbedBuilder#withImage(String)}.
+	 *
+	 * @param files The files to upload.
+	 * @param embed An optional embed object to send with the file.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 *
+	 * @see EmbedBuilder
+	 * @see EmbedBuilder#withImage(String)
+	 */
+	IMessage sendFiles(EmbedObject embed, File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
 	 *
 	 * @param content The content of the attached message.
@@ -408,6 +452,19 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 */
 	IMessage sendFile(String content, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
+	 * Uploads AttachmentPartEntries to the channel with an attached message and option for tts.
+	 *
+	 * @param content The content of the attached message.
+	 * @param entries The attachments to upload.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	IMessage sendFiles(String content, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
@@ -430,6 +487,25 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	IMessage sendFile(EmbedObject embed, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
+	 * Uploads AttachmentPartEntries to the channel with an attached message and option for tts.
+	 * <br>
+	 * If you are using an image file for the upload WITH use in the embed object, name the withImage URL <code>attachment://filename.png</code>
+	 * where the filename has only alphanumerics. See {@link EmbedBuilder#withImage(String)}.
+	 *
+	 * @param entries The entries to upload
+	 * @param embed An optional embed object to send with the file. Build embed objects with {@link EmbedBuilder}.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 *
+	 * @see EmbedBuilder
+	 * @see EmbedBuilder#withImage(String)
+	 */
+	IMessage sendFiles(EmbedObject embed, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
 	 *
 	 * @param content The content of the attached message.
@@ -443,6 +519,15 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws MissingPermissionsException
 	 */
 	IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
+	 * Send multiple attachments
+	 * @param content The content of the attached message.
+	 * @param tts Whether the message should use tts or not.
+	 * @param entries The attachments to attach to this message.
+	 * @return
+	 */
+	IMessage sendFiles(String content, boolean tts, AttachmentPartEntry... entries)throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
@@ -465,6 +550,24 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @see EmbedBuilder#withImage(String)
 	 */
 	IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+
+	/**
+	 * Uploads AttachmentStreamEntries to the channel with an attached message and option for tts.
+	 * <br>
+	 * If you are using an image file for the upload WITH use in the embed object, name the withImage URL <code>attachment://filename.png</code>
+	 * where the filename has only alphanumerics. See {@link EmbedBuilder#withImage(String)}.
+	 *
+	 * @param content The content of the attached message.
+	 * @param tts Whether the message should use tts or not.
+	 * @param entries The files to upload
+	 * @param embed An optional embed object to send with the file. Build embed objects with {@link EmbedBuilder}.
+	 * @return The message created by this action.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	IMessage sendFiles(String content, boolean tts, EmbedObject embed, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
