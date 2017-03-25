@@ -22,10 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-/**
- * @author ashley
- * @since 3/24/17 4:23 PM
- */
 public class AttachmentPartEntry {
 	/**
 	 * The name of this file

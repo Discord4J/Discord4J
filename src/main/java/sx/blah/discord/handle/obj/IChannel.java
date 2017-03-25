@@ -527,7 +527,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param entries The attachments to attach to this message.
 	 * @return
 	 */
-	IMessage sendFiles(String content, boolean tts, AttachmentPartEntry... entries)throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(String content, boolean tts, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
