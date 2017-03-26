@@ -457,7 +457,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IUser> getUsersByName(String name) {
-		return getUsersByName(name, true);
+		return getUsersByName(name, false);
 	}
 
 	@Override
