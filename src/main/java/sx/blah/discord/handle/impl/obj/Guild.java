@@ -848,18 +848,6 @@ public class Guild implements IGuild {
 		});
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IGuild) other).getID().equals(getID());
-	}
 
 	@Override
 	public int getTotalMemberCount() {
@@ -868,5 +856,20 @@ public class Guild implements IGuild {
 
 	public void setTotalMemberCount(int totalMemberCount){
 		this.totalMemberCount = totalMemberCount;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return DiscordUtils.equals(this, other);
 	}
 }

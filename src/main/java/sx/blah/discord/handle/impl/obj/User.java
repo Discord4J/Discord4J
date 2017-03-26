@@ -274,6 +274,18 @@ public class User implements IUser {
 	}
 
 	@Override
+	public void addRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
+	}
+
+	@Override
+	public void removeRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
+	}
+
+	@Override
 	public IUser copy() {
 		User newUser = new User(shard, name, id, discriminator, avatar, presence, isBot);
 		newUser.voiceStates.putAll(voiceStates);
@@ -315,21 +327,6 @@ public class User implements IUser {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
-	}
-
-	@Override
-	public void addRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
-	}
-
-	@Override
-	public void removeRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
-		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
+		return DiscordUtils.equals(this ,other);
 	}
 }
