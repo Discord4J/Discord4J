@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package sx.blah.discord.api.internal;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,15 +25,13 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
+import static java.lang.Thread.sleep;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class UDPVoiceSocket {
 
@@ -45,9 +42,7 @@ public class UDPVoiceSocket {
 	private DatagramSocket udpSocket;
 	private InetSocketAddress address;
 
-	private final ScheduledExecutorService sendExecutor = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Audio Send Executor"));
-	private final ScheduledExecutorService receiveExecutor = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Audio Receive Executor"));
-	private final ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("UDP Voice Socket Keep Alive"));
+	private HighPrecisionRecurrentTask audioTask;
 
 	private byte[] secret;
 	private boolean isSpeaking = false;
@@ -59,25 +54,23 @@ public class UDPVoiceSocket {
 
 	private final Runnable sendRunnable = () -> {
 		try {
-			if (!udpSocket.isClosed()) {
-				byte[] audio = ((AudioManager) voiceWS.getGuild().getAudioManager()).sendAudio();
-				if (audio != null && audio.length > 0) {
-					OpusPacket packet = new OpusPacket(sequence, timestamp, ssrc, audio);
-					packet.encrypt(secret);
-					byte[] toSend = packet.asByteArray();
+			byte[] audio = ((AudioManager) voiceWS.getGuild().getAudioManager()).sendAudio();
+			if (audio != null && audio.length > 0) {
+				OpusPacket packet = new OpusPacket(sequence, timestamp, ssrc, audio);
+				packet.encrypt(secret);
+				byte[] toSend = packet.asByteArray();
 
-					if (!isSpeaking) setSpeaking(true);
-					udpSocket.send(new DatagramPacket(toSend, toSend.length, address));
+				if (!isSpeaking) setSpeaking(true);
+				udpSocket.send(new DatagramPacket(toSend, toSend.length, address));
 
-					sequence++;
-					timestamp += OpusUtil.OPUS_FRAME_SIZE;
-					silenceToSend = 5;
-				} else {
-					if (isSpeaking) setSpeaking(false);
-					if (silenceToSend > 0) {
-						sendSilence();
-						silenceToSend--;
-					}
+				sequence++;
+				timestamp += OpusUtil.OPUS_FRAME_SIZE;
+				silenceToSend = 5;
+			} else {
+				if (isSpeaking) setSpeaking(false);
+				if (silenceToSend > 0) {
+					sendSilence();
+					silenceToSend--;
 				}
 			}
 		} catch (Exception e) {
@@ -85,34 +78,38 @@ public class UDPVoiceSocket {
 		}
 	};
 
-	private final Runnable receiveRunnable = () -> {
-		try {
-			if (!udpSocket.isClosed()) {
-				DatagramPacket udpPacket = new DatagramPacket(new byte[1920], 1920);
-				udpSocket.receive(udpPacket);
+	private final Runnable receiveRunnable = new Runnable() {
+		int iterations = 0;
 
-				OpusPacket opusPacket = new OpusPacket(udpPacket);
-				opusPacket.decrypt(secret);
+		@Override
+		public void run() {
+			iterations++;
+			if (iterations % (5000 / 20) == 0) { //once every 5 seconds, assuming that each invocation happens every 20ms.
+				try {
+					DatagramPacket udpPacket = new DatagramPacket(new byte[1920], 1920);
+					udpSocket.receive(udpPacket);
 
-				IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
-				if (userSpeaking != null) {
-					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
+					OpusPacket opusPacket = new OpusPacket(udpPacket);
+					opusPacket.decrypt(secret);
+
+					IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
+					if (userSpeaking != null) {
+						((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
+					}
+				} catch (SocketTimeoutException e) {
+				} catch (Exception e) {
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 				}
 			}
-		} catch (Exception e) {
-			if (e instanceof SocketException) return;
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	};
 
 	private final Runnable keepAliveRunnable = () -> {
-		if (!udpSocket.isClosed()) {
-			try {
-				DatagramPacket packet = new DatagramPacket(KEEP_ALIVE_DATA, KEEP_ALIVE_DATA.length, address);
-				udpSocket.send(packet);
-			} catch (Exception e) {
-				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Internal exception sending UDP keepalive: ", e);
-			}
+		try {
+			DatagramPacket packet = new DatagramPacket(KEEP_ALIVE_DATA, KEEP_ALIVE_DATA.length, address);
+			udpSocket.send(packet);
+		} catch (Exception e) {
+			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Internal exception sending UDP keepalive: ", e);
 		}
 	};
 
@@ -127,6 +124,8 @@ public class UDPVoiceSocket {
 			this.ssrc = ssrc;
 
 			Pair<String, Integer> ourIp = doIPDiscovery(ssrc);
+			
+			udpSocket.setSoTimeout(10); //after IP discovery, every usage times out after 10ms, because it's better to drop a frame than block the thread.
 
 			SelectProtocolRequest selectRequest = new SelectProtocolRequest(ourIp.getLeft(), ourIp.getRight());
 			voiceWS.send(VoiceOps.SELECT_PROTOCOL, selectRequest);
@@ -136,14 +135,19 @@ public class UDPVoiceSocket {
 	}
 
 	void begin() {
-		sendExecutor.scheduleWithFixedDelay(sendRunnable, 0, OpusUtil.OPUS_FRAME_TIME - 1, TimeUnit.MILLISECONDS);
-		receiveExecutor.scheduleWithFixedDelay(receiveRunnable, 0, OpusUtil.OPUS_FRAME_TIME, TimeUnit.MILLISECONDS);
-		keepAlive.scheduleAtFixedRate(keepAliveRunnable, 0, 5, TimeUnit.SECONDS);
+		audioTask = new HighPrecisionRecurrentTask(OpusUtil.OPUS_FRAME_TIME, 0.01f, () -> {
+			if (!udpSocket.isClosed()) {
+				sendRunnable.run();
+				receiveRunnable.run();
+				keepAliveRunnable.run();
+			}
+		});
+		audioTask.setDaemon(true);
+		audioTask.start();
 	}
 
 	void shutdown() {
-		receiveExecutor.shutdown();
-		sendExecutor.shutdown();
+		audioTask.setStop(true);
 		udpSocket.close();
 	}
 
@@ -178,4 +182,67 @@ public class UDPVoiceSocket {
 	void setSecret(byte[] secret) {
 		this.secret = secret;
 	}
+}
+
+/**
+ * Custom Thread that executes the passed task every specified period.
+ *
+ * Time of execution is held in account when calculating the time to sleep until the next execution.
+ *
+ */
+class HighPrecisionRecurrentTask extends Thread {
+
+	private final int periodInNanos;
+	private final int spinningTimeNanos;
+	private final Runnable target;
+	private volatile boolean stop;
+
+	/**
+	 *
+	 * @param periodInMilis Every what time the task is executed.
+	 * @param percentageOfSleepSpinning Of the total millis to sleep, what percentage of it should be done spinning to increase accuracy.
+	 * @param target Task to run
+	 */
+	public HighPrecisionRecurrentTask(int periodInMilis, float percentageOfSleepSpinning, Runnable target) {
+		super("D4J AudioThread");
+		if (percentageOfSleepSpinning < 0 || percentageOfSleepSpinning > 1)
+			throw new IllegalArgumentException("percentageOfSleepSpinning < 0 | percentageOfSleepSpinning > 1");
+		this.periodInNanos = periodInMilis * 1_000_000;
+		this.spinningTimeNanos = (int) (periodInNanos * percentageOfSleepSpinning);
+		this.target = target;
+	}
+
+	public boolean isStop() {
+		return stop;
+	}
+
+	public void setStop(boolean stop) {
+		this.stop = stop;
+	}
+
+	@Override
+	@SuppressWarnings("empty-statement")
+	public void run() {
+		long nextTarget = 0;
+		while (!stop) {
+			long now = System.nanoTime();
+			target.run();
+			long total = System.nanoTime() - now;
+			nextTarget = now + periodInNanos - total;
+			sleepFor(periodInNanos - total - spinningTimeNanos);
+			while (nextTarget > System.nanoTime()); //consume cycles
+		}
+	}
+
+	private void sleepFor(long nanos) {
+		if (nanos > 0) {
+			long ms = nanos / 1000000;
+			long nanosRem = nanos % 1000000;
+			try {
+				sleep(ms, (int) nanosRem);
+			} catch (InterruptedException ex) {
+			}
+		}
+	}
+
 }
