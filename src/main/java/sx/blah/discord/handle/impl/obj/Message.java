@@ -18,6 +18,7 @@
 package sx.blah.discord.handle.impl.obj;
 
 import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -27,12 +28,20 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.MessageTokenizer;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -507,7 +516,30 @@ public class Message implements IMessage {
 
 	@Override
 	public void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
-		emoji = emoji.replace("<:", "").replace(">", "");
+		String toEncode;
+
+		if (emoji.matches("<?:[A-Za-z_0-9]+:\\d+>?")) {
+			// custom emoji
+			toEncode = emoji.replace("<", "").replace(">", "");
+		} else if (emoji.matches(":.+:")) {
+			// Unicode alias
+			String alias = emoji.replace(":", "");
+			Emoji e = EmojiManager.getForAlias(alias);
+
+			if (e == null) {
+				throw new IllegalArgumentException("Tried to lookup alias " + alias +
+						" in emoji-java, got nothing. Please use the Unicode value (ex: ☑).");
+			}
+
+			toEncode = e.getUnicode();
+		} else if (EmojiManager.isEmoji(emoji)) {
+			// as-is
+			toEncode = emoji;
+		} else {
+			throw new IllegalArgumentException("Emoji argument (" + emoji +
+					") is malformed. Please use either Unicode (ex: ☑), an IEmoji toString (<:name:id>), or an alias " +
+					"(ex: :ballot_box_with_check:).");
+		}
 
 		if (this.getReactionByName(emoji) == null)
 			DiscordUtils.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
@@ -515,7 +547,7 @@ public class Message implements IMessage {
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getID(), getID(),
-							URLEncoder.encode(emoji, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
+							URLEncoder.encode(toEncode, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}

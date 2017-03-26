@@ -252,7 +252,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	void addReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
-	 * Adds your reaction as a custom emoji
+	 * Adds your reaction as a custom emoji.
 	 *
 	 * @param emoji The custom emoji
 	 * @throws MissingPermissionsException
@@ -262,7 +262,9 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	void addReaction(IEmoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
 
 	/**
-	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;:name:id&gt;)
+	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji (☑), or an IEmoji formatted one (&lt;:name:id&gt;).
+	 * Alternatively, you can provide the emoji alias like you would in normal Discord (ex: :ballot_box_with_check:) and we'll
+	 * attempt to look it up in emoji-java (if it doesn't exist in emoji-java, you'll need to provide the Unicode version).
 	 *
 	 * @param emoji The string emoji
 	 * @throws MissingPermissionsException
