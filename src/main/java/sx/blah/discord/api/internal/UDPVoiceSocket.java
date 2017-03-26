@@ -14,9 +14,9 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package sx.blah.discord.api.internal;
 
+import sx.blah.discord.util.HighPrecisionRecurrentTask;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.requests.voice.SelectProtocolRequest;
@@ -29,25 +29,21 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class UDPVoiceSocket {
 
 	private static final byte[] SILENCE_FRAMES = {(byte) 0xF8, (byte) 0xFF, (byte) 0xFE};
 	private static final byte[] KEEP_ALIVE_DATA = {(byte) 0xC9, 0, 0, 0, 0, 0, 0, 0, 0};
+	private static final int MAX_INCOMING_AUDIO_PACKET = OpusUtil.OPUS_FRAME_SIZE * 2 + 12; //two channels + 12 rtp header bytes.
 
 	private DiscordVoiceWS voiceWS;
 	private DatagramSocket udpSocket;
 	private InetSocketAddress address;
 
-	private final ScheduledExecutorService sendExecutor = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Audio Send Executor"));
-	private final ScheduledExecutorService receiveExecutor = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Audio Receive Executor"));
-	private final ScheduledExecutorService keepAlive = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("UDP Voice Socket Keep Alive"));
+	private HighPrecisionRecurrentTask audioTask;
 
 	private byte[] secret;
 	private boolean isSpeaking = false;
@@ -59,25 +55,23 @@ public class UDPVoiceSocket {
 
 	private final Runnable sendRunnable = () -> {
 		try {
-			if (!udpSocket.isClosed()) {
-				byte[] audio = ((AudioManager) voiceWS.getGuild().getAudioManager()).sendAudio();
-				if (audio != null && audio.length > 0) {
-					OpusPacket packet = new OpusPacket(sequence, timestamp, ssrc, audio);
-					packet.encrypt(secret);
-					byte[] toSend = packet.asByteArray();
+			byte[] audio = ((AudioManager) voiceWS.getGuild().getAudioManager()).sendAudio();
+			if (audio != null && audio.length > 0) {
+				OpusPacket packet = new OpusPacket(sequence, timestamp, ssrc, audio);
+				packet.encrypt(secret);
+				byte[] toSend = packet.asByteArray();
 
-					if (!isSpeaking) setSpeaking(true);
-					udpSocket.send(new DatagramPacket(toSend, toSend.length, address));
+				if (!isSpeaking) setSpeaking(true);
+				udpSocket.send(new DatagramPacket(toSend, toSend.length, address));
 
-					sequence++;
-					timestamp += OpusUtil.OPUS_FRAME_SIZE;
-					silenceToSend = 5;
-				} else {
-					if (isSpeaking) setSpeaking(false);
-					if (silenceToSend > 0) {
-						sendSilence();
-						silenceToSend--;
-					}
+				sequence++;
+				timestamp += OpusUtil.OPUS_FRAME_SIZE;
+				silenceToSend = 5;
+			} else {
+				if (isSpeaking) setSpeaking(false);
+				if (silenceToSend > 0) {
+					sendSilence();
+					silenceToSend--;
 				}
 			}
 		} catch (Exception e) {
@@ -87,31 +81,35 @@ public class UDPVoiceSocket {
 
 	private final Runnable receiveRunnable = () -> {
 		try {
-			if (!udpSocket.isClosed()) {
-				DatagramPacket udpPacket = new DatagramPacket(new byte[1920], 1920);
-				udpSocket.receive(udpPacket);
+			DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
+			udpSocket.receive(udpPacket);
 
-				OpusPacket opusPacket = new OpusPacket(udpPacket);
-				opusPacket.decrypt(secret);
+			OpusPacket opusPacket = new OpusPacket(udpPacket);
+			opusPacket.decrypt(secret);
 
-				IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
-				if (userSpeaking != null) {
-					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
-				}
+			IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
+			if (userSpeaking != null) {
+				((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
 			}
+		} catch (SocketTimeoutException e) {
 		} catch (Exception e) {
-			if (e instanceof SocketException) return;
 			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	};
 
-	private final Runnable keepAliveRunnable = () -> {
-		if (!udpSocket.isClosed()) {
-			try {
-				DatagramPacket packet = new DatagramPacket(KEEP_ALIVE_DATA, KEEP_ALIVE_DATA.length, address);
-				udpSocket.send(packet);
-			} catch (Exception e) {
-				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Internal exception sending UDP keepalive: ", e);
+	private final Runnable keepAliveRunnable = new Runnable() {
+		int iterations = 0;
+
+		@Override
+		public void run() {
+			iterations++;
+			if (iterations % (5000 / 20) == 0) { //once every 5 seconds, assuming that each invocation happens every 20ms.
+				try {
+					DatagramPacket packet = new DatagramPacket(KEEP_ALIVE_DATA, KEEP_ALIVE_DATA.length, address);
+					udpSocket.send(packet);
+				} catch (Exception e) {
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Internal exception sending UDP keepalive: ", e);
+				}
 			}
 		}
 	};
@@ -128,6 +126,8 @@ public class UDPVoiceSocket {
 
 			Pair<String, Integer> ourIp = doIPDiscovery(ssrc);
 
+			udpSocket.setSoTimeout(10); //after IP discovery, every usage times out after 10ms, because it's better to drop a frame than block the thread.
+
 			SelectProtocolRequest selectRequest = new SelectProtocolRequest(ourIp.getLeft(), ourIp.getRight());
 			voiceWS.send(VoiceOps.SELECT_PROTOCOL, selectRequest);
 		} catch (IOException e) {
@@ -136,14 +136,19 @@ public class UDPVoiceSocket {
 	}
 
 	void begin() {
-		sendExecutor.scheduleWithFixedDelay(sendRunnable, 0, OpusUtil.OPUS_FRAME_TIME - 1, TimeUnit.MILLISECONDS);
-		receiveExecutor.scheduleWithFixedDelay(receiveRunnable, 0, OpusUtil.OPUS_FRAME_TIME, TimeUnit.MILLISECONDS);
-		keepAlive.scheduleAtFixedRate(keepAliveRunnable, 0, 5, TimeUnit.SECONDS);
+		audioTask = new HighPrecisionRecurrentTask(OpusUtil.OPUS_FRAME_TIME, 0.01f, () -> {
+			if (!udpSocket.isClosed()) {
+				sendRunnable.run();
+				receiveRunnable.run();
+				keepAliveRunnable.run();
+			}
+		});
+		audioTask.setDaemon(true);
+		audioTask.start();
 	}
 
 	void shutdown() {
-		receiveExecutor.shutdown();
-		sendExecutor.shutdown();
+		audioTask.setStop(true);
 		udpSocket.close();
 	}
 
