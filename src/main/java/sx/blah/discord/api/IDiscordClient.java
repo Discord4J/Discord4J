@@ -268,6 +268,14 @@ public interface IDiscordClient {
 	IUser getUserByID(String userID);
 
 	/**
+	 * Gets a set of users by their name.
+	 *
+	 * @param name The name of the desired user(s).
+	 * @return A {@link Collection} of {@link User} objects with the provided name.
+	 */
+	List<IUser> getUsersByName(String name);
+
+	/**
 	 * Gets a set of all roles visible to the bot user.
 	 *
 	 * @return A {@link Collection} of all {@link Role} objects.

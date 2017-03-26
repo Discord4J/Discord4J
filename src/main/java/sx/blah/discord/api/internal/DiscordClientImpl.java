@@ -456,6 +456,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	public List<IUser> getUsersByName(String name) {
+		return getUsers().stream()
+				.filter(u -> u.getName().equals(name))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public List<IRole> getRoles() {
 		return getShards().stream()
 				.map(IShard::getRoles)
