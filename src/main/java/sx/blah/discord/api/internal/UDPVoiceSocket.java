@@ -37,6 +37,7 @@ public class UDPVoiceSocket {
 
 	private static final byte[] SILENCE_FRAMES = {(byte) 0xF8, (byte) 0xFF, (byte) 0xFE};
 	private static final byte[] KEEP_ALIVE_DATA = {(byte) 0xC9, 0, 0, 0, 0, 0, 0, 0, 0};
+	private static final int MAX_INCOMING_AUDIO_PACKET = OpusUtil.OPUS_FRAME_SIZE * 2 + 12; //two channels + 12 rtp header bytes.
 
 	private DiscordVoiceWS voiceWS;
 	private DatagramSocket udpSocket;
@@ -86,7 +87,7 @@ public class UDPVoiceSocket {
 			iterations++;
 			if (iterations % (5000 / 20) == 0) { //once every 5 seconds, assuming that each invocation happens every 20ms.
 				try {
-					DatagramPacket udpPacket = new DatagramPacket(new byte[1920], 1920);
+					DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
 					udpSocket.receive(udpPacket);
 
 					OpusPacket opusPacket = new OpusPacket(udpPacket);
