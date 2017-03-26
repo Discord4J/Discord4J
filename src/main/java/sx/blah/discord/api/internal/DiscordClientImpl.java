@@ -457,8 +457,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IUser> getUsersByName(String name) {
+		return getUsersByName(name, true);
+	}
+
+	@Override
+	public List<IUser> getUsersByName(String name, boolean ignoreCase) {
 		return getUsers().stream()
-				.filter(u -> u.getName().equals(name))
+				.filter(u -> ignoreCase ? u.getName().equalsIgnoreCase(name) : u.getName().equals(name))
 				.collect(Collectors.toList());
 	}
 
