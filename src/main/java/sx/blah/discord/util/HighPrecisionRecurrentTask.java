@@ -16,6 +16,8 @@
  */
 package sx.blah.discord.util;
 
+import java.util.concurrent.locks.LockSupport;
+
 /**
  * Custom Thread that executes the passed task every specified period.
  *
@@ -69,11 +71,11 @@ public class HighPrecisionRecurrentTask extends Thread {
 
 	private void sleepFor(long nanos) {
 		if (nanos > 0) {
-			long ms = nanos / 1000000;
-			long nanosRem = nanos % 1000000;
-			try {
-				sleep(ms, (int) nanosRem);
-			} catch (InterruptedException ex) {
+			long elapsed = 0;
+			while (elapsed < nanos) {
+				long t0 = System.nanoTime();
+				LockSupport.parkNanos(nanos - elapsed);
+				elapsed += System.nanoTime() - t0;
 			}
 		}
 	}
