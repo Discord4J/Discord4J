@@ -631,6 +631,6 @@ public class Message implements IMessage {
 
 	@Override
 	public boolean equals(Object other) {
-		return other != null && this.getClass().isAssignableFrom(other.getClass()) && ((IMessage) other).getID().equals(getID());
+		return DiscordUtils.equals(this, other);
 	}
 }

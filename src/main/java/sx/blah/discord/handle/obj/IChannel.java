@@ -900,5 +900,24 @@ public interface IChannel extends IDiscordObject<IChannel> {
 		public EnumSet<Permissions> deny() {
 			return deny;
 		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other == null)
+				return false;
+
+			if (!this.getClass().isAssignableFrom(other.getClass()))
+				return false;
+
+			if (!((PermissionOverride) other).deny.equals(this.deny)) return false;
+			if (!((PermissionOverride) other).allow.equals(this.allow)) return false;
+
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "PermissionOverride (Allow: " + allow + ", Deny: " + deny + ")";
+		}
 	}
 }

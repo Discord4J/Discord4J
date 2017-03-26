@@ -900,4 +900,32 @@ public class DiscordUtils {
 			return thread;
 		};
 	}
+
+	/**
+	 * Used to check equality between two {@link IDiscordObject}s using their IDs.
+	 * If one of the given objects is not a discord object, it will use the {@link Object#equals(Object)} method of that
+	 * object instead.
+	 *
+	 * @param a The first object.
+	 * @param b The second object.
+	 * @return If the two objects are equal.
+	 */
+	public static boolean equals(Object a, Object b) {
+		if (a == b) return true;
+		if (a == null || b == null) return false;
+
+		if (!IDiscordObject.class.isAssignableFrom(a.getClass())) {
+			return a.equals(b);
+		}
+
+		if (!IDiscordObject.class.isAssignableFrom(b.getClass())) {
+			return b.equals(a);
+		}
+
+		if (!a.getClass().isAssignableFrom(b.getClass())) return false;
+
+		if (!((IDiscordObject) a).getID().equals(((IDiscordObject) b).getID())) return false;
+
+		return true;
+	}
 }

@@ -175,9 +175,6 @@ public class Webhook implements IWebhook {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IWebhook) other).getID().equals(getID());
+		return DiscordUtils.equals(this, other);
 	}
 }

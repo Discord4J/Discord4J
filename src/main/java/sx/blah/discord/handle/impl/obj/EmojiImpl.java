@@ -20,6 +20,7 @@ package sx.blah.discord.handle.impl.obj;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordEndpoints;
+import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -146,20 +147,17 @@ public class EmojiImpl implements IEmoji {
 	}
 
 	@Override
+	public String toString() {
+		return "<:" + getName() + ":" + getID() + ">";
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(id);
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IEmoji) other).getID().equals(getID());
-	}
-
-	@Override
-	public String toString() {
-		return "<:" + getName() + ":" + getID() + ">";
+		return DiscordUtils.equals(this, other);
 	}
 }
