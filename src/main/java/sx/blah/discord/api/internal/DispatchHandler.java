@@ -93,6 +93,7 @@ class DispatchHandler {
 			case "MESSAGE_REACTION_REMOVE": reactionRemove(MAPPER.treeToValue(json, ReactionEventResponse.class)); break;
 			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
 			case "WEBHOOKS_UPDATE": webhookUpdate(MAPPER.treeToValue(json, WebhookObject.class)); break;
+			case "PRESENCES_REPLACE": /* Ignored. Not meant for bot accounts. */ break;
 
 			default:
 				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
