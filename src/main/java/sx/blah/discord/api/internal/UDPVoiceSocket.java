@@ -16,6 +16,7 @@
  */
 package sx.blah.discord.api.internal;
 
+import sx.blah.discord.util.HighPrecisionRecurrentTask;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.requests.voice.SelectProtocolRequest;
@@ -25,7 +26,6 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
-import static java.lang.Thread.sleep;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
@@ -183,67 +183,4 @@ public class UDPVoiceSocket {
 	void setSecret(byte[] secret) {
 		this.secret = secret;
 	}
-}
-
-/**
- * Custom Thread that executes the passed task every specified period.
- *
- * Time of execution is held in account when calculating the time to sleep until the next execution.
- *
- */
-class HighPrecisionRecurrentTask extends Thread {
-
-	private final int periodInNanos;
-	private final int spinningTimeNanos;
-	private final Runnable target;
-	private volatile boolean stop;
-
-	/**
-	 *
-	 * @param periodInMilis Every what time the task is executed.
-	 * @param percentageOfSleepSpinning Of the total millis to sleep, what percentage of it should be done spinning to increase accuracy.
-	 * @param target Task to run
-	 */
-	public HighPrecisionRecurrentTask(int periodInMilis, float percentageOfSleepSpinning, Runnable target) {
-		super("D4J AudioThread");
-		if (percentageOfSleepSpinning < 0 || percentageOfSleepSpinning > 1)
-			throw new IllegalArgumentException("percentageOfSleepSpinning < 0 | percentageOfSleepSpinning > 1");
-		this.periodInNanos = periodInMilis * 1_000_000;
-		this.spinningTimeNanos = (int) (periodInNanos * percentageOfSleepSpinning);
-		this.target = target;
-	}
-
-	public boolean isStop() {
-		return stop;
-	}
-
-	public void setStop(boolean stop) {
-		this.stop = stop;
-	}
-
-	@Override
-	@SuppressWarnings("empty-statement")
-	public void run() {
-		long nextTarget = 0;
-		while (!stop) {
-			long now = System.nanoTime();
-			target.run();
-			long total = System.nanoTime() - now;
-			nextTarget = now + periodInNanos - total;
-			sleepFor(periodInNanos - total - spinningTimeNanos);
-			while (nextTarget > System.nanoTime()); //consume cycles
-		}
-	}
-
-	private void sleepFor(long nanos) {
-		if (nanos > 0) {
-			long ms = nanos / 1000000;
-			long nanosRem = nanos % 1000000;
-			try {
-				sleep(ms, (int) nanosRem);
-			} catch (InterruptedException ex) {
-			}
-		}
-	}
-
 }
