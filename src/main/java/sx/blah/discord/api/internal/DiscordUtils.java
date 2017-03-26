@@ -108,6 +108,16 @@ public class DiscordUtils {
 	public static final BigInteger DISCORD_EPOCH = new BigInteger("1420070400000");
 
 	/**
+	 * If the input matches the toString() result of IEmoji.
+	 */
+	public static final Pattern IEMOJI_TOSTRING_RESULT = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
+
+	/**
+	 * If the input matches an emoji alias (:alias:)
+	 */
+	public static final Pattern EMOJI_ALIAS = Pattern.compile(":.+:");
+
+	/**
 	 * Converts a String timestamp into a java object timestamp.
 	 *
 	 * @param time The String timestamp.

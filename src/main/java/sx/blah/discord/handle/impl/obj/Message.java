@@ -518,10 +518,10 @@ public class Message implements IMessage {
 	public void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
 		String toEncode;
 
-		if (emoji.matches("<?:[A-Za-z_0-9]+:\\d+>?")) {
+		if (DiscordUtils.IEMOJI_TOSTRING_RESULT.matcher(emoji).matches()) {
 			// custom emoji
 			toEncode = emoji.replace("<", "").replace(">", "");
-		} else if (emoji.matches(":.+:")) {
+		} else if (DiscordUtils.EMOJI_ALIAS.matcher(emoji).matches()) {
 			// Unicode alias
 			String alias = emoji.replace(":", "");
 			Emoji e = EmojiManager.getForAlias(alias);
