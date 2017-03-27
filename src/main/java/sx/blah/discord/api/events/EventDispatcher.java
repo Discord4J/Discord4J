@@ -14,9 +14,9 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package sx.blah.discord.api.events;
 
+import java.lang.invoke.MethodHandle;
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
@@ -24,20 +24,29 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.Procedure;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Manages event listeners and event logic.
  */
 public class EventDispatcher {
 
+	private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+	private final AtomicReference<HashSet<EventHandler>> listenersRegistry = new AtomicReference<>(new HashSet<>());
 	private final ConcurrentHashMap<Class<?>, ConcurrentHashMap<Method, CopyOnWriteArrayList<ListenerPair<Object>>>> methodListeners = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<Class<?>, CopyOnWriteArrayList<ListenerPair<IListener>>> classListeners = new ConcurrentHashMap<>();
 	private final ExecutorService eventExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"));
@@ -111,41 +120,59 @@ public class EventDispatcher {
 			return;
 		}
 
-		for (Method method : listenerClass.getMethods()) {
-			if (method.getParameterCount() == 1
-					&& method.isAnnotationPresent(EventSubscriber.class)) {
-				if ((Modifier.isStatic(method.getModifiers()) && listener == null) || listener != null) {
-					method.setAccessible(true);
-					Class<?> eventClass = method.getParameterTypes()[0];
-					if (Event.class.isAssignableFrom(eventClass)) {
-						if (!methodListeners.containsKey(eventClass))
-							methodListeners.put(eventClass, new ConcurrentHashMap<>());
+		Stream<Method> eventSubscriberMethods = Arrays.asList(listenerClass.getMethods()).stream().filter(m -> m.isAnnotationPresent(EventSubscriber.class));
+		if (listener == null)
+			eventSubscriberMethods = eventSubscriberMethods.filter(m -> Modifier.isStatic(m.getModifiers()));
+		else
+			eventSubscriberMethods = eventSubscriberMethods.filter(m -> !Modifier.isStatic(m.getModifiers()));
 
-						if (!methodListeners.get(eventClass).containsKey(method))
-							methodListeners.get(eventClass).put(method, new CopyOnWriteArrayList<>());
+		//calculate handlers before attempting to add them to the registered listeners, so all invalid settings can be reported.
+		List<EventHandler> handlers = eventSubscriberMethods.map(method -> {
+			if (method.getParameterCount() != 1)
+				throw new IllegalArgumentException("EventSubscriber methods must accept only one argument. Invalid method " + method);
 
-						methodListeners.get(eventClass).get(method).add(new ListenerPair<>(isTemporary, listener));
-						Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered method listener {}#{}", listenerClass.getSimpleName(), method.getName());
-					}
-				}
+			Class<?> eventClass = method.getParameterTypes()[0];
+			if (!Event.class.isAssignableFrom(eventClass))
+				throw new IllegalArgumentException("Argument type is not Event nor a subclass of it. Invalid method " + method);
+
+			method.setAccessible(true);
+			try {
+				MethodHandle mh = lookup.unreflect(method);
+				if (listener != null) mh = mh.bindTo(listener);
+				final MethodHandle methodHandle = mh;
+				return new MethodEventHandler(eventClass, methodHandle, method, listener, isTemporary);
+			} catch (IllegalAccessException ex) {
+				throw new IllegalStateException("Method " + method + " is not accessible", ex);
 			}
-		}
+
+		}).collect(Collectors.toList());
+
+		listenersRegistry.updateAndGet(set -> {
+			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
+			for (EventHandler handler : handlers) {
+				n.add(handler);
+				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered {}", handler);
+			}
+			n.addAll(handlers);
+			return n;
+		});
 	}
 
 	private <T extends Event> void registerListener(IListener<T> listener, boolean isTemporary) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
-		if (Event.class.isAssignableFrom(rawType)) {
-			if (!classListeners.containsKey(rawType))
-				classListeners.put(rawType, new CopyOnWriteArrayList<>());
+		if (!Event.class.isAssignableFrom(rawType)) throw new IllegalArgumentException("Type " + rawType + " is not a subclass of Event.");
 
-			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered IListener {}", listener.getClass().getSimpleName());
-			classListeners.get(rawType).add(new ListenerPair<>(isTemporary, listener));
-		}
+		ListenerEventHandler eventHandler = new ListenerEventHandler(isTemporary, rawType, listener);
+		listenersRegistry.updateAndGet(set -> {
+			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
+			n.add(eventHandler);
+			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered IListener {}", eventHandler);
+			return n;
+		});
 	}
 
 	/**
-	 * This registers a temporary event listener using {@link EventSubscriber} method annotations.
-	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 * This registers a temporary event listener using {@link EventSubscriber} method annotations. Meaning that when it listens to an event, it immediately unregisters itself.
 	 *
 	 * @param listener The listener.
 	 */
@@ -157,8 +184,7 @@ public class EventDispatcher {
 	}
 
 	/**
-	 * This registers a temporary event listener using {@link EventSubscriber} method annotations.
-	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 * This registers a temporary event listener using {@link EventSubscriber} method annotations. Meaning that when it listens to an event, it immediately unregisters itself.
 	 *
 	 * @param listener The listener.
 	 */
@@ -167,8 +193,7 @@ public class EventDispatcher {
 	}
 
 	/**
-	 * This registers a temporary single event listener.
-	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 * This registers a temporary single event listener. Meaning that when it listens to an event, it immediately unregisters itself.
 	 *
 	 * @param listener The listener.
 	 */
@@ -192,8 +217,7 @@ public class EventDispatcher {
 	 * This causes the currently executing thread to wait until the specified event is dispatched.
 	 *
 	 * @param eventClass The class of the event to wait for.
-	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
-	 * of whether the event fired.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param <T> The event type to wait for.
 	 *
 	 * @throws InterruptedException
@@ -206,23 +230,22 @@ public class EventDispatcher {
 	 * This causes the currently executing thread to wait until the specified event is dispatched.
 	 *
 	 * @param eventClass The class of the event to wait for.
-	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
-	 * event fired.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param unit The unit for the time parameter.
 	 * @param <T> The event type to wait for.
 	 *
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Class<T> eventClass, long time, TimeUnit unit) throws InterruptedException {
-		waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time, unit, () -> {});
+		waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time, unit, () -> {
+		});
 	}
 
 	/**
 	 * This causes the currently executing thread to wait until the specified event is dispatched.
 	 *
 	 * @param eventClass The class of the event to wait for.
-	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
-	 * event fired.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param unit The unit for the time parameter.
 	 * @param onTimeout The procedure to execute when the timeout is reached.
 	 * @param <T> The event type to wait for.
@@ -234,8 +257,7 @@ public class EventDispatcher {
 	}
 
 	/**
-	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
-	 * {@link Predicate} returns true.
+	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided {@link Predicate} returns true.
 	 *
 	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
 	 * @param <T> The event type to wait for.
@@ -247,43 +269,39 @@ public class EventDispatcher {
 	}
 
 	/**
-	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
-	 * {@link Predicate} returns true.
+	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided {@link Predicate} returns true.
 	 *
 	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
-	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
-	 * of whether the event fired.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param <T> The event type to wait for.
 	 *
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Predicate<T> filter, long time) throws InterruptedException {
-		waitFor(filter, time, TimeUnit.MILLISECONDS, () -> {});
+		waitFor(filter, time, TimeUnit.MILLISECONDS, () -> {
+		});
 	}
 
 	/**
-	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
-	 * {@link Predicate} returns true.
+	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided {@link Predicate} returns true.
 	 *
 	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
-	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
-	 * of whether the event fired.
+	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param unit The unit for the time parameter.
 	 * @param <T> The event type to wait for.
 	 *
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Predicate<T> filter, long time, TimeUnit unit) throws InterruptedException {
-		waitFor(filter, time, unit, () -> {});
+		waitFor(filter, time, unit, () -> {
+		});
 	}
 
 	/**
-	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided
-	 * {@link Predicate} returns true.
+	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided {@link Predicate} returns true.
 	 *
 	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
-	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
-	 * event fired.
+	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param unit The unit for the time parameter.
 	 * @param onTimeout The procedure to execute when the timeout is reached.
 	 * @param <T> The event type to wait for.
@@ -321,18 +339,7 @@ public class EventDispatcher {
 		if (listener instanceof IListener) {
 			unregisterListener((IListener) listener);
 		} else {
-			for (Method method : listener.getClass().getMethods()) {
-				if (method.getParameterCount() == 1) {
-					Class<?> eventClass = method.getParameterTypes()[0];
-					if (Event.class.isAssignableFrom(eventClass)) {
-						if (methodListeners.containsKey(eventClass))
-							if (methodListeners.get(eventClass).containsKey(method)) {
-								methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == listener); //Yes, the == is intentional. We want the exact same instance.
-								Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered method listener {}", listener.getClass().getSimpleName(), method.toString());
-							}
-					}
-				}
-			}
+			unregisterListener(listener.getClass(), listener);
 		}
 	}
 
@@ -342,18 +349,34 @@ public class EventDispatcher {
 	 * @param clazz The listener class with static methods.
 	 */
 	public void unregisterListener(Class<?> clazz) {
-		for (Method method : clazz.getMethods()) {
-			if (method.getParameterCount() == 1) {
-				Class<?> eventClass = method.getParameterTypes()[0];
-				if (Event.class.isAssignableFrom(eventClass)) {
-					if (methodListeners.containsKey(eventClass))
-						if (methodListeners.get(eventClass).containsKey(method)) {
-							methodListeners.get(eventClass).get(method).removeIf((ListenerPair pair) -> pair.listener == null); // null for static listener
-							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered class method listener {}", clazz.getSimpleName(), method.toString());
-						}
+		unregisterListener(clazz, null);
+	}
+
+	/**
+	 * Iterates the methods of {@code clazz} finding their MethodEventHandler and removes them. Notice that removal depends on if we are looking for instance methods or static
+	 * methods.
+	 *
+	 * @param clazz
+	 * @param instance
+	 */
+	private void unregisterListener(Class<?> clazz, Object instance) {
+		List<Method> methods = Arrays.asList(clazz.getMethods()).stream().
+				filter(m -> m.getParameterCount() == 1 && Event.class.isAssignableFrom(m.getParameterTypes()[0])).collect(Collectors.toList());
+
+		listenersRegistry.updateAndGet(set -> {
+			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
+			for (Iterator<EventHandler> it = n.iterator(); it.hasNext();) {
+				EventHandler eventHandler = it.next();
+				if (eventHandler instanceof MethodEventHandler) {
+					MethodEventHandler handler = (MethodEventHandler) eventHandler;
+					if (methods.contains(handler.method) && instance == handler.instance) {
+						it.remove();
+						Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered class method listener {}", clazz.getSimpleName(), handler.method.toString());
+					}
 				}
 			}
-		}
+			return n;
+		});
 	}
 
 	/**
@@ -364,11 +387,30 @@ public class EventDispatcher {
 	public void unregisterListener(IListener listener) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (Event.class.isAssignableFrom(rawType)) {
-			if (classListeners.containsKey(rawType)) {
-				classListeners.get(rawType).removeIf((ListenerPair pair) -> pair.listener == listener); //Yes, the == is intentional. We want the exact same instance.
-				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered IListener {}", listener.getClass().getSimpleName());
-			}
+			listenersRegistry.updateAndGet(set -> {
+				HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
+				for (Iterator<EventHandler> iterator = n.iterator(); iterator.hasNext();) {
+					EventHandler eventHandler = iterator.next();
+					if (eventHandler instanceof ListenerEventHandler) {
+						ListenerEventHandler<?> handler = (ListenerEventHandler) eventHandler;
+						if (handler.listener == listener) {//Yes, the == is intentional. We want the exact same instance.
+							iterator.remove();
+							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered IListener {}", listener);
+						}
+					}
+				}
+				return n;
+			});
 		}
+	}
+
+	private void unregisterHandler(EventHandler eventHandler) {
+		listenersRegistry.updateAndGet(set -> {
+			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
+			n.remove(eventHandler);
+			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered event handler {}", eventHandler);
+			return n;
+		});
 	}
 
 	/**
@@ -381,40 +423,18 @@ public class EventDispatcher {
 			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 			event.client = client;
 
-			methodListeners.entrySet().stream()
-					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-					.map(Map.Entry::getValue)
-					.forEach(m ->
-							m.forEach((k, v) ->
-									v.forEach(o -> {
-										try {
-											k.invoke(o.listener, event);
-											if (o.isTemporary)
-												unregisterListener(o.listener);
-										} catch (IllegalAccessException e) {
-											Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event " + event.getClass().getSimpleName(), e);
-										} catch(InvocationTargetException e) {
-											Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e.getCause());
-										} catch (Exception e) {
-											Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
-										}
-									})));
-
-			classListeners.entrySet().stream()
-					.filter(e -> e.getKey().isAssignableFrom(event.getClass()))
-					.map(Map.Entry::getValue)
-					.forEach(s -> s.forEach(l -> {
-						try {
-							l.listener.handle(event);
-
-							if (l.isTemporary)
-								unregisterListener(l.listener);
-						} catch (ClassCastException e) {
-							//FIXME: This occurs when a lambda expression is used to create an IListener leading it to be registered under the type 'Event'. This is due to a bug in TypeTools: https://github.com/jhalterman/typetools/issues/14
-					    } catch (Exception e) {
-							Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event "+event.getClass().getSimpleName(), e);
-						}
-					}));
+			listenersRegistry.get().stream().filter(e -> e.accepts(event)).forEach(handler -> {
+				try {
+					handler.handle(event);
+					if (handler.isTemporary()) unregisterHandler(handler);
+				} catch (IllegalAccessException e) {
+					Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event " + event.getClass().getSimpleName(), e);
+				} catch (InvocationTargetException e) {
+					Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event " + event.getClass().getSimpleName(), e.getCause());
+				} catch (Throwable e) {
+					Discord4J.LOGGER.error(LogMarkers.EVENTS, "Unhandled exception caught dispatching event " + event.getClass().getSimpleName(), e);
+				}
+			});
 		});
 	}
 
@@ -426,8 +446,7 @@ public class EventDispatcher {
 	private static class ListenerPair<V> {
 
 		/**
-		 * Whether the listener is temporary.
-		 * True if a temporary listener, false if otherwise.
+		 * Whether the listener is temporary. True if a temporary listener, false if otherwise.
 		 */
 		final boolean isTemporary;
 		/**
@@ -438,6 +457,86 @@ public class EventDispatcher {
 		private ListenerPair(boolean isTemporary, V listener) {
 			this.isTemporary = isTemporary;
 			this.listener = listener;
+		}
+	}
+
+	private static interface EventHandler {
+
+		boolean isTemporary();
+
+		boolean accepts(Event e);
+
+		void handle(Event e) throws Throwable;
+	}
+
+	private static class MethodEventHandler implements EventHandler {
+
+		private final Class<?> eventClass;
+		private final MethodHandle methodHandle;
+		private final Method method;
+		private final Object instance;
+		private final boolean temporary;
+
+		public MethodEventHandler(Class<?> eventClass, MethodHandle methodHandle, Method method, Object instance, boolean temporary) {
+			this.eventClass = eventClass;
+			this.methodHandle = methodHandle;
+			this.method = method;
+			this.instance = instance;
+			this.temporary = temporary;
+		}
+
+		@Override
+		public boolean isTemporary() {
+			return temporary;
+		}
+
+		@Override
+		public boolean accepts(Event e) {
+			return eventClass.isInstance(e);
+		}
+
+		@Override
+		public void handle(Event e) throws Throwable {
+			methodHandle.invoke(e);
+		}
+
+		@Override
+		public String toString() {
+			return method.toString();
+		}
+
+	}
+
+	private static class ListenerEventHandler<T extends Event> implements EventHandler {
+
+		private final boolean isTemporary;
+		private final Class<?> rawType;
+		private final IListener<T> listener;
+
+		public ListenerEventHandler(boolean isTemporary, Class<?> rawType, IListener<T> listener) {
+			this.isTemporary = isTemporary;
+			this.rawType = rawType;
+			this.listener = listener;
+		}
+
+		@Override
+		public boolean isTemporary() {
+			return isTemporary;
+		}
+
+		@Override
+		public boolean accepts(Event e) {
+			return rawType.isInstance(e);
+		}
+
+		@Override
+		public void handle(Event e) throws Throwable {
+			listener.handle((T) e);
+		}
+
+		@Override
+		public String toString() {
+			return listener.getClass().getSimpleName();
 		}
 	}
 }
