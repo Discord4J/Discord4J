@@ -314,7 +314,7 @@ public class EventDispatcher {
 				@Override
 				public void handle(T event) {
 					if (filter.test(event)) {
-						client.getDispatcher().unregisterListener(this);
+						unregisterListener(this);
 						synchronized (currentThread) {
 							timedOut.set(false);
 							currentThread.notify();
