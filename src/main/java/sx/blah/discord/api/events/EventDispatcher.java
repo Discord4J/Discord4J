@@ -55,6 +55,12 @@ public class EventDispatcher {
 
 	/**
 	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the annotated instance methods of the passed listener.
 	 *
 	 * @param listener The listener.
 	 */
@@ -67,6 +73,12 @@ public class EventDispatcher {
 
 	/**
 	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the annotated static methods of the passed listener.
 	 *
 	 * @param listener The listener.
 	 */
@@ -85,6 +97,12 @@ public class EventDispatcher {
 
 	/**
 	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the instance methods of the passed listener.
 	 *
 	 * @param listeners The listeners.
 	 */
@@ -94,6 +112,12 @@ public class EventDispatcher {
 
 	/**
 	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the static methods of the passed listener.
 	 *
 	 * @param listeners The listeners.
 	 */
@@ -170,6 +194,7 @@ public class EventDispatcher {
 
 	/**
 	 * This registers a temporary event listener using {@link EventSubscriber} method annotations. Meaning that when it listens to an event, it immediately unregisters itself.
+	 * See {@code registerListener} for the constraints.
 	 *
 	 * @param listener The listener.
 	 */
@@ -182,6 +207,7 @@ public class EventDispatcher {
 
 	/**
 	 * This registers a temporary event listener using {@link EventSubscriber} method annotations. Meaning that when it listens to an event, it immediately unregisters itself.
+	 * See {@code registerListener} for the constraints.
 	 *
 	 * @param listener The listener.
 	 */
@@ -191,6 +217,7 @@ public class EventDispatcher {
 
 	/**
 	 * This registers a temporary single event listener. Meaning that when it listens to an event, it immediately unregisters itself.
+	 * See {@code registerListener} for the constraints.
 	 *
 	 * @param listener The listener.
 	 */
@@ -203,6 +230,7 @@ public class EventDispatcher {
 	 *
 	 * @param eventClass The class of the event to wait for.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 */
@@ -216,6 +244,7 @@ public class EventDispatcher {
 	 * @param eventClass The class of the event to wait for.
 	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 */
@@ -230,6 +259,7 @@ public class EventDispatcher {
 	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param unit The unit for the time parameter.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 */
@@ -245,6 +275,7 @@ public class EventDispatcher {
 	 * @param unit The unit for the time parameter.
 	 * @param onTimeout The procedure to execute when the timeout is reached.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 * @deprecated use the version of waitFor that return the value.
@@ -259,6 +290,7 @@ public class EventDispatcher {
 	 *
 	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 */
@@ -272,6 +304,7 @@ public class EventDispatcher {
 	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
 	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 */
@@ -286,6 +319,7 @@ public class EventDispatcher {
 	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless of whether the event fired.
 	 * @param unit The unit for the time parameter.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 */
@@ -301,6 +335,7 @@ public class EventDispatcher {
 	 * @param unit The unit for the time parameter.
 	 * @param onTimeout The procedure to execute when the timeout is reached.
 	 * @param <T> The event type to wait for.
+	 * @return The event found.
 	 *
 	 * @throws InterruptedException
 	 * @deprecated use the version of waitFor that return the value.
@@ -430,15 +465,30 @@ public class EventDispatcher {
 		});
 	}
 
+	/**
+	 * General behavior of an event handler.
+	 */
 	private static interface EventHandler {
 
+		/**
+		 * Should the handler be removed after handling an event.
+		 * @return 
+		 */
 		boolean isTemporary();
 
+		/**
+		 * Checks whether the handler should process the given event.
+		 * @param e
+		 * @return 
+		 */
 		boolean accepts(Event e);
 
 		void handle(Event e) throws Throwable;
 	}
 
+	/**
+	 * Specialized version of EventHandler that invokes the given MethodHandle for each event.
+	 */
 	private static class MethodEventHandler implements EventHandler {
 
 		private final Class<?> eventClass;
@@ -477,6 +527,10 @@ public class EventDispatcher {
 
 	}
 
+	/**
+	 * EventHandler implementation that delegates to an IListener.
+	 * @param <T> 
+	 */
 	private static class ListenerEventHandler<T extends Event> implements EventHandler {
 
 		private final boolean isTemporary;
