@@ -268,7 +268,7 @@ public interface IDiscordClient {
 	IUser getUserByID(String userID);
 
 	/**
-	 * Gets a set of users by their name, ignoring case.
+	 * Gets a set of users by their name, case-sensitive.
 	 *
 	 * @param name The name of the desired user(s).
 	 * @return A {@link Collection} of {@link User} objects with the provided name.
