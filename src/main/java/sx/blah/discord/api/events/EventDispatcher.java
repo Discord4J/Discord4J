@@ -306,25 +306,17 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> void waitFor(Predicate<T> filter, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
-		final Thread currentThread = Thread.currentThread();
-		final AtomicBoolean timedOut = new AtomicBoolean(true);
-
-		synchronized (currentThread) {
-			registerListener(new IListener<T>() {
-				@Override
-				public void handle(T event) {
-					if (filter.test(event)) {
-						unregisterListener(this);
-						synchronized (currentThread) {
-							timedOut.set(false);
-							currentThread.notify();
-						}
-					}
+		SynchronousQueue<T> result = new SynchronousQueue<>();
+		registerListener(new IListener<T>() {
+			@Override
+			public void handle(T event) {
+				if (filter.test(event)) {
+					result.offer(event);
+					unregisterListener(this);
 				}
-			});
-			currentThread.wait(unit.toMillis(time));
-			if (timedOut.get()) onTimeout.invoke();
-		}
+			}
+		});
+		result.poll(time, unit);
 	}
 
 	/**
