@@ -435,28 +435,6 @@ public class EventDispatcher {
 		});
 	}
 
-	/**
-	 * This is used to differentiate temporary event listeners from permanent ones.
-	 *
-	 * @param <V> The type of listener, either {@link Object} or {@link IListener}
-	 */
-	private static class ListenerPair<V> {
-
-		/**
-		 * Whether the listener is temporary. True if a temporary listener, false if otherwise.
-		 */
-		final boolean isTemporary;
-		/**
-		 * The actual listener object instance.
-		 */
-		final V listener;
-
-		private ListenerPair(boolean isTemporary, V listener) {
-			this.isTemporary = isTemporary;
-			this.listener = listener;
-		}
-	}
-
 	private static interface EventHandler {
 
 		boolean isTemporary();
