@@ -69,14 +69,14 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public void login() throws DiscordException {
+	public void login() {
 		Discord4J.LOGGER.trace(LogMarkers.API, "Shard logging in.");
 		this.ws = new DiscordWS(this, gateway, client.maxMissedPings);
 		this.ws.connect();
 	}
 
 	@Override
-	public void logout() throws DiscordException {
+	public void logout() {
 		checkLoggedIn("logout");
 
 		Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
@@ -301,7 +301,7 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
+	public IPrivateChannel getOrCreatePMChannel(IUser user) {
 		checkReady("get PM channel");
 
 		if (user.equals(getClient().getOurUser()))

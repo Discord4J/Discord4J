@@ -190,7 +190,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage delete(int index) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage delete(int index) {
 		IMessage message = get(index);
 		message.delete();
 		return message;
@@ -207,7 +207,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage delete(String id) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage delete(String id) {
 		IMessage message = get(id);
 
 		if (message == null)

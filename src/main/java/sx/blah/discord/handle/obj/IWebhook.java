@@ -83,7 +83,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws MissingPermissionsException
 	 */
 
-	void changeDefaultName(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changeDefaultName(String name);
 
 	/**
 	 * Changes the default avatar of the user this webhook posts as.
@@ -93,7 +93,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeDefaultAvatar(String avatar) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changeDefaultAvatar(String avatar);
 
 	/**
 	 * Changes the default avatar of the user this webhook posts as.
@@ -104,7 +104,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws MissingPermissionsException
 	 */
 
-	void changeDefaultAvatar(Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changeDefaultAvatar(Image avatar);
 
 	/**
 	 * Deletes this webhook.
@@ -113,7 +113,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws DiscordException, RateLimitException, MissingPermissionsException;
+	void delete();
 
 	/**
 	 * Checks to see if this webhook is deleted.

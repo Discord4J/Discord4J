@@ -49,7 +49,7 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public InviteResponse details() throws DiscordException, RateLimitException {
+	public InviteResponse details() {
 		client.checkReady("get invite details");
 		InviteObject response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode, InviteObject.class);
 
@@ -57,7 +57,7 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public void delete() throws DiscordException, RateLimitException {
+	public void delete() {
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode);
 	}
 

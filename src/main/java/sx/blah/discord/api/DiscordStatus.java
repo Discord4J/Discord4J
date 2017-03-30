@@ -37,7 +37,7 @@ public class DiscordStatus {
 	 *
 	 * @return The mean response time (in milliseconds).
 	 */
-	public static double getAPIResponseTimeForDay() throws DiscordException, RateLimitException {
+	public static double getAPIResponseTimeForDay() {
 		MetricsResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.METRICS, "day"), MetricsResponse.class);
 
@@ -49,7 +49,7 @@ public class DiscordStatus {
 	 *
 	 * @return The mean response time (in milliseconds).
 	 */
-	public static double getAPIResponseTimeForWeek() throws DiscordException, RateLimitException {
+	public static double getAPIResponseTimeForWeek() {
 		MetricsResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.METRICS, "week"), MetricsResponse.class);
 
@@ -61,7 +61,7 @@ public class DiscordStatus {
 	 *
 	 * @return The mean response time (in milliseconds).
 	 */
-	public static double getAPIResponseTimeForMonth() throws DiscordException, RateLimitException {
+	public static double getAPIResponseTimeForMonth() {
 		MetricsResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.METRICS, "month"), MetricsResponse.class);
 
@@ -76,7 +76,7 @@ public class DiscordStatus {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public static Maintenance[] getActiveMaintenances() throws DiscordException, RateLimitException {
+	public static Maintenance[] getActiveMaintenances() {
 		StatusResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "active"), StatusResponse.class);
 
@@ -98,7 +98,7 @@ public class DiscordStatus {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	public static Maintenance[] getUpcomingMaintenances() throws DiscordException, RateLimitException {
+	public static Maintenance[] getUpcomingMaintenances() {
 		StatusResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(
 				String.format(DiscordEndpoints.STATUS, "upcoming"), StatusResponse.class);
 

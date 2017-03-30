@@ -118,7 +118,7 @@ public class Reaction implements IReaction {
 	}
 
 	@Override
-	public synchronized List<IUser> getUsers() throws DiscordException, RateLimitException {
+	public synchronized List<IUser> getUsers() {
 		if (shouldRefreshUsers()) {
 			users.clear();
 

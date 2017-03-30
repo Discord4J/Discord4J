@@ -107,7 +107,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void reply(String content) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void reply(String content);
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
@@ -121,7 +121,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	void reply(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void reply(String content, EmbedObject embed);
 
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -131,7 +131,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
-	IMessage edit(String content) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage edit(String content);
 
 	/**
 	 * Edits the message with an embed object. NOTE: Discord only supports editing YOUR OWN messages!
@@ -144,7 +144,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage edit(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage edit(String content, EmbedObject embed);
 
 	/**
 	 * Edits the message with only an embed object. NOTE: Discord only supports editing YOUR OWN messages!
@@ -156,7 +156,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage edit(EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage edit(EmbedObject embed);
 
 	/**
 	 * Returns whether this message mentions everyone through @everyone.
@@ -179,7 +179,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws DiscordException, RateLimitException, MissingPermissionsException;
+	void delete();
 
 	/**
 	 * Gets the time that this message was last edited.
@@ -239,7 +239,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see Permissions#MANAGE_MESSAGES
 	 */
-	void removeAllReactions() throws DiscordException, RateLimitException, MissingPermissionsException;
+	void removeAllReactions();
 
 	/**
 	 * Adds your reaction to an existing one.
@@ -249,7 +249,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void addReaction(IReaction reaction);
 
 	/**
 	 * Adds your reaction as a custom emoji.
@@ -259,7 +259,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(IEmoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void addReaction(IEmoji emoji);
 
 	/**
 	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji (☑), or an IEmoji formatted one (&lt;:name:id&gt;).
@@ -271,7 +271,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void addReaction(String emoji);
 
 	/**
 	 * Adds your reaction as a Unicode one. Use {@link com.vdurmont.emoji.EmojiManager#getForAlias(String)}
@@ -282,7 +282,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(Emoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void addReaction(Emoji emoji);
 
 	/**
 	 * Removes a reaction for a user.
@@ -293,7 +293,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removeReaction(IUser user, IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void removeReaction(IUser user, IReaction reaction);
 
 	/**
 	 * Removes a reaction for yourself.
@@ -303,7 +303,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removeReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void removeReaction(IReaction reaction);
 
 	/**
 	 * This creates a new {@link MessageTokenizer} instance with this message instance.

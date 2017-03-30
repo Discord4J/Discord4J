@@ -154,7 +154,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return this.token;
 	}
 
-	private void changeAccountInfo(String username, String avatar) throws DiscordException, RateLimitException {
+	private void changeAccountInfo(String username, String avatar) {
 		checkLoggedIn("change account info");
 
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
@@ -162,12 +162,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void changeUsername(String username) throws DiscordException, RateLimitException {
+	public void changeUsername(String username) {
 		changeAccountInfo(username, Image.forUser(ourUser).getData());
 	}
 
 	@Override
-	public void changeAvatar(Image avatar) throws DiscordException, RateLimitException {
+	public void changeAvatar(Image avatar) {
 		changeAccountInfo(ourUser.getName(), avatar.getData());
 	}
 
@@ -177,7 +177,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IRegion> getRegions() throws DiscordException, RateLimitException {
+	public List<IRegion> getRegions() {
 		if (REGIONS.isEmpty()) {
 			VoiceRegionObject[] regions = REQUESTS.GET.makeRequest(
 					DiscordEndpoints.VOICE+"regions", VoiceRegionObject[].class);
@@ -202,12 +202,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return null;
 	}
 
-	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
+	private ApplicationInfoResponse getApplicationInfo() {
 		return REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me", ApplicationInfoResponse.class);
 	}
 
 	@Override
-	public String getApplicationDescription() throws DiscordException {
+	public String getApplicationDescription() {
 		try {
 			return getApplicationInfo().description;
 		} catch (RateLimitException e) {
@@ -217,7 +217,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public String getApplicationIconURL() throws DiscordException {
+	public String getApplicationIconURL() {
 		try {
 			ApplicationInfoResponse info = getApplicationInfo();
 			return String.format(DiscordEndpoints.APPLICATION_ICON, info.id, info.icon);
@@ -228,7 +228,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public String getApplicationClientID() throws DiscordException {
+	public String getApplicationClientID() {
 		try {
 			return getApplicationInfo().id;
 		} catch (RateLimitException e) {
@@ -238,7 +238,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public String getApplicationName() throws DiscordException {
+	public String getApplicationName() {
 		try {
 			return getApplicationInfo().name;
 		} catch (RateLimitException e) {
@@ -248,7 +248,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IUser getApplicationOwner() throws DiscordException {
+	public IUser getApplicationOwner() {
 		try {
 			UserObject owner = getApplicationInfo().owner;
 
@@ -275,14 +275,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return gateway;
 	}
 
-	private void validateToken() throws DiscordException, RateLimitException {
+	private void validateToken() {
 		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me");
 	}
 
 	// Sharding delegation
 
 	@Override
-	public void login() throws DiscordException, RateLimitException {
+	public void login() {
 		if (!getShards().isEmpty()) {
 			throw new DiscordException("Attempt to login client more than once.");
 		}
@@ -320,7 +320,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void logout() throws DiscordException {
+	public void logout() {
 		for (IShard shard : getShards()) {
 			shard.logout();
 		}
@@ -494,7 +494,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
+	public IPrivateChannel getOrCreatePMChannel(IUser user) {
 		IShard shard = getShards().stream().filter(s -> s.getUserByID(user.getID()) != null).findFirst().get();
 		return shard.getOrCreatePMChannel(user);
 	}
