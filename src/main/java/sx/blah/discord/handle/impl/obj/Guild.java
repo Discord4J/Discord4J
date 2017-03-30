@@ -383,10 +383,13 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public List<IUser> getBannedUsers() throws DiscordException, RateLimitException {
+	public List<IUser> getBannedUsers() throws DiscordException, RateLimitException, MissingPermissionsException {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+
 		BanObject[] bans = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
 				DiscordEndpoints.GUILDS+id+"/bans",
 				BanObject[].class);
+
 		return Arrays.stream(bans).map(b -> DiscordUtils.getUserFromJSON(getShard(), b.user)).collect(Collectors.toList());
 	}
 
