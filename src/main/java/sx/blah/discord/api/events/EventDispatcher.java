@@ -16,7 +16,6 @@
  */
 package sx.blah.discord.api.events;
 
-import java.lang.invoke.MethodHandle;
 import net.jodah.typetools.TypeResolver;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
@@ -24,6 +23,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.Procedure;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -158,9 +158,8 @@ public class EventDispatcher {
 
 			method.setAccessible(true);
 			try {
-				MethodHandle mh = lookup.unreflect(method);
-				if (listener != null) mh = mh.bindTo(listener);
-				final MethodHandle methodHandle = mh;
+				MethodHandle methodHandle = lookup.unreflect(method);
+				if (listener != null) methodHandle = methodHandle.bindTo(listener);
 				return new MethodEventHandler(eventClass, methodHandle, method, listener, isTemporary);
 			} catch (IllegalAccessException ex) {
 				throw new IllegalStateException("Method " + method + " is not accessible", ex);
@@ -169,13 +168,13 @@ public class EventDispatcher {
 		}).collect(Collectors.toList());
 
 		listenersRegistry.updateAndGet(set -> {
-			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
+			HashSet<EventHandler> updatedSet = (HashSet<EventHandler>) set.clone();
 			for (EventHandler handler : handlers) {
-				n.add(handler);
+				updatedSet.add(handler);
 				Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered {}", handler);
 			}
-			n.addAll(handlers);
-			return n;
+			updatedSet.addAll(handlers);
+			return updatedSet;
 		});
 	}
 
@@ -185,10 +184,10 @@ public class EventDispatcher {
 
 		ListenerEventHandler eventHandler = new ListenerEventHandler(isTemporary, rawType, listener);
 		listenersRegistry.updateAndGet(set -> {
-			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
-			n.add(eventHandler);
+			HashSet<EventHandler> updatedSet = (HashSet<EventHandler>) set.clone();
+			updatedSet.add(eventHandler);
 			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Registered IListener {}", eventHandler);
-			return n;
+			return updatedSet;
 		});
 	}
 
@@ -352,9 +351,9 @@ public class EventDispatcher {
 				}
 			}
 		});
-		T evt = result.poll(time, unit);
-		if (evt == null && onTimeout != null) onTimeout.invoke();
-		return evt;
+		T event = result.poll(time, unit);
+		if (event == null && onTimeout != null) onTimeout.invoke();
+		return event;
 	}
 
 	/**
@@ -391,8 +390,8 @@ public class EventDispatcher {
 				filter(m -> m.getParameterCount() == 1 && Event.class.isAssignableFrom(m.getParameterTypes()[0])).collect(Collectors.toList());
 
 		listenersRegistry.updateAndGet(set -> {
-			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
-			for (Iterator<EventHandler> it = n.iterator(); it.hasNext();) {
+			HashSet<EventHandler> updatedSet = (HashSet<EventHandler>) set.clone();
+			for (Iterator<EventHandler> it = updatedSet.iterator(); it.hasNext();) {
 				EventHandler eventHandler = it.next();
 				if (eventHandler instanceof MethodEventHandler) {
 					MethodEventHandler handler = (MethodEventHandler) eventHandler;
@@ -402,7 +401,7 @@ public class EventDispatcher {
 					}
 				}
 			}
-			return n;
+			return updatedSet;
 		});
 	}
 
@@ -415,8 +414,8 @@ public class EventDispatcher {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (Event.class.isAssignableFrom(rawType)) {
 			listenersRegistry.updateAndGet(set -> {
-				HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
-				for (Iterator<EventHandler> iterator = n.iterator(); iterator.hasNext();) {
+				HashSet<EventHandler> updatedSet = (HashSet<EventHandler>) set.clone();
+				for (Iterator<EventHandler> iterator = updatedSet.iterator(); iterator.hasNext();) {
 					EventHandler eventHandler = iterator.next();
 					if (eventHandler instanceof ListenerEventHandler) {
 						ListenerEventHandler<?> handler = (ListenerEventHandler) eventHandler;
@@ -426,17 +425,17 @@ public class EventDispatcher {
 						}
 					}
 				}
-				return n;
+				return updatedSet;
 			});
 		}
 	}
 
 	private void unregisterHandler(EventHandler eventHandler) {
 		listenersRegistry.updateAndGet(set -> {
-			HashSet<EventHandler> n = (HashSet<EventHandler>) set.clone();
-			n.remove(eventHandler);
+			HashSet<EventHandler> updatedSet = (HashSet<EventHandler>) set.clone();
+			updatedSet.remove(eventHandler);
 			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered event handler {}", eventHandler);
-			return n;
+			return updatedSet;
 		});
 	}
 
