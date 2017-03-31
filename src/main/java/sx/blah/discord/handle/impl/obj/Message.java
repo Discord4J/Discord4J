@@ -37,7 +37,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -311,7 +310,7 @@ public class Message implements IMessage {
 	@Override
 	public List<IEmbed> getEmbeds() {
 		List<IEmbed> copy = new ArrayList<>(embeds.size());
-		Collections.copy(copy, embeds);
+		copy.addAll(embeds);
 		return copy;
 	}
 
