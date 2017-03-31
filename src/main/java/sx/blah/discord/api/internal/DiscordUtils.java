@@ -416,7 +416,7 @@ public class DiscordUtils {
 		if (channel.messages != null && channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
-			message.setEmbedded(getEmbedsFromJSON(json));
+			message.setEmbeds(getEmbedsFromJSON(json));
 			message.setContent(json.content);
 			message.setMentionsEveryone(json.mention_everyone);
 			message.setMentions(getMentionsFromJSON(json), getRoleMentionsFromJSON(json));
@@ -460,7 +460,7 @@ public class DiscordUtils {
 		if (!attachments.isEmpty())
 			message.setAttachments(attachments);
 		if (!embeds.isEmpty())
-			message.setEmbedded(embeds);
+			message.setEmbeds(embeds);
 		if (json.content != null) {
 			message.setContent(json.content);
 			message.setMentions(getMentionsFromJSON(json), getRoleMentionsFromJSON(json));
