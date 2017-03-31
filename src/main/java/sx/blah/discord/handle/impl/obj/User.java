@@ -97,8 +97,12 @@ public class User implements IUser {
 	protected final Map<String, IVoiceState> voiceStates = new ConcurrentHashMap<>();
 
 	public User(IShard shard, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
+		this(shard, shard == null ? null : shard.getClient(), name, id, discriminator, avatar, presence, isBot);
+	}
+
+	public User(IShard shard, IDiscordClient client, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this.shard = shard;
-		this.client = shard.getClient();
+		this.client = client;
 		this.id = id;
 		this.name = name;
 		this.discriminator = discriminator;

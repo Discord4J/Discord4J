@@ -450,9 +450,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IUser getUserByID(String userID) {
-		return getUsers().stream()
+		IUser user =  getUsers().stream()
 				.filter(u -> u.getID().equals(userID))
 				.findFirst().orElse(null);
+
+		if (user == null && isReady() && isLoggedIn())
+			user = DiscordUtils.getUserFromJSON(null, REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + userID, UserObject.class)); //This user isn't present in any shard so give it a null shard
+
+		return user;
 	}
 
 	@Override
