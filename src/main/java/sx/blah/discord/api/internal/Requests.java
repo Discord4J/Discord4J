@@ -136,7 +136,7 @@ public class Requests {
 		 * @throws DiscordException
 		 * @throws RateLimitException
 		 */
-		public <T> T makeRequest(String url, Object entity, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public <T> T makeRequest(String url, Object entity, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
 				return makeRequest(url, DiscordUtils.MAPPER.writeValueAsString(entity), clazz, headers);
 			} catch (JsonProcessingException e) {
@@ -144,7 +144,7 @@ public class Requests {
 			}
 		}
 
-		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
 				byte[] response = makeRequest(url, entity, headers);
 				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
@@ -164,7 +164,7 @@ public class Requests {
 		 * @throws DiscordException
 		 * @throws RateLimitException
 		 */
-		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
 				byte[] response = makeRequest(url, headers);
 				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
@@ -183,7 +183,7 @@ public class Requests {
 		 * @throws DiscordException
 		 * @throws RateLimitException
 		 */
-		public void makeRequest(String url, Object entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public void makeRequest(String url, Object entity, BasicNameValuePair... headers) {
 			try {
 				makeRequest(url, DiscordUtils.MAPPER.writeValueAsString(entity), headers);
 			} catch (IOException e) {
@@ -201,7 +201,7 @@ public class Requests {
 		 * @throws DiscordException
 		 * @throws RateLimitException
 		 */
-		public byte[] makeRequest(String url, String entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public byte[] makeRequest(String url, String entity, BasicNameValuePair... headers) {
 			return makeRequest(url, new StringEntity(entity, "UTF-8"), headers);
 		}
 
@@ -214,7 +214,7 @@ public class Requests {
 		 * @throws RateLimitException
 		 * @throws DiscordException
 		 */
-		public byte[] makeRequest(String url, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public byte[] makeRequest(String url, BasicNameValuePair... headers) {
 			try {
 				HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 				for (BasicNameValuePair header : headers) {
@@ -239,7 +239,7 @@ public class Requests {
 		 * @throws RateLimitException
 		 * @throws DiscordException
 		 */
-		public byte[] makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) throws DiscordException, RateLimitException {
+		public byte[] makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) {
 			try {
 				if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 					HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -258,11 +258,11 @@ public class Requests {
 			return null;
 		}
 
-		private byte[] request(HttpUriRequest request) throws RateLimitException, DiscordException {
+		private byte[] request(HttpUriRequest request) {
 			return request(request, 1, client == null ? 0 : client.getRetryCount());
 		}
 
-		private byte[] request(HttpUriRequest request, long sleepTime, int retry) throws DiscordException, RateLimitException {
+		private byte[] request(HttpUriRequest request, long sleepTime, int retry) {
 			if (client != null)
 				request.addHeader("Authorization", client.getToken());
 

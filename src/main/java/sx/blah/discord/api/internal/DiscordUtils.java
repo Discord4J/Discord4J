@@ -660,8 +660,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IUser user, IGuild guild, List<IRole> roles,
-										EnumSet<Permissions> required) throws MissingPermissionsException {
+	public static void checkPermissions(IUser user, IGuild guild, List<IRole> roles, EnumSet<Permissions> required) {
 		try {
 			if (!isUserHigher(guild, user, roles))
 				throw new MissingPermissionsException("Edited roles hierarchy is too high.", EnumSet.noneOf(Permissions.class));
@@ -681,8 +680,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IUser user, IChannel channel, List<IRole> roles,
-										EnumSet<Permissions> required) throws MissingPermissionsException {
+	public static void checkPermissions(IUser user, IChannel channel, List<IRole> roles, EnumSet<Permissions> required) {
 		try {
 			if (!isUserHigher(channel.getGuild(), user, roles))
 				throw new MissingPermissionsException("Edited roles hierarchy is too high.", EnumSet.noneOf(Permissions.class));
@@ -700,8 +698,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IUser user, IChannel channel, EnumSet<Permissions> required) throws
-			MissingPermissionsException {
+	public static void checkPermissions(IUser user, IChannel channel, EnumSet<Permissions> required) {
 		try {
 			EnumSet<Permissions> contained = channel.getModifiedPermissions(user);
 			checkPermissions(contained, required);
@@ -717,8 +714,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IUser user, IGuild guild, EnumSet<Permissions> required) throws
-			MissingPermissionsException {
+	public static void checkPermissions(IUser user, IGuild guild, EnumSet<Permissions> required) {
 		try {
 			EnumSet<Permissions> contained = EnumSet.noneOf(Permissions.class);
 			List<IRole> roles = user.getRolesForGuild(guild);
@@ -740,8 +736,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IDiscordClient client, IGuild guild, List<IRole> roles,
-										EnumSet<Permissions> required) throws MissingPermissionsException {
+	public static void checkPermissions(IDiscordClient client, IGuild guild, List<IRole> roles, EnumSet<Permissions> required) {
 		checkPermissions(client.getOurUser(), guild, roles, required);
 	}
 
@@ -755,8 +750,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IDiscordClient client, IChannel channel, List<IRole> roles,
-										EnumSet<Permissions> required) throws MissingPermissionsException {
+	public static void checkPermissions(IDiscordClient client, IChannel channel, List<IRole> roles, EnumSet<Permissions> required)  {
 		checkPermissions(client.getOurUser(), channel, roles, required);
 	}
 
@@ -768,8 +762,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IDiscordClient client, IChannel channel, EnumSet<Permissions> required) throws
-			MissingPermissionsException {
+	public static void checkPermissions(IDiscordClient client, IChannel channel, EnumSet<Permissions> required) {
 		checkPermissions(client.getOurUser(), channel, required);
 	}
 
@@ -781,8 +774,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IDiscordClient client, IGuild guild, EnumSet<Permissions> required) throws
-			MissingPermissionsException {
+	public static void checkPermissions(IDiscordClient client, IGuild guild, EnumSet<Permissions> required) {
 		checkPermissions(client.getOurUser(), guild, required);
 	}
 
@@ -793,8 +785,7 @@ public class DiscordUtils {
 	 * @param required  The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(EnumSet<Permissions> contained, EnumSet<Permissions> required) throws
-			MissingPermissionsException {
+	public static void checkPermissions(EnumSet<Permissions> contained, EnumSet<Permissions> required) {
 		if (contained.contains(Permissions.ADMINISTRATOR))
 			return;
 

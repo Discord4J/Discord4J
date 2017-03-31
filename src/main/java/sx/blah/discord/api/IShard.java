@@ -43,13 +43,13 @@ public interface IShard {
 	 * Connects this shard to the Discord gateway.
 	 * @throws DiscordException
 	 */
-	void login() throws DiscordException;
+	void login();
 
 	/**
 	 * Disconnects this shard from the Discord gateway.
 	 * @throws DiscordException
 	 */
-	void logout() throws DiscordException;
+	void logout();
 
 	/**
 	 * Checks if the api is ready to be interacted with. This means all available guilds on this shard have been received.
@@ -64,7 +64,7 @@ public interface IShard {
 	 * @param action The action that is being attempted. (i.e. "send message")
 	 * @throws DiscordException
 	 */
-	default void checkReady(String action) throws DiscordException {
+	default void checkReady(String action) {
 		if (!isReady()) throw new DiscordException("Attempt to " + action + " before shard is ready!");
 	}
 
@@ -82,7 +82,7 @@ public interface IShard {
 	 * @param action The action that is being attempted. (i.e. "send message")
 	 * @throws DiscordException
 	 */
-	default void checkLoggedIn(String action) throws DiscordException {
+	default void checkLoggedIn(String action) {
 		if (!isLoggedIn()) throw new DiscordException("Attempt to " + action + " before shard has logged in!");
 	}
 
@@ -293,5 +293,5 @@ public interface IShard {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException;
+	IPrivateChannel getOrCreatePMChannel(IUser user);
 }

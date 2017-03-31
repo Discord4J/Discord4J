@@ -108,7 +108,7 @@ public class ClientBuilder {
 		this.shardCount = shardCount;
 		return this;
 	}
-	
+
 	/**
 	 * Sets whether the bot should use Discord's recommended number of shards on login.
 	 *
@@ -119,7 +119,7 @@ public class ClientBuilder {
 		this.withRecomendedShardCount = useRecommended;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the bot to use Discord's recommended number of shards on login.
 	 *
@@ -235,7 +235,7 @@ public class ClientBuilder {
 	 *
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
-	public IDiscordClient build() throws DiscordException {
+	public IDiscordClient build() {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 		if (withRecomendedShardCount){
@@ -262,7 +262,7 @@ public class ClientBuilder {
 	 *
 	 * @throws DiscordException Thrown if the instance isn't built correctly
 	 */
-	public IDiscordClient login() throws DiscordException {
+	public IDiscordClient login() {
 		IDiscordClient client = build();
 		try {
 			client.login();

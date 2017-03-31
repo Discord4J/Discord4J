@@ -40,7 +40,7 @@ public interface IInvite {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	InviteResponse details() throws DiscordException, RateLimitException;
+	InviteResponse details();
 
 	/**
 	 * Attempts to delete the invite this object represents.
@@ -48,7 +48,7 @@ public interface IInvite {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws DiscordException, RateLimitException;
+	void delete();
 
 	/**
 	 * This gets the client that this object is tied to.

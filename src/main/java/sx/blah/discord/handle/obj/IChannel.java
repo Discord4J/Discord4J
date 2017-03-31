@@ -289,7 +289,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendMessage(String content);
 
 	/**
 	 * Sends a message to the desired channel.
@@ -303,7 +303,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage sendMessage(EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendMessage(EmbedObject embed);
 
 	/**
 	 * Sends a message to the desired channel.
@@ -316,7 +316,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IMessage sendMessage(String content, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendMessage(String content, boolean tts);
 
 	/**
 	 * Sends a message to the desired channel.
@@ -331,7 +331,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage sendMessage(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendMessage(String content, EmbedObject embed);
 
 	/**
 	 * Sends a message to the desired channel.
@@ -347,7 +347,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage sendMessage(String content, EmbedObject embed, boolean tts) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendMessage(String content, EmbedObject embed, boolean tts);
 
 	/**
 	 * Uploads a file to the channel.
@@ -360,7 +360,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(File file) throws FileNotFoundException;
 
 	/**
 	 * Uploads multiple files to the channel.
@@ -372,7 +372,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFiles(File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(File... files) throws FileNotFoundException;
 
 	/**
 	 * Uploads a file to the channel with a message attached.
@@ -386,7 +386,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(String content, File file) throws FileNotFoundException;
 
 	/**
 	 * Uploads multiple files to the channel with a message attached.
@@ -394,12 +394,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param content The content of the attached message.
 	 * @param files The files to upload.
 	 * @return The message created by this action.
+	 *
 	 * @throws FileNotFoundException
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFiles(String content, File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(String content, File... files) throws FileNotFoundException;
 
 	/**
 	 * Uploads a file to the channel with an attached message and option for tts.
@@ -418,7 +419,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @see EmbedBuilder
 	 * @see EmbedBuilder#withImage(String)
 	 */
-	IMessage sendFile(EmbedObject embed, File file) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(EmbedObject embed, File file) throws FileNotFoundException;
 
 	/**
 	 * Uploads files to the channel with an attached message and option for tts.
@@ -430,6 +431,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param embed An optional embed object to send with the file.
 	 * @return The message created by this action.
 	 *
+	 * @throws FileNotFoundException
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
@@ -437,7 +439,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @see EmbedBuilder
 	 * @see EmbedBuilder#withImage(String)
 	 */
-	IMessage sendFiles(EmbedObject embed, File... files) throws FileNotFoundException, DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(EmbedObject embed, File... files) throws FileNotFoundException;
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
@@ -451,7 +453,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(String content, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(String content, InputStream file, String fileName);
 
 	/**
 	 * Uploads AttachmentPartEntries to the channel with an attached message and option for tts.
@@ -464,7 +466,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFiles(String content, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(String content, AttachmentPartEntry... entries);
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
@@ -484,7 +486,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @see EmbedBuilder
 	 * @see EmbedBuilder#withImage(String)
 	 */
-	IMessage sendFile(EmbedObject embed, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(EmbedObject embed, InputStream file, String fileName);
 
 	/**
 	 * Uploads AttachmentPartEntries to the channel with an attached message and option for tts.
@@ -503,7 +505,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @see EmbedBuilder
 	 * @see EmbedBuilder#withImage(String)
 	 */
-	IMessage sendFiles(EmbedObject embed, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(EmbedObject embed, AttachmentPartEntry... entries);
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
@@ -518,7 +520,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(String content, boolean tts, InputStream file, String fileName);
 
 	/**
 	 * Send multiple attachments
@@ -527,7 +529,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param entries The attachments to attach to this message.
 	 * @return
 	 */
-	IMessage sendFiles(String content, boolean tts, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(String content, boolean tts, AttachmentPartEntry... entries);
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
@@ -549,7 +551,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @see EmbedBuilder
 	 * @see EmbedBuilder#withImage(String)
 	 */
-	IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(String content, boolean tts, InputStream file, String fileName, EmbedObject embed);
 
 	/**
 	 * Uploads AttachmentStreamEntries to the channel with an attached message and option for tts.
@@ -567,7 +569,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFiles(String content, boolean tts, EmbedObject embed, AttachmentPartEntry... entries) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFiles(String content, boolean tts, EmbedObject embed, AttachmentPartEntry... entries);
 
 	/**
 	 * Uploads an InputStream to the channel with an attached message and option for tts.
@@ -584,7 +586,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	IMessage sendFile(MessageBuilder builder, InputStream file, String fileName) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IMessage sendFile(MessageBuilder builder, InputStream file, String fileName);
 
 	/**
 	 * Generates an invite for this channel.
@@ -599,7 +601,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique);
 
 	/**
 	 * Toggles whether the bot is "typing".
@@ -631,7 +633,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void edit(String name, int position, String topic);
 
 	/**
 	 * Changes the name of the channel
@@ -641,7 +643,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changeName(String name);
 
 	/**
 	 * Changes the position of the channel
@@ -651,7 +653,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changePosition(int position) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changePosition(int position);
 
 	/**
 	 * Changes the topic of the channel
@@ -661,7 +663,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeTopic(String topic) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changeTopic(String topic);
 
 	/**
 	 * Gets the position of the channel on the channel list.
@@ -677,7 +679,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws DiscordException, RateLimitException, MissingPermissionsException;
+	void delete();
 
 	/**
 	 * Gets the permissions overrides for users. (Key = User id).
@@ -718,7 +720,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void removePermissionsOverride(IUser user);
 
 	/**
 	 * Removes a permissions override on this channel.
@@ -729,7 +731,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removePermissionsOverride(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void removePermissionsOverride(IRole role);
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -742,7 +744,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
 
 	/**
 	 * Creates/edits permission overrides for this channel.
@@ -755,7 +757,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
 
 	/**
 	 * This gets all the currently available invites for this channel.
@@ -766,7 +768,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException;
+	List<IInvite> getInvites();
 
 	/**
 	 * This gets the users with the ability to read this channel.
@@ -783,7 +785,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IMessage> getPinnedMessages() throws DiscordException, RateLimitException;
+	List<IMessage> getPinnedMessages();
 
 	/**
 	 * This pins the provided message to this channel.
@@ -794,7 +796,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void pin(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void pin(IMessage message);
 
 	/**
 	 * This unpins the provided message from this channel.
@@ -805,7 +807,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void unpin(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void unpin(IMessage message);
 
 	/**
 	 * Gets the webhooks for this channel.
@@ -836,7 +838,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param name The default name for the webhook.
 	 * @return The created webhook.
 	 */
-	IWebhook createWebhook(String name) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IWebhook createWebhook(String name);
 
 	/**
 	 * This creates a webhook for this channel with the provided name and the provided avatar
@@ -845,7 +847,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param avatar The default avatar for the webhook.
 	 * @return The created webhook.
 	 */
-	IWebhook createWebhook(String name, Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IWebhook createWebhook(String name, Image avatar);
 
 	/**
 	 * This creates a webhook for this channel with the provided name and the provided avatar
@@ -854,7 +856,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param avatar The default avatar for the webhook.
 	 * @return The created webhook.
 	 */
-	IWebhook createWebhook(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException;
+	IWebhook createWebhook(String name, String avatar);
 
 	/**
 	 * Checks to see if the this channel is deleted.

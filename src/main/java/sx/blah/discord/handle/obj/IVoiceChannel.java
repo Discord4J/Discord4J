@@ -53,7 +53,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	void edit(String name, int position, int bitrate, int userLimit) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void edit(String name, int position, int bitrate, int userLimit);
 
 	/**
 	 * Changes the bitrate of the channel
@@ -63,7 +63,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeBitrate(int bitrate) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changeBitrate(int bitrate);
 
 	/**
 	 * Changes the user limit of the channel
@@ -73,7 +73,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeUserLimit(int limit) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void changeUserLimit(int limit);
 
 	/**
 	 * Makes the bot user join this voice channel.
@@ -82,7 +82,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void join() throws DiscordException, RateLimitException, MissingPermissionsException;
+	void join();
 
 	/**
 	 * Makes the bot user leave this voice channel.
