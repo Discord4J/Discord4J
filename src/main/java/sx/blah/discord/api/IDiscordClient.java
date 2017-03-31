@@ -268,6 +268,23 @@ public interface IDiscordClient {
 	IUser getUserByID(String userID);
 
 	/**
+	 * Gets a set of users by their name, case-sensitive.
+	 *
+	 * @param name The name of the desired user(s).
+	 * @return A {@link Collection} of {@link User} objects with the provided name.
+	 */
+	List<IUser> getUsersByName(String name);
+
+	/**
+	 * Gets a set of users by their name.
+	 *
+	 * @param name The name of the desired user(s).
+	 * @param ignoreCase Whether to ignore the case of the user's name.
+	 * @return A {@link Collection} of {@link User} objects with the provided name.
+	 */
+	List<IUser> getUsersByName(String name, boolean ignoreCase);
+
+	/**
 	 * Gets a set of all roles visible to the bot user.
 	 *
 	 * @return A {@link Collection} of all {@link Role} objects.
