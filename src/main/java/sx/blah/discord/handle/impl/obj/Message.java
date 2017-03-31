@@ -311,13 +311,13 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void reply(String content) {
-		reply(content, null);
+	public IMessage reply(String content) {
+		return reply(content, null);
 	}
 
 	@Override
-	public void reply(String content, EmbedObject embed) {
-		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
+	public IMessage reply(String content, EmbedObject embed) {
+		return getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
 	}
 
 	@Override

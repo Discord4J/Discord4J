@@ -103,11 +103,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * object before your content
 	 *
 	 * @param content Message to send.
+	 * @return The message object representing the sent message
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void reply(String content);
+	IMessage reply(String content);
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
@@ -115,13 +117,15 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @param content Message content to send.
 	 * @param embed The embed object
+	 * @return The message object representing the sent message
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 *
 	 * @see EmbedBuilder
 	 */
-	void reply(String content, EmbedObject embed);
+	IMessage reply(String content, EmbedObject embed);
 
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
