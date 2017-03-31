@@ -161,7 +161,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	IPrivateChannel getOrCreatePMChannel() throws DiscordException, RateLimitException;
+	IPrivateChannel getOrCreatePMChannel();
 
 	/**
 	 * Adds a Role to this user.
@@ -172,7 +172,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void addRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void addRole(IRole role);
 
 	/**
 	 * Removes a Role from this user.
@@ -183,5 +183,5 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void removeRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException;
+	void removeRole(IRole role);
 }

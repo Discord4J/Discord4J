@@ -110,7 +110,7 @@ public class EmbedBuilder {
 				throw new IllegalArgumentException(
 						"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
 
-		throwExceptionForCharacterLimit(title.length());
+		throwExceptionForCharacterLimit(title == null ? 4 : title.length());
 
 		embed.title = title;
 		return this;
@@ -131,7 +131,7 @@ public class EmbedBuilder {
 						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 		}
 
-		throwExceptionForCharacterLimit(desc.length());
+		throwExceptionForCharacterLimit(desc == null ? 4 : desc.length());
 
 		embed.description = desc;
 		return this;
@@ -164,7 +164,7 @@ public class EmbedBuilder {
 						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 		}
 
-		throwExceptionForCharacterLimit(desc.length());
+		throwExceptionForCharacterLimit(desc == null ? 4 : desc.length());
 
 		embed.description += desc;
 		return this;

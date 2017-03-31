@@ -97,8 +97,12 @@ public class User implements IUser {
 	protected final Map<String, IVoiceState> voiceStates = new ConcurrentHashMap<>();
 
 	public User(IShard shard, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
+		this(shard, shard == null ? null : shard.getClient(), name, id, discriminator, avatar, presence, isBot);
+	}
+
+	public User(IShard shard, IDiscordClient client, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this.shard = shard;
-		this.client = shard.getClient();
+		this.client = client;
 		this.id = id;
 		this.name = name;
 		this.discriminator = discriminator;
@@ -274,13 +278,13 @@ public class User implements IUser {
 	}
 
 	@Override
-	public void addRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void addRole(IRole role) {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
 		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}
 
 	@Override
-	public void removeRole(IRole role) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void removeRole(IRole role) {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
 	}
@@ -301,7 +305,7 @@ public class User implements IUser {
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel() throws DiscordException, RateLimitException {
+	public IPrivateChannel getOrCreatePMChannel() {
 		return client.getOrCreatePMChannel(this);
 	}
 

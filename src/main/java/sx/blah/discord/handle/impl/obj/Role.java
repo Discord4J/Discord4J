@@ -221,7 +221,7 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) {
 		if (color == null)
 			throw new IllegalArgumentException("Color must not be null.");
 		if (name == null || name.length() < 1 || name.length() > 32)
@@ -233,7 +233,7 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void changeColor(Color color) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeColor(Color color) {
 		if (color == null)
 			throw new IllegalArgumentException("Color must not be null.");
 
@@ -241,12 +241,12 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void changeHoist(boolean hoist) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeHoist(boolean hoist) {
 		edit(new RoleEditRequest.Builder().mentionable(hoist).build());
 	}
 
 	@Override
-	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeName(String name) {
 		if (name == null || name.length() < 1 || name.length() > 32)
 			throw new IllegalArgumentException("Role name must be between 1 and 32 characters!");
 
@@ -254,7 +254,7 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void changePermissions(EnumSet<Permissions> permissions) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changePermissions(EnumSet<Permissions> permissions) {
 		if (permissions == null)
 			throw new IllegalArgumentException("Permissions set must not be null.");
 
@@ -262,12 +262,12 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public void changeMentionable(boolean mentionable) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeMentionable(boolean mentionable) {
 		edit(new RoleEditRequest.Builder().mentionable(mentionable).build());
 	}
 
 	@Override
-	public void delete() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void delete() {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);

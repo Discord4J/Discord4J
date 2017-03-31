@@ -21,6 +21,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
+import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
@@ -69,14 +70,14 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public void login() throws DiscordException {
+	public void login() {
 		Discord4J.LOGGER.trace(LogMarkers.API, "Shard logging in.");
 		this.ws = new DiscordWS(this, gateway, client.maxMissedPings);
 		this.ws.connect();
 	}
 
 	@Override
-	public void logout() throws DiscordException {
+	public void logout() {
 		checkLoggedIn("logout");
 
 		Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
@@ -252,7 +253,12 @@ public class ShardImpl implements IShard {
 		IUser user = guild != null ? guild.getUserByID(userID) : null;
 		IUser ourUser = getClient().getOurUser();
 
-		return ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
+		user = ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
+
+		if (user == null && isReady() && isLoggedIn())
+			user = DiscordUtils.getUserFromJSON(null, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + userID, UserObject.class)); //This user isn't present in any shard so give it a null shard
+
+		return user;
 	}
 
 	@Override
@@ -301,7 +307,7 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
+	public IPrivateChannel getOrCreatePMChannel(IUser user) {
 		checkReady("get PM channel");
 
 		if (user.equals(getClient().getOurUser()))

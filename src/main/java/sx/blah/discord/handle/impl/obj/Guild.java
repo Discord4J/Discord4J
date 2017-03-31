@@ -373,7 +373,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IRole createRole() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IRole createRole() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
 		RoleObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
@@ -383,26 +383,29 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public List<IUser> getBannedUsers() throws DiscordException, RateLimitException {
+	public List<IUser> getBannedUsers() {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
+
 		BanObject[] bans = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
 				DiscordEndpoints.GUILDS+id+"/bans",
 				BanObject[].class);
+
 		return Arrays.stream(bans).map(b -> DiscordUtils.getUserFromJSON(getShard(), b.user)).collect(Collectors.toList());
 	}
 
 	@Override
-	public void banUser(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void banUser(IUser user) {
 		banUser(user, 0);
 	}
 
 	@Override
-	public void banUser(IUser user, int deleteMessagesForDays) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void banUser(IUser user, int deleteMessagesForDays) {
 		DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
 		banUser(user.getID(), deleteMessagesForDays);
 	}
 
 	@Override
-	public void banUser(String userID) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void banUser(String userID) {
 		IUser user = getUserByID(userID);
 		if (getUserByID(userID) == null) {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
@@ -414,24 +417,24 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void banUser(String userID, int deleteMessagesForDays) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void banUser(String userID, int deleteMessagesForDays) {
 		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + userID + "?delete-message-days=" + deleteMessagesForDays);
 	}
 
 	@Override
-	public void pardonUser(String userID) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void pardonUser(String userID) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID);
 	}
 
 	@Override
-	public void kickUser(IUser user) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void kickUser(IUser user) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID());
 	}
 
 	@Override
-	public void editUserRoles(IUser user, IRole[] roles) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void editUserRoles(IUser user, IRole[] roles) {
 		DiscordUtils.checkPermissions(client, this, Arrays.asList(roles), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
@@ -445,7 +448,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void setDeafenUser(IUser user, boolean deafen) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void setDeafenUser(IUser user, boolean deafen) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_DEAFEN_MEMBERS));
 
 		try {
@@ -458,7 +461,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void setMuteUser(IUser user, boolean mute) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void setMuteUser(IUser user, boolean mute) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.VOICE_MUTE_MEMBERS));
 
 		try {
@@ -471,7 +474,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void setUserNickname(IUser user, String nick) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void setUserNickname(IUser user, String nick) {
 		boolean isSelf = user.equals(client.getOurUser());
 		if (isSelf) {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CHANGE_NICKNAME));
@@ -489,7 +492,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void edit(String name, IRegion region, VerificationLevel level, Image icon, IVoiceChannel afkChannel, int afkTimeout) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void edit(String name, IRegion region, VerificationLevel level, Image icon, IVoiceChannel afkChannel, int afkTimeout) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 
 		if (name == null || name.length() < 2 || name.length() > 100)
@@ -511,38 +514,38 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeName(String name) {
 		edit(name, getRegion(), getVerificationLevel(), this::getIcon, getAFKChannel(), getAFKTimeout());
 	}
 
 	@Override
-	public void changeRegion(IRegion region) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeRegion(IRegion region) {
 		edit(getName(), region, getVerificationLevel(), this::getIcon, getAFKChannel(), getAFKTimeout());
 	}
 
 	@Override
-	public void changeVerificationLevel(VerificationLevel verificationLevel) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeVerificationLevel(VerificationLevel verificationLevel) {
 		edit(getName(), getRegion(), verificationLevel, this::getIcon, getAFKChannel(), getAFKTimeout());
 	}
 
 	@Override
-	public void changeIcon(Image icon) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeIcon(Image icon) {
 		edit(getName(), getRegion(), getVerificationLevel(), icon, getAFKChannel(), getAFKTimeout());
 	}
 
 	@Override
-	public void changeAFKChannel(IVoiceChannel afkChannel) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeAFKChannel(IVoiceChannel afkChannel) {
 		edit(getName(), getRegion(), getVerificationLevel(), this::getIcon, afkChannel, getAFKTimeout());
 	}
 
 	@Override
-	public void changeAFKTimeout(int timeout) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeAFKTimeout(int timeout) {
 		edit(getName(), getRegion(), getVerificationLevel(), this::getIcon, getAFKChannel(), timeout);
 	}
 
 	@Override
 	@Deprecated
-	public void deleteGuild() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void deleteGuild() {
 		if (!ownerID.equals(client.getOurUser().getID()))
 			throw new MissingPermissionsException("You must be the guild owner to delete guilds!", EnumSet.noneOf(Permissions.class));
 
@@ -551,7 +554,7 @@ public class Guild implements IGuild {
 
 	@Override
 	@Deprecated
-	public void leaveGuild() throws DiscordException, RateLimitException {
+	public void leaveGuild() {
 		if (ownerID.equals(client.getOurUser().getID()))
 			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
 
@@ -559,12 +562,12 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void leave() throws DiscordException, RateLimitException {
+	public void leave() {
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id);
 	}
 
 	@Override
-	public IChannel createChannel(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IChannel createChannel(String name) {
 		shard.checkReady("create channel");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
@@ -583,7 +586,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IVoiceChannel createVoiceChannel(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IVoiceChannel createVoiceChannel(String name) {
 		getShard().checkReady("create voice channel");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
@@ -640,7 +643,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public List<IInvite> getInvites() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IInvite> getInvites() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
 				DiscordEndpoints.GUILDS+ id + "/invites",
@@ -654,7 +657,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void reorderRoles(IRole... rolesInOrder) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void reorderRoles(IRole... rolesInOrder) {
 		if (rolesInOrder.length != getRoles().size())
 			throw new DiscordException("The number of roles to reorder does not equal the number of available roles!");
 
@@ -683,7 +686,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public int getUsersToBePruned(int days) throws DiscordException, RateLimitException {
+	public int getUsersToBePruned(int days) {
 		PruneResponse response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
 				DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 				PruneResponse.class);
@@ -691,7 +694,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public int pruneUsers(int days) throws DiscordException, RateLimitException {
+	public int pruneUsers(int days) {
 		PruneResponse response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
 				PruneResponse.class);
@@ -718,7 +721,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public LocalDateTime getJoinTimeForUser(IUser user) throws DiscordException {
+	public LocalDateTime getJoinTimeForUser(IUser user) {
 		if (!joinTimes.containsKey(user))
 			throw new DiscordException("Cannot find user "+user.getDisplayName(this)+" in this guild!");
 

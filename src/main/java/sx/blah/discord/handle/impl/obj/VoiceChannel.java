@@ -53,6 +53,20 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public int getBitrate() { return bitrate; }
 
+	@Override
+	public int getPosition() {
+		getGuild().getVoiceChannels().sort((c1, c2) -> {
+			int originalPos1 = ((Channel) c1).position;
+			int originalPos2 = ((Channel) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return getGuild().getVoiceChannels().indexOf(this);
+	}
+
 	/**
 	 * Sets the CACHED user limit.
 	 *
@@ -70,7 +84,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void setBitrate(int bitrate) { this.bitrate = bitrate; }
 
 	@Override
-	public void edit(String name, int position, int bitrate, int userLimit) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void edit(String name, int position, int bitrate, int userLimit) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
 		if (name == null || name.length() < 2 || name.length() > 100)
@@ -86,27 +100,27 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void changeName(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeName(String name) {
 		edit(name, getPosition(), getBitrate(), getUserLimit());
 	}
 
 	@Override
-	public void changePosition(int position) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changePosition(int position) {
 		edit(getName(), position, getBitrate(), getUserLimit());
 	}
 
 	@Override
-	public void changeBitrate(int bitrate) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeBitrate(int bitrate) {
 		edit(getName(), getPosition(), bitrate, getUserLimit());
 	}
 
 	@Override
-	public void changeUserLimit(int limit) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeUserLimit(int limit) {
 		edit(getName(), getPosition(), getBitrate(), limit);
 	}
 
 	@Override
-	public void join() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void join() {
 		getShard().checkReady("join voice channel");
 
 		if (isConnected()) return;
@@ -268,17 +282,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws FileNotFoundException, DiscordException, RateLimitException {
+	public IMessage sendFile(File file) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException {
+	public IMessage sendFile(String content, File file) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException {
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -293,12 +307,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void changeTopic(String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void changeTopic(String topic) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void edit(String name, int position, String topic) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void edit(String name, int position, String topic) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -323,17 +337,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IWebhook createWebhook(String name) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IWebhook createWebhook(String name) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, Image avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IWebhook createWebhook(String name, Image avatar) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, String avatar) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IWebhook createWebhook(String name, String avatar) {
 		throw new UnsupportedOperationException();
 	}
 

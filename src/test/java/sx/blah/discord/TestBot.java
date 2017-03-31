@@ -316,7 +316,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						new RoleBuilder(message.getGuild()).setHoist(false).setMentionable(false).withColor(new Color(0x1f3a1f)).withName("please ignore").build();
+						message.reply(message.getClient().getUserByID(message.getContent().split(" ")[1]).mention());
 					}
 				});
 			}

@@ -132,7 +132,7 @@ public class RequestBuffer {
 		 *
 		 * @throws RateLimitException
 		 */
-		T request() throws RateLimitException;
+		T request();
 
 		/**
 		 * This is called when this request is retried. This should NOT block.
@@ -149,7 +149,7 @@ public class RequestBuffer {
 	@FunctionalInterface
 	public interface IVoidRequest extends IRequest<Void> {
 
-		default Void request() throws RateLimitException {
+		default Void request() {
 			doRequest();
 			return null;
 		}
@@ -159,7 +159,7 @@ public class RequestBuffer {
 		 *
 		 * @throws RateLimitException
 		 */
-		void doRequest() throws RateLimitException;
+		void doRequest();
 	}
 
 	public static class RequestFuture<T> implements Future<T>, Delayed {
@@ -238,7 +238,7 @@ public class RequestBuffer {
 		}
 
 		@Override
-		public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+		public T get(long timeout, TimeUnit unit) {
 			long timeoutTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
 			try {
 				while (!isDone() && !isCancelled() && System.currentTimeMillis() <= timeoutTime) {}

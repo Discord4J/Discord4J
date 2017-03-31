@@ -175,7 +175,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		return 0;
 	}
 
-	private boolean queryMessages(int messageCount) throws DiscordException, RateLimitException {
+	private boolean queryMessages(int messageCount) {
 		if (!hasPermissions())
 			return false;
 
@@ -377,7 +377,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 *
 	 * @throws RateLimitException
 	 */
-	public boolean load(int messageCount) throws RateLimitException {
+	public boolean load(int messageCount) {
 		try {
 			boolean success = queryMessages(messageCount);
 
@@ -420,7 +420,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage delete(int index) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage delete(int index) {
 		IMessage message = get(index);
 		if (message != null) {
 			message.delete();
@@ -440,7 +440,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteFromRange(int startIndex, int endIndex) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteFromRange(int startIndex, int endIndex) {
 		List<IMessage> messages = subList(startIndex, endIndex);
 		bulkDelete(messages);
 		return messages;
@@ -458,7 +458,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index, int amount) {
 		return deleteFromRange(index, index+amount);
 	}
 
@@ -473,7 +473,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index) {
 		return deleteAfter(index, size()-index);
 	}
 
@@ -489,7 +489,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message, int amount) {
 		return deleteAfter(indexOf(message), amount);
 	}
 
@@ -504,7 +504,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message) {
 		return deleteAfter(indexOf(message));
 	}
 
@@ -520,7 +520,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index, int amount) {
 		return deleteFromRange(Math.max(0, index-amount), index+1);
 	}
 
@@ -535,7 +535,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index) {
 		return deleteFromRange(0, index+1);
 	}
 
@@ -551,7 +551,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message, int amount) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message, int amount) {
 		return deleteBefore(indexOf(message), amount);
 	}
 
@@ -566,7 +566,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message) {
 		return deleteBefore(indexOf(message));
 	}
 
@@ -579,7 +579,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	public void bulkDelete(List<IMessage> messages) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void bulkDelete(List<IMessage> messages) {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (channel.isPrivate())

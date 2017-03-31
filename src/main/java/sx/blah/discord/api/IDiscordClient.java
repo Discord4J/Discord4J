@@ -71,14 +71,14 @@ public interface IDiscordClient {
 	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.
 	 */
-	void login() throws DiscordException, RateLimitException;
+	void login();
 
 	/**
 	 * Logs out every shard this client manages.
 	 *
 	 * @throws DiscordException
 	 */
-	void logout() throws DiscordException;
+	void logout();
 
 	/**
 	 * Changes this client's account's username.
@@ -87,7 +87,7 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	void changeUsername(String username) throws DiscordException, RateLimitException;
+	void changeUsername(String username);
 
 	/**
 	 * Changes this client's account's avatar.
@@ -96,7 +96,7 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	void changeAvatar(Image avatar) throws DiscordException, RateLimitException;
+	void changeAvatar(Image avatar);
 
 	/**
 	 * Changes this user's presence on all shards.
@@ -169,7 +169,7 @@ public interface IDiscordClient {
 	 * @param action The action that is being attempted. (i.e. "send message")
 	 * @throws DiscordException
 	 */
-	default void checkReady(String action) throws DiscordException {
+	default void checkReady(String action) {
 		if (!isReady()) throw new DiscordException("Attempt to " + action + " before client is ready!");
 	}
 
@@ -187,7 +187,7 @@ public interface IDiscordClient {
 	 * @param action The action that is being attempted. (i.e. "send message")
 	 * @throws DiscordException
 	 */
-	default void checkLoggedIn(String action) throws DiscordException {
+	default void checkLoggedIn(String action) {
 		if (!isLoggedIn()) throw new DiscordException("Attempt to " + action + " before client has logged in!");
 	}
 
@@ -268,6 +268,23 @@ public interface IDiscordClient {
 	IUser getUserByID(String userID);
 
 	/**
+	 * Gets a set of users by their name, case-sensitive.
+	 *
+	 * @param name The name of the desired user(s).
+	 * @return A {@link Collection} of {@link User} objects with the provided name.
+	 */
+	List<IUser> getUsersByName(String name);
+
+	/**
+	 * Gets a set of users by their name.
+	 *
+	 * @param name The name of the desired user(s).
+	 * @param ignoreCase Whether to ignore the case of the user's name.
+	 * @return A {@link Collection} of {@link User} objects with the provided name.
+	 */
+	List<IUser> getUsersByName(String name, boolean ignoreCase);
+
+	/**
 	 * Gets a set of all roles visible to the bot user.
 	 *
 	 * @return A {@link Collection} of all {@link Role} objects.
@@ -314,7 +331,7 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException;
+	IPrivateChannel getOrCreatePMChannel(IUser user);
 
 	/**
 	 * Gets the invite for a code.
@@ -322,7 +339,7 @@ public interface IDiscordClient {
 	 * @param code The invite code.
 	 * @return The invite, or null if it doesn't exist.
 	 */
-	IInvite getInviteForCode(String code) throws DiscordException, RateLimitException;
+	IInvite getInviteForCode(String code);
 
 	/**
 	 * Gets the regions available for discord.
@@ -332,7 +349,7 @@ public interface IDiscordClient {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<IRegion> getRegions() throws DiscordException, RateLimitException;
+	List<IRegion> getRegions();
 
 	/**
 	 * Gets the corresponding region for a given id.
@@ -356,7 +373,7 @@ public interface IDiscordClient {
 	 *
 	 * @throws DiscordException
 	 */
-	String getApplicationDescription() throws DiscordException;
+	String getApplicationDescription();
 
 	/**
 	 * Gets the url leading to this bot's application's icon.
@@ -365,7 +382,7 @@ public interface IDiscordClient {
 	 *
 	 * @throws DiscordException
 	 */
-	String getApplicationIconURL() throws DiscordException;
+	String getApplicationIconURL();
 
 	/**
 	 * Gets the bot's application's client id.
@@ -374,7 +391,7 @@ public interface IDiscordClient {
 	 *
 	 * @throws DiscordException
 	 */
-	String getApplicationClientID() throws DiscordException;
+	String getApplicationClientID();
 
 	/**
 	 * Gets the bot's application's name.
@@ -383,7 +400,7 @@ public interface IDiscordClient {
 	 *
 	 * @throws DiscordException
 	 */
-	String getApplicationName() throws DiscordException;
+	String getApplicationName();
 
 	/**
 	 * Gets the bot's application's owner.
@@ -392,5 +409,5 @@ public interface IDiscordClient {
 	 *
 	 * @throws DiscordException
 	 */
-	IUser getApplicationOwner() throws DiscordException;
+	IUser getApplicationOwner();
 }

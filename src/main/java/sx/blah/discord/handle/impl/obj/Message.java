@@ -311,27 +311,27 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void reply(String content) throws DiscordException, RateLimitException, MissingPermissionsException {
-		reply(content, null);
+	public IMessage reply(String content) {
+		return reply(content, null);
 	}
 
 	@Override
-	public void reply(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
-		getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
+	public IMessage reply(String content, EmbedObject embed) {
+		return getChannel().sendMessage(String.format("%s, %s", this.getAuthor(), content), embed, false);
 	}
 
 	@Override
-	public IMessage edit(String content) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage edit(String content) {
 		return edit(content, null);
 	}
 
 	@Override
-	public IMessage edit(EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage edit(EmbedObject embed) {
 		return edit(null, embed);
 	}
 
 	@Override
-	public IMessage edit(String content, EmbedObject embed) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public IMessage edit(String content, EmbedObject embed) {
 		getShard().checkReady("edit message");
 		if (!this.getAuthor().equals(client.getOurUser()))
 			throw new MissingPermissionsException("Cannot edit other users' messages!", EnumSet.noneOf(Permissions.class));
@@ -387,7 +387,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void delete() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void delete() {
 		getShard().checkReady("delete message");
 		if (!getAuthor().equals(client.getOurUser())) {
 			if (channel.isPrivate())
@@ -488,7 +488,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void removeAllReactions() throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void removeAllReactions() {
 		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
@@ -496,7 +496,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void addReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void addReaction(IReaction reaction) {
 		if (reaction == null)
 			throw new NullPointerException("Reaction argument cannot be null.");
 
@@ -510,12 +510,12 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void addReaction(IEmoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void addReaction(IEmoji emoji) {
 		addReaction(emoji.toString());
 	}
 
 	@Override
-	public void addReaction(String emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void addReaction(String emoji) {
 		String toEncode;
 
 		if (DiscordUtils.IEMOJI_TOSTRING_RESULT.matcher(emoji).matches()) {
@@ -554,12 +554,12 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void addReaction(Emoji emoji) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void addReaction(Emoji emoji) {
 		addReaction(emoji.getUnicode());
 	}
 
 	@Override
-	public void removeReaction(IUser user, IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void removeReaction(IUser user, IReaction reaction) {
 		IMessage message = reaction.getMessage();
 		if (!this.equals(message))
 			throw new DiscordException("Reaction argument's message does not match this one.");
@@ -581,7 +581,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void removeReaction(IReaction reaction) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void removeReaction(IReaction reaction) {
 		removeReaction(client.getOurUser(), reaction);
 	}
 

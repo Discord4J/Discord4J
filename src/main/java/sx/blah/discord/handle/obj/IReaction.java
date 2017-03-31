@@ -70,7 +70,7 @@ public interface IReaction {
 	 *
 	 * @return A list of users that reacted
 	 */
-	List<IUser> getUsers() throws DiscordException, RateLimitException;
+	List<IUser> getUsers();
 
 	/**
 	 * Gets the {@link IDiscordClient} instance this object belongs to.
