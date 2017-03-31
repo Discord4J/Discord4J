@@ -245,6 +245,7 @@ class DispatchHandler {
 				Discord4J.LOGGER.debug(LogMarkers.MESSAGES, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
+				//TODO remove
 				List<String> inviteCodes = DiscordUtils.getInviteCodesFromMessage(json.content);
 				if (!inviteCodes.isEmpty()) {
 					List<IInvite> invites = inviteCodes.stream()
