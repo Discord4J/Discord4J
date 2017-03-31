@@ -36,9 +36,7 @@ import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -48,6 +46,7 @@ class DispatchHandler {
 	private DiscordWS ws;
 	private ShardImpl shard;
 	private DiscordClientImpl client;
+	private final ExecutorService dispatchExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("Websocket Dispatch Handler"));
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
 		this.ws = ws;
@@ -55,49 +54,120 @@ class DispatchHandler {
 		this.client = (DiscordClientImpl) shard.getClient();
 	}
 
-	public void handle(JsonNode event) throws JsonProcessingException {
-		String type = event.get("t").asText();
-		JsonNode json = event.get("d");
-		switch (type) {
-			case "RESUMED": resumed(); break;
-			case "READY": ready(MAPPER.treeToValue(json, ReadyResponse.class)); break;
-			case "MESSAGE_CREATE": messageCreate(MAPPER.treeToValue(json, MessageObject.class)); break;
-			case "TYPING_START": typingStart(MAPPER.treeToValue(json, TypingEventResponse.class)); break;
-			case "GUILD_CREATE":guildCreate(MAPPER.treeToValue(json, GuildObject.class)); break;
-			case "GUILD_MEMBER_ADD": guildMemberAdd(MAPPER.treeToValue(json, GuildMemberAddEventResponse.class)); break;
-			case "GUILD_MEMBER_REMOVE": guildMemberRemove(MAPPER.treeToValue(json, GuildMemberRemoveEventResponse.class)); break;
-			case "GUILD_MEMBER_UPDATE": guildMemberUpdate(MAPPER.treeToValue(json, GuildMemberUpdateEventResponse.class)); break;
-			case "MESSAGE_UPDATE": messageUpdate(MAPPER.treeToValue(json, MessageObject.class)); break;
-			case "MESSAGE_DELETE": messageDelete(MAPPER.treeToValue(json, MessageDeleteEventResponse.class)); break;
-			case "MESSAGE_DELETE_BULK": messageDeleteBulk(MAPPER.treeToValue(json, MessageDeleteBulkEventResponse.class)); break;
-			case "PRESENCE_UPDATE": presenceUpdate(MAPPER.treeToValue(json, PresenceUpdateEventResponse.class)); break;
-			case "GUILD_DELETE": guildDelete(MAPPER.treeToValue(json, GuildObject.class)); break;
-			case "CHANNEL_CREATE": channelCreate(json); break;
-			case "CHANNEL_DELETE": channelDelete(MAPPER.treeToValue(json, ChannelObject.class)); break;
-			case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */ break;
-			case "CHANNEL_PINS_ACK": /* Ignored */ break;
-			case "USER_UPDATE": userUpdate(MAPPER.treeToValue(json, UserUpdateEventResponse.class)); break;
-			case "CHANNEL_UPDATE": channelUpdate(MAPPER.treeToValue(json, ChannelObject.class)); break;
-			case "GUILD_MEMBERS_CHUNK": guildMembersChunk(MAPPER.treeToValue(json, GuildMemberChunkEventResponse.class)); break;
-			case "GUILD_UPDATE": guildUpdate(MAPPER.treeToValue(json, GuildObject.class)); break;
-			case "GUILD_ROLE_CREATE": guildRoleCreate(MAPPER.treeToValue(json, GuildRoleEventResponse.class)); break;
-			case "GUILD_ROLE_UPDATE": guildRoleUpdate(MAPPER.treeToValue(json, GuildRoleEventResponse.class)); break;
-			case "GUILD_ROLE_DELETE": guildRoleDelete(MAPPER.treeToValue(json, GuildRoleDeleteEventResponse.class)); break;
-			case "GUILD_BAN_ADD": guildBanAdd(MAPPER.treeToValue(json, GuildBanEventResponse.class)); break;
-			case "GUILD_BAN_REMOVE": guildBanRemove(MAPPER.treeToValue(json, GuildBanEventResponse.class)); break;
-			case "GUILD_EMOJIS_UPDATE": guildEmojisUpdate(MAPPER.treeToValue(json, GuildEmojiUpdateResponse.class)); break;
-			case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */ break;
-			case "VOICE_STATE_UPDATE": voiceStateUpdate(MAPPER.treeToValue(json, VoiceStateObject.class)); break;
-			case "VOICE_SERVER_UPDATE": voiceServerUpdate(MAPPER.treeToValue(json, VoiceUpdateResponse.class)); break;
-			case "MESSAGE_REACTION_ADD": reactionAdd(MAPPER.treeToValue(json, ReactionEventResponse.class)); break;
-			case "MESSAGE_REACTION_REMOVE": reactionRemove(MAPPER.treeToValue(json, ReactionEventResponse.class)); break;
-			case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */ break;
-			case "WEBHOOKS_UPDATE": webhookUpdate(MAPPER.treeToValue(json, WebhookObject.class)); break;
-			case "PRESENCES_REPLACE": /* Ignored. Not meant for bot accounts. */ break;
+	public void handle(final JsonNode event) {
+		dispatchExecutor.submit(() -> {
+			try {
+				String type = event.get("t").asText();
+				JsonNode json = event.get("d");
+				switch (type) {
+					case "RESUMED":
+						resumed();
+						break;
+					case "READY":
+						ready(MAPPER.treeToValue(json, ReadyResponse.class));
+						break;
+					case "MESSAGE_CREATE":
+						messageCreate(MAPPER.treeToValue(json, MessageObject.class));
+						break;
+					case "TYPING_START":
+						typingStart(MAPPER.treeToValue(json, TypingEventResponse.class));
+						break;
+					case "GUILD_CREATE":
+						guildCreate(MAPPER.treeToValue(json, GuildObject.class));
+						break;
+					case "GUILD_MEMBER_ADD":
+						guildMemberAdd(MAPPER.treeToValue(json, GuildMemberAddEventResponse.class));
+						break;
+					case "GUILD_MEMBER_REMOVE":
+						guildMemberRemove(MAPPER.treeToValue(json, GuildMemberRemoveEventResponse.class));
+						break;
+					case "GUILD_MEMBER_UPDATE":
+						guildMemberUpdate(MAPPER.treeToValue(json, GuildMemberUpdateEventResponse.class));
+						break;
+					case "MESSAGE_UPDATE":
+						messageUpdate(MAPPER.treeToValue(json, MessageObject.class));
+						break;
+					case "MESSAGE_DELETE":
+						messageDelete(MAPPER.treeToValue(json, MessageDeleteEventResponse.class));
+						break;
+					case "MESSAGE_DELETE_BULK":
+						messageDeleteBulk(MAPPER.treeToValue(json, MessageDeleteBulkEventResponse.class));
+						break;
+					case "PRESENCE_UPDATE":
+						presenceUpdate(MAPPER.treeToValue(json, PresenceUpdateEventResponse.class));
+						break;
+					case "GUILD_DELETE":
+						guildDelete(MAPPER.treeToValue(json, GuildObject.class));
+						break;
+					case "CHANNEL_CREATE":
+						channelCreate(json);
+						break;
+					case "CHANNEL_DELETE":
+						channelDelete(MAPPER.treeToValue(json, ChannelObject.class));
+						break;
+					case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */
+						break;
+					case "CHANNEL_PINS_ACK": /* Ignored */
+						break;
+					case "USER_UPDATE":
+						userUpdate(MAPPER.treeToValue(json, UserUpdateEventResponse.class));
+						break;
+					case "CHANNEL_UPDATE":
+						channelUpdate(MAPPER.treeToValue(json, ChannelObject.class));
+						break;
+					case "GUILD_MEMBERS_CHUNK":
+						guildMembersChunk(MAPPER.treeToValue(json, GuildMemberChunkEventResponse.class));
+						break;
+					case "GUILD_UPDATE":
+						guildUpdate(MAPPER.treeToValue(json, GuildObject.class));
+						break;
+					case "GUILD_ROLE_CREATE":
+						guildRoleCreate(MAPPER.treeToValue(json, GuildRoleEventResponse.class));
+						break;
+					case "GUILD_ROLE_UPDATE":
+						guildRoleUpdate(MAPPER.treeToValue(json, GuildRoleEventResponse.class));
+						break;
+					case "GUILD_ROLE_DELETE":
+						guildRoleDelete(MAPPER.treeToValue(json, GuildRoleDeleteEventResponse.class));
+						break;
+					case "GUILD_BAN_ADD":
+						guildBanAdd(MAPPER.treeToValue(json, GuildBanEventResponse.class));
+						break;
+					case "GUILD_BAN_REMOVE":
+						guildBanRemove(MAPPER.treeToValue(json, GuildBanEventResponse.class));
+						break;
+					case "GUILD_EMOJIS_UPDATE":
+						guildEmojisUpdate(MAPPER.treeToValue(json, GuildEmojiUpdateResponse.class));
+						break;
+					case "GUILD_INTEGRATIONS_UPDATE": /* TODO: Impl Guild integrations */
+						break;
+					case "VOICE_STATE_UPDATE":
+						voiceStateUpdate(MAPPER.treeToValue(json, VoiceStateObject.class));
+						break;
+					case "VOICE_SERVER_UPDATE":
+						voiceServerUpdate(MAPPER.treeToValue(json, VoiceUpdateResponse.class));
+						break;
+					case "MESSAGE_REACTION_ADD":
+						reactionAdd(MAPPER.treeToValue(json, ReactionEventResponse.class));
+						break;
+					case "MESSAGE_REACTION_REMOVE":
+						reactionRemove(MAPPER.treeToValue(json, ReactionEventResponse.class));
+						break;
+					case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */
+						break;
+					case "WEBHOOKS_UPDATE":
+						webhookUpdate(MAPPER.treeToValue(json, WebhookObject.class));
+						break;
+					case "PRESENCES_REPLACE": /* Ignored. Not meant for bot accounts. */
+						break;
 
-			default:
-				Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
-		}
+					default:
+						Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
+				}
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Unable to process JSON!", e);
+			}
+		});
 	}
 
 	private void ready(ReadyResponse ready) {
