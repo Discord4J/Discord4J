@@ -92,11 +92,20 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	List<Attachment> getAttachments();
 
 	/**
-	 * Gets the Embedded attachments in this message.
+	 * Gets the embeds in this message.
 	 *
-	 * @return The attachments.
+	 * @return The embeds.
+	 * @deprecated Use {@link #getEmbeds()} instead.
 	 */
+	@Deprecated
 	List<IEmbed> getEmbedded();
+
+	/**
+	 * Gets the embeds in this message.
+	 *
+	 * @return The embeds.
+	 */
+	List<IEmbed> getEmbeds();
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message

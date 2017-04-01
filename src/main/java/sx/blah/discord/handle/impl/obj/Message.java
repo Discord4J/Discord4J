@@ -32,7 +32,6 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -95,9 +94,9 @@ public class Message implements IMessage {
 	protected volatile List<Attachment> attachments;
 
 	/**
-	 * The Embeds, if any, on the message.
+	 * The embeds, if any, on the message.
 	 */
-	protected volatile List<Embed> embedded;
+	protected volatile List<Embed> embeds;
 
 	/**
 	 * Whether the message mentions everyone.
@@ -158,7 +157,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, String id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<String> mentions, List<String> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embed> embedded, List<IReaction> reactions, String webhookID) {
+				   boolean pinned, List<Embed> embeds, List<IReaction> reactions, String webhookID) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -171,7 +170,7 @@ public class Message implements IMessage {
 		this.attachments = attachments;
 		this.isPinned = pinned;
 		this.channelMentions = new ArrayList<>();
-		this.embedded = embedded;
+		this.embeds = embeds;
 		this.everyoneMentionIsValid = mentionsEveryone;
 		this.reactions = reactions;
 		this.webhookID = webhookID;
@@ -239,12 +238,12 @@ public class Message implements IMessage {
 	}
 
 	/**
-	 * Sets the CACHED embedded attachments in this message.
+	 * Sets the CACHED embed list in this message.
 	 *
-	 * @param attachments The new attachements.
+	 * @param embeds The new embeds.
 	 */
-	public void setEmbedded(List<Embed> attachments) {
-		this.embedded = attachments;
+	public void setEmbeds(List<Embed> embeds) {
+		this.embeds = embeds;
 	}
 
 	@Override
@@ -303,11 +302,16 @@ public class Message implements IMessage {
 	}
 
 	@Override
+	@Deprecated
 	public List<IEmbed> getEmbedded() {
-		List<IEmbed> interfaces = new ArrayList<>();
-		for (Embed embed : embedded)
-			interfaces.add(embed);
-		return interfaces;
+		return getEmbeds();
+	}
+
+	@Override
+	public List<IEmbed> getEmbeds() {
+		List<IEmbed> copy = new ArrayList<>(embeds.size());
+		copy.addAll(embeds);
+		return copy;
 	}
 
 	@Override
@@ -430,7 +434,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embedded, reactions, webhookID);
+				mentions, roleMentions, attachments, isPinned, embeds, reactions, webhookID);
 	}
 
 	@Override
