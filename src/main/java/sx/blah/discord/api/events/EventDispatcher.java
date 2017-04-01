@@ -342,10 +342,13 @@ public class EventDispatcher {
 	@Deprecated
 	public <T extends Event> T waitFor(Predicate<T> filter, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
 		SynchronousQueue<T> result = new SynchronousQueue<>();
+		// we need to account for the fact that the predicate will have an implicit cast introduced by the compiler
+		// meanwhile new IListener<T> will erase to Object and there will be no compiler check, hence we manually introduce filterRawType.isInstance
+		Class<?> filterRawType = TypeResolver.resolveRawArgument(Predicate.class, filter.getClass());
 		registerListener(new IListener<T>() {
 			@Override
 			public void handle(T event) {
-				if (filter.test(event)) {
+				if (filterRawType.isInstance(event) && filter.test(event)) {
 					unregisterListener(this);
 					result.offer(event);
 				}
