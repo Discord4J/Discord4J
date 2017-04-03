@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This event is dispatched whenever a message is edited.
+ * This event is dispatched whenever a message is edited and the embeds Discord generates change.
  */
 public class MessageEmbedEvent extends MessageEvent {
 
