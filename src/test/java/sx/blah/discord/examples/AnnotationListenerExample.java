@@ -20,8 +20,8 @@ package sx.blah.discord.examples;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
@@ -50,7 +50,7 @@ public class AnnotationListenerExample extends BaseBot {
 		}
 
 		@EventSubscriber
-		public void logout(DiscordDisconnectedEvent event) { // This is called when DiscordDisconnectedEvent is dispatched
+		public void logout(DisconnectedEvent event) { // This is called when dDisconnectedEvent is dispatched
 			System.out.println("Logged out for reason " + event.getReason() + "!");
 		}
 	}
