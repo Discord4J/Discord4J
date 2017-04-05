@@ -31,8 +31,8 @@ public class EmojiCreateRequest {
 	 */
 	public String image;
 
-	public EmojiCreateRequest(String name, byte[] image) {
+	public EmojiCreateRequest(String name, String image) {
 		this.name = name;
-		this.image = new String(image);
+		this.image = image;
 	}
 }

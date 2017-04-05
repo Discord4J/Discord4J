@@ -24,7 +24,6 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
-import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -612,7 +611,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param image The BufferedImage of the Emoji.
 	 * @return The emoji.
 	 */
-	IEmoji addEmoji(String name, BufferedImage image);
+	IEmoji addEmoji(String name, Image image);
 
 	/**
 	 * This gets a webhook by its id.
