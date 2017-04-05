@@ -124,7 +124,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	String getNicknameForGuild(IGuild guild);
 
 	/**
-	 * Gets the user's voice states for the given guild.
+	 * Get's the user's never-null voice state for the given guild.
 	 *
 	 * @param guild The guild to check.
 	 * @return The voice state.

@@ -30,6 +30,8 @@ public interface IVoiceState {
 
 	/**
 	 * Gets the voice channel for this voice state.
+	 * This is null if the user is not in a voice channel.
+	 *
 	 * @return The voice channel.
 	 */
 	IVoiceChannel getChannel();
