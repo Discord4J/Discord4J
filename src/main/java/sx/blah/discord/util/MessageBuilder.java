@@ -302,7 +302,7 @@ public class MessageBuilder {
 		BOLD("**"),
 		BOLD_ITALICS("***"),
 		STRIKEOUT("~~"),
-		CODE("``` "),
+		CODE("```\n"),
 		INLINE_CODE("`"),
 		UNDERLINE("__"),
 		UNDERLINE_ITALICS("__*"),
