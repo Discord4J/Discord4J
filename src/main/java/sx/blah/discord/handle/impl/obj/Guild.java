@@ -25,10 +25,7 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
-import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
-import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
-import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
-import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
+import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -38,6 +35,8 @@ import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -776,6 +775,18 @@ public class Guild implements IGuild {
 	@Override
 	public IEmoji getEmojiByName(String name) {
 		return emojis.stream().filter(iemoji -> iemoji.getName().equals(name)).findFirst().orElse(null);
+	}
+
+	@Override
+	public IEmoji addEmoji(String name, BufferedImage image){
+		if (name.length() < 2 || name.length() > 32 || DiscordUtils.EMOJI_CREATE_NAME.matcher(name).find())
+			throw new DiscordException("Emoji names must be at least 2 characters long and can only contain alphanumeric characters and underscores.");
+
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_EMOJIS));
+
+		DataBufferByte data = (DataBufferByte) image.getRaster().getDataBuffer();
+		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + getID() + "/emojis", new EmojiCreateRequest(name, data.getData()), EmojiObject.class);
+		return DiscordUtils.getEmojiFromJSON(this, response);
 	}
 
 	@Override

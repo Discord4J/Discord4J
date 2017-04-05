@@ -24,6 +24,7 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -603,6 +604,15 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The emoji.
 	 */
 	IEmoji getEmojiByName(String name);
+
+	/**
+	 * This adds a custom emoji to the guild.
+	 *
+	 * @param name The name, <b>without colons</b>.
+	 * @param image The BufferedImage of the Emoji.
+	 * @return The emoji.
+	 */
+	IEmoji addEmoji(String name, BufferedImage image);
 
 	/**
 	 * This gets a webhook by its id.

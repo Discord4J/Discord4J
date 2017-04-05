@@ -113,6 +113,11 @@ public class DiscordUtils {
 	public static final Pattern IEMOJI_TOSTRING_RESULT = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
 
 	/**
+	 * Check the input of name in IGuild.addEmoji().
+	 */
+	public static final Pattern EMOJI_CREATE_NAME = Pattern.compile("([^A-Za-z0-9_])");
+
+	/**
 	 * If the input matches an emoji alias (:alias:)
 	 */
 	public static final Pattern EMOJI_ALIAS = Pattern.compile(":.+:");
