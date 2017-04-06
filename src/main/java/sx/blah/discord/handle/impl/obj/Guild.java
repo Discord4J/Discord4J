@@ -782,12 +782,12 @@ public class Guild implements IGuild {
 
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_EMOJIS));
 
-		try {
-			EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + getID() + "/emojis", new EmojiCreateRequest(name, image.getData()), EmojiObject.class);
-			return DiscordUtils.getEmojiFromJSON(this, response);
-		} catch (NullPointerException e){
+		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + getID() + "/emojis", new EmojiCreateRequest(name, image.getData()), EmojiObject.class);
+
+		if (response == null)
 			throw new DiscordException("Bots normally cannot create emojis. If you are building a service that needs to create emojis please contact support@discordapp.com to be whitelisted.");
-		}
+
+		return DiscordUtils.getEmojiFromJSON(this, response);
 	}
 
 	@Override
