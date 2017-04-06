@@ -139,7 +139,7 @@ public class DiscordUtils {
 			return null;
 
 		User user;
-		if (shard != null && (user = (User) shard.getUserByID(response.id)) != null) {
+		if (shard != null && (user = (User) shard.getUsers().stream().filter(it -> it.getID().equals(response.id)).findFirst().orElse(null)) != null) {
 			user.setAvatar(response.avatar);
 			user.setName(response.username);
 			user.setDiscriminator(response.discriminator);
