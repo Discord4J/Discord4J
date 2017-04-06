@@ -305,7 +305,7 @@ public class Requests {
 				}
 
 				if (responseCode == 404) {
-					if (!request.getURI().toString().contains("invite") && !request.getURI().toString().contains("messages")) //Suppresses common 404s which are a result on queries to verify if something exists or not
+					if (!request.getURI().toString().contains("invite") && !request.getURI().toString().contains("messages") && !request.getURI().toString().contains("users")) //Suppresses common 404s which are a result on queries to verify if something exists or not
 						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
 					return null;
 				} else if (responseCode == 403) {
