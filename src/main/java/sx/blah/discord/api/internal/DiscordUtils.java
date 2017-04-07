@@ -428,8 +428,14 @@ public class DiscordUtils {
 
 			return message;
 		} else {
+			IUser author = channel.getGuild()
+					.getUsers()
+					.stream()
+					.filter(it -> it.getID().equals(json.author.id))
+					.findAny()
+					.orElseGet(() -> getUserFromJSON(channel.getShard(), json.author));
 			Message message = new Message(channel.getClient(), json.id, json.content,
-					channel.getGuild().getUserByID(json.author.id), channel, convertFromTimestamp(json.timestamp),
+					author, channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
