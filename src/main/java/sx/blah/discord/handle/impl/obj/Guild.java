@@ -225,9 +225,20 @@ public class Guild implements IGuild {
 	public IUser getUserByID(String id) {
 		if (users == null)
 			return null;
-		return Arrays.stream(users.toArray(new IUser[users.size()]))
+		IUser user = Arrays.stream(users.toArray(new IUser[users.size()]))
 				.filter(u -> u != null && u.getID() != null && u.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
+
+		if (user == null) {
+			if (id.equals(client.getOurUser().getID()))
+				user = client.getOurUser();
+			else if (id.equals(ownerID))
+				user = getOwner();
+			else
+				user = client.getUserByID(id);
+		}
+
+		return user;
 	}
 
 	@Override

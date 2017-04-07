@@ -413,7 +413,7 @@ public class DiscordUtils {
 	 * @return The message object.
 	 */
 	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
-		if (channel.messages != null && channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
+		if (channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setEmbeds(getEmbedsFromJSON(json));
@@ -429,7 +429,7 @@ public class DiscordUtils {
 			return message;
 		} else {
 			Message message = new Message(channel.getClient(), json.id, json.content,
-					getUserFromJSON(channel.getShard(), json.author), channel, convertFromTimestamp(json.timestamp),
+					channel.getGuild().getUserByID(json.author.id), channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
