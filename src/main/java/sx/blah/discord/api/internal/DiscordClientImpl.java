@@ -525,7 +525,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		InviteObject invite;
 		try {
-			invite = DiscordUtils.MAPPER.readValue(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
+			byte[] data = REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code);
+			if (data != null && data.length > 0)
+				invite = DiscordUtils.MAPPER.readValue(data, InviteObject.class);
+			else
+				return null;
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite: ", e);
 			return null;
