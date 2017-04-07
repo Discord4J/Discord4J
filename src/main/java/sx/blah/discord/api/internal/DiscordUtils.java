@@ -492,7 +492,7 @@ public class DiscordUtils {
 
 			return webhook;
 		} else {
-			return new Webhook(channel.getClient(), json.name, json.id, channel, getUserFromJSON(channel.getShard(), json.user), json.avatar, json.token);
+			return new Webhook(channel.getClient(), json.name, json.id, channel, channel.getGuild().getUserByID(json.user.id), json.avatar, json.token);
 		}
 	}
 
