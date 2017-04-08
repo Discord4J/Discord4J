@@ -753,9 +753,9 @@ class DispatchHandler {
 					if (reaction.getCount() <= 0) {
 						message.getReactions().remove(reaction);
 					}
-
-					client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 				}
+
+				client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 			}
 		}
 	}
