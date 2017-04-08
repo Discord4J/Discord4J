@@ -53,6 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -299,14 +300,15 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateObject voiceState : json.voice_states) {
-					Guild finalGuild = guild;
-					new RequestBuilder(shard.getClient()).setAsync(true).shouldBufferRequests(true).doAction(() -> {
-						IUser user = finalGuild.getUserByID(voiceState.user_id);
-						if (user == null) user = shard.fetchUser(voiceState.user_id);
-						if (user != null)
-							user.getVoiceStates().put(finalGuild.getID(), DiscordUtils.getVoiceStateFromJson(finalGuild, voiceState));
-						return true;
-					}).execute();
+					final AtomicReference<IUser> user = new AtomicReference<>(guild.getUserByID(voiceState.user_id));
+					if (user.get() == null) {
+						new RequestBuilder(shard.getClient()).shouldBufferRequests(true).doAction(() -> {
+							if (user.get() == null) user.set(shard.fetchUser(voiceState.user_id));
+							return true;
+						}).execute();
+					}
+					if (user.get()!= null)
+						user.get().getVoiceStates().put(guild.getID(), DiscordUtils.getVoiceStateFromJson(guild, voiceState));
 				}
 			}
 		}
