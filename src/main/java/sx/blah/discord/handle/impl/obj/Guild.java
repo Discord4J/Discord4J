@@ -223,14 +223,14 @@ public class Guild implements IGuild {
 
 	@Override
 	public IUser getUserByID(String id) {
-		if (users == null)
+		if (users == null || id == null)
 			return null;
 		IUser user = Arrays.stream(users.toArray(new IUser[users.size()]))
 				.filter(u -> u != null && u.getID() != null && u.getID().equalsIgnoreCase(id))
 				.findAny().orElse(null);
 
 		if (user == null) {
-			if (id.equals(client.getOurUser().getID()))
+			if (client.getOurUser() != null && id.equals(client.getOurUser().getID()))
 				user = client.getOurUser();
 			else if (id.equals(ownerID))
 				user = getOwner();
