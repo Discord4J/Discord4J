@@ -37,6 +37,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RequestBuilder;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -302,8 +303,14 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateObject voiceState : json.voice_states) {
-					guild.getUserByID(voiceState.user_id).getVoiceStates().put(
-							guild.getID(), DiscordUtils.getVoiceStateFromJson(guild, voiceState));
+					Guild finalGuild = guild;
+					new RequestBuilder(shard.getClient()).setAsync(true).shouldBufferRequests(true).doAction(() -> {
+						IUser user = finalGuild.getUserByID(voiceState.user_id);
+						if (user == null) user = shard.fetchUser(voiceState.user_id);
+						if (user != null)
+							user.getVoiceStates().put(finalGuild.getID(), DiscordUtils.getVoiceStateFromJson(finalGuild, voiceState));
+						return true;
+					}).execute();
 				}
 			}
 		}
