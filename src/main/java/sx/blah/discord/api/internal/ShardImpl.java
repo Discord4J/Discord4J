@@ -260,11 +260,13 @@ public class ShardImpl implements IShard {
 		IUser ourUser = getClient().getOurUser();
 
 		user = ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
-
-		if (user == null && isReady() && isLoggedIn())
-			user = DiscordUtils.getUserFromJSON(null, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + userID, UserObject.class)); //This user isn't present in any shard so give it a null shard
-
 		return user;
+	}
+
+	@Override
+	public IUser fetchUser(String id) {
+		IUser cached = getUserByID(id);
+		return cached == null ? DiscordUtils.getUserFromJSON(null, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
 	}
 
 	@Override
