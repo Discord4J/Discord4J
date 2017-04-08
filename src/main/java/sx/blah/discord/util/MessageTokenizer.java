@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  */
 public class MessageTokenizer {
 
-	public static final String ANY_MENTION_REGEX = "<((@[!&]?)|#)\\d+>";
+	public static final String ANY_MENTION_REGEX = "<(?:(?:@[!&]?)|#)(\\d+)>";
 	public static final String CUSTOM_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
 	public static final String INVITE_REGEX = "(?:discord\\.gg/)([\\w-]+)";
 	public static final String WORD_REGEX = "(?:\\s|\\n)+";
