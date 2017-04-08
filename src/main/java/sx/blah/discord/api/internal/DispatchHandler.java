@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
@@ -298,6 +299,10 @@ class DispatchHandler {
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
 		shard.guildList.add(guild);
+
+		if (json.large) { //The guild is large, we have to send a request to get the offline users
+			shard.ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
+		}
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {

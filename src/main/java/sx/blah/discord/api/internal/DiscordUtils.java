@@ -278,10 +278,6 @@ public class DiscordUtils {
 				}
 			}
 
-			if (json.large) { //The guild is large, we have to send a request to get the offline users
-				((ShardImpl) shard).ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
-			}
-
 			if (json.presences != null)
 				for (PresenceObject presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
