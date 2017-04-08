@@ -413,7 +413,7 @@ public class DiscordUtils {
 	 * @return The message object.
 	 */
 	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
-		if (channel.messages != null && channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
+		if (channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setEmbeds(getEmbedsFromJSON(json));
@@ -428,8 +428,14 @@ public class DiscordUtils {
 
 			return message;
 		} else {
+			IUser author = channel.getGuild()
+					.getUsers()
+					.stream()
+					.filter(it -> it.getID().equals(json.author.id))
+					.findAny()
+					.orElseGet(() -> getUserFromJSON(channel.getShard(), json.author));
 			Message message = new Message(channel.getClient(), json.id, json.content,
-					getUserFromJSON(channel.getShard(), json.author), channel, convertFromTimestamp(json.timestamp),
+					author, channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
@@ -492,7 +498,13 @@ public class DiscordUtils {
 
 			return webhook;
 		} else {
-			return new Webhook(channel.getClient(), json.name, json.id, channel, getUserFromJSON(channel.getShard(), json.user), json.avatar, json.token);
+			IUser author = channel.getGuild()
+					.getUsers()
+					.stream()
+					.filter(it -> it.getID().equals(json.user.id))
+					.findAny()
+					.orElseGet(() -> getUserFromJSON(channel.getShard(), json.user));
+			return new Webhook(channel.getClient(), json.name, json.id, channel, author, json.avatar, json.token);
 		}
 	}
 

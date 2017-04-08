@@ -753,9 +753,12 @@ class DispatchHandler {
 					if (reaction.getCount() <= 0) {
 						message.getReactions().remove(reaction);
 					}
-
-					client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
+				} else {
+					IEmoji custom = channel.getGuild().getEmojiByID(event.emoji.id);
+					reaction = new Reaction(channel.getShard(), 0, new ArrayList<>(), custom != null ? custom.getID() : event.emoji.name, custom != null);
 				}
+
+				client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 			}
 		}
 	}

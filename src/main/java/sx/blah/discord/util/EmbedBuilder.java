@@ -434,6 +434,16 @@ public class EmbedBuilder {
 	}
 
 	/**
+	 * Clears the fields in the builder.
+	 *
+	 * @return Itself for chaining
+	 */
+	public EmbedBuilder clearFields(){
+		fields.clear();
+		return this;
+	}
+
+	/**
 	 * Returns the number of fields in the builder.
 	 *
 	 * @return The number of fields in the builder.
