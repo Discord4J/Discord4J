@@ -47,7 +47,7 @@ class DispatchHandler {
 	private DiscordWS ws;
 	private ShardImpl shard;
 	private DiscordClientImpl client;
-	private final ExecutorService dispatchExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("Websocket Dispatch Handler"));
+	private final ExecutorService dispatchExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("Dispatch Handler"));
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
 		this.ws = ws;
