@@ -237,9 +237,10 @@ public class ShardImpl implements IShard {
 	@Override
 	public List<IUser> getUsers() {
 		List<IUser> guildUserList = guildList
-				.parallelStream()
+				.stream()
 				.map(IGuild::getUsers)
-				.flatMap(List::parallelStream)
+				.distinct()
+				.flatMap(List::stream)
 				.collect(Collectors.toList());
 
 		if (client.getOurUser() != null && !guildUserList.contains(client.getOurUser()))

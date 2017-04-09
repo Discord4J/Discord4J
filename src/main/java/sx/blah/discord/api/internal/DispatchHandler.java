@@ -300,23 +300,22 @@ class DispatchHandler {
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
 		shard.guildList.add(guild);
 
-		if (json.large) { //The guild is large, we have to send a request to get the offline users
-			shard.ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
-		}
-
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {
-				guild.loadWebhooks();
 				if (json.large) {
+					shard.ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
 					client.getDispatcher().waitFor((AllUsersReceivedEvent e) ->
 							e.getGuild().getID().equals(guild.getID())
 					);
 				}
-				client.dispatcher.dispatch(new GuildCreateEvent(guild));
-				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
 			} catch (InterruptedException e) {
 				Discord4J.LOGGER.error(LogMarkers.EVENTS, "Wait for AllUsersReceivedEvent on guild create was interrupted.", e);
 			}
+			return true;
+		}).andThen(() -> {
+			guild.loadWebhooks();
+			client.dispatcher.dispatch(new GuildCreateEvent(guild));
+			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
 			return true;
 		}).execute();
 	}
@@ -584,7 +583,7 @@ class DispatchHandler {
 			IUser user = DiscordUtils.getUserFromGuildMemberResponse(guildToUpdate, member);
 			guildToUpdate.addUser(user);
 		}
-		if (guildToUpdate.getUsers().size() == guildToUpdate.getTotalMemberCount()) {
+		if (guildToUpdate.getUsers().size() >= guildToUpdate.getTotalMemberCount()) {
 			client.getDispatcher().dispatch(new AllUsersReceivedEvent(guildToUpdate));
 		}
 	}

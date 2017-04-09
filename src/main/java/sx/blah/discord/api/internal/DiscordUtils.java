@@ -283,8 +283,7 @@ public class DiscordUtils {
 				for (PresenceObject presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
 					if (user != null) {
-						user.setPresence(
-								DiscordUtils.getPresenceFromJSON(presence));
+						user.setPresence(DiscordUtils.getPresenceFromJSON(presence));
 					}
 				}
 
