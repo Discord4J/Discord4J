@@ -662,20 +662,23 @@ class DispatchHandler {
 
 	private void voiceStateUpdate(VoiceStateObject json) {
 		IUser user = shard.getUserByID(json.user_id);
-		IVoiceState curVoiceState = user.getVoiceStates().get(json.guild_id);
 
-		IVoiceChannel channel = shard.getVoiceChannelByID(json.channel_id);
-		IVoiceChannel oldChannel = curVoiceState == null ? null : curVoiceState.getChannel();
+		if (user != null) {
+			IVoiceState curVoiceState = user.getVoiceStates().get(json.guild_id);
 
-		user.getVoiceStates().put(json.guild_id, DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
+			IVoiceChannel channel = shard.getVoiceChannelByID(json.channel_id);
+			IVoiceChannel oldChannel = curVoiceState == null ? null : curVoiceState.getChannel();
 
-		if (oldChannel != channel) {
-			if (channel == null) {
-				client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
-			} else if (oldChannel == null) {
-				client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));
-			} else if (oldChannel.getGuild().equals(channel.getGuild())) {
-				client.getDispatcher().dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
+			user.getVoiceStates().put(json.guild_id, DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
+
+			if (oldChannel != channel) {
+				if (channel == null) {
+					client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
+				} else if (oldChannel == null) {
+					client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));
+				} else if (oldChannel.getGuild().equals(channel.getGuild())) {
+					client.getDispatcher().dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
+				}
 			}
 		}
 	}
