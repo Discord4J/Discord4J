@@ -730,7 +730,7 @@ class DispatchHandler {
 					message.getReactions().add(reaction);
 				} else {
 					reaction.getCachedUsers().add(user);
-					reaction.setCount(reaction.getCount() + 1);
+					reaction.setCount(reaction.getCount());
 				}
 
 				reaction.setMessage(message);
