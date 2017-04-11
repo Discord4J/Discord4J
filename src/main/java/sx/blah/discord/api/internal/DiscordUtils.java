@@ -31,7 +31,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
-import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
@@ -432,7 +431,7 @@ public class DiscordUtils {
 
 			return message;
 		} else {
-			IUser author = channel.getGuild()
+			IUser author = channel.getGuild() == null ? getUserFromJSON(channel.getShard(), json.author) : channel.getGuild()
 					.getUsers()
 					.stream()
 					.filter(it -> it.getID().equals(json.author.id))
