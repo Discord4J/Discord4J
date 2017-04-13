@@ -28,17 +28,18 @@ import java.util.List;
  */
 public class MessageEmbedEvent extends MessageEvent {
 
-	private final List<IEmbed> newEmbed;
+	private final List<IEmbed> newEmbeds;
 
-	public MessageEmbedEvent(IMessage message, List<IEmbed> oldEmbed) {
+	public MessageEmbedEvent(IMessage message, List<IEmbed> oldEmbeds) {
 		super(message);
+
 		List<IEmbed> tempArray = new ArrayList<>();
 		for (IEmbed attachment : message.getEmbedded()) {
-			if (!oldEmbed.contains(attachment)) {
+			if (!oldEmbeds.contains(attachment)) {
 				tempArray.add(attachment);
 			}
 		}
-		newEmbed = tempArray;
+		newEmbeds = tempArray;
 	}
 
 	/**
@@ -46,7 +47,17 @@ public class MessageEmbedEvent extends MessageEvent {
 	 *
 	 * @return An array of the new embedded media.
 	 */
+	@Deprecated
 	public List<IEmbed> getNewEmbed() {
-		return newEmbed;
+		return newEmbeds;
+	}
+
+	/**
+	 * The new embeds that have been added to the message.
+	 *
+	 * @return The new embeds that have been added to the message.
+	 */
+	public List<IEmbed> getNewEmbeds() {
+		return newEmbeds;
 	}
 }

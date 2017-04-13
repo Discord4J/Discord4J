@@ -222,6 +222,8 @@ class DispatchHandler {
 		Channel channel = (Channel) client.getChannelByID(json.channel_id);
 
 		if (null != channel) {
+
+			// check if our user is mentioned directly
 			if (!mentioned) { //Not worth checking if already mentioned
 				for (UserObject user : json.mentions) { //Check mention array for a mention
 					if (client.getOurUser().getID().equals(user.id)) {
@@ -231,6 +233,7 @@ class DispatchHandler {
 				}
 			}
 
+			// check if our user is mentioned through role mentions
 			if (!mentioned) { //Not worth checking if already mentioned
 				for (String role : json.mention_roles) { //Check roles for a mention
 					if (client.getOurUser().getRolesForGuild(channel.getGuild()).contains(channel.getGuild().getRoleByID(role))) {
@@ -400,17 +403,18 @@ class DispatchHandler {
 			return;
 
 		Message toUpdate = (Message) channel.getMessageByID(id);
-		IMessage oldMessage = toUpdate != null ? toUpdate.copy() : null;
+		if (toUpdate == null) return;
 
+		IMessage oldMessage = toUpdate.copy();
 		toUpdate = (Message) DiscordUtils.getUpdatedMessageFromJSON(toUpdate, json);
 
-		if (oldMessage != null && json.pinned != null && oldMessage.isPinned() && !json.pinned) {
+		if (json.pinned != null && oldMessage.isPinned() && !json.pinned) {
 			client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
-		} else if (oldMessage != null && json.pinned != null && !oldMessage.isPinned() && json.pinned) {
+		} else if (json.pinned != null && !oldMessage.isPinned() && json.pinned) {
 			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
-		} else if (oldMessage != null && oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
+		} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
 			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
-		} else {
+		} else if (json.content != null && oldMessage.getContent().equals(json.content)) {
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		}
 	}
