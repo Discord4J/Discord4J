@@ -241,10 +241,26 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Gets a reaction by the emoji text. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
 	 * instead.
 	 *
-	 * @param name The emoji text
+	 * @param name The emoji text (as Unicode)
 	 * @return The reaction, or null if there aren't any that match
 	 * @see IMessage#getReactionByIEmoji(IEmoji)
 	 */
+	IReaction getReactionByUnicode(String name);
+
+	/**
+	 * Gets a reaction by the Unicode emoji. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
+	 * instead. This simply calls {@link Emoji#getUnicode()} on the other overload of this method.
+	 *
+	 * @param emoji The emoji (as Unicode)
+	 * @return The reaction, or null if there aren't any that match
+	 * @see IMessage#getReactionByIEmoji(IEmoji)
+	 */
+	IReaction getReactionByUnicode(Emoji emoji);
+
+	/**
+	 * @deprecated Use {@link #getReactionByUnicode(String)} instead
+	 */
+	@Deprecated
 	IReaction getReactionByName(String name);
 
 	/**
