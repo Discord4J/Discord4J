@@ -605,10 +605,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IEmoji getEmojiByName(String name);
 
 	/**
-	 * This adds a custom emoji to the guild.
+	 * This adds a custom emoji to the guild. This is only available if your bot has been whitelisted by Discord.
 	 *
-	 * @param name The name, <b>without colons</b>.
-	 * @param image The BufferedImage of the Emoji.
+	 * @param name The name, <b>without colons</b> of length 2-32 characters.
+	 * @param image The Image of the Emoji.
 	 * @return The emoji.
 	 */
 	IEmoji addEmoji(String name, Image image);
