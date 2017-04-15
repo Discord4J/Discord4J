@@ -610,6 +610,10 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param name The name, <b>without colons</b> of length 2-32 characters.
 	 * @param image The Image of the Emoji.
 	 * @return The emoji.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
 	 */
 	IEmoji addEmoji(String name, Image image);
 
