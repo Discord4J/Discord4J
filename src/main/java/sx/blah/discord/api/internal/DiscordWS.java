@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.UpgradeException;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -37,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -148,8 +150,9 @@ public class DiscordWS extends WebSocketAdapter {
 		isReady = false;
 		hasReceivedReady = false;
 		heartbeatHandler.shutdown();
-		if (!(this.state == State.DISCONNECTING || statusCode == 4003 || statusCode == 4004 || statusCode == 4005 ||
-				statusCode == 4010) && !(statusCode == 1001 && reason != null && reason.equals("Shutdown"))) {
+
+		if (!(this.state == State.DISCONNECTING || statusCode == 4003 || statusCode == 4004 || statusCode == 4005 || statusCode == 4010)
+				&& !(statusCode == 1001 && reason != null && reason.equals("Shutdown"))) {
 			this.state = State.RESUMING;
 			client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.ABNORMAL_CLOSE, shard));
 			client.reconnectManager.scheduleReconnect(this);
@@ -162,6 +165,10 @@ public class DiscordWS extends WebSocketAdapter {
 
 		if (cause instanceof UnresolvedAddressException) {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UnresolvedAddressException. Internet outage?");
+		} else if (cause instanceof UnknownHostException) {
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UnknownHostException. Internet outage?");
+		} else if (cause instanceof UpgradeException) {
+			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UpgradeException. Internet outage?");
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", cause);
 		}

@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.impl.events;
 
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.ReconnectManager;
 
 /**
  * Fired when a reconnect attempt for a shard fails.
@@ -28,11 +27,11 @@ import sx.blah.discord.api.internal.ReconnectManager;
  */
 @Deprecated
 public class ReconnectFailureEvent extends sx.blah.discord.handle.impl.events.shard.ReconnectFailureEvent {
-	
+
 	public ReconnectFailureEvent(IShard shard, int curAttempt, int maxAttempts) {
 		super(shard, curAttempt, maxAttempts);
 	}
-	
+
 	/**
 	 * Gets the attempt the {@link ReconnectManager} failed on.
 	 * @return The current attempt.
