@@ -331,6 +331,8 @@ public interface IDiscordClient {
 
 	/**
 	 * This attempts to search all guilds/private channels for a message.
+	 * <b>NOTE:</b> This only checks already cached messages, see {@link IChannel#getMessageByID(String)} if you want
+	 * to retrieve messages which aren't cached already.
 	 *
 	 * @param messageID The message id of the message to find.
 	 * @return The message or null if not found.
