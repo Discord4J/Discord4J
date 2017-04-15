@@ -551,15 +551,12 @@ public class Channel implements IChannel {
 				.filter(msg -> msg.getID().equals(messageID))
 				.findAny()
 				.orElseGet(() -> {
-					try {
-						DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
-
+					DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
+					return RequestBuffer.request(() -> {
 						return DiscordUtils.getMessageFromJSON(this, client.REQUESTS.GET.makeRequest(
 								DiscordEndpoints.CHANNELS + this.getID() + "/messages/" + messageID,
 								MessageObject.class));
-					} catch (Exception ignored) {
-						return null;
-					}
+					}).get();
 				});
 	}
 
