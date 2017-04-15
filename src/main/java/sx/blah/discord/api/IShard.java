@@ -239,12 +239,28 @@ public interface IShard {
 	List<IUser> getUsers();
 
 	/**
-	 * Gets a user by its unique id.
+	 * Gets a cached user by its unique id.
 	 *
 	 * @param userID The id of the desired user.
 	 * @return The {@link User} object with the provided id.
+	 *
+	 * @see #fetchUser(String)
 	 */
 	IUser getUserByID(String userID);
+
+	/**
+	 * This attempts to retrieve a user by its id by first checking the api's internal cache, if the user is not found,
+	 * a REST request is performed.
+	 *
+	 * @param id The id of the user to find.
+	 * @return Ths user fetched, if found.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 *
+	 * @see #getUserByID(String)
+	 */
+	IUser fetchUser(String id);
 
 	/**
 	 * Gets a set of all roles visible to this shard.

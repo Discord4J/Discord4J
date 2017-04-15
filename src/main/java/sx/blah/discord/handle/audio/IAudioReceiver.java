@@ -22,6 +22,7 @@ import sx.blah.discord.handle.obj.IUser;
 /**
  * Handles the receiving of audio from Discord.
  */
+@FunctionalInterface
 public interface IAudioReceiver {
 
 	/**

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
@@ -32,6 +33,7 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
@@ -46,7 +48,7 @@ class DispatchHandler {
 	private DiscordWS ws;
 	private ShardImpl shard;
 	private DiscordClientImpl client;
-	private final ExecutorService dispatchExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("Websocket Dispatch Handler"));
+	private final ExecutorService dispatchExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("Dispatch Handler"));
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
 		this.ws = ws;
@@ -221,6 +223,8 @@ class DispatchHandler {
 		Channel channel = (Channel) client.getChannelByID(json.channel_id);
 
 		if (null != channel) {
+
+			// check if our user is mentioned directly
 			if (!mentioned) { //Not worth checking if already mentioned
 				for (UserObject user : json.mentions) { //Check mention array for a mention
 					if (client.getOurUser().getID().equals(user.id)) {
@@ -230,6 +234,7 @@ class DispatchHandler {
 				}
 			}
 
+			// check if our user is mentioned through role mentions
 			if (!mentioned) { //Not worth checking if already mentioned
 				for (String role : json.mention_roles) { //Check roles for a mention
 					if (client.getOurUser().getRolesForGuild(channel.getGuild()).contains(channel.getGuild().getRoleByID(role))) {
@@ -301,17 +306,20 @@ class DispatchHandler {
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {
-				guild.loadWebhooks();
 				if (json.large) {
+					shard.ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
 					client.getDispatcher().waitFor((AllUsersReceivedEvent e) ->
 							e.getGuild().getID().equals(guild.getID())
 					);
 				}
-				client.dispatcher.dispatch(new GuildCreateEvent(guild));
-				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
 			} catch (InterruptedException e) {
 				Discord4J.LOGGER.error(LogMarkers.EVENTS, "Wait for AllUsersReceivedEvent on guild create was interrupted.", e);
 			}
+			return true;
+		}).andThen(() -> {
+			guild.loadWebhooks();
+			client.dispatcher.dispatch(new GuildCreateEvent(guild));
+			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "New guild has been created/joined! \"{}\" with ID {} on shard {}.", guild.getName(), guild.getID(), shard.getInfo()[0]);
 			return true;
 		}).execute();
 	}
@@ -396,17 +404,18 @@ class DispatchHandler {
 			return;
 
 		Message toUpdate = (Message) channel.getMessageByID(id);
-		IMessage oldMessage = toUpdate != null ? toUpdate.copy() : null;
+		if (toUpdate == null) return;
 
+		IMessage oldMessage = toUpdate.copy();
 		toUpdate = (Message) DiscordUtils.getUpdatedMessageFromJSON(toUpdate, json);
 
-		if (oldMessage != null && json.pinned != null && oldMessage.isPinned() && !json.pinned) {
+		if (json.pinned != null && oldMessage.isPinned() && !json.pinned) {
 			client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
-		} else if (oldMessage != null && json.pinned != null && !oldMessage.isPinned() && json.pinned) {
+		} else if (json.pinned != null && !oldMessage.isPinned() && json.pinned) {
 			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
-		} else if (oldMessage != null && oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
+		} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
 			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
-		} else {
+		} else if (json.content != null && oldMessage.getContent().equals(json.content)) {
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		}
 	}
@@ -579,7 +588,7 @@ class DispatchHandler {
 			IUser user = DiscordUtils.getUserFromGuildMemberResponse(guildToUpdate, member);
 			guildToUpdate.addUser(user);
 		}
-		if (guildToUpdate.getUsers().size() == guildToUpdate.getTotalMemberCount()) {
+		if (guildToUpdate.getUsers().size() >= guildToUpdate.getTotalMemberCount()) {
 			client.getDispatcher().dispatch(new AllUsersReceivedEvent(guildToUpdate));
 		}
 	}
@@ -658,20 +667,23 @@ class DispatchHandler {
 
 	private void voiceStateUpdate(VoiceStateObject json) {
 		IUser user = shard.getUserByID(json.user_id);
-		IVoiceState curVoiceState = user.getVoiceStates().get(json.guild_id);
 
-		IVoiceChannel channel = shard.getVoiceChannelByID(json.channel_id);
-		IVoiceChannel oldChannel = curVoiceState == null ? null : curVoiceState.getChannel();
+		if (user != null) {
+			IVoiceState curVoiceState = user.getVoiceStates().get(json.guild_id);
 
-		user.getVoiceStates().put(json.guild_id, DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
+			IVoiceChannel channel = shard.getVoiceChannelByID(json.channel_id);
+			IVoiceChannel oldChannel = curVoiceState == null ? null : curVoiceState.getChannel();
 
-		if (oldChannel != channel) {
-			if (channel == null) {
-				client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
-			} else if (oldChannel == null) {
-				client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));
-			} else if (oldChannel.getGuild().equals(channel.getGuild())) {
-				client.getDispatcher().dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
+			user.getVoiceStates().put(json.guild_id, DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
+
+			if (oldChannel != channel) {
+				if (channel == null) {
+					client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
+				} else if (oldChannel == null) {
+					client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));
+				} else if (oldChannel.getGuild().equals(channel.getGuild())) {
+					client.getDispatcher().dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
+				}
 			}
 		}
 	}
@@ -705,11 +717,13 @@ class DispatchHandler {
 	private void reactionAdd(ReactionEventResponse event) {
 		IChannel channel = client.getChannelByID(event.channel_id);
 		if (channel != null) {
-			IMessage message = channel.getMessageByID(event.message_id);
+			IMessage message = RequestBuffer.request(() -> {
+				return channel.getMessageByID(event.message_id);
+			}).get();
 
 			if (message != null) {
 				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByName(event.emoji.name)
+						? message.getReactionByUnicode(event.emoji.name)
 						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(event.emoji.id)));
 				IUser user = message.getClient().getUserByID(event.user_id);
 
@@ -721,9 +735,9 @@ class DispatchHandler {
 							event.emoji.id != null ? event.emoji.id : event.emoji.name, event.emoji.id != null);
 
 					message.getReactions().add(reaction);
-				} else {
-					reaction.getCachedUsers().add(user);
+				} else if (channel.getMessageHistory().contains(message.getID())) { //If the message is in the internal cache then it doesn't have the most up to date reaction count
 					reaction.setCount(reaction.getCount() + 1);
+					reaction.getCachedUsers().add(user);
 				}
 
 				reaction.setMessage(message);
@@ -741,7 +755,7 @@ class DispatchHandler {
 
 			if (message != null) {
 				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByName(event.emoji.name)
+						? message.getReactionByUnicode(event.emoji.name)
 						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(event.emoji.id)));
 				IUser user = message.getClient().getUserByID(event.user_id);
 

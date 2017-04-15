@@ -31,12 +31,12 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
-import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RequestBuilder;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -52,6 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -139,7 +140,7 @@ public class DiscordUtils {
 			return null;
 
 		User user;
-		if (shard != null && (user = (User) shard.getUsers().stream().filter(it -> it.getID().equals(response.id)).findFirst().orElse(null)) != null) {
+		if (shard != null && (user = (User) shard.getUserByID(response.id)) != null) {
 			user.setAvatar(response.avatar);
 			user.setName(response.username);
 			user.setDiscriminator(response.discriminator);
@@ -277,16 +278,11 @@ public class DiscordUtils {
 				}
 			}
 
-			if (json.large) { //The guild is large, we have to send a request to get the offline users
-				((ShardImpl) shard).ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
-			}
-
 			if (json.presences != null)
 				for (PresenceObject presence : json.presences) {
 					User user = (User) guild.getUserByID(presence.user.id);
 					if (user != null) {
-						user.setPresence(
-								DiscordUtils.getPresenceFromJSON(presence));
+						user.setPresence(DiscordUtils.getPresenceFromJSON(presence));
 					}
 				}
 
@@ -302,8 +298,15 @@ public class DiscordUtils {
 
 			if (json.voice_states != null) {
 				for (VoiceStateObject voiceState : json.voice_states) {
-					guild.getUserByID(voiceState.user_id).getVoiceStates().put(
-							guild.getID(), DiscordUtils.getVoiceStateFromJson(guild, voiceState));
+					final AtomicReference<IUser> user = new AtomicReference<>(guild.getUserByID(voiceState.user_id));
+					if (user.get() == null) {
+						new RequestBuilder(shard.getClient()).shouldBufferRequests(true).doAction(() -> {
+							if (user.get() == null) user.set(shard.fetchUser(voiceState.user_id));
+							return true;
+						}).execute();
+					}
+					if (user.get()!= null)
+						user.get().getVoiceStates().put(guild.getID(), DiscordUtils.getVoiceStateFromJson(guild, voiceState));
 				}
 			}
 		}
@@ -428,7 +431,7 @@ public class DiscordUtils {
 
 			return message;
 		} else {
-			IUser author = channel.getGuild()
+			IUser author = channel.getGuild() == null ? getUserFromJSON(channel.getShard(), json.author) : channel.getGuild()
 					.getUsers()
 					.stream()
 					.filter(it -> it.getID().equals(json.author.id))

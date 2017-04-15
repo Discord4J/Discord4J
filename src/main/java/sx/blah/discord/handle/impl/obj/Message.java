@@ -484,11 +484,22 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public IReaction getReactionByName(String name) {
+	public IReaction getReactionByUnicode(String name) {
 		if (name == null)
 			return null;
 		return reactions.stream().filter(r -> r != null && !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
 				.orElse(null);
+	}
+
+	@Override
+	public IReaction getReactionByUnicode(Emoji emoji) {
+		return getReactionByUnicode(emoji.getUnicode());
+	}
+
+	@Deprecated
+	@Override
+	public IReaction getReactionByName(String name) {
+		return getReactionByUnicode(name);
 	}
 
 	@Override
@@ -545,7 +556,7 @@ public class Message implements IMessage {
 					"(ex: :ballot_box_with_check:).");
 		}
 
-		if (this.getReactionByName(emoji) == null)
+		if (this.getReactionByUnicode(emoji) == null)
 			DiscordUtils.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
 
 		try {

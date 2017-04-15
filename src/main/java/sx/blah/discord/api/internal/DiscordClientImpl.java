@@ -445,19 +445,21 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return getShards().stream()
 				.map(IShard::getUsers)
 				.flatMap(List::stream)
+				.distinct()
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public IUser getUserByID(String userID) {
-		IUser user =  getUsers().stream()
+		return getUsers().stream()
 				.filter(u -> u.getID().equals(userID))
 				.findFirst().orElse(null);
+	}
 
-		if (user == null && isReady() && isLoggedIn())
-			user = DiscordUtils.getUserFromJSON(null, REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + userID, UserObject.class)); //This user isn't present in any shard so give it a null shard
-
-		return user;
+	@Override
+	public IUser fetchUser(String id) {
+		IUser cached = getUserByID(id);
+		return cached == null ? DiscordUtils.getUserFromJSON(null, REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
 	}
 
 	@Override

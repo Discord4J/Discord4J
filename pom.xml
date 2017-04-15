@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
 			<artifactId>websocket-client</artifactId>
-			<version>9.4.2.v20170220</version>
+			<version>9.4.3.v20170317</version>
 		</dependency>
 
 		<dependency>

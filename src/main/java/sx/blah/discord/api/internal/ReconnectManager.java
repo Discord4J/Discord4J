@@ -40,7 +40,7 @@ public class ReconnectManager {
 		this.maxAttempts = maxAttempts;
 	}
 
-	void scheduleReconnect(DiscordWS ws) {
+	synchronized void scheduleReconnect(DiscordWS ws) {
 		Discord4J.LOGGER.trace(LogMarkers.WEBSOCKET, "Reconnect scheduled for shard {}.", ws.shard.getInfo()[0]);
 		toReconnect.offer(ws);
 		if (toReconnect.size() == 1) { // If this is the only WS in the queue, immediately begin the reconnect process
@@ -48,7 +48,7 @@ public class ReconnectManager {
 		}
 	}
 
-	void onReconnectSuccess() {
+	synchronized void onReconnectSuccess() {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Reconnect for shard {} succeeded.", toReconnect.peek().shard.getInfo()[0]);
 		client.getDispatcher().dispatch(new ReconnectSuccessEvent(toReconnect.peek().shard));
 		toReconnect.remove();
@@ -63,7 +63,7 @@ public class ReconnectManager {
 		}
 	}
 
-	void onReconnectError() {
+	synchronized void onReconnectError() {
 		client.getDispatcher().dispatch(new ReconnectFailureEvent(toReconnect.peek().shard, curAttempt.get(), maxAttempts));
 		if (curAttempt.get() <= maxAttempts) {
 			try {
