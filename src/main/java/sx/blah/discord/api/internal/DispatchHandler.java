@@ -33,6 +33,7 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
@@ -716,7 +717,9 @@ class DispatchHandler {
 	private void reactionAdd(ReactionEventResponse event) {
 		IChannel channel = client.getChannelByID(event.channel_id);
 		if (channel != null) {
-			IMessage message = channel.getMessageByID(event.message_id);
+			IMessage message = RequestBuffer.request(() -> {
+				return channel.getMessageByID(event.message_id);
+			}).get();
 
 			if (message != null) {
 				Reaction reaction = (Reaction) (event.emoji.id == null
@@ -732,9 +735,9 @@ class DispatchHandler {
 							event.emoji.id != null ? event.emoji.id : event.emoji.name, event.emoji.id != null);
 
 					message.getReactions().add(reaction);
-				} else {
-					reaction.getCachedUsers().add(user);
+				} else if (channel.getMessageHistory().contains(message.getID())) { //If the message is in the internal cache then it doesn't have the most up to date reaction count
 					reaction.setCount(reaction.getCount() + 1);
+					reaction.getCachedUsers().add(user);
 				}
 
 				reaction.setMessage(message);
