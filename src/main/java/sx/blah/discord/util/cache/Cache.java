@@ -24,6 +24,7 @@ import sx.blah.discord.handle.obj.IIDLinkedObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * This represents an internal data structure for storing discord id, object pairs.
@@ -288,6 +289,24 @@ public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, R
 	@Override
 	public Collection<T> values() {
 		return delegate.values();
+	}
+
+	/**
+	 * Gets a stream of values from this cache.
+	 *
+	 * @return The stream of values.
+	 */
+	public Stream<T> stream() {
+		return delegate.stream();
+	}
+
+	/**
+	 * Gets a stream of values from this cache.
+	 *
+	 * @return The stream of values.
+	 */
+	public Stream<T> parallelStream() {
+		return delegate.parallelStream();
 	}
 
 	/**

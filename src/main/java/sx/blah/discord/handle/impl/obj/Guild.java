@@ -243,14 +243,14 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IChannel> getChannelsByName(String name) {
-		return channels.values().stream()
+		return channels.stream()
 				.filter(channel -> channel.getName().equals(name))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannelsByName(String name) {
-		return voiceChannels.values().stream()
+		return voiceChannels.stream()
 				.filter(channel -> channel.getName().equals(name))
 				.collect(Collectors.toList());
 	}
@@ -262,14 +262,14 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IUser> getUsersByName(String name, boolean includeNicknames) {
-		return users.values().stream()
+		return users.stream()
 				.filter(u -> includeNicknames ? u.getDisplayName(this).equals(name) : u.getName().equals(name))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<IUser> getUsersByRole(IRole role) {
-		return users.values().stream()
+		return users.stream()
 				.filter(user -> user.getRolesForGuild(this).contains(role))
 				.collect(Collectors.toList());
 	}
@@ -340,7 +340,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IRole> getRolesByName(String name) {
-		return roles.values().stream()
+		return roles.stream()
 				.filter(role -> role.getName().equals(name))
 				.collect(Collectors.toList());
 	}
@@ -738,7 +738,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IMessage getMessageByID(String id) {
-		IMessage message =  channels.values().stream()
+		IMessage message =  channels.stream()
 				.map(IChannel::getMessageHistory)
 				.flatMap(List::stream)
 				.filter(msg -> msg.getID().equalsIgnoreCase(id))
@@ -783,14 +783,14 @@ public class Guild implements IGuild {
 
 	@Override
 	public IEmoji getEmojiByName(String name) {
-		return emojis.values().stream()
+		return emojis.stream()
 				.filter(emoji -> emoji.getName().equals(name))
 				.findFirst().orElse(null);
 	}
 
 	@Override
 	public IWebhook getWebhookByID(String id) {
-		return channels.values().stream()
+		return channels.stream()
 				.map(channel -> channel.getWebhookByID(id))
 				.filter(Objects::nonNull)
 				.findAny().orElse(null);
@@ -798,7 +798,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IWebhook> getWebhooksByName(String name) {
-		return channels.values().stream()
+		return channels.stream()
 				.map(IChannel::getWebhooks)
 				.flatMap(List::stream)
 				.filter(hook -> hook.getDefaultName().equals(name))
@@ -807,7 +807,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IWebhook> getWebhooks() {
-		return channels.values().stream()
+		return channels.stream()
 				.map(IChannel::getWebhooks)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());

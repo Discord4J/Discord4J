@@ -250,7 +250,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.values().stream()
+		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
 				.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
 				.collect(Collectors.toList()));
 
@@ -286,7 +286,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.values().stream()
+		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
 				.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
 				.collect(Collectors.toList()));
 
@@ -320,7 +320,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.values().stream()
+		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
 				.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
 				.collect(Collectors.toList()));
 
@@ -1025,7 +1025,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IWebhook> getWebhooksByName(String name) {
-		return webhooks.values().stream()
+		return webhooks.stream()
 				.filter(w -> w.getDefaultName().equals(name))
 				.collect(Collectors.toList());
 	}

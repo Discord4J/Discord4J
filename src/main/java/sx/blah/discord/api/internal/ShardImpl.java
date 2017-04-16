@@ -182,7 +182,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IChannel> getChannels(boolean includePrivate) {
-		List<IChannel> channels = guildCache.values().stream()
+		List<IChannel> channels = guildCache.stream()
 				.map(IGuild::getChannels)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
@@ -210,7 +210,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannels() {
-		return guildCache.values().stream()
+		return guildCache.stream()
 				.map(IGuild::getVoiceChannels)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
@@ -244,7 +244,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IUser> getUsers() {
-		List<IUser> guildUserList = guildCache.values().stream()
+		List<IUser> guildUserList = guildCache.stream()
 				.map(IGuild::getUsers)
 				.distinct()
 				.flatMap(List::stream)
@@ -280,7 +280,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IRole> getRoles() {
-		return guildCache.values().stream()
+		return guildCache.stream()
 				.map(IGuild::getRoles)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
