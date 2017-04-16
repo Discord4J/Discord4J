@@ -29,15 +29,14 @@ import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
 import sx.blah.discord.handle.impl.obj.PresenceImpl;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.cache.Cache;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class ShardImpl implements IShard {
@@ -48,7 +47,7 @@ public class ShardImpl implements IShard {
 	private final int[] info;
 
 	private final DiscordClientImpl client;
-	final Cache<IGuild> guildList;
+	final Cache<IGuild> guildCache;
 	final Cache<IPrivateChannel> privateChannels;
 	public final Cache<DiscordVoiceWS> voiceWebSockets;
 
@@ -56,7 +55,7 @@ public class ShardImpl implements IShard {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
 		this.info = info;
-		this.guildList = new Cache<>((DiscordClientImpl) client, IGuild.class);
+		this.guildCache = new Cache<>((DiscordClientImpl) client, IGuild.class);
 		this.privateChannels = new Cache<>((DiscordClientImpl) client, IPrivateChannel.class);
 		this.voiceWebSockets = new Cache<>((DiscordClientImpl) client, DiscordVoiceWS.class);
 	}
@@ -182,13 +181,14 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public List<IChannel> getChannels(boolean priv) {
-		List<IChannel> channels = guildList.values().stream()
+	public List<IChannel> getChannels(boolean includePrivate) {
+		List<IChannel> channels = guildCache.values().stream()
 				.map(IGuild::getChannels)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
-		if (priv)
+		if (includePrivate)
 			channels.addAll(privateChannels.values());
+
 		return channels;
 	}
 
@@ -199,7 +199,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public IChannel getChannelByID(String id) {
-		for (IGuild guild : guildList.values()) {
+		for (IGuild guild : guildCache.values()) {
 			IChannel channel = guild.getChannelByID(id);
 			if (channel != null)
 				return channel;
@@ -210,7 +210,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannels() {
-		return guildList.values().stream()
+		return guildCache.values().stream()
 				.map(IGuild::getVoiceChannels)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
@@ -223,7 +223,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public IVoiceChannel getVoiceChannelByID(String id) {
-		for (IGuild guild : guildList.values()) {
+		for (IGuild guild : guildCache.values()) {
 			IVoiceChannel channel = guild.getVoiceChannelByID(id);
 			if (channel != null)
 				return channel;
@@ -234,19 +234,17 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IGuild> getGuilds() {
-		return new LinkedList<>(guildList.values());
+		return new LinkedList<>(guildCache.values());
 	}
 
 	@Override
 	public IGuild getGuildByID(String guildID) {
-		return guildList.get(guildID);
+		return guildCache.get(guildID);
 	}
 
 	@Override
 	public List<IUser> getUsers() {
-		List<IUser> guildUserList = guildList
-				.values()
-				.stream()
+		List<IUser> guildUserList = guildCache.values().stream()
 				.map(IGuild::getUsers)
 				.distinct()
 				.flatMap(List::stream)
@@ -262,7 +260,7 @@ public class ShardImpl implements IShard {
 	public IUser getUserByID(String userID) {
 		IUser user = null;
 
-		for (IGuild guild : guildList.values()) {
+		for (IGuild guild : guildCache.values()) {
 			user = guild.getUserByID(userID);
 			if (user != null)
 				break;
@@ -282,7 +280,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public List<IRole> getRoles() {
-		return guildList.values().stream()
+		return guildCache.values().stream()
 				.map(IGuild::getRoles)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
@@ -290,7 +288,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public IRole getRoleByID(String roleID) {
-		for (IGuild guild : guildList.values()) {
+		for (IGuild guild : guildCache.values()) {
 			IRole role = guild.getRoleByID(roleID);
 			if (role != null)
 				return role;
@@ -314,7 +312,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		for (IGuild guild : guildList.values()) {
+		for (IGuild guild : guildCache.values()) {
 			IMessage message = guild.getMessageByID(messageID);
 			if (message != null)
 				return message;

@@ -233,7 +233,7 @@ public class DiscordWS extends WebSocketAdapter {
 		this.hasReceivedReady = false;
 		this.seq = 0;
 		this.sessionId = null;
-		this.shard.guildList.clear();
+		this.shard.guildCache.clear();
 		this.shard.privateChannels.clear();
 	}
 

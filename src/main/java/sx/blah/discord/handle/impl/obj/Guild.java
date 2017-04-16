@@ -243,12 +243,16 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IChannel> getChannelsByName(String name) {
-		return channels.values().stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+		return channels.values().stream()
+				.filter(channel -> channel.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannelsByName(String name) {
-		return voiceChannels.values().stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+		return voiceChannels.values().stream()
+				.filter(channel -> channel.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -336,7 +340,9 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IRole> getRolesByName(String name) {
-		return roles.values().stream().filter((role) -> role.getName().equals(name)).collect(Collectors.toList());
+		return roles.values().stream()
+				.filter(role -> role.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -733,10 +739,10 @@ public class Guild implements IGuild {
 	@Override
 	public IMessage getMessageByID(String id) {
 		IMessage message =  channels.values().stream()
-									.map(IChannel::getMessageHistory)
-									.flatMap(List::stream)
-									.filter(msg -> msg.getID().equalsIgnoreCase(id))
-									.findAny().orElse(null);
+				.map(IChannel::getMessageHistory)
+				.flatMap(List::stream)
+				.filter(msg -> msg.getID().equalsIgnoreCase(id))
+				.findAny().orElse(null);
 
 		if (message == null) {
 			for (IChannel channel : channels.values()) {
@@ -771,13 +777,15 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IEmoji getEmojiByID(String idToUse) {
-		return emojis.get(idToUse);
+	public IEmoji getEmojiByID(String id) {
+		return emojis.get(id);
 	}
 
 	@Override
 	public IEmoji getEmojiByName(String name) {
-		return emojis.values().stream().filter(iemoji -> iemoji.getName().equals(name)).findFirst().orElse(null);
+		return emojis.values().stream()
+				.filter(emoji -> emoji.getName().equals(name))
+				.findFirst().orElse(null);
 	}
 
 	@Override

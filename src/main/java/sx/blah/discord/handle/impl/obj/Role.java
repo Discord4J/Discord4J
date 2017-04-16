@@ -28,10 +28,7 @@ import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
 import java.io.IOException;

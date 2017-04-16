@@ -198,19 +198,15 @@ class DispatchHandler {
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id)));
 			return true;
 		}).andThen(() -> {
-			try {
-				if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard one
-					for (PrivateChannelObject pmObj : ready.private_channels) {
-						IPrivateChannel pm = DiscordUtils.getPrivateChannelFromJSON(shard, pmObj);
-						shard.privateChannels.put(pm);
-					}
+			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard 0
+				for (PrivateChannelObject pmObj : ready.private_channels) {
+					IPrivateChannel pm = DiscordUtils.getPrivateChannelFromJSON(shard, pmObj);
+					shard.privateChannels.put(pm);
 				}
-
-				ws.isReady = true;
-				client.getDispatcher().dispatch(new ShardReadyEvent(shard)); // All information for this shard has been received
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+
+			ws.isReady = true;
+			client.getDispatcher().dispatch(new ShardReadyEvent(shard)); // All information for this shard has been received
 			return true;
 		}).execute();
 	}
@@ -307,7 +303,7 @@ class DispatchHandler {
 		}
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
-		shard.guildList.put(guild);
+		shard.guildCache.put(guild);
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {

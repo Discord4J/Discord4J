@@ -16,13 +16,13 @@
  */
 package sx.blah.discord.api.internal;
 
-import sx.blah.discord.util.HighPrecisionRecurrentTask;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.requests.voice.SelectProtocolRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceSpeakingRequest;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.HighPrecisionRecurrentTask;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;

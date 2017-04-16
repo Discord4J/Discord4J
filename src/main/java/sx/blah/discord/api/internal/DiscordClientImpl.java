@@ -426,7 +426,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IChannel getChannelByID(String channelID) {
 		for (IShard shard : shards) {
-			IChannel channel= shard.getChannelByID(channelID);
+			IChannel channel = shard.getChannelByID(channelID);
 			if (channel != null)
 				return channel;
 		}
@@ -450,7 +450,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IVoiceChannel getVoiceChannelByID(String id) {
 		for (IShard shard : shards) {
-			IVoiceChannel voiceChannel= shard.getVoiceChannelByID(id);
+			IVoiceChannel voiceChannel = shard.getVoiceChannelByID(id);
 			if (voiceChannel != null)
 				return voiceChannel;
 		}
