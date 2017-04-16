@@ -114,7 +114,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	volatile Timer keepAlive;
 	private final int retryCount;
 	private final int maxCacheCount;
-	private final Lazy<ApplicationInfoResponse> applicationInfo = new Lazy<>(this::getApplicationInfo);
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
 							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider) {
@@ -216,7 +215,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public String getApplicationDescription() {
 		try {
-			return applicationInfo.get().description;
+			return getApplicationInfo().description;
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
@@ -226,7 +225,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public String getApplicationIconURL() {
 		try {
-			ApplicationInfoResponse info = applicationInfo.get();
+			ApplicationInfoResponse info = getApplicationInfo();
 			return String.format(DiscordEndpoints.APPLICATION_ICON, info.id, info.icon);
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
@@ -237,7 +236,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public String getApplicationClientID() {
 		try {
-			return applicationInfo.get().id;
+			return getApplicationInfo().id;
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
@@ -247,7 +246,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public String getApplicationName() {
 		try {
-			return applicationInfo.get().name;
+			return getApplicationInfo().name;
 		} catch (RateLimitException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
@@ -257,7 +256,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IUser getApplicationOwner() {
 		try {
-			UserObject owner = applicationInfo.get().owner;
+			UserObject owner = getApplicationInfo().owner;
 
 			IUser user = getUserByID(owner.id);
 			if (user == null)

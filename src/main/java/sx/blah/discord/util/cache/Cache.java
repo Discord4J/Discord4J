@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  *
  * @param <T> The object held by the cache
  */
-public final class Cache<T  extends IIDLinkedObject> implements Map<String, T>, RandomAccess {
+public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, RandomAccess {
 
 	/**
 	 * This represents the default {@link ICacheDelegateProvider} used by Discord4J.
