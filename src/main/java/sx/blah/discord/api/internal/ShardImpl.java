@@ -183,9 +183,9 @@ public class ShardImpl implements IShard {
 	@Override
 	public List<IChannel> getChannels(boolean includePrivate) {
 		List<IChannel> channels = guildCache.stream()
-				.map(IGuild::getChannels)
-				.flatMap(List::stream)
+				.flatMap(g -> g.getChannels().stream())
 				.collect(Collectors.toList());
+
 		if (includePrivate)
 			channels.addAll(privateChannels.values());
 

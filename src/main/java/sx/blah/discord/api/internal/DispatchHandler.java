@@ -494,14 +494,7 @@ class DispatchHandler {
 
 		if (isPrivate) { // PM channel.
 			PrivateChannelObject event = MAPPER.treeToValue(json, PrivateChannelObject.class);
-			String id = event.id;
-			boolean contained = false;
-			for (IPrivateChannel privateChannel : shard.privateChannels.values()) {
-				if (privateChannel.getID().equalsIgnoreCase(id))
-					contained = true;
-			}
-
-			if (contained)
+			if (shard.privateChannels.containsKey(event.id))
 				return; // we already have this PM channel; no need to create another.
 
 			shard.privateChannels.put(DiscordUtils.getPrivateChannelFromJSON(shard, event));
