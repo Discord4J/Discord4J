@@ -35,12 +35,12 @@ import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.cache.Cache;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -67,7 +67,7 @@ public class Channel implements IChannel {
 	/**
 	 * Messages that have been sent into this channel
 	 */
-	public final ConcurrentLinkedDeque<IMessage> messages = new ConcurrentLinkedDeque<>();
+	public final Cache<IMessage> messages;
 
 	/**
 	 * The guild this channel belongs to.
@@ -102,24 +102,24 @@ public class Channel implements IChannel {
 	/**
 	 * The permission overrides for users (key = user id).
 	 */
-	protected final Map<String, PermissionOverride> userOverrides;
+	protected final Cache<PermissionOverride> userOverrides;
 
 	/**
 	 * The permission overrides for roles (key = role id).
 	 */
-	protected final Map<String, PermissionOverride> roleOverrides;
+	protected final Cache<PermissionOverride> roleOverrides;
 
 	/**
 	 * The webhooks for this channel.
 	 */
-	protected final List<IWebhook> webhooks;
+	protected final Cache<IWebhook> webhooks;
 
 	/**
 	 * The client that created this object.
 	 */
 	protected final DiscordClientImpl client;
 
-	public Channel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public Channel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -128,7 +128,8 @@ public class Channel implements IChannel {
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
-		this.webhooks = new CopyOnWriteArrayList<>();
+		this.messages = new Cache<>(client, IMessage.class);
+		this.webhooks = new Cache<>(client, IWebhook.class);
 	}
 
 
@@ -164,12 +165,13 @@ public class Channel implements IChannel {
 	 */
 	public void addToCache(IMessage message) {
 		if (getMaxInternalCacheCount() < 0) {
-			messages.addFirst(message);
+			messages.put(message);
 		} else if (getMaxInternalCacheCount() != 0) {
-			if (getInternalCacheCount() == getMaxInternalCacheCount())
-				messages.removeLast(); //At max so we need to make room
+			if (getInternalCacheCount() == getMaxInternalCacheCount()) {
+				messages.remove(messages.longIDs().stream().mapToLong(it -> it).min().getAsLong()); //Lowest id should be the earliest
+			}
 
-			messages.addFirst(message);
+			messages.put(message);
 		}
 	}
 
@@ -204,11 +206,12 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistory() {
-		return new MessageHistory(messages);
+		return new MessageHistory(messages.values());
 	}
 
 	private Collection<IMessage> subDeque(int from, int end) {
 		List<IMessage> list = new ArrayList<>();
+		Collection<IMessage> messages = this.messages.values();
 		if (from >= 0 || end < from) { //Skip this step if the indexes are invalid
 			for (int i = from; i < end; i++)
 				list.add((IMessage) messages.toArray()[i]);
@@ -222,7 +225,7 @@ public class Channel implements IChannel {
 			return new MessageHistory(subDeque(0, messageCount));
 		else {
 			final AtomicInteger remaining = new AtomicInteger(messageCount - messages.size());
-			final List<IMessage> retrieved = new ArrayList<>(messages);
+			final List<IMessage> retrieved = new ArrayList<>(messages.values());
 			while (remaining.get() > 0) {
 				RequestBuffer.request(() -> {
 					int requestCount = Math.min(remaining.get(), MESSAGE_CHUNK_COUNT);
@@ -248,7 +251,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
+		final List<IMessage> retrieved = new ArrayList<>(messages.values().stream()
 				.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
 				.collect(Collectors.toList()));
 
@@ -284,7 +287,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
+		final List<IMessage> retrieved = new ArrayList<>(messages.values().stream()
 				.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
 				.collect(Collectors.toList()));
 
@@ -318,13 +321,13 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
+		final List<IMessage> retrieved = new ArrayList<>(messages.values().stream()
 				.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
 				.collect(Collectors.toList()));
 
 		final AtomicReference<String> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getID() : null);
 
-		if (((IMessage) messages.toArray()[messages.size()-1]).getTimestamp().compareTo(endDate) <= 0) { //When the last message cached matches the criteria there may still be more in history
+		if (((IMessage) messages.values().toArray()[messages.size()-1]).getTimestamp().compareTo(endDate) <= 0) { //When the last message cached matches the criteria there may still be more in history
 			while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
 				if (RequestBuffer.request(() -> {
 					IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
@@ -359,7 +362,7 @@ public class Channel implements IChannel {
 	public MessageHistory getMessageHistoryFrom(String id, int maxCount) {
 		int index = -1;
 		for (int i = 0; i < messages.size(); i++) {
-			if (((IMessage) messages.toArray()[i]).getID().equals(id)) {
+			if (((IMessage) messages.values().toArray()[i]).getID().equals(id)) {
 				index = i;
 				break;
 			}
@@ -400,7 +403,7 @@ public class Channel implements IChannel {
 	public MessageHistory getMessageHistoryTo(String id, int maxCount) {
 		final List<IMessage> retrieved = new ArrayList<>();
 
-		for (IMessage message : messages) {
+		for (IMessage message : messages.values()) {
 			retrieved.add(message);
 			if (message.getID().equals(id))
 				return new MessageHistory(retrieved); //Let's end early since we reached the target
@@ -436,7 +439,7 @@ public class Channel implements IChannel {
 	public MessageHistory getMessageHistoryIn(String beginID, String endID, int maxCount) {
 		int startIndex = -1;
 		for (int i = 0; i < messages.size(); i++) {
-			if (((IMessage) messages.toArray()[i]).getID().equals(id)) {
+			if (((IMessage) messages.values().toArray()[i]).getID().equals(id)) {
 				startIndex = i;
 				break;
 			}
@@ -475,7 +478,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getFullMessageHistory() {
-		final List<IMessage> retrieved = new ArrayList<>(messages);
+		final List<IMessage> retrieved = new ArrayList<>(messages.values());
 
 		while (true) {
 			if (RequestBuffer.request(() -> {
@@ -547,10 +550,7 @@ public class Channel implements IChannel {
 		if (messageID == null)
 			return null;
 
-		return messages.stream()
-				.filter(msg -> msg.getID().equals(messageID))
-				.findAny()
-				.orElseGet(() -> {
+		return messages.getOrElseGet(messageID, () -> {
 					DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 					return RequestBuffer.request(() -> {
 						return DiscordUtils.getMessageFromJSON(this, client.REQUESTS.GET.makeRequest(
@@ -1016,19 +1016,17 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IWebhook> getWebhooks() {
-		return webhooks;
+		return new LinkedList<>(webhooks.values());
 	}
 
 	@Override
 	public IWebhook getWebhookByID(String id) {
-		return webhooks.stream()
-				.filter(w -> w.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
+		return webhooks.get(id);
 	}
 
 	@Override
 	public List<IWebhook> getWebhooksByName(String name) {
-		return webhooks.stream()
+		return webhooks.values().stream()
 				.filter(w -> w.getDefaultName().equals(name))
 				.collect(Collectors.toList());
 	}
@@ -1068,8 +1066,7 @@ public class Channel implements IChannel {
 	 * @param webhook The webhook.
 	 */
 	public void addWebhook(IWebhook webhook) {
-		if (!this.webhooks.contains(webhook))
-			this.webhooks.add(webhook);
+		this.webhooks.put(webhook);
 	}
 
 	/**
@@ -1134,7 +1131,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, guild, topic, position, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+		Channel channel = new Channel(client, name, id, guild, topic, position, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
 		channel.isTyping.set(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);

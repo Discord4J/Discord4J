@@ -35,6 +35,7 @@ import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IIDLinkedObject;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
@@ -46,7 +47,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class DiscordVoiceWS extends WebSocketAdapter {
+public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject {
 
 	private WebSocketClient wsClient;
 	private ScheduledExecutorService heartbeat = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Discord Voice WS Heartbeat"));
@@ -172,5 +173,10 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 
 	IGuild getGuild() {
 		return this.guild;
+	}
+
+	@Override
+	public String getID() {
+		return guild.getID();
 	}
 }

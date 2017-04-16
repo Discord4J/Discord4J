@@ -198,14 +198,19 @@ class DispatchHandler {
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id)));
 			return true;
 		}).andThen(() -> {
-			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard one
-				Arrays.stream(ready.private_channels)
-						.map(pm -> DiscordUtils.getPrivateChannelFromJSON(shard, pm))
-						.forEach(shard.privateChannels::add);
-			}
+			try {
+				if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard one
+					for (PrivateChannelObject pmObj : ready.private_channels) {
+						IPrivateChannel pm = DiscordUtils.getPrivateChannelFromJSON(shard, pmObj);
+						shard.privateChannels.put(pm);
+					}
+				}
 
-			ws.isReady = true;
-			client.getDispatcher().dispatch(new ShardReadyEvent(shard)); // All information for this shard has been received
+				ws.isReady = true;
+				client.getDispatcher().dispatch(new ShardReadyEvent(shard)); // All information for this shard has been received
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			return true;
 		}).execute();
 	}
@@ -302,7 +307,7 @@ class DispatchHandler {
 		}
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
-		shard.guildList.add(guild);
+		shard.guildList.put(guild);
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {
@@ -495,7 +500,7 @@ class DispatchHandler {
 			PrivateChannelObject event = MAPPER.treeToValue(json, PrivateChannelObject.class);
 			String id = event.id;
 			boolean contained = false;
-			for (IPrivateChannel privateChannel : shard.privateChannels) {
+			for (IPrivateChannel privateChannel : shard.privateChannels.values()) {
 				if (privateChannel.getID().equalsIgnoreCase(id))
 					contained = true;
 			}
@@ -503,7 +508,7 @@ class DispatchHandler {
 			if (contained)
 				return; // we already have this PM channel; no need to create another.
 
-			shard.privateChannels.add(DiscordUtils.getPrivateChannelFromJSON(shard, event));
+			shard.privateChannels.put(DiscordUtils.getPrivateChannelFromJSON(shard, event));
 
 		} else { // Regular channel.
 			ChannelObject event = MAPPER.treeToValue(json, ChannelObject.class);
@@ -516,7 +521,7 @@ class DispatchHandler {
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
 				} else if (type.equalsIgnoreCase("voice")) {
 					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(guild, event);
-					guild.addVoiceChannel(channel);
+					guild.addChannel(channel);
 					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
 				}
 			}

@@ -23,6 +23,7 @@ import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.cache.Cache;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +40,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int userLimit = 0;
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
+	public VoiceChannel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position,
+						int userLimit, int bitrate, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
 		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
@@ -358,7 +360,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, guild, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
+		return new VoiceChannel(client, name, id, guild, topic, position, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
 	}
 
 	@Override

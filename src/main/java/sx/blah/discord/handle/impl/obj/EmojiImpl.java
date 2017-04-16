@@ -19,13 +19,16 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.util.cache.Cache;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,7 +46,7 @@ public class EmojiImpl implements IEmoji {
 	/**
 	 * Roles for integration?
 	 */
-	protected final List<IRole> roles;
+	protected final Cache<IRole> roles;
 	/**
 	 * The name.
 	 */
@@ -67,13 +70,13 @@ public class EmojiImpl implements IEmoji {
 		this.name = name;
 		this.requiresColons = requiresColons;
 		this.isManaged = isManaged;
-		this.roles = new CopyOnWriteArrayList<>();
+		this.roles = new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class);
 
 		for (String roleId : roleIds) {
 			IRole role = guild.getRoleByID(roleId);
 
 			if (role != null) {
-				this.roles.add(role);
+				this.roles.put(role);
 			}
 		}
 	}
@@ -103,9 +106,7 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public IEmoji copy() {
-		EmojiImpl copy = new EmojiImpl(guild, id, name, requiresColons, isManaged, roles.toArray(new IRole[roles.size()]));
-
-		return copy;
+		return new EmojiImpl(guild, id, name, requiresColons, isManaged, roles.values().toArray(new IRole[roles.size()]));
 	}
 
 	@Override
@@ -138,7 +139,7 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public List<IRole> getRoles() {
-		return roles;
+		return new LinkedList<>(roles.values());
 	}
 
 	@Override

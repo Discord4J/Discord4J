@@ -19,10 +19,8 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.Cache;
 
 import java.util.*;
 
@@ -34,7 +32,9 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	protected final IUser recipient;
 
 	public PrivateChannel(DiscordClientImpl client, IUser recipient, String id) {
-		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
+		super(client, recipient.getName(), id, null, null, 0,
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)),
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)));
 		this.recipient = recipient;
 	}
 
