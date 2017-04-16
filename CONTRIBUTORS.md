@@ -31,7 +31,7 @@
 * @UnderMybrella - Added webhook support
 * @BloodShura - AudioPlayer::queue(IAudioProvider) now calls the correct constructor for AudioInputStreamProvider instances; Track(AudioInputStream) constructor no longer declares IOException as being throwable
 * @xaanit - Added IEmbedBuilder#appendField(IEmbedField)
-* @randomname8 - Audio receive
+* @randomname8 - Helped with audio receive, rewrote event dispatcher
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
