@@ -137,10 +137,12 @@ public class UDPVoiceSocket {
 
 	void begin() {
 		audioTask = new HighPrecisionRecurrentTask(OpusUtil.OPUS_FRAME_TIME, 0.01f, () -> {
-			if (!udpSocket.isClosed()) {
-				sendRunnable.run();
-				receiveRunnable.run();
-				keepAliveRunnable.run();
+			synchronized (udpSocket) { //while the the audio handling is happening, lock the socket so no concurrent shutdown happens
+				if (!udpSocket.isClosed()) {
+					sendRunnable.run();
+					receiveRunnable.run();
+					keepAliveRunnable.run();
+				}
 			}
 		});
 		audioTask.setDaemon(true);
@@ -149,7 +151,9 @@ public class UDPVoiceSocket {
 
 	void shutdown() {
 		audioTask.setStop(true);
-		udpSocket.close();
+		synchronized (udpSocket) {
+			udpSocket.close();
+		}
 	}
 
 	private Pair<String, Integer> doIPDiscovery(int ssrc) throws IOException {
