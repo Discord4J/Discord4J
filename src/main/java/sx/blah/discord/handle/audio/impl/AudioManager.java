@@ -108,8 +108,11 @@ public class AudioManager implements IAudioManager {
 	}
 
 	public synchronized void receiveAudio(byte[] opusAudio, IUser user) {
-		byte[] pcm = OpusUtil.decode(stereoDecoder.get(), opusAudio);
-		receiveAudio(opusAudio, pcm, user);
+		// Initializing decoder is an expensive op. Don't do it if no one is listening
+		if (generalReceivers.size() > 0 || userReceivers.size() > 0) {
+			byte[] pcm = OpusUtil.decode(stereoDecoder.get(), opusAudio);
+			receiveAudio(opusAudio, pcm, user);
+		}
 	}
 
 	private void receiveAudio(byte[] opusAudio, byte[] pcmAudio, IUser user) {
@@ -131,8 +134,6 @@ public class AudioManager implements IAudioManager {
 			});
 		}
 	}
-
-
 
 	@Override
 	public IGuild getGuild() {
