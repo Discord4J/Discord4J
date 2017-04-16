@@ -33,6 +33,7 @@ import sx.blah.discord.util.cache.Cache;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Supplier;
 
 public class User implements IUser {
 
@@ -94,7 +95,7 @@ public class User implements IUser {
 	/**
 	 * The voice states this user has.
 	 */
-	protected final Cache<IVoiceState> voiceStates;
+	public final Cache<IVoiceState> voiceStates;
 
 	public User(IShard shard, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this(shard, shard == null ? null : shard.getClient(), name, id, discriminator, avatar, presence, isBot);
@@ -235,12 +236,13 @@ public class User implements IUser {
 
 	@Override
 	public IVoiceState getVoiceStateForGuild(IGuild guild) {
-		return voiceStates.computeIfAbsent(guild.getID(), (String key) -> new VoiceState(guild, this));
+		voiceStates.putIfAbsent(guild.getID(), () -> new VoiceState(guild, this));
+		return voiceStates.get(guild.getID());
 	}
 
 	@Override
 	public Map<String, IVoiceState> getVoiceStates() {
-		return voiceStates;
+		return voiceStates.mapCopy();
 	}
 
 	@Override
@@ -270,7 +272,7 @@ public class User implements IUser {
 	 * @param nick    The nickname, or null to remove it.
 	 */
 	public void addNick(String guildID, String nick) {
-		nicks.put(guildID, new NickHolder(guildID, nick));
+		nicks.put(new NickHolder(guildID, nick));
 	}
 
 	/**
@@ -280,7 +282,8 @@ public class User implements IUser {
 	 * @param role    The role.
 	 */
 	public void addRole(String guildID, IRole role) {
-		roles.computeIfAbsent(guildID, (String id) -> new RolesHolder(id, new CopyOnWriteArraySet<>())).getObject().add(role);
+		roles.putIfAbsent(guildID, () -> new RolesHolder(guildID, new CopyOnWriteArraySet<>()));
+		roles.get(guildID).getObject().add(role);
 	}
 
 	@Override

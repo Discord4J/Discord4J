@@ -444,7 +444,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getOurUser().getVoiceStates().values().stream().map(IVoiceState::getChannel).filter(Objects::nonNull).collect(Collectors.toList());
+		return ((User) getOurUser()).voiceStates.values().stream().map(IVoiceState::getChannel).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Override

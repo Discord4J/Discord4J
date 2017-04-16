@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 /**
  * This represents a generic discord object.
  */
-public interface IDiscordObject<SELF extends IDiscordObject> extends IIDLinkedObject { //The SELF thing is just a hack to get copy() to work correctly because self types don't exist in java >.>
+public interface IDiscordObject<SELF extends IDiscordObject<SELF>> extends IIDLinkedObject { //The SELF thing is just a hack to get copy() to work correctly because self types don't exist in java >.>
 
 	/**
 	 * Gets the {@link IDiscordClient} instance this object belongs to.

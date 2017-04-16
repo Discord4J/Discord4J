@@ -23,7 +23,9 @@ import sx.blah.discord.handle.obj.IIDLinkedObject;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -31,7 +33,7 @@ import java.util.stream.Stream;
  *
  * @param <T> The object held by the cache
  */
-public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, RandomAccess {
+public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 
 	/**
 	 * This represents the default {@link ICacheDelegateProvider} used by Discord4J.
@@ -87,25 +89,28 @@ public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, R
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Gets the amount of elements stored in this cache.
+	 *
+	 * @return The number of contained elements.
 	 */
-	@Override
 	public int size() {
 		return delegate.size();
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Checks if the cache is empty.
+	 *
+	 * @return True if the cache is empty, false if otherwise.
 	 */
-	@Override
 	public boolean isEmpty() {
 		return size() < 1;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Checks whether a key is present in the cache.
+	 *
+	 * @return True if the key is present, false if otherwise.
 	 */
-	@Override
 	public boolean containsKey(Object key) {
 		if (key instanceof String) {
 			return delegate.contains((String) key);
@@ -129,17 +134,19 @@ public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, R
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Checks whether a value is existent in the cache.
+	 *
+	 * @return True if the value exists, false if otherwise.
 	 */
-	@Override
 	public boolean containsValue(Object value) {
 		return value instanceof IIDLinkedObject && delegate.contains((T) value);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Gets an object by the specified id.
+	 *
+	 * @return The object, or null if not found.
 	 */
-	@Override
 	public T get(Object key) {
 		if (key instanceof String) {
 			return delegate.retrieve((String) key).orElse(null);
@@ -187,32 +194,49 @@ public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, R
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public T put(String key, T value) {
-		if (!key.equals(value.getID()))
-			throw new IllegalArgumentException("Key does not match the value's id");
-
-		return put(value);
-	}
-
-	/**
-	 * An implementation of {@link #put(String, T)} which accepts just an object (since it provides its respective id).
+	 * An puts an object into the cache.
 	 *
 	 * @param value The key to search for.
 	 * @return The previous object if it exists, or null if it doesn't.
-	 *
-	 * @see #put(String, T)
 	 */
 	public T put(T value) {
 		return delegate.put(value).orElse(null);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Puts a value into the cache if there is no value associated with it already.
+	 *
+	 * @param id The id associated with the object.
+	 * @param valueSupplier The supplier to use if there is no object.
+	 * @return The previous object if it exists, or null if it doesn't.
 	 */
-	@Override
+	public T putIfAbsent(String id, Supplier<T> valueSupplier) {
+		if (containsKey(id))
+			return null;
+		else
+			return put(valueSupplier.get());
+	}
+
+	/**
+	 * Puts a value into the cache if there is no value associated with it already.
+	 *
+	 * @param id The id associated with the object.
+	 * @param valueSupplier The supplier to use if there is no object.
+	 * @return The previous object if it exists, or null if it doesn't.
+	 */
+	public T putIfAbsent(long id, Supplier<T> valueSupplier) {
+		if (containsKey(id))
+			return null;
+		else
+			return put(valueSupplier.get());
+	}
+
+	/**
+	 * Attempts to remove an object from the cache.
+	 *
+	 * @param obj The object removed, this could either be a key or the object itself.
+	 * @return The object removed.
+	 */
 	public T remove(Object obj) {
 		if (obj instanceof String) {
 			return delegate.remove((String) obj).orElse(null);
@@ -238,35 +262,26 @@ public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, R
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * This is called to place a collection of objects into the cache.
+	 *
+	 * @param objs The objects to insert.
+	 * @return The objects replaced by this operation.
 	 */
-	@Override
-	public void putAll(Map<? extends String, ? extends T> m) {
-		delegate.putAll((Collection<T>) m.values());
+	public Collection<T> putAll(Cache<T> objs) {
+		return delegate.putAll(objs.values());
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * This clears the cache.
 	 */
-	@Override
 	public void clear() {
 		delegate.clear();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Set<String> keySet() {
-		return new HashSet<>(delegate.ids());
 	}
 
 	/**
 	 * This gets a collection of ids which correspond to stored objects in this cache.
 	 *
 	 * @return A collection of ids of objects present.
-	 *
-	 * @see #keySet()
 	 */
 	public Collection<String> ids() {
 		return delegate.ids();
@@ -276,17 +291,16 @@ public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, R
 	 * This gets a collection of primitive ids which correspond to stored objects in this cache.
 	 *
 	 * @return A collection of ids of objects present.
-	 *
-	 * @see #keySet()
 	 */
 	public Collection<Long> longIDs() {
 		return delegate.longIDs();
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Gets a collection of the values stored by this cache.
+	 *
+	 * @return The values stored in this cache.
 	 */
-	@Override
 	public Collection<T> values() {
 		return delegate.values();
 	}
@@ -310,35 +324,29 @@ public final class Cache<T extends IIDLinkedObject> implements Map<String, T>, R
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Set<Entry<String, T>> entrySet() {
-		Set<Entry<String, T>> set = new HashSet<>();
-		delegate.ids().forEach(id -> set.add(new AbstractMap.SimpleEntry<String, T>(id, get(id))));
-		return set;
-	}
-
-	/**
-	 * An implementation of {@link #entrySet()} which returns an entry set with {@link Long} keys.
-	 *
-	 * @return The set of entries in this cache..
-	 *
-	 * @see #entrySet()
-	 */
-	public Set<Entry<Long, T>> longEntrySet() {
-		Set<Entry<Long, T>> set = new HashSet<>();
-		delegate.longIDs().forEach(id -> set.add(new AbstractMap.SimpleEntry<Long, T>(id, get(id))));
-		return set;
-	}
-
-	/**
 	 * This gets a copy of this cache.
 	 *
 	 * @return The new copy of the cache.
 	 */
 	public Cache<T> copy() {
 		return new Cache<>(client, delegate.copy());
+	}
+
+	/**
+	 * Creates a copy of this cache in a {@link Map}.
+	 *
+	 * @return The copy of the cache.
+	 */
+	public Map<String, T> mapCopy() {
+		return values().stream().collect(Collectors.toMap(T::getID, Function.identity()));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Iterator<T> iterator() {
+		return delegate.iterator();
 	}
 
 	/**

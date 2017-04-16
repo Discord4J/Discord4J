@@ -101,12 +101,12 @@ public class Channel implements IChannel {
 	/**
 	 * The permission overrides for users (key = user id).
 	 */
-	protected final Cache<PermissionOverride> userOverrides;
+	public final Cache<PermissionOverride> userOverrides;
 
 	/**
 	 * The permission overrides for roles (key = role id).
 	 */
-	protected final Cache<PermissionOverride> roleOverrides;
+	public final Cache<PermissionOverride> roleOverrides;
 
 	/**
 	 * The webhooks for this channel.
@@ -845,12 +845,12 @@ public class Channel implements IChannel {
 
 	@Override
 	public Map<String, PermissionOverride> getUserOverrides() {
-		return userOverrides;
+		return userOverrides.mapCopy();
 	}
 
 	@Override
 	public Map<String, PermissionOverride> getRoleOverrides() {
-		return roleOverrides;
+		return roleOverrides.mapCopy();
 	}
 
 	@Override
@@ -861,7 +861,7 @@ public class Channel implements IChannel {
 		List<IRole> roles = user.getRolesForGuild(guild);
 		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
 
-		PermissionOverride override = getUserOverrides().get(user.getID());
+		PermissionOverride override = userOverrides.get(user.getID());
 		List<PermissionOverride> overrideRoles = roles.stream()
 				.filter(r -> roleOverrides.containsKey(r.getID()))
 				.map(role -> roleOverrides.get(role.getID()))
@@ -883,37 +883,17 @@ public class Channel implements IChannel {
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
 		EnumSet<Permissions> base = role.getPermissions();
-		PermissionOverride override = getRoleOverrides().get(role.getID());
+		PermissionOverride override = roleOverrides.get(role.getID());
 
 		if (override == null) {
-			if ((override = getRoleOverrides().get(guild.getEveryoneRole().getID())) == null)
+			if ((override = roleOverrides.get(guild.getEveryoneRole().getID())) == null)
 				return base;
 		}
 
-		base.addAll(override.allow().stream().collect(Collectors.toList()));
+		base.addAll(new ArrayList<>(override.allow()));
 		override.deny().forEach(base::remove);
 
 		return base;
-	}
-
-	/**
-	 * CACHES a permissions override for a user in this channel.
-	 *
-	 * @param userId   The user the permissions override is for.
-	 * @param override The permissions override.
-	 */
-	public void addUserOverride(String userId, PermissionOverride override) {
-		userOverrides.put(userId, override);
-	}
-
-	/**
-	 * CACHES a permissions override for a role in this channel.
-	 *
-	 * @param roleId   The role the permissions override is for.
-	 * @param override The permissions override.
-	 */
-	public void addRoleOverride(String roleId, PermissionOverride override) {
-		roleOverrides.put(roleId, override);
 	}
 
 	@Override

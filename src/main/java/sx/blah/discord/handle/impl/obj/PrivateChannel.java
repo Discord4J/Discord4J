@@ -62,16 +62,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void addUserOverride(String userId, PermissionOverride override) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addRoleOverride(String roleId, PermissionOverride override) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void removePermissionsOverride(IUser user) {
 		throw new UnsupportedOperationException();
 	}

@@ -473,7 +473,7 @@ class DispatchHandler {
 
 		// Clean up cache
 		guild.getShard().getGuilds().remove(guild);
-		client.getOurUser().getVoiceStates().remove(guild.getID());
+		((User) client.getOurUser()).voiceStates.remove(guild.getID());
 		DiscordVoiceWS vWS = shard.voiceWebSockets.get(json.id);
 		if (vWS != null) {
 			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
@@ -660,15 +660,15 @@ class DispatchHandler {
 	}
 
 	private void voiceStateUpdate(VoiceStateObject json) {
-		IUser user = shard.getUserByID(json.user_id);
+		User user = (User) shard.getUserByID(json.user_id);
 
 		if (user != null) {
-			IVoiceState curVoiceState = user.getVoiceStates().get(json.guild_id);
+			IVoiceState curVoiceState = user.voiceStates.get(json.guild_id);
 
 			IVoiceChannel channel = shard.getVoiceChannelByID(json.channel_id);
 			IVoiceChannel oldChannel = curVoiceState == null ? null : curVoiceState.getChannel();
 
-			user.getVoiceStates().put(json.guild_id, DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
+			user.voiceStates.put(DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
 
 			if (oldChannel != channel) {
 				if (channel == null) {
@@ -689,7 +689,7 @@ class DispatchHandler {
 		}
 
 		DiscordVoiceWS vWS = new DiscordVoiceWS(shard, event);
-		shard.voiceWebSockets.put(event.guild_id, vWS);
+		shard.voiceWebSockets.put(vWS);
 		vWS.connect();
 	}
 

@@ -306,7 +306,7 @@ public class DiscordUtils {
 						}).execute();
 					}
 					if (user.get()!= null)
-						user.get().getVoiceStates().put(guild.getID(), DiscordUtils.getVoiceStateFromJson(guild, voiceState));
+						((User) user.get()).voiceStates.put(DiscordUtils.getVoiceStateFromJson(guild, voiceState));
 				}
 			}
 		}
@@ -523,10 +523,10 @@ public class DiscordUtils {
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			channel.setTopic(json.topic);
-			channel.getUserOverrides().clear();
-			channel.getUserOverrides().putAll(userOverrides);
-			channel.getRoleOverrides().clear();
-			channel.getRoleOverrides().putAll(roleOverrides);
+			channel.userOverrides.clear();
+			channel.userOverrides.putAll(userOverrides);
+			channel.roleOverrides.clear();
+			channel.roleOverrides.putAll(roleOverrides);
 		} else {
 			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					roleOverrides, userOverrides);
@@ -548,12 +548,10 @@ public class DiscordUtils {
 
 		for (OverwriteObject overrides : overwrites) {
 			if (overrides.type.equalsIgnoreCase("role")) {
-				roleOverrides.put(overrides.id,
-						new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+				roleOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
 								Permissions.getDeniedPermissionsForNumber(overrides.deny), overrides.id));
 			} else if (overrides.type.equalsIgnoreCase("member")) {
-				userOverrides.put(overrides.id,
-						new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+				userOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
 								Permissions.getDeniedPermissionsForNumber(overrides.deny), overrides.id));
 			} else {
 				Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
@@ -617,10 +615,10 @@ public class DiscordUtils {
 			channel.setBitrate(json.bitrate);
 			channel.setName(json.name);
 			channel.setPosition(json.position);
-			channel.getUserOverrides().clear();
-			channel.getUserOverrides().putAll(userOverrides);
-			channel.getRoleOverrides().clear();
-			channel.getRoleOverrides().putAll(roleOverrides);
+			channel.userOverrides.clear();
+			channel.userOverrides.putAll(userOverrides);
+			channel.roleOverrides.clear();
+			channel.roleOverrides.putAll(roleOverrides);
 		} else {
 			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					json.user_limit, json.bitrate, roleOverrides, userOverrides);
