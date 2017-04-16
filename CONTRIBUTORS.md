@@ -20,7 +20,7 @@
 * @Kaioru - Fixed the module-requires manifest key
 * @theIgloo - Fixed voice state logic, added self mute and deaf support, made IVoiceChannel#join() check the user's 
  permissions, added voice channel bitrate support, and fixed various permission caching problems
-* @Techtony96 - Made IVoiceChannel#mention() throw an UnsupportedOperationException, IGuild
+* @Techtony96 - Made IVoiceChannel#mention() throw an UnsupportedOperationException
 * @poncethecat - Added .addRole and .removeRole for the User object
 * @oopsjpeg - Added ignore case for getXByName for many methods
 * @ArsenArsen - Added CloudFlare requests to retry
