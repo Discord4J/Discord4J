@@ -33,13 +33,13 @@ import java.util.function.Supplier;
 public final class Cache<T  extends IIDLinkedObject> implements Map<String, T>, RandomAccess {
 
 	/**
-	 * This represents the default {@link ICacheProvider} used by Discord4J.
+	 * This represents the default {@link ICacheDelegateProvider} used by Discord4J.
 	 */
-	public static final ICacheProvider DEFAULT_PROVIDER = new DefaultCacheProvider();
+	public static final ICacheDelegateProvider DEFAULT_PROVIDER = new DefaultCacheDelegateProvider();
 	/**
-	 * This represents an implementation of {@link ICacheProvider} which stores nothing.
+	 * This represents an implementation of {@link ICacheDelegateProvider} which stores nothing.
 	 */
-	public static final ICacheProvider IGNORING_PROVIDER = new IgnoringCacheProvider();
+	public static final ICacheDelegateProvider IGNORING_PROVIDER = new IgnoringCacheDelegateProvider();
 
 	private volatile ICacheDelegate<T> delegate;
 	private final DiscordClientImpl client;
@@ -496,7 +496,7 @@ public final class Cache<T  extends IIDLinkedObject> implements Map<String, T>, 
 	}
 }
 
-class DefaultCacheProvider implements ICacheProvider {
+class DefaultCacheDelegateProvider implements ICacheDelegateProvider {
 
 	@Override
 	public <T extends IIDLinkedObject> ICacheDelegate<T> provide(Class<T> clazz) {
@@ -504,7 +504,7 @@ class DefaultCacheProvider implements ICacheProvider {
 	}
 }
 
-class IgnoringCacheProvider implements ICacheProvider {
+class IgnoringCacheDelegateProvider implements ICacheDelegateProvider {
 
 	@Override
 	public <T extends IIDLinkedObject> ICacheDelegate<T> provide(Class<T> clazz) {

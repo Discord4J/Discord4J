@@ -33,9 +33,8 @@ import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
-import sx.blah.discord.util.cache.ICacheProvider;
+import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -102,7 +101,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Provides cache objects used by this api.
 	 */
-	private final ICacheProvider cacheProvider;
+	private final ICacheDelegateProvider cacheProvider;
 
 	/**
 	 * The requests holder object.
@@ -118,7 +117,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final Lazy<ApplicationInfoResponse> applicationInfo = new Lazy<>(this::getApplicationInfo);
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount, ICacheProvider provider) {
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
@@ -579,7 +578,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return maxCacheCount;
 	}
 
-	public ICacheProvider getCacheProvider() {
+	public ICacheDelegateProvider getCacheProvider() {
 		return cacheProvider;
 	}
 }

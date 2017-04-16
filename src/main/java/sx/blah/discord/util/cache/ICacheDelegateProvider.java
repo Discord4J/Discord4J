@@ -23,7 +23,7 @@ import sx.blah.discord.handle.obj.IIDLinkedObject;
  * This represents a provider of {@link ICacheDelegate}s for use in {@link Cache}s.
  */
 @FunctionalInterface
-public interface ICacheProvider {
+public interface ICacheDelegateProvider {
 
 	/**
 	 * This is called to provide a new instance of an {@link ICacheDelegate}.

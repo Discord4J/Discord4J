@@ -26,7 +26,7 @@ import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.api.internal.json.responses.GatewayBotResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.cache.Cache;
-import sx.blah.discord.util.cache.ICacheProvider;
+import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +51,7 @@ public class ClientBuilder {
 	private int maxReconnectAttempts = 5;
 	private int retryCount = 5;
 	private int maxCacheCount = DEFAULT_MESSAGE_CACHE_LIMIT;
-	private ICacheProvider provider = Cache.DEFAULT_PROVIDER;
+	private ICacheDelegateProvider provider = Cache.DEFAULT_PROVIDER;
 
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
@@ -158,13 +158,13 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the {@link ICacheProvider} used to create {@link sx.blah.discord.util.cache.ICacheDelegate}s to store cached
+	 * Sets the {@link ICacheDelegateProvider} used to create {@link sx.blah.discord.util.cache.ICacheDelegate}s to store cached
 	 * objects.
 	 *
 	 * @param provider The cache provider for this client to use.
 	 * @return The instance of the builder.
 	 */
-	public ClientBuilder setCacheProvider(ICacheProvider provider) {
+	public ClientBuilder setCacheProvider(ICacheDelegateProvider provider) {
 		this.provider = provider;
 		return this;
 	}
