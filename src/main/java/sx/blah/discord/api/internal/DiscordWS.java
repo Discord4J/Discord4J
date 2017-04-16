@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -169,6 +170,8 @@ public class DiscordWS extends WebSocketAdapter {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UnknownHostException. Internet outage?");
 		} else if (cause instanceof UpgradeException) {
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Caught UpgradeException. Internet outage?");
+		} else if (cause instanceof ClosedChannelException) {
+			Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Discord rejected our connection, reconnecting...");
 		} else {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", cause);
 		}
