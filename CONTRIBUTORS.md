@@ -9,18 +9,18 @@
 * @quanticc
 
 ## Contributors
+* @dec - Wrote the regex for invite parsing, docs
 * @phantamanta44 - Added some Java 8 goodness
 * @lclc98 - Added audio support, initial sharding
 * @sedmelluq - Realized how UTF-8 was ruining audio
 * @TheFjonG - Created the awesome (now outdated) Discord4J ReadTheDocs page
 * @Martacus - Created an example repo for Discord4J modules
 * @davue - Added user fields to VoiceUser events
-* @dec - Wrote the regex for invite parsing
 * @langerhans - Helped with the AudioChannel object
 * @Kaioru - Fixed the module-requires manifest key
 * @theIgloo - Fixed voice state logic, added self mute and deaf support, made IVoiceChannel#join() check the user's 
  permissions, added voice channel bitrate support, and fixed various permission caching problems
-* @Techtony96 - Made IVoiceChannel#mention() throw an UnsupportedOperationException
+* @Techtony96 - Made IVoiceChannel#mention() throw an UnsupportedOperationException, IGuild
 * @poncethecat - Added .addRole and .removeRole for the User object
 * @oopsjpeg - Added ignore case for getXByName for many methods
 * @ArsenArsen - Added CloudFlare requests to retry
@@ -31,6 +31,7 @@
 * @UnderMybrella - Added webhook support
 * @BloodShura - AudioPlayer::queue(IAudioProvider) now calls the correct constructor for AudioInputStreamProvider instances; Track(AudioInputStream) constructor no longer declares IOException as being throwable
 * @xaanit - Added IEmbedBuilder#appendField(IEmbedField)
+* @randomname8 - Audio receive
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
