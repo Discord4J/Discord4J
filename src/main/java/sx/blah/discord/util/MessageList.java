@@ -183,11 +183,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 		String queryParams = "?limit="+messageCount;
 		if (initialSize != 0)
-			queryParams += "&before="+messageCache.getLast().getID();
+			queryParams += "&before="+messageCache.getLast().getStringID();
 
 		MessageObject[] messages = new MessageObject[0];
 		try {
-			messages = DiscordUtils.MAPPER.readValue(client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams), MessageObject[].class);
+			messages = DiscordUtils.MAPPER.readValue(client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getStringID()+"/messages"+queryParams), MessageObject[].class);
 		} catch (IOException e) {
 			throw new DiscordException("JSON Parsing exception!", e);
 		}
@@ -253,7 +253,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return True if found, false if otherwise.
 	 */
 	public boolean contains(String id) {
-		return messageCache.stream().filter(it -> it.getID().equals(id)).findFirst().isPresent();
+		return messageCache.stream().filter(it -> it.getStringID().equals(id)).findFirst().isPresent();
 	}
 
 	/**
@@ -356,12 +356,12 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return The message object found, or null if nonexistent.
 	 */
 	public IMessage get(String id) {
-		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+		IMessage message = stream().filter((m) -> m.getStringID().equalsIgnoreCase(id)).findFirst().orElse(null);
 
 		if (message == null && hasPermissions() && client.isReady())
 			try {
 				return DiscordUtils.getMessageFromJSON((Channel) channel, client.REQUESTS.GET.makeRequest(
-						DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id,
+						DiscordEndpoints.CHANNELS + channel.getStringID() + "/messages/" + id,
 						MessageObject.class));
 			} catch (Exception ignored) {}
 
@@ -589,7 +589,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			throw new DiscordException("Must provide at least 2 and fewer than 100 messages to delete.");
 
 		long invalidCount = messages.stream()
-				.mapToLong(it -> Long.parseLong(it.getID()))
+				.mapToLong(IIDLinkedObject::getLongID)
 				.filter(id -> id < (((System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000) - 1420070400000L) << 22)) // Taken from Jake
 				// IF THE ID IS LESS THAN TWO WEEKS AGO SUBTRACT DISCORD EPOCH BITSHIFT LEFT 22 THEN COUNT IT BECAUSE IT'S BAD
 				.count();
@@ -597,7 +597,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 			throw new DiscordException(String.format("%d messages cannot be bulk deleted! They are more than 2 weeks old.", invalidCount));
 
 		client.REQUESTS.POST.makeRequest(
-				DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk-delete",
+				DiscordEndpoints.CHANNELS + channel.getStringID() + "/messages/bulk-delete",
 				new BulkDeleteRequest(messages));
 	}
 

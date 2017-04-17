@@ -51,7 +51,7 @@ public class Invite implements IInvite {
 		client.checkReady("get invite details");
 		InviteObject response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode, InviteObject.class);
 
-		return new InviteResponse(response.guild.id, response.guild.name, response.channel.id, response.channel.name);
+		return new InviteResponse(Long.parseUnsignedLong(response.guild.id), response.guild.name, Long.parseUnsignedLong(response.channel.id), response.channel.name);
 	}
 
 	@Override

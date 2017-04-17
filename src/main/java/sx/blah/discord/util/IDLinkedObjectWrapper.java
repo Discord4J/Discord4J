@@ -24,10 +24,10 @@ import sx.blah.discord.handle.obj.IIDLinkedObject;
  */
 public class IDLinkedObjectWrapper<T> implements IIDLinkedObject {
 
-	private final String id;
+	private final long id;
 	private final T obj;
 
-	public IDLinkedObjectWrapper(String id, T obj) {
+	public IDLinkedObjectWrapper(long id, T obj) {
 		this.id = id;
 		this.obj = obj;
 	}
@@ -36,7 +36,7 @@ public class IDLinkedObjectWrapper<T> implements IIDLinkedObject {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 

@@ -198,14 +198,8 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IChannel getChannelByID(String id) {
-		for (IGuild guild : guildCache.values()) {
-			IChannel channel = guild.getChannelByID(id);
-			if (channel != null)
-				return channel;
-		}
-
-		return privateChannels.get(id);
+	public IChannel getChannelByID(long id) {
+		return guildCache.findResult((guildID, guild) -> guild.getChannelByID(id));
 	}
 
 	@Override
@@ -222,14 +216,8 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IVoiceChannel getVoiceChannelByID(String id) {
-		for (IGuild guild : guildCache.values()) {
-			IVoiceChannel channel = guild.getVoiceChannelByID(id);
-			if (channel != null)
-				return channel;
-		}
-
-		return null;
+	public IVoiceChannel getVoiceChannelByID(long id) {
+		return guildCache.findResult((guildID, guild) -> guild.getVoiceChannelByID(id));
 	}
 
 	@Override
@@ -238,7 +226,7 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IGuild getGuildByID(String guildID) {
+	public IGuild getGuildByID(long guildID) {
 		return guildCache.get(guildID);
 	}
 
@@ -257,25 +245,16 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IUser getUserByID(String userID) {
-		IUser user = null;
-
-		for (IGuild guild : guildCache.values()) {
-			user = guild.getUserByID(userID);
-			if (user != null)
-				break;
-		}
-
+	public IUser getUserByID(long userID) {
 		IUser ourUser = getClient().getOurUser();
-
-		user = ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
-		return user;
+		if (ourUser != null && userID == ourUser.getLongID()) return ourUser;
+		return guildCache.findResult((guildID, guild) -> guild.getUserByID(userID));
 	}
 
 	@Override
-	public IUser fetchUser(String id) {
+	public IUser fetchUser(long id) {
 		IUser cached = getUserByID(id);
-		return cached == null ? DiscordUtils.getUserFromJSON(this, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
+		return cached == null ? DiscordUtils.getUserFromJSON(null, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + Long.toUnsignedString(id), UserObject.class)) : cached;
 	}
 
 	@Override
@@ -287,14 +266,8 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IRole getRoleByID(String roleID) {
-		for (IGuild guild : guildCache.values()) {
-			IRole role = guild.getRoleByID(roleID);
-			if (role != null)
-				return role;
-		}
-
-		return null;
+	public IRole getRoleByID(long roleID) {
+		return guildCache.findResult((guildID, guild) -> guild.getRoleByID(roleID));
 	}
 
 	@Override
@@ -311,20 +284,11 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IMessage getMessageByID(String messageID) {
-		for (IGuild guild : guildCache.values()) {
-			IMessage message = guild.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		for (IPrivateChannel privateChannel : privateChannels.values()) {
-			IMessage message = privateChannel.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		return null;
+	public IMessage getMessageByID(long messageID) {
+		IMessage message = guildCache.findResult((guildID, guild) -> guild.getMessageByID(messageID));
+		if (message == null)
+			message = privateChannels.findResult((channelID, channel) -> channel.getMessageByID(messageID));
+		return message;
 	}
 
 	@Override
@@ -334,13 +298,13 @@ public class ShardImpl implements IShard {
 		if (user.equals(getClient().getOurUser()))
 			throw new DiscordException("Cannot PM yourself!");
 
-		IPrivateChannel channel = privateChannels.get(user.getID());
+		IPrivateChannel channel = privateChannels.get(user.getLongID());
 		if (channel != null)
 			return channel;
 
 		PrivateChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
-				DiscordEndpoints.USERS+getClient().getOurUser().getID()+"/channels",
-				new PrivateChannelCreateRequest(user.getID()),
+				DiscordEndpoints.USERS+getClient().getOurUser().getStringID()+"/channels",
+				new PrivateChannelCreateRequest(user.getStringID()),
 				PrivateChannelObject.class);
 		channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
 		privateChannels.put(channel);

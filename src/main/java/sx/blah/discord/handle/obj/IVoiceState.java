@@ -85,7 +85,7 @@ public interface IVoiceState extends IIDLinkedObject {
 	 * @return The guild id.
 	 */
 	@Override
-	default String getID() {
-		return getGuild().getID();
+	default long getLongID() {
+		return getGuild().getLongID();
 	}
 }

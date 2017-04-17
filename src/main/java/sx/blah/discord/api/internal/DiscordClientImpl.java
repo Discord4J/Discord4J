@@ -258,7 +258,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		try {
 			UserObject owner = getApplicationInfo().owner;
 
-			IUser user = getUserByID(owner.id);
+			IUser user = getUserByID(Long.parseUnsignedLong(owner.id));
 			if (user == null)
 				user = DiscordUtils.getUserFromJSON(getShards().get(0), owner);
 
@@ -397,7 +397,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IGuild getGuildByID(String guildID) {
+	public IGuild getGuildByID(long guildID) {
 		for (IShard shard : shards) {
 			IGuild guild = shard.getGuildByID(guildID);
 			if (guild != null)
@@ -424,7 +424,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IChannel getChannelByID(String channelID) {
+	public IChannel getChannelByID(long channelID) {
 		for (IShard shard : shards) {
 			IChannel channel = shard.getChannelByID(channelID);
 			if (channel != null)
@@ -448,7 +448,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IVoiceChannel getVoiceChannelByID(String id) {
+	public IVoiceChannel getVoiceChannelByID(long id) {
 		for (IShard shard : shards) {
 			IVoiceChannel voiceChannel = shard.getVoiceChannelByID(id);
 			if (voiceChannel != null)
@@ -468,7 +468,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IUser getUserByID(String userID) {
+	public IUser getUserByID(long userID) {
 		for (IShard shard : shards) {
 			IUser user = shard.getUserByID(userID);
 			if (user != null)
@@ -479,9 +479,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IUser fetchUser(String id) {
+	public IUser fetchUser(long id) {
 		IUser cached = getUserByID(id);
-		return cached == null ? DiscordUtils.getUserFromJSON(shards.get(0), REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
+		return cached == null ? DiscordUtils.getUserFromJSON(shards.get(0), REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + Long.toUnsignedString(id), UserObject.class)) : cached;
 	}
 
 	@Override
@@ -505,7 +505,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IRole getRoleByID(String roleID) {
+	public IRole getRoleByID(long roleID) {
 		for (IShard shard : shards) {
 			IRole role = shard.getRoleByID(roleID);
 			if (role != null)
@@ -532,7 +532,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IMessage getMessageByID(String messageID) {
+	public IMessage getMessageByID(long messageID) {
 		for (IShard shard : shards) {
 			IMessage message = shard.getMessageByID(messageID);
 			if (message != null)

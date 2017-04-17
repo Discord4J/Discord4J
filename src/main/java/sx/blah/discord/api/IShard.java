@@ -191,8 +191,21 @@ public interface IShard {
 	 *
 	 * @param channelID The id of the desired channel.
 	 * @return The {@link Channel} object with the provided id.
+	 * @deprecated Use {@link #getChannelByID(long)} instead
 	 */
-	IChannel getChannelByID(String channelID);
+	@Deprecated
+	default IChannel getChannelByID(String channelID) {
+		if (channelID == null) return null;
+		return getChannelByID(Long.parseUnsignedLong(channelID));
+	}
+
+	/**
+	 * Gets a channel by its unique id.
+	 *
+	 * @param channelID The id of the desired channel.
+	 * @return The {@link Channel} object with the provided id.
+	 */
+	IChannel getChannelByID(long channelID);
 
 	/**
 	 * Gets a set of all voice channels visible to this shard.
@@ -213,8 +226,21 @@ public interface IShard {
 	 *
 	 * @param id The voice channel id.
 	 * @return The voice channel (or null if not found).
+	 * @deprecated Use {@link #getVoiceChannelByID(long)} instead
 	 */
-	IVoiceChannel getVoiceChannelByID(String id);
+	@Deprecated
+	default IVoiceChannel getVoiceChannelByID(String id) {
+		if (id == null) return null;
+		return getVoiceChannelByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * Gets a voice channel from a given id.
+	 *
+	 * @param id The voice channel id.
+	 * @return The voice channel (or null if not found).
+	 */
+	IVoiceChannel getVoiceChannelByID(long id);
 
 	/**
 	 * Gets a set of all guilds visible to this shard.
@@ -228,8 +254,21 @@ public interface IShard {
 	 *
 	 * @param guildID The id of the desired guild.
 	 * @return The {@link Guild} object with the provided id.
+	 * @deprecated Use {@link #getGuildByID(long)} instead
 	 */
-	IGuild getGuildByID(String guildID);
+	@Deprecated
+	default IGuild getGuildByID(String guildID) {
+		if (guildID == null) return null;
+		return getGuildByID(Long.parseUnsignedLong(guildID));
+	}
+
+	/**
+	 * Gets a guild by its unique id.
+	 *
+	 * @param guildID The id of the desired guild.
+	 * @return The {@link Guild} object with the provided id.
+	 */
+	IGuild getGuildByID(long guildID);
 
 	/**
 	 * Gets a set of all users visible to this shard.
@@ -245,8 +284,23 @@ public interface IShard {
 	 * @return The {@link User} object with the provided id.
 	 *
 	 * @see #fetchUser(String)
+	 * @deprecated Use {@link #getUserByID(long)} instead
 	 */
-	IUser getUserByID(String userID);
+	@Deprecated
+	default IUser getUserByID(String userID) {
+		if (userID == null) return null;
+		return getUserByID(Long.parseUnsignedLong(userID));
+	}
+
+	/**
+	 * Gets a cached user by its unique id.
+	 *
+	 * @param userID The id of the desired user.
+	 * @return The {@link User} object with the provided id.
+	 *
+	 * @see #fetchUser(long)
+	 */
+	IUser getUserByID(long userID);
 
 	/**
 	 * This attempts to retrieve a user by its id by first checking the api's internal cache, if the user is not found,
@@ -259,8 +313,27 @@ public interface IShard {
 	 * @throws RateLimitException
 	 *
 	 * @see #getUserByID(String)
+	 * @deprecated Use {@link #fetchUser(long)} instead
 	 */
-	IUser fetchUser(String id);
+	@Deprecated
+	default IUser fetchUser(String id) {
+		if (id == null) return null;
+		return fetchUser(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * This attempts to retrieve a user by its id by first checking the api's internal cache, if the user is not found,
+	 * a REST request is performed.
+	 *
+	 * @param id The id of the user to find.
+	 * @return Ths user fetched, if found.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 *
+	 * @see #getUserByID(long)
+	 */
+	IUser fetchUser(long id);
 
 	/**
 	 * Gets a set of all roles visible to this shard.
@@ -274,8 +347,21 @@ public interface IShard {
 	 *
 	 * @param roleID The id of the desired role.
 	 * @return The {@link Role} object
+	 * @deprecated Use {@link #getRoleByID(long)} instead
 	 */
-	IRole getRoleByID(String roleID);
+	@Deprecated
+	default IRole getRoleByID(String roleID) {
+		if (roleID == null) return null;
+		return getRoleByID(Long.parseUnsignedLong(roleID));
+	}
+
+	/**
+	 * Gets a role by its unique id.
+	 *
+	 * @param roleID The id of the desired role.
+	 * @return The {@link Role} object
+	 */
+	IRole getRoleByID(long roleID);
 
 	/**
 	 * This gets all messages stored in this shard's cache.
@@ -299,8 +385,23 @@ public interface IShard {
 	 *
 	 * @param messageID The message id of the message to find.
 	 * @return The message or null if not found.
+	 * @deprecated Use {@link #getMessageByID(long)} instead
 	 */
-	IMessage getMessageByID(String messageID);
+	@Deprecated
+	default IMessage getMessageByID(String messageID) {
+		if (messageID == null) return null;
+		return getMessageByID(Long.parseUnsignedLong(messageID));
+	}
+
+	/**
+	 * This attempts to search all guilds/private channels visible to this shard for a message.
+	 * <b>NOTE:</b> This only checks already cached messages, see {@link IChannel#getMessageByID(long)} if you want
+	 * to retrieve messages which aren't cached already.
+	 *
+	 * @param messageID The message id of the message to find.
+	 * @return The message or null if not found.
+	 */
+	IMessage getMessageByID(long messageID);
 
 	/**
 	 * Gets a {@link IPrivateChannel} for the provided recipient.

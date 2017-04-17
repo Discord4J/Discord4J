@@ -37,6 +37,6 @@ public class BulkDeleteRequest {
 	}
 
 	public BulkDeleteRequest(List<IMessage> messages) {
-		this(messages.stream().map(IDiscordObject::getID).toArray(String[]::new));
+		this(messages.stream().map(IDiscordObject::getStringID).toArray(String[]::new));
 	}
 }

@@ -154,6 +154,18 @@
 			<version>3.2.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.koloboke</groupId>
+			<artifactId>koloboke-compile</artifactId>
+			<version>0.5.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.koloboke</groupId>
+			<artifactId>koloboke-impl-common-jdk8</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
