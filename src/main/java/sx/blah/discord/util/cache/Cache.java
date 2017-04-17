@@ -45,19 +45,13 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	public static final ICacheDelegateProvider IGNORING_PROVIDER = new IgnoringCacheDelegateProvider();
 
 	private volatile ICacheDelegate<T> delegate;
-	private final DiscordClientImpl client;
 
 	public Cache(ICacheDelegate<T> delegate) {
-		this(null, delegate);
-	}
-
-	public Cache(DiscordClientImpl client, ICacheDelegate<T> delegate) {
 		this.delegate = delegate;
-		this.client = client;
 	}
 
 	public Cache(DiscordClientImpl client, Class<T> self) {
-		this(client, client.getCacheProvider().provide(self));
+		this(client.getCacheProvider().provide(self));
 	}
 
 	/**
@@ -77,15 +71,6 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	 */
 	public ICacheDelegate<T> getDelegate() {
 		return delegate;
-	}
-
-	/**
-	 * Gets the client this cache is related to.
-	 *
-	 * @return The client instance.
-	 */
-	public IDiscordClient getClient() {
-		return client;
 	}
 
 	/**
@@ -329,7 +314,7 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	 * @return The new copy of the cache.
 	 */
 	public Cache<T> copy() {
-		return new Cache<>(client, delegate.copy());
+		return new Cache<>(delegate.copy());
 	}
 
 	/**
