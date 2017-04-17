@@ -80,20 +80,24 @@ public class UDPVoiceSocket {
 	};
 
 	private final Runnable receiveRunnable = () -> {
-		try {
-			DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
-			udpSocket.receive(udpPacket);
+		//keep receiving audio for 10ms. This will consume as many frames as are readily available, without blocking the thread for more than 10ms.
+		long start = System.nanoTime();
+		while (System.nanoTime() - start < 10_000_000) {
+			try {
+				DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
+				udpSocket.receive(udpPacket);
 
-			OpusPacket opusPacket = new OpusPacket(udpPacket);
-			opusPacket.decrypt(secret);
+				OpusPacket opusPacket = new OpusPacket(udpPacket);
+				opusPacket.decrypt(secret);
 
-			IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
-			if (userSpeaking != null) {
-				((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
+				IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
+				if (userSpeaking != null) {
+					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
+				}
+			} catch (SocketTimeoutException e) {
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 			}
-		} catch (SocketTimeoutException e) {
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	};
 
@@ -126,7 +130,7 @@ public class UDPVoiceSocket {
 
 			Pair<String, Integer> ourIp = doIPDiscovery(ssrc);
 
-			udpSocket.setSoTimeout(10); //after IP discovery, every usage times out after 10ms, because it's better to drop a frame than block the thread.
+			udpSocket.setSoTimeout(5); //after IP discovery, every usage times out after 5ms, because it's better to drop a frame than block the thread.
 
 			SelectProtocolRequest selectRequest = new SelectProtocolRequest(ourIp.getLeft(), ourIp.getRight());
 			voiceWS.send(VoiceOps.SELECT_PROTOCOL, selectRequest);
