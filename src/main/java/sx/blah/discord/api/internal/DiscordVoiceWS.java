@@ -149,6 +149,7 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error while shutting down voice websocket: ", e);
 			}
 		}
+		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket Disconnected.");
 	}
 
 	public void send(VoiceOps op, Object payload) {
