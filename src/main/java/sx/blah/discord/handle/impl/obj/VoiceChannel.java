@@ -57,15 +57,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public int getPosition() {
-		getGuild().getVoiceChannels().sort((c1, c2) -> {
-			int originalPos1 = ((Channel) c1).position;
-			int originalPos2 = ((Channel) c2).position;
-			if (originalPos1 == originalPos2) {
-				return c2.getCreationDate().compareTo(c1.getCreationDate());
-			} else {
-				return originalPos1 - originalPos2;
-			}
-		});
 		return getGuild().getVoiceChannels().indexOf(this);
 	}
 

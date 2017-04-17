@@ -211,7 +211,17 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IChannel> getChannels() {
-		return new LinkedList<>(channels.values());
+		LinkedList<IChannel> list = new LinkedList<>(channels.values());
+		list.sort((c1, c2) -> {
+			int originalPos1 = ((Channel) c1).position;
+			int originalPos2 = ((Channel) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
 	}
 
 	@Override
@@ -316,7 +326,17 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IRole> getRoles() {
-		return new LinkedList<>(roles.values());
+		LinkedList<IRole> list = new LinkedList<>(roles.values());
+		list.sort((r1, r2) -> {
+			int originalPos1 = ((Role) r1).position;
+			int originalPos2 = ((Role) r2).position;
+			if (originalPos1 == originalPos2) {
+				return r2.getCreationDate().compareTo(r1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
 	}
 
 	@Override
@@ -347,7 +367,17 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannels() {
-		return new LinkedList<>(voiceChannels.values());
+		LinkedList<IVoiceChannel> list = new LinkedList<>(voiceChannels.values());
+		list.sort((c1, c2) -> {
+			int originalPos1 = ((Channel) c1).position;
+			int originalPos2 = ((Channel) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
 	}
 
 	@Override

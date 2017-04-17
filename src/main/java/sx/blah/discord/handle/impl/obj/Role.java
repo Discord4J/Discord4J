@@ -97,15 +97,6 @@ public class Role implements IRole {
 
 	@Override
 	public int getPosition() {
-		getGuild().getRoles().sort((r1, r2) -> {
-			int originalPos1 = ((Role) r1).position;
-			int originalPos2 = ((Role) r2).position;
-			if (originalPos1 == originalPos2) {
-				return r2.getCreationDate().compareTo(r1.getCreationDate());
-			} else {
-				return originalPos1 - originalPos2;
-			}
-		});
 		return getGuild().getRoles().indexOf(this);
 	}
 

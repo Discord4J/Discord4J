@@ -61,7 +61,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	String getIconURL();
 
 	/**
-	 * Gets all the channels on the server.
+	 * Gets all the channels on the guild sorted by their effective positions.
 	 *
 	 * @return All channels on the server.
 	 */
@@ -141,7 +141,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	String getName();
 
 	/**
-	 * Gets the roles contained in this guild.
+	 * Gets the roles contained in this guild sorted by their effective positions.
 	 *
 	 * @return The list of roles in the guild.
 	 */
@@ -172,7 +172,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	List<IRole> getRolesByName(String name);
 
 	/**
-	 * Gets the voice channels in this guild.
+	 * Gets the voice channels in this guild sorted by their effective positions.
 	 *
 	 * @return The voice channels.
 	 */
