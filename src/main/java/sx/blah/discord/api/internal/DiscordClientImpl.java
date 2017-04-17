@@ -481,7 +481,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public IUser fetchUser(String id) {
 		IUser cached = getUserByID(id);
-		return cached == null ? DiscordUtils.getUserFromJSON(null, REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
+		return cached == null ? DiscordUtils.getUserFromJSON(shards.get(0), REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
 	}
 
 	@Override

@@ -275,7 +275,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public IUser fetchUser(String id) {
 		IUser cached = getUserByID(id);
-		return cached == null ? DiscordUtils.getUserFromJSON(null, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
+		return cached == null ? DiscordUtils.getUserFromJSON(this, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
 	}
 
 	@Override
