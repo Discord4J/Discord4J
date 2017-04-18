@@ -87,14 +87,14 @@ public class UDPVoiceSocket {
 				DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
 				udpSocket.receive(udpPacket);
 
-				OpusPacket opusPacket = new OpusPacket(udpPacket);
-				opusPacket.decrypt(secret);
+				OpusPacket opus = new OpusPacket(udpPacket);
+				opus.decrypt(secret);
 
-				IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
-				if (userSpeaking != null) {
-					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
+				IUser user = voiceWS.users.get(opus.header.ssrc);
+				if (user != null) {
+					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opus.getAudio(), user ,opus.header.sequence, opus.header.timestamp);
 				}
-			} catch (SocketTimeoutException e) {
+			} catch (SocketTimeoutException ignored) {
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 			}
