@@ -581,7 +581,7 @@ class DispatchHandler {
 
 		for (MemberObject member : event.members) {
 			IUser user = DiscordUtils.getUserFromGuildMemberResponse(guildToUpdate, member);
-			guildToUpdate.users.remove(user);
+			guildToUpdate.users.put(user);
 		}
 		if (guildToUpdate.getUsers().size() >= guildToUpdate.getTotalMemberCount()) {
 			client.getDispatcher().dispatch(new AllUsersReceivedEvent(guildToUpdate));
