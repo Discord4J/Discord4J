@@ -24,7 +24,7 @@ import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class OpusPacket {
+class OpusPacket {
 
 	final RTPHeader header;
 	private byte[] audio;

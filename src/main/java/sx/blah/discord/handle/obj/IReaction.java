@@ -20,8 +20,6 @@ package sx.blah.discord.handle.obj;
 import com.vdurmont.emoji.Emoji;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.util.List;
 

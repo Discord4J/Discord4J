@@ -198,10 +198,11 @@ class DispatchHandler {
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(guild.id)));
 			return true;
 		}).andThen(() -> {
-			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard one
-				Arrays.stream(ready.private_channels)
-						.map(pm -> DiscordUtils.getPrivateChannelFromJSON(shard, pm))
-						.forEach(shard.privateChannels::add);
+			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard 0
+				for (PrivateChannelObject pmObj : ready.private_channels) {
+					IPrivateChannel pm = DiscordUtils.getPrivateChannelFromJSON(shard, pmObj);
+					shard.privateChannels.put(pm);
+				}
 			}
 
 			ws.isReady = true;
@@ -302,7 +303,7 @@ class DispatchHandler {
 		}
 
 		Guild guild = (Guild) DiscordUtils.getGuildFromJSON(shard, json);
-		shard.guildList.add(guild);
+		shard.guildCache.put(guild);
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {
@@ -329,7 +330,7 @@ class DispatchHandler {
 		Guild guild = (Guild) client.getGuildByID(guildID);
 		if (guild != null) {
 			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(guild, new MemberObject(event.user, event.roles));
-			guild.addUser(user);
+			guild.users.put(user);
 			guild.setTotalMemberCount(guild.getTotalMemberCount() + 1);
 			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
@@ -343,8 +344,8 @@ class DispatchHandler {
 		if (guild != null) {
 			User user = (User) guild.getUserByID(event.user.id);
 			if (user != null) {
-				guild.getUsers().remove(user);
-				guild.getJoinTimes().remove(user);
+				guild.users.remove(user);
+				guild.joinTimes.remove(user);
 				guild.setTotalMemberCount(guild.getTotalMemberCount() - 1);
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
 				client.dispatcher.dispatch(new UserLeaveEvent(guild, user));
@@ -357,7 +358,7 @@ class DispatchHandler {
 		User user = (User) client.getUserByID(event.user.id);
 
 		if (guild != null && user != null) {
-			List<IRole> oldRoles = new ArrayList<>(user.getRolesForGuild(guild));
+			List<IRole> oldRoles = user.getRolesForGuild(guild);
 			boolean rolesChanged = oldRoles.size() != event.roles.length + 1;//Add one for the @everyone role
 			if (!rolesChanged) {
 				rolesChanged = oldRoles.stream().filter(role -> {
@@ -375,7 +376,8 @@ class DispatchHandler {
 			}
 
 			if (rolesChanged) {
-				user.getRolesForGuild(guild).clear();
+				user.roles.remove(guild);
+
 				for (String role : event.roles)
 					user.addRole(guild.getID(), guild.getRoleByID(role));
 
@@ -472,7 +474,7 @@ class DispatchHandler {
 
 		// Clean up cache
 		guild.getShard().getGuilds().remove(guild);
-		client.getOurUser().getVoiceStates().remove(guild.getID());
+		((User) client.getOurUser()).voiceStates.remove(guild.getID());
 		DiscordVoiceWS vWS = shard.voiceWebSockets.get(json.id);
 		if (vWS != null) {
 			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
@@ -493,17 +495,10 @@ class DispatchHandler {
 
 		if (isPrivate) { // PM channel.
 			PrivateChannelObject event = MAPPER.treeToValue(json, PrivateChannelObject.class);
-			String id = event.id;
-			boolean contained = false;
-			for (IPrivateChannel privateChannel : shard.privateChannels) {
-				if (privateChannel.getID().equalsIgnoreCase(id))
-					contained = true;
-			}
-
-			if (contained)
+			if (shard.privateChannels.containsKey(event.id))
 				return; // we already have this PM channel; no need to create another.
 
-			shard.privateChannels.add(DiscordUtils.getPrivateChannelFromJSON(shard, event));
+			shard.privateChannels.put(DiscordUtils.getPrivateChannelFromJSON(shard, event));
 
 		} else { // Regular channel.
 			ChannelObject event = MAPPER.treeToValue(json, ChannelObject.class);
@@ -512,11 +507,11 @@ class DispatchHandler {
 			if (guild != null) {
 				if (type.equalsIgnoreCase("text")) { //Text channel
 					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(guild, event);
-					guild.addChannel(channel);
+					guild.channels.put(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
 				} else if (type.equalsIgnoreCase("voice")) {
 					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(guild, event);
-					guild.addVoiceChannel(channel);
+					guild.voiceChannels.put(channel);
 					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
 				}
 			}
@@ -528,7 +523,7 @@ class DispatchHandler {
 			Channel channel = (Channel) client.getChannelByID(json.id);
 			if (channel != null) {
 				if (!channel.isPrivate())
-					channel.getGuild().getChannels().remove(channel);
+					((Guild) channel.getGuild()).channels.remove(channel);
 				else
 					shard.privateChannels.remove(channel);
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
@@ -536,7 +531,7 @@ class DispatchHandler {
 		} else if (json.type.equalsIgnoreCase("voice")) {
 			VoiceChannel channel = (VoiceChannel) client.getVoiceChannelByID(json.id);
 			if (channel != null) {
-				channel.getGuild().getVoiceChannels().remove(channel);
+				((Guild) channel.getGuild()).voiceChannels.remove(channel);
 				client.dispatcher.dispatch(new VoiceChannelDeleteEvent(channel));
 			}
 		}
@@ -586,7 +581,7 @@ class DispatchHandler {
 
 		for (MemberObject member : event.members) {
 			IUser user = DiscordUtils.getUserFromGuildMemberResponse(guildToUpdate, member);
-			guildToUpdate.addUser(user);
+			guildToUpdate.users.put(user);
 		}
 		if (guildToUpdate.getUsers().size() >= guildToUpdate.getTotalMemberCount()) {
 			client.getDispatcher().dispatch(new AllUsersReceivedEvent(guildToUpdate));
@@ -633,23 +628,23 @@ class DispatchHandler {
 	}
 
 	private void guildRoleDelete(GuildRoleDeleteEventResponse event) {
-		IGuild guild = client.getGuildByID(event.guild_id);
+		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			IRole role = guild.getRoleByID(event.role_id);
 			if (role != null) {
-				guild.getRoles().remove(role);
+				guild.roles.remove(role);
 				client.dispatcher.dispatch(new RoleDeleteEvent(role));
 			}
 		}
 	}
 
 	private void guildBanAdd(GuildBanEventResponse event) {
-		IGuild guild = client.getGuildByID(event.guild_id);
+		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			IUser user = DiscordUtils.getUserFromJSON(shard, event.user);
 			if (client.getUserByID(user.getID()) != null) {
-				guild.getUsers().remove(user);
-				((Guild) guild).getJoinTimes().remove(user);
+				guild.users.remove(user);
+				guild.joinTimes.remove(user);
 			}
 
 			client.dispatcher.dispatch(new UserBanEvent(guild, user));
@@ -666,15 +661,15 @@ class DispatchHandler {
 	}
 
 	private void voiceStateUpdate(VoiceStateObject json) {
-		IUser user = shard.getUserByID(json.user_id);
+		User user = (User) shard.getUserByID(json.user_id);
 
 		if (user != null) {
-			IVoiceState curVoiceState = user.getVoiceStates().get(json.guild_id);
+			IVoiceState curVoiceState = user.voiceStates.get(json.guild_id);
 
 			IVoiceChannel channel = shard.getVoiceChannelByID(json.channel_id);
 			IVoiceChannel oldChannel = curVoiceState == null ? null : curVoiceState.getChannel();
 
-			user.getVoiceStates().put(json.guild_id, DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
+			user.voiceStates.put(DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(json.guild_id), json));
 
 			if (oldChannel != channel) {
 				if (channel == null) {
@@ -695,19 +690,19 @@ class DispatchHandler {
 		}
 
 		DiscordVoiceWS vWS = new DiscordVoiceWS(shard, event);
-		shard.voiceWebSockets.put(event.guild_id, vWS);
+		shard.voiceWebSockets.put(vWS);
 		vWS.connect();
 	}
 
 	private void guildEmojisUpdate(GuildEmojiUpdateResponse event) {
-		IGuild guild = client.getGuildByID(event.guild_id);
+		Guild guild = (Guild) client.getGuildByID(event.guild_id);
 		if (guild != null) {
 			List<IEmoji> oldList = guild.getEmojis().stream().map(IEmoji::copy)
 					.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
-			guild.getEmojis().clear();
+			guild.emojis.clear();
 			for (EmojiObject obj : event.emojis) {
-				guild.getEmojis().add(DiscordUtils.getEmojiFromJSON(guild, obj));
+				guild.emojis.put(DiscordUtils.getEmojiFromJSON(guild, obj));
 			}
 
 			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldList, guild.getEmojis()));

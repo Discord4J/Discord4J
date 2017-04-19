@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.impl.events.shard;
 
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.ReconnectManager;
 
 /**
  * Fired when a reconnect attempt for a shard fails.
@@ -37,20 +36,20 @@ public class ReconnectFailureEvent extends ShardEvent {
 	}
 
 	/**
-	 * Gets the attempt the {@link ReconnectManager} failed on.
+	 * Gets the attempt the {@link sx.blah.discord.api.internal.ReconnectManager} failed on.
 	 *
 	 * @return The current attempt.
 	 */
 	public int getCurrentAttempt() {
 		return curAttempt;
 	}
-	
+
 	/**
 	 * This returns whether the shard will be abandoned (no further reconnects will be attempted).
 	 *
 	 * @return True if shard will be abandoned, false if otherwise.
 	 */
 	public boolean isShardAbandoned() {
-		return curAttempt > maxAttempts;
+		return curAttempt == maxAttempts - 1;
 	}
 }

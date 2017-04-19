@@ -27,12 +27,13 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.IDLinkedObjectWrapper;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.Cache;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Supplier;
 
 public class User implements IUser {
 
@@ -84,17 +85,17 @@ public class User implements IUser {
 	/**
 	 * The roles the user is a part of. (Key = guild id).
 	 */
-	protected final Map<String, List<IRole>> roles = new ConcurrentHashMap<>();
+	public final Cache<RolesHolder> roles;
 
 	/**
 	 * The nicknames this user has. (Key = guild id).
 	 */
-	protected final Map<String, String> nicks = new ConcurrentHashMap<>();
+	public final Cache<NickHolder> nicks;
 
 	/**
 	 * The voice states this user has.
 	 */
-	protected final Map<String, IVoiceState> voiceStates = new ConcurrentHashMap<>();
+	public final Cache<IVoiceState> voiceStates;
 
 	public User(IShard shard, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this(shard, shard == null ? null : shard.getClient(), name, id, discriminator, avatar, presence, isBot);
@@ -111,6 +112,9 @@ public class User implements IUser {
 				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
 		this.presence = presence;
 		this.isBot = isBot;
+		this.roles = new Cache<>((DiscordClientImpl) client, RolesHolder.class);
+		this.nicks = new Cache<>((DiscordClientImpl) client, NickHolder.class);
+		this.voiceStates = new Cache<>((DiscordClientImpl) client, IVoiceState.class);
 	}
 
 	@Override
@@ -207,7 +211,13 @@ public class User implements IUser {
 
 	@Override
 	public List<IRole> getRolesForGuild(IGuild guild) {
-		return roles.getOrDefault(guild.getID(), new ArrayList<>());
+		if (roles != null) {
+			RolesHolder retrievedRoles = roles.get(guild.getID());
+			if (retrievedRoles != null && retrievedRoles.getObject() != null)
+				return new LinkedList<>(retrievedRoles.getObject());
+		}
+
+		return new LinkedList<>();
 	}
 
 	@Override
@@ -221,17 +231,18 @@ public class User implements IUser {
 
 	@Override
 	public String getNicknameForGuild(IGuild guild) {
-		return nicks.get(guild.getID());
+		return nicks.get(guild.getID()).getObject();
 	}
 
 	@Override
 	public IVoiceState getVoiceStateForGuild(IGuild guild) {
-		return voiceStates.computeIfAbsent(guild.getID(), (String key) -> new VoiceState(guild, this));
+		voiceStates.putIfAbsent(guild.getID(), () -> new VoiceState(guild, this));
+		return voiceStates.get(guild.getID());
 	}
 
 	@Override
 	public Map<String, IVoiceState> getVoiceStates() {
-		return voiceStates;
+		return voiceStates.mapCopy();
 	}
 
 	@Override
@@ -261,12 +272,7 @@ public class User implements IUser {
 	 * @param nick    The nickname, or null to remove it.
 	 */
 	public void addNick(String guildID, String nick) {
-		if (nick == null) {
-			if (nicks.containsKey(guildID))
-				nicks.remove(guildID);
-		} else {
-			nicks.put(guildID, nick);
-		}
+		nicks.put(new NickHolder(guildID, nick));
 	}
 
 	/**
@@ -276,7 +282,8 @@ public class User implements IUser {
 	 * @param role    The role.
 	 */
 	public void addRole(String guildID, IRole role) {
-		roles.computeIfAbsent(guildID, (String id) -> new ArrayList<>()).add(role);
+		roles.putIfAbsent(guildID, () -> new RolesHolder(guildID, new CopyOnWriteArraySet<>()));
+		roles.get(guildID).getObject().add(role);
 	}
 
 	@Override
@@ -334,5 +341,19 @@ public class User implements IUser {
 	@Override
 	public boolean equals(Object other) {
 		return DiscordUtils.equals(this ,other);
+	}
+}
+
+class RolesHolder extends IDLinkedObjectWrapper<Collection<IRole>> {
+
+	RolesHolder(String id, Collection<IRole> roles) {
+		super(id, roles);
+	}
+}
+
+class NickHolder extends IDLinkedObjectWrapper<String> {
+
+	NickHolder(String id, String string) {
+		super(id, string);
 	}
 }

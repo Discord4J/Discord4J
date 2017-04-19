@@ -32,8 +32,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -474,14 +476,14 @@ public class EventDispatcher {
 
 		/**
 		 * Should the handler be removed after handling an event.
-		 * @return 
+		 * @return
 		 */
 		boolean isTemporary();
 
 		/**
 		 * Checks whether the handler should process the given event.
 		 * @param e
-		 * @return 
+		 * @return
 		 */
 		boolean accepts(Event e);
 
@@ -531,7 +533,7 @@ public class EventDispatcher {
 
 	/**
 	 * EventHandler implementation that delegates to an IListener.
-	 * @param <T> 
+	 * @param <T>
 	 */
 	private static class ListenerEventHandler<T extends Event> implements EventHandler {
 

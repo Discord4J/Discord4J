@@ -20,7 +20,7 @@ package sx.blah.discord.handle.obj;
 /**
  * Represents a {@link sx.blah.discord.handle.impl.obj.User}'s voice state in a guild.
  */
-public interface IVoiceState {
+public interface IVoiceState extends IIDLinkedObject {
 
 	/**
 	 * Gets the guild for this voice state.
@@ -78,4 +78,14 @@ public interface IVoiceState {
 	 * @return User suppressed state.
 	 */
 	boolean isSuppressed();
+
+	/**
+	 * Gets the ID of the guild this relates to.
+	 *
+	 * @return The guild id.
+	 */
+	@Override
+	default String getID() {
+		return getGuild().getID();
+	}
 }

@@ -30,8 +30,10 @@ public interface IAudioReceiver {
 	 *
 	 * @param audio The packet of audio. Format depends on {{@link #getAudioEncodingType()}}
 	 * @param user The user this audio was received from.
+	 * @param sequence The sequence from the RTP header of this packet.
+	 * @param timestamp The timestamp from the RTP header of this packet.
 	 */
-	void receive(byte[] audio, IUser user);
+	void receive(byte[] audio, IUser user, char sequence, int timestamp);
 
 	/**
 	 * This is called to determine the type of audio data provided by this receiver. This determines how the audio data

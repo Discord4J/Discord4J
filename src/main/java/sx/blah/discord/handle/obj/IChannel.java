@@ -868,7 +868,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	/**
 	 * Represents specific permission overrides for a user/role in the channel.
 	 */
-	class PermissionOverride {
+	class PermissionOverride implements IIDLinkedObject {
 
 		/**
 		 * Permissions to add.
@@ -880,9 +880,15 @@ public interface IChannel extends IDiscordObject<IChannel> {
 		 */
 		protected final EnumSet<Permissions> deny;
 
-		public PermissionOverride(EnumSet<Permissions> allow, EnumSet<Permissions> deny) {
+		/**
+		 * The id of the object this is linked to.
+		 */
+		protected final String id;
+
+		public PermissionOverride(EnumSet<Permissions> allow, EnumSet<Permissions> deny, String id) {
 			this.allow = allow;
 			this.deny = deny;
+			this.id = id;
 		}
 
 		/**
@@ -920,6 +926,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 		@Override
 		public String toString() {
 			return "PermissionOverride (Allow: " + allow + ", Deny: " + deny + ")";
+		}
+
+		@Override
+		public String getID() {
+			return id;
 		}
 	}
 }

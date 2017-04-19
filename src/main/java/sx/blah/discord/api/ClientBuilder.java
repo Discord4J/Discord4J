@@ -25,6 +25,8 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.api.internal.json.responses.GatewayBotResponse;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +51,7 @@ public class ClientBuilder {
 	private int maxReconnectAttempts = 5;
 	private int retryCount = 5;
 	private int maxCacheCount = DEFAULT_MESSAGE_CACHE_LIMIT;
+	private ICacheDelegateProvider provider = Cache.DEFAULT_PROVIDER;
 
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
@@ -155,6 +158,18 @@ public class ClientBuilder {
 	}
 
 	/**
+	 * Sets the {@link ICacheDelegateProvider} used to create {@link sx.blah.discord.util.cache.ICacheDelegate}s to store cached
+	 * objects.
+	 *
+	 * @param provider The cache provider for this client to use.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder setCacheProvider(ICacheDelegateProvider provider) {
+		this.provider = provider;
+		return this;
+	}
+
+	/**
 	 * This registers event listeners before the client is logged in.
 	 *
 	 * @param listeners The listeners to register.
@@ -244,7 +259,7 @@ public class ClientBuilder {
 		}
 
 		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings,
-				maxReconnectAttempts, retryCount, maxCacheCount);
+				maxReconnectAttempts, retryCount, maxCacheCount, provider);
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();

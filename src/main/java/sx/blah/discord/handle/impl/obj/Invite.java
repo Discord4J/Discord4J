@@ -22,8 +22,6 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.util.Objects;
 

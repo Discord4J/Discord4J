@@ -85,7 +85,7 @@ public class EmbedBuilder {
 
 	/**
 	 * This configures if the builder is lenient. When lenient, the builder will truncate strings in order to fit in an
-	 * embed and ignore empty/null fields.
+	 * embed and ignore empty/null fields, otherwise will throw an IllegalArgumentException.
 	 *
 	 * @param lenient True to make the builder lenient, false for the opposite.
 	 * @return Itself for chaining.

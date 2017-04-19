@@ -37,6 +37,7 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuilder;
+import sx.blah.discord.util.cache.Cache;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -48,7 +49,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -251,8 +251,8 @@ public class DiscordUtils {
 			for (RoleObject roleResponse : json.roles) {
 				newRoles.add(getRoleFromJSON(guild, roleResponse));
 			}
-			guild.getRoles().clear();
-			guild.getRoles().addAll(newRoles);
+			guild.roles.clear();
+			guild.roles.putAll(newRoles);
 
 			for (IUser user : guild.getUsers()) { //Removes all deprecated roles
 				for (IRole role : user.getRolesForGuild(guild)) {
@@ -274,7 +274,7 @@ public class DiscordUtils {
 			if (json.members != null) {
 				for (MemberObject member : json.members) {
 					IUser user = getUserFromGuildMemberResponse(guild, member);
-					guild.addUser(user);
+					guild.users.put(user);
 				}
 			}
 
@@ -290,9 +290,9 @@ public class DiscordUtils {
 				for (ChannelObject channelResponse : json.channels) {
 					String channelType = channelResponse.type;
 					if (channelType.equalsIgnoreCase("text")) {
-						guild.addChannel(getChannelFromJSON(guild, channelResponse));
+						guild.channels.put(getChannelFromJSON(guild, channelResponse));
 					} else if (channelType.equalsIgnoreCase("voice")) {
-						guild.addVoiceChannel(getVoiceChannelFromJSON(guild, channelResponse));
+						guild.voiceChannels.put(getVoiceChannelFromJSON(guild, channelResponse));
 					}
 				}
 
@@ -306,14 +306,14 @@ public class DiscordUtils {
 						}).execute();
 					}
 					if (user.get()!= null)
-						user.get().getVoiceStates().put(guild.getID(), DiscordUtils.getVoiceStateFromJson(guild, voiceState));
+						((User) user.get()).voiceStates.put(DiscordUtils.getVoiceStateFromJson(guild, voiceState));
 				}
 			}
 		}
 
-		guild.getEmojis().clear();
+		guild.emojis.clear();
 		for (EmojiObject obj : json.emojis) {
-			guild.getEmojis().add(DiscordUtils.getEmojiFromJSON(guild, obj));
+			guild.emojis.put(DiscordUtils.getEmojiFromJSON(guild, obj));
 		}
 
 		return guild;
@@ -377,7 +377,7 @@ public class DiscordUtils {
 		voiceState.setDeafened(json.deaf);
 		voiceState.setMuted(json.mute);
 
-		((Guild) guild).getJoinTimes().put(user, convertFromTimestamp(json.joined_at));
+		((Guild) guild).joinTimes.put(new Guild.TimeStampHolder(user.getID(), convertFromTimestamp(json.joined_at)));
 		return user;
 	}
 
@@ -389,20 +389,13 @@ public class DiscordUtils {
 	 * @return The private channel object.
 	 */
 	public static IPrivateChannel getPrivateChannelFromJSON(IShard shard, PrivateChannelObject json) {
-		String id = json.id;
-		User recipient = (User) shard.getUserByID(id);
-		if (recipient == null)
-			recipient = getUserFromJSON(shard, json.recipient);
-
-		PrivateChannel channel = null;
-		for (IPrivateChannel privateChannel : ((ShardImpl) shard).privateChannels) {
-			if (privateChannel.getRecipient().equals(recipient)) {
-				channel = (PrivateChannel) privateChannel;
-				break;
-			}
-		}
+		IPrivateChannel channel = ((ShardImpl) shard).privateChannels.get(json.id);
 		if (channel == null) {
-			channel = new PrivateChannel((DiscordClientImpl) shard.getClient(), recipient, id);
+			User recipient = (User) shard.getUserByID(json.id);
+			if (recipient == null)
+				recipient = getUserFromJSON(shard, json.recipient);
+
+			channel = new PrivateChannel((DiscordClientImpl) shard.getClient(), recipient, json.id);
 		}
 
 		return channel;
@@ -416,7 +409,7 @@ public class DiscordUtils {
 	 * @return The message object.
 	 */
 	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
-		if (channel.messages.stream().anyMatch(msg -> msg.getID().equals(json.id))) {
+		if (channel.messages.containsKey(json.id)) {
 			Message message = (Message) channel.getMessageByID(json.id);
 			message.setAttachments(getAttachmentsFromJSON(json));
 			message.setEmbeds(getEmbedsFromJSON(json));
@@ -521,20 +514,19 @@ public class DiscordUtils {
 	public static IChannel getChannelFromJSON(IGuild guild, ChannelObject json) {
 		Channel channel;
 
-		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs(
-				json.permission_overwrites);
-		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
-		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
+		Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
+				getPermissionOverwritesFromJSONs((DiscordClientImpl) guild.getClient(), json.permission_overwrites);
+		Cache<IChannel.PermissionOverride> userOverrides = overrides.getLeft();
+		Cache<IChannel.PermissionOverride> roleOverrides = overrides.getRight();
 
 		if ((channel = (Channel) guild.getChannelByID(json.id)) != null) {
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			channel.setTopic(json.topic);
-			channel.getUserOverrides().clear();
-			channel.getUserOverrides().putAll(userOverrides);
-			channel.getRoleOverrides().clear();
-			channel.getRoleOverrides().putAll(roleOverrides);
+			channel.userOverrides.clear();
+			channel.userOverrides.putAll(userOverrides);
+			channel.roleOverrides.clear();
+			channel.roleOverrides.putAll(roleOverrides);
 		} else {
 			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					roleOverrides, userOverrides);
@@ -549,20 +541,18 @@ public class DiscordUtils {
 	 * @param overwrites The overwrites.
 	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
 	 */
-	public static Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>>
-	getPermissionOverwritesFromJSONs(OverwriteObject[] overwrites) {
-		Map<String, IChannel.PermissionOverride> userOverrides = new ConcurrentHashMap<>();
-		Map<String, IChannel.PermissionOverride> roleOverrides = new ConcurrentHashMap<>();
+	public static Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>>
+	getPermissionOverwritesFromJSONs(DiscordClientImpl client, OverwriteObject[] overwrites) {
+		Cache<IChannel.PermissionOverride> userOverrides = new Cache<>(client, IChannel.PermissionOverride.class);
+		Cache<IChannel.PermissionOverride> roleOverrides = new Cache<>(client, IChannel.PermissionOverride.class);
 
 		for (OverwriteObject overrides : overwrites) {
 			if (overrides.type.equalsIgnoreCase("role")) {
-				roleOverrides.put(overrides.id,
-						new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
+				roleOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+								Permissions.getDeniedPermissionsForNumber(overrides.deny), overrides.id));
 			} else if (overrides.type.equalsIgnoreCase("member")) {
-				userOverrides.put(overrides.id,
-						new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny)));
+				userOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+								Permissions.getDeniedPermissionsForNumber(overrides.deny), overrides.id));
 			} else {
 				Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 			}
@@ -590,7 +580,7 @@ public class DiscordUtils {
 		} else {
 			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color,
 					json.mentionable, guild);
-			((Guild) guild).addRole(role);
+			((Guild) guild).roles.put(role);
 		}
 		return role;
 	}
@@ -615,21 +605,20 @@ public class DiscordUtils {
 	public static IVoiceChannel getVoiceChannelFromJSON(IGuild guild, ChannelObject json) {
 		VoiceChannel channel;
 
-		Pair<Map<String, IChannel.PermissionOverride>, Map<String, IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs(
-				json.permission_overwrites);
-		Map<String, IChannel.PermissionOverride> userOverrides = overrides.getLeft();
-		Map<String, IChannel.PermissionOverride> roleOverrides = overrides.getRight();
+		Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
+				getPermissionOverwritesFromJSONs((DiscordClientImpl) guild.getClient(), json.permission_overwrites);
+		Cache<IChannel.PermissionOverride> userOverrides = overrides.getLeft();
+		Cache<IChannel.PermissionOverride> roleOverrides = overrides.getRight();
 
 		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(json.id)) != null) {
 			channel.setUserLimit(json.user_limit);
 			channel.setBitrate(json.bitrate);
 			channel.setName(json.name);
 			channel.setPosition(json.position);
-			channel.getUserOverrides().clear();
-			channel.getUserOverrides().putAll(userOverrides);
-			channel.getRoleOverrides().clear();
-			channel.getRoleOverrides().putAll(roleOverrides);
+			channel.userOverrides.clear();
+			channel.userOverrides.putAll(userOverrides);
+			channel.roleOverrides.clear();
+			channel.roleOverrides.putAll(roleOverrides);
 		} else {
 			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, json.id, guild, json.topic, json.position,
 					json.user_limit, json.bitrate, roleOverrides, userOverrides);

@@ -313,7 +313,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.reply(String.valueOf(message.getClient().getUserByID(message.getContent().split(" ")[1]).getRolesForGuild(message.getGuild()).size()));
+						message.reply(message.getClient().fetchUser(message.getContent().split(" ")[1]).mention());
 					}
 				});
 			}

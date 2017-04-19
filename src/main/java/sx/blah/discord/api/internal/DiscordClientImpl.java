@@ -33,8 +33,8 @@ import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -99,6 +99,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private int shardCount;
 
 	/**
+	 * Provides cache objects used by this api.
+	 */
+	private final ICacheDelegateProvider cacheProvider;
+
+	/**
 	 * The requests holder object.
 	 */
 	public final Requests REQUESTS = new Requests(this);
@@ -111,13 +116,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount) {
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
 		this.maxCacheCount = maxCacheCount;
+		this.cacheProvider = provider;
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
@@ -392,9 +398,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IGuild getGuildByID(String guildID) {
-		return getGuilds().stream()
-				.filter(g -> g.getID().equals(guildID))
-				.findFirst().orElse(null);
+		for (IShard shard : shards) {
+			IGuild guild = shard.getGuildByID(guildID);
+			if (guild != null)
+				return guild;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -415,9 +425,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IChannel getChannelByID(String channelID) {
-		return getChannels(true).stream()
-				.filter(c -> c.getID().equals(channelID))
-				.findFirst().orElse(null);
+		for (IShard shard : shards) {
+			IChannel channel = shard.getChannelByID(channelID);
+			if (channel != null)
+				return channel;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -430,14 +444,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getOurUser().getVoiceStates().values().stream().map(IVoiceState::getChannel).filter(Objects::nonNull).collect(Collectors.toList());
+		return ((User) getOurUser()).voiceStates.values().stream().map(IVoiceState::getChannel).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Override
 	public IVoiceChannel getVoiceChannelByID(String id) {
-		return getVoiceChannels().stream()
-				.filter(vc -> vc.getID().equals(id))
-				.findFirst().orElse(null);
+		for (IShard shard : shards) {
+			IVoiceChannel voiceChannel = shard.getVoiceChannelByID(id);
+			if (voiceChannel != null)
+				return voiceChannel;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -451,15 +469,19 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IUser getUserByID(String userID) {
-		return getUsers().stream()
-				.filter(u -> u.getID().equals(userID))
-				.findFirst().orElse(null);
+		for (IShard shard : shards) {
+			IUser user = shard.getUserByID(userID);
+			if (user != null)
+				return user;
+		}
+
+		return null;
 	}
 
 	@Override
 	public IUser fetchUser(String id) {
 		IUser cached = getUserByID(id);
-		return cached == null ? DiscordUtils.getUserFromJSON(null, REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
+		return cached == null ? DiscordUtils.getUserFromJSON(shards.get(0), REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
 	}
 
 	@Override
@@ -484,9 +506,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IRole getRoleByID(String roleID) {
-		return getRoles().stream()
-				.filter(r -> r.getID().equals(roleID))
-				.findFirst().orElse(null);
+		for (IShard shard : shards) {
+			IRole role = shard.getRoleByID(roleID);
+			if (role != null)
+				return role;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -507,15 +533,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IMessage getMessageByID(String messageID) {
-		return getMessages(true).stream()
-				.filter(m -> m.getID().equals(messageID))
-				.findFirst().orElse(null);
+		for (IShard shard : shards) {
+			IMessage message = shard.getMessageByID(messageID);
+			if (message != null)
+				return message;
+		}
+
+		return null;
 	}
 
 	@Override
 	public IPrivateChannel getOrCreatePMChannel(IUser user) {
-		IShard shard = getShards().stream().filter(s -> s.getUserByID(user.getID()) != null).findFirst().get();
-		return shard.getOrCreatePMChannel(user);
+		return user.getShard().getOrCreatePMChannel(user);
 	}
 
 	@Override
@@ -546,5 +575,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	public int getMaxCacheCount() {
 		return maxCacheCount;
+	}
+
+	public ICacheDelegateProvider getCacheProvider() {
+		return cacheProvider;
 	}
 }

@@ -16,13 +16,13 @@
  */
 package sx.blah.discord.api.internal;
 
-import sx.blah.discord.util.HighPrecisionRecurrentTask;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.requests.voice.SelectProtocolRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceSpeakingRequest;
 import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.HighPrecisionRecurrentTask;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
@@ -80,20 +80,24 @@ public class UDPVoiceSocket {
 	};
 
 	private final Runnable receiveRunnable = () -> {
-		try {
-			DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
-			udpSocket.receive(udpPacket);
+		//keep receiving audio for 10ms. This will consume as many frames as are readily available, without blocking the thread for more than 10ms.
+		long start = System.nanoTime();
+		while (System.nanoTime() - start < 10_000_000) {
+			try {
+				DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
+				udpSocket.receive(udpPacket);
 
-			OpusPacket opusPacket = new OpusPacket(udpPacket);
-			opusPacket.decrypt(secret);
+				OpusPacket opus = new OpusPacket(udpPacket);
+				opus.decrypt(secret);
 
-			IUser userSpeaking = voiceWS.users.get(opusPacket.header.ssrc);
-			if (userSpeaking != null) {
-				((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opusPacket.getAudio(), userSpeaking);
+				IUser user = voiceWS.users.get(opus.header.ssrc);
+				if (user != null) {
+					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opus.getAudio(), user ,opus.header.sequence, opus.header.timestamp);
+				}
+			} catch (SocketTimeoutException ignored) {
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 			}
-		} catch (SocketTimeoutException e) {
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	};
 
@@ -126,7 +130,7 @@ public class UDPVoiceSocket {
 
 			Pair<String, Integer> ourIp = doIPDiscovery(ssrc);
 
-			udpSocket.setSoTimeout(10); //after IP discovery, every usage times out after 10ms, because it's better to drop a frame than block the thread.
+			udpSocket.setSoTimeout(5); //after IP discovery, every usage times out after 5ms, because it's better to drop a frame than block the thread.
 
 			SelectProtocolRequest selectRequest = new SelectProtocolRequest(ourIp.getLeft(), ourIp.getRight());
 			voiceWS.send(VoiceOps.SELECT_PROTOCOL, selectRequest);
@@ -137,10 +141,12 @@ public class UDPVoiceSocket {
 
 	void begin() {
 		audioTask = new HighPrecisionRecurrentTask(OpusUtil.OPUS_FRAME_TIME, 0.01f, () -> {
-			if (!udpSocket.isClosed()) {
-				sendRunnable.run();
-				receiveRunnable.run();
-				keepAliveRunnable.run();
+			synchronized (udpSocket) { //while the the audio handling is happening, lock the socket so no concurrent shutdown happens
+				if (!udpSocket.isClosed()) {
+					sendRunnable.run();
+					receiveRunnable.run();
+					keepAliveRunnable.run();
+				}
 			}
 		});
 		audioTask.setDaemon(true);
@@ -149,7 +155,9 @@ public class UDPVoiceSocket {
 
 	void shutdown() {
 		audioTask.setStop(true);
-		udpSocket.close();
+		synchronized (udpSocket) {
+			udpSocket.close();
+		}
 	}
 
 	private Pair<String, Integer> doIPDiscovery(int ssrc) throws IOException {

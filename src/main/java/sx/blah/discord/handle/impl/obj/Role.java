@@ -28,10 +28,7 @@ import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -100,15 +97,6 @@ public class Role implements IRole {
 
 	@Override
 	public int getPosition() {
-		getGuild().getRoles().sort((r1, r2) -> {
-			int originalPos1 = ((Role) r1).position;
-			int originalPos2 = ((Role) r2).position;
-			if (originalPos1 == originalPos2) {
-				return r2.getCreationDate().compareTo(r1.getCreationDate());
-			} else {
-				return originalPos1 - originalPos2;
-			}
-		});
 		return getGuild().getRoles().indexOf(this);
 	}
 
