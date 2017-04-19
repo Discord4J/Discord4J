@@ -1025,27 +1025,9 @@ public class Channel implements IChannel {
 				WebhookObject.class);
 
 		IWebhook webhook = DiscordUtils.getWebhookFromJSON(this, response);
-		addWebhook(webhook);
+		webhooks.put(webhook);
 
 		return webhook;
-	}
-
-	/**
-	 * CACHES a webhook to the channel.
-	 *
-	 * @param webhook The webhook.
-	 */
-	public void addWebhook(IWebhook webhook) {
-		this.webhooks.put(webhook);
-	}
-
-	/**
-	 * Removes a webhook from the CACHE of the channel.
-	 *
-	 * @param webhook The webhook.
-	 */
-	public void removeWebhook(IWebhook webhook) {
-		this.webhooks.remove(webhook);
 	}
 
 	public void loadWebhooks() {
@@ -1071,7 +1053,7 @@ public class Channel implements IChannel {
 						if (getWebhookByID(webhookObject.id) == null) {
 							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(this, webhookObject);
 							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
-							addWebhook(newWebhook);
+							webhooks.put(newWebhook);
 						} else {
 							IWebhook toUpdate = getWebhookByID(webhookObject.id);
 							IWebhook oldWebhook = toUpdate.copy();
@@ -1085,7 +1067,7 @@ public class Channel implements IChannel {
 				}
 
 				oldList.forEach(webhook -> {
-					removeWebhook(webhook);
+					webhooks.remove(webhook);
 					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
 				});
 			} catch (Exception e) {

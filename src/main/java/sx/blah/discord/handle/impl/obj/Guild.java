@@ -49,22 +49,22 @@ public class Guild implements IGuild {
 	/**
 	 * All text channels in the guild.
 	 */
-	protected final Cache<IChannel> channels;
+	public final Cache<IChannel> channels;
 
 	/**
 	 * All voice channels in the guild.
 	 */
-	protected final Cache<IVoiceChannel> voiceChannels;
+	public final Cache<IVoiceChannel> voiceChannels;
 
 	/**
 	 * All users connected to the guild.
 	 */
-	protected final Cache<IUser> users;
+	public final Cache<IUser> users;
 
 	/**
 	 * The joined timetamps for users.
 	 */
-	protected final Cache<TimeStampHolder> joinTimes;
+	public final Cache<TimeStampHolder> joinTimes;
 
 	/**
 	 * The name of the guild.
@@ -94,7 +94,7 @@ public class Guild implements IGuild {
 	/**
 	 * The roles the guild contains.
 	 */
-	protected final Cache<IRole> roles;
+	public final Cache<IRole> roles;
 
 	/**
 	 * The channel where those who are afk are moved to.
@@ -133,7 +133,7 @@ public class Guild implements IGuild {
 	/**
 	 * The list of emojis.
 	 */
-	protected final Cache<IEmoji> emojis;
+	public final Cache<IEmoji> emojis;
 
 	/**
 	 * The total number of members in this guild
@@ -303,27 +303,6 @@ public class Guild implements IGuild {
 		return id;
 	}
 
-	/**
-	 * CACHES a user to the guild.
-	 *
-	 * @param user The user.
-	 */
-	public void addUser(IUser user) {
-		this.users.put(user);
-	}
-
-	/**
-	 * CACHES a channel to the guild.
-	 *
-	 * @param channel The channel.
-	 */
-	public void addChannel(IChannel channel) {
-		if (channel instanceof IVoiceChannel)
-			voiceChannels.put((IVoiceChannel) channel);
-		else
-			this.channels.put(channel);
-	}
-
 	@Override
 	public List<IRole> getRoles() {
 		LinkedList<IRole> list = new LinkedList<>(roles.values());
@@ -342,15 +321,6 @@ public class Guild implements IGuild {
 	@Override
 	public List<IRole> getRolesForUser(IUser user) {
 		return user.getRolesForGuild(this);
-	}
-
-	/**
-	 * CACHES a role to the guild.
-	 *
-	 * @param role The role.
-	 */
-	public void addRole(IRole role) {
-		this.roles.put(role);
 	}
 
 	@Override
@@ -618,7 +588,7 @@ public class Guild implements IGuild {
 				ChannelObject.class);
 
 		IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
-		addChannel(channel);
+		channels.put(channel);
 
 		return channel;
 	}
@@ -637,7 +607,7 @@ public class Guild implements IGuild {
 				ChannelObject.class);
 
 		IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
-		addChannel(channel);
+		channels.put(channel);
 
 		return channel;
 	}
@@ -749,15 +719,6 @@ public class Guild implements IGuild {
 		return audioManager;
 	}
 
-	/**
-	 * This gets the CACHED join times map.
-	 *
-	 * @return The join times.
-	 */
-	public Cache<TimeStampHolder> getJoinTimes() {
-		return joinTimes;
-	}
-
 	@Override
 	public LocalDateTime getJoinTimeForUser(IUser user) {
 		if (!joinTimes.containsKey(user.getID()))
@@ -867,7 +828,7 @@ public class Guild implements IGuild {
 						if (getWebhookByID(webhookObject.id) == null) {
 							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
 							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
-							channel.addWebhook(newWebhook);
+							channel.webhooks.put(newWebhook);
 						} else {
 							IWebhook toUpdate = channel.getWebhookByID(webhookObject.id);
 							IWebhook oldWebhook = toUpdate.copy();
@@ -881,7 +842,7 @@ public class Guild implements IGuild {
 				}
 
 				oldList.forEach(webhook -> {
-					((Channel) webhook.getChannel()).removeWebhook(webhook);
+					((Channel) webhook.getChannel()).webhooks.remove(webhook);
 					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
 				});
 			} catch (Exception e) {

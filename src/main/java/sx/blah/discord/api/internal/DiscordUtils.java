@@ -251,8 +251,8 @@ public class DiscordUtils {
 			for (RoleObject roleResponse : json.roles) {
 				newRoles.add(getRoleFromJSON(guild, roleResponse));
 			}
-			guild.getRoles().clear();
-			guild.getRoles().addAll(newRoles);
+			guild.roles.clear();
+			guild.roles.putAll(newRoles);
 
 			for (IUser user : guild.getUsers()) { //Removes all deprecated roles
 				for (IRole role : user.getRolesForGuild(guild)) {
@@ -274,7 +274,7 @@ public class DiscordUtils {
 			if (json.members != null) {
 				for (MemberObject member : json.members) {
 					IUser user = getUserFromGuildMemberResponse(guild, member);
-					guild.addUser(user);
+					guild.users.put(user);
 				}
 			}
 
@@ -290,9 +290,9 @@ public class DiscordUtils {
 				for (ChannelObject channelResponse : json.channels) {
 					String channelType = channelResponse.type;
 					if (channelType.equalsIgnoreCase("text")) {
-						guild.addChannel(getChannelFromJSON(guild, channelResponse));
+						guild.channels.put(getChannelFromJSON(guild, channelResponse));
 					} else if (channelType.equalsIgnoreCase("voice")) {
-						guild.addChannel(getVoiceChannelFromJSON(guild, channelResponse));
+						guild.voiceChannels.put(getVoiceChannelFromJSON(guild, channelResponse));
 					}
 				}
 
@@ -311,9 +311,9 @@ public class DiscordUtils {
 			}
 		}
 
-		guild.getEmojis().clear();
+		guild.emojis.clear();
 		for (EmojiObject obj : json.emojis) {
-			guild.getEmojis().add(DiscordUtils.getEmojiFromJSON(guild, obj));
+			guild.emojis.put(DiscordUtils.getEmojiFromJSON(guild, obj));
 		}
 
 		return guild;
@@ -377,7 +377,7 @@ public class DiscordUtils {
 		voiceState.setDeafened(json.deaf);
 		voiceState.setMuted(json.mute);
 
-		((Guild) guild).getJoinTimes().put(new Guild.TimeStampHolder(user.getID(), convertFromTimestamp(json.joined_at)));
+		((Guild) guild).joinTimes.put(new Guild.TimeStampHolder(user.getID(), convertFromTimestamp(json.joined_at)));
 		return user;
 	}
 
@@ -580,7 +580,7 @@ public class DiscordUtils {
 		} else {
 			role = new Role(json.position, json.permissions, json.name, json.managed, json.id, json.hoist, json.color,
 					json.mentionable, guild);
-			((Guild) guild).addRole(role);
+			((Guild) guild).roles.put(role);
 		}
 		return role;
 	}

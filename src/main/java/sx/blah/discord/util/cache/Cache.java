@@ -17,7 +17,6 @@
 
 package sx.blah.discord.util.cache;
 
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.obj.IIDLinkedObject;
 
@@ -247,13 +246,23 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
+	 * This is called to place a cache of objects into the cache.
+	 *
+	 * @param objs The cache to insert.
+	 * @return The objects replaced by this operation.
+	 */
+	public Collection<T> putAll(Cache<T> objs) {
+		return putAll(objs.values());
+	}
+
+	/**
 	 * This is called to place a collection of objects into the cache.
 	 *
 	 * @param objs The objects to insert.
 	 * @return The objects replaced by this operation.
 	 */
-	public Collection<T> putAll(Cache<T> objs) {
-		return delegate.putAll(objs.values());
+	public Collection<T> putAll(Collection<T> objs) {
+		return delegate.putAll(objs);
 	}
 
 	/**

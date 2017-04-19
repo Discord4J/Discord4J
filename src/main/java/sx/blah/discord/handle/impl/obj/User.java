@@ -85,12 +85,12 @@ public class User implements IUser {
 	/**
 	 * The roles the user is a part of. (Key = guild id).
 	 */
-	protected final Cache<RolesHolder> roles;
+	public final Cache<RolesHolder> roles;
 
 	/**
 	 * The nicknames this user has. (Key = guild id).
 	 */
-	protected final Cache<NickHolder> nicks;
+	public final Cache<NickHolder> nicks;
 
 	/**
 	 * The voice states this user has.
