@@ -474,7 +474,7 @@ class DispatchHandler {
 		Guild guild = (Guild) client.getGuildByID(guildId);
 
 		// Clean up cache
-		guild.getShard().getGuilds().remove(guild);
+		((ShardImpl) guild.getShard()).guildCache.remove(guild);
 		((User) client.getOurUser()).voiceStates.remove(guild.getLongID());
 		DiscordVoiceWS vWS = shard.voiceWebSockets.get(guildId);
 		if (vWS != null) {
