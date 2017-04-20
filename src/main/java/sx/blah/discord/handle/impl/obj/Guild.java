@@ -357,6 +357,9 @@ public class Guild implements IGuild {
 
 	@Override
 	public IVoiceChannel getAFKChannel() {
+		if (afkChannel == 0)
+			return null;
+
 		return getVoiceChannelByID(afkChannel);
 	}
 

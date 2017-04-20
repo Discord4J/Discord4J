@@ -275,7 +275,7 @@ public class DiscordUtils {
 			}
 		} else {
 			guild = new Guild(shard, json.name, guildId, json.icon, Long.parseUnsignedLong(json.owner_id),
-					Long.parseUnsignedLong(json.afk_channel_id), json.afk_timeout, json.region, json.verification_level);
+					json.afk_channel_id == null ? 0 : Long.parseUnsignedLong(json.afk_channel_id), json.afk_timeout, json.region, json.verification_level);
 
 			if (json.roles != null)
 				for (RoleObject roleResponse : json.roles) {
