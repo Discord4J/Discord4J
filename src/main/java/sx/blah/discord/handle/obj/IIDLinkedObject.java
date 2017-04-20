@@ -29,16 +29,16 @@ public interface IIDLinkedObject {
 	 * @deprecated Use {@link #getStringID()} instead as this will return a long in future versions.
 	 */
 	@Deprecated
-	String getID();
+	default String getID() {
+		return getStringID();
+	}
 
 	/**
 	 * Gets the <b>unsigned</b> long value of the id for this object.
 	 *
 	 * @return The id.
 	 */
-	default long getLongID() {
-		return Long.parseUnsignedLong(getID());
-	}
+	long getLongID();
 
 	/**
 	 * Gets the snowflake unique id for this object.
@@ -46,6 +46,6 @@ public interface IIDLinkedObject {
 	 * @return The id.
 	 */
 	default String getStringID() {
-		return getID();
+		return Long.toUnsignedString(getLongID());
 	}
 }

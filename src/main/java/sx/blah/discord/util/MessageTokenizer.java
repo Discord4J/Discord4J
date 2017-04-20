@@ -549,7 +549,7 @@ public class MessageTokenizer {
 		private UserMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getUserByID(getContent().replaceAll("<@!?", "").replace(">", ""));
+			mention = tokenizer.getClient().getUserByID(Long.parseUnsignedLong(getContent().replaceAll("<@!?", "").replace(">", "")));
 
 			isNickname = getContent().contains("<@!");
 		}
@@ -576,7 +576,7 @@ public class MessageTokenizer {
 		private RoleMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getRoleByID(getContent().replace("<@&", "").replace(">", ""));
+			mention = tokenizer.getClient().getRoleByID(Long.parseUnsignedLong(getContent().replace("<@&", "").replace(">", "")));
 		}
 	}
 
@@ -592,7 +592,7 @@ public class MessageTokenizer {
 		private ChannelMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getChannelByID(getContent().replace("<#", "").replace(">", ""));
+			mention = tokenizer.getClient().getChannelByID(Long.parseUnsignedLong(getContent().replace("<#", "").replace(">", "")));
 		}
 	}
 
@@ -614,10 +614,10 @@ public class MessageTokenizer {
 			super(tokenizer, startIndex, endIndex);
 
 			final String content = getContent();
-			final String emojiId = content.substring(content.lastIndexOf(":") + 1, content.length());
+			final long emojiId = Long.parseUnsignedLong(content.substring(content.lastIndexOf(":") + 1, content.length()));
 
 			emoji = tokenizer.getClient().getGuilds().stream()
-					.map(guild -> guild.getEmojiByID(emojiId) != null ? guild.getEmojiByID(emojiId) : null).findFirst()
+					.map(guild -> guild.getEmojiByID(emojiId)).findFirst()
 					.orElse(null);
 		}
 

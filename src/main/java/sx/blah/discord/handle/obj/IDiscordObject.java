@@ -47,7 +47,7 @@ public interface IDiscordObject<SELF extends IDiscordObject<SELF>> extends IIDLi
 	 * @return The creation date of this object.
 	 */
 	default LocalDateTime getCreationDate() {
-		return DiscordUtils.getSnowflakeTimeFromID(getID());
+		return DiscordUtils.getSnowflakeTimeFromID(getLongID());
 	}
 
 	/**

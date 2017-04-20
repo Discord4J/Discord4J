@@ -51,7 +51,7 @@ public class SpoofBot {
 	private final IDiscordClient other;
 	private final IDiscordClient client;
 
-	public SpoofBot(IDiscordClient other, String token, String channelID) throws Exception {
+	public SpoofBot(IDiscordClient other, String token, long channelID) throws Exception {
 		this.other = other;
 		client = new ClientBuilder().withToken(token).login();
 		client.getDispatcher().registerListener(new IListener<ReadyEvent>() {

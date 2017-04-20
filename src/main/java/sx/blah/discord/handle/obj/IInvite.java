@@ -65,7 +65,7 @@ public interface IInvite {
 		/**
 		 * ID of the guild you were invited to.
 		 */
-		private final String guildID;
+		private final long guildID;
 
 		/**
 		 * Name of the guild you were invited to.
@@ -75,7 +75,7 @@ public interface IInvite {
 		/**
 		 * ID of the channel you were invited from.
 		 */
-		private final String channelID;
+		private final long channelID;
 
 		/**
 		 * Name of the channel you were invited from.
@@ -83,7 +83,7 @@ public interface IInvite {
 		private final String channelName;
 
 		//TODO replace with objects. Need to figure out logistics, as the GUILD_CREATE is sent after MESSAGE_CREATE and after we accept the invite
-		public InviteResponse(String guildID, String guildName, String channelID, String channelName) {
+		public InviteResponse(long guildID, String guildName, long channelID, String channelName) {
 			this.guildID = guildID;
 			this.guildName = guildName;
 			this.channelID = channelID;
@@ -94,8 +94,19 @@ public interface IInvite {
 		 * Gets the guild id the invite leads to.
 		 *
 		 * @return The guild id.
+		 * @deprecated Use {@link #getGuildLongID()} instead
 		 */
+		@Deprecated
 		public String getGuildID() {
+			return Long.toUnsignedString(getGuildLongID());
+		}
+
+		/**
+		 * Gets the guild id the invite leads to.
+		 *
+		 * @return The guild id.
+		 */
+		public long getGuildLongID() {
 			return guildID;
 		}
 
@@ -112,8 +123,19 @@ public interface IInvite {
 		 * Gets the channel id the invite leads to.
 		 *
 		 * @return The channel id.
+		 * @deprecated Use {@link #getChannelLongID()} instead
 		 */
+		@Deprecated
 		public String getChannelID() {
+			return Long.toUnsignedString(getChannelLongID());
+		}
+
+		/**
+		 * Gets the channel id the invite leads to.
+		 *
+		 * @return The channel id.
+		 */
+		public long getChannelLongID() {
 			return channelID;
 		}
 

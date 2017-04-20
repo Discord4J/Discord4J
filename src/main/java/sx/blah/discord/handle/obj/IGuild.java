@@ -36,8 +36,19 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * Gets the user id for the owner of this guild.
 	 *
 	 * @return The owner id.
+	 * @deprecated Use {@link #getOwnerLongID()}
 	 */
-	String getOwnerID();
+	@Deprecated
+	default String getOwnerID() {
+		return Long.toUnsignedString(getOwnerLongID());
+	}
+
+	/**
+	 * Gets the user id for the owner of this guild.
+	 *
+	 * @return The owner id.
+	 */
+	long getOwnerLongID();
 
 	/**
 	 * Gets the user object for the owner of this guild.
@@ -72,8 +83,21 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The ID of the channel you want to find.
 	 * @return The channel with given ID.
+	 * @deprecated Use {@link #getChannelByID(long)} instead
 	 */
-	IChannel getChannelByID(String id);
+	@Deprecated
+	default IChannel getChannelByID(String id) {
+		if (id == null) return null;
+		return getChannelByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * Gets a channel on the guild by a specific channel id.
+	 *
+	 * @param id The ID of the channel you want to find.
+	 * @return The channel with given ID.
+	 */
+	IChannel getChannelByID(long id);
 
 	/**
 	 * Gets all the users connected to the guild.
@@ -87,8 +111,21 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id ID of the user you want to find.
 	 * @return The user with given ID.
+	 * @deprecated Use {@link #getUserByID(long)} instead
 	 */
-	IUser getUserByID(String id);
+	@Deprecated
+	default IUser getUserByID(String id) {
+		if (id == null) return null;
+		return getUserByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * Gets a user by its id in the guild.
+	 *
+	 * @param id ID of the user you want to find.
+	 * @return The user with given ID.
+	 */
+	IUser getUserByID(long id);
 
 	/**
 	 * Gets all the channels which has a name matching the provided one.
@@ -160,8 +197,21 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The role id of the desired role.
 	 * @return The role, or null if not found.
+	 * @deprecated Use {@link #getRoleByID(long)} instead
 	 */
-	IRole getRoleByID(String id);
+	@Deprecated
+	default IRole getRoleByID(String id) {
+		if (id == null) return null;
+		return getRoleByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * Gets a role object for its unique id.
+	 *
+	 * @param id The role id of the desired role.
+	 * @return The role, or null if not found.
+	 */
+	IRole getRoleByID(long id);
 
 	/**
 	 * This finds all the roles which has the same name as the provided one.
@@ -183,8 +233,21 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The channel id.
 	 * @return The voice channel (or null if not found).
+	 * @deprecated Use {@link #getVoiceChannelByID(long)} instead
 	 */
-	IVoiceChannel getVoiceChannelByID(String id);
+	@Deprecated
+	default IVoiceChannel getVoiceChannelByID(String id) {
+		if (id == null) return null;
+		return getVoiceChannelByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * Gets a voice channel for a give id.
+	 *
+	 * @param id The channel id.
+	 * @return The voice channel (or null if not found).
+	 */
+	IVoiceChannel getVoiceChannelByID(long id);
 
 	/**
 	 * Gets the voice channel that the bot is currently connected to.
@@ -259,8 +322,41 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 * @deprecated Use {@link #banUser(long)} instead
 	 */
-	void banUser(String userID);
+	@Deprecated
+	default void banUser(String userID) {
+		if (userID == null) return;
+		banUser(Long.parseUnsignedLong(userID));
+	}
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(long userID);
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @deprecated Use {@link #banUser(long, int)} instead
+	 */
+	@Deprecated
+	default void banUser(String userID, int deleteMessagesForDays) {
+		if (userID == null) return;
+		banUser(Long.parseUnsignedLong(userID), deleteMessagesForDays);
+	}
 
 	/**
 	 * Bans a user from this guild.
@@ -272,7 +368,23 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void banUser(String userID, int deleteMessagesForDays);
+	void banUser(long userID, int deleteMessagesForDays);
+
+	/**
+	 * This removes a ban on a user.
+	 *
+	 * @param userID The user to unban.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 * @deprecated Use {@link #pardonUser(long)} instead
+	 */
+	@Deprecated
+	default void pardonUser(String userID) {
+		if (userID == null) return;
+		pardonUser(Long.parseUnsignedLong(userID));
+	}
 
 	/**
 	 * This removes a ban on a user.
@@ -283,7 +395,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void pardonUser(String userID);
+	void pardonUser(long userID);
 
 	/**
 	 * Kicks a user from the guild.
@@ -578,8 +690,21 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The message id.
 	 * @return The message or null if not found.
+	 * @deprecated Use {@link #getMessageByID(long)} instad
 	 */
-	IMessage getMessageByID(String id);
+	@Deprecated
+	default IMessage getMessageByID(String id) {
+		if (id == null) return null;
+		return getMessageByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * This gets a message by its id.
+	 *
+	 * @param id The message id.
+	 * @return The message or null if not found.
+	 */
+	IMessage getMessageByID(long id);
 
 	/**
 	 * This gets all the emojis in the guild.
@@ -593,8 +718,21 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The ID.
 	 * @return The emoji.
+	 * @deprecated Use {@link #getEmojiByID(long)} instead
 	 */
-	IEmoji getEmojiByID(String id);
+	@Deprecated
+	default IEmoji getEmojiByID(String id) {
+		if (id == null) return null;
+		return getEmojiByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * This gets an emoji by its ID.
+	 *
+	 * @param id The ID.
+	 * @return The emoji.
+	 */
+	IEmoji getEmojiByID(long id);
 
 	/**
 	 * This gets an emoji by its name.
@@ -609,8 +747,21 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The webhook id.
 	 * @return The webhook or null if not found.
+	 * @deprecated Use {@link #getWebhookByID(long)} instead
 	 */
-	IWebhook getWebhookByID(String id);
+	@Deprecated
+	default IWebhook getWebhookByID(String id) {
+		if (id == null) return null;
+		return getWebhookByID(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * This gets a webhook by its id.
+	 *
+	 * @param id The webhook id.
+	 * @return The webhook or null if not found.
+	 */
+	IWebhook getWebhookByID(long id);
 
 	/**
 	 * This finds all the webhooks which have the same name as the provided one.

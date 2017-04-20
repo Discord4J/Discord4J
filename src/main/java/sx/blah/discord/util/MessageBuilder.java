@@ -104,8 +104,20 @@ public class MessageBuilder {
 	 *
 	 * @param channelID The channel to send the message to.
 	 * @return The message builder instance.
+	 * @deprecated Use {@link #withChannel(long)} instead
 	 */
+	@Deprecated
 	public MessageBuilder withChannel(String channelID) {
+		return withChannel(Long.parseUnsignedLong(channelID));
+	}
+
+	/**
+	 * Sets the channel that the message should go to.
+	 *
+	 * @param channelID The channel to send the message to.
+	 * @return The message builder instance.
+	 */
+	public MessageBuilder withChannel(long channelID) {
 		this.channel = client.getChannelByID(channelID);
 		return this;
 	}

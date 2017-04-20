@@ -17,14 +17,23 @@
 
 package sx.blah.discord.util.cache;
 
+import com.koloboke.collect.set.LongSet;
+import com.koloboke.function.LongObjConsumer;
+import com.koloboke.function.LongObjFunction;
+import com.koloboke.function.LongObjPredicate;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.obj.IIDLinkedObject;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
@@ -331,8 +340,37 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	 *
 	 * @return The copy of the cache.
 	 */
-	public Map<String, T> mapCopy() {
-		return values().stream().collect(Collectors.toMap(T::getID, Function.identity()));
+	public LongMap<T> mapCopy() {
+		return delegate.mapCopy();
+	}
+
+	/**
+	 * Optimized version of {@link #forEach(Consumer)}
+	 *
+	 * @param action Action to do with pairs of keys and values
+	 */
+	public void forEach(LongObjConsumer<? super T> action) {
+		delegate.forEach(action);
+	}
+
+	/**
+	 * Just like {@link #forEach(LongObjConsumer)}, but it stops when predicate returns false
+	 *
+	 * @param predicate Predicate, that consumes keys and values and produces false when iterating should be stopped
+	 * @return true if iterating was interrupted
+	 */
+	public boolean forEachWhile(LongObjPredicate<? super T> predicate) {
+		return delegate.forEachWhile(predicate);
+	}
+
+	/**
+	 * Helper to do searching with transformation
+	 *
+	 * @param function Function, that accepts pair of key and value and produce some result
+	 * @return First non-null result
+	 */
+	public <Z> Z findResult(LongObjFunction<? super T, ? extends Z> function) {
+		return delegate.findResult(function);
 	}
 
 	/**
@@ -348,13 +386,14 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	 */
 	public static class MapCacheDelegate<T extends IIDLinkedObject> implements ICacheDelegate<T> {
 
-		private final Map<String, T> backing;
+		private final LongMap<T> backing;
+		private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
 		public MapCacheDelegate() {
-			this(new ConcurrentHashMap<>());
+			this(LongMap.newMap());
 		}
 
-		public MapCacheDelegate(Map<String, T> backing) {
+		public MapCacheDelegate(LongMap<T> backing) {
 			this.backing = backing;
 		}
 
@@ -362,8 +401,13 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public Optional<T> retrieve(String id) {
-			return Optional.ofNullable(backing.get(id));
+		public Optional<T> retrieve(long id) {
+			lock.readLock().lock();
+			try {
+				return Optional.ofNullable(backing.get(id));
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		/**
@@ -371,12 +415,22 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 */
 		@Override
 		public Optional<T> put(T obj) {
-			return Optional.ofNullable(backing.put(obj.getID(), obj));
+			lock.writeLock().lock();
+			try {
+				return Optional.ofNullable(backing.put(obj.getLongID(), obj));
+			} finally {
+				lock.writeLock().unlock();
+			}
 		}
 
 		@Override
-		public Optional<T> remove(String id) {
-			return Optional.ofNullable(backing.remove(id));
+		public Optional<T> remove(long id) {
+			lock.writeLock().lock();
+			try {
+				return Optional.ofNullable(backing.remove(id));
+			} finally {
+				lock.writeLock().unlock();
+			}
 		}
 
 		/**
@@ -384,17 +438,27 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 */
 		@Override
 		public Collection<T> clear() {
-			Collection<T> cleared = values();
-			backing.clear();
-			return cleared;
+			lock.writeLock().lock();
+			try {
+				Collection<T> cleared = values();
+				backing.clear();
+				return cleared;
+			} finally {
+				lock.writeLock().unlock();
+			}
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		@Override
-		public boolean contains(String id) {
-			return backing.containsKey(id);
+		public boolean contains(long id) {
+			lock.readLock().lock();
+			try {
+				return backing.containsKey(id);
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		/**
@@ -402,7 +466,12 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 */
 		@Override
 		public int size() {
-			return backing.size();
+			lock.readLock().lock();
+			try {
+				return backing.size();
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		/**
@@ -417,7 +486,7 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public Collection<String> ids() {
+		public LongSet longIDs() {
 			return backing.keySet();
 		}
 
@@ -434,7 +503,41 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 */
 		@Override
 		public ICacheDelegate<T> copy() {
-			return new MapCacheDelegate<>(new ConcurrentHashMap<>(backing));
+			return new MapCacheDelegate<>(mapCopy());
+		}
+
+		@Override
+		public LongMap<T> mapCopy() {
+			lock.readLock().lock();
+			try {
+				return LongMap.copyMap(backing);
+			} finally {
+				lock.readLock().unlock();
+			}
+		}
+
+		@Override
+		public void forEach(LongObjConsumer<? super T> action) {
+			backing.forEach(action);
+		}
+
+		@Override
+		public boolean forEachWhile(LongObjPredicate<? super T> predicate) {
+			return backing.forEachWhile(predicate);
+		}
+
+		@Override
+		public <Z> Z findResult(LongObjFunction<? super T, ? extends Z> function) {
+			AtomicReference<Z> result = new AtomicReference<>();
+			forEachWhile((key, value) -> {
+				Z tmp = function.apply(key, value);
+				if (tmp != null) {
+					result.set(tmp);
+					return false;
+				}
+				return true;
+			});
+			return result.get();
 		}
 	}
 
@@ -447,7 +550,7 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public Optional<T> retrieve(String id) {
+		public Optional<T> retrieve(long id) {
 			return Optional.empty();
 		}
 
@@ -463,7 +566,7 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public Optional<T> remove(String id) {
+		public Optional<T> remove(long id) {
 			return Optional.empty();
 		}
 
@@ -495,8 +598,8 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public Collection<String> ids() {
-			return Collections.emptySet();
+		public LongSet longIDs() {
+			return LongMap.EmptyLongSet.INSTANCE;
 		}
 
 		/**
@@ -513,6 +616,26 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		@Override
 		public ICacheDelegate<T> copy() {
 			return this;
+		}
+
+		@Override
+		public LongMap<T> mapCopy() {
+			return LongMap.emptyMap();
+		}
+
+		@Override
+		public void forEach(LongObjConsumer<? super T> action) {
+
+		}
+
+		@Override
+		public boolean forEachWhile(LongObjPredicate<? super T> predicate) {
+			return true;
+		}
+
+		@Override
+		public <Z> Z findResult(LongObjFunction<? super T, ? extends Z> function) {
+			return null;
 		}
 	}
 }
