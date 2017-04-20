@@ -665,6 +665,20 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public List<IExtendedInvite> getExtendedInvites() {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
+		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.GUILDS+ id + "/invites",
+				ExtendedInviteObject[].class);
+
+		List<IExtendedInvite> invites = new ArrayList<>();
+		for (ExtendedInviteObject inviteResponse : response)
+			invites.add(DiscordUtils.getExtendedInviteFromJSON(client, inviteResponse));
+
+		return invites;
+	}
+
+	@Override
 	public void reorderRoles(IRole... rolesInOrder) {
 		if (rolesInOrder.length != getRoles().size())
 			throw new DiscordException("The number of roles to reorder does not equal the number of available roles!");

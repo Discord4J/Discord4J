@@ -159,7 +159,18 @@ public class DiscordUtils {
 	 * @return The java invite object.
 	 */
 	public static IInvite getInviteFromJSON(IDiscordClient client, InviteObject json) {
-		return new Invite(client, json.code);
+		return new Invite(client, json);
+	}
+
+	/**
+	 * Creates a java {@link ExtendedInvite} object for a json response.
+	 *
+	 * @param client The discord client to use.
+	 * @param json   The json response to use.
+	 * @return The java extended invite object.
+	 */
+	public static IExtendedInvite getExtendedInviteFromJSON(IDiscordClient client, ExtendedInviteObject json) {
+		return new ExtendedInvite(client, json);
 	}
 
 	/**

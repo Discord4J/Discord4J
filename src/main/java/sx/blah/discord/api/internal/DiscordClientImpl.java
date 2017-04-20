@@ -549,24 +549,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IInvite getInviteForCode(String code) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite before bot is ready!");
-			return null;
-		}
-
-		InviteObject invite;
-		try {
-			byte[] data = REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code);
-			if (data != null && data.length > 0)
-				invite = DiscordUtils.MAPPER.readValue(data, InviteObject.class);
-			else
-				return null;
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite: ", e);
-			return null;
-		}
-
-		return invite == null ? null : DiscordUtils.getInviteFromJSON(this, invite);
+		checkLoggedIn("get invite");
+		return DiscordUtils.getInviteFromJSON(this, REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code, InviteObject.class));
 	}
 
 	public int getRetryCount() {

@@ -15,34 +15,42 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.api.internal.json.objects;
+package sx.blah.discord.handle.obj;
+
+import java.time.LocalDateTime;
 
 /**
- * Represents a json invite with metadata.
+ * Represents an invite to a channel which extra metadata.
  */
-public class ExtendedInviteObject extends InviteObject {
+public interface IExtendedInvite extends IInvite {
+
 	/**
-	 * Number of times this invite has been used.
+	 * @return The number of times this invite has been used.
 	 */
-	public int uses;
+	int getUses();
+
 	/**
-	 * Max number of times this invite can be used.
+	 * @return The maximum number of times this invite can be used. 0 if infinite.
 	 */
-	public int max_uses;
+	int getMaxUses();
+
 	/**
-	 * Duration (in seconds) after which the invite expires.
+	 * @return The duration (in seconds) after which this invite expires.
 	 */
-	public int max_age;
+	int getMaxAge();
+
 	/**
-	 * Whether this invite only grants temporary membership.
+	 * @return Whether this invite only grants temporary membership.
 	 */
-	public boolean temporary;
+	boolean isTemporary();
+
 	/**
-	 * When this invite was created.
+	 * @return The time at which this invite was created.
 	 */
-	public String created_at;
+	LocalDateTime getCreationTime();
+
 	/**
-	 * Whether this invite is revoked.
+	 * @return Whether this invite is revoked.
 	 */
-	public boolean revoked;
+	boolean isRevoked();
 }

@@ -897,8 +897,18 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
+	 *
+	 * @deprecated Use {@link #getExtendedInvites()} instead.
 	 */
+	@Deprecated
 	List<IInvite> getInvites();
+
+	/**
+	 * Gets all the invites for this channel.
+	 *
+	 * @return The list invites for this channel.
+	 */
+	List<IExtendedInvite> getExtendedInvites();
 
 	/**
 	 * This gets the users with the ability to read this channel.

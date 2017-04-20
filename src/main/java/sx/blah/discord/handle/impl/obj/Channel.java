@@ -739,16 +739,16 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) {
+	public IExtendedInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) {
 		getShard().checkReady("create invite");
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.CREATE_INVITE));
 
-		ExtendedInviteObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+		ExtendedInviteObject response = (client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.CHANNELS+getStringID()+"/invites",
 				new InviteCreateRequest(maxAge, maxUses, temporary, unique),
 				ExtendedInviteObject.class);
 
-		return DiscordUtils.getInviteFromJSON(client, response);
+		return DiscordUtils.getExtendedInviteFromJSON(client, response);
 	}
 
 	@Override
@@ -933,13 +933,27 @@ public class Channel implements IChannel {
 	@Override
 	public List<IInvite> getInvites() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
-		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+		ExtendedInviteObject[] response = client.REQUESTS.GET.makeRequest(
 				DiscordEndpoints.CHANNELS + id + "/invites",
 				ExtendedInviteObject[].class);
 
 		List<IInvite> invites = new ArrayList<>();
 		for (ExtendedInviteObject inviteResponse : response)
 			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
+
+		return invites;
+	}
+
+	@Override
+	public List<IExtendedInvite> getExtendedInvites() {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL));
+		ExtendedInviteObject[] response = client.REQUESTS.GET.makeRequest(
+				DiscordEndpoints.CHANNELS + id + "/invites",
+				ExtendedInviteObject[].class);
+
+		List<IExtendedInvite> invites = new ArrayList<>();
+		for (ExtendedInviteObject inviteResponse : response)
+			invites.add(DiscordUtils.getExtendedInviteFromJSON(client, inviteResponse));
 
 		return invites;
 	}

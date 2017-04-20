@@ -18,8 +18,6 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 
 /**
  * Represents an invite into a channel.
@@ -27,39 +25,53 @@ import sx.blah.discord.util.RateLimitException;
 public interface IInvite {
 
 	/**
-	 * @return The invite code
+	 * @return The invite code for this invite.
 	 */
-	String getInviteCode();
+	String getCode();
 
 	/**
-	 * Gains the same information as accepting,
-	 * but doesn't actually accept the invite.
-	 *
-	 * @return an InviteResponse containing the invite's details.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @return The guild this invite is for.
 	 */
-	InviteResponse details();
+	IGuild getGuild();
 
 	/**
-	 * Attempts to delete the invite this object represents.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @return The channel this invite is for.
 	 */
-	void delete();
+	IChannel getChannel();
 
 	/**
-	 * This gets the client that this object is tied to.
-	 *
-	 * @return The client.
+	 * Note: This is null for vanity url invites and invites for widgets.
+	 * @return The user who created this invite.
+	 */
+	IUser getInviter();
+
+	/**
+	 * @return The client this invite is tied to.
 	 */
 	IDiscordClient getClient();
 
 	/**
-	 * Represents the details of an invite.
+	 * Deletes this invite.
 	 */
+	void delete();
+
+	/**
+	 * @return The invite code for this invite.
+	 *
+	 * @deprecated Use {@link #getCode()} instead.
+	 */
+	@Deprecated
+	String getInviteCode();
+
+	/**
+	 * @return An {@link InviteResponse} containing the invite's details.
+	 *
+	 * @deprecated This is no longer needed as the same information and more can be obtained with methods in {@link IInvite} and {@link IExtendedInvite}.
+	 */
+	@Deprecated
+	InviteResponse details();
+
+	@Deprecated
 	class InviteResponse {
 
 		/**
@@ -82,7 +94,6 @@ public interface IInvite {
 		 */
 		private final String channelName;
 
-		//TODO replace with objects. Need to figure out logistics, as the GUILD_CREATE is sent after MESSAGE_CREATE and after we accept the invite
 		public InviteResponse(long guildID, String guildName, long channelID, String channelName) {
 			this.guildID = guildID;
 			this.guildName = guildName;

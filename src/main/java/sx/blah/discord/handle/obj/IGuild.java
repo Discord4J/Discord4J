@@ -625,8 +625,18 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
+	 *
+	 * @deprecated Use {@link #getExtendedInvites()} instead.
 	 */
+	@Deprecated
 	List<IInvite> getInvites();
+
+	/**
+	 * Gets all the invites for this guild.
+	 *
+	 * @return The list invites for this guild.
+	 */
+	List<IExtendedInvite> getExtendedInvites();
 
 	/**
 	 * This reorders the position of the roles in this guild.
