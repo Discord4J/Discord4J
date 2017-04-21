@@ -26,14 +26,7 @@ import java.time.LocalDateTime;
 /**
  * This represents a generic discord object.
  */
-public interface IDiscordObject<SELF extends IDiscordObject> { //The SELF thing is just a hack to get copy() to work correctly because self types don't exist in java >.>
-
-	/**
-	 * Gets the snowflake unique id for this object.
-	 *
-	 * @return The id.
-	 */
-	String getID();
+public interface IDiscordObject<SELF extends IDiscordObject<SELF>> extends IIDLinkedObject { //The SELF thing is just a hack to get copy() to work correctly because self types don't exist in java >.>
 
 	/**
 	 * Gets the {@link IDiscordClient} instance this object belongs to.
@@ -54,7 +47,7 @@ public interface IDiscordObject<SELF extends IDiscordObject> { //The SELF thing 
 	 * @return The creation date of this object.
 	 */
 	default LocalDateTime getCreationDate() {
-		return DiscordUtils.getSnowflakeTimeFromID(getID());
+		return DiscordUtils.getSnowflakeTimeFromID(getLongID());
 	}
 
 	/**

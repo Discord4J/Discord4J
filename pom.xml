@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
 			<artifactId>websocket-client</artifactId>
-			<version>9.4.2.v20170220</version>
+			<version>9.4.3.v20170317</version>
 		</dependency>
 
 		<dependency>
@@ -154,6 +154,18 @@
 			<version>3.2.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.koloboke</groupId>
+			<artifactId>koloboke-compile</artifactId>
+			<version>0.5.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.koloboke</groupId>
+			<artifactId>koloboke-impl-common-jdk8</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

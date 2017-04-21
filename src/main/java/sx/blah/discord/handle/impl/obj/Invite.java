@@ -21,44 +21,44 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
-
-import java.util.Objects;
+import sx.blah.discord.handle.obj.IUser;
 
 public class Invite implements IInvite {
-	/**
-	 * An invite code, AKA an invite URL minus the https://discord.gg/
-	 */
-	protected final String inviteCode;
 
-	/**
-	 * The client that created this object.
-	 */
-	protected final IDiscordClient client;
+	private final IDiscordClient client;
+	private final InviteObject backing;
 
-	public Invite(IDiscordClient client, String inviteCode) {
+	public Invite(IDiscordClient client, InviteObject backing) {
 		this.client = client;
-		this.inviteCode = inviteCode;
+		this.backing = backing;
+	}
+
+	@Override
+	public String getCode() {
+		return backing.code;
 	}
 
 	@Override
 	public String getInviteCode() {
-		return inviteCode;
+		return getCode();
 	}
 
 	@Override
-	public InviteResponse details() {
-		client.checkReady("get invite details");
-		InviteObject response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode, InviteObject.class);
-
-		return new InviteResponse(response.guild.id, response.guild.name, response.channel.id, response.channel.name);
+	public IGuild getGuild() {
+		return client.getGuildByID(backing.guild.id);
 	}
 
 	@Override
-	public void delete() {
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode);
+	public IChannel getChannel() {
+		return getGuild().getChannelByID(backing.channel.id);
+	}
+
+	@Override
+	public IUser getInviter() {
+		return getGuild().getUserByID(backing.inviter.id);
 	}
 
 	@Override
@@ -67,8 +67,13 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(inviteCode);
+	public void delete() {
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE + getCode());
+	}
+
+	@Override
+	public InviteResponse details() {
+		return null;
 	}
 
 	@Override
@@ -76,11 +81,11 @@ public class Invite implements IInvite {
 		if (other == null)
 			return false;
 
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IInvite) other).getInviteCode().equals(getInviteCode());
+		return this.getClass().isAssignableFrom(other.getClass()) && ((IInvite) other).getCode().equals(getCode());
 	}
 
 	@Override
 	public String toString() {
-		return inviteCode;
+		return "discord.gg/" + getCode();
 	}
 }

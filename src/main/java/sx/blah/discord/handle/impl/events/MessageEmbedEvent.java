@@ -29,7 +29,7 @@ import java.util.List;
 @Deprecated
 public class MessageEmbedEvent extends sx.blah.discord.handle.impl.events.guild.channel.message.MessageEmbedEvent {
 
-	public MessageEmbedEvent(IMessage message, List<IEmbed> oldEmbed) {
-		super(message, oldEmbed);
+	public MessageEmbedEvent(IMessage message, List<IEmbed> oldEmbeds) {
+		super(message, oldEmbeds);
 	}
 }

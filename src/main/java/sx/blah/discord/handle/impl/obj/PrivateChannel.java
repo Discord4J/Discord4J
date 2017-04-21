@@ -19,10 +19,9 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
 import java.util.*;
 
@@ -33,19 +32,21 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	 */
 	protected final IUser recipient;
 
-	public PrivateChannel(DiscordClientImpl client, IUser recipient, String id) {
-		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
+	public PrivateChannel(DiscordClientImpl client, IUser recipient, long id) {
+		super(client, recipient.getName(), id, null, null, 0,
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)),
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)));
 		this.recipient = recipient;
 	}
 
 	@Override
-	public Map<String, PermissionOverride> getUserOverrides() {
-		return new HashMap<>();
+	public LongMap<PermissionOverride> getUserOverridesLong() {
+		return LongMap.emptyMap();
 	}
 
 	@Override
-	public Map<String, PermissionOverride> getRoleOverrides() {
-		return new HashMap<>();
+	public LongMap<PermissionOverride> getRoleOverridesLong() {
+		return LongMap.emptyMap();
 	}
 
 	@Override
@@ -58,16 +59,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addUserOverride(String userId, PermissionOverride override) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addRoleOverride(String roleId, PermissionOverride override) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -132,7 +123,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) {
+	public IExtendedInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -172,7 +163,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IWebhook getWebhookByID(String id) {
+	public IWebhook getWebhookByID(long id) {
 		throw new UnsupportedOperationException();
 	}
 

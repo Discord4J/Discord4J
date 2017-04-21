@@ -20,8 +20,10 @@ package sx.blah.discord.handle.obj;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.LongMap;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -124,7 +126,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	String getNicknameForGuild(IGuild guild);
 
 	/**
-	 * Gets the user's voice states for the given guild.
+	 * Get's the user's never-null voice state for the given guild.
 	 *
 	 * @param guild The guild to check.
 	 * @return The voice state.
@@ -136,8 +138,22 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * Key is the guild ID that the voice state is for.
 	 *
 	 * @return All of the user's voice states.
+	 * @deprecated Use {@link #getVoiceStatesLong()} instead
 	 */
-	Map<String, IVoiceState> getVoiceStates();
+	@Deprecated
+	default Map<String, IVoiceState> getVoiceStates() {
+		Map<String, IVoiceState> map = new HashMap<>();
+		getVoiceStatesLong().forEach((key, value) -> map.put(Long.toUnsignedString(key), value));
+		return map;
+	}
+
+	/**
+	 * Gets all of the user's voice states.
+	 * Key is the guild ID that the voice state is for.
+	 *
+	 * @return All of the user's voice states.
+	 */
+	LongMap<IVoiceState> getVoiceStatesLong();
 
 	/**
 	 * Moves the user to the given voice channel.

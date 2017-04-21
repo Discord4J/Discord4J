@@ -78,6 +78,11 @@ public enum LogMarkers implements Marker {
 	 */
 	WEBSOCKET_TRAFFIC(WEBSOCKET),
 	/**
+	 * The marker for all reconnect-related logging.
+	 * It is a child of {@link #WEBSOCKET}
+	 */
+	RECONNECTS(WEBSOCKET),
+	/**
 	 * The marker for all voice-related logging.
 	 * It is a child of {@link #API}.
 	 */

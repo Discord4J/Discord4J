@@ -27,19 +27,21 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.IDLinkedObjectWrapper;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Supplier;
 
 public class User implements IUser {
 
 	/**
 	 * User ID.
 	 */
-	protected final String id;
+	protected final long id;
 
 	/**
 	 * The client that created this object.
@@ -84,23 +86,23 @@ public class User implements IUser {
 	/**
 	 * The roles the user is a part of. (Key = guild id).
 	 */
-	protected final Map<String, List<IRole>> roles = new ConcurrentHashMap<>();
+	public final Cache<RolesHolder> roles;
 
 	/**
 	 * The nicknames this user has. (Key = guild id).
 	 */
-	protected final Map<String, String> nicks = new ConcurrentHashMap<>();
+	public final Cache<NickHolder> nicks;
 
 	/**
 	 * The voice states this user has.
 	 */
-	protected final Map<String, IVoiceState> voiceStates = new ConcurrentHashMap<>();
+	public final Cache<IVoiceState> voiceStates;
 
-	public User(IShard shard, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
+	public User(IShard shard, String name, long id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this(shard, shard == null ? null : shard.getClient(), name, id, discriminator, avatar, presence, isBot);
 	}
 
-	public User(IShard shard, IDiscordClient client, String name, String id, String discriminator, String avatar, IPresence presence, boolean isBot) {
+	public User(IShard shard, IDiscordClient client, String name, long id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this.shard = shard;
 		this.client = client;
 		this.id = id;
@@ -111,10 +113,13 @@ public class User implements IUser {
 				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
 		this.presence = presence;
 		this.isBot = isBot;
+		this.roles = new Cache<>((DiscordClientImpl) client, RolesHolder.class);
+		this.nicks = new Cache<>((DiscordClientImpl) client, NickHolder.class);
+		this.voiceStates = new Cache<>((DiscordClientImpl) client, IVoiceState.class);
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -207,11 +212,19 @@ public class User implements IUser {
 
 	@Override
 	public List<IRole> getRolesForGuild(IGuild guild) {
-		return roles.getOrDefault(guild.getID(), new ArrayList<>());
+		if (roles != null) {
+			RolesHolder retrievedRoles = roles.get(guild.getLongID());
+			if (retrievedRoles != null && retrievedRoles.getObject() != null)
+				return new LinkedList<>(retrievedRoles.getObject());
+		}
+
+		return new LinkedList<>();
 	}
 
 	@Override
 	public EnumSet<Permissions> getPermissionsForGuild(IGuild guild){
+		if (guild.getOwner().equals(this))
+			return EnumSet.allOf(Permissions.class);
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 		getRolesForGuild(guild).forEach(role -> permissions.addAll(role.getPermissions()));
 		return permissions;
@@ -219,17 +232,18 @@ public class User implements IUser {
 
 	@Override
 	public String getNicknameForGuild(IGuild guild) {
-		return nicks.get(guild.getID());
+		return nicks.get(guild.getLongID()).getObject();
 	}
 
 	@Override
 	public IVoiceState getVoiceStateForGuild(IGuild guild) {
-		return voiceStates.computeIfAbsent(guild.getID(), (String key) -> new VoiceState(guild, this));
+		voiceStates.putIfAbsent(guild.getLongID(), () -> new VoiceState(guild, this));
+		return voiceStates.get(guild.getLongID());
 	}
 
 	@Override
-	public Map<String, IVoiceState> getVoiceStates() {
-		return voiceStates;
+	public LongMap<IVoiceState> getVoiceStatesLong() {
+		return voiceStates.mapCopy();
 	}
 
 	@Override
@@ -244,8 +258,8 @@ public class User implements IUser {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS + channel.getGuild().getID() + "/members/" + id,
-					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().channel(channel.getID()).build()));
+					DiscordEndpoints.GUILDS + channel.getGuild().getStringID() + "/members/" + id,
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().channel(channel.getStringID()).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -258,13 +272,8 @@ public class User implements IUser {
 	 * @param guildID The guild the nickname is for.
 	 * @param nick    The nickname, or null to remove it.
 	 */
-	public void addNick(String guildID, String nick) {
-		if (nick == null) {
-			if (nicks.containsKey(guildID))
-				nicks.remove(guildID);
-		} else {
-			nicks.put(guildID, nick);
-		}
+	public void addNick(long guildID, String nick) {
+		nicks.put(new NickHolder(guildID, nick));
 	}
 
 	/**
@@ -273,20 +282,21 @@ public class User implements IUser {
 	 * @param guildID The guild the role is for.
 	 * @param role    The role.
 	 */
-	public void addRole(String guildID, IRole role) {
-		roles.computeIfAbsent(guildID, (String id) -> new ArrayList<>()).add(role);
+	public void addRole(long guildID, IRole role) {
+		roles.putIfAbsent(guildID, () -> new RolesHolder(guildID, new CopyOnWriteArraySet<>()));
+		roles.get(guildID).getObject().add(role);
 	}
 
 	@Override
 	public void addRole(IRole role) {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getStringID()+"/members/"+id+"/roles/"+role.getStringID());
 	}
 
 	@Override
 	public void removeRole(IRole role) {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getStringID()+"/members/"+id+"/roles/"+role.getStringID());
 	}
 
 	@Override
@@ -332,5 +342,19 @@ public class User implements IUser {
 	@Override
 	public boolean equals(Object other) {
 		return DiscordUtils.equals(this ,other);
+	}
+}
+
+class RolesHolder extends IDLinkedObjectWrapper<Collection<IRole>> {
+
+	RolesHolder(long id, Collection<IRole> roles) {
+		super(id, roles);
+	}
+}
+
+class NickHolder extends IDLinkedObjectWrapper<String> {
+
+	NickHolder(long id, String string) {
+		super(id, string);
 	}
 }

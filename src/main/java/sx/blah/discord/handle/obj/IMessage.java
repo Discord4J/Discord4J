@@ -241,10 +241,26 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Gets a reaction by the emoji text. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
 	 * instead.
 	 *
-	 * @param name The emoji text
+	 * @param name The emoji text (as Unicode)
 	 * @return The reaction, or null if there aren't any that match
 	 * @see IMessage#getReactionByIEmoji(IEmoji)
 	 */
+	IReaction getReactionByUnicode(String name);
+
+	/**
+	 * Gets a reaction by the Unicode emoji. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
+	 * instead. This simply calls {@link Emoji#getUnicode()} on the other overload of this method.
+	 *
+	 * @param emoji The emoji (as Unicode)
+	 * @return The reaction, or null if there aren't any that match
+	 * @see IMessage#getReactionByIEmoji(IEmoji)
+	 */
+	IReaction getReactionByUnicode(Emoji emoji);
+
+	/**
+	 * @deprecated Use {@link #getReactionByUnicode(String)} instead
+	 */
+	@Deprecated
 	IReaction getReactionByName(String name);
 
 	/**
@@ -336,13 +352,24 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Gets the ID of the webhook that sent this message. May be null.
 	 *
 	 * @return The webhook ID.
+	 * @deprecated Use {@link #getWebhookLongID()} instead
 	 */
-	String getWebhookID();
+	@Deprecated
+	default String getWebhookID() {
+		return Long.toUnsignedString(getWebhookLongID());
+	}
+
+	/**
+	 * Gets the ID of the webhook that sent this message. May be null.
+	 *
+	 * @return The webhook ID.
+	 */
+	long getWebhookLongID();
 
 	/**
 	 * Represents an attachment included in the message.
 	 */
-	class Attachment {
+	class Attachment implements IIDLinkedObject {
 
 		/**
 		 * The file name of the attachment.
@@ -357,14 +384,14 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		/**
 		 * The attachment id.
 		 */
-		protected final String id;
+		protected final long id;
 
 		/**
 		 * The download link for the attachment.
 		 */
 		protected final String url;
 
-		public Attachment(String filename, int filesize, String id, String url) {
+		public Attachment(String filename, int filesize, long id, String url) {
 			this.filename = filename;
 			this.filesize = filesize;
 			this.id = id;
@@ -393,8 +420,20 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		 * Gets the id of the attachment.
 		 *
 		 * @return The attachment id.
+		 * @deprecated Use {@link #getLongID()} or {@link #getStringID()} instead
 		 */
+		@Deprecated
 		public String getId() {
+			return getStringID();
+		}
+
+		/**
+		 * Gets the id of the attachment.
+		 *
+		 * @return The attachment id.
+		 */
+		@Override
+		public long getLongID() {
 			return id;
 		}
 

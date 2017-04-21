@@ -35,6 +35,7 @@ import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IIDLinkedObject;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.LogMarkers;
 
@@ -46,7 +47,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class DiscordVoiceWS extends WebSocketAdapter {
+public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject {
 
 	private WebSocketClient wsClient;
 	private ScheduledExecutorService heartbeat = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Discord Voice WS Heartbeat"));
@@ -63,7 +64,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 		this.shard = (ShardImpl) shard;
 		this.endpoint = event.endpoint.replace(":80", "");
 		this.token = event.token;
-		this.guild = shard.getGuildByID(event.guild_id);
+		this.guild = shard.getGuildByID(Long.parseUnsignedLong(event.guild_id));
 	}
 
 	void connect() {
@@ -84,7 +85,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 		super.onWebSocketConnect(sess);
 		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket Connected.");
 
-		send(VoiceOps.IDENTIFY, new VoiceIdentifyRequest(guild.getID(), shard.getClient().getOurUser().getID(), shard.ws.sessionId, token));
+		send(VoiceOps.IDENTIFY, new VoiceIdentifyRequest(guild.getStringID(), shard.getClient().getOurUser().getStringID(), shard.ws.sessionId, token));
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 					break;
 				case SPEAKING:
 					VoiceSpeakingResponse response = DiscordUtils.MAPPER.treeToValue(d, VoiceSpeakingResponse.class);
-					IUser user = getGuild().getUserByID(response.user_id);
+					IUser user = getGuild().getUserByID(Long.parseUnsignedLong(response.user_id));
 					users.put(response.ssrc, user);
 					guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.speaking));
 					break;
@@ -138,7 +139,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
 		try {
 			shard.getClient().getDispatcher().dispatch(new VoiceDisconnectedEvent(getGuild(), reason));
-			shard.voiceWebSockets.remove(guild.getID());
+			shard.voiceWebSockets.remove(guild.getLongID());
 			heartbeat.shutdownNow();
 			voiceSocket.shutdown();
 			if (getSession() != null) getSession().close(1000, null); // Discord doesn't care about the reason
@@ -148,6 +149,7 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error while shutting down voice websocket: ", e);
 			}
 		}
+		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket Disconnected.");
 	}
 
 	public void send(VoiceOps op, Object payload) {
@@ -172,5 +174,10 @@ public class DiscordVoiceWS extends WebSocketAdapter {
 
 	IGuild getGuild() {
 		return this.guild;
+	}
+
+	@Override
+	public long getLongID() {
+		return guild.getLongID();
 	}
 }

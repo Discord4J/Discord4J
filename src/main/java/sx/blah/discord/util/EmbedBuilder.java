@@ -85,7 +85,7 @@ public class EmbedBuilder {
 
 	/**
 	 * This configures if the builder is lenient. When lenient, the builder will truncate strings in order to fit in an
-	 * embed and ignore empty/null fields.
+	 * embed and ignore empty/null fields, otherwise will throw an IllegalArgumentException.
 	 *
 	 * @param lenient True to make the builder lenient, false for the opposite.
 	 * @return Itself for chaining.
@@ -431,6 +431,16 @@ public class EmbedBuilder {
 				throw new IllegalArgumentException("Field can not be null!");
 		}
 		return appendField(field.getName(), field.getValue(), field.isInline());
+	}
+
+	/**
+	 * Clears the fields in the builder.
+	 *
+	 * @return Itself for chaining
+	 */
+	public EmbedBuilder clearFields(){
+		fields.clear();
+		return this;
 	}
 
 	/**

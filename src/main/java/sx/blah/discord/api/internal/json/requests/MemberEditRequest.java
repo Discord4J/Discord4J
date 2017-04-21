@@ -103,7 +103,7 @@ public class MemberEditRequest {
 	private final String channel_id;
 
 	MemberEditRequest(IRole[] roles, String nick, Boolean mute, Boolean deaf, String channelID) {
-		this.roles = roles == null ? null : Arrays.stream(roles).map(IRole::getID).distinct().toArray(String[]::new);
+		this.roles = roles == null ? null : Arrays.stream(roles).map(IRole::getStringID).distinct().toArray(String[]::new);
 		this.nick = nick;
 		this.mute = mute;
 		this.deaf = deaf;

@@ -26,12 +26,12 @@ import sx.blah.discord.handle.obj.IGuild;
  */
 @Deprecated
 public class GuildUnavailableEvent extends sx.blah.discord.handle.impl.events.guild.GuildUnavailableEvent {
-	
+
 	public GuildUnavailableEvent(IGuild guild) {
 		super(guild);
 	}
-	
-	public GuildUnavailableEvent(String id) {
+
+	public GuildUnavailableEvent(long id) {
 		super(id);
 	}
 }

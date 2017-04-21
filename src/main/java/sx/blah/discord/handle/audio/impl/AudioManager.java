@@ -107,32 +107,33 @@ public class AudioManager implements IAudioManager {
 		return getAudioDataForProvider(provider);
 	}
 
-	public synchronized void receiveAudio(byte[] opusAudio, IUser user) {
-		byte[] pcm = OpusUtil.decode(stereoDecoder.get(), opusAudio);
-		receiveAudio(opusAudio, pcm, user);
+	public synchronized void receiveAudio(byte[] opus, IUser user, char sequence, int timestamp) {
+		// Initializing decoder is an expensive op. Don't do it if no one is listening
+		if (generalReceivers.size() > 0 || userReceivers.size() > 0) {
+			byte[] pcm = OpusUtil.decode(stereoDecoder.get(), opus);
+			receiveAudio(opus, pcm, user, sequence, timestamp);
+		}
 	}
 
-	private void receiveAudio(byte[] opusAudio, byte[] pcmAudio, IUser user) {
+	private void receiveAudio(byte[] opusAudio, byte[] pcmAudio, IUser user, char sequence, int timestamp) {
 		generalReceivers.parallelStream().forEach(r -> {
 			if (r.getAudioEncodingType() == AudioEncodingType.OPUS) {
-				r.receive(opusAudio, user);
+				r.receive(opusAudio, user, sequence, timestamp);
 			} else {
-				r.receive(pcmAudio, user);
+				r.receive(pcmAudio, user, sequence, timestamp);
 			}
 		});
 
 		if (userReceivers.containsKey(user)) {
 			userReceivers.get(user).parallelStream().forEach(r -> {
 				if (r.getAudioEncodingType() == AudioEncodingType.OPUS) {
-					r.receive(opusAudio, user);
+					r.receive(opusAudio, user, sequence, timestamp);
 				} else {
-					r.receive(pcmAudio, user);
+					r.receive(pcmAudio, user, sequence, timestamp);
 				}
 			});
 		}
 	}
-
-
 
 	@Override
 	public IGuild getGuild() {

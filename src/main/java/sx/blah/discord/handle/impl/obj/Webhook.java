@@ -26,17 +26,14 @@ import sx.blah.discord.api.internal.json.objects.WebhookObject;
 import sx.blah.discord.api.internal.json.requests.WebhookEditRequest;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.util.EnumSet;
 import java.util.Objects;
 
 public class Webhook implements IWebhook {
 
-	protected final String id;
+	protected final long id;
 	protected final IDiscordClient client;
 	protected final IChannel channel;
 	protected final IUser author;
@@ -44,7 +41,7 @@ public class Webhook implements IWebhook {
 	protected volatile String avatar;
 	protected final String token;
 
-	public Webhook(IDiscordClient client, String name, String id, IChannel channel, IUser author, String avatar, String token) {
+	public Webhook(IDiscordClient client, String name, long id, IChannel channel, IUser author, String avatar, String token) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -55,7 +52,7 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 

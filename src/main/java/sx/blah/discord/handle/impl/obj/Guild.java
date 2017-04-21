@@ -34,10 +34,10 @@ import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.cache.Cache;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,22 +46,22 @@ public class Guild implements IGuild {
 	/**
 	 * All text channels in the guild.
 	 */
-	protected final List<IChannel> channels;
+	public final Cache<IChannel> channels;
 
 	/**
 	 * All voice channels in the guild.
 	 */
-	protected final List<IVoiceChannel> voiceChannels;
+	public final Cache<IVoiceChannel> voiceChannels;
 
 	/**
 	 * All users connected to the guild.
 	 */
-	protected final List<IUser> users;
+	public final Cache<IUser> users;
 
 	/**
 	 * The joined timetamps for users.
 	 */
-	protected final Map<IUser, LocalDateTime> joinTimes;
+	public final Cache<TimeStampHolder> joinTimes;
 
 	/**
 	 * The name of the guild.
@@ -71,7 +71,7 @@ public class Guild implements IGuild {
 	/**
 	 * The ID of this guild.
 	 */
-	protected final String id;
+	protected final long id;
 
 	/**
 	 * The location of the guild icon
@@ -86,17 +86,17 @@ public class Guild implements IGuild {
 	/**
 	 * The user id for the owner of the guild
 	 */
-	protected volatile String ownerID;
+	protected volatile long ownerID;
 
 	/**
 	 * The roles the guild contains.
 	 */
-	protected final List<IRole> roles;
+	public final Cache<IRole> roles;
 
 	/**
 	 * The channel where those who are afk are moved to.
 	 */
-	protected volatile String afkChannel;
+	protected volatile long afkChannel;
 	/**
 	 * The time in seconds for a user to be idle to be determined as "afk".
 	 */
@@ -130,18 +130,23 @@ public class Guild implements IGuild {
 	/**
 	 * The list of emojis.
 	 */
-	protected final List<IEmoji> emojis;
+	public final Cache<IEmoji> emojis;
 
 	/**
 	 * The total number of members in this guild
 	 */
 	private int totalMemberCount;
 
-	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int verification) {
-		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new ConcurrentHashMap<>());
+	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout, String region, int verification) {
+		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification,
+				new Cache<>((DiscordClientImpl) shard.getClient(), IRole.class), new Cache<>((DiscordClientImpl) shard.getClient(), IChannel.class),
+				new Cache<>((DiscordClientImpl) shard.getClient(), IVoiceChannel.class), new Cache<>((DiscordClientImpl) shard.getClient(), IUser.class),
+				new Cache<>((DiscordClientImpl) shard.getClient(), TimeStampHolder.class));
 	}
 
-	public Guild(IShard shard, String name, String id, String icon, String ownerID, String afkChannel, int afkTimeout, String region, int verification, List<IRole> roles, List<IChannel> channels, List<IVoiceChannel> voiceChannels, List<IUser> users, Map<IUser, LocalDateTime> joinTimes) {
+	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout,
+				 String region, int verification, Cache<IRole> roles, Cache<IChannel> channels,
+				 Cache<IVoiceChannel> voiceChannels, Cache<IUser> users, Cache<TimeStampHolder> joinTimes) {
 		this.shard = shard;
 		this.client = shard.getClient();
 		this.name = name;
@@ -159,11 +164,11 @@ public class Guild implements IGuild {
 		this.regionID = region;
 		this.verification = VerificationLevel.get(verification);
 		this.audioManager = new AudioManager(this);
-		this.emojis = new CopyOnWriteArrayList<>();
+		this.emojis = new Cache<>((DiscordClientImpl) client, IEmoji.class);
 	}
 
 	@Override
-	public String getOwnerID() {
+	public long getOwnerLongID() {
 		return ownerID;
 	}
 
@@ -177,7 +182,7 @@ public class Guild implements IGuild {
 	 *
 	 * @param id The user if of the new owner.
 	 */
-	public void setOwnerID(String id) {
+	public void setOwnerID(long id) {
 		ownerID = id;
 	}
 
@@ -203,38 +208,58 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IChannel> getChannels() {
-		return channels;
+		LinkedList<IChannel> list = new LinkedList<>(channels.values());
+		list.sort((c1, c2) -> {
+			int originalPos1 = ((Channel) c1).position;
+			int originalPos2 = ((Channel) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
 	}
 
 	@Override
-	public IChannel getChannelByID(String id) {
-		return channels.stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
+	public IChannel getChannelByID(long id) {
+		return channels.get(id);
 	}
 
 	@Override
 	public List<IUser> getUsers() {
-		return users;
+		return new LinkedList<>(users.values());
 	}
 
 	@Override
-	public IUser getUserByID(String id) {
+	public IUser getUserByID(long id) {
 		if (users == null)
 			return null;
-		return Arrays.stream(users.toArray(new IUser[users.size()]))
-				.filter(u -> u != null && u.getID() != null && u.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
+
+		IUser user = users.get(id);
+
+		if (user == null) {
+			if (client.getOurUser() != null && id == client.getOurUser().getLongID())
+				user = client.getOurUser();
+			else if (id == ownerID)
+				user = getOwner();
+		}
+
+		return user;
 	}
 
 	@Override
 	public List<IChannel> getChannelsByName(String name) {
-		return channels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+		return channels.stream()
+				.filter(channel -> channel.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannelsByName(String name) {
-		return voiceChannels.stream().filter((channel) -> channel.getName().equals(name)).collect(Collectors.toList());
+		return voiceChannels.stream()
+				.filter(channel -> channel.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -271,33 +296,23 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
-	}
-
-	/**
-	 * CACHES a user to the guild.
-	 *
-	 * @param user The user.
-	 */
-	public void addUser(IUser user) {
-		if (!this.users.contains(user) && user != null)
-			this.users.add(user);
-	}
-
-	/**
-	 * CACHES a channel to the guild.
-	 *
-	 * @param channel The channel.
-	 */
-	public void addChannel(IChannel channel) {
-		if (!this.channels.contains(channel) && !(channel instanceof IVoiceChannel) && !(channel instanceof IPrivateChannel))
-			this.channels.add(channel);
 	}
 
 	@Override
 	public List<IRole> getRoles() {
-		return roles;
+		LinkedList<IRole> list = new LinkedList<>(roles.values());
+		list.sort((r1, r2) -> {
+			int originalPos1 = ((Role) r1).position;
+			int originalPos2 = ((Role) r2).position;
+			if (originalPos1 == originalPos2) {
+				return r2.getCreationDate().compareTo(r1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
 	}
 
 	@Override
@@ -305,49 +320,50 @@ public class Guild implements IGuild {
 		return user.getRolesForGuild(this);
 	}
 
-	/**
-	 * CACHES a role to the guild.
-	 *
-	 * @param role The role.
-	 */
-	public void addRole(IRole role) {
-		if (!this.roles.contains(role))
-			this.roles.add(role);
-	}
-
 	@Override
-	public IRole getRoleByID(String id) {
-		return roles.stream()
-				.filter(r -> r.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
+	public IRole getRoleByID(long id) {
+		return roles.get(id);
 	}
 
 	@Override
 	public List<IRole> getRolesByName(String name) {
-		return roles.stream().filter((role) -> role.getName().equals(name)).collect(Collectors.toList());
+		return roles.stream()
+				.filter(role -> role.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannels() {
-		return voiceChannels;
+		LinkedList<IVoiceChannel> list = new LinkedList<>(voiceChannels.values());
+		list.sort((c1, c2) -> {
+			int originalPos1 = ((Channel) c1).position;
+			int originalPos2 = ((Channel) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
 	}
 
 	@Override
-	public IVoiceChannel getVoiceChannelByID(String id) {
-		return voiceChannels.stream()
-				.filter(c -> c.getID().equals(id))
-				.findAny().orElse(null);
+	public IVoiceChannel getVoiceChannelByID(long id) {
+		return voiceChannels.get(id);
 	}
 
 	@Override
 	public IVoiceChannel getAFKChannel() {
+		if (afkChannel == 0)
+			return null;
+
 		return getVoiceChannelByID(afkChannel);
 	}
 
 	@Override
 	public IVoiceChannel getConnectedVoiceChannel() {
 		return client.getConnectedVoiceChannels().stream()
-				.filter((c -> voiceChannels.contains(c)))
+				.filter(voiceChannels::containsValue)
 				.findFirst().orElse(null);
 	}
 
@@ -356,17 +372,12 @@ public class Guild implements IGuild {
 		return afkTimeout;
 	}
 
-	public void setAFKChannel(String id) {
+	public void setAFKChannel(long id) {
 		this.afkChannel = id;
 	}
 
 	public void setAfkTimeout(int timeout) {
 		this.afkTimeout = timeout;
-	}
-
-	public void addVoiceChannel(IVoiceChannel channel) {
-		if (!voiceChannels.contains(channel) && !(channel instanceof IPrivateChannel))
-			voiceChannels.add(channel);
 	}
 
 	@Override
@@ -398,11 +409,11 @@ public class Guild implements IGuild {
 	@Override
 	public void banUser(IUser user, int deleteMessagesForDays) {
 		DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
-		banUser(user.getID(), deleteMessagesForDays);
+		banUser(user.getLongID(), deleteMessagesForDays);
 	}
 
 	@Override
-	public void banUser(String userID) {
+	public void banUser(long userID) {
 		IUser user = getUserByID(userID);
 		if (getUserByID(userID) == null) {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
@@ -414,20 +425,20 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public void banUser(String userID, int deleteMessagesForDays) {
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + userID + "?delete-message-days=" + deleteMessagesForDays);
+	public void banUser(long userID, int deleteMessagesForDays) {
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + Long.toUnsignedString(userID) + "?delete-message-days=" + deleteMessagesForDays);
 	}
 
 	@Override
-	public void pardonUser(String userID) {
+	public void pardonUser(long userID) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/bans/"+userID);
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + Long.toUnsignedString(userID));
 	}
 
 	@Override
 	public void kickUser(IUser user) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getID());
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID());
 	}
 
 	@Override
@@ -436,7 +447,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID(),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().roles(roles).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -450,7 +461,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID(),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().deafen(deafen).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -463,7 +474,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+user.getID(),
+					DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID(),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().mute(mute).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -481,7 +492,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getID()),
+					DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getStringID()),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().nick(nick == null ? "" : nick).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -507,7 +518,7 @@ public class Guild implements IGuild {
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.GUILDS + id, new GuildEditRequest(name, region.getID(), level.ordinal(), icon.getData(),
-						afkChannel == null ? null : afkChannel.getID(), afkTimeout));
+						afkChannel == null ? null : afkChannel.getStringID(), afkTimeout));
 	}
 
 	@Override
@@ -543,7 +554,7 @@ public class Guild implements IGuild {
 	@Override
 	@Deprecated
 	public void deleteGuild() {
-		if (!ownerID.equals(client.getOurUser().getID()))
+		if (ownerID != client.getOurUser().getLongID())
 			throw new MissingPermissionsException("You must be the guild owner to delete guilds!", EnumSet.noneOf(Permissions.class));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id);
@@ -552,7 +563,7 @@ public class Guild implements IGuild {
 	@Override
 	@Deprecated
 	public void leaveGuild() {
-		if (ownerID.equals(client.getOurUser().getID()))
+		if (ownerID == client.getOurUser().getLongID())
 			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id);
@@ -572,12 +583,12 @@ public class Guild implements IGuild {
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-				DiscordEndpoints.GUILDS+getID()+"/channels",
+				DiscordEndpoints.GUILDS+getStringID()+"/channels",
 				new ChannelCreateRequest(name, "text"),
 				ChannelObject.class);
 
 		IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
-		addChannel(channel);
+		channels.put(channel);
 
 		return channel;
 	}
@@ -591,12 +602,12 @@ public class Guild implements IGuild {
 			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-				DiscordEndpoints.GUILDS+getID()+"/channels",
+				DiscordEndpoints.GUILDS+getStringID()+"/channels",
 				new ChannelCreateRequest(name, "voice"),
 				ChannelObject.class);
 
 		IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
-		addVoiceChannel(channel);
+		channels.put(channel);
 
 		return channel;
 	}
@@ -654,6 +665,20 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public List<IExtendedInvite> getExtendedInvites() {
+		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
+		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				DiscordEndpoints.GUILDS+ id + "/invites",
+				ExtendedInviteObject[].class);
+
+		List<IExtendedInvite> invites = new ArrayList<>();
+		for (ExtendedInviteObject inviteResponse : response)
+			invites.add(DiscordUtils.getExtendedInviteFromJSON(client, inviteResponse));
+
+		return invites;
+	}
+
+	@Override
 	public void reorderRoles(IRole... rolesInOrder) {
 		if (rolesInOrder.length != getRoles().size())
 			throw new DiscordException("The number of roles to reorder does not equal the number of available roles!");
@@ -671,11 +696,11 @@ public class Guild implements IGuild {
 			IRole role = rolesInOrder[i];
 
 			int newPosition = role.getPosition();
-			int oldPosition = getRoleByID(role.getID()).getPosition();
+			int oldPosition = getRoleByID(role.getLongID()).getPosition();
 			if (newPosition != oldPosition && oldPosition >= usersHighest) { // If the position was changed and the user doesn't have permission to change it.
 				throw new MissingPermissionsException("Cannot edit the position of a role higher than or equal to your own.", EnumSet.noneOf(Permissions.class));
 			} else {
-				request[i] = new ReorderRolesRequest(role.getID(), i);
+				request[i] = new ReorderRolesRequest(role.getStringID(), i);
 			}
 		}
 
@@ -708,33 +733,24 @@ public class Guild implements IGuild {
 		return audioManager;
 	}
 
-	/**
-	 * This gets the CACHED join times map.
-	 *
-	 * @return The join times.
-	 */
-	public Map<IUser, LocalDateTime> getJoinTimes() {
-		return joinTimes;
-	}
-
 	@Override
 	public LocalDateTime getJoinTimeForUser(IUser user) {
-		if (!joinTimes.containsKey(user))
+		if (!joinTimes.containsKey(user.getLongID()))
 			throw new DiscordException("Cannot find user "+user.getDisplayName(this)+" in this guild!");
 
-		return joinTimes.get(user);
+		return joinTimes.get(user.getLongID()).getObject();
 	}
 
 	@Override
-	public IMessage getMessageByID(String id) {
+	public IMessage getMessageByID(long id) {
 		IMessage message =  channels.stream()
-									.map(IChannel::getMessageHistory)
-									.flatMap(List::stream)
-									.filter(msg -> msg.getID().equalsIgnoreCase(id))
-									.findAny().orElse(null);
+				.map(IChannel::getMessageHistory)
+				.flatMap(List::stream)
+				.filter(msg -> msg.getLongID() == id)
+				.findAny().orElse(null);
 
 		if (message == null) {
-			for (IChannel channel : channels) {
+			for (IChannel channel : channels.values()) {
 				message = channel.getMessageByID(id);
 				if (message != null)
 					return message;
@@ -757,22 +773,24 @@ public class Guild implements IGuild {
 	@Override
 	public IGuild copy() {
 		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, verification.ordinal(),
-				roles, channels, voiceChannels, users, joinTimes);
+				roles.copy(), channels.copy(), voiceChannels.copy(), users.copy(), joinTimes.copy());
 	}
 
 	@Override
 	public List<IEmoji> getEmojis() {
-		return emojis;
+		return new LinkedList<>(emojis.values());
 	}
 
 	@Override
-	public IEmoji getEmojiByID(String idToUse) {
-		return emojis.stream().filter(iemoji -> iemoji.getID().equals(idToUse)).findFirst().orElse(null);
+	public IEmoji getEmojiByID(long id) {
+		return emojis.get(id);
 	}
 
 	@Override
 	public IEmoji getEmojiByName(String name) {
-		return emojis.stream().filter(iemoji -> iemoji.getName().equals(name)).findFirst().orElse(null);
+		return emojis.stream()
+				.filter(emoji -> emoji.getName().equals(name))
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -791,11 +809,10 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IWebhook getWebhookByID(String id) {
+	public IWebhook getWebhookByID(long id) {
 		return channels.stream()
-				.map(IChannel::getWebhooks)
-				.flatMap(List::stream)
-				.filter(hook -> hook.getID().equals(id))
+				.map(channel -> channel.getWebhookByID(id))
+				.filter(Objects::nonNull)
 				.findAny().orElse(null);
 	}
 
@@ -831,18 +848,19 @@ public class Guild implements IGuild {
 						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
 				WebhookObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-						DiscordEndpoints.GUILDS + getID() + "/webhooks",
+						DiscordEndpoints.GUILDS + getStringID() + "/webhooks",
 						WebhookObject[].class);
 
 				if (response != null) {
 					for (WebhookObject webhookObject : response) {
-						Channel channel = (Channel) getChannelByID(webhookObject.channel_id);
-						if (getWebhookByID(webhookObject.id) == null) {
+						Channel channel = (Channel) getChannelByID(Long.parseUnsignedLong(webhookObject.channel_id));
+						long webhookId = Long.parseUnsignedLong(webhookObject.id);
+						if (getWebhookByID(webhookId) == null) {
 							IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
 							client.getDispatcher().dispatch(new WebhookCreateEvent(newWebhook));
-							channel.addWebhook(newWebhook);
+							channel.webhooks.put(newWebhook);
 						} else {
-							IWebhook toUpdate = channel.getWebhookByID(webhookObject.id);
+							IWebhook toUpdate = channel.getWebhookByID(webhookId);
 							IWebhook oldWebhook = toUpdate.copy();
 							toUpdate = DiscordUtils.getWebhookFromJSON(channel, webhookObject);
 							if (!oldWebhook.getDefaultName().equals(toUpdate.getDefaultName()) || !String.valueOf(oldWebhook.getDefaultAvatar()).equals(String.valueOf(toUpdate.getDefaultAvatar())))
@@ -854,7 +872,7 @@ public class Guild implements IGuild {
 				}
 
 				oldList.forEach(webhook -> {
-					((Channel) webhook.getChannel()).removeWebhook(webhook);
+					((Channel) webhook.getChannel()).webhooks.remove(webhook);
 					client.getDispatcher().dispatch(new WebhookDeleteEvent(webhook));
 				});
 			} catch (Exception e) {
@@ -886,5 +904,12 @@ public class Guild implements IGuild {
 	@Override
 	public boolean equals(Object other) {
 		return DiscordUtils.equals(this, other);
+	}
+
+	public static class TimeStampHolder extends IDLinkedObjectWrapper<LocalDateTime> {
+
+		public TimeStampHolder(long id, LocalDateTime obj) {
+			super(id, obj);
+		}
 	}
 }
