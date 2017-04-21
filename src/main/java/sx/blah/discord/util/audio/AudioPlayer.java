@@ -20,7 +20,6 @@ package sx.blah.discord.util.audio;
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.IAudioProcessor;
@@ -267,13 +266,7 @@ public class AudioPlayer implements IAudioProvider {
 	 * @return The {@link Track} object representing this audio provider.
 	 */
 	public Track queue(IAudioProvider provider) {
-		Track track;
-
-		if (provider instanceof AudioInputStreamProvider)
-			track = new Track((AudioInputStreamProvider) provider);
-		else
-			track = new Track(provider);
-
+		Track track = new Track(provider);
 		queue(track);
 		return track;
 	}
@@ -495,22 +488,25 @@ public class AudioPlayer implements IAudioProvider {
 		private final Map<String, Object> metadata = new ConcurrentHashMap<>();
 
 		public Track(IAudioProvider provider) {
-			this.provider = provider;
-			stream = null;
-		}
+			if (provider instanceof AudioInputStreamProvider) {
+				AudioInputStreamProvider streamProvider = (AudioInputStreamProvider) provider;
 
-		public Track(AudioInputStreamProvider provider) {
-			this(provider.getStream());
+				// No need to call DiscordUtils#getPCMStream again, since it's already called on AudioInputStreamProvider's constructor.
+				this.stream = new AmplitudeAudioInputStream(streamProvider.getStream());
+				this.provider = new AudioInputStreamProvider(this.stream);
+
+				// Available Frames / frames per second = Available seconds. Available seconds * 1000 = available milliseconds.
+				totalTrackTime = (stream.getFrameLength() / (long)this.stream.getFormat().getFrameRate())*1000;
+				if (totalTrackTime == 0)
+					totalTrackTime = -1;
+			} else {
+				this.provider = provider;
+				this.stream = null;
+			}
 		}
 
 		public Track(AudioInputStream stream) {
-			this.stream = new AmplitudeAudioInputStream(DiscordUtils.getPCMStream(stream));
-			this.provider = new AudioInputStreamProvider(this.stream);
-
-			//Available Frames / frames per second = Available seconds. Available seconds * 1000 = available milliseconds.
-			totalTrackTime = (stream.getFrameLength() / (long)this.stream.getFormat().getFrameRate())*1000;
-			if (totalTrackTime == 0)
-				totalTrackTime = -1;
+			this(new AudioInputStreamProvider(stream));
 		}
 
 		protected void close() {
