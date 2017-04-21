@@ -84,7 +84,7 @@ public class BotInviteBuilder {
 			url += "&permissions="+Permissions.generatePermissionsNumber(permissions);
 
 		if (guild != null)
-			url += "&guild_id="+guild.getID();
+			url += "&guild_id="+guild.getStringID();
 
 		try {
 			return String.format(url, clientIDOverride == null ? client.getApplicationClientID() : clientIDOverride);

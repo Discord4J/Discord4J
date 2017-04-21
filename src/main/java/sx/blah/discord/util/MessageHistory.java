@@ -101,10 +101,23 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 *
 	 * @param id The id.
 	 * @return The message if found, else null.
+	 * @deprecated Use {@link #get(long)} instead
 	 */
+	@Deprecated
 	public IMessage get(String id) {
+		if (id == null) return null;
+		return get(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * This gets a message by its id.
+	 *
+	 * @param id The id.
+	 * @return The message if found, else null.
+	 */
+	public IMessage get(long id) {
 		return Arrays.stream(backing)
-				.filter(msg -> msg.getID().equals(id))
+				.filter(msg -> msg.getLongID() == id)
 				.findFirst()
 				.orElse(null);
 	}
@@ -114,10 +127,17 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 *
 	 * @param id The id to look for.
 	 * @return True if the specified id is stored, false otherwise.
+	 * @deprecated Use {@link #contains(long)} instead
 	 */
+	@Deprecated
 	public boolean contains(String id) {
+		if (id == null) return false;
+		return contains(Long.parseUnsignedLong(id));
+	}
+
+	public boolean contains(long id) {
 		return Arrays.stream(backing)
-				.filter(msg -> msg.getID().equals(id))
+				.filter(msg -> msg.getLongID() == id)
 				.count() > 0;
 	}
 
@@ -206,8 +226,26 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
+	 * @deprecated Use {@link #delete(long)} instead
 	 */
+	@Deprecated
 	public IMessage delete(String id) {
+		if (id == null) return null;
+		return delete(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * This deletes the message with the specified id This does NOT remove the deleted message from thi MessageHistory
+	 * instance.
+	 *
+	 * @param id The id of the message to delete.
+	 * @return The message deleted or null if the message couldn't be found.
+	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 * @throws MissingPermissionsException
+	 */
+	public IMessage delete(long id) {
 		IMessage message = get(id);
 
 		if (message == null)

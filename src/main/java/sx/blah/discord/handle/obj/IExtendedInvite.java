@@ -17,35 +17,40 @@
 
 package sx.blah.discord.handle.obj;
 
+import java.time.LocalDateTime;
+
 /**
- * This represents an object which is associated with an id.
+ * Represents an invite to a channel which extra metadata.
  */
-public interface IIDLinkedObject {
+public interface IExtendedInvite extends IInvite {
 
 	/**
-	 * Gets the snowflake unique id for this object.
-	 *
-	 * @return The id.
-	 * @deprecated Use {@link #getStringID()} instead as this will return a long in future versions.
+	 * @return The number of times this invite has been used.
 	 */
-	@Deprecated
-	default String getID() {
-		return getStringID();
-	}
+	int getUses();
 
 	/**
-	 * Gets the <b>unsigned</b> long value of the id for this object.
-	 *
-	 * @return The id.
+	 * @return The maximum number of times this invite can be used. 0 if infinite.
 	 */
-	long getLongID();
+	int getMaxUses();
 
 	/**
-	 * Gets the snowflake unique id for this object.
-	 *
-	 * @return The id.
+	 * @return The duration (in seconds) after which this invite expires.
 	 */
-	default String getStringID() {
-		return Long.toUnsignedString(getLongID());
-	}
+	int getMaxAge();
+
+	/**
+	 * @return Whether this invite only grants temporary membership.
+	 */
+	boolean isTemporary();
+
+	/**
+	 * @return The time at which this invite was created.
+	 */
+	LocalDateTime getCreationTime();
+
+	/**
+	 * @return Whether this invite is revoked.
+	 */
+	boolean isRevoked();
 }

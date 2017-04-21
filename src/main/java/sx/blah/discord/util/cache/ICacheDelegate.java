@@ -17,9 +17,14 @@
 
 package sx.blah.discord.util.cache;
 
+import com.koloboke.collect.set.LongSet;
+import com.koloboke.function.LongObjConsumer;
+import com.koloboke.function.LongObjFunction;
+import com.koloboke.function.LongObjPredicate;
 import sx.blah.discord.handle.obj.IIDLinkedObject;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -36,7 +41,9 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @param id The id to retrieve the object for.
 	 * @return The result of the query.
 	 */
-	Optional<T> retrieve(String id);
+	default Optional<T> retrieve(String id) {
+		return retrieve(Long.parseUnsignedLong(id));
+	}
 
 	/**
 	 * This is called to retrieve an object from an associated id.
@@ -44,9 +51,7 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @param id The id to retrieve the object for.
 	 * @return The result of the query.
 	 */
-	default Optional<T> retrieve(long id) {
-		return retrieve(Long.toUnsignedString(id));
-	}
+	Optional<T> retrieve(long id);
 
 	/**
 	 * This is called to put an object into the cache.
@@ -72,7 +77,9 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @param id The id to remove from the cache.
 	 * @return The object removed from this operation.
 	 */
-	Optional<T> remove(String id);
+	default Optional<T> remove(String id) {
+		return remove(Long.parseUnsignedLong(id));
+	}
 
 	/**
 	 * This is called to remove a key, value pair associated with the specified id.
@@ -80,9 +87,7 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @param id The id to remove from the cache.
 	 * @return The object removed from this operation.
 	 */
-	default Optional<T> remove(long id) {
-		return remove(Long.toUnsignedString(id));
-	}
+	Optional<T> remove(long id);
 
 	/**
 	 * This is called to remove a key, value pair associated with the specified object.
@@ -91,7 +96,7 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @return The object removed from this operation.
 	 */
 	default Optional<T> remove(T obj) {
-		return remove(obj.getID());
+		return remove(obj.getLongID());
 	}
 
 	/**
@@ -108,7 +113,7 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @return True if an object is present or false if otherwise.
 	 */
 	default boolean contains(String id) {
-		return retrieve(id).isPresent();
+		return contains(Long.parseUnsignedLong(id));
 	}
 
 	/**
@@ -118,7 +123,7 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @return True if an object is present or false if otherwise.
 	 */
 	default boolean contains(long id) {
-		return contains(Long.toUnsignedString(id));
+		return retrieve(id).isPresent();
 	}
 
 	/**
@@ -128,7 +133,7 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @return True if an object is present or false if otherwise.
 	 */
 	default boolean contains(T obj) {
-		return contains(obj.getID());
+		return contains(obj.getLongID());
 	}
 
 	/**
@@ -143,16 +148,16 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 *
 	 * @return The ids stored.
 	 */
-	Collection<String> ids();
+	default Collection<String> ids() {
+		return longIDs().stream().map(Long::toUnsignedString).collect(Collectors.toSet());
+	}
 
 	/**
 	 * This is called to get the ids stored in this cache.
 	 *
 	 * @return The ids stored.
 	 */
-	default Collection<Long> longIDs() {
-		return ids().stream().map(Long::parseUnsignedLong).collect(Collectors.toSet());
-	}
+	LongSet longIDs();
 
 	/**
 	 * This is called to get the values stored in this cache.
@@ -167,6 +172,36 @@ public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess,
 	 * @return The copy of the delegate.
 	 */
 	ICacheDelegate<T> copy();
+
+	/**
+	 * This is called to copy (or produce) copy of underlying map
+	 *
+	 * @return The copy of the map
+	 */
+	LongMap<T> mapCopy();
+
+	/**
+	 * Optimized version of {@link #forEach(Consumer)}
+	 *
+	 * @param action Action to do with pairs of keys and values
+	 */
+	void forEach(LongObjConsumer<? super T> action);
+
+	/**
+	 * Just like {@link #forEach(LongObjConsumer)}, but it stops when predicate returns false
+	 *
+	 * @param predicate Predicate, that consumes keys and values and produces false when iterating should be stopped
+	 * @return true if iterating was interrupted
+	 */
+	boolean forEachWhile(LongObjPredicate<? super T> predicate);
+
+	/**
+	 * Helper to do searching with transformation
+	 *
+	 * @param function Function, that accepts pair of key and value and produce some result
+	 * @return First non-null result
+	 */
+	<Z> Z findResult(LongObjFunction<? super T, ? extends Z> function);
 
 	/**
 	 * @see Collection#spliterator()

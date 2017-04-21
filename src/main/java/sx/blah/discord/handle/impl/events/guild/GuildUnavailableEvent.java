@@ -27,14 +27,14 @@ import java.util.Optional;
  */
 public class GuildUnavailableEvent extends GuildEvent {
 
-	private final String id;
+	private final long id;
 
 	public GuildUnavailableEvent(IGuild guild) {
 		super(guild);
-		this.id = guild.getID();
+		this.id = guild.getLongID();
 	}
 
-	public GuildUnavailableEvent(String id) {
+	public GuildUnavailableEvent(long id) {
 		super(null);
 		this.id = id;
 	}
@@ -52,8 +52,19 @@ public class GuildUnavailableEvent extends GuildEvent {
 	 * Gets the id of the guild that became unavailable. This is always available.
 	 *
 	 * @return The unavailable guild.
+	 * @deprecated Use {@link #getGuildLongID()} instead
 	 */
+	@Deprecated
 	public String getGuildID() {
+		return Long.toUnsignedString(id);
+	}
+
+	/**
+	 * Gets the id of the guild that became unavailable. This is always available.
+	 *
+	 * @return The unavailable guild.
+	 */
+	public long getGuildLongID() {
 		return id;
 	}
 }

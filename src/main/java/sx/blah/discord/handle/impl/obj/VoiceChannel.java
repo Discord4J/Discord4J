@@ -40,7 +40,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int userLimit = 0;
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(DiscordClientImpl client, String name, String id, IGuild guild, String topic, int position,
+	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
 						int userLimit, int bitrate, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
 		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
@@ -123,7 +123,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		boolean isMuted = voiceState != null && voiceState.isMuted();
 		boolean isDeafened = voiceState != null && voiceState.isDeafened();
 		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
-				new VoiceStateUpdateRequest(getGuild().getID(), getID(), isMuted, isDeafened));
+				new VoiceStateUpdateRequest(getGuild().getStringID(), getStringID(), isMuted, isDeafened));
 	}
 
 	@Override
@@ -136,9 +136,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		boolean isDeafened = voiceState != null && voiceState.isDeafened();
 
 		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
-				new VoiceStateUpdateRequest(getGuild().getID(), null, isMuted, isDeafened));
+				new VoiceStateUpdateRequest(getGuild().getStringID(), null, isMuted, isDeafened));
 
-		DiscordVoiceWS vWS = ((ShardImpl) getShard()).voiceWebSockets.get(getGuild().getID());
+		DiscordVoiceWS vWS = ((ShardImpl) getShard()).voiceWebSockets.get(getGuild().getLongID());
 		if (vWS != null) {
 			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		}
@@ -170,17 +170,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(String id, int maxCount) {
+	public MessageHistory getMessageHistoryFrom(long id, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(String id, int maxCount) {
+	public MessageHistory getMessageHistoryTo(long id, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(String beginID, String endID, int maxCount) {
+	public MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -210,17 +210,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(String id) {
+	public MessageHistory getMessageHistoryFrom(long id) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(String id) {
+	public MessageHistory getMessageHistoryTo(long id) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(String beginID, String endID) {
+	public MessageHistory getMessageHistoryIn(long beginID, long endID) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -250,7 +250,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage getMessageByID(String messageID) {
+	public IMessage getMessageByID(long messageID) {
 		return null;
 	}
 
@@ -320,7 +320,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IWebhook getWebhookByID(String id) {
+	public IWebhook getWebhookByID(long id) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -371,6 +371,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return getGuild().getVoiceChannelByID(getID()) != this;
+		return getGuild().getVoiceChannelByID(getLongID()) != this;
 	}
 }

@@ -41,7 +41,7 @@ public class EmojiImpl implements IEmoji {
 	/**
 	 * The ID.
 	 */
-	protected final String id;
+	protected final long id;
 	/**
 	 * Roles for integration?
 	 */
@@ -59,11 +59,15 @@ public class EmojiImpl implements IEmoji {
 	 */
 	protected volatile boolean isManaged;
 
-	public EmojiImpl(IGuild guild, String id, String name, boolean requiresColons, boolean isManaged, IRole[] roles) {
+	public EmojiImpl(IGuild guild, long id, String name, boolean requiresColons, boolean isManaged, String[] roles) {
+		this(guild, id, name, requiresColons, isManaged, convertStringsToLongs(roles));
+	}
+
+	public EmojiImpl(IGuild guild, long id, String name, boolean requiresColons, boolean isManaged, IRole[] roles) {
 		this(guild, id, name, requiresColons, isManaged, convertRolesToIDs(roles));
 	}
 
-	public EmojiImpl(IGuild guild, String id, String name, boolean requiresColons, boolean isManaged, String[] roleIds) {
+	public EmojiImpl(IGuild guild, long id, String name, boolean requiresColons, boolean isManaged, long[] roleIds) {
 		this.guild = guild;
 		this.id = id;
 		this.name = name;
@@ -71,7 +75,7 @@ public class EmojiImpl implements IEmoji {
 		this.isManaged = isManaged;
 		this.roles = new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class);
 
-		for (String roleId : roleIds) {
+		for (long roleId : roleIds) {
 			IRole role = guild.getRoleByID(roleId);
 
 			if (role != null) {
@@ -80,8 +84,12 @@ public class EmojiImpl implements IEmoji {
 		}
 	}
 
-	private static String[] convertRolesToIDs(IRole[] roles) {
-		return Arrays.stream(roles).filter(role -> role != null).map(IRole::getID).toArray(String[]::new);
+	private static long[] convertRolesToIDs(IRole[] roles) {
+		return Arrays.stream(roles).filter(role -> role != null).mapToLong(IRole::getLongID).toArray();
+	}
+
+	private static long[] convertStringsToLongs(String[] roles) {
+		return Arrays.stream(roles).mapToLong(Long::parseUnsignedLong).toArray();
 	}
 
 	public void setRequiresColons(boolean requiresColons) {
@@ -89,7 +97,7 @@ public class EmojiImpl implements IEmoji {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -143,12 +151,12 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public String getImageUrl() {
-		return String.format(DiscordEndpoints.EMOJI_IMAGE, getID());
+		return String.format(DiscordEndpoints.EMOJI_IMAGE, getStringID());
 	}
 
 	@Override
 	public String toString() {
-		return "<:" + getName() + ":" + getID() + ">";
+		return "<:" + getName() + ":" + getStringID() + ">";
 	}
 
 	@Override

@@ -61,7 +61,7 @@ public class Role implements IRole {
 	/**
 	 * The role id
 	 */
-	protected volatile String id;
+	protected volatile long id;
 
 	/**
 	 * Whether to display this role separately from others
@@ -83,7 +83,7 @@ public class Role implements IRole {
 	 */
 	protected volatile IGuild guild;
 
-	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, boolean mentionable, IGuild guild) {
+	public Role(int position, int permissions, String name, boolean managed, long id, boolean hoist, int color, boolean mentionable, IGuild guild) {
 		this.position = position;
 		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
 		this.name = name;
@@ -143,7 +143,7 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -201,7 +201,7 @@ public class Role implements IRole {
 			DiscordUtils.getRoleFromJSON(guild,
 					DiscordUtils.MAPPER.readValue(
 							((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
-									DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
+									DiscordEndpoints.GUILDS + guild.getStringID() + "/roles/" + id,
 									DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(request)), RoleObject.class));
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -258,7 +258,7 @@ public class Role implements IRole {
 	public void delete() {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getStringID()+"/roles/"+id);
 	}
 
 	@Override
