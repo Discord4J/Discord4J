@@ -34,7 +34,6 @@ import sx.blah.discord.util.cache.LongMap;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Supplier;
 
 public class User implements IUser {
 

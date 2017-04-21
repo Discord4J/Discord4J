@@ -20,11 +20,13 @@ package sx.blah.discord.util.cache;
 import com.koloboke.collect.LongCursor;
 import com.koloboke.collect.LongIterator;
 import com.koloboke.collect.set.LongSet;
+import com.koloboke.compile.ConcurrentModificationUnchecked;
 import com.koloboke.compile.KolobokeMap;
+import com.koloboke.compile.hash.algo.openaddressing.LinearProbing;
+import com.koloboke.compile.mutability.Mutable;
 import com.koloboke.function.LongObjConsumer;
 import com.koloboke.function.LongObjPredicate;
 
-import javax.annotation.Nonnull;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,43 +36,48 @@ import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 
 @KolobokeMap
-public interface LongMap<T> {
-	static <T> LongMap<T> newMap() {
-		return new KolobokeLongMap<>(64);
+@LinearProbing
+@Mutable
+@ConcurrentModificationUnchecked
+public abstract class LongMap<T> {
+
+	public static <T> LongMap<T> newMap() {
+		return new KolobokeLongMap<>(8);
 	}
 
-	static <T> LongMap<T> copyMap(LongMap<T> map) {
+	public static <T> LongMap<T> copyMap(LongMap<T> map) {
 		LongMap<T> cache = newMap();
 		map.keySet().forEach((long key) -> cache.put(key, map.get(key)));
 		return cache;
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T> LongMap<T> emptyMap() {
+	public static <T> LongMap<T> emptyMap() {
 		return (LongMap<T>) EmptyLongMap.INSTANCE;
 	}
 
-	boolean containsKey(long key);
+	public abstract boolean containsKey(long key);
 
-	T get(long key);
+	public abstract T get(long key);
 
-	T put(long key, T value);
+	public abstract T put(long key, T value);
 
-	T remove(long key);
+	public abstract T remove(long key);
 
-	void clear();
+	public abstract void clear();
 
-	int size();
+	public abstract int size();
 
-	LongSet keySet();
+	public abstract LongSet keySet();
 
-	Collection<T> values();
+	public abstract Collection<T> values();
 
-	void forEach(LongObjConsumer<? super T> action);
+	public abstract void forEach(LongObjConsumer<? super T> action);
 
-	boolean forEachWhile(LongObjPredicate<? super T> predicate);
+	public abstract boolean forEachWhile(LongObjPredicate<? super T> predicate);
 
-	final class EmptyLongMap<T> implements LongMap<T> {
+	public static final class EmptyLongMap<T> extends LongMap<T> {
+
 		private static final LongMap<Object> INSTANCE = new EmptyLongMap<>();
 
 		@Override
@@ -124,7 +131,8 @@ public interface LongMap<T> {
 		}
 	}
 
-	final class EmptyLongSet extends AbstractSet<Long> implements LongSet {
+	public static final class EmptyLongSet extends AbstractSet<Long> implements LongSet {
+
 		public static final LongSet INSTANCE = new EmptyLongSet();
 
 		@Override
@@ -132,24 +140,21 @@ public interface LongMap<T> {
 			return false;
 		}
 
-		@Nonnull
 		@Override
 		public long[] toLongArray() {
 			return new long[0];
 		}
 
-		@Nonnull
 		@Override
-		public long[] toArray(@Nonnull long[] longs) {
+		public long[] toArray(long[] longs) {
 			return new long[0];
 		}
 
-		@Nonnull
 		@Override
 		public LongCursor cursor() {
 			return new LongCursor() {
 				@Override
-				public void forEachForward(@Nonnull LongConsumer longConsumer) {
+				public void forEachForward(LongConsumer longConsumer) {
 
 				}
 
@@ -171,17 +176,17 @@ public interface LongMap<T> {
 		}
 
 		@Override
-		public void forEach(@Nonnull Consumer<? super Long> consumer) {
+		public void forEach(Consumer<? super Long> consumer) {
 
 		}
 
 		@Override
-		public void forEach(@Nonnull LongConsumer longConsumer) {
+		public void forEach(LongConsumer longConsumer) {
 
 		}
 
 		@Override
-		public boolean forEachWhile(@Nonnull LongPredicate longPredicate) {
+		public boolean forEachWhile(LongPredicate longPredicate) {
 			return false;
 		}
 
@@ -196,12 +201,12 @@ public interface LongMap<T> {
 		}
 
 		@Override
-		public boolean removeIf(@Nonnull Predicate<? super Long> predicate) {
+		public boolean removeIf(Predicate<? super Long> predicate) {
 			return false;
 		}
 
 		@Override
-		public boolean removeIf(@Nonnull LongPredicate longPredicate) {
+		public boolean removeIf(LongPredicate longPredicate) {
 			return false;
 		}
 
@@ -229,12 +234,12 @@ public interface LongMap<T> {
 				}
 
 				@Override
-				public void forEachRemaining(@Nonnull Consumer<? super Long> consumer) {
+				public void forEachRemaining(Consumer<? super Long> consumer) {
 
 				}
 
 				@Override
-				public void forEachRemaining(@Nonnull LongConsumer longConsumer) {
+				public void forEachRemaining(LongConsumer longConsumer) {
 
 				}
 
