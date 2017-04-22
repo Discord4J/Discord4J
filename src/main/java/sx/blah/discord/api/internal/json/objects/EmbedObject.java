@@ -1,3 +1,20 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.api.internal.json.objects;
 
 import sx.blah.discord.handle.obj.IEmbed;
@@ -6,7 +23,8 @@ import java.awt.*;
 import java.util.stream.Collectors;
 
 /**
- * Represents a json embed object.
+ * Represents a json embed object. Use {@link sx.blah.discord.util.EmbedBuilder} to build these objects.
+ * @see sx.blah.discord.util.EmbedBuilder
  */
 public class EmbedObject {
 	/**
@@ -61,6 +79,8 @@ public class EmbedObject {
 	 * The fields of the embed.
 	 */
     public EmbedFieldObject[] fields;
+
+	public EmbedObject() {}
 
 	/**
 	 * Please use EmbedBuilder to build these objects.
@@ -154,7 +174,9 @@ public class EmbedObject {
 		 */
 		public int width;
 
-        public ThumbnailObject(String url, String proxy_url, int height, int width) {
+		public ThumbnailObject() {}
+
+		public ThumbnailObject(String url, String proxy_url, int height, int width) {
             this.url = url;
             this.proxy_url = proxy_url;
             this.height = height;
@@ -179,8 +201,11 @@ public class EmbedObject {
 		 */
         public int width;
 
-        public VideoObject(String url, int height, int width) {
+		public VideoObject() {}
+
+		public VideoObject(String url, int height, int width) {
             this.url = url;
+
             this.height = height;
             this.width = width;
         }
@@ -207,7 +232,9 @@ public class EmbedObject {
 		 */
 		public int width;
 
-        public ImageObject(String url, String proxy_url, int height, int width) {
+		public ImageObject() {}
+
+		public ImageObject(String url, String proxy_url, int height, int width) {
             this.url = url;
             this.proxy_url = proxy_url;
             this.height = height;
@@ -228,7 +255,9 @@ public class EmbedObject {
 		 */
 		public String url;
 
-        public ProviderObject(String name, String url) {
+		public ProviderObject() {}
+
+		public ProviderObject(String name, String url) {
             this.name = name;
             this.url = url;
         }
@@ -255,7 +284,9 @@ public class EmbedObject {
 		 */
 		public String proxy_icon_url;
 
-        public AuthorObject(String name, String url, String icon_url, String proxy_icon_url) {
+		public AuthorObject() {}
+
+		public AuthorObject(String name, String url, String icon_url, String proxy_icon_url) {
             this.name = name;
             this.url = url;
             this.icon_url = icon_url;
@@ -280,7 +311,9 @@ public class EmbedObject {
 		 */
         public String proxy_icon_url;
 
-        public FooterObject(String text, String icon_url, String proxy_icon_url) {
+		public FooterObject() {}
+
+		public FooterObject(String text, String icon_url, String proxy_icon_url) {
             this.text = text;
             this.icon_url = icon_url;
             this.proxy_icon_url = proxy_icon_url;
@@ -303,6 +336,8 @@ public class EmbedObject {
 		 * Whether the field should be displayed inline.
 		 */
         public boolean inline;
+
+        public EmbedFieldObject() {}
 
         public EmbedFieldObject(String name, String value, boolean inline) {
             this.name = name;

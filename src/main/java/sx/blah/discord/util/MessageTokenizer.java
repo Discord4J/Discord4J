@@ -1,5 +1,25 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.util;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
@@ -18,18 +38,22 @@ import java.util.regex.Pattern;
  */
 public class MessageTokenizer {
 
-	public static final String ANY_MENTION_REGEX = "<((@[!&]?)|#)\\d+>";
+	public static final String ANY_MENTION_REGEX = "<(?:(?:@[!&]?)|#)(\\d+)>";
 	public static final String CUSTOM_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
+	public static final String INVITE_REGEX = "(?:discord\\.gg/)([\\w-]+)";
+	public static final String WORD_REGEX = "(?:\\s|\\n)+";
+	public static final Pattern ANY_MENTION_PATTERN = Pattern.compile(ANY_MENTION_REGEX);
+	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile(CUSTOM_EMOJI_REGEX);
+	public static final Pattern INVITE_PATTERN = Pattern.compile(INVITE_REGEX);
+	public static final Pattern WORD_PATTERN = Pattern.compile(WORD_REGEX);
 
 	private final String content;
 	private final IDiscordClient client;
-	private final Pattern anyMentionPattern = Pattern.compile(ANY_MENTION_REGEX);
-	private final Pattern customEmojiPattern = Pattern.compile(CUSTOM_EMOJI_REGEX);
-	private int currentPosition = 0;
+	private volatile int currentPosition = 0;
 	/**
 	 * The remaining substring.
 	 */
-	private String remaining;
+	private volatile String remaining;
 
 	/**
 	 * Initializes using the message contents and client.
@@ -68,22 +92,33 @@ public class MessageTokenizer {
 	 * @return The new current position
 	 */
 	public int stepForward(int amount) {
-		currentPosition += amount;
-		currentPosition = Math.max(0, Math.min(currentPosition, content.length()));
-		remaining = content.substring(currentPosition);
-
-		return currentPosition;
+		return stepTo(currentPosition + amount);
 	}
 
 	/**
-	 * Steps to the desired index.
+	 * Steps to the position provided and updates the internal remaining string.
 	 *
 	 * @param index The index to step to
 	 * @return The new current position
-	 * @see MessageTokenizer#stepForward(int)
+	 * * @see MessageTokenizer#stepTo(int)
+	 * @deprecated Use {@link #stepTo(int)}
+	 */
+	@Deprecated
+	public int stepForwardTo(int index) {
+		return stepTo(index);
+	}
+
+	/**
+	 * Steps to the position provided and updates the internal remaining string.
+	 *
+	 * @param index The index to step to
+	 * @return The new current position
 	 */
 	public int stepTo(int index) {
-		return stepForward(index - currentPosition);
+		currentPosition = Math.max(0, Math.min(index, content.length()));
+		remaining = content.substring(currentPosition);
+
+		return currentPosition;
 	}
 
 	/**
@@ -121,18 +156,43 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is another word to go to. A word is delimited by a space.
+	 * Returns true if the tokenizer has the sequence provided.
+	 * @param sequence The string sequence to look for
+	 * @return True if it contains the sequence
+	 */
+	public boolean hasNextSequence(String sequence) {
+		return remaining.contains(sequence);
+	}
+
+	/**
+	 * Returns a Token of the following sequence.
+	 * @param sequence The string sequence to look for
+	 * @return The token
+	 */
+	public Token nextSequence(String sequence) {
+		if (!hasNextSequence(sequence))
+			throw new IllegalStateException("The sequence \"" + sequence + "\" was not found!");
+
+		final int index = remaining.indexOf(sequence);
+
+		Token t = new Token(this, currentPosition + index, currentPosition + index + sequence.length());
+
+		stepForward(index + sequence.length());
+		return t;
+	}
+
+	/**
+	 * Returns true if there is another word to go to. A word is delimited by whitespace or newlines.
 	 *
 	 * @return True if there is another word to step to
 	 */
 	public boolean hasNextWord() {
-		int index = remaining.indexOf(' ');
-		return hasNext() && index < remaining.length() - 1;
+		return hasNext();
 	}
 
 	/**
 	 * Returns the next word, stepping forward the tokenizer to the next non-space character. A word is delimited by
-	 * a space.
+	 * whitespace/newlines.
 	 *
 	 * @return The next word
 	 */
@@ -140,20 +200,28 @@ public class MessageTokenizer {
 		if (!hasNextWord())
 			throw new IllegalStateException("No more words found!");
 
-		int spaceIndex = remaining.indexOf(' ');
-		int nlIndex = remaining.indexOf('\n');
-
-		int indexOfSpace = -1;
-		if (spaceIndex == -1 && nlIndex == -1) {
-			indexOfSpace = content.length() - currentPosition;
-		} else if (spaceIndex == -1) {
-			indexOfSpace = nlIndex;
-		} else if (nlIndex == -1) {
-			indexOfSpace = spaceIndex;
+		{
+			Matcher matcher = WORD_PATTERN.matcher(remaining);
+			if (matcher.find()) {
+				if (matcher.start() == 0) {
+					stepTo(currentPosition + matcher.end());
+				}
+			}
 		}
-		Token token = new Token(this, currentPosition, currentPosition + indexOfSpace);
 
-		stepForward(indexOfSpace + 1);
+		Matcher matcher = WORD_PATTERN.matcher(remaining);
+		final int end;
+		boolean found = true;
+		if (!matcher.find()) {
+			end = content.length();
+			found = false;
+		} else {
+			end = currentPosition + matcher.start();
+		}
+
+		Token token = new Token(this, currentPosition, end);
+
+		stepTo(found ? (currentPosition + matcher.end()) : content.length());
 
 		return token;
 	}
@@ -207,7 +275,7 @@ public class MessageTokenizer {
 		if (!hasNextRegex(pattern))
 			throw new IllegalStateException("No more occurrences found!");
 
-		Matcher matcher = anyMentionPattern.matcher(remaining);
+		Matcher matcher = ANY_MENTION_PATTERN.matcher(remaining);
 		if (!matcher.find())
 			throw new IllegalStateException("Couldn't find any matches!");
 		final int start = currentPosition + matcher.start();
@@ -219,12 +287,36 @@ public class MessageTokenizer {
 	}
 
 	/**
+	 * Returns true if there is an invite to go to.
+	 *
+	 * @return True if there is an invite to go to.
+	 */
+	public boolean hasNextInvite() {
+		return hasNextRegex(INVITE_PATTERN);
+	}
+
+	public InviteToken nextInvite() {
+		if (!hasNextInvite())
+			throw new IllegalStateException("No more invites found!");
+
+		Matcher matcher = INVITE_PATTERN.matcher(remaining);
+		if (!matcher.find())
+			throw new IllegalStateException("Couldn't find any matches!");
+		final int start = currentPosition + matcher.start();
+		final int end = currentPosition + matcher.end();
+
+		stepTo(end);
+
+		return new InviteToken(this, start, end);
+	}
+
+	/**
 	 * Returns true if there is a mention to go to.
 	 *
 	 * @return True if there is a mention to go to.
 	 */
 	public boolean hasNextMention() {
-		return hasNextRegex(anyMentionPattern);
+		return hasNextRegex(ANY_MENTION_PATTERN);
 	}
 
 	/**
@@ -237,7 +329,7 @@ public class MessageTokenizer {
 		if (!hasNextMention())
 			throw new IllegalStateException("No more mentions found!");
 
-		Token t = nextRegex(anyMentionPattern);
+		Token t = nextRegex(ANY_MENTION_PATTERN);
 		final int lessThan = t.getStartIndex();
 		final int greaterThan = t.getEndIndex();
 		final String matched = t.getContent();
@@ -263,7 +355,7 @@ public class MessageTokenizer {
 	 * @return True if there is another custom emoji.
 	 */
 	public boolean hasNextEmoji() {
-		return hasNextRegex(customEmojiPattern);
+		return hasNextRegex(CUSTOM_EMOJI_PATTERN);
 	}
 
 	/**
@@ -276,11 +368,26 @@ public class MessageTokenizer {
 		if (!hasNextEmoji())
 			throw new IllegalStateException("No more custom server emojis found!");
 
-		Token t = nextRegex(customEmojiPattern);
+		Token t = nextRegex(CUSTOM_EMOJI_PATTERN);
 		final int lessThan = t.getStartIndex();
 		final int greaterThan = t.getEndIndex();
 
 		return new CustomEmojiToken(this, lessThan, greaterThan);
+	}
+
+	/**
+	 * Returns true if there is a Unicode emoji that is the same as the provided one to go to.
+	 *
+	 * @param emoji The emoji to look for
+	 * @return True if there is another custom emoji.
+	 */
+	public boolean hasNextUnicodeEmoji(Emoji emoji) {
+		return hasNextSequence(emoji.getUnicode());
+	}
+
+	public UnicodeEmojiToken nextUnicodeEmoji(Emoji emoji) {
+		Token t = nextSequence(emoji.getUnicode());
+		return new UnicodeEmojiToken(this, t.startIndex, t.endIndex);
 	}
 
 	/**
@@ -308,6 +415,15 @@ public class MessageTokenizer {
 	 */
 	public int getCurrentPosition() {
 		return currentPosition;
+	}
+
+	/**
+	 * Returns the internal substring based on the current position.
+	 *
+	 * @return The remaining content
+	 */
+	public String getRemainingContent() {
+		return remaining;
 	}
 
 	/**
@@ -433,7 +549,7 @@ public class MessageTokenizer {
 		private UserMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getUserByID(getContent().replaceAll("<@!?", "").replace(">", ""));
+			mention = tokenizer.getClient().getUserByID(Long.parseUnsignedLong(getContent().replaceAll("<@!?", "").replace(">", "")));
 
 			isNickname = getContent().contains("<@!");
 		}
@@ -460,7 +576,7 @@ public class MessageTokenizer {
 		private RoleMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getRoleByID(getContent().replace("<@&", "").replace(">", ""));
+			mention = tokenizer.getClient().getRoleByID(Long.parseUnsignedLong(getContent().replace("<@&", "").replace(">", "")));
 		}
 	}
 
@@ -476,7 +592,7 @@ public class MessageTokenizer {
 		private ChannelMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getChannelByID(getContent().replace("<#", "").replace(">", ""));
+			mention = tokenizer.getClient().getChannelByID(Long.parseUnsignedLong(getContent().replace("<#", "").replace(">", "")));
 		}
 	}
 
@@ -498,10 +614,10 @@ public class MessageTokenizer {
 			super(tokenizer, startIndex, endIndex);
 
 			final String content = getContent();
-			final String emojiId = content.substring(content.lastIndexOf(":") + 1, content.length());
+			final long emojiId = Long.parseUnsignedLong(content.substring(content.lastIndexOf(":") + 1, content.length()));
 
 			emoji = tokenizer.getClient().getGuilds().stream()
-					.map(guild -> guild.getEmojiByID(emojiId) != null ? guild.getEmojiByID(emojiId) : null).findFirst()
+					.map(guild -> guild.getEmojiByID(emojiId)).findFirst()
 					.orElse(null);
 		}
 
@@ -511,6 +627,78 @@ public class MessageTokenizer {
 		 * @return The emoji
 		 */
 		public IEmoji getEmoji() {
+			return emoji;
+		}
+	}
+
+	public static class InviteToken extends Token {
+
+		/**
+		 * The invite.
+		 */
+		private final IInvite invite;
+
+		/**
+		 * An invite link from a message with content and position.
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private InviteToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex);
+
+			invite = RequestBuffer.request(() -> {
+				try {
+					return tokenizer.getClient()
+							.getInviteForCode(getContent().substring(getContent().lastIndexOf("/")));
+				} catch (DiscordException e) {
+					Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
+				}
+
+				return null;
+			}).get();
+		}
+
+		/**
+		 * Return the invite.
+		 *
+		 * @return The invite.
+		 */
+		public IInvite getInvite() {
+			return invite;
+		}
+	}
+
+	public static class UnicodeEmojiToken extends Token {
+
+		/**
+		 * The {@link Emoji}.
+		 */
+		private final Emoji emoji;
+
+		/**
+		 * A Unicode {@link Emoji} from a message with content and position.
+		 *
+		 * @param tokenizer  The tokenizer
+		 * @param startIndex The start index of the tokenizer's contents
+		 * @param endIndex   The end index of the tokenizer's contents, exclusive
+		 */
+		private UnicodeEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
+			super(tokenizer, startIndex, endIndex);
+
+			String content = getContent();
+			boolean isUnicode = EmojiManager.isEmoji(content);
+			emoji = isUnicode ? EmojiManager.getByUnicode(content) : EmojiManager.getForAlias(content);
+		}
+
+		/**
+		 * Return the emoji object.
+		 *
+		 * @return The emoji.
+		 * @see Emoji
+		 */
+		public Emoji getEmoji() {
 			return emoji;
 		}
 	}

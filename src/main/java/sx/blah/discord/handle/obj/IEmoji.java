@@ -1,7 +1,29 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
 import java.util.List;
 
+/**
+ * Represents a guild's <b>custom</b> emoji, not a Unicode one. This can be used for reactions. If you need the
+ * Unicode type emojis, use {@link com.vdurmont.emoji.EmojiManager#getForAlias(String)} to get
+ * an {@link com.vdurmont.emoji.Emoji}.
+ */
 public interface IEmoji extends IDiscordObject<IEmoji> {
 
 	/**

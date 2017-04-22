@@ -1,7 +1,23 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.api.internal.json.requests;
 
-
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import sx.blah.discord.Discord4J;
 
 public class IdentifyRequest {
@@ -24,15 +40,15 @@ public class IdentifyRequest {
 	}
 
 	private static class Properties {
-		@SerializedName("$os")
+		@JsonProperty("$os")
 		private final String os;
-		@SerializedName("$browser")
+		@JsonProperty("$browser")
 		private final String browser;
-		@SerializedName("$device")
+		@JsonProperty("$device")
 		private final String device;
-		@SerializedName("$referrer")
+		@JsonProperty("$referrer")
 		private final String referrer;
-		@SerializedName("$referring_domain")
+		@JsonProperty("$referring_domain")
 		private final String referring_domain;
 
 		public Properties() {

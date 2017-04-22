@@ -1,9 +1,6 @@
 <img align="right" src="http://i.imgur.com/quyShBK.png" height="320" width="320">
 
-# Discord4J
-
-[![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j) 
-[![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY)
+# Discord4J [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY) [![Documentation Status](https://readthedocs.org/projects/discord4j/badge/?version=latest)](http://discord4j.readthedocs.io/en/latest/?badge=latest)
 
 Java interface for the official [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
@@ -67,9 +64,10 @@ Project Properties > Java Build Path > Add the jar file
 
 ## So, how do I use this?
 ### Tutorials/Resources
-* A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by @oopsjpeg
-* A Discord Bot [quick start example](https://gist.github.com/quanticc/a32fa8f3a57f98aee9dc9e935f851e72) maintined by @quantic
-* A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by @Martacus 
+* A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by [@oopsjpeg](https://github.com/oopsjpeg)
+* A Discord Bot [quick start example](https://gist.github.com/quanticc/a32fa8f3a57f98aee9dc9e935f851e72) maintined by [@quantic](https://github.com/quanticc)
+* A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by [@Martacus](https://github.com/Martacus)
+* The [Official Javadocs](http://austinv11.github.io/Discord4J/docs.html) (or the [Dash](https://kapeli.com/dash)/[Velocity](https://velocity.silverlakesoftware.com/)/[Zeal](https://zealdocs.org/) mirror maintained by [@jammehcow](https://github.com/jammehcow))
 
 ### Starting with the API
 The very first thing you need to do is obtain an `IDiscordClient` object. This can be done by using the `ClientBuilder`.
@@ -143,8 +141,10 @@ See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/
 
 ## Projects using Discord4J
 * Official Discord4J Addons: A collection of official addons and modules for Discord4J (https://github.com/Discord4J-Addons)
-* D4J/JDA Player by @DV8FromTheWorld: A full-featured audio player for Discord4J and JDA (https://github.com/DV8FromTheWorld/JDA-Player)
-* Instructability by @Kaioru: A simple command API (https://github.com/Kaioru/Instructability)
+* Lavaplayer by [@sedmelluq](https://github.com/sedmelluq): A full-featured audio player for Discord4J and JDA (https://github.com/sedmelluq/lavaplayer)
+* Discordinator by [@alpha;helix](https://github.com/alphahelix00): A modularized command API (https://github.com/alphahelix00/Discordinator)
+* Instructability by [@Kaioru](https://github.com/Kaioru): A simple command API (https://github.com/Kaioru/Instructability)
+* C4A4D4J by [@Phanta](https://github.com/phantamanta44): An annotation based command API (https://github.com/phantamanta44/c4a4d4j)
 
 ## Deprecation policy
 Due to the nature of the Discord API, any deprecations found in the API should not be expected to last past the current
@@ -158,6 +158,7 @@ In such an event, please contact me or submit a pull request.
 No one is perfect at programming and I am no exception. If you see something that can be improved, please read the [contributing guildelines](https://github.com/austinv11/Discord4J/blob/master/.github/CONTRIBUTING.md) and feel free to submit a pull request! 
 
 ## Other info
-More information can be found in the [javadocs](http://austinv11.github.io/Discord4J/docs.html). 
+More information can be found in the official [javadocs](http://austinv11.github.io/Discord4J/docs.html). 
+Alternatively you can view the docs through [Dash](https://kapeli.com/dash), [Velocity](https://velocity.silverlakesoftware.com/), or [Zeal](https://zealdocs.org/) (maintained by [@jammehcow](https://github.com/jammehcow)) under the *User Contributed* tab.
 
 You can contact me on the [Official Discord4J Server (recommended)](https://discord.gg/NxGAeCY) or the [Discord API server](https://discord.gg/0SBTUU1wZTU7PCok) in the #java_discord4j channel.

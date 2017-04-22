@@ -1,6 +1,22 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.events;
 
-import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
@@ -9,53 +25,12 @@ import java.util.List;
 
 /**
  * This event is dispatched when a guild updates a user's roles.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.member.UserRoleUpdateEvent} instead.
  */
-public class UserRoleUpdateEvent extends Event {
-
-	private final List<IRole> oldRoles, newRoles;
-	private final IUser user;
-	private final IGuild guild;
-
-	public UserRoleUpdateEvent(List<IRole> oldRoles, List<IRole> newRoles, IUser user, IGuild guild) {
-		this.oldRoles = oldRoles;
-		this.newRoles = newRoles;
-		this.user = user;
-		this.guild = guild;
-	}
-
-	/**
-	 * Gets the old roles for the user.
-	 *
-	 * @return The old roles.
-	 */
-	public List<IRole> getOldRoles() {
-		return oldRoles;
-	}
-
-	/**
-	 * Gets the new roles for the user.
-	 *
-	 * @return The new roles.
-	 */
-	public List<IRole> getNewRoles() {
-		return newRoles;
-	}
-
-	/**
-	 * Gets the user involved.
-	 *
-	 * @return The user.
-	 */
-	public IUser getUser() {
-		return user;
-	}
-
-	/**
-	 * Gets the guild involved.
-	 *
-	 * @return The guild.
-	 */
-	public IGuild getGuild() {
-		return guild;
+@Deprecated
+public class UserRoleUpdateEvent extends sx.blah.discord.handle.impl.events.guild.member.UserRoleUpdateEvent {
+	
+	public UserRoleUpdateEvent(IGuild guild, IUser user, List<IRole> oldRoles, List<IRole> newRoles) {
+		super(guild, user, oldRoles, newRoles);
 	}
 }

@@ -1,6 +1,22 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.api.internal;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -8,18 +24,19 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
+import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
+import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
+import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.api.internal.json.requests.*;
-import sx.blah.discord.api.internal.json.responses.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
+import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +45,7 @@ import java.util.stream.Collectors;
 public final class DiscordClientImpl implements IDiscordClient {
 
 	static {
-		ServiceUtil.loadServices();
+		if (!Discord4J.audioDisabled.get()) Services.load();
 	}
 
 	/**
@@ -67,11 +84,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
-	 * Holds the active connections to voice sockets.
-	 */
-	public final Map<IGuild, DiscordVoiceWS> voiceConnections = new ConcurrentHashMap<>();
-
-	/**
 	 * The maximum amount of pings discord can miss before a new session is created.
 	 */
 	final int maxMissedPings;
@@ -87,6 +99,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private int shardCount;
 
 	/**
+	 * Provides cache objects used by this api.
+	 */
+	private final ICacheDelegateProvider cacheProvider;
+
+	/**
 	 * The requests holder object.
 	 */
 	public final Requests REQUESTS = new Requests(this);
@@ -94,16 +111,28 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * Timer to keep the program alive if the client is not daemon
 	 */
-	private Timer keepAlive;
+	volatile Timer keepAlive;
+	private final int retryCount;
+	private final int maxCacheCount;
 
-	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts) {
+	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider) {
 		this.token = "Bot " + token;
+		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
 		this.shardCount = shardCount;
+		this.maxCacheCount = maxCacheCount;
+		this.cacheProvider = provider;
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
+
+		final DiscordClientImpl instance = this;
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if (instance.keepAlive != null)
+				instance.keepAlive.cancel();
+		}));
 	}
 
 	@Override
@@ -131,29 +160,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return this.token;
 	}
 
-	private void changeAccountInfo(String username, String avatar) throws RateLimitException, DiscordException {
+	private void changeAccountInfo(String username, String avatar) {
+		checkLoggedIn("change account info");
+
 		Discord4J.LOGGER.debug(LogMarkers.API, "Changing account info.");
-
-		if (!isLoggedIn()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to change account info before bot has logged in!");
-			return;
-		}
-
-		try {
-			REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me",
-					new StringEntity(DiscordUtils.GSON.toJson(new AccountInfoChangeRequest(username, avatar))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
+		REQUESTS.PATCH.makeRequest(DiscordEndpoints.USERS+"@me", new AccountInfoChangeRequest(username, avatar));
 	}
 
 	@Override
-	public void changeUsername(String username) throws DiscordException, RateLimitException {
+	public void changeUsername(String username) {
 		changeAccountInfo(username, Image.forUser(ourUser).getData());
 	}
 
 	@Override
-	public void changeAvatar(Image avatar) throws DiscordException, RateLimitException {
+	public void changeAvatar(Image avatar) {
 		changeAccountInfo(ourUser.getName(), avatar.getData());
 	}
 
@@ -163,11 +183,10 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public List<IRegion> getRegions() throws RateLimitException, DiscordException {
+	public List<IRegion> getRegions() {
 		if (REGIONS.isEmpty()) {
-			VoiceRegionObject[] regions = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(
-					DiscordEndpoints.VOICE+"regions"),
-					VoiceRegionObject[].class);
+			VoiceRegionObject[] regions = REQUESTS.GET.makeRequest(
+					DiscordEndpoints.VOICE+"regions", VoiceRegionObject[].class);
 
 			Arrays.stream(regions)
 					.map(DiscordUtils::getRegionFromJSON)
@@ -189,13 +208,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return null;
 	}
 
-	private ApplicationInfoResponse getApplicationInfo() throws DiscordException, RateLimitException {
-		return DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me"),
-				ApplicationInfoResponse.class);
+	private ApplicationInfoResponse getApplicationInfo() {
+		return REQUESTS.GET.makeRequest(DiscordEndpoints.APPLICATIONS+"/@me", ApplicationInfoResponse.class);
 	}
 
 	@Override
-	public String getApplicationDescription() throws DiscordException {
+	public String getApplicationDescription() {
 		try {
 			return getApplicationInfo().description;
 		} catch (RateLimitException e) {
@@ -205,7 +223,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public String getApplicationIconURL() throws DiscordException {
+	public String getApplicationIconURL() {
 		try {
 			ApplicationInfoResponse info = getApplicationInfo();
 			return String.format(DiscordEndpoints.APPLICATION_ICON, info.id, info.icon);
@@ -216,7 +234,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public String getApplicationClientID() throws DiscordException {
+	public String getApplicationClientID() {
 		try {
 			return getApplicationInfo().id;
 		} catch (RateLimitException e) {
@@ -226,7 +244,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public String getApplicationName() throws DiscordException {
+	public String getApplicationName() {
 		try {
 			return getApplicationInfo().name;
 		} catch (RateLimitException e) {
@@ -236,11 +254,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IUser getApplicationOwner() throws DiscordException {
+	public IUser getApplicationOwner() {
 		try {
 			UserObject owner = getApplicationInfo().owner;
 
-			IUser user = getUserByID(owner.id);
+			IUser user = getUserByID(Long.parseUnsignedLong(owner.id));
 			if (user == null)
 				user = DiscordUtils.getUserFromJSON(getShards().get(0), owner);
 
@@ -254,8 +272,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private String obtainGateway() {
 		String gateway = null;
 		try {
-			GatewayResponse response = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY),
-					GatewayResponse.class);
+			GatewayResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY, GatewayResponse.class);
 			gateway = response.url + "?encoding=json&v=5";
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
@@ -264,14 +281,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return gateway;
 	}
 
-	private void validateToken() throws DiscordException, RateLimitException {
+	private void validateToken() {
 		REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + "@me");
 	}
 
 	// Sharding delegation
 
 	@Override
-	public void login() throws DiscordException, RateLimitException {
+	public void login() {
 		if (!getShards().isEmpty()) {
 			throw new DiscordException("Attempt to login client more than once.");
 		}
@@ -286,9 +303,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 				getShards().add(shardNum, shard);
 				shard.login();
 
-				getDispatcher().waitFor((ShardReadyEvent e) -> true, 1, TimeUnit.MINUTES, () ->
-					Discord4J.LOGGER.warn(LogMarkers.API, "Shard {} failed to login.", shardNum)
-				);
+				getDispatcher().waitFor(ShardReadyEvent.class);
 
 				if (i != shardCount - 1) { // all but last
 					Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
@@ -311,7 +326,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void logout() throws DiscordException {
+	public void logout() {
 		for (IShard shard : getShards()) {
 			shard.logout();
 		}
@@ -330,13 +345,47 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	@Deprecated
 	public void changeStatus(Status status) {
-		getShards().forEach(shard -> shard.changeStatus(status));
+		// old functionality just in case
+		getShards().forEach(s -> s.changeStatus(status));
 	}
 
 	@Override
+	@Deprecated
 	public void changePresence(boolean isIdle) {
-		getShards().forEach(shard -> shard.changePresence(isIdle));
+		// old functionality just in case
+		getShards().forEach(s -> s.changePresence(isIdle));
+	}
+
+	@Override
+	public void changePlayingText(String playingText) {
+		getShards().forEach(s -> s.changePlayingText(playingText));
+	}
+
+	@Override
+	public void online(String playingText) {
+		getShards().forEach(s -> s.online(playingText));
+	}
+
+	@Override
+	public void online() {
+		getShards().forEach(IShard::online);
+	}
+
+	@Override
+	public void idle(String playingText) {
+		getShards().forEach(s -> s.idle(playingText));
+	}
+
+	@Override
+	public void idle() {
+		getShards().forEach(IShard::idle);
+	}
+
+	@Override
+	public void streaming(String playingText, String streamingUrl) {
+		getShards().forEach(s -> s.streaming(playingText, streamingUrl));
 	}
 
 	@Override
@@ -348,10 +397,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IGuild getGuildByID(String guildID) {
-		return getGuilds().stream()
-				.filter(g -> g.getID().equals(guildID))
-				.findFirst().orElse(null);
+	public IGuild getGuildByID(long guildID) {
+		for (IShard shard : shards) {
+			IGuild guild = shard.getGuildByID(guildID);
+			if (guild != null)
+				return guild;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -371,10 +424,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IChannel getChannelByID(String channelID) {
-		return getChannels(true).stream()
-				.filter(c -> c.getID().equals(channelID))
-				.findFirst().orElse(null);
+	public IChannel getChannelByID(long channelID) {
+		for (IShard shard : shards) {
+			IChannel channel = shard.getChannelByID(channelID);
+			if (channel != null)
+				return channel;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -387,14 +444,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return getOurUser().getConnectedVoiceChannels();
+		return ((User) getOurUser()).voiceStates.values().stream().map(IVoiceState::getChannel).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	@Override
-	public IVoiceChannel getVoiceChannelByID(String id) {
-		return getVoiceChannels().stream()
-				.filter(vc -> vc.getID().equals(id))
-				.findFirst().orElse(null);
+	public IVoiceChannel getVoiceChannelByID(long id) {
+		for (IShard shard : shards) {
+			IVoiceChannel voiceChannel = shard.getVoiceChannelByID(id);
+			if (voiceChannel != null)
+				return voiceChannel;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -402,14 +463,37 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return getShards().stream()
 				.map(IShard::getUsers)
 				.flatMap(List::stream)
+				.distinct()
 				.collect(Collectors.toList());
 	}
 
 	@Override
-	public IUser getUserByID(String userID) {
+	public IUser getUserByID(long userID) {
+		for (IShard shard : shards) {
+			IUser user = shard.getUserByID(userID);
+			if (user != null)
+				return user;
+		}
+
+		return null;
+	}
+
+	@Override
+	public IUser fetchUser(long id) {
+		IUser cached = getUserByID(id);
+		return cached == null ? DiscordUtils.getUserFromJSON(shards.get(0), REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + Long.toUnsignedString(id), UserObject.class)) : cached;
+	}
+
+	@Override
+	public List<IUser> getUsersByName(String name) {
+		return getUsersByName(name, false);
+	}
+
+	@Override
+	public List<IUser> getUsersByName(String name, boolean ignoreCase) {
 		return getUsers().stream()
-				.filter(u -> u.getID().equals(userID))
-				.findFirst().orElse(null);
+				.filter(u -> ignoreCase ? u.getName().equalsIgnoreCase(name) : u.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -421,10 +505,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IRole getRoleByID(String roleID) {
-		return getRoles().stream()
-				.filter(r -> r.getID().equals(roleID))
-				.findFirst().orElse(null);
+	public IRole getRoleByID(long roleID) {
+		for (IShard shard : shards) {
+			IRole role = shard.getRoleByID(roleID);
+			if (role != null)
+				return role;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -444,33 +532,36 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public IMessage getMessageByID(String messageID) {
-		return getMessages(true).stream()
-				.filter(m -> m.getID().equals(messageID))
-				.findFirst().orElse(null);
+	public IMessage getMessageByID(long messageID) {
+		for (IShard shard : shards) {
+			IMessage message = shard.getMessageByID(messageID);
+			if (message != null)
+				return message;
+		}
+
+		return null;
 	}
 
 	@Override
-	public IPrivateChannel getOrCreatePMChannel(IUser user) throws DiscordException, RateLimitException {
-		IShard shard = getShards().stream().filter(s -> s.getUserByID(user.getID()) != null).findFirst().get();
-		return shard.getOrCreatePMChannel(user);
+	public IPrivateChannel getOrCreatePMChannel(IUser user) {
+		return user.getShard().getOrCreatePMChannel(user);
 	}
 
 	@Override
 	public IInvite getInviteForCode(String code) {
-		if (!isReady()) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Attempt to get invite before bot is ready!");
-			return null;
-		}
+		checkLoggedIn("get invite");
+		return DiscordUtils.getInviteFromJSON(this, REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code, InviteObject.class));
+	}
 
-		InviteObject invite;
-		try {
-			invite = DiscordUtils.GSON.fromJson(REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code), InviteObject.class);
-		} catch (DiscordException | RateLimitException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Encountered error while retrieving invite: ", e);
-			return null;
-		}
+	public int getRetryCount() {
+		return retryCount;
+	}
 
-		return invite == null ? null : DiscordUtils.getInviteFromJSON(this, invite);
+	public int getMaxCacheCount() {
+		return maxCacheCount;
+	}
+
+	public ICacheDelegateProvider getCacheProvider() {
+		return cacheProvider;
 	}
 }

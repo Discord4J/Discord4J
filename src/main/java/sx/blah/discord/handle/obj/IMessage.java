@@ -1,10 +1,25 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
+import com.vdurmont.emoji.Emoji;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -77,22 +92,33 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	List<Attachment> getAttachments();
 
 	/**
-	 * Gets the Embedded attachments in this message.
+	 * Gets the embeds in this message.
 	 *
-	 * @return The attachments.
+	 * @return The embeds.
+	 * @deprecated Use {@link #getEmbeds()} instead.
 	 */
+	@Deprecated
 	List<IEmbed> getEmbedded();
+
+	/**
+	 * Gets the embeds in this message.
+	 *
+	 * @return The embeds.
+	 */
+	List<IEmbed> getEmbeds();
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
 	 * object before your content
 	 *
 	 * @param content Message to send.
+	 * @return The message object representing the sent message
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void reply(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage reply(String content);
 
 	/**
 	 * Adds an "@mention," to the author of the referenced Message
@@ -100,13 +126,15 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @param content Message content to send.
 	 * @param embed The embed object
+	 * @return The message object representing the sent message
+	 *
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 *
 	 * @see EmbedBuilder
 	 */
-	void reply(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage reply(String content, EmbedObject embed);
 
 	/**
 	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
@@ -116,7 +144,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws MissingPermissionsException
 	 * @throws DiscordException
 	 */
-	IMessage edit(String content) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage edit(String content);
 
 	/**
 	 * Edits the message with an embed object. NOTE: Discord only supports editing YOUR OWN messages!
@@ -129,7 +157,19 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see EmbedBuilder
 	 */
-	IMessage edit(String content, EmbedObject embed) throws MissingPermissionsException, RateLimitException, DiscordException;
+	IMessage edit(String content, EmbedObject embed);
+
+	/**
+	 * Edits the message with only an embed object. NOTE: Discord only supports editing YOUR OWN messages!
+	 *
+	 * @param embed The embed object
+	 * @return The new message (this).
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 *
+	 * @see EmbedBuilder
+	 */
+	IMessage edit(EmbedObject embed);
 
 	/**
 	 * Returns whether this message mentions everyone through @everyone.
@@ -152,7 +192,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+	void delete();
 
 	/**
 	 * Gets the time that this message was last edited.
@@ -201,10 +241,26 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Gets a reaction by the emoji text. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
 	 * instead.
 	 *
-	 * @param name The emoji text
+	 * @param name The emoji text (as Unicode)
 	 * @return The reaction, or null if there aren't any that match
 	 * @see IMessage#getReactionByIEmoji(IEmoji)
 	 */
+	IReaction getReactionByUnicode(String name);
+
+	/**
+	 * Gets a reaction by the Unicode emoji. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
+	 * instead. This simply calls {@link Emoji#getUnicode()} on the other overload of this method.
+	 *
+	 * @param emoji The emoji (as Unicode)
+	 * @return The reaction, or null if there aren't any that match
+	 * @see IMessage#getReactionByIEmoji(IEmoji)
+	 */
+	IReaction getReactionByUnicode(Emoji emoji);
+
+	/**
+	 * @deprecated Use {@link #getReactionByUnicode(String)} instead
+	 */
+	@Deprecated
 	IReaction getReactionByName(String name);
 
 	/**
@@ -212,7 +268,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @see Permissions#MANAGE_MESSAGES
 	 */
-	void removeAllReactions() throws RateLimitException, MissingPermissionsException, DiscordException;
+	void removeAllReactions();
 
 	/**
 	 * Adds your reaction to an existing one.
@@ -222,30 +278,40 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
+	void addReaction(IReaction reaction);
 
 	/**
-	 * Adds your reaction as a custom emoji
+	 * Adds your reaction as a custom emoji.
 	 *
 	 * @param emoji The custom emoji
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(IEmoji emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
+	void addReaction(IEmoji emoji);
 
 	/**
-	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji, or an IEmoji formatted one (&lt;:name:id&gt;)
+	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji (☑), or an IEmoji formatted one (&lt;:name:id&gt;).
+	 * Alternatively, you can provide the emoji alias like you would in normal Discord (ex: :ballot_box_with_check:) and we'll
+	 * attempt to look it up in emoji-java (if it doesn't exist in emoji-java, you'll need to provide the Unicode version).
 	 *
 	 * @param emoji The string emoji
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void addReaction(String emoji) throws MissingPermissionsException, RateLimitException,
-			DiscordException;
+	void addReaction(String emoji);
+
+	/**
+	 * Adds your reaction as a Unicode one. Use {@link com.vdurmont.emoji.EmojiManager#getForAlias(String)}
+	 * to retrieve an Emoji object.
+	 *
+	 * @param emoji The string emoji
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void addReaction(Emoji emoji);
 
 	/**
 	 * Removes a reaction for a user.
@@ -256,7 +322,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removeReaction(IUser user, IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeReaction(IUser user, IReaction reaction);
 
 	/**
 	 * Removes a reaction for yourself.
@@ -266,7 +332,14 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void removeReaction(IReaction reaction) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeReaction(IReaction reaction);
+
+	/**
+	 * This creates a new {@link MessageTokenizer} instance with this message instance.
+	 *
+	 * @return A new tokenizer.
+	 */
+	MessageTokenizer tokenize();
 
 	/**
 	 * Checks to see is this message deleted.
@@ -279,13 +352,24 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Gets the ID of the webhook that sent this message. May be null.
 	 *
 	 * @return The webhook ID.
+	 * @deprecated Use {@link #getWebhookLongID()} instead
 	 */
-	String getWebhookID();
+	@Deprecated
+	default String getWebhookID() {
+		return Long.toUnsignedString(getWebhookLongID());
+	}
+
+	/**
+	 * Gets the ID of the webhook that sent this message. May be null.
+	 *
+	 * @return The webhook ID.
+	 */
+	long getWebhookLongID();
 
 	/**
 	 * Represents an attachment included in the message.
 	 */
-	class Attachment {
+	class Attachment implements IIDLinkedObject {
 
 		/**
 		 * The file name of the attachment.
@@ -300,14 +384,14 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		/**
 		 * The attachment id.
 		 */
-		protected final String id;
+		protected final long id;
 
 		/**
 		 * The download link for the attachment.
 		 */
 		protected final String url;
 
-		public Attachment(String filename, int filesize, String id, String url) {
+		public Attachment(String filename, int filesize, long id, String url) {
 			this.filename = filename;
 			this.filesize = filesize;
 			this.id = id;
@@ -336,8 +420,20 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		 * Gets the id of the attachment.
 		 *
 		 * @return The attachment id.
+		 * @deprecated Use {@link #getLongID()} or {@link #getStringID()} instead
 		 */
+		@Deprecated
 		public String getId() {
+			return getStringID();
+		}
+
+		/**
+		 * Gets the id of the attachment.
+		 *
+		 * @return The attachment id.
+		 */
+		@Override
+		public long getLongID() {
 			return id;
 		}
 

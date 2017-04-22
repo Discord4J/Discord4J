@@ -1,9 +1,27 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.util.audio.providers;
 
-import sx.blah.discord.api.internal.TimedValue;
+import sx.blah.discord.api.internal.OpusUtil;
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioProvider;
-import sx.blah.discord.handle.audio.impl.AudioManager;
 import sx.blah.discord.handle.audio.impl.DefaultProvider;
+import sx.blah.discord.util.TimedValue;
 
 /**
  * GlobalProvider allows for an {@link IAudioProvider} to provide the same audio across multiple
@@ -13,14 +31,14 @@ public class GlobalProvider implements IAudioProvider {
 
 	private static volatile IAudioProvider provider;
 
-	private static final TimedValue<Boolean> isReady = new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT,
+	private static final TimedValue<Boolean> isReady = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME,
 			() -> provider.isReady());
-	private static final TimedValue<byte[]> provide = new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT,
+	private static final TimedValue<byte[]> provide = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME,
 			() -> provider.provide());
-	private static final TimedValue<Integer> channels = new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT,
+	private static final TimedValue<Integer> channels = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME,
 			() -> provider.getChannels());
 	private static final TimedValue<AudioEncodingType> audioEncodingType
-			= new TimedValue<>(AudioManager.OPUS_FRAME_TIME_AMOUNT, () -> provider.getAudioEncodingType());
+			= new TimedValue<>(OpusUtil.OPUS_FRAME_TIME, () -> provider.getAudioEncodingType());
 
 	private static final GlobalProvider instance = new GlobalProvider(); //Singleton instance
 

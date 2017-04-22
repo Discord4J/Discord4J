@@ -1,10 +1,32 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
 import java.util.Optional;
 
 /**
- * This represent's a user's "status" i.e. game or streaming.
+ * <b>DEPRECATED</b> - Use {@link IPresence#getPlayingText()} and {@link IPresence#getStreamingUrl()} instead
+ * <br><br>
+ * This represent's a user's "online status" i.e. game or streaming.
+ *
+ * @deprecated Use {@link IPresence#getPlayingText()} and {@link IPresence#getStreamingUrl()}
  */
+@Deprecated
 public class Status {
 
 	/**
@@ -34,7 +56,9 @@ public class Status {
 	 * Creates an empty status (i.e. one with no message shown for the user).
 	 *
 	 * @return An empty status.
+	 * @deprecated Use {@link sx.blah.discord.api.IDiscordClient#changePlayingText(String)}
 	 */
+	@Deprecated
 	public static Status empty() {
 		return NONE;
 	}
@@ -44,7 +68,9 @@ public class Status {
 	 *
 	 * @param game The game being played.
 	 * @return A game status.
+	 * @deprecated Use {@link sx.blah.discord.api.IDiscordClient#changePlayingText(String)}
 	 */
+	@Deprecated
 	public static Status game(String game) {
 		return new Status(StatusType.GAME, game);
 	}
@@ -55,7 +81,9 @@ public class Status {
 	 * @param message The stream message.
 	 * @param url The stream url.
 	 * @return The stream status.
+	 * @deprecated Use {@link sx.blah.discord.api.IDiscordClient#streaming(String, String)}
 	 */
+	@Deprecated
 	public static Status stream(String message, String url) {
 		return new Status(StatusType.STREAM, message, url);
 	}
@@ -115,7 +143,9 @@ public class Status {
 
 	/**
 	 * This represents the types of statuses that exist.
+	 * @deprecated Use {@link IPresence}
 	 */
+	@Deprecated
 	public enum StatusType {
 		/**
 		 * This represents a game playing status.

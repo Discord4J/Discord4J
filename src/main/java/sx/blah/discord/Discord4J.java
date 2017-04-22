@@ -1,21 +1,20 @@
 /*
- * Discord4J - Unofficial wrapper for Discord API
- * Copyright (c) 2016
+ *     This file is part of Discord4J.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package sx.blah.discord;
 
 import org.eclipse.jetty.util.log.Log;
@@ -26,19 +25,16 @@ import org.slf4j.helpers.MarkerIgnoringBase;
 import org.slf4j.helpers.MessageFormatter;
 import org.slf4j.helpers.NOPLoggerFactory;
 import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.modules.Configuration;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Properties;
@@ -75,7 +71,8 @@ public class Discord4J {
 	protected static final LocalDateTime launchTime = LocalDateTime.now();
 	/**
 	 * Whether to log when the user doesn't have the permissions to view a channel.
-     */
+         */
+	@Deprecated
 	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
 	/**
 	 * Whether to allow for audio to be used.
@@ -145,7 +142,7 @@ public class Discord4J {
 		public void ignore(Throwable ignored) {}
 	};
 
-	//Dynamically getting various information from maven
+	// Dynamically getting various information from maven
 	static {
 		InputStream stream = Discord4J.class.getClassLoader().getResourceAsStream("app.properties");
 		Properties properties = new Properties();
@@ -156,28 +153,32 @@ public class Discord4J {
 			Discord4J.LOGGER.error(LogMarkers.MAIN, "Discord4J Internal Exception", e);
 		}
 		NAME = properties.getProperty("application.name");
-		VERSION = properties.getProperty("application.version");
+		String branch = properties.getProperty("application.git.branch");
+		if (branch.equals("master"))
+			VERSION = properties.getProperty("application.version");
+		else
+			VERSION = String.format("%s (%s-%s)", properties.getProperty("application.version"), branch, properties.getProperty("application.git.commit"));
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
 
 		jettyLogger = Log.getLog();
 		Log.setLog(ignoredJettyLogger);
 
-		LOGGER.info(LogMarkers.MAIN, "{} v{}", NAME, VERSION);
+		LOGGER.info(LogMarkers.MAIN, "{} v{} ({})", NAME, VERSION, URL);
 		LOGGER.info(LogMarkers.MAIN, "{}", DESCRIPTION);
 	}
 
 	/**
 	 * This is used to run Discord4J independent of any bot, making it module dependent.
 	 *
-	 * @param args The args should be either email/password or just the bot token
+	 * @param args The args should only include the bot token.
 	 */
 	public static void main(String[] args) {
 		//This functionality is dependent on these options being true
 		if (!Configuration.AUTOMATICALLY_ENABLE_MODULES || !Configuration.LOAD_EXTERNAL_MODULES)
-			throw new RuntimeException("Invalid configuration!");
+			throw new RuntimeException("Invalid configuration! Must have auto-enabling of modules + loading of external modules enabled.");
 		if (args.length == 0)
-			throw new RuntimeException("Invalid configuration!");
+			throw new RuntimeException("Invalid configuration! No arguments passed in.");
 		try {
 			ClientBuilder builder = new ClientBuilder();
 			IDiscordClient client = builder.withToken(args[0]).login();
@@ -209,7 +210,9 @@ public class Discord4J {
 
 	/**
 	 * This disables logging for when the user doesn't have the required permissions to view a channel.
-     */
+	 * @deprecated This functionality isn't available in MessageHistories.
+         */
+	@Deprecated
 	public static void disableChannelWarnings() {
 		ignoreChannelWarnings.set(true);
 	}
@@ -239,7 +242,7 @@ public class Discord4J {
 		if (!isSLF4JImplementationPresent()) {
 			System.err.println("Discord4J: ERROR INITIALIZING LOGGER!");
 			System.err.println("Discord4J: No SLF4J implementation found, reverting to the internal implementation ("+Discord4JLogger.class.getName()+")");
-			System.err.println("Discord4J: It is *highly* recommended to use an full featured implementation like logback!");
+			System.err.println("Discord4J: It is *highly* recommended to use a fully featured implementation like logback!");
 			return new Discord4JLogger(Discord4J.class.getName());
 		} else {
 			return LoggerFactory.getLogger(Discord4J.class);

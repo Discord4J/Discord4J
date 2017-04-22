@@ -1,3 +1,20 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
@@ -66,7 +83,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws MissingPermissionsException
 	 */
 
-	void changeDefaultName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeDefaultName(String name);
 
 	/**
 	 * Changes the default avatar of the user this webhook posts as.
@@ -76,7 +93,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeDefaultAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeDefaultAvatar(String avatar);
 
 	/**
 	 * Changes the default avatar of the user this webhook posts as.
@@ -87,7 +104,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws MissingPermissionsException
 	 */
 
-	void changeDefaultAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeDefaultAvatar(Image avatar);
 
 	/**
 	 * Deletes this webhook.
@@ -96,7 +113,7 @@ public interface IWebhook extends IDiscordObject<IWebhook> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+	void delete();
 
 	/**
 	 * Checks to see if this webhook is deleted.

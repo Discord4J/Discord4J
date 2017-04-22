@@ -1,6 +1,22 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -9,21 +25,16 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.RoleObject;
 import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
-import sx.blah.discord.handle.impl.events.RoleUpdateEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Role implements IRole {
 
@@ -50,7 +61,7 @@ public class Role implements IRole {
 	/**
 	 * The role id
 	 */
-	protected volatile String id;
+	protected volatile long id;
 
 	/**
 	 * Whether to display this role separately from others
@@ -72,7 +83,7 @@ public class Role implements IRole {
 	 */
 	protected volatile IGuild guild;
 
-	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, boolean mentionable, IGuild guild) {
+	public Role(int position, int permissions, String name, boolean managed, long id, boolean hoist, int color, boolean mentionable, IGuild guild) {
 		this.position = position;
 		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
 		this.name = name;
@@ -86,15 +97,6 @@ public class Role implements IRole {
 
 	@Override
 	public int getPosition() {
-		getGuild().getRoles().sort((r1, r2) -> {
-			int originalPos1 = ((Role) r1).position;
-			int originalPos2 = ((Role) r2).position;
-			if (originalPos1 == originalPos2) {
-				return r2.getCreationDate().compareTo(r1.getCreationDate());
-			} else {
-				return originalPos1 - originalPos2;
-			}
-		});
 		return getGuild().getRoles().indexOf(this);
 	}
 
@@ -141,7 +143,7 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -192,63 +194,77 @@ public class Role implements IRole {
 		return guild;
 	}
 
-	private void edit(Optional<Color> color, Optional<Boolean> hoist, Optional<String> name, Optional<EnumSet<Permissions>> permissions, Optional<Boolean> isMentionable) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
+	private void edit(RoleEditRequest request) {
+		DiscordUtils.checkPermissions(getClient(), guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
 		try {
-			RoleObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) guild.getClient()).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new RoleEditRequest(color.orElse(getColor()),
-							hoist.orElse(isHoisted()), name.orElse(getName()), permissions.orElse(getPermissions()),
-							isMentionable.orElse(isMentionable()))))),
-					RoleObject.class);
-
-			IRole oldRole = copy();
-			IRole newRole = DiscordUtils.getRoleFromJSON(guild, response);
-
-			getClient().getDispatcher().dispatch(new RoleUpdateEvent(oldRole, newRole, guild));
-		} catch (UnsupportedEncodingException e) {
+			DiscordUtils.getRoleFromJSON(guild,
+					DiscordUtils.MAPPER.readValue(
+							((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+									DiscordEndpoints.GUILDS + guild.getStringID() + "/roles/" + id,
+									DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(request)), RoleObject.class));
+		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
 	}
 
 	@Override
-	public void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.of(color), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+	public void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable) {
+		if (color == null)
+			throw new IllegalArgumentException("Color must not be null.");
+		if (name == null || name.length() < 1 || name.length() > 32)
+			throw new IllegalArgumentException("Role name must be between 1 and 32 characters!");
+		if (permissions == null)
+			throw new IllegalArgumentException("Permissions set must not be null.");
+
+		edit(new RoleEditRequest.Builder().color(color).hoist(hoist).name(name).permissions(permissions).mentionable(isMentionable).build());
 	}
 
 	@Override
-	public void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.of(hoist), Optional.empty(), Optional.empty(), Optional.empty());
+	public void changeColor(Color color) {
+		if (color == null)
+			throw new IllegalArgumentException("Color must not be null.");
+
+		edit(new RoleEditRequest.Builder().color(color).build());
 	}
 
 	@Override
-	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(name), Optional.empty(), Optional.empty());
+	public void changeHoist(boolean hoist) {
+		edit(new RoleEditRequest.Builder().mentionable(hoist).build());
 	}
 
 	@Override
-	public void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(permissions), Optional.empty());
+	public void changeName(String name) {
+		if (name == null || name.length() < 1 || name.length() > 32)
+			throw new IllegalArgumentException("Role name must be between 1 and 32 characters!");
+
+		edit(new RoleEditRequest.Builder().name(name).build());
 	}
 
 	@Override
-	public void changeMentionable(boolean isMentionable) throws RateLimitException, DiscordException, MissingPermissionsException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(isMentionable));
+	public void changePermissions(EnumSet<Permissions> permissions) {
+		if (permissions == null)
+			throw new IllegalArgumentException("Permissions set must not be null.");
+
+		edit(new RoleEditRequest.Builder().permissions(permissions).build());
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void changeMentionable(boolean mentionable) {
+		edit(new RoleEditRequest.Builder().mentionable(mentionable).build());
+	}
+
+	@Override
+	public void delete() {
 		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
 
-		((DiscordClientImpl) guild.getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getStringID()+"/roles/"+id);
 	}
 
 	@Override
 	public IRole copy() {
-		Role role = new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
+		return new Role(position, Permissions.generatePermissionsNumber(permissions), name, managed, id, hoist,
 				color.getRGB(), mentionable, guild);
-		return role;
 	}
 
 	@Override
@@ -288,9 +304,6 @@ public class Role implements IRole {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IRole) other).getID().equals(getID());
+		return DiscordUtils.equals(this, other);
 	}
 }

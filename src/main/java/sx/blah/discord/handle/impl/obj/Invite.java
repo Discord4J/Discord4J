@@ -1,58 +1,64 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.obj;
 
-import com.google.gson.Gson;
-import org.apache.http.message.BasicNameValuePair;
-import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IInvite;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.LogMarkers;
-
-import java.util.Objects;
+import sx.blah.discord.handle.obj.IUser;
 
 public class Invite implements IInvite {
-	/**
-	 * An invite code, AKA an invite URL minus the https://discord.gg/
-	 */
-	protected final String inviteCode;
 
-	/**
-	 * The client that created this object.
-	 */
-	protected final IDiscordClient client;
+	private final IDiscordClient client;
+	private final InviteObject backing;
 
-	public Invite(IDiscordClient client, String inviteCode) {
+	public Invite(IDiscordClient client, InviteObject backing) {
 		this.client = client;
-		this.inviteCode = inviteCode;
+		this.backing = backing;
+	}
+
+	@Override
+	public String getCode() {
+		return backing.code;
 	}
 
 	@Override
 	public String getInviteCode() {
-		return inviteCode;
+		return getCode();
 	}
 
 	@Override
-	public InviteResponse details() throws DiscordException, RateLimitException {
-		if (client.isReady()) {
-			String response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE+inviteCode);
-
-			InviteObject inviteResponse = new Gson().fromJson(response, InviteObject.class);
-
-			return new InviteResponse(inviteResponse.guild.id, inviteResponse.guild.name,
-					inviteResponse.channel.id, inviteResponse.channel.name);
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to get invite details before bot is ready!");
-			return null;
-		}
+	public IGuild getGuild() {
+		return client.getGuildByID(backing.guild.id);
 	}
 
 	@Override
-	public void delete() throws RateLimitException, DiscordException {
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE+inviteCode);
+	public IChannel getChannel() {
+		return getGuild().getChannelByID(backing.channel.id);
+	}
+
+	@Override
+	public IUser getInviter() {
+		return getGuild().getUserByID(backing.inviter.id);
 	}
 
 	@Override
@@ -61,8 +67,13 @@ public class Invite implements IInvite {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(inviteCode);
+	public void delete() {
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE + getCode());
+	}
+
+	@Override
+	public InviteResponse details() {
+		return null;
 	}
 
 	@Override
@@ -70,11 +81,11 @@ public class Invite implements IInvite {
 		if (other == null)
 			return false;
 
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IInvite) other).getInviteCode().equals(getInviteCode());
+		return this.getClass().isAssignableFrom(other.getClass()) && ((IInvite) other).getCode().equals(getCode());
 	}
 
 	@Override
 	public String toString() {
-		return inviteCode;
+		return "discord.gg/" + getCode();
 	}
 }

@@ -1,13 +1,32 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
 
 public class PrivateChannel extends Channel implements IPrivateChannel {
 
@@ -16,19 +35,21 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	 */
 	protected final IUser recipient;
 
-	public PrivateChannel(IDiscordClient client, IUser recipient, String id) {
-		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
+	public PrivateChannel(DiscordClientImpl client, IUser recipient, long id) {
+		super(client, recipient.getName(), id, null, null, 0,
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)),
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)));
 		this.recipient = recipient;
 	}
 
 	@Override
-	public Map<String, PermissionOverride> getUserOverrides() {
-		return new HashMap<>();
+	public LongMap<PermissionOverride> getUserOverridesLong() {
+		return LongMap.emptyMap();
 	}
 
 	@Override
-	public Map<String, PermissionOverride> getRoleOverrides() {
-		return new HashMap<>();
+	public LongMap<PermissionOverride> getRoleOverridesLong() {
+		return LongMap.emptyMap();
 	}
 
 	@Override
@@ -45,37 +66,27 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void addUserOverride(String userId, PermissionOverride override) {
+	public void removePermissionsOverride(IUser user) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addRoleOverride(String roleId, PermissionOverride override) {
+	public void removePermissionsOverride(IRole role) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removePermissionsOverride(IUser user) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removePermissionsOverride(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) throws MissingPermissionsException, RateLimitException, DiscordException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<IInvite> getInvites() throws DiscordException, RateLimitException {
+	public List<IInvite> getInvites() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -95,17 +106,17 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeName(String name) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void changePosition(int position) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changePosition(int position) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeTopic(String topic) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -115,7 +126,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) throws MissingPermissionsException, RateLimitException, DiscordException {
+	public IExtendedInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -155,7 +166,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IWebhook getWebhookByID(String id) {
+	public IWebhook getWebhookByID(long id) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -165,17 +176,17 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, Image avatar) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, String avatar) {
 		throw new UnsupportedOperationException();
 	}
 

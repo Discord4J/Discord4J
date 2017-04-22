@@ -1,9 +1,26 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.util.audio;
 
 import org.tritonus.dsp.ais.AmplitudeAudioInputStream;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
@@ -194,7 +211,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues an AudioInputStream for the AudioPlayer.
-	 * <br>Supports: ogg, mp3, flac, wav
+	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
 	 *
 	 * @param stream The stream to queue.
 	 * @return The {@link Track} object representing this stream.
@@ -209,7 +226,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues a file for the AudioPlayer.
-	 * <br>Supports: ogg, mp3, flac, wav
+	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
 	 *
 	 * @param file The file to queue.
 	 * @return The {@link Track} object representing this file.
@@ -226,7 +243,7 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues a url for the AudioPlayer.
-	 * <br>Supports: ogg, mp3, flac, wav
+	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
 	 *
 	 * @param url The url to queue.
 	 * @return The {@link Track} object representing this url.
@@ -243,26 +260,20 @@ public class AudioPlayer implements IAudioProvider {
 
 	/**
 	 * This queues an audio provider for the AudioPlayer.
-	 * <br>Supports: ogg, mp3, flac, wav
+	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
 	 *
 	 * @param provider The audio provider to queue.
 	 * @return The {@link Track} object representing this audio provider.
 	 */
 	public Track queue(IAudioProvider provider) {
-		Track track;
-
-		if (provider instanceof AudioInputStreamProvider)
-			track = new Track((AudioInputStreamProvider) provider);
-		else
-			track = new Track(provider);
-
+		Track track = new Track(provider);
 		queue(track);
 		return track;
 	}
 
 	/**
 	 * This queues a track for the AudioPlayer.
-	 * <br>Supports: ogg, mp3, flac, wav
+	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
 	 *
 	 * @param track The track to queue.
 	 */
@@ -338,7 +349,7 @@ public class AudioPlayer implements IAudioProvider {
 			Track track = trackQueue.remove(0);
 
 			if (track.isReady() && track.getCurrentTrackTime() == track.getTotalTrackTime()) { //The track was actually skipped, not skipped due to the way my logic works
-				client.getDispatcher().dispatch(new TrackSkipEvent(this, track));
+				client.getDispatcher().dispatch(new TrackSkipEvent(this, track, trackQueue.size() > 0 ? trackQueue.get(0) : null));
 			}
 
 			if (isLooping()) {
@@ -477,22 +488,25 @@ public class AudioPlayer implements IAudioProvider {
 		private final Map<String, Object> metadata = new ConcurrentHashMap<>();
 
 		public Track(IAudioProvider provider) {
-			this.provider = provider;
-			stream = null;
-		}
+			if (provider instanceof AudioInputStreamProvider) {
+				AudioInputStreamProvider streamProvider = (AudioInputStreamProvider) provider;
 
-		public Track(AudioInputStreamProvider provider) {
-			this(provider.getStream());
+				// No need to call DiscordUtils#getPCMStream again, since it's already called on AudioInputStreamProvider's constructor.
+				this.stream = new AmplitudeAudioInputStream(streamProvider.getStream());
+				this.provider = new AudioInputStreamProvider(this.stream);
+
+				// Available Frames / frames per second = Available seconds. Available seconds * 1000 = available milliseconds.
+				totalTrackTime = (stream.getFrameLength() / (long)this.stream.getFormat().getFrameRate())*1000;
+				if (totalTrackTime == 0)
+					totalTrackTime = -1;
+			} else {
+				this.provider = provider;
+				this.stream = null;
+			}
 		}
 
 		public Track(AudioInputStream stream) {
-			this.stream = new AmplitudeAudioInputStream(DiscordUtils.getPCMStream(stream));
-			this.provider = new AudioInputStreamProvider(this.stream);
-
-			//Available Frames / frames per second = Available seconds. Available seconds * 1000 = available milliseconds.
-			totalTrackTime = (stream.getFrameLength() / (long)this.stream.getFormat().getFrameRate())*1000;
-			if (totalTrackTime == 0)
-				totalTrackTime = -1;
+			this(new AudioInputStreamProvider(stream));
 		}
 
 		protected void close() {

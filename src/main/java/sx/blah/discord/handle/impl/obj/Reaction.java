@@ -1,18 +1,34 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.obj;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.ReactionUserObject;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.util.List;
 
@@ -73,7 +89,12 @@ public class Reaction implements IReaction {
 
 	@Override
 	public IEmoji getCustomEmoji() {
-		return getMessage().getGuild().getEmojiByID(emoji);
+		return getMessage().getGuild().getEmojiByID(Long.parseUnsignedLong(emoji));
+	}
+
+	@Override
+	public Emoji getUnicodeEmoji() {
+		return EmojiManager.getByUnicode(emoji);
 	}
 
 	@Override
@@ -95,21 +116,18 @@ public class Reaction implements IReaction {
 	}
 
 	@Override
-	public synchronized List<IUser> getUsers() throws RateLimitException, DiscordException {
+	public synchronized List<IUser> getUsers() {
 		if (shouldRefreshUsers()) {
 			users.clear();
 
 			int gottenSoFar = 0;
-			String emoji = isCustomEmoji() ? (getCustomEmoji().getName() + ":" + getCustomEmoji().getID()) : this
-					.emoji;
+			String emoji = isCustomEmoji() ? (getCustomEmoji().getName() + ":" + getCustomEmoji().getStringID()) : this.emoji;
 			String userAfter = null;
-			DiscordClientImpl clientImpl = ((DiscordClientImpl) getClient());
 			while (gottenSoFar < count) {
-				String response = clientImpl.REQUESTS.GET.makeRequest(
-						String.format(DiscordEndpoints.REACTIONS_USER_LIST, message.getChannel().getID(),
-								message.getID(), emoji), new BasicNameValuePair("after", userAfter));
-
-				ReactionUserObject[] userObjs = DiscordUtils.GSON.fromJson(response, ReactionUserObject[].class);
+				ReactionUserObject[] userObjs = ((DiscordClientImpl) getClient()).REQUESTS.GET.makeRequest(
+						String.format(DiscordEndpoints.REACTIONS_USER_LIST, message.getChannel().getStringID(), message.getStringID(), emoji),
+						ReactionUserObject[].class,
+						new BasicNameValuePair("after", userAfter));
 
 				if (userObjs.length == 0)
 					break;
@@ -117,7 +135,7 @@ public class Reaction implements IReaction {
 				gottenSoFar += userObjs.length;
 
 				for (ReactionUserObject obj : userObjs) {
-					IUser u = getClient().getUserByID(obj.id);
+					IUser u = getClient().getUserByID(Long.parseUnsignedLong(obj.id));
 
 					if (u != null) {
 						users.add(u);

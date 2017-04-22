@@ -1,6 +1,24 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.audio;
 
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  * This class centralizes all audio handling.
@@ -36,11 +54,26 @@ public interface IAudioManager {
 	IAudioProcessor getAudioProcessor();
 
 	/**
-	 * Gets the next 20 ms of audio for discord.
+	 * This subscribes an {@link IAudioReceiver} to receive audio from all sources regardless of user.
 	 *
-	 * @return The raw, opus-encoded bytes.
+	 * @param receiver The receiver to subscribe.
 	 */
-	byte[] getAudio();
+	void subscribeReceiver(IAudioReceiver receiver);
+
+	/**
+	 * This subscribes an {@link IAudioReceiver} to receive audio from a specific user specifically.
+	 *
+	 * @param receiver The receiver to subscribe.
+	 * @param user The user to receive audio from.
+	 */
+	void subscribeReceiver(IAudioReceiver receiver, IUser user);
+
+	/**
+	 * This unsubscribes all copies of this {@link IAudioReceiver} instance from receiving audio.
+	 *
+	 * @param receiver The receiver to unsubscribe.
+	 */
+	void unsubscribeReceiver(IAudioReceiver receiver);
 
 	/**
 	 * Gets the guild this AudioManager instance belongs to.

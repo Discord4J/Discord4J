@@ -1,12 +1,31 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.LongMap;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 /**
  * This class defines the Discord user.
@@ -19,13 +38,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return The username.
 	 */
 	String getName();
-
-	/**
-	 * Gets the status for this user.
-	 *
-	 * @return The user's status.
-	 */
-	Status getStatus();
 
 	/**
 	 * Gets the user's avatar id.
@@ -46,7 +58,16 @@ public interface IUser extends IDiscordObject<IUser> {
 	 *
 	 * @return The user's presence.
 	 */
-	Presences getPresence();
+	IPresence getPresence();
+
+	/**
+	 * Gets the status for this user.
+	 *
+	 * @return The user's status.
+	 * @deprecated Use {@link #getPresence()}
+	 */
+	@Deprecated
+	Status getStatus();
 
 	/**
 	 * Gets the name displayed to a guild for this user.
@@ -102,7 +123,44 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @param guild The guild to get the nickname for.
 	 * @return The nickname (if it exists in this guild).
 	 */
-	Optional<String> getNicknameForGuild(IGuild guild);
+	String getNicknameForGuild(IGuild guild);
+
+	/**
+	 * Get's the user's never-null voice state for the given guild.
+	 *
+	 * @param guild The guild to check.
+	 * @return The voice state.
+	 */
+	IVoiceState getVoiceStateForGuild(IGuild guild);
+
+	/**
+	 * Gets all of the user's voice states.
+	 * Key is the guild ID that the voice state is for.
+	 *
+	 * @return All of the user's voice states.
+	 * @deprecated Use {@link #getVoiceStatesLong()} instead
+	 */
+	@Deprecated
+	default Map<String, IVoiceState> getVoiceStates() {
+		Map<String, IVoiceState> map = new HashMap<>();
+		getVoiceStatesLong().forEach((key, value) -> map.put(Long.toUnsignedString(key), value));
+		return map;
+	}
+
+	/**
+	 * Gets all of the user's voice states.
+	 * Key is the guild ID that the voice state is for.
+	 *
+	 * @return All of the user's voice states.
+	 */
+	LongMap<IVoiceState> getVoiceStatesLong();
+
+	/**
+	 * Moves the user to the given voice channel.
+	 *
+	 * @param channel The voice channel to move to.
+	 */
+	void moveToVoiceChannel(IVoiceChannel channel);
 
 	/**
 	 * Gets whether or not this user is a bot.
@@ -112,24 +170,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	boolean isBot();
 
 	/**
-	 * Moves this user to a different voice channel.
-	 *
-	 * @param newChannel The new channel the user should move to.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
-	 */
-	void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException, MissingPermissionsException;
-
-	/**
-	 * Gets the voice channels this user is connected to.
-	 *
-	 * @return The voice channels.
-	 */
-	List<IVoiceChannel> getConnectedVoiceChannels();
-
-	/**
 	 * Gets a {@link IPrivateChannel} for this user.
 	 *
 	 * @return The {@link IPrivateChannel} object.
@@ -137,37 +177,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws DiscordException
 	 * @throws RateLimitException
 	 */
-	IPrivateChannel getOrCreatePMChannel() throws RateLimitException, DiscordException;
-
-	/**
-	 * Gets whether this user is deafened in the given guild.
-	 *
-	 * @param guild The guild to check the status for.
-	 * @return True if deafened, false if otherwise.
-	 */
-	boolean isDeaf(IGuild guild);
-
-	/**
-	 * Gets whether this user is muted in the given guild.
-	 *
-	 * @param guild The guild to check the status for.
-	 * @return True if muted, false if otherwise.
-	 */
-	boolean isMuted(IGuild guild);
-
-	/**
-	 * Gets whether this user is deafened locally (meaning they deafened themselves).
-	 *
-	 * @return True if deafened, false if otherwise.
-     */
-	boolean isDeafLocally();
-
-	/**
-	 * Gets whether this user is muted locally (meaning they muted themselves).
-	 *
-	 * @return True if muted, false if otherwise.
-     */
-	boolean isMutedLocally();
+	IPrivateChannel getOrCreatePMChannel();
 
 	/**
 	 * Adds a Role to this user.
@@ -178,8 +188,7 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
-
+	void addRole(IRole role);
 
 	/**
 	 * Removes a Role from this user.
@@ -190,5 +199,5 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException;
+	void removeRole(IRole role);
 }

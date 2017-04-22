@@ -1,8 +1,23 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.util.RateLimitException;
 
 /**
  * Represents an invite into a channel.
@@ -10,45 +25,59 @@ import sx.blah.discord.util.RateLimitException;
 public interface IInvite {
 
 	/**
-	 * @return The invite code
+	 * @return The invite code for this invite.
 	 */
-	String getInviteCode();
+	String getCode();
 
 	/**
-	 * Gains the same information as accepting,
-	 * but doesn't actually accept the invite.
-	 *
-	 * @return an InviteResponse containing the invite's details.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @return The guild this invite is for.
 	 */
-	InviteResponse details() throws DiscordException, RateLimitException;
+	IGuild getGuild();
 
 	/**
-	 * Attempts to delete the invite this object represents.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @return The channel this invite is for.
 	 */
-	void delete() throws RateLimitException, DiscordException;
+	IChannel getChannel();
 
 	/**
-	 * This gets the client that this object is tied to.
-	 *
-	 * @return The client.
+	 * Note: This is null for vanity url invites and invites for widgets.
+	 * @return The user who created this invite.
+	 */
+	IUser getInviter();
+
+	/**
+	 * @return The client this invite is tied to.
 	 */
 	IDiscordClient getClient();
 
 	/**
-	 * Represents the details of an invite.
+	 * Deletes this invite.
 	 */
+	void delete();
+
+	/**
+	 * @return The invite code for this invite.
+	 *
+	 * @deprecated Use {@link #getCode()} instead.
+	 */
+	@Deprecated
+	String getInviteCode();
+
+	/**
+	 * @return An {@link InviteResponse} containing the invite's details.
+	 *
+	 * @deprecated This is no longer needed as the same information and more can be obtained with methods in {@link IInvite} and {@link IExtendedInvite}.
+	 */
+	@Deprecated
+	InviteResponse details();
+
+	@Deprecated
 	class InviteResponse {
 
 		/**
 		 * ID of the guild you were invited to.
 		 */
-		private final String guildID;
+		private final long guildID;
 
 		/**
 		 * Name of the guild you were invited to.
@@ -58,15 +87,14 @@ public interface IInvite {
 		/**
 		 * ID of the channel you were invited from.
 		 */
-		private final String channelID;
+		private final long channelID;
 
 		/**
 		 * Name of the channel you were invited from.
 		 */
 		private final String channelName;
 
-		//TODO replace with objects. Need to figure out logistics, as the GUILD_CREATE is sent after MESSAGE_CREATE and after we accept the invite
-		public InviteResponse(String guildID, String guildName, String channelID, String channelName) {
+		public InviteResponse(long guildID, String guildName, long channelID, String channelName) {
 			this.guildID = guildID;
 			this.guildName = guildName;
 			this.channelID = channelID;
@@ -77,8 +105,19 @@ public interface IInvite {
 		 * Gets the guild id the invite leads to.
 		 *
 		 * @return The guild id.
+		 * @deprecated Use {@link #getGuildLongID()} instead
 		 */
+		@Deprecated
 		public String getGuildID() {
+			return Long.toUnsignedString(getGuildLongID());
+		}
+
+		/**
+		 * Gets the guild id the invite leads to.
+		 *
+		 * @return The guild id.
+		 */
+		public long getGuildLongID() {
 			return guildID;
 		}
 
@@ -95,8 +134,19 @@ public interface IInvite {
 		 * Gets the channel id the invite leads to.
 		 *
 		 * @return The channel id.
+		 * @deprecated Use {@link #getChannelLongID()} instead
 		 */
+		@Deprecated
 		public String getChannelID() {
+			return Long.toUnsignedString(getChannelLongID());
+		}
+
+		/**
+		 * Gets the channel id the invite leads to.
+		 *
+		 * @return The channel id.
+		 */
+		public long getChannelLongID() {
 			return channelID;
 		}
 

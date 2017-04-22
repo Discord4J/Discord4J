@@ -1,3 +1,20 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.modules;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -12,6 +29,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -120,6 +138,9 @@ public class ModuleLoader {
 	 * @return true if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
 	 */
 	public boolean loadModule(IModule module) {
+                if (!loadedModules.contains(module) && !canModuleLoad(module)) {
+			return false;
+                }
 		Class<? extends IModule> clazz = module.getClass();
 		if (clazz.isAnnotationPresent(Requires.class)) {
 			Requires annotation = clazz.getAnnotation(Requires.class);
@@ -319,21 +340,27 @@ public class ModuleLoader {
 				return loaded;
 			}));
 
-			if (dependents.size() == 0)
+			if (dependents.isEmpty())
 				break;
 		}
 
 		if (dependents.size() > 0)
-			Discord4J.LOGGER.warn("Unable to load {} modules!", dependents.size());
+			Discord4J.LOGGER.warn(LogMarkers.MODULES, "Unable to load {} modules!", dependents.size());
 	}
 
 	private static String[] getModuleRequires(File file) throws IOException {
 		JarFile jarFile = new JarFile(file);
 		Manifest manifest = jarFile.getManifest();
-		Attributes.Name moduleRequires = new Attributes.Name("module-requires");
-		if (manifest != null && manifest.getMainAttributes() != null
-				&& manifest.getMainAttributes().containsKey(moduleRequires)) {
-			String value = manifest.getMainAttributes().getValue(moduleRequires);
+		Attributes.Name moduleRequiresLower = new Attributes.Name("module-requires"); //TODO remove
+		Attributes.Name moduleRequiresUpper = new Attributes.Name("Module-Requires");
+		if (manifest != null && manifest.getMainAttributes() != null //TODO remove
+				&& manifest.getMainAttributes().containsKey(moduleRequiresLower)) {
+			String value = manifest.getMainAttributes().getValue(moduleRequiresLower);
+			Discord4J.LOGGER.warn(LogMarkers.MODULES, "File {} uses the 'module-requires' attribute instead of 'Module-Requires', please rename the attribute!", file.getName());
+			return value.contains(";") ? value.split(";") : new String[]{value};
+		} else if (manifest != null && manifest.getMainAttributes() != null
+				&& manifest.getMainAttributes().containsKey(moduleRequiresUpper)) {
+			String value = manifest.getMainAttributes().getValue(moduleRequiresUpper);
 			return value.contains(";") ? value.split(";") : new String[]{value};
 		} else {
 			return new String[0];
@@ -357,6 +384,10 @@ public class ModuleLoader {
 	 * @param clazz The module class.
 	 */
 	public static void addModuleClass(Class<? extends IModule> clazz) {
-		modules.add(clazz);
+                if (!Modifier.isAbstract(clazz.getModifiers())
+                        && !Modifier.isInterface(clazz.getModifiers())
+                        && !modules.contains(clazz)) {
+                        modules.add(clazz);
+                }
 	}
 }

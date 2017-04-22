@@ -1,8 +1,25 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 import java.awt.*;
 import java.util.EnumSet;
@@ -69,6 +86,21 @@ public interface IRole extends IDiscordObject<IRole> {
 	IGuild getGuild();
 
 	/**
+	 * Edits all properties of this role.
+	 *
+	 * @param color The new color of the role.
+	 * @param hoist Whether the role should be displayed separately from others.
+	 * @param name The new name of the role.
+	 * @param permissions The new permissions set of the role.
+	 * @param isMentionable Whether the role can be mentioned.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable);
+
+	/**
 	 * Changes the color of the role.
 	 *
 	 * @param color The new color for the role.
@@ -77,7 +109,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeColor(Color color) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeColor(Color color);
 
 	/**
 	 * Changes whether to hoist the role.
@@ -88,7 +120,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeHoist(boolean hoist) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeHoist(boolean hoist);
 
 	/**
 	 * Changes the name of the role.
@@ -99,7 +131,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeName(String name) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeName(String name);
 
 	/**
 	 * Changes the permissions of the role.
@@ -110,7 +142,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changePermissions(EnumSet<Permissions> permissions) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changePermissions(EnumSet<Permissions> permissions);
 
 	/**
 	 * Changes whether this role is mentionable.
@@ -121,7 +153,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeMentionable(boolean isMentionable) throws RateLimitException, DiscordException, MissingPermissionsException;
+	void changeMentionable(boolean isMentionable);
 
 	/**
 	 * Attempts to delete this role.
@@ -130,7 +162,7 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	void delete() throws MissingPermissionsException, RateLimitException, DiscordException;
+	void delete();
 
 	/**
 	 * This checks if the role is the @everyone role.

@@ -1,6 +1,22 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.util;
 
-import org.apache.http.entity.StringEntity;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -10,10 +26,12 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.MessageObject;
 import sx.blah.discord.api.internal.json.requests.BulkDeleteRequest;
 import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.obj.Channel;
 import sx.blah.discord.handle.obj.*;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -21,7 +39,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  *
  * The list gets a message on demand, it either fetches it from the cache or it requests the message from Discord
  * if not cached.
+ *
+ * @deprecated Use {@link MessageHistory} instead, this should NOT be relied on to work properly anymore.
  */
+@Deprecated
 public class MessageList extends AbstractList<IMessage> implements List<IMessage> {
 
 	/**
@@ -42,6 +63,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	/**
 	 * This is the max number of guild before the list stops automatically loading its history.
 	 */
+	@Deprecated
 	public static final int MAX_GUILD_COUNT = 10;
 
 	/**
@@ -60,20 +82,15 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	private final MessageListEventListener listener;
 
 	/**
-	 * This is true if the client object has permission to read this channel's messages.
-	 */
-	private volatile boolean hasPermission;
-
-	/**
 	 * This is the maximum amount of messages that will be cached by this list. If negative, it'll store unlimited
 	 * messages.
 	 */
 	private volatile int capacity = 256;
 
 	/**
-	 * This determines whether message history is automatically loaded.
+	 * This determines how efficiently MessageLists run.
 	 */
-	private static volatile boolean loadInitialMessages = true;
+	private static final Map<IDiscordClient, EfficiencyLevel> efficiencies = new ConcurrentHashMap<>();
 
 	/**
 	 * @param client The client for this list to respect.
@@ -86,10 +103,17 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		this.client = (DiscordClientImpl) client;
 		this.channel = channel;
 
-		updatePermissions();
+		if (getEfficiency() != EfficiencyLevel.HIGH) {
+			listener = new MessageListEventListener(this);
+			client.getDispatcher().registerListener(listener);
 
-		listener = new MessageListEventListener(this);
-		client.getDispatcher().registerListener(listener);
+			if (getEfficiency() == EfficiencyLevel.MEDIUM) {
+				capacity /= 2;
+			}
+		} else {
+			listener = null;
+			capacity = 0;
+		}
 	}
 
 	/**
@@ -100,7 +124,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	public MessageList(IDiscordClient client, IChannel channel, int initialContents) {
 		this(client, channel);
 
-		if (loadInitialMessages)
+		if (getEfficiency() == EfficiencyLevel.NONE)
 			RequestBuffer.request(() -> load(initialContents));
 	}
 
@@ -151,29 +175,29 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 		return 0;
 	}
 
-	private boolean queryMessages(int messageCount) throws DiscordException, RateLimitException {
-		if (!hasPermission)
+	private boolean queryMessages(int messageCount) {
+		if (!hasPermissions())
 			return false;
 
 		int initialSize = size();
 
 		String queryParams = "?limit="+messageCount;
 		if (initialSize != 0)
-			queryParams += "&before="+messageCache.getLast().getID();
+			queryParams += "&before="+messageCache.getLast().getStringID();
 
-		String response = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getID()+"/messages"+queryParams);
-
-		if (response == null)
-			return false;
-
-		MessageObject[] messages = DiscordUtils.GSON.fromJson(response, MessageObject[].class);
+		MessageObject[] messages = new MessageObject[0];
+		try {
+			messages = DiscordUtils.MAPPER.readValue(client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS+channel.getStringID()+"/messages"+queryParams), MessageObject[].class);
+		} catch (IOException e) {
+			throw new DiscordException("JSON Parsing exception!", e);
+		}
 
 		if (messages.length == 0) {
 			return false;
 		}
 
 		for (MessageObject messageResponse : messages) {
-			if (!add(DiscordUtils.getMessageFromJSON(channel, messageResponse), true))
+			if (!add(DiscordUtils.getMessageFromJSON((Channel) channel, messageResponse), true))
 				return false;
 		}
 
@@ -229,7 +253,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return True if found, false if otherwise.
 	 */
 	public boolean contains(String id) {
-		return messageCache.stream().filter(it -> it.getID().equals(id)).findFirst().isPresent();
+		return messageCache.stream().filter(it -> it.getStringID().equals(id)).findFirst().isPresent();
 	}
 
 	/**
@@ -332,14 +356,14 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @return The message object found, or null if nonexistent.
 	 */
 	public IMessage get(String id) {
-		IMessage message = stream().filter((m) -> m.getID().equalsIgnoreCase(id)).findFirst().orElse(null);
+		IMessage message = stream().filter((m) -> m.getStringID().equalsIgnoreCase(id)).findFirst().orElse(null);
 
-		if (message == null && hasPermission && client.isReady())
+		if (message == null && hasPermissions() && client.isReady())
 			try {
-				return DiscordUtils.getMessageFromJSON(channel,
-						DiscordUtils.GSON.fromJson(client.REQUESTS.GET.makeRequest(
-								DiscordEndpoints.CHANNELS + channel.getID() + "/messages/" + id), MessageObject.class));
-			} catch (Exception e) {}
+				return DiscordUtils.getMessageFromJSON((Channel) channel, client.REQUESTS.GET.makeRequest(
+						DiscordEndpoints.CHANNELS + channel.getStringID() + "/messages/" + id,
+						MessageObject.class));
+			} catch (Exception ignored) {}
 
 		return message;
 	}
@@ -353,7 +377,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 *
 	 * @throws RateLimitException
 	 */
-	public boolean load(int messageCount) throws RateLimitException {
+	public boolean load(int messageCount) {
 		try {
 			boolean success = queryMessages(messageCount);
 
@@ -396,7 +420,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public IMessage delete(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public IMessage delete(int index) {
 		IMessage message = get(index);
 		if (message != null) {
 			message.delete();
@@ -416,7 +440,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteFromRange(int startIndex, int endIndex) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteFromRange(int startIndex, int endIndex) {
 		List<IMessage> messages = subList(startIndex, endIndex);
 		bulkDelete(messages);
 		return messages;
@@ -434,7 +458,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index, int amount) {
 		return deleteFromRange(index, index+amount);
 	}
 
@@ -449,7 +473,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(int index) {
 		return deleteAfter(index, size()-index);
 	}
 
@@ -465,7 +489,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message, int amount) {
 		return deleteAfter(indexOf(message), amount);
 	}
 
@@ -480,7 +504,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteAfter(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteAfter(IMessage message) {
 		return deleteAfter(indexOf(message));
 	}
 
@@ -496,7 +520,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index, int amount) {
 		return deleteFromRange(Math.max(0, index-amount), index+1);
 	}
 
@@ -511,7 +535,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(int index) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(int index) {
 		return deleteFromRange(0, index+1);
 	}
 
@@ -527,7 +551,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message, int amount) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message, int amount) {
 		return deleteBefore(indexOf(message), amount);
 	}
 
@@ -542,7 +566,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	public List<IMessage> deleteBefore(IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public List<IMessage> deleteBefore(IMessage message) {
 		return deleteBefore(indexOf(message));
 	}
 
@@ -555,21 +579,26 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	public void bulkDelete(List<IMessage> messages) throws DiscordException, RateLimitException, MissingPermissionsException {
+	public void bulkDelete(List<IMessage> messages) {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
 
 		if (channel.isPrivate())
 			throw new UnsupportedOperationException("Cannot bulk delete in private channels!");
 
-		if (messages.size() > 100)
-			throw new DiscordException("You can only delete 100 messages at a time!");
+		if (messages.size() < 2 || messages.size() > 100)
+			throw new DiscordException("Must provide at least 2 and fewer than 100 messages to delete.");
 
-		try {
-			client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + channel.getID() + "/messages/bulk-delete",
-					new StringEntity(DiscordUtils.GSON.toJson(new BulkDeleteRequest(messages))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
-		}
+		long invalidCount = messages.stream()
+				.mapToLong(IIDLinkedObject::getLongID)
+				.filter(id -> id < (((System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000) - 1420070400000L) << 22)) // Taken from Jake
+				// IF THE ID IS LESS THAN TWO WEEKS AGO SUBTRACT DISCORD EPOCH BITSHIFT LEFT 22 THEN COUNT IT BECAUSE IT'S BAD
+				.count();
+		if (invalidCount > 0)
+			throw new DiscordException(String.format("%d messages cannot be bulk deleted! They are more than 2 weeks old.", invalidCount));
+
+		client.REQUESTS.POST.makeRequest(
+				DiscordEndpoints.CHANNELS + channel.getStringID() + "/messages/bulk-delete",
+				new BulkDeleteRequest(messages));
 	}
 
 	/**
@@ -577,9 +606,11 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
 	 *
 	 * @param download Whether to automatically download history.
+	 * @deprecated Use {@link #setEfficiency(EfficiencyLevel)} instead.
 	 */
+	@Deprecated
 	public static void shouldDownloadHistoryAutomatically(boolean download) {
-		loadInitialMessages = download;
+		//shh bby is ok
 	}
 
 	/**
@@ -587,19 +618,61 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * automatically disabled if the number of guilds logged into exceeds {@link MessageList#MAX_GUILD_COUNT}.
 	 *
 	 * @return  Whether it'll automatically download history.
+	 * @deprecated Use {@link #getEfficiency()} instead.
 	 */
+	@Deprecated
 	public static boolean downloadsHistoryAutomatically() {
-		return loadInitialMessages;
+		return new Random().nextBoolean();
 	}
 
-	private void updatePermissions() {
+	/**
+	 * This sets how efficiently MessageLists run.
+	 *
+	 * @param level The new efficiency level.
+	 */
+	public static void setEfficiency(IDiscordClient client, EfficiencyLevel level) {
+		efficiencies.put(client, level);
+	}
+
+	/**
+	 * This gets the efficiency level that MessageLists run at.
+	 *
+	 * @return The current efficiency level.
+	 */
+	public static EfficiencyLevel getEfficiency(IDiscordClient client) {
+		if (!efficiencies.containsKey(client)) {
+			return null;
+		}
+
+		return efficiencies.get(client);
+	}
+
+	/**
+	 * This sets how efficiently MessageLists run.
+	 *
+	 * @param level The new efficiency level.
+	 */
+	public void setEfficiency(EfficiencyLevel level) {
+		setEfficiency(client, level);
+	}
+
+	/**
+	 * This gets the efficiency level that MessageLists run at.
+	 *
+	 * @return The current efficiency level.
+	 */
+	public EfficiencyLevel getEfficiency() {
+		return getEfficiency(client);
+	}
+
+	private boolean hasPermissions() {
 		try {
 			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
-			hasPermission = true;
+			return true;
 		} catch (MissingPermissionsException e) {
 			if (!Discord4J.ignoreChannelWarnings.get())
-				Discord4J.LOGGER.warn(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
-			hasPermission = false;
+				Discord4J.LOGGER.debug(LogMarkers.UTIL, "Missing permissions required to read channel {}. If this is an error, report this it the Discord4J dev!", channel.getName());
+			return false;
 		}
 	}
 
@@ -650,39 +723,62 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 				list.client.getDispatcher().unregisterListener(this);
 			}
 		}
+	}
 
-		//The following are to update the hasPermission boolean
+	/**
+	 * This enum represents how efficient a MessageList is. By lowering efficiency, more data is cached but can hurt bot
+	 * performance.
+	 */
+	public enum EfficiencyLevel {
 
-		@EventSubscriber
-		public void onRoleUpdate(RoleUpdateEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild()) &&
-					list.client.getOurUser().getRolesForGuild(list.channel.getGuild()).contains(event.getNewRole()))
-				list.updatePermissions();
+		/**
+		 * At this level, the message list caches the default amount of messages (256) and past message history is
+		 * requested up to {@link #MESSAGE_CHUNK_COUNT} messages.
+		 */
+		NONE(-1),
+		/**
+		 * At this level, the message list caches the default amount of messages (256) and past message history is NOT
+		 * requested on initialization.
+		 */
+		LOW(10),
+		/**
+		 * At this level, the message list caches the half the default amount of messages (128) and past message history
+		 * is NOT requested on initialization.
+		 */
+		MEDIUM(50),
+		/**
+		 * At this level, the message list does NOT cache any messages and past message history is NOT requested on
+		 * initialization. Additionally, the MessageList's built-in event listener is never registered.
+		 */
+		HIGH(100);
+
+		private int guildsRequired;
+
+		EfficiencyLevel(int guildsRequired) {
+			this.guildsRequired = guildsRequired;
 		}
 
-		@EventSubscriber
-		public void onGuildUpdate(GuildUpdateEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getNewGuild().equals(list.channel.getGuild()))
-				list.updatePermissions();
+		/**
+		 * This is the number of guilds required for this efficiency level to be automatically used.
+		 *
+		 * @return The minimum number of guilds required.
+		 */
+		public int getGuildsRequired() {
+			return guildsRequired;
 		}
 
-		@EventSubscriber
-		public void onUserRoleUpdate(UserRoleUpdateEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getUser().equals(list.client.getOurUser()) && event.getGuild().equals(list.channel.getGuild()))
-				list.updatePermissions();
-		}
-
-		@EventSubscriber
-		public void onGuildTransferOwnership(GuildTransferOwnershipEvent event) {
-			if (!(list.channel instanceof IPrivateChannel) && event.getGuild().equals(list.channel.getGuild())) {
-				list.updatePermissions();
-			}
-		}
-
-		@EventSubscriber
-		public void onChannelUpdateEvent(ChannelUpdateEvent event) {
-			if (event.getNewChannel().equals(list.channel))
-				list.updatePermissions();
+		/**
+		 * This retrieves the correct efficiency level for a given number of joined guilds.
+		 *
+		 * @param guildNumber The number of joined guilds..
+		 * @return The proper efficiency.
+		 */
+		public static EfficiencyLevel getEfficiencyForGuilds(int guildNumber) {
+			return Arrays.stream(EfficiencyLevel.values())
+					.filter((EfficiencyLevel level) -> level.getGuildsRequired() <= guildNumber)
+					.max((EfficiencyLevel obj1, EfficiencyLevel obj2) ->
+							obj1.guildsRequired < obj2.guildsRequired ? -1 : (obj1.guildsRequired > obj2.guildsRequired ? 1 : 0))
+					.orElse(HIGH);
 		}
 	}
 }

@@ -1,22 +1,38 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.*;
-import sx.blah.discord.api.internal.json.objects.ChannelObject;
-import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
+import sx.blah.discord.api.internal.json.requests.VoiceChannelEditRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
-import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
-import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MessageHistory;
+import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.cache.Cache;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class VoiceChannel extends Channel implements IVoiceChannel {
@@ -24,8 +40,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int userLimit = 0;
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(IDiscordClient client, String name, String id, IGuild parent, String topic, int position, int userLimit, int bitrate, Map<String, PermissionOverride> roleOverrides, Map<String, PermissionOverride> userOverrides) {
-		super(client, name, id, parent, topic, position, roleOverrides, userOverrides);
+	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
+						int userLimit, int bitrate, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
+		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
 	}
@@ -37,6 +54,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public int getBitrate() { return bitrate; }
+
+	@Override
+	public int getPosition() {
+		return getGuild().getVoiceChannels().indexOf(this);
+	}
 
 	/**
 	 * Sets the CACHED user limit.
@@ -55,87 +77,70 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public void setBitrate(int bitrate) { this.bitrate = bitrate; }
 
 	@Override
-	public void changeName(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.of(name), Optional.empty(), Optional.empty(), Optional.empty());
-	}
-
-	@Override
-	public void changePosition(int position) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.empty(), Optional.of(position), Optional.empty(), Optional.empty());
-	}
-
-	@Override
-	public void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(limit));
-	}
-
-	@Override
-	public void changeBitrate(int bitrate) throws MissingPermissionsException, DiscordException, RateLimitException {
-		edit(Optional.empty(), Optional.empty(), Optional.of(bitrate), Optional.empty());
-	}
-
-	private void edit(Optional<String> name, Optional<Integer> position, Optional<Integer> bitrate, Optional<Integer> userLimit) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public void edit(String name, int position, int bitrate, int userLimit) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
 
-		String newName = name.orElse(this.name);
-		int newPosition = position.orElse(this.position);
-		int newBitrate = bitrate.orElse(this.bitrate);
-		int newUserLimit = userLimit.orElse(this.userLimit);
+		if (name == null || name.length() < 2 || name.length() > 100)
+			throw new IllegalArgumentException("Channel name must be between 2 and 100 characters!");
+		if (bitrate < 8000 || bitrate > 128000)
+			throw new IllegalArgumentException("Channel bitrate must be between 8 and 128 kbps!");
+		if (userLimit < 0 || userLimit > 99)
+			throw new IllegalArgumentException("Channel user limit must be between 0 and 99!");
 
-		if (newName == null || newName.length() < 2 || newName.length() > 100)
-			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-		if (newBitrate < 8000 || newBitrate > 128000)
-			throw new DiscordException("Channel bitrate can only be between 8 and 128 kbps!");
-		if (newUserLimit < 0 || newUserLimit > 99)
-			throw new DiscordException("Channel user limit can only be between 0 and 99!");
-
-		try {
-			ChannelObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.CHANNELS+id,
-					new StringEntity(DiscordUtils.GSON.toJson(new ChannelEditRequest(newName, newPosition, newBitrate, newUserLimit)))),
-					ChannelObject.class);
-
-			IChannel oldChannel = copy();
-			IChannel newChannel = DiscordUtils.getChannelFromJSON(getGuild(), response);
-
-			client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, newChannel));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.CHANNELS + id,
+				new VoiceChannelEditRequest(name, position, bitrate, userLimit));
 	}
 
 	@Override
-	public void join() throws MissingPermissionsException {
-		if (client.isReady()) {
-			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.VOICE_CONNECT));
-			if (!client.getOurUser().getConnectedVoiceChannels().contains(this)) {
-				if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
-					Discord4J.LOGGER.info(LogMarkers.HANDLE, "Attempting to join multiple channels in the same guild! Moving channels instead...");
-					try {
-						client.getOurUser().moveToVoiceChannel(this);
-					} catch (DiscordException | RateLimitException | MissingPermissionsException e) {
-						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Unable to switch voice channels! Aborting join request...", e);
-						return;
-					}
-				}
+	public void changeName(String name) {
+		edit(name, getPosition(), getBitrate(), getUserLimit());
+	}
 
-				((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), id, false, false));
-			} else {
-				Discord4J.LOGGER.info(LogMarkers.HANDLE, "Already connected to the voice channel!");
-			}
-		} else {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Attempt to join voice channel before bot is ready!");
-		}
+	@Override
+	public void changePosition(int position) {
+		edit(getName(), position, getBitrate(), getUserLimit());
+	}
+
+	@Override
+	public void changeBitrate(int bitrate) {
+		edit(getName(), getPosition(), bitrate, getUserLimit());
+	}
+
+	@Override
+	public void changeUserLimit(int limit) {
+		edit(getName(), getPosition(), getBitrate(), limit);
+	}
+
+	@Override
+	public void join() {
+		getShard().checkReady("join voice channel");
+
+		if (isConnected()) return;
+		DiscordUtils.checkPermissions(getClient().getOurUser(), this, EnumSet.of(Permissions.VOICE_CONNECT));
+
+		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
+		boolean isMuted = voiceState != null && voiceState.isMuted();
+		boolean isDeafened = voiceState != null && voiceState.isDeafened();
+		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
+				new VoiceStateUpdateRequest(getGuild().getStringID(), getStringID(), isMuted, isDeafened));
 	}
 
 	@Override
 	public void leave() {
-		if (client.getConnectedVoiceChannels().contains(this)) {
-			((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(parent.getID(), null, false, false));
-			if (((DiscordClientImpl) client).voiceConnections.containsKey(parent)) {
-				((DiscordClientImpl) client).voiceConnections.get(parent).disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
-			}
-		} else {
-			Discord4J.LOGGER.warn(LogMarkers.HANDLE, "Attempted to leave a non-joined voice channel! Ignoring the method call...");
+		getShard().checkReady("leave voice channel");
+		if (!isConnected()) return;
+
+		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
+		boolean isMuted = voiceState != null && voiceState.isMuted();
+		boolean isDeafened = voiceState != null && voiceState.isDeafened();
+
+		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
+				new VoiceStateUpdateRequest(getGuild().getStringID(), null, isMuted, isDeafened));
+
+		DiscordVoiceWS vWS = ((ShardImpl) getShard()).voiceWebSockets.get(getGuild().getLongID());
+		if (vWS != null) {
+			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		}
 	}
 
@@ -150,7 +155,102 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage getMessageByID(String messageID) {
+	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(long id, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(long id, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistory() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistory(int messageCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryFrom(long id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryTo(long id) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(long beginID, long endID) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getFullMessageHistory() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IMessage> bulkDelete() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IMessage> bulkDelete(List<IMessage> messages) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getMaxInternalCacheCount() {
+		return 0;
+	}
+
+	@Override
+	public int getInternalCacheCount() {
+		return 0;
+	}
+
+	@Override
+	public IMessage getMessageByID(long messageID) {
 		return null;
 	}
 
@@ -175,17 +275,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IMessage sendFile(File file) throws FileNotFoundException, RateLimitException, DiscordException {
+	public IMessage sendFile(File file) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IMessage sendFile(String content, File file) throws FileNotFoundException, DiscordException, RateLimitException {
+	public IMessage sendFile(String content, File file) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) throws DiscordException, RateLimitException {
+	public IMessage sendFile(String content, boolean tts, InputStream file, String fileName) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -200,7 +300,12 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public void changeTopic(String topic) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeTopic(String topic) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void edit(String name, int position, String topic) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -215,7 +320,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IWebhook getWebhookByID(String id) {
+	public IWebhook getWebhookByID(long id) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -225,17 +330,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public IWebhook createWebhook(String name) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, Image avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, Image avatar) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook createWebhook(String name, String avatar) throws MissingPermissionsException, DiscordException, RateLimitException {
+	public IWebhook createWebhook(String name, String avatar) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -246,7 +351,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, parent, topic, position, userLimit, bitrate, roleOverrides, userOverrides);
+		return new VoiceChannel(client, name, id, guild, topic, position, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
 	}
 
 	@Override
@@ -256,7 +361,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IUser> getConnectedUsers() {
-		return parent.getUsers().stream().filter((user) -> user.getConnectedVoiceChannels().contains(this)).collect(Collectors.toList());
+		return guild.getUsers().stream().filter(u -> this.equals(u.getVoiceStateForGuild(guild).getChannel())).collect(Collectors.toList());
 	}
 
 	@Override
@@ -266,6 +371,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return getGuild().getVoiceChannelByID(getID()) != this;
+		return getGuild().getVoiceChannelByID(getLongID()) != this;
 	}
 }

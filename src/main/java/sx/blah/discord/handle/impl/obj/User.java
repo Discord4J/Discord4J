@@ -1,6 +1,23 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -10,104 +27,98 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.IDLinkedObjectWrapper;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class User implements IUser {
 
 	/**
 	 * User ID.
 	 */
-	protected final String id;
-	/**
-	 * The roles the user is a part of. (Key = guild id).
-	 */
-	protected final Map<String, List<IRole>> roles;
-	/**
-	 * The nicknames this user has. (Key = guild id).
-	 */
-	protected final Map<String, String> nicks;
-	/**
-	 * The voice channels this user is in.
-	 */
-	protected final List<IVoiceChannel> channels = new CopyOnWriteArrayList<>();
+	protected final long id;
+
 	/**
 	 * The client that created this object.
 	 */
 	protected final IDiscordClient client;
+
 	/**
 	 * The shard this object belongs to.
 	 */
 	protected final IShard shard;
-	/**
-	 * The muted status of this user. (Key = guild id).
-	 */
-	private final Map<String, Boolean> isMuted = new ConcurrentHashMap<>();
-	/**
-	 * The deafened status of this user. (Key = guild id).
-	 */
-	private final Map<String, Boolean> isDeaf = new ConcurrentHashMap<>();
+
 	/**
 	 * Display name of the user.
 	 */
 	protected volatile String name;
+
 	/**
 	 * The user's avatar location.
 	 */
 	protected volatile String avatar;
-	/**
-	 * The user's status.
-	 */
-	protected volatile Status status = Status.empty();
+
 	/**
 	 * User discriminator.
 	 * Distinguishes users with the same name.
 	 */
 	protected volatile String discriminator;
+
 	/**
 	 * Whether this user is a bot or not.
 	 */
 	protected volatile boolean isBot;
+
 	/**
 	 * This user's presence.
-	 * One of [online/idle/offline].
 	 */
-	protected volatile Presences presence;
+	protected volatile IPresence presence;
 	/**
 	 * The user's avatar in URL form.
 	 */
 	protected volatile String avatarURL;
-	/**
-	 * The local muted status of this user.
-	 */
-	private volatile boolean isMutedLocally;
-	/**
-	 * The local deafened status of this user.
-	 */
-	private volatile boolean isDeafLocally;
 
-	public User(IShard shard, String name, String id, String discriminator, String avatar, Presences presence, boolean isBot) {
+	/**
+	 * The roles the user is a part of. (Key = guild id).
+	 */
+	public final Cache<RolesHolder> roles;
+
+	/**
+	 * The nicknames this user has. (Key = guild id).
+	 */
+	public final Cache<NickHolder> nicks;
+
+	/**
+	 * The voice states this user has.
+	 */
+	public final Cache<IVoiceState> voiceStates;
+
+	public User(IShard shard, String name, long id, String discriminator, String avatar, IPresence presence, boolean isBot) {
+		this(shard, shard == null ? null : shard.getClient(), name, id, discriminator, avatar, presence, isBot);
+	}
+
+	public User(IShard shard, IDiscordClient client, String name, long id, String discriminator, String avatar, IPresence presence, boolean isBot) {
 		this.shard = shard;
-		this.client = shard.getClient();
+		this.client = client;
 		this.id = id;
 		this.name = name;
 		this.discriminator = discriminator;
 		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
+		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
+				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
 		this.presence = presence;
-		this.roles = new ConcurrentHashMap<>();
-		this.nicks = new ConcurrentHashMap<>();
 		this.isBot = isBot;
+		this.roles = new Cache<>((DiscordClientImpl) client, RolesHolder.class);
+		this.nicks = new Cache<>((DiscordClientImpl) client, NickHolder.class);
+		this.voiceStates = new Cache<>((DiscordClientImpl) client, IVoiceState.class);
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -126,17 +137,9 @@ public class User implements IUser {
 	}
 
 	@Override
+	@Deprecated
 	public Status getStatus() {
-		return status;
-	}
-
-	/**
-	 * Sets the user's CACHED status.
-	 *
-	 * @param status The status.
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
+		return null;
 	}
 
 	@Override
@@ -151,7 +154,8 @@ public class User implements IUser {
 	 */
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar);
+		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
+				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
 	}
 
 	@Override
@@ -160,7 +164,7 @@ public class User implements IUser {
 	}
 
 	@Override
-	public Presences getPresence() {
+	public IPresence getPresence() {
 		return presence;
 	}
 
@@ -169,16 +173,16 @@ public class User implements IUser {
 	 *
 	 * @param presence The new presence.
 	 */
-	public void setPresence(Presences presence) {
+	public void setPresence(IPresence presence) {
 		this.presence = presence;
 	}
 
 	@Override
 	public String getDisplayName(IGuild guild) {
-		if (guild == null)
+		if (guild == null || getNicknameForGuild(guild) == null)
 			return getName();
 
-		return getNicknameForGuild(guild).isPresent() ? getNicknameForGuild(guild).get() : getName();
+		return getNicknameForGuild(guild);
 	}
 
 	@Override
@@ -207,19 +211,58 @@ public class User implements IUser {
 
 	@Override
 	public List<IRole> getRolesForGuild(IGuild guild) {
-		return roles.getOrDefault(guild.getID(), new ArrayList<>());
+		if (roles != null) {
+			RolesHolder retrievedRoles = roles.get(guild.getLongID());
+			if (retrievedRoles != null && retrievedRoles.getObject() != null)
+				return new LinkedList<>(retrievedRoles.getObject());
+		}
+
+		return new LinkedList<>();
 	}
 
 	@Override
 	public EnumSet<Permissions> getPermissionsForGuild(IGuild guild){
+		if (guild.getOwner().equals(this))
+			return EnumSet.allOf(Permissions.class);
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
-		getRolesForGuild(guild).forEach(iRole -> permissions.addAll(iRole.getPermissions()));
+		getRolesForGuild(guild).forEach(role -> permissions.addAll(role.getPermissions()));
 		return permissions;
 	}
 
 	@Override
-	public Optional<String> getNicknameForGuild(IGuild guild) {
-		return Optional.ofNullable(nicks.containsKey(guild.getID()) ? nicks.get(guild.getID()) : null);
+	public String getNicknameForGuild(IGuild guild) {
+		return nicks.get(guild.getLongID()).getObject();
+	}
+
+	@Override
+	public IVoiceState getVoiceStateForGuild(IGuild guild) {
+		voiceStates.putIfAbsent(guild.getLongID(), () -> new VoiceState(guild, this));
+		return voiceStates.get(guild.getLongID());
+	}
+
+	@Override
+	public LongMap<IVoiceState> getVoiceStatesLong() {
+		return voiceStates.mapCopy();
+	}
+
+	@Override
+	public void moveToVoiceChannel(IVoiceChannel channel) {
+		IVoiceChannel oldChannel = getVoiceStateForGuild(channel.getGuild()).getChannel();
+
+		if (oldChannel == null)
+			throw new DiscordException("User must already be in a voice channel before they can be moved to another.");
+
+		// client must have permission to both move members and connect to the channel.
+		DiscordUtils.checkPermissions(client.getOurUser(), channel, EnumSet.of(Permissions.VOICE_MOVE_MEMBERS, Permissions.VOICE_CONNECT));
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.GUILDS + channel.getGuild().getStringID() + "/members/" + id,
+					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().channel(channel.getStringID()).build()));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+
 	}
 
 	/**
@@ -228,13 +271,8 @@ public class User implements IUser {
 	 * @param guildID The guild the nickname is for.
 	 * @param nick    The nickname, or null to remove it.
 	 */
-	public void addNick(String guildID, String nick) {
-		if (nick == null) {
-			if (nicks.containsKey(guildID))
-				nicks.remove(guildID);
-		} else {
-			nicks.put(guildID, nick);
-		}
+	public void addNick(long guildID, String nick) {
+		nicks.put(new NickHolder(guildID, nick));
 	}
 
 	/**
@@ -243,25 +281,30 @@ public class User implements IUser {
 	 * @param guildID The guild the role is for.
 	 * @param role    The role.
 	 */
-	public void addRole(String guildID, IRole role) {
-		if (!roles.containsKey(guildID)) {
-			roles.put(guildID, new ArrayList<>());
-		}
+	public void addRole(long guildID, IRole role) {
+		roles.putIfAbsent(guildID, () -> new RolesHolder(guildID, new CopyOnWriteArraySet<>()));
+		roles.get(guildID).getObject().add(role);
+	}
 
-		roles.get(guildID).add(role);
+	@Override
+	public void addRole(IRole role) {
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getStringID()+"/members/"+id+"/roles/"+role.getStringID());
+	}
+
+	@Override
+	public void removeRole(IRole role) {
+		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getStringID()+"/members/"+id+"/roles/"+role.getStringID());
 	}
 
 	@Override
 	public IUser copy() {
 		User newUser = new User(shard, name, id, discriminator, avatar, presence, isBot);
-		newUser.setStatus(this.status);
-		for (String key : isMuted.keySet())
-			newUser.setIsMute(key, isMuted.get(key));
-		for (String key : isDeaf.keySet())
-			newUser.setIsDeaf(key, isDeaf.get(key));
+		newUser.voiceStates.putAll(voiceStates);
+		newUser.setPresence(presence.copy());
 		newUser.nicks.putAll(nicks);
 		newUser.roles.putAll(roles);
-		newUser.channels.addAll(channels);
 		return newUser;
 	}
 
@@ -270,107 +313,9 @@ public class User implements IUser {
 		return isBot;
 	}
 
-	/**
-	 * Sets the CACHED isBot status to true.
-	 */
-	public void convertToBot() {
-		isBot = true;
-	}
-
 	@Override
-	public void moveToVoiceChannel(IVoiceChannel newChannel) throws DiscordException, RateLimitException,
-			MissingPermissionsException {
-		// can this user go to this channel?
-		DiscordUtils.checkPermissions(this, newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
-
-		// in order to move a member:
-		// both users have to be able to access the new VC (half of it is covered above)
-		// the client must have either Move Members or Administrator
-
-		// this isn't the client, so the client is moving this uesr
-		if (!this.equals(client.getOurUser())) {
-			// can the client go to this channel?
-			DiscordUtils.checkPermissions(client.getOurUser(), newChannel, EnumSet.of(Permissions.VOICE_CONNECT));
-
-			DiscordUtils.checkPermissions(newChannel.getModifiedPermissions(client.getOurUser()),
-					EnumSet.of(Permissions.VOICE_MOVE_MEMBERS));
-		}
-
-		try {
-			((DiscordClientImpl) client).REQUESTS.PATCH
-					.makeRequest(DiscordEndpoints.GUILDS + newChannel.getGuild().getID() + "/members/" + id,
-							new StringEntity(DiscordUtils.GSON_NO_NULLS.toJson(new MemberEditRequest(newChannel.getID()))));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
-	}
-
-	@Override
-	public List<IVoiceChannel> getConnectedVoiceChannels() {
-		return channels;
-	}
-
-	@Override
-	public IPrivateChannel getOrCreatePMChannel() throws RateLimitException, DiscordException {
+	public IPrivateChannel getOrCreatePMChannel() {
 		return client.getOrCreatePMChannel(this);
-	}
-
-	/**
-	 * Sets whether the user is muted or not. This value is CACHED.
-	 *
-	 * @param guildID The guild in which this is the case.
-	 * @param isMuted Whether the user is muted or not.
-	 */
-	public void setIsMute(String guildID, boolean isMuted) {
-		this.isMuted.put(guildID, isMuted);
-	}
-
-	/**
-	 * Sets whether the user is deafened or not. This value is CACHED.
-	 *
-	 * @param guildID The guild in which this is the case.
-	 * @param isDeaf  Whether the user is deafened or not.
-	 */
-	public void setIsDeaf(String guildID, boolean isDeaf) {
-		this.isDeaf.put(guildID, isDeaf);
-	}
-
-	@Override
-	public boolean isDeaf(IGuild guild) {
-		return isDeaf.getOrDefault(guild.getID(), false);
-	}
-
-	@Override
-	public boolean isMuted(IGuild guild) {
-		return isMuted.getOrDefault(guild.getID(), false);
-	}
-
-	/**
-	 * Sets whether the user is muted locally or not (meaning they muted themselves). This value is CACHED.
-	 *
-	 * @param isMuted Whether the user is muted or not.
-	 */
-	public void setIsMutedLocally(boolean isMuted) {
-		this.isMutedLocally = isMuted;
-	}
-
-	/**
-	 * Sets whether the user is deafened locally or not (meaning they deafened themselves). This value is CACHED.
-	 *
-	 * @param isDeaf Whether the user is deafened or not.
-	 */
-	public void setIsDeafLocally(boolean isDeaf) {
-		this.isDeafLocally = isDeaf;
-	}
-
-	@Override
-	public boolean isDeafLocally() {
-		return isDeafLocally;
-	}
-
-	@Override
-	public boolean isMutedLocally() {
-		return isMutedLocally;
 	}
 
 	@Override
@@ -395,21 +340,20 @@ public class User implements IUser {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IUser) other).getID().equals(getID());
+		return DiscordUtils.equals(this ,other);
 	}
+}
 
-	@Override
-	public void addRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
+class RolesHolder extends IDLinkedObjectWrapper<Collection<IRole>> {
+
+	RolesHolder(long id, Collection<IRole> roles) {
+		super(id, roles);
 	}
+}
 
-	@Override
-	public void removeRole(IRole role) throws MissingPermissionsException, RateLimitException, DiscordException {
-		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getID()+"/members/"+id+"/roles/"+role.getID());
+class NickHolder extends IDLinkedObjectWrapper<String> {
+
+	NickHolder(long id, String string) {
+		super(id, string);
 	}
 }

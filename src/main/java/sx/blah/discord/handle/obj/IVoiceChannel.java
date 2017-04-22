@@ -1,3 +1,20 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.DiscordException;
@@ -25,6 +42,20 @@ public interface IVoiceChannel extends IChannel {
 	int getBitrate();
 
 	/**
+	 * Edits all properties of this voice channel.
+	 *
+	 * @param name The new name of the channel.
+	 * @param position The new position of the channel.
+	 * @param bitrate The new bitrate of the channel (in bits).
+	 * @param userLimit The new user limit of the channel.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws DiscordException
+	 * @throws RateLimitException
+	 */
+	void edit(String name, int position, int bitrate, int userLimit);
+
+	/**
 	 * Changes the bitrate of the channel
 	 *
 	 * @param bitrate The new bitrate of the channel (in bits).
@@ -32,7 +63,7 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeBitrate(int bitrate) throws MissingPermissionsException, DiscordException, RateLimitException;
+	void changeBitrate(int bitrate);
 
 	/**
 	 * Changes the user limit of the channel
@@ -42,14 +73,16 @@ public interface IVoiceChannel extends IChannel {
 	 * @throws DiscordException
 	 * @throws MissingPermissionsException
 	 */
-	void changeUserLimit(int limit) throws MissingPermissionsException, DiscordException, RateLimitException;
+	void changeUserLimit(int limit);
 
 	/**
 	 * Makes the bot user join this voice channel.
 	 *
+	 * @throws DiscordException
+	 * @throws RateLimitException
 	 * @throws MissingPermissionsException
 	 */
-	void join() throws MissingPermissionsException;
+	void join();
 
 	/**
 	 * Makes the bot user leave this voice channel.

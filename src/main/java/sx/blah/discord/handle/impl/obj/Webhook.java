@@ -1,7 +1,22 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package sx.blah.discord.handle.impl.obj;
 
-import org.apache.http.entity.StringEntity;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
@@ -11,16 +26,14 @@ import sx.blah.discord.api.internal.json.objects.WebhookObject;
 import sx.blah.discord.api.internal.json.requests.WebhookEditRequest;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
 
-import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Webhook implements IWebhook {
 
-	protected final String id;
+	protected final long id;
 	protected final IDiscordClient client;
 	protected final IChannel channel;
 	protected final IUser author;
@@ -28,7 +41,7 @@ public class Webhook implements IWebhook {
 	protected volatile String avatar;
 	protected final String token;
 
-	public Webhook(IDiscordClient client, String name, String id, IChannel channel, IUser author, String avatar, String token) {
+	public Webhook(IDiscordClient client, String name, long id, IChannel channel, IUser author, String avatar, String token) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -39,7 +52,7 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -88,35 +101,32 @@ public class Webhook implements IWebhook {
 		return token;
 	}
 
-	private void edit(String name, String avatar) throws MissingPermissionsException, RateLimitException, DiscordException {
+	private void edit(String name, String avatar) {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
 
-		try {
-			WebhookObject response = DiscordUtils.GSON.fromJson(((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.WEBHOOKS + id,
-					new StringEntity(DiscordUtils.GSON.toJson(new WebhookEditRequest(name, avatar)))),
-					WebhookObject.class);
+		WebhookObject response = ((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.WEBHOOKS + id,
+				new WebhookEditRequest(name, avatar),
+				WebhookObject.class);
 
-			IWebhook oldWebhook = copy();
-			IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, response);
+		IWebhook oldWebhook = copy();
+		IWebhook newWebhook = DiscordUtils.getWebhookFromJSON(channel, response);
 
-			client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, newWebhook, oldWebhook.getChannel()));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		client.getDispatcher().dispatch(new WebhookUpdateEvent(oldWebhook, newWebhook));
 	}
 
 	@Override
-	public void changeDefaultName(String name) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultName(String name) {
 		edit(name, null);
 	}
 
 	@Override
-	public void changeDefaultAvatar(String avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultAvatar(String avatar) {
 		edit(this.name, avatar);
 	}
 
 	@Override
-	public void changeDefaultAvatar(Image avatar) throws RateLimitException, DiscordException, MissingPermissionsException {
+	public void changeDefaultAvatar(Image avatar) {
 		edit(this.name, avatar.getData());
 	}
 
@@ -139,7 +149,7 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public void delete() throws MissingPermissionsException, RateLimitException, DiscordException {
+	public void delete() {
 		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.WEBHOOKS + id);
@@ -162,9 +172,6 @@ public class Webhook implements IWebhook {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null)
-			return false;
-
-		return this.getClass().isAssignableFrom(other.getClass()) && ((IWebhook) other).getID().equals(getID());
+		return DiscordUtils.equals(this, other);
 	}
 }

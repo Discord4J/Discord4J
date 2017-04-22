@@ -20,7 +20,7 @@ So, you are thinking about sending a pull request, awesome! Before starting on y
 the [pull request template](PULL_REQUEST_TEMPLATE.md) Just a few things to note when submitting a pull 
 request:
 
-1. All your code will be subject to the project's licence, in this case [GNU GPLv2](LICENSE.txt)
+1. All your code will be subject to the project's licence, in this case [GNU LGPLv3](LICENSE.txt)
 2. You cannot modify this project's style (i.e. indentation style, bracket style, naming, etc). I'll understand if you
 do this by accident, but I'll expect you to fix it before I merge the pull request. (That being said, rewrites of 
 certain systems are fine, I will just need to review it before deciding whether to merge it as with all other pull 
@@ -33,6 +33,7 @@ requests)
 line if statements do not need brackets.
 * All instanced objects should have getters and setters (where reasonable)
 * All classes and methods should be documented with javadocs
+* All new files should have the same LGPL 3 boilerplate header found in existing files.
 
 ## Credit
 I won't ever take complete credit for something I didn't do or something someone helped me with. I will always credit 

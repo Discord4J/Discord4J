@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~     This file is part of Discord4J.
+  ~
+  ~     Discord4J is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Lesser General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     Discord4J is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Lesser General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Lesser General Public License
+  ~     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>sx.blah</groupId>
+	<groupId>com.github.austinv11</groupId>
 	<artifactId>Discord4J</artifactId>
-	<version>2.7.0</version>
-	<description>A Java binding for the official Discord API, forked from https://github.com/nerd/Discord4J. Copyright (c) 2016, Licensed under GNU GPLv2</description>
+	<version>2.7.1-SNAPSHOT</version>
+	<description>A Java binding for the official Discord API, forked from the inactive https://github.com/nerd/Discord4J. Copyright (c) 2017, Licensed under GNU LGPLv3</description>
 	<url>https://github.com/austinv11/Discord4J</url>
 	<licenses>
 		<license>
-			<name>GNU GPLv2 License</name>
-			<url>http://opensource.org/licenses/GPL-2.0</url>
+			<name>GNU LGPLv3 License</name>
+			<url>https://opensource.org/licenses/LGPL-3.0</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -30,7 +47,7 @@
 		<dependency>
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-api</artifactId>
-		    <version>1.7.21</version>
+		    <version>1.7.24</version>
 		</dependency>
 
 		<!--<dependency>-->
@@ -43,19 +60,19 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-			<version>4.4.5</version>
+			<version>4.4.6</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
+			<version>4.5.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
-			<version>4.5.2</version>
+			<version>4.5.3</version>
 		</dependency>
 
 		<dependency>
@@ -67,7 +84,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
 			<artifactId>websocket-client</artifactId>
-			<version>9.4.0.v20161208</version>
+			<version>9.4.3.v20170317</version>
 		</dependency>
 
 		<dependency>
@@ -83,9 +100,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.0</version>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-afterburner</artifactId>
+			<version>2.8.7</version>
 		</dependency>
 
 		<dependency>
@@ -98,13 +115,13 @@
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
-			<version>4.2.2</version>
+			<version>4.3.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>mp3spi</artifactId>
-			<version>1.9.5.4</version>
+			<version>1.9.5-2</version>
 		</dependency>
 
 		<dependency>
@@ -122,7 +139,7 @@
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>tritonus-share</artifactId>
-			<version>0.3.7.4</version>
+			<version>0.3.7-3</version>
 		</dependency>
 
 		<dependency> <!--Thanks DV8!-->
@@ -131,6 +148,24 @@
 			<version>0.3.6</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.vdurmont</groupId>
+			<artifactId>emoji-java</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.koloboke</groupId>
+			<artifactId>koloboke-compile</artifactId>
+			<version>0.5.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.koloboke</groupId>
+			<artifactId>koloboke-impl-common-jdk8</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -146,7 +181,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.7.201606060606</version>
+				<version>0.7.9</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -164,7 +199,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -192,6 +227,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -204,6 +240,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -219,13 +256,30 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.0.2</version>
 				<configuration>
 					<nonFilteredFileExtensions>
 						<nonFilteredFileExtension>dll</nonFilteredFileExtension>
 						<nonFilteredFileExtension>so</nonFilteredFileExtension>
 						<nonFilteredFileExtension>dylib</nonFilteredFileExtension>
 					</nonFilteredFileExtensions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<verbose>true</verbose>
+					<dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+					<generateGitPropertiesFile>false</generateGitPropertiesFile>
 				</configuration>
 			</plugin>
 		</plugins>

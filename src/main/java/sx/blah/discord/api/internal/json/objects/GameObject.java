@@ -1,11 +1,40 @@
-package sx.blah.discord.api.internal.json.objects;
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import sx.blah.discord.handle.obj.Status;
+package sx.blah.discord.api.internal.json.objects;
 
 /**
  * Represents a json game object.
  */
 public class GameObject {
+
+	/**
+	 * The GameObject type integer for playing a game.
+	 */
+	public static final int GAME = 0;
+	/**
+	 * The GameObject type integer for streaming a game.
+	 */
+	public static final int STREAMING = 1;
+	/**
+	 * The GameObject type integer for lack of playing/streaming anything.
+	 */
+	public static final int NONE = 0;
+
 	/**
 	 * The type of the game.
 	 */
@@ -19,11 +48,11 @@ public class GameObject {
 	 */
 	public String url;
 
-	public GameObject(Status status) {
-		if (status.getType() != Status.StatusType.NONE) {
-			this.name = status.getStatusMessage();
-			this.url = status.getUrl().orElse(null);
-			this.type = status.getType().ordinal();
-		}
+	public GameObject() {}
+
+	public GameObject(String name, String url, int type) {
+		this.name = name;
+		this.url = url;
+		this.type = type;
 	}
 }
