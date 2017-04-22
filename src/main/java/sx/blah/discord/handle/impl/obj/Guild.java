@@ -753,7 +753,10 @@ public class Guild implements IGuild {
 				.findAny().orElse(null);
 
 		if (message == null) {
-			for (IChannel channel : channels.values()) {
+			Collection<IChannel> toCheck = channels.stream()
+					.filter(it -> it.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGE_HISTORY))
+					.collect(Collectors.toSet());
+			for (IChannel channel : toCheck) {
 				message = channel.getMessageByID(id);
 				if (message != null)
 					return message;
