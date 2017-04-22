@@ -420,6 +420,9 @@ public class DiscordUtils {
 	 * @return The message object.
 	 */
 	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
+		if (json == null)
+			return null;
+
 		if (channel.messages.containsKey(json.id)) {
 			Message message = (Message) channel.getMessageByID(Long.parseUnsignedLong(json.id));
 			message.setAttachments(getAttachmentsFromJSON(json));
