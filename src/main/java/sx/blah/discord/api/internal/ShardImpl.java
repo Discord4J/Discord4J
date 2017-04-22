@@ -199,7 +199,9 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public IChannel getChannelByID(long id) {
-		return guildCache.findResult((guildID, guild) -> guild.getChannelByID(id));
+		IChannel channel = guildCache.findResult((guildID, guild) -> guild.getChannelByID(id));
+
+		return channel == null ? privateChannels.get(id) : channel;
 	}
 
 	@Override
