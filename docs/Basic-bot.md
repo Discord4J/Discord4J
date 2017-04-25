@@ -23,6 +23,9 @@ public class MainRunner {
 
         IDiscordClient cli = BotUtils.getBuiltDiscordClient(args[0]);
 
+        /*
+        // Commented out as you don't really want duplicate listeners unless you're intentionally writing your code 
+        // like that.
         // Register a listener via the IListener interface
         cli.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
             public void handle(MessageReceivedEvent event) {
@@ -30,6 +33,7 @@ public class MainRunner {
                     BotUtils.sendMesasge(event.getChannel(), "I am sending a message from an IListener listener");
             }
         });
+        */
 
         // Register a listener via the EventSubscriber annotation which allows for organisation and delegation of events
         cli.getDispatcher().registerListener(new MyEvents());
@@ -80,6 +84,8 @@ class BotUtils {
             }
         });
 
+		/*
+		// The below example is written to demonstrate sending a message if you want to catch the RLE for logging purposes
         RequestBuffer.request(() -> {
             try{
                 channel.sendMessage(message);
@@ -88,6 +94,7 @@ class BotUtils {
                 throw e;
             }
         });
+        */
 
     }
 }
