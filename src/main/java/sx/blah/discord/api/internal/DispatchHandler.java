@@ -764,7 +764,7 @@ class DispatchHandler {
 						message.getReactions().remove(reaction);
 					}
 				} else {
-					IEmoji custom = channel.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id));
+					IEmoji custom = event.emoji.id == null ? null : channel.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id));
 					reaction = new Reaction(channel.getShard(), 0, new ArrayList<>(), custom != null ? custom.getStringID() : event.emoji.name, custom != null);
 				}
 
