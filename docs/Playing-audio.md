@@ -57,7 +57,7 @@ public class CommandHandler {
             IVoiceChannel botVoiceChannel = event.getClient().getOurUser().getVoiceStateForGuild(event.getGuild()).getChannel();
 
             if(botVoiceChannel == null) {
-                BotUtils.sendMesasge(event.getChannel(), "Not in a voice channel, join one and then use joinvoice");
+                BotUtils.sendMessage(event.getChannel(), "Not in a voice channel, join one and then use joinvoice");
                 return;
             }
 
@@ -81,11 +81,11 @@ public class CommandHandler {
             try {
                 audioP.queue(songDir[0]);
             } catch (IOException | UnsupportedAudioFileException e) {
-                BotUtils.sendMesasge(event.getChannel(), "There was an issue playing that song.");
+                BotUtils.sendMessage(event.getChannel(), "There was an issue playing that song.");
                 e.printStackTrace();
             }
 
-            BotUtils.sendMesasge(event.getChannel(), "Now playing: " + songDir[0].getName());
+            BotUtils.sendMessage(event.getChannel(), "Now playing: " + songDir[0].getName());
 
         });
 

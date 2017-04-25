@@ -30,7 +30,7 @@ public class MainRunner {
         cli.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
             public void handle(MessageReceivedEvent event) {
                 if(event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
-                    BotUtils.sendMesasge(event.getChannel(), "I am sending a message from an IListener listener");
+                    BotUtils.sendMessage(event.getChannel(), "I am sending a message from an IListener listener");
             }
         });
         */
@@ -72,7 +72,7 @@ class BotUtils {
     }
 
     // Helper functions to make certain aspects of the bot easier to use.
-    static void sendMesasge(IChannel channel, String message){
+    static void sendMessage(IChannel channel, String message){
 
         // This might look weird but it'll be explained in another page.
         RequestBuffer.request(() -> {
@@ -111,7 +111,7 @@ public class MyEvents {
     @EventSubscriber
     public void onMessageReceived(MessageReceivedEvent event){
         if(event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
-            BotUtils.sendMesasge(event.getChannel(), "I am sending a message from an EventSubscriber listener");
+            BotUtils.sendMessage(event.getChannel(), "I am sending a message from an EventSubscriber listener");
     }
 
 }
