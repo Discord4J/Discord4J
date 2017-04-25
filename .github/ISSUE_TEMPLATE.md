@@ -1,8 +1,7 @@
 ### Prerequisites
 * [ ] If this is a question/suggestion, I have already considered talking about it on the [Discord4J server](https://discord.gg/NxGAeCY)
 * [ ] This issue specifically has something to do with Discord4J
-* [ ] I have attempted to [look for similar issues](https://github.com/austinv11/Discord4J/issues?utf8=%E2%9C%93&q=is%3Aissue)
-already
+* [ ] I have attempted to [look for similar issues](https://github.com/austinv11/Discord4J/issues?utf8=%E2%9C%93&q=is%3Aissue) already
 
 ### Description
 [Description of the issue]
