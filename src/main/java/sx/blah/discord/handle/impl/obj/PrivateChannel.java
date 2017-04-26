@@ -219,4 +219,9 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	public boolean isDeleted() {
 		return false;
 	}
+
+	@Override
+	public boolean isNSFW() {
+		return false;
+	}
 }
