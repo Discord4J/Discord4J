@@ -370,6 +370,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	boolean isPrivate();
 
 	/**
+	 * Gets whether or not the channel is marked as NSFW (Not Suitable For Work)
+	 *
+	 * @return True if the channel is NSFW, false if not.
+	 */
+	boolean isNSFW();
+
+	/**
 	 * Gets the topic for the channel.
 	 *
 	 * @return The channel topic (null if not set).

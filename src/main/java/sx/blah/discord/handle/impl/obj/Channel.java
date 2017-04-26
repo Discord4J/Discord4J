@@ -45,6 +45,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
@@ -574,6 +575,13 @@ public class Channel implements IChannel {
 	@Override
 	public boolean isPrivate() {
 		return this instanceof PrivateChannel;
+	}
+
+	@Override
+	public boolean isNSFW() {
+		Pattern nsfwPattern = Pattern.compile("^nsfw(-|$)");
+
+		return nsfwPattern.matcher(name).find();
 	}
 
 	@Override
