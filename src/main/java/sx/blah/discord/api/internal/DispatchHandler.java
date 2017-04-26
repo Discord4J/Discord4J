@@ -417,7 +417,7 @@ class DispatchHandler {
 			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
 		} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
 			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
-		} else if (json.content != null && oldMessage.getContent().equals(json.content)) {
+		} else if (json.content != null && !oldMessage.getContent().equals(json.content)) {
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		}
 	}
