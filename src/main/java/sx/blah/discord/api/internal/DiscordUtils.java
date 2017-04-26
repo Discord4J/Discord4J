@@ -95,27 +95,24 @@ public class DiscordUtils {
 			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
 	/**
-	 * Used to find urls in order to not escape them
-	 */
-	public static final Pattern URL_PATTERN = Pattern.compile(
-			"(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)" + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*" +
-					"[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
-			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-
-	/**
 	 * Used to determine age based on discord ids
 	 */
-	public static final long DISCORD_EPOCH = 1420070400000l;
+	public static final long DISCORD_EPOCH = 1420070400000L;
 
 	/**
-	 * If the input matches the toString() result of IEmoji.
+	 * Pattern for Discord's custom emoji
 	 */
-	public static final Pattern IEMOJI_TOSTRING_RESULT = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
+	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
 
 	/**
-	 * If the input matches an emoji alias (:alias:)
+	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:)
 	 */
-	public static final Pattern EMOJI_ALIAS = Pattern.compile(":.+:");
+	public static final Pattern EMOJI_ALIAS_PATTERN = Pattern.compile(":.+:");
+
+	/**
+	 * Pattern for Discord's nsfw channel name indicator
+	 */
+	public static final Pattern NSFW_CHANNEL_PATTERN = Pattern.compile("^nsfw(-|$)");
 
 	/**
 	 * Converts a String timestamp into a java object timestamp.

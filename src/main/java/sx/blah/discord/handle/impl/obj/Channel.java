@@ -579,9 +579,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isNSFW() {
-		Pattern nsfwPattern = Pattern.compile("^nsfw(-|$)");
-
-		return nsfwPattern.matcher(name).find();
+		return DiscordUtils.NSFW_CHANNEL_PATTERN.matcher(name).find();
 	}
 
 	@Override
