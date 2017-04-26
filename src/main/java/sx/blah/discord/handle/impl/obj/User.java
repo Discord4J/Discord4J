@@ -231,7 +231,8 @@ public class User implements IUser {
 
 	@Override
 	public String getNicknameForGuild(IGuild guild) {
-		return nicks.get(guild.getLongID()).getObject();
+		NickHolder holder = nicks.get(guild.getLongID());
+		return holder == null ? null : holder.getObject();
 	}
 
 	@Override
