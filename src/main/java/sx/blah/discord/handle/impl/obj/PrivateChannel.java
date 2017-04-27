@@ -23,7 +23,10 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
 
 public class PrivateChannel extends Channel implements IPrivateChannel {
 
@@ -214,6 +217,11 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public boolean isDeleted() {
+		return false;
+	}
+
+	@Override
+	public boolean isNSFW() {
 		return false;
 	}
 }

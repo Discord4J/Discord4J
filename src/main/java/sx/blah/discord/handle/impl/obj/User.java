@@ -34,7 +34,6 @@ import sx.blah.discord.util.cache.LongMap;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Supplier;
 
 public class User implements IUser {
 
@@ -232,7 +231,8 @@ public class User implements IUser {
 
 	@Override
 	public String getNicknameForGuild(IGuild guild) {
-		return nicks.get(guild.getLongID()).getObject();
+		NickHolder holder = nicks.get(guild.getLongID());
+		return holder == null ? null : holder.getObject();
 	}
 
 	@Override

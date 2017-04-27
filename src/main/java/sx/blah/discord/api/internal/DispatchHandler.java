@@ -417,7 +417,7 @@ class DispatchHandler {
 			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
 		} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
 			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
-		} else if (json.content != null && oldMessage.getContent().equals(json.content)) {
+		} else if (json.content != null && !oldMessage.getContent().equals(json.content)) {
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		}
 	}
@@ -764,7 +764,7 @@ class DispatchHandler {
 						message.getReactions().remove(reaction);
 					}
 				} else {
-					IEmoji custom = channel.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id));
+					IEmoji custom = event.emoji.id == null ? null : channel.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id));
 					reaction = new Reaction(channel.getShard(), 0, new ArrayList<>(), custom != null ? custom.getStringID() : event.emoji.name, custom != null);
 				}
 

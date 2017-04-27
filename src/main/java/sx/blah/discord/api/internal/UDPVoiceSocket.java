@@ -94,7 +94,7 @@ public class UDPVoiceSocket {
 				if (user != null) {
 					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opus.getAudio(), user ,opus.header.sequence, opus.header.timestamp);
 				}
-			} catch (SocketTimeoutException ignored) {
+			} catch (SocketTimeoutException | IllegalStateException ignored) { // TODO: actually figure out ISE for decryption
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 			}

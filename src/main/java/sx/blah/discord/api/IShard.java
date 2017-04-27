@@ -128,7 +128,7 @@ public interface IShard {
 	 * Set this shard's presence to be streaming, using the provided game playing text and streaming URL.
 	 *
 	 * @param playingText The game playing text
-	 * @param streamingUrl The streaming URL (Twitch, YouTube Gaming, etc.)
+	 * @param streamingUrl The streaming URL (Twitch)
 	 */
 	void streaming(String playingText, String streamingUrl);
 

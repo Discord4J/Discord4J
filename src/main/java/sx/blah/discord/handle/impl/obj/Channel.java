@@ -45,6 +45,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
@@ -560,7 +561,7 @@ public class Channel implements IChannel {
 					DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 					return RequestBuffer.request(() -> {
 						return DiscordUtils.getMessageFromJSON(this, client.REQUESTS.GET.makeRequest(
-								DiscordEndpoints.CHANNELS + this.getStringID() + "/messages/" + messageID,
+								DiscordEndpoints.CHANNELS + this.getStringID() + "/messages/" + Long.toUnsignedString(messageID),
 								MessageObject.class));
 					}).get();
 				});
@@ -574,6 +575,11 @@ public class Channel implements IChannel {
 	@Override
 	public boolean isPrivate() {
 		return this instanceof PrivateChannel;
+	}
+
+	@Override
+	public boolean isNSFW() {
+		return DiscordUtils.NSFW_CHANNEL_PATTERN.matcher(name).find();
 	}
 
 	@Override

@@ -21,7 +21,6 @@ import com.koloboke.collect.set.LongSet;
 import com.koloboke.function.LongObjConsumer;
 import com.koloboke.function.LongObjFunction;
 import com.koloboke.function.LongObjPredicate;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.obj.IIDLinkedObject;
 
@@ -30,10 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**

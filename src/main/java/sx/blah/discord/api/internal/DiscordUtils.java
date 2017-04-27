@@ -43,7 +43,6 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.awt.*;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -96,27 +95,24 @@ public class DiscordUtils {
 			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
 	/**
-	 * Used to find urls in order to not escape them
-	 */
-	public static final Pattern URL_PATTERN = Pattern.compile(
-			"(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)" + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*" +
-					"[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
-			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-
-	/**
 	 * Used to determine age based on discord ids
 	 */
-	public static final long DISCORD_EPOCH = 1420070400000l;
+	public static final long DISCORD_EPOCH = 1420070400000L;
 
 	/**
-	 * If the input matches the toString() result of IEmoji.
+	 * Pattern for Discord's custom emoji
 	 */
-	public static final Pattern IEMOJI_TOSTRING_RESULT = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
+	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
 
 	/**
-	 * If the input matches an emoji alias (:alias:)
+	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:)
 	 */
-	public static final Pattern EMOJI_ALIAS = Pattern.compile(":.+:");
+	public static final Pattern EMOJI_ALIAS_PATTERN = Pattern.compile(":.+:");
+
+	/**
+	 * Pattern for Discord's nsfw channel name indicator
+	 */
+	public static final Pattern NSFW_CHANNEL_PATTERN = Pattern.compile("^nsfw(-|$)");
 
 	/**
 	 * Converts a String timestamp into a java object timestamp.
@@ -253,7 +249,7 @@ public class DiscordUtils {
 			guild.setIcon(json.icon);
 			guild.setName(json.name);
 			guild.setOwnerID(Long.parseUnsignedLong(json.owner_id));
-			guild.setAFKChannel(Long.parseUnsignedLong(json.afk_channel_id));
+			guild.setAFKChannel(json.afk_channel_id == null ? 0 : Long.parseUnsignedLong(json.afk_channel_id));
 			guild.setAfkTimeout(json.afk_timeout);
 			guild.setRegion(json.region);
 			guild.setVerificationLevel(json.verification_level);
@@ -421,6 +417,9 @@ public class DiscordUtils {
 	 * @return The message object.
 	 */
 	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
+		if (json == null)
+			return null;
+
 		if (channel.messages.containsKey(json.id)) {
 			Message message = (Message) channel.getMessageByID(Long.parseUnsignedLong(json.id));
 			message.setAttachments(getAttachmentsFromJSON(json));

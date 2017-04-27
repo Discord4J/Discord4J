@@ -199,7 +199,9 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public IChannel getChannelByID(long id) {
-		return guildCache.findResult((guildID, guild) -> guild.getChannelByID(id));
+		IChannel channel = guildCache.findResult((guildID, guild) -> guild.getChannelByID(id));
+
+		return channel == null ? privateChannels.get(id) : channel;
 	}
 
 	@Override
@@ -254,7 +256,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public IUser fetchUser(long id) {
 		IUser cached = getUserByID(id);
-		return cached == null ? DiscordUtils.getUserFromJSON(null, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + Long.toUnsignedString(id), UserObject.class)) : cached;
+		return cached == null ? DiscordUtils.getUserFromJSON(this, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + Long.toUnsignedString(id), UserObject.class)) : cached;
 	}
 
 	@Override

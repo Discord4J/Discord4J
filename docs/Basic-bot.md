@@ -23,13 +23,17 @@ public class MainRunner {
 
         IDiscordClient cli = BotUtils.getBuiltDiscordClient(args[0]);
 
+        /*
+        // Commented out as you don't really want duplicate listeners unless you're intentionally writing your code 
+        // like that.
         // Register a listener via the IListener interface
         cli.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
             public void handle(MessageReceivedEvent event) {
                 if(event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
-                    BotUtils.sendMesasge(event.getChannel(), "I am sending a message from an IListener listener");
+                    BotUtils.sendMessage(event.getChannel(), "I am sending a message from an IListener listener");
             }
         });
+        */
 
         // Register a listener via the EventSubscriber annotation which allows for organisation and delegation of events
         cli.getDispatcher().registerListener(new MyEvents());
@@ -68,7 +72,7 @@ class BotUtils {
     }
 
     // Helper functions to make certain aspects of the bot easier to use.
-    static void sendMesasge(IChannel channel, String message){
+    static void sendMessage(IChannel channel, String message){
 
         // This might look weird but it'll be explained in another page.
         RequestBuffer.request(() -> {
@@ -80,6 +84,8 @@ class BotUtils {
             }
         });
 
+		/*
+		// The below example is written to demonstrate sending a message if you want to catch the RLE for logging purposes
         RequestBuffer.request(() -> {
             try{
                 channel.sendMessage(message);
@@ -88,6 +94,7 @@ class BotUtils {
                 throw e;
             }
         });
+        */
 
     }
 }
@@ -104,7 +111,7 @@ public class MyEvents {
     @EventSubscriber
     public void onMessageReceived(MessageReceivedEvent event){
         if(event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
-            BotUtils.sendMesasge(event.getChannel(), "I am sending a message from an EventSubscriber listener");
+            BotUtils.sendMessage(event.getChannel(), "I am sending a message from an EventSubscriber listener");
     }
 
 }

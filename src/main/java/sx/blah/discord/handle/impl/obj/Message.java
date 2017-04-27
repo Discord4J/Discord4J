@@ -551,10 +551,10 @@ public class Message implements IMessage {
 	public void addReaction(String emoji) {
 		String toEncode;
 
-		if (DiscordUtils.IEMOJI_TOSTRING_RESULT.matcher(emoji).matches()) {
+		if (DiscordUtils.CUSTOM_EMOJI_PATTERN.matcher(emoji).matches()) {
 			// custom emoji
 			toEncode = emoji.replace("<", "").replace(">", "");
-		} else if (DiscordUtils.EMOJI_ALIAS.matcher(emoji).matches()) {
+		} else if (DiscordUtils.EMOJI_ALIAS_PATTERN.matcher(emoji).matches()) {
 			// Unicode alias
 			String alias = emoji.replace(":", "");
 			Emoji e = EmojiManager.getForAlias(alias);

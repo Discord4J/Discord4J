@@ -59,7 +59,7 @@ public class CommandHandler {
 
     private void testCommand(MessageReceivedEvent event, List<String> args){
 
-        BotUtils.sendMesasge(event.getChannel(), "You ran the test command with args: " + args);
+        BotUtils.sendMessage(event.getChannel(), "You ran the test command with args: " + args);
 
     }
 
@@ -119,11 +119,11 @@ public class CommandHandler {
     static {
 
         commandMap.put("testcommand", (event, args) -> {
-            BotUtils.sendMesasge(event.getChannel(), "You ran the test command with args: " + args);
+            BotUtils.sendMessage(event.getChannel(), "You ran the test command with args: " + args);
         });
 
         commandMap.put("ping", (event, args) -> {
-            BotUtils.sendMesasge(event.getChannel(), "pong");
+            BotUtils.sendMessage(event.getChannel(), "pong");
         });
 
     }

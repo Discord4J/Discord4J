@@ -151,7 +151,7 @@ public interface IDiscordClient {
 	 * Set this user/all shards' presences to be streaming, using the provided game playing text and streaming URL.
 	 *
 	 * @param playingText The game playing text
-	 * @param streamingUrl The streaming URL (Twitch, YouTube Gaming, etc.)
+	 * @param streamingUrl The streaming URL (Twitch)
 	 */
 	void streaming(String playingText, String streamingUrl);
 

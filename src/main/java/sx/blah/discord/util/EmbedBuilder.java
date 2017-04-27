@@ -103,14 +103,14 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withTitle(String title) {
-		if (title != null && title.length() > TITLE_LENGTH_LIMIT)
+		if (title != null && title.trim().length() > TITLE_LENGTH_LIMIT)
 			if (lenient)
 				title = title.substring(0, TITLE_LENGTH_LIMIT);
 			else
 				throw new IllegalArgumentException(
 						"Embed title cannot have more than " + TITLE_LENGTH_LIMIT + " characters");
 
-		throwExceptionForCharacterLimit(title == null ? 4 : title.length());
+		throwExceptionForCharacterLimit(title == null ? 4 : title.trim().length());
 
 		embed.title = title;
 		return this;
@@ -123,7 +123,7 @@ public class EmbedBuilder {
 	 * @return Itself for chaining
 	 */
 	public EmbedBuilder withDescription(String desc) {
-		if (desc != null && desc.length() > DESCRIPTION_CONTENT_LIMIT) {
+		if (desc != null && desc.trim().length() > DESCRIPTION_CONTENT_LIMIT) {
 			if (lenient)
 				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT);
 			else
@@ -131,7 +131,7 @@ public class EmbedBuilder {
 						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 		}
 
-		throwExceptionForCharacterLimit(desc == null ? 4 : desc.length());
+		throwExceptionForCharacterLimit(desc == null ? 4 : desc.trim().length());
 
 		embed.description = desc;
 		return this;
@@ -156,7 +156,7 @@ public class EmbedBuilder {
 	public EmbedBuilder appendDescription(String desc) {
 		if (embed.description == null)
 			embed.description = "";
-		if (desc != null && (embed.description + desc).length() > DESCRIPTION_CONTENT_LIMIT) {
+		if (desc != null && (embed.description + desc).trim().length() > DESCRIPTION_CONTENT_LIMIT) {
 			if (lenient)
 				desc = desc.substring(0, DESCRIPTION_CONTENT_LIMIT - embed.description.length());
 			else
@@ -164,9 +164,9 @@ public class EmbedBuilder {
 						"Embed description cannot have more than " + DESCRIPTION_CONTENT_LIMIT + " characters");
 		}
 
-		throwExceptionForCharacterLimit(desc == null ? 4 : desc.length());
+		throwExceptionForCharacterLimit(desc == null ? 4 : desc.trim().length());
 
-		embed.description += desc;
+		embed.description += desc == null ? null : desc.trim();
 		return this;
 	}
 
@@ -244,7 +244,7 @@ public class EmbedBuilder {
 		if (embed.footer == null)
 			embed.footer = new EmbedObject.FooterObject(null, null, null);
 
-		if (footer.length() > FOOTER_CONTENT_LIMIT) {
+		if (footer.trim().length() > FOOTER_CONTENT_LIMIT) {
 			if (lenient)
 				footer = footer.substring(0, FOOTER_CONTENT_LIMIT);
 			else
@@ -252,7 +252,7 @@ public class EmbedBuilder {
 						"Embed footer text cannot have more than " + FOOTER_CONTENT_LIMIT + " characters");
 		}
 
-		throwExceptionForCharacterLimit(footer.length());
+		throwExceptionForCharacterLimit(footer.trim().length());
 
 		embed.footer.text = footer;
 		return this;
@@ -324,7 +324,7 @@ public class EmbedBuilder {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
 
-		throwExceptionForCharacterLimit(name.length());
+		throwExceptionForCharacterLimit(name.trim().length());
 
 		embed.author.name = name;
 		return this;
@@ -381,7 +381,7 @@ public class EmbedBuilder {
 	 * @see #setLenient(boolean)
 	 */
 	public EmbedBuilder appendField(String title, String content, boolean inline) {
-		if (((title == null || title.isEmpty()) || (content == null || content.isEmpty()))) {
+		if (((title == null || title.trim().isEmpty()) || (content == null || content.trim().isEmpty()))) {
 			if (lenient)
 				return this;
 			throw new IllegalArgumentException("Title or content cannot be null/empty.");
@@ -410,7 +410,7 @@ public class EmbedBuilder {
 						"Embed field content cannot have more than " + FIELD_CONTENT_LIMIT + " characters");
 		}
 
-		throwExceptionForCharacterLimit(title.length() + content.length());
+		throwExceptionForCharacterLimit(title.trim().length() + content.trim().length());
 
 		fields.add(new EmbedObject.EmbedFieldObject(title, content, inline));
 		return this;
