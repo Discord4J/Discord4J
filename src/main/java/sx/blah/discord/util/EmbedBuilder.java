@@ -166,7 +166,7 @@ public class EmbedBuilder {
 
 		throwExceptionForCharacterLimit(desc == null ? 4 : desc.trim().length());
 
-		embed.description += desc == null ? null : desc.trim();
+		embed.description += desc;
 		return this;
 	}
 
