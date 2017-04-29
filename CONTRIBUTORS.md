@@ -33,6 +33,7 @@
 * @xaanit - Added IEmbedBuilder#appendField(IEmbedField)
 * @randomname8 - Helped with audio receive, rewrote event dispatcher
 * @Prototik - Completed the conversion to long ids internally
+* @firestar115 - Added sbt instructions for retrieving Discord4J
 
 ## Pre-Fork Contributors
 * @nerd -Project creator and original maintainer
