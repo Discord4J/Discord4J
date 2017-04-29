@@ -45,7 +45,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
@@ -245,12 +244,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
-		return getMessageHistoryFrom(startDate, -1);
+	public MessageHistory getMessageHistoryBefore(LocalDateTime startDate) {
+		return getMessageHistoryBefore(startDate, -1);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
+	public MessageHistory getMessageHistoryBefore(LocalDateTime startDate, int maxCount) {
 		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
 				.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
 				.collect(Collectors.toList()));
@@ -281,12 +280,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
-		return getMessageHistoryTo(endDate, -1);
+	public MessageHistory getMessageHistoryAfter(LocalDateTime endDate) {
+		return getMessageHistoryAfter(endDate, -1);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryAfter(LocalDateTime endDate, int maxCount) {
 		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
 				.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
 				.collect(Collectors.toList()));
@@ -315,12 +314,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
-		return getMessageHistoryIn(startDate, endDate, -1);
+	public MessageHistory getMessageHistoryBetween(LocalDateTime startDate, LocalDateTime endDate) {
+		return getMessageHistoryBetween(startDate, endDate, -1);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryBetween(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
 		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
 				.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
 				.collect(Collectors.toList()));
@@ -354,12 +353,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(long id) {
-		return getMessageHistoryFrom(id, -1);
+	public MessageHistory getMessageHistoryBefore(long id) {
+		return getMessageHistoryBefore(id, -1);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(long id, int maxCount) {
+	public MessageHistory getMessageHistoryBefore(long id, int maxCount) {
 		IMessage[] array = messages.values().toArray(new IMessage[messages.size()]);
 		int index = -1;
 		for (int i = 0; i < array.length; i++) {
@@ -396,12 +395,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(long id) {
-		return getMessageHistoryTo(id, -1);
+	public MessageHistory getMessageHistoryAfter(long id) {
+		return getMessageHistoryAfter(id, -1);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(long id, int maxCount) {
+	public MessageHistory getMessageHistoryAfter(long id, int maxCount) {
 		final List<IMessage> retrieved = new ArrayList<>();
 
 		for (IMessage message : messages.values()) {
@@ -432,12 +431,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(long beginID, long endID) {
-		return getMessageHistoryIn(beginID, endID, -1);
+	public MessageHistory getMessageHistoryBetween(long beginID, long endID) {
+		return getMessageHistoryBetween(beginID, endID, -1);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount) {
+	public MessageHistory getMessageHistoryBetween(long beginID, long endID, int maxCount) {
 		IMessage[] array = messages.values().toArray(new IMessage[messages.size()]);
 		int startIndex = -1;
 		for (int i = 0; i < array.length; i++) {
