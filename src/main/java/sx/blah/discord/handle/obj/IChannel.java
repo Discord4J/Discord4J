@@ -76,11 +76,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @param startDate The date to start gathering messages from (inclusive).
 	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryAfter(LocalDateTime)}
+	 * @deprecated Use {@link #getMessageHistoryBefore(LocalDateTime)}
 	 */
 	@Deprecated
 	default MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
-		return getMessageHistoryAfter(startDate);
+		return getMessageHistoryBefore(startDate);
 	}
 
 	/**
@@ -91,7 +91,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param startDate The date to start gathering messages from (inclusive).
 	 * @param maxMessageCount The max number of messages to retrieve.
 	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryAfter(LocalDateTime, int)}
+	 * @deprecated Use {@link #getMessageHistoryBefore(LocalDateTime, int)}
 	 */
 	@Deprecated
 	default MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount) {

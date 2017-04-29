@@ -497,7 +497,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IMessage> bulkDelete() {
-		return bulkDelete(getMessageHistoryTo(LocalDateTime.now().minusWeeks(2)));
+		return bulkDelete(getMessageHistoryAfter(LocalDateTime.now().minusWeeks(2)));
 	}
 
 	@Override
