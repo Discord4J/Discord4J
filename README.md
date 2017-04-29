@@ -55,6 +55,17 @@ dependencies {
 }
 ...
 ```
+### With SBT
+In your `build.sbt` add (without the ellipses):
+```sbt
+...
+libraryDependencies ++= Seq(
+  "com.github.austinv11" % "Discord4J" % "@VERSION@"
+)
+
+resolvers += "jcenter" at "http://jcenter.bintray.com"
+resolvers += "jitpack.io" at "https://jitpack.io"
+```
 ### Manually with the shaded jar
 If you don't use Maven nor Gradle (which you really should, because it's a lot more flexible and allows you to update easily), you can always [grab the shaded jar file](http://austinv11.github.io/Discord4J/downloads.html) (which has all the D4J dependencies inside), and link it in your IntelliJ or Eclipse project.
 #### IntelliJ
