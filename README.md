@@ -60,7 +60,7 @@ In your `build.sbt` add (without the ellipses):
 ```sbt
 ...
 libraryDependencies ++= Seq(
-  "com.github.austinv11" % "Discord4J" % "dev-SNAPSHOT"
+  "com.github.austinv11" % "Discord4J" % "@VERSION@"
 )
 
 resolvers += "jcenter" at "http://jcenter.bintray.com"
