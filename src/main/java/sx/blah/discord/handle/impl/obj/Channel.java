@@ -45,15 +45,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Channel implements IChannel {
 
 	/**
 	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
+	 * @deprecated See {@link MessageHistoryBuilder}
 	 */
-	public static final int MESSAGE_CHUNK_COUNT = 100; //100 is the max amount discord lets you retrieve at one time
+	@Deprecated
+	public static final int MESSAGE_CHUNK_COUNT = MessageHistoryBuilder.MESSAGE_CHUNK_COUNT; //100 is the max amount discord lets you retrieve at one time
 
 	/**
 	 * User-friendly channel name (e.g. "general")
