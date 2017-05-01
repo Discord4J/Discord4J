@@ -449,7 +449,7 @@ class DispatchHandler {
 
 	private void presenceUpdate(PresenceUpdateEventResponse event) {
 		IPresence presence = DiscordUtils.getPresenceFromJSON(event);
-		Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+		Guild guild = event.guild_id == null ? null : (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
 		if (guild != null) {
 			User user = (User) guild.getUserByID(Long.parseUnsignedLong(event.user.id));
 			if (user != null) {
