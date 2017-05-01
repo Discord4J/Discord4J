@@ -148,6 +148,8 @@ See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/
 * Discordinator by [@alpha;helix](https://github.com/alphahelix00): A modularized command API (https://github.com/alphahelix00/Discordinator)
 * Instructability by [@Kaioru](https://github.com/Kaioru): A simple command API (https://github.com/Kaioru/Instructability)
 * C4A4D4J by [@Phanta](https://github.com/phantamanta44): An annotation based command API (https://github.com/phantamanta44/c4a4d4j)
+* D4J-OAuth by [@xaanit](https://github.com/xaanit) and [@UnderMybrella](https://github.com/UnderMybrella): An OAuth extenssion to Discord4J (https://github.com/xaanit/D4J-OAuth)
+* DiscordEmoji4J by [@nerd](https://github.com/nerd/DiscordEmoji4J): An emoji library designed with Discord in mind (https://github.com/nerd/DiscordEmoji4J)
 
 ## Deprecation policy
 Due to the nature of the Discord API, any deprecations found in the API should not be expected to last past the current
