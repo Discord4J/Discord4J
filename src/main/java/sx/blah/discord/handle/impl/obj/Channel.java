@@ -51,10 +51,8 @@ public class Channel implements IChannel {
 
 	/**
 	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
-	 * @deprecated See {@link MessageHistoryBuilder}
 	 */
-	@Deprecated
-	public static final int MESSAGE_CHUNK_COUNT = MessageHistoryBuilder.MESSAGE_CHUNK_COUNT; //100 is the max amount discord lets you retrieve at one time
+	public static final int MESSAGE_CHUNK_COUNT = 100; //100 is the max amount discord lets you retrieve at one time
 
 	/**
 	 * User-friendly channel name (e.g. "general")
@@ -177,18 +175,18 @@ public class Channel implements IChannel {
 		}
 	}
 
-	private IMessage[] requestHistory(Long before, int limit) {
+	public IMessage[] requestHistory(Long before, Long after, int limit) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
 
 		String queryParams = "?limit=" + limit;
 
 		if (before != null) {
 			queryParams += "&before=" + Long.toUnsignedString(before);
+		} else if (after != null) {
+			queryParams += "&after=" + Long.toUnsignedString(after);
 		}
-//		} else if (around != null) {
+//		else if (around != null) {
 //			queryParams += "&around="+around;
-//		} else if (after != null) {
-//			queryParams += "&after="+after;
 //		}
 
 		MessageObject[] messages = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages" + queryParams, MessageObject[].class);
@@ -230,7 +228,7 @@ public class Channel implements IChannel {
 			while (remaining.get() > 0) {
 				RequestBuffer.request(() -> {
 					int requestCount = Math.min(remaining.get(), MESSAGE_CHUNK_COUNT);
-					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, requestCount);
+					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, null, requestCount);
 
 					if (requestCount != chunk.length)
 						remaining.set(0); //Got all possible messages already
@@ -259,7 +257,7 @@ public class Channel implements IChannel {
 		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
 		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
 			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+				IMessage[] chunk = requestHistory(lastID.get(), null, MESSAGE_CHUNK_COUNT);
 
 				List<IMessage> toAdd = Arrays.stream(chunk)
 						.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
@@ -295,7 +293,7 @@ public class Channel implements IChannel {
 		if (messages.size() == retrieved.size()) { //All elements were copied over, meaning that we're likely not done finding messages
 			while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
 				if (RequestBuffer.request(() -> {
-					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, MESSAGE_CHUNK_COUNT);
+					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, null, MESSAGE_CHUNK_COUNT);
 
 					List<IMessage> toAdd = Arrays.stream(chunk)
 							.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
@@ -331,7 +329,7 @@ public class Channel implements IChannel {
 		if (((IMessage) messages.values().toArray()[messages.size()-1]).getTimestamp().compareTo(endDate) <= 0) { //When the last message cached matches the criteria there may still be more in history
 			while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
 				if (RequestBuffer.request(() -> {
-					IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+					IMessage[] chunk = requestHistory(lastID.get(), null, MESSAGE_CHUNK_COUNT);
 
 					List<IMessage> toAdd = Arrays.stream(chunk)
 							.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
@@ -378,7 +376,7 @@ public class Channel implements IChannel {
 		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
 		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
 			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+				IMessage[] chunk = requestHistory(lastID.get(), null, MESSAGE_CHUNK_COUNT);
 
 				retrieved.addAll(Arrays.asList(chunk));
 
@@ -413,7 +411,7 @@ public class Channel implements IChannel {
 
 		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
 			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, MESSAGE_CHUNK_COUNT);
+				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, null, MESSAGE_CHUNK_COUNT);
 
 				for (IMessage message : chunk) {
 					retrieved.add(message);
@@ -457,7 +455,7 @@ public class Channel implements IChannel {
 
 		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
 			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+				IMessage[] chunk = requestHistory(lastID.get(), null, MESSAGE_CHUNK_COUNT);
 
 				for (IMessage message : chunk) {
 					retrieved.add(message);
@@ -485,7 +483,7 @@ public class Channel implements IChannel {
 
 		while (true) {
 			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, MESSAGE_CHUNK_COUNT);
+				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null,null, MESSAGE_CHUNK_COUNT);
 
 				retrieved.addAll(Arrays.asList(chunk));
 
