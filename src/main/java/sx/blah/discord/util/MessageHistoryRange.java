@@ -119,11 +119,13 @@ public class MessageHistoryRange {
 		private Endpoint() {}
 
 		public Endpoint(IMessage msg, boolean include) {
+			if(msg == null) throw new IllegalArgumentException("Message argument for endpoint cannot be null!");
 			this.msg = msg;
 			this.inclusive = include;
 		}
 
 		public Endpoint(LocalDateTime time, boolean include) {
+			if(time == null) throw new IllegalArgumentException("Time argument for endpoint cannot be null!");
 			this.time = time;
 			this.inclusive = include;
 		}

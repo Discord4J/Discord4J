@@ -3,7 +3,9 @@ package sx.blah.discord.util;
 import org.apache.commons.lang3.ArrayUtils;
 import sx.blah.discord.handle.obj.IMessage;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
