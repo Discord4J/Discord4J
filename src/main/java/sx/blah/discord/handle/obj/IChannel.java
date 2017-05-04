@@ -44,6 +44,14 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	String getName();
 
 	/**
+	 * Gets a message history builder for this channel
+	 *
+	 * @see MessageHistoryBuilder
+	 * @return MessageHistoryBuilder object for this channel
+	 */
+	MessageHistoryBuilder getHistory();
+
+	/**
 	 * Gets the messages in this channel.
 	 *
 	 * @return The list of messages in the channel.

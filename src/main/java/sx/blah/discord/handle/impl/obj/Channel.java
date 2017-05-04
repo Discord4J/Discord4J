@@ -153,6 +153,11 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public MessageHistoryBuilder getHistory() {
+		return new MessageHistoryBuilder(this);
+	}
+
+	@Override
 	@Deprecated
 	public MessageList getMessages() {
 		return new MessageList(client, this);

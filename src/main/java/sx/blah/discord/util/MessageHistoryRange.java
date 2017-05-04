@@ -5,6 +5,8 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MessageHistoryRange {
 
@@ -36,7 +38,57 @@ public class MessageHistoryRange {
 		return end;
 	}
 
+	public boolean isChronological() {
+		return chronological;
+	}
+
 	public IMessage fetchFirstInRange() {
+
+		if(start.getMessage() != null) return start.getMessage();
+
+		List<IMessage> cached = channel.messages.stream().sorted(MessageComparator.DEFAULT).collect(Collectors.toList());
+
+		// Check the cache for the start message
+		if(chronological) {
+			for (int i = 0; i < cached.size(); i++) {
+				if (!checkStart(cached.get(i))) // if we just went past start message (confusing logic)
+					return i == 0 ? null : cached.get(i - 1);
+			}
+		} else {
+			for (int i = 0; i < cached.size(); i++) {
+				if (checkStart(cached.get(i))) // if we just hit start message (confusing logic)
+					return cached.get(i);
+			}
+		}
+
+		// If execution has reached this point, need to request history to find message
+		long last = cached.isEmpty() ? 0 : cached.get(cached.size() - 1).getLongID(); // start at last element of cached stuff
+
+		// Get chunk of messages
+		long fLast = last;
+		IMessage[] chunk = RequestBuffer.request(() -> {return channel.requestHistory(fLast, null, Channel.MESSAGE_CHUNK_COUNT);}).get();
+
+		// While we haven't reached the channel's end
+		while(chunk.length != 0) {
+
+			// Same logic as for cache
+			if(chronological) {
+				for (int i = 0; i < chunk.length; i++) {
+					if (!checkStart(chunk[i])) // if we just went past start message (confusing logic)
+						return i == 0 ? null : chunk[i - 1];
+				}
+			} else {
+				for (int i = 0; i < cached.size(); i++) {
+					if (checkStart(chunk[i])) // if we just hit start message (confusing logic)
+						return chunk[i];
+				}
+			}
+
+			last = chunk[chunk.length - 1].getLongID();
+			long lastF = last;
+			chunk = RequestBuffer.request(() -> {return channel.requestHistory(lastF, null, Channel.MESSAGE_CHUNK_COUNT);}).get();
+		}
+
 		return null;
 	}
 
