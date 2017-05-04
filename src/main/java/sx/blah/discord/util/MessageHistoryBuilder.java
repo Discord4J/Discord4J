@@ -323,12 +323,16 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	private void buildRange() {
 		range = new MessageHistoryRange(channel,
 				uStart == null ?
-						new MessageHistoryRange.Endpoint(uStartTime, uIncludeStart) :
+						uStartTime == null ?
+								MessageHistoryRange.Endpoint.NOW :
+								new MessageHistoryRange.Endpoint(uStartTime, uIncludeStart) :
 						new MessageHistoryRange.Endpoint(uStart, uIncludeStart),
 				uEnd == null ?
-						new MessageHistoryRange.Endpoint(uEndTime, uIncludeEnd) :
+						uEndTime == null ?
+								MessageHistoryRange.Endpoint.CHANNEL_CREATE :
+								new MessageHistoryRange.Endpoint(uEndTime, uIncludeEnd) :
 						new MessageHistoryRange.Endpoint(uEnd, uIncludeEnd)
-		);
+		); 
 	}
 
 	private void fetch() {
