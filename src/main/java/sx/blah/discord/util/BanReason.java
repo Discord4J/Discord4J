@@ -20,6 +20,7 @@ public class BanReason {
 
 	/**
 	 * Returns the reason for this ban. May be null to signify no reason provided.
+	 *
 	 * @return The reason, or null if there isn't one
 	 */
 	public String getReason() {
@@ -28,6 +29,7 @@ public class BanReason {
 
 	/**
 	 * Returns the user banned.
+	 *
 	 * @return The banned user
 	 */
 	public IUser getUser() {
@@ -36,6 +38,7 @@ public class BanReason {
 
 	/**
 	 * Returns the guild the user was banned from.
+	 *
 	 * @return The guild the user was banned from
 	 */
 	public IGuild getGuild() {
