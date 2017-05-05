@@ -19,10 +19,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -282,7 +279,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IRole createRole();
 
 	/**
-	 * Retrieves the list of banned users from this guild.
+	 * Retrieves the list of banned users from this guild. NOTE: This is always requested from Discord, and should
+	 * not be called excessively!
 	 *
 	 * @return The list of banned users.
 	 *
@@ -290,6 +288,17 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 */
 	List<IUser> getBannedUsers();
+
+	/**
+	 * Retrieves the list of banned users (with reasons) from this guild. NOTE: This is always requested from Discord, and should
+	 * not be called excessively!
+	 *
+	 * @return The list of banned users.
+	 *
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	List<BanReason> getBanReasons();
 
 	/**
 	 * Bans a user from this guild.
@@ -313,6 +322,31 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 */
 	void banUser(IUser user, int deleteMessagesForDays);
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param user The user to ban.
+	 * @param reason The reason for banning.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(IUser user, String reason);
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param user The user to ban.
+	 * @param reason The reason for banning.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(IUser user, String reason, int deleteMessagesForDays);
 
 	/**
 	 * Bans a user from this guild.
@@ -371,6 +405,31 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void banUser(long userID, int deleteMessagesForDays);
 
 	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 * @param reason The reason for banning.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(long userID, String reason);
+
+	/**
+	 * Bans a user from this guild.
+	 *
+	 * @param userID The snowflake ID of the user.
+	 * @param reason The reason for banning.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void banUser(long userID, String reason, int deleteMessagesForDays);
+
+	/**
 	 * This removes a ban on a user.
 	 *
 	 * @param userID The user to unban.
@@ -407,6 +466,18 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws DiscordException
 	 */
 	void kickUser(IUser user);
+
+	/**
+	 * Kicks a user from the guild.
+	 *
+	 * @param user The user to kick.
+	 * @param reason The reason for kicking.
+	 *
+	 * @throws MissingPermissionsException
+	 * @throws RateLimitException
+	 * @throws DiscordException
+	 */
+	void kickUser(IUser user, String reason);
 
 	/**
 	 * Edits the roles a user is a part of.

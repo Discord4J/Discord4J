@@ -39,6 +39,8 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.Cache;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -395,41 +397,71 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IUser> getBannedUsers() {
+		return getBanReasons().stream().map(BanReason::getUser).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<BanReason> getBanReasons() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 
 		BanObject[] bans = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
 				DiscordEndpoints.GUILDS+id+"/bans",
 				BanObject[].class);
 
-		return Arrays.stream(bans).map(b -> DiscordUtils.getUserFromJSON(getShard(), b.user)).collect(Collectors.toList());
+		return Arrays.stream(bans)
+				.map(b -> new BanReason(this, DiscordUtils.getUserFromJSON(getShard(), b.user), b.reason))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public void banUser(IUser user) {
-		banUser(user, 0);
+		banUser(user, null, 0);
 	}
 
 	@Override
 	public void banUser(IUser user, int deleteMessagesForDays) {
-		DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
-		banUser(user.getLongID(), deleteMessagesForDays);
+		banUser(user, null, deleteMessagesForDays);
+	}
+
+	@Override
+	public void banUser(IUser user, String reason) {
+		banUser(user, reason, 0);
+	}
+
+	@Override
+	public void banUser(IUser user, String reason, int deleteMessagesForDays) {
+		banUser(user.getLongID(), reason, deleteMessagesForDays);
 	}
 
 	@Override
 	public void banUser(long userID) {
+		banUser(userID, null, 0);
+	}
+
+	@Override
+	public void banUser(long userID, int deleteMessagesForDays) {
+		banUser(userID, null, deleteMessagesForDays);
+	}
+
+	@Override
+	public void banUser(long userID, String reason) {
+		banUser(userID, reason, 0);
+	}
+
+	@Override
+	public void banUser(long userID, String reason, int deleteMessagesForDays) {
 		IUser user = getUserByID(userID);
 		if (getUserByID(userID) == null) {
 			DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 		} else {
 			DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
 		}
-
-		banUser(userID, 0);
-	}
-
-	@Override
-	public void banUser(long userID, int deleteMessagesForDays) {
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + Long.toUnsignedString(userID) + "?delete-message-days=" + deleteMessagesForDays);
+		try {
+			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + Long.toUnsignedString(userID) + "?delete-message-days=" + deleteMessagesForDays + (reason == null ? "" : ("&reason=" +
+					URLEncoder.encode(reason, "UTF-8"))));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -440,8 +472,17 @@ public class Guild implements IGuild {
 
 	@Override
 	public void kickUser(IUser user) {
+		kickUser(user, null);
+	}
+
+	@Override
+	public void kickUser(IUser user, String reason) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID());
+		try {
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID() + (reason == null ? "" : ("?reason=" + URLEncoder.encode(reason, "UTF-8"))));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
