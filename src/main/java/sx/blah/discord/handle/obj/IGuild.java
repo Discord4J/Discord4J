@@ -298,7 +298,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws RateLimitException
 	 * @throws DiscordException
 	 */
-	List<BanReason> getBanReasons();
+	List<Ban> getBanReasons();
 
 	/**
 	 * Bans a user from this guild.
