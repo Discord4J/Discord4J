@@ -389,9 +389,8 @@ public class Guild implements IGuild {
 	public IRole createRole() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_ROLES));
 
-		RoleObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/roles",
-				RoleObject.class);
+		RoleObject response = ((DiscordClientImpl) client).REQUESTS.POST
+				.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/roles", RoleObject.class);
 		return DiscordUtils.getRoleFromJSON(this, response);
 	}
 
@@ -404,9 +403,8 @@ public class Guild implements IGuild {
 	public List<IBanReason> getBanReasons() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 
-		BanObject[] bans = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-				DiscordEndpoints.GUILDS+id+"/bans",
-				BanObject[].class);
+		BanObject[] bans = ((DiscordClientImpl) client).REQUESTS.GET
+				.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/bans", BanObject[].class);
 
 		return Arrays.stream(bans)
 				.map(b -> new BanReason(this, DiscordUtils.getUserFromJSON(getShard(), b.user), b.reason))
@@ -479,7 +477,7 @@ public class Guild implements IGuild {
 	public void kickUser(IUser user, String reason) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
 		try {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID() + (reason == null ? "" : ("?reason=" + URLEncoder.encode(reason, "UTF-8"))));
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+getStringID()+"/members/"+user.getStringID() + (reason == null ? "" : ("?reason=" + URLEncoder.encode(reason, "UTF-8"))));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -491,7 +489,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID(),
+					DiscordEndpoints.GUILDS+getStringID()+"/members/"+user.getStringID(),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().roles(roles).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -505,7 +503,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID(),
+					DiscordEndpoints.GUILDS+getStringID()+"/members/"+user.getStringID(),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().deafen(deafen).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -518,7 +516,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+user.getStringID(),
+					DiscordEndpoints.GUILDS+getStringID()+"/members/"+user.getStringID(),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().mute(mute).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -536,7 +534,7 @@ public class Guild implements IGuild {
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-					DiscordEndpoints.GUILDS+id+"/members/"+(isSelf ? "@me/nick" : user.getStringID()),
+					DiscordEndpoints.GUILDS+getStringID()+"/members/"+(isSelf ? "@me/nick" : user.getStringID()),
 					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(new MemberEditRequest.Builder().nick(nick == null ? "" : nick).build()));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
