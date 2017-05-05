@@ -208,7 +208,7 @@ public class Guild implements IGuild {
 	 */
 	public void setIcon(String icon) {
 		this.icon = icon;
-		this.iconURL = String.format(DiscordEndpoints.ICONS, this.id, this.icon);
+		this.iconURL = String.format(DiscordEndpoints.ICONS, getStringID(), this.icon);
 	}
 
 	@Override
@@ -455,7 +455,7 @@ public class Guild implements IGuild {
 			DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
 		}
 		try {
-			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + Long.toUnsignedString(userID) + "?delete-message-days=" + deleteMessagesForDays + (reason == null ? "" : ("&reason=" +
+			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/bans/" + Long.toUnsignedString(userID) + "?delete-message-days=" + deleteMessagesForDays + (reason == null ? "" : ("&reason=" +
 					URLEncoder.encode(reason, "UTF-8"))));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -465,7 +465,7 @@ public class Guild implements IGuild {
 	@Override
 	public void pardonUser(long userID) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS + id + "/bans/" + Long.toUnsignedString(userID));
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/bans/" + Long.toUnsignedString(userID));
 	}
 
 	@Override
@@ -559,7 +559,7 @@ public class Guild implements IGuild {
 			throw new IllegalArgumentException("AFK timeout must be one of (60, 300, 900, 1800, 3600).");
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
-				DiscordEndpoints.GUILDS + id, new GuildEditRequest(name, region.getID(), level.ordinal(), icon.getData(),
+				DiscordEndpoints.GUILDS + getStringID(), new GuildEditRequest(name, region.getID(), level.ordinal(), icon.getData(),
 						afkChannel == null ? null : afkChannel.getStringID(), afkTimeout));
 	}
 
@@ -599,7 +599,7 @@ public class Guild implements IGuild {
 		if (ownerID != client.getOurUser().getLongID())
 			throw new MissingPermissionsException("You must be the guild owner to delete guilds!", EnumSet.noneOf(Permissions.class));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+id);
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+getStringID());
 	}
 
 	@Override
@@ -608,12 +608,12 @@ public class Guild implements IGuild {
 		if (ownerID == client.getOurUser().getLongID())
 			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id);
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+getStringID());
 	}
 
 	@Override
 	public void leave() {
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+id);
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+getStringID());
 	}
 
 	@Override
@@ -696,7 +696,7 @@ public class Guild implements IGuild {
 	public List<IInvite> getInvites() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-				DiscordEndpoints.GUILDS+ id + "/invites",
+				DiscordEndpoints.GUILDS+ getStringID() + "/invites",
 				ExtendedInviteObject[].class);
 
 		List<IInvite> invites = new ArrayList<>();
@@ -710,7 +710,7 @@ public class Guild implements IGuild {
 	public List<IExtendedInvite> getExtendedInvites() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_SERVER));
 		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-				DiscordEndpoints.GUILDS+ id + "/invites",
+				DiscordEndpoints.GUILDS+ getStringID() + "/invites",
 				ExtendedInviteObject[].class);
 
 		List<IExtendedInvite> invites = new ArrayList<>();
@@ -746,13 +746,13 @@ public class Guild implements IGuild {
 			}
 		}
 
-		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + id + "/roles", request);
+		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/roles", request);
 	}
 
 	@Override
 	public int getUsersToBePruned(int days) {
 		PruneResponse response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-				DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
+				DiscordEndpoints.GUILDS + getStringID() + "/prune?days=" + days,
 				PruneResponse.class);
 		return response.pruned;
 	}
@@ -760,7 +760,7 @@ public class Guild implements IGuild {
 	@Override
 	public int pruneUsers(int days) {
 		PruneResponse response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-				DiscordEndpoints.GUILDS + id + "/prune?days=" + days,
+				DiscordEndpoints.GUILDS + getStringID() + "/prune?days=" + days,
 				PruneResponse.class);
 		return response.pruned;
 	}
