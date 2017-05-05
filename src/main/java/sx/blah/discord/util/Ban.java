@@ -6,13 +6,13 @@ import sx.blah.discord.handle.obj.IUser;
 /**
  * Represents a banned user from a guild, with a nullable reason.
  */
-public class BanReason {
+public class Ban {
 
 	private final IGuild guild;
 	private final IUser user;
 	private final String reason;
 
-	public BanReason(IGuild guild, IUser user, String reason) {
+	public Ban(IGuild guild, IUser user, String reason) {
 		this.guild = guild;
 		this.user = user;
 		this.reason = reason;
