@@ -397,11 +397,11 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<IUser> getBannedUsers() {
-		return getBanReasons().stream().map(BanReason::getUser).collect(Collectors.toList());
+		return getBanReasons().stream().map(IBanReason::getUser).collect(Collectors.toList());
 	}
 
 	@Override
-	public List<BanReason> getBanReasons() {
+	public List<IBanReason> getBanReasons() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.BAN));
 
 		BanObject[] bans = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(

@@ -1,12 +1,10 @@
-package sx.blah.discord.util;
+package sx.blah.discord.handle.impl.obj;
 
+import sx.blah.discord.handle.obj.IBanReason;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
-/**
- * Represents a banned user from a guild, with a nullable reason.
- */
-public class BanReason {
+public class BanReason implements IBanReason {
 
 	private final IGuild guild;
 	private final IUser user;
@@ -18,27 +16,19 @@ public class BanReason {
 		this.reason = reason;
 	}
 
-	/**
-	 * Returns the reason for this ban. May be null to signify no reason provided.
-	 * @return The reason, or null if there isn't one
-	 */
+	@Override
 	public String getReason() {
 		return reason;
 	}
 
-	/**
-	 * Returns the user banned.
-	 * @return The banned user
-	 */
+	@Override
 	public IUser getUser() {
 		return user;
 	}
 
-	/**
-	 * Returns the guild the user was banned from.
-	 * @return The guild the user was banned from
-	 */
+	@Override
 	public IGuild getGuild() {
 		return guild;
 	}
 }
+
