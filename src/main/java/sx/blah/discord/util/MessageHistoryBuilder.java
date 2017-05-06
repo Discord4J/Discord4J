@@ -280,12 +280,26 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	}
 
 	/**
-	 * Builds a {@link MessageHistory} object based on this builder.
+	 * Requests a {@link MessageHistory} object with the parameters set in this builder.
+	 * NOTE: This will not block the thread during execution. Use {@link MessageHistoryBuilder#get()} to block the
+	 * thread.
 	 *
 	 * @see MessageHistory
 	 * @return the message history
 	 */
-	public MessageHistory build() {
+	public RequestBuffer.RequestFuture<MessageHistory> request() {
+		return RequestBuffer.request(() -> {return this.get();});
+	}
+
+	/**
+	 * Builds a {@link MessageHistory} object with the parameters set in this builder.
+	 * NOTE: This will block the thread until all messages are received. Use {@link MessageHistoryBuilder#request()}
+	 * to request this message history without blocking.
+	 *
+	 * @see MessageHistory
+	 * @return the message history
+	 */
+	public MessageHistory get() {
 
 		// Get cache from the channel, sorted
 		cached = channel.messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList());
