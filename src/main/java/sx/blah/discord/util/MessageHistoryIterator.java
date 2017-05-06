@@ -6,6 +6,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -26,7 +27,7 @@ public class MessageHistoryIterator implements Iterable<IMessage>, Iterator<IMes
 
 		if (last != null) { // if last is null, there's no history available to get
 
-			backing = (IMessage[]) range.getChannel().messages.values().toArray();
+			backing = range.getChannel().messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList()).toArray(new IMessage[0]);
 
 			index = ArrayUtils.indexOf(backing, last);
 
@@ -43,32 +44,34 @@ public class MessageHistoryIterator implements Iterable<IMessage>, Iterator<IMes
 
 	@Override
 	public boolean hasNext() {
-		return backing != null;
+		return backing != null && backing.length != 0 && range.checkEnd(backing[index]);
 	}
 
 	@Override
 	public IMessage next() {
 
-		if (backing == null) return null; // no more messages to get
+		if (!hasNext()) {
+			if(backing != null) backing = null;
+			return null; // no more messages to get
+		}
 
 		// next message (backing[index] always guaranteed to be within range)
-		IMessage result = backing[range.isChronological() ? index++ : index--];
+		IMessage result = backing[range.isChronological() ? index-- : index++];
 
-		if (!range.checkEnd(backing[index])) {
-			backing = null;
-			index = -1;
-		} else {
-			if (range.isChronological()) {
-				if (index == 0) {
-					long last = backing[0].getLongID();
-					backing = nextCache.get();
-					nextCache = requestHistory(last);
+		if (range.isChronological()) {
+			if (index == -1) {
+				backing = nextCache.get();
+				index = backing.length - 1;
+				if (hasNext()) {
+					nextCache = requestHistory(backing[0].getLongID());
 				}
-			} else {
-				if (index == backing.length - 1) {
-					long last = backing[backing.length - 1].getLongID();
-					backing = nextCache.get();
-					nextCache = requestHistory(last);
+			}
+		} else {
+			if (index == backing.length) {
+				backing = nextCache.get();
+				index = 0;
+				if (hasNext()) {
+					nextCache = requestHistory(backing[backing.length - 1].getLongID());
 				}
 			}
 		}
