@@ -474,12 +474,14 @@ class DispatchHandler {
 		Guild guild = (Guild) client.getGuildByID(guildId);
 
 		// Clean up cache
-		((ShardImpl) guild.getShard()).guildCache.remove(guild);
-		((User) client.getOurUser()).voiceStates.remove(guild.getLongID());
-		DiscordVoiceWS vWS = shard.voiceWebSockets.get(guildId);
-		if (vWS != null) {
-			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
-			shard.voiceWebSockets.remove(guildId);
+		if (guild != null) {
+			((ShardImpl) guild.getShard()).guildCache.remove(guild);
+			((User) client.getOurUser()).voiceStates.remove(guild.getLongID());
+			DiscordVoiceWS vWS = shard.voiceWebSockets.get(guildId);
+			if (vWS != null) {
+				vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
+				shard.voiceWebSockets.remove(guildId);
+			}
 		}
 
 		if (json.unavailable) { //Guild can't be reached
