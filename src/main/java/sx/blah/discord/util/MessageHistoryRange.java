@@ -44,9 +44,9 @@ public class MessageHistoryRange {
 
 	public IMessage fetchFirstInRange() {
 
-		if(start.getMessage() != null) return start.getMessage();
+		if(start.getMessage() != null && start.inclusive) return start.getMessage();
 
-		List<IMessage> cached = channel.messages.stream().sorted(MessageComparator.DEFAULT).collect(Collectors.toList());
+		List<IMessage> cached = channel.messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList());
 
 		// Check the cache for the start message
 		if(chronological) {
@@ -78,7 +78,7 @@ public class MessageHistoryRange {
 						return i == 0 ? null : chunk[i - 1];
 				}
 			} else {
-				for (int i = 0; i < cached.size(); i++) {
+				for (int i = 0; i < chunk.length; i++) {
 					if (checkStart(chunk[i])) // if we just hit start message (confusing logic)
 						return chunk[i];
 				}
@@ -103,9 +103,9 @@ public class MessageHistoryRange {
 	public boolean checkEnd(IMessage msg) {
 		return chronological ?
 				end != Endpoint.CHANNEL_CREATE &&
-						msg.getTimestamp().compareTo(end.getTime()) < (start.inclusive ? 1 : 0) :
+						msg.getTimestamp().compareTo(end.getTime()) < (end.inclusive ? 1 : 0) :
 				end != Endpoint.NOW &&
-						msg.getTimestamp().compareTo(end.getTime()) > (start.inclusive ? -1 : 0);
+						msg.getTimestamp().compareTo(end.getTime()) > (end.inclusive ? -1 : 0);
 	}
 
 	public static class Endpoint {

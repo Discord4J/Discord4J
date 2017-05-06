@@ -288,7 +288,7 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	public MessageHistory build() {
 
 		// Get cache from the channel, sorted
-		cached = channel.messages.stream().sorted(MessageComparator.DEFAULT).collect(Collectors.toList());
+		cached = channel.messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList());
 
 		buildRange();
 
@@ -332,7 +332,7 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 								MessageHistoryRange.Endpoint.CHANNEL_CREATE :
 								new MessageHistoryRange.Endpoint(uEndTime, uIncludeEnd) :
 						new MessageHistoryRange.Endpoint(uEnd, uIncludeEnd)
-		); 
+		);
 	}
 
 	private void fetch() {
@@ -345,16 +345,30 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 			return;
 		}
 
-		messages.add(last); // Add first message (first message of each chunk skipped)
+		if(count < 0 || currentCount++ < count) {
+			messages.add(last); // Add first message
+		} else return; // only happens if count == 0 so we should return
+
+		// add any messages from cache
+		int index = cached.indexOf(last);
+		if(index >= 0) {
+			IMessage[] toAdd = cached.subList(index+1, cached.size()).toArray(new IMessage[0]);
+			if(toAdd.length > 0) {
+				if (!add(toAdd)) return;
+				last = toAdd[toAdd.length - 1];
+			}
+		}
 
 		IMessage[] chunk;
 
 		do {
-			// Get a chunk, using "after" instead of "before" if getting history in reverse order
+			// Get a chunk
 			chunk = fetchHistory(last.getLongID());
 
+			if(chunk == null || chunk.length == 0) return; // no more messages/reached end or beginning of channel
+
 			// get new starting point- last message of list for normal, first message if reversed
-			last = chunk[range.isChronological() ? 0 : chunk.length - 1];
+			last = chunk[range.isChronological() ? 0: chunk.length - 1];
 		} while (add(chunk)); // while endpoint not reached
 		// Add checks all the stuff for endpoints and counts
 
@@ -370,16 +384,23 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	private boolean add(IMessage[] toAdd) { // Returns true if all messages were added (i.e. end not yet passed)
 
 		if (range.isChronological()) {
-			for (int i = toAdd.length - 2; i >= 0; i--) {
-				if (range.checkEnd(toAdd[i]) && count < 0 || currentCount < count) {
+
+			for (int i = toAdd.length - 1; i >= 0; i--) {
+
+				if (range.checkEnd(toAdd[i]) && // check if in range
+						(count < 0 || currentCount++ < count)) { // check count
 					messages.add(toAdd[i]);
 				} else return false;
 			}
+
 		} else {
-			for (int i = 1; i < toAdd.length; i++) {
-				if (range.checkEnd(toAdd[i]) && count < 0 || currentCount < count) {
+
+			for (int i = 0; i < toAdd.length; i++) {
+
+				if (range.checkEnd(toAdd[i]) && // check if in range
+						(count < 0 || currentCount++ < count)) { // check count
 					messages.add(toAdd[i]);
-				} else return false;
+				} else return false; // one of the checks failed, so reached last message
 			}
 		}
 
