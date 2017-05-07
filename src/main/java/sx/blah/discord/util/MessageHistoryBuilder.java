@@ -94,6 +94,8 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 
 	/**
 	 * Specifies the time to start at (inclusive).
+	 * NOTE: Using this method to set a start time chronologically before endAt, and using withMaxCount > 0, may
+	 * result in SIGNIFICANT performance loss.
 	 *
 	 * @param startTime the time to start at
 	 * @return this, for chaining
@@ -139,6 +141,8 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 
 	/**
 	 * Specifies the time to start at.
+	 * NOTE: Using this method to set a start time chronologically before endAt, and using withMaxCount > 0, may
+	 * result in SIGNIFICANT performance loss.
 	 *
 	 * @param startTime the time to start at
 	 * @param inclusive whether or not to include the specified message
