@@ -32,7 +32,11 @@ public class MessageHistoryIterator implements Iterable<IMessage>, Iterator<IMes
 			index = ArrayUtils.indexOf(backing, last);
 
 			if (index < 0) {
-				backing = requestHistory(last.getLongID()).get();
+				IMessage[] temp = requestHistory(last.getLongID()).get();
+				backing = new IMessage[temp.length+1];
+				backing[0] = last;
+				System.arraycopy(temp, 0, backing, 1, temp.length);
+
 				index = range.isChronological() ? backing.length - 1 : 0;
 			}
 
