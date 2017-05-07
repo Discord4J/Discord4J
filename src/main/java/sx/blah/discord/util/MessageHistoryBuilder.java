@@ -288,7 +288,6 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	public MessageHistory get() {
 		if (limit == 0) {
 			messages = new ArrayList<>(); // Empty array list because limit = 0
-
 		} else {
 			// Get cache from the channel, sorted
 			cached = channel.messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList());
@@ -304,10 +303,10 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 			// count unlimited, then it is equivalent to switching endpoints and reversing the collection afterwards
 			if (range.isChronological() && limit < 0) {
 				range = new MessageHistoryRange(channel,
-						new MessageHistoryRange.Endpoint(endTime, includeEnd),
+						new MessageHistoryRange.Point(endTime, includeEnd),
 						start == null ?
-								new MessageHistoryRange.Endpoint(startTime, includeStart) :
-								new MessageHistoryRange.Endpoint(start, includeStart)
+								new MessageHistoryRange.Point(startTime, includeStart) :
+								new MessageHistoryRange.Point(start, includeStart)
 				);
 
 				fetch();
@@ -321,23 +320,23 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	}
 
 	private void buildRange() {
-		MessageHistoryRange.Endpoint first;
-		MessageHistoryRange.Endpoint second;
+		MessageHistoryRange.Point first;
+		MessageHistoryRange.Point second;
 
 		if (start != null) { // if start message was specified
-			first = new MessageHistoryRange.Endpoint(start, includeStart);
+			first = new MessageHistoryRange.Point(start, includeStart);
 		} else {
 			if (startTime != null) { // if start time was specified
-				first = new MessageHistoryRange.Endpoint(startTime, includeStart);
+				first = new MessageHistoryRange.Point(startTime, includeStart);
 			} else {
-				first = MessageHistoryRange.Endpoint.NOW; // No start time given. Defaults to most recent message.
+				first = MessageHistoryRange.Point.NOW; // No start time given. Defaults to most recent message.
 			}
 		}
 
 		if (endTime != null) { // if end time was specified
-			second = new MessageHistoryRange.Endpoint(endTime, includeEnd);
+			second = new MessageHistoryRange.Point(endTime, includeEnd);
 		} else {
-			second = MessageHistoryRange.Endpoint.CHANNEL_CREATE; // No end time given. Defaults to channel create.
+			second = MessageHistoryRange.Point.CHANNEL_CREATE; // No end time given. Defaults to channel create.
 		}
 
 		range = new MessageHistoryRange(channel, first, second);
@@ -345,7 +344,7 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 
 	private void fetch() {
 		// fetch first message from the range
-		IMessage last = range.fetchFirstInRange();
+		IMessage last = range.fetchFirst();
 
 		if (last == null) { // Means out of range start
 			messages = new ArrayList<>();

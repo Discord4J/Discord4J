@@ -49,7 +49,7 @@ public class MessageHistoryIterator implements Iterator<IMessage> {
 	public MessageHistoryIterator(MessageHistoryRange range) {
 		this.range = range;
 
-		IMessage last = range.fetchFirstInRange();
+		IMessage last = range.fetchFirst();
 
 		if (last != null) { // if last is null, there's no history available to get
 			backing = range.getChannel().messages.stream().sorted(MessageComparator.REVERSED)

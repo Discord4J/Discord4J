@@ -34,18 +34,18 @@ import java.util.stream.Collectors;
  *
  * @see MessageHistoryBuilder
  * @see MessageHistoryIterator
- * @see Endpoint
+ * @see Point
  */
 public class MessageHistoryRange {
 
 	private final Channel channel;
 
-	private final Endpoint start;
-	private final Endpoint end;
+	private final Point start;
+	private final Point end;
 
 	private final boolean chronological;
 
-	public MessageHistoryRange(IChannel channel, Endpoint start, Endpoint end) {
+	public MessageHistoryRange(IChannel channel, Point start, Point end) {
 		this.channel = (Channel) channel;
 
 		this.start = start;
@@ -64,20 +64,20 @@ public class MessageHistoryRange {
 	}
 
 	/**
-	 * Gets the {@link Endpoint} object that defines this range's starting point
+	 * Gets the {@link Point} object that defines this range's starting point
 	 *
 	 * @return the starting point
 	 */
-	public Endpoint getStart() {
+	public Point getStart() {
 		return start;
 	}
 
 	/**
-	 * Gets the {@link Endpoint} object that defines this range's ending point
+	 * Gets the {@link Point} object that defines this range's ending point
 	 *
 	 * @return the ending point
 	 */
-	public Endpoint getEnd() {
+	public Point getEnd() {
 		return end;
 	}
 
@@ -100,7 +100,7 @@ public class MessageHistoryRange {
 	 *
 	 * @return the first message within this range
 	 */
-	public IMessage fetchFirstInRange() {
+	public IMessage fetchFirst() {
 
 		if (start.getMessage() != null && start.inclusive) return start.getMessage();
 
@@ -163,9 +163,9 @@ public class MessageHistoryRange {
 	 */
 	public boolean checkStart(IMessage msg) {
 		return chronological ?
-				start != Endpoint.NOW &&
+				start != Point.NOW &&
 						msg.getTimestamp().compareTo(start.getTime()) > (start.inclusive ? -1 : 0) :
-				start != Endpoint.CHANNEL_CREATE &&
+				start != Point.CHANNEL_CREATE &&
 						msg.getTimestamp().compareTo(start.getTime()) < (start.inclusive ? 1 : 0);
 	}
 
@@ -178,9 +178,9 @@ public class MessageHistoryRange {
 	 */
 	public boolean checkEnd(IMessage msg) {
 		return chronological ?
-				end != Endpoint.CHANNEL_CREATE &&
+				end != Point.CHANNEL_CREATE &&
 						msg.getTimestamp().compareTo(end.getTime()) < (end.inclusive ? 1 : 0) :
-				end != Endpoint.NOW &&
+				end != Point.NOW &&
 						msg.getTimestamp().compareTo(end.getTime()) > (end.inclusive ? -1 : 0);
 	}
 
@@ -189,38 +189,38 @@ public class MessageHistoryRange {
 	 * or a message, and includes whether or not the point should be included in the range. This class also includes
 	 * constants for the idea of a channel's beginning and a channel's most recent point.
 	 */
-	public static class Endpoint {
+	public static class Point {
 		/**
 		 * This constant represents the channel's earliest point, its creation. Used as default ending point for {@link MessageHistoryBuilder}.
 		 * Essentially equivalent to the oldest message in the channel, INCLUSIVE.
 		 */
-		public static final Endpoint CHANNEL_CREATE = new Endpoint();
+		public static final Point CHANNEL_CREATE = new Point();
 
 		/**
 		 * This constant represents the channel's most recent point. Used as default starting point for {@link MessageHistoryBuilder}.
 		 * Essentially equivalent to the most recent message in the channel, INCLUSIVE.
 		 */
-		public static final Endpoint NOW = new Endpoint();
+		public static final Point NOW = new Point();
 
 		private final IMessage msg;
 		private final LocalDateTime time;
 		private final boolean inclusive;
 
 		// Used for the two constants
-		private Endpoint() {
+		private Point() {
 			msg = null;
 			time = null;
 			inclusive = false;
 		}
 
-		public Endpoint(IMessage msg, boolean include) {
+		public Point(IMessage msg, boolean include) {
 			if (msg == null) throw new IllegalArgumentException("Message argument for endpoint cannot be null!");
 			this.msg = msg;
 			this.time = null;
 			this.inclusive = include;
 		}
 
-		public Endpoint(LocalDateTime time, boolean include) {
+		public Point(LocalDateTime time, boolean include) {
 			if (time == null) throw new IllegalArgumentException("Time argument for endpoint cannot be null!");
 			this.time = time;
 			this.msg = null;
@@ -263,7 +263,7 @@ public class MessageHistoryRange {
 		 * @param other the endpoint to compare to
 		 * @return true if this endpoint is before other
 		 */
-		public boolean isBefore(Endpoint other) {
+		public boolean isBefore(Point other) {
 			return this.getTime().isBefore(other.getTime());
 		}
 
@@ -273,7 +273,7 @@ public class MessageHistoryRange {
 		 * @param other the endpoint to compare to
 		 * @return true if this endpoint is after other
 		 */
-		public boolean isAfter(Endpoint other) {
+		public boolean isAfter(Point other) {
 			return this.getTime().isAfter(other.getTime());
 		}
 	}
