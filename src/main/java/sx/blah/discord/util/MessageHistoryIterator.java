@@ -33,7 +33,7 @@ public class MessageHistoryIterator implements Iterable<IMessage>, Iterator<IMes
 
 			if (index < 0) {
 				IMessage[] temp = requestHistory(last.getLongID()).get();
-				backing = new IMessage[temp.length+1];
+				backing = new IMessage[temp.length + 1];
 				backing[0] = last;
 				System.arraycopy(temp, 0, backing, 1, temp.length);
 
@@ -55,7 +55,7 @@ public class MessageHistoryIterator implements Iterable<IMessage>, Iterator<IMes
 	public IMessage next() {
 
 		if (!hasNext()) {
-			if(backing != null) backing = null;
+			if (backing != null) backing = null;
 			return null; // no more messages to get
 		}
 

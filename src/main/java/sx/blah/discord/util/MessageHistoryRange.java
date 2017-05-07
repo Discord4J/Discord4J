@@ -44,12 +44,12 @@ public class MessageHistoryRange {
 
 	public IMessage fetchFirstInRange() {
 
-		if(start.getMessage() != null && start.inclusive) return start.getMessage();
+		if (start.getMessage() != null && start.inclusive) return start.getMessage();
 
 		List<IMessage> cached = channel.messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList());
 
 		// Check the cache for the start message
-		if(chronological) {
+		if (chronological) {
 			for (int i = 0; i < cached.size(); i++) {
 				if (!checkStart(cached.get(i))) // if we just went past start message (confusing logic)
 					return i == 0 ? null : cached.get(i - 1);
@@ -66,13 +66,15 @@ public class MessageHistoryRange {
 
 		// Get chunk of messages
 		long fLast = last;
-		IMessage[] chunk = RequestBuffer.request(() -> {return channel.requestHistory(fLast, null, Channel.MESSAGE_CHUNK_COUNT);}).get();
+		IMessage[] chunk = RequestBuffer.request(() -> {
+			return channel.requestHistory(fLast, null, Channel.MESSAGE_CHUNK_COUNT);
+		}).get();
 
 		// While we haven't reached the channel's end
-		while(chunk.length != 0) {
+		while (chunk.length != 0) {
 
 			// Same logic as for cache
-			if(chronological) {
+			if (chronological) {
 				for (int i = 0; i < chunk.length; i++) {
 					if (!checkStart(chunk[i])) // if we just went past start message (confusing logic)
 						return i == 0 ? null : chunk[i - 1];
@@ -86,7 +88,9 @@ public class MessageHistoryRange {
 
 			last = chunk[chunk.length - 1].getLongID();
 			long lastF = last;
-			chunk = RequestBuffer.request(() -> {return channel.requestHistory(lastF, null, Channel.MESSAGE_CHUNK_COUNT);}).get();
+			chunk = RequestBuffer.request(() -> {
+				return channel.requestHistory(lastF, null, Channel.MESSAGE_CHUNK_COUNT);
+			}).get();
 		}
 
 		return null;
@@ -116,16 +120,17 @@ public class MessageHistoryRange {
 		private LocalDateTime time;
 		private boolean inclusive;
 
-		private Endpoint() {}
+		private Endpoint() {
+		}
 
 		public Endpoint(IMessage msg, boolean include) {
-			if(msg == null) throw new IllegalArgumentException("Message argument for endpoint cannot be null!");
+			if (msg == null) throw new IllegalArgumentException("Message argument for endpoint cannot be null!");
 			this.msg = msg;
 			this.inclusive = include;
 		}
 
 		public Endpoint(LocalDateTime time, boolean include) {
-			if(time == null) throw new IllegalArgumentException("Time argument for endpoint cannot be null!");
+			if (time == null) throw new IllegalArgumentException("Time argument for endpoint cannot be null!");
 			this.time = time;
 			this.inclusive = include;
 		}
@@ -135,7 +140,7 @@ public class MessageHistoryRange {
 		}
 
 		public LocalDateTime getTime() {
-			if(this == CHANNEL_CREATE) return LocalDateTime.MIN;
+			if (this == CHANNEL_CREATE) return LocalDateTime.MIN;
 			if (this == NOW) return LocalDateTime.MAX;
 			return time == null ? msg.getTimestamp() : time;
 		}

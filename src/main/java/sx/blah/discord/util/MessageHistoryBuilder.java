@@ -259,8 +259,8 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	/**
 	 * Returns a stream of the message history.
 	 *
-	 * @see MessageHistoryIterator
 	 * @return the stream of the message history
+	 * @see MessageHistoryIterator
 	 */
 	public Stream<IMessage> stream() {
 
@@ -288,11 +288,13 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * NOTE: This will not block the thread during execution. Use {@link MessageHistoryBuilder#get()} to block the
 	 * thread.
 	 *
-	 * @see MessageHistory
 	 * @return the message history
+	 * @see MessageHistory
 	 */
 	public RequestBuffer.RequestFuture<MessageHistory> request() {
-		return RequestBuffer.request(() -> {return this.get();});
+		return RequestBuffer.request(() -> {
+			return this.get();
+		});
 	}
 
 	/**
@@ -300,8 +302,8 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * NOTE: This will block the thread until all messages are received. Use {@link MessageHistoryBuilder#request()}
 	 * to request this message history without blocking.
 	 *
-	 * @see MessageHistory
 	 * @return the message history
+	 * @see MessageHistory
 	 */
 	public MessageHistory get() {
 
@@ -363,15 +365,15 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 			return;
 		}
 
-		if(count < 0 || currentCount++ < count) {
+		if (count < 0 || currentCount++ < count) {
 			messages.add(last); // Add first message
 		} else return; // only happens if count == 0 so we should return
 
 		// add any messages from cache
 		int index = cached.indexOf(last);
-		if(index >= 0) {
-			IMessage[] toAdd = cached.subList(index+1, cached.size()).toArray(new IMessage[0]);
-			if(toAdd.length > 0) {
+		if (index >= 0) {
+			IMessage[] toAdd = cached.subList(index + 1, cached.size()).toArray(new IMessage[0]);
+			if (toAdd.length > 0) {
 				if (!add(toAdd)) return;
 				last = toAdd[toAdd.length - 1];
 			}
@@ -383,10 +385,10 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 			// Get a chunk
 			chunk = fetchHistory(last.getLongID());
 
-			if(chunk == null || chunk.length == 0) return; // no more messages/reached end or beginning of channel
+			if (chunk == null || chunk.length == 0) return; // no more messages/reached end or beginning of channel
 
 			// get new starting point- last message of list for normal, first message if reversed
-			last = chunk[range.isChronological() ? 0: chunk.length - 1];
+			last = chunk[range.isChronological() ? 0 : chunk.length - 1];
 		} while (add(chunk)); // while endpoint not reached
 		// Add checks all the stuff for endpoints and counts
 
