@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,70 +42,68 @@ import static sx.blah.discord.handle.impl.obj.Channel.MESSAGE_CHUNK_COUNT;
  */
 public class MessageHistoryBuilder implements Iterable<IMessage> {
 
-	private Channel channel;
+	private final Channel channel;
 
 	// User provided info
-	private IMessage uStart; // Null if not given
-	private LocalDateTime uStartTime; // null signifies most recent
-	private boolean uIncludeStart;
-	private IMessage uEnd; // Null if not given
-	private LocalDateTime uEndTime; // null signifies channel start
-	private boolean uIncludeEnd;
-	private int count = -1; // < 0 signifies no limit
+	private IMessage start; // Null if not given
+	private LocalDateTime startTime; // null signifies most recent
+	private boolean includeStart;
+	private LocalDateTime endTime; // null signifies channel start
+	private boolean includeEnd;
+	private int limit = -1; // < 0 signifies no limit
+	private boolean lenient;
 
 	// Used for builds
 	private List<IMessage> cached;
 	private List<IMessage> messages;
 	private MessageHistoryRange range;
-	private int currentCount;
+	private int count;
 
 	public MessageHistoryBuilder(IChannel channel) {
 		this.channel = (Channel) channel;
 	}
 
 	/**
-	 * Specifies the message to start at (inclusive).
+	 * Determines whether to throw exceptions on invalid inputs. If true, invalid input is ignored. Default false.
 	 *
-	 * @param startID the message ID to start at
+	 * @param lenient the lenience
+	 * @return this, for chaining
+	 */
+	public MessageHistoryBuilder setLenient(boolean lenient) {
+		this.lenient = lenient;
+		return this;
+	}
+
+	/**
+	 * Specifies the message to start at.
+	 *
+	 * @param startID the message ID to start at (inclusive)
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder startAt(long startID) {
-		this.uStart = channel.getMessageByID(startID);
-		if (uStart == null)
-			throw new IllegalArgumentException("Message " + Long.toUnsignedString(startID) + " does not exist in channel " + channel.getStringID() + "!");
-		this.uStartTime = uStart.getTimestamp();
-		this.uIncludeStart = true;
-		return this;
+		return startAt(channel.getMessageByID(startID));
 	}
 
 	/**
-	 * Specifies the message to start at (inclusive).
+	 * Specifies the message to start at.
 	 *
-	 * @param msg the message to start at
+	 * @param msg the message to start at (inclusive)
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder startAt(IMessage msg) {
-		if (!channel.equals(msg.getChannel()))
-			throw new IllegalArgumentException("Message " + msg.getStringID() + " does not exist in channel " + channel.getStringID() + "!");
-		this.uStart = msg;
-		this.uStartTime = uStart.getTimestamp();
-		this.uIncludeStart = true;
-		return this;
+		return startAt(msg, true);
 	}
 
 	/**
-	 * Specifies the time to start at (inclusive).
+	 * Specifies the time to start at.
 	 * NOTE: Using this method to set a start time chronologically before endAt, and using withMaxCount > 0, may
 	 * result in SIGNIFICANT performance loss.
 	 *
-	 * @param startTime the time to start at
+	 * @param startTime the time to start at (inclusive)
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder startAt(LocalDateTime startTime) {
-		this.uStart = null;
-		this.uStartTime = startTime;
-		this.uIncludeStart = true;
-		return this;
+		return startAt(startTime, true);
 	}
 
 	/**
@@ -115,12 +114,7 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder startAt(long startID, boolean inclusive) {
-		this.uStart = channel.getMessageByID(startID);
-		if (uStart == null)
-			throw new IllegalArgumentException("Message " + Long.toUnsignedString(startID) + " does not exist in channel " + channel.getStringID() + "!");
-		this.uStartTime = uStart.getTimestamp();
-		this.uIncludeStart = inclusive;
-		return this;
+		return startAt(channel.getMessageByID(startID), inclusive);
 	}
 
 	/**
@@ -131,11 +125,13 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder startAt(IMessage msg, boolean inclusive) {
-		if (!channel.equals(msg.getChannel()))
-			throw new IllegalArgumentException("Message " + msg.getStringID() + " does not exist in channel " + channel.getStringID() + "!");
-		this.uStart = msg;
-		this.uStartTime = uStart.getTimestamp();
-		this.uIncludeStart = inclusive;
+		if (msg == null || !channel.equals(msg.getChannel())) {
+			if (lenient) return this; // Ignores input values
+			throw new IllegalArgumentException("Message is null or does not exist in channel " + channel.getStringID() + "!");
+		}
+		this.start = msg;
+		this.startTime = start.getTimestamp();
+		this.includeStart = inclusive;
 		return this;
 	}
 
@@ -149,53 +145,44 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder startAt(LocalDateTime startTime, boolean inclusive) {
-		this.uStart = null;
-		this.uStartTime = startTime;
-		this.uIncludeStart = inclusive;
+		if (startTime == null) {
+			if (lenient) return this; // Ignores input values
+			throw new IllegalArgumentException("Start time is null!");
+		}
+		this.start = null;
+		this.startTime = startTime;
+		this.includeStart = inclusive;
 		return this;
 	}
 
 	/**
-	 * Specifies the message to end at (exclusive).
+	 * Specifies the message to end at.
 	 *
-	 * @param endID the message ID to end at
+	 * @param endID the message ID to end at (exclusive)
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder endAt(long endID) {
-		this.uEnd = channel.getMessageByID(endID);
-		if (uEnd == null)
-			throw new IllegalArgumentException("Message " + Long.toUnsignedString(endID) + " does not exist in channel " + channel.getStringID() + "!");
-		this.uEndTime = uEnd.getTimestamp();
-		this.uIncludeEnd = false;
-		return this;
+		return endAt(channel.getMessageByID(endID));
 	}
 
 	/**
-	 * Specifies the message to end at (exclusive).
+	 * Specifies the message to end at.
 	 *
-	 * @param msg the message ID to end at
+	 * @param msg the message ID to end at (exclusive)
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder endAt(IMessage msg) {
-		if (!channel.equals(msg.getChannel()))
-			throw new IllegalArgumentException("Message " + msg.getStringID() + " does not exist in channel " + channel.getStringID() + "!");
-		this.uEnd = msg;
-		this.uEndTime = msg.getTimestamp();
-		this.uIncludeEnd = false;
-		return this;
+		return endAt(msg, false);
 	}
 
 	/**
-	 * Specifies the time to end at (exclusive).
+	 * Specifies the time to end at.
 	 *
-	 * @param endTime the time to end at
+	 * @param endTime the time to end at (exclusive)
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder endAt(LocalDateTime endTime) {
-		this.uEnd = null;
-		this.uEndTime = endTime;
-		this.uIncludeEnd = false;
-		return this;
+		return endAt(endTime, false);
 	}
 
 	/**
@@ -206,12 +193,7 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder endAt(long endID, boolean inclusive) {
-		this.uEnd = channel.getMessageByID(endID);
-		if (uEnd == null)
-			throw new IllegalArgumentException("Message " + Long.toUnsignedString(endID) + " does not exist in channel " + channel.getStringID() + "!");
-		this.uEndTime = uEnd.getTimestamp();
-		this.uIncludeEnd = inclusive;
-		return this;
+		return endAt(channel.getMessageByID(endID), inclusive);
 	}
 
 	/**
@@ -222,11 +204,12 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder endAt(IMessage msg, boolean inclusive) {
-		if (!channel.equals(msg.getChannel()))
-			throw new IllegalArgumentException("Message " + msg.getStringID() + " does not exist in channel " + channel.getStringID() + "!");
-		this.uEnd = msg;
-		this.uEndTime = msg.getTimestamp();
-		this.uIncludeEnd = inclusive;
+		if (msg == null || !channel.equals(msg.getChannel())) {
+			if (lenient) return this;
+			throw new IllegalArgumentException("Message is null or does not exist in channel " + channel.getStringID() + "!");
+		}
+		this.endTime = msg.getTimestamp();
+		this.includeEnd = inclusive;
 		return this;
 	}
 
@@ -238,21 +221,24 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @return this, for chaining
 	 */
 	public MessageHistoryBuilder endAt(LocalDateTime endTime, boolean inclusive) {
-		this.uEnd = null;
-		this.uEndTime = endTime;
-		this.uIncludeEnd = inclusive;
+		if (endTime == null) {
+			if (lenient) return this;
+			throw new IllegalArgumentException("End time is null!");
+		}
+		this.endTime = endTime;
+		this.includeEnd = inclusive;
 		return this;
 	}
 
 	/**
 	 * Specifies the maximum number of messages to get. Defaults to -1 (no limit).
 	 *
-	 * @param count max number of messages to get
+	 * @param limit max number of messages to get
 	 * @return this, for chaining
 	 */
-	public MessageHistoryBuilder withMaxCount(int count) {
-		if (count < 1) throw new IllegalArgumentException();
-		this.count = count;
+	public MessageHistoryBuilder withMaxCount(int limit) {
+		if (limit < 0 && !lenient) throw new IllegalArgumentException("Limit is negative!");
+		this.limit = limit;
 		return this;
 	}
 
@@ -263,23 +249,19 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @see MessageHistoryIterator
 	 */
 	public Stream<IMessage> stream() {
-
 		buildRange();
-
 		return new MessageHistoryIterator(range).stream();
 	}
 
 	/**
 	 * Returns an iterator for this message history.
-	 * NOTE: This object can be put directly in a for-each loop.
+	 * NOTE: This object can be put directly in a for-each loop without using this method.
 	 *
 	 * @return an Iterator instance for the message history
 	 */
 	@Override
 	public Iterator<IMessage> iterator() {
-
 		buildRange();
-
 		return new MessageHistoryIterator(range);
 	}
 
@@ -291,72 +273,77 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 	 * @return the message history
 	 * @see MessageHistory
 	 */
-	public RequestBuffer.RequestFuture<MessageHistory> request() {
-		return RequestBuffer.request(() -> {
-			return this.get();
-		});
+	public CompletableFuture<MessageHistory> request() {
+		return CompletableFuture.supplyAsync(this::get);
 	}
 
 	/**
 	 * Builds a {@link MessageHistory} object with the parameters set in this builder.
-	 * NOTE: This will block the thread until all messages are received. Use {@link MessageHistoryBuilder#request()}
+	 * NOTE: This will block the thread until all messages are retrieved. Use {@link MessageHistoryBuilder#request()}
 	 * to request this message history without blocking.
 	 *
 	 * @return the message history
 	 * @see MessageHistory
 	 */
 	public MessageHistory get() {
+		if (limit == 0) {
+			messages = new ArrayList<>(); // Empty array list because limit = 0
 
-		// Get cache from the channel, sorted
-		cached = channel.messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList());
-
-		buildRange();
-
-		// Initialize messages
-		messages = count < 0 ?
-				new ArrayList<>(MESSAGE_CHUNK_COUNT) :
-				new ArrayList<>(count);
-
-		// Checks for special case for efficiency- if a range is reverse ordered (start earlier in history than end) but
-		// count unlimited, then it is equivalent to switching endpoints and reversing the collection afterwards
-		if (range.isChronological() && count < 0) {
-
-			range = new MessageHistoryRange(channel,
-					uEnd == null ?
-							new MessageHistoryRange.Endpoint(uEndTime, uIncludeEnd) :
-							new MessageHistoryRange.Endpoint(uEnd, uIncludeEnd),
-					uStart == null ?
-							new MessageHistoryRange.Endpoint(uStartTime, uIncludeStart) :
-							new MessageHistoryRange.Endpoint(uStart, uIncludeStart)
-			);
-
-			fetch();
-
-			Collections.reverse(messages);
 		} else {
-			fetch();
+			// Get cache from the channel, sorted
+			cached = channel.messages.stream().sorted(MessageComparator.REVERSED).collect(Collectors.toList());
+
+			buildRange();
+
+			// Initialize messages
+			messages = limit < 0 ?
+					new ArrayList<>(MESSAGE_CHUNK_COUNT) :
+					new ArrayList<>(limit);
+
+			// Checks for special case for efficiency- if a range is reverse ordered (start earlier in history than end) but
+			// count unlimited, then it is equivalent to switching endpoints and reversing the collection afterwards
+			if (range.isChronological() && limit < 0) {
+				range = new MessageHistoryRange(channel,
+						new MessageHistoryRange.Endpoint(endTime, includeEnd),
+						start == null ?
+								new MessageHistoryRange.Endpoint(startTime, includeStart) :
+								new MessageHistoryRange.Endpoint(start, includeStart)
+				);
+
+				fetch();
+				Collections.reverse(messages);
+			} else {
+				fetch();
+			}
 		}
 
 		return new MessageHistory(messages);
 	}
 
 	private void buildRange() {
-		range = new MessageHistoryRange(channel,
-				uStart == null ?
-						uStartTime == null ?
-								MessageHistoryRange.Endpoint.NOW :
-								new MessageHistoryRange.Endpoint(uStartTime, uIncludeStart) :
-						new MessageHistoryRange.Endpoint(uStart, uIncludeStart),
-				uEnd == null ?
-						uEndTime == null ?
-								MessageHistoryRange.Endpoint.CHANNEL_CREATE :
-								new MessageHistoryRange.Endpoint(uEndTime, uIncludeEnd) :
-						new MessageHistoryRange.Endpoint(uEnd, uIncludeEnd)
-		);
+		MessageHistoryRange.Endpoint first;
+		MessageHistoryRange.Endpoint second;
+
+		if (start != null) { // if start message was specified
+			first = new MessageHistoryRange.Endpoint(start, includeStart);
+		} else {
+			if (startTime != null) { // if start time was specified
+				first = new MessageHistoryRange.Endpoint(startTime, includeStart);
+			} else {
+				first = MessageHistoryRange.Endpoint.NOW; // No start time given. Defaults to most recent message.
+			}
+		}
+
+		if (endTime != null) { // if end time was specified
+			second = new MessageHistoryRange.Endpoint(endTime, includeEnd);
+		} else {
+			second = MessageHistoryRange.Endpoint.CHANNEL_CREATE; // No end time given. Defaults to channel create.
+		}
+
+		range = new MessageHistoryRange(channel, first, second);
 	}
 
 	private void fetch() {
-
 		// fetch first message from the range
 		IMessage last = range.fetchFirstInRange();
 
@@ -365,9 +352,7 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 			return;
 		}
 
-		if (count < 0 || currentCount++ < count) {
-			messages.add(last); // Add first message
-		} else return; // only happens if count == 0 so we should return
+		messages.add(last); // Add first message
 
 		// add any messages from cache
 		int index = cached.indexOf(last);
@@ -389,37 +374,35 @@ public class MessageHistoryBuilder implements Iterable<IMessage> {
 
 			// get new starting point- last message of list for normal, first message if reversed
 			last = chunk[range.isChronological() ? 0 : chunk.length - 1];
+
+			// Add checks all the stuff for endpoints and limits
 		} while (add(chunk)); // while endpoint not reached
-		// Add checks all the stuff for endpoints and counts
 
 	}
 
-	private IMessage[] fetchHistory(Long last) {
+	private IMessage[] fetchHistory(long last) {
 		return RequestBuffer.request(() -> {
 			return channel.requestHistory(range.isChronological() ? null : last,
 					range.isChronological() ? last : null, MESSAGE_CHUNK_COUNT);
 		}).get();
 	}
 
-	private boolean add(IMessage[] toAdd) { // Returns true if all messages were added (i.e. end not yet passed)
-
+	// Returns true if all messages in toAdd were added (i.e. end wasn't reached)
+	private boolean add(IMessage[] toAdd) {
 		if (range.isChronological()) {
-
 			for (int i = toAdd.length - 1; i >= 0; i--) {
-
 				if (range.checkEnd(toAdd[i]) && // check if in range
-						(count < 0 || currentCount++ < count)) { // check count
+						(limit < 0 || count < limit)) { // check count
 					messages.add(toAdd[i]);
+					count++;
 				} else return false;
 			}
-
 		} else {
-
 			for (int i = 0; i < toAdd.length; i++) {
-
 				if (range.checkEnd(toAdd[i]) && // check if in range
-						(count < 0 || currentCount++ < count)) { // check count
+						(limit < 0 || count++ < limit)) { // check count
 					messages.add(toAdd[i]);
+					count++;
 				} else return false; // one of the checks failed, so reached last message
 			}
 		}
