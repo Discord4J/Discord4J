@@ -124,27 +124,29 @@ class ReconnectManager {
 		if (!acknowledgeErrors) return;
 		acknowledgeErrors = false;
 
-		client.getDispatcher().dispatch(new ReconnectFailureEvent(websockets.peek().shard, curAttempt, maxAttempts));
-		if (curAttempt == maxAttempts - 1) {
-			// abandon the ws
-			Discord4J.LOGGER.info(LogMarkers.RECONNECTS, "Reconnect for shard {} failed after {} attempts. Abandoning shard.", websockets.peek().shard.getInfo()[0], maxAttempts);
-			curAttempt = 0;
-			client.getShards().remove(websockets.peek().shard); // remove reference to the shard from the client. It is useless now.
-			websockets.remove();
+		reconnectExecutor.submit(() -> {
+			client.getDispatcher().dispatch(new ReconnectFailureEvent(websockets.peek().shard, curAttempt, maxAttempts));
+			if (curAttempt == maxAttempts - 1) {
+				// abandon the ws
+				Discord4J.LOGGER.info(LogMarkers.RECONNECTS, "Reconnect for shard {} failed after {} attempts. Abandoning shard.", websockets.peek().shard.getInfo()[0], maxAttempts);
+				curAttempt = 0;
+				client.getShards().remove(websockets.peek().shard); // remove reference to the shard from the client. It is useless now.
+				websockets.remove();
 
-			// begin the next one
-			if (websockets.size() > 0) beginNewReconnect();
-		} else {
-			try {
-				long backOff = Math.max(1000, getBackOffMillis());
-				Discord4J.LOGGER.debug(LogMarkers.RECONNECTS, "Sleeping for {} ms.", backOff);
-				Thread.sleep(backOff);
-				curAttempt++;
-				performReconnect();
-			} catch (Exception e) {
-				Discord4J.LOGGER.error(LogMarkers.RECONNECTS, "Discord4J Internal Exception", e);
+				// begin the next one
+				if (websockets.size() > 0) beginNewReconnect();
+			} else {
+				try {
+					long backOff = Math.max(1000, getBackOffMillis());
+					Discord4J.LOGGER.debug(LogMarkers.RECONNECTS, "Sleeping for {} ms.", backOff);
+					Thread.sleep(backOff);
+					curAttempt++;
+					performReconnect();
+				} catch (Exception e) {
+					Discord4J.LOGGER.error(LogMarkers.RECONNECTS, "Discord4J Internal Exception", e);
+				}
 			}
-		}
+		});
 	}
 
 	/**
