@@ -10,4 +10,4 @@ You're likely thinking of Embeds. A tutorial can be found [here](http://discord4
 
 ### How to make a music bot?
 
-The best way to do this is to use [Lavaplayer](https://github.com/sedmelluq/lavaplayer). An example is on the github of how to use it. Or you can look at the wiki page [here.](http://discord4j.readthedocs.io/en/latest/Playing-audio/)
+The best way to do this is to use [Lavaplayer](https://github.com/sedmelluq/lavaplayer). An example is on the github of how to use it. There is also an example bot (made by decyg) that has it [here](https://github.com/decyg/d4jexamplebot) or you can look at the wiki page [here.](http://discord4j.readthedocs.io/en/latest/Playing-audio/)
