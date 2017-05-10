@@ -332,6 +332,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 *
+	 * @see Ban#MAX_REASON_LENGTH
 	 */
 	void banUser(IUser user, String reason);
 
@@ -345,6 +347,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 *
+	 * @see Ban#MAX_REASON_LENGTH
 	 */
 	void banUser(IUser user, String reason, int deleteMessagesForDays);
 
@@ -413,6 +417,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 *
+	 * @see Ban#MAX_REASON_LENGTH
 	 */
 	void banUser(long userID, String reason);
 
@@ -426,6 +432,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 *
+	 * @see Ban#MAX_REASON_LENGTH
 	 */
 	void banUser(long userID, String reason, int deleteMessagesForDays);
 
@@ -476,6 +484,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @throws MissingPermissionsException
 	 * @throws RateLimitException
 	 * @throws DiscordException
+	 *
+	 * @see Ban#MAX_REASON_LENGTH
 	 */
 	void kickUser(IUser user, String reason);
 

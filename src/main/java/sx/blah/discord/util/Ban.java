@@ -8,6 +8,11 @@ import sx.blah.discord.handle.obj.IUser;
  */
 public class Ban {
 
+	/**
+	 * The maximum reason length. Also applies to kicks.
+	 */
+	public static final int MAX_REASON_LENGTH = 512;
+
 	private final IGuild guild;
 	private final IUser user;
 	private final String reason;

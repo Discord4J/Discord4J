@@ -454,6 +454,9 @@ public class Guild implements IGuild {
 		} else {
 			DiscordUtils.checkPermissions(client, this, getRolesForUser(user), EnumSet.of(Permissions.BAN));
 		}
+		if (reason != null && reason.length() > Ban.MAX_REASON_LENGTH) {
+			throw new IllegalArgumentException("Reason length cannot be more than " + Ban.MAX_REASON_LENGTH);
+		}
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/bans/" + Long.toUnsignedString(userID) + "?delete-message-days=" + deleteMessagesForDays + (reason == null ? "" : ("&reason=" +
 					URLEncoder.encode(reason, "UTF-8"))));
@@ -476,6 +479,9 @@ public class Guild implements IGuild {
 	@Override
 	public void kickUser(IUser user, String reason) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(this), EnumSet.of(Permissions.KICK));
+		if (reason != null && reason.length() > Ban.MAX_REASON_LENGTH) {
+			throw new IllegalArgumentException("Reason length cannot be more than " + Ban.MAX_REASON_LENGTH);
+		}
 		try {
 			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+getStringID()+"/members/"+user.getStringID() + (reason == null ? "" : ("?reason=" + URLEncoder.encode(reason, "UTF-8"))));
 		} catch (UnsupportedEncodingException e) {
