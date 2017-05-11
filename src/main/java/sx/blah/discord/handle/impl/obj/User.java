@@ -108,8 +108,8 @@ public class User implements IUser {
 		this.name = name;
 		this.discriminator = discriminator;
 		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
-				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
+		this.avatarURL = this.avatar == null ? null : String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
+				(this.avatar.startsWith("a_")) ? "gif" : "webp");
 		this.presence = presence;
 		this.isBot = isBot;
 		this.roles = new Cache<>((DiscordClientImpl) client, RolesHolder.class);
