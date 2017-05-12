@@ -107,9 +107,7 @@ public class User implements IUser {
 		this.id = id;
 		this.name = name;
 		this.discriminator = discriminator;
-		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
-				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
+		setAvatar(avatar);
 		this.presence = presence;
 		this.isBot = isBot;
 		this.roles = new Cache<>((DiscordClientImpl) client, RolesHolder.class);
@@ -154,8 +152,9 @@ public class User implements IUser {
 	 */
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
-				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
+		this.avatarURL = this.avatar == null ?
+				String.format(DiscordEndpoints.DEFAULT_AVATAR, Integer.parseInt(discriminator) % 5)
+				: String.format(DiscordEndpoints.AVATARS, this.id, this.avatar, (this.avatar.startsWith("a_")) ? "gif" : "webp");
 	}
 
 	@Override
@@ -221,7 +220,7 @@ public class User implements IUser {
 	}
 
 	@Override
-	public EnumSet<Permissions> getPermissionsForGuild(IGuild guild){
+	public EnumSet<Permissions> getPermissionsForGuild(IGuild guild) {
 		if (guild.getOwner().equals(this))
 			return EnumSet.allOf(Permissions.class);
 		EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
@@ -290,13 +289,13 @@ public class User implements IUser {
 	@Override
 	public void addRole(IRole role) {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getStringID()+"/members/"+id+"/roles/"+role.getStringID());
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.GUILDS + role.getGuild().getStringID() + "/members/" + id + "/roles/" + role.getStringID());
 	}
 
 	@Override
 	public void removeRole(IRole role) {
 		DiscordUtils.checkPermissions(client, role.getGuild(), Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_ROLES));
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+role.getGuild().getStringID()+"/members/"+id+"/roles/"+role.getStringID());
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS + role.getGuild().getStringID() + "/members/" + id + "/roles/" + role.getStringID());
 	}
 
 	@Override
@@ -341,7 +340,7 @@ public class User implements IUser {
 
 	@Override
 	public boolean equals(Object other) {
-		return DiscordUtils.equals(this ,other);
+		return DiscordUtils.equals(this, other);
 	}
 }
 
