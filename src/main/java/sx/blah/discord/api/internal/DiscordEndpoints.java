@@ -138,4 +138,9 @@ public final class DiscordEndpoints {
 	 */
 	public static final String REACTIONS_USER = REACTIONS_USER_LIST + "/%s";
 
+	/**
+	 * Assets URL (arg 1 is name, arg 2 is extension)
+	 */
+	public static final String ASSETS = "https://discordapp.com/assets/%s.%s";
+
 }
