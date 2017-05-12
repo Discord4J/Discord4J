@@ -141,6 +141,6 @@ public final class DiscordEndpoints {
 	/**
 	 * Default avatars (arg 1 is <code>discrim % 5</code>)
 	 */
-	public static final String DEFAULT_AVATAR = BASE + "https://cdn.discordapp.com/embed/avatars/%d.png";
+	public static final String DEFAULT_AVATAR = "https://cdn.discordapp.com/embed/avatars/%d.png";
 
 }

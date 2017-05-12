@@ -107,10 +107,7 @@ public class User implements IUser {
 		this.id = id;
 		this.name = name;
 		this.discriminator = discriminator;
-		this.avatar = avatar;
-		this.avatarURL = this.avatar == null ?
-				String.format(DiscordEndpoints.DEFAULT_AVATAR, Integer.parseInt(discriminator) % 5)
-				: String.format(DiscordEndpoints.AVATARS, this.id, this.avatar, (this.avatar.startsWith("a_")) ? "gif" : "webp");
+		setAvatar(avatar);
 		this.presence = presence;
 		this.isBot = isBot;
 		this.roles = new Cache<>((DiscordClientImpl) client, RolesHolder.class);
@@ -155,8 +152,9 @@ public class User implements IUser {
 	 */
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
-		this.avatarURL = String.format(DiscordEndpoints.AVATARS, this.id, this.avatar,
-				(this.avatar != null && this.avatar.startsWith("a_")) ? "gif" : "webp");
+		this.avatarURL = this.avatar == null ?
+				String.format(DiscordEndpoints.DEFAULT_AVATAR, Integer.parseInt(discriminator) % 5)
+				: String.format(DiscordEndpoints.AVATARS, this.id, this.avatar, (this.avatar.startsWith("a_")) ? "gif" : "webp");
 	}
 
 	@Override
