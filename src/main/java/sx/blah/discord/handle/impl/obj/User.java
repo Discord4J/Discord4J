@@ -38,17 +38,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class User implements IUser {
 
 	/**
-	 * Default avatars for users
-	 */
-	private static String[] DEFAULT_AVATARS = {
-			"6debd47ed13483642cf09e832ed0bc1b",
-			"322c936a8c8be1b803cd94861bdfa868",
-			"dd4dbc0016779df1378e7812eabaa04d",
-			"0e291f67c9274a1abdddeb3fd919cbaa",
-			"1cbd08c76f8af6dddce02c5138971129"
-	};
-
-	/**
 	 * User ID.
 	 */
 	protected final long id;
@@ -120,7 +109,7 @@ public class User implements IUser {
 		this.discriminator = discriminator;
 		this.avatar = avatar;
 		this.avatarURL = this.avatar == null ?
-				String.format(DiscordEndpoints.ASSETS, DEFAULT_AVATARS[Integer.parseInt(discriminator) % DEFAULT_AVATARS.length], "png")
+				String.format(DiscordEndpoints.DEFAULT_AVATAR, Integer.parseInt(discriminator) % 5)
 				: String.format(DiscordEndpoints.AVATARS, this.id, this.avatar, (this.avatar.startsWith("a_")) ? "gif" : "webp");
 		this.presence = presence;
 		this.isBot = isBot;
