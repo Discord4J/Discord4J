@@ -138,4 +138,9 @@ public final class DiscordEndpoints {
 	 */
 	public static final String REACTIONS_USER = REACTIONS_USER_LIST + "/%s";
 
+	/**
+	 * Default avatars (arg 1 is <code>discrim % 5</code>)
+	 */
+	public static final String DEFAULT_AVATAR = "https://cdn.discordapp.com/embed/avatars/%d.png";
+
 }
