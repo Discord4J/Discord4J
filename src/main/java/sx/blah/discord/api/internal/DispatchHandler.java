@@ -714,6 +714,8 @@ class DispatchHandler {
 
 	private void reactionAdd(ReactionEventResponse event) {
 		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
+			return;
 		if (channel != null) {
 			IMessage message = RequestBuffer.request(() -> {
 				return channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
@@ -748,6 +750,8 @@ class DispatchHandler {
 
 	private void reactionRemove(ReactionEventResponse event) {
 		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
+			return;
 		if (channel != null) {
 			IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 
