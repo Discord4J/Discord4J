@@ -43,6 +43,7 @@ public class ClientBuilder {
 	 */
 	public static final int DEFAULT_MESSAGE_CACHE_LIMIT = 256;
 
+	private int[] shard = null;
 	private boolean withRecomendedShardCount = false;
 	private int maxMissedPings = -1;
 	private String botToken;
@@ -124,7 +125,7 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the bot to use Discord's recommended number of shards on login.
+	 * Sets the bot to use Discord's recommended number of shards on login. NOTE: This is incompatible with {@link #setShard(int, int)}.
 	 *
 	 * @return The instance of the builder.
 	 */
@@ -244,6 +245,20 @@ public class ClientBuilder {
 	}
 
 	/**
+	 * Sets the shard for this client to run on. NOTE: This is incompatible with {@link #withRecommendedShardCount()}.
+	 *
+	 * @param shardIndex The shard to run on.
+	 * @param totalShards The total of number of shards being run.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder setShard(int shardIndex, int totalShards) {
+		if (totalShards >= shardIndex) throw new IllegalArgumentException("The shard index is out of bounds for the provided total shard count!");
+
+		this.shard = new int[]{shardIndex, totalShards};
+		return this;
+	}
+
+	/**
 	 * Creates the discord instance with the desired features
 	 *
 	 * @return The discord instance
@@ -253,13 +268,17 @@ public class ClientBuilder {
 	public IDiscordClient build() {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
+
+		if (withRecomendedShardCount && shard != null)
+			throw new DiscordException("Cannot use recommend shard count options with a specific shard!");
+
 		if (withRecomendedShardCount){
 			GatewayBotResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY + "/bot", GatewayBotResponse.class, new BasicNameValuePair("Authorization", "Bot " + botToken), new BasicNameValuePair("Content-Type", "application/json"));
 			shardCount = response.shards;
 		}
 
-		final IDiscordClient client = new DiscordClientImpl(botToken, shardCount, isDaemon, maxMissedPings,
-				maxReconnectAttempts, retryCount, maxCacheCount, provider);
+		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon, maxMissedPings,
+				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard);
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();

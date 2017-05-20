@@ -104,6 +104,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final ICacheDelegateProvider cacheProvider;
 
 	/**
+	 * The specific shard (if there is one) that the client is running on.
+	 */
+	private final int[] shard;
+
+	/**
 	 * The requests holder object.
 	 */
 	public final Requests REQUESTS = new Requests(this);
@@ -116,14 +121,15 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider) {
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
-		this.shardCount = shardCount;
+		this.shardCount = shardCount == -1 ? 1 : shardCount;
 		this.maxCacheCount = maxCacheCount;
 		this.cacheProvider = provider;
+		this.shard = shard;
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
@@ -297,17 +303,25 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		String gateway = obtainGateway();
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
-			for (int i = 0; i < shardCount; i++) {
-				final int shardNum = i;
-				ShardImpl shard = new ShardImpl(this, gateway, new int[] {shardNum, shardCount});
-				getShards().add(shardNum, shard);
-				shard.login();
+			if (shard != null) {
+				ShardImpl shardObj = new ShardImpl(this, gateway, new int[]{shard[0], shard[1]});
+				getShards().add(shardObj);
+				shardObj.login();
 
 				getDispatcher().waitFor(ShardReadyEvent.class);
+			} else {
+				for (int i = 0; i < shardCount; i++) {
+					final int shardNum = i;
+					ShardImpl shard = new ShardImpl(this, gateway, new int[]{shardNum, shardCount});
+					getShards().add(shardNum, shard);
+					shard.login();
 
-				if (i != shardCount - 1) { // all but last
-					Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
-					Thread.sleep(5000);
+					getDispatcher().waitFor(ShardReadyEvent.class);
+
+					if (i != shardCount - 1) { // all but last
+						Discord4J.LOGGER.trace(LogMarkers.API, "Sleeping for login ratelimit.");
+						Thread.sleep(5000);
+					}
 				}
 			}
 			getDispatcher().dispatch(new ReadyEvent());
