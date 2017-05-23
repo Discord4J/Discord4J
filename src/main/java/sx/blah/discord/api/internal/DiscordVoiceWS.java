@@ -116,7 +116,7 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 					users.put(response.ssrc, user);
 					guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.speaking));
 					break;
-				case UNKNOWN:
+				default:
 					Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
 					break;
 			}
