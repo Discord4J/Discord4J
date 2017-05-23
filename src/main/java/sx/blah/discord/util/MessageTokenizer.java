@@ -200,12 +200,10 @@ public class MessageTokenizer {
 		if (!hasNextWord())
 			throw new IllegalStateException("No more words found!");
 
-		{
+		{    // TODO Comment this block and why it's a block and not a method
 			Matcher matcher = WORD_PATTERN.matcher(remaining);
-			if (matcher.find()) {
-				if (matcher.start() == 0) {
-					stepTo(currentPosition + matcher.end());
-				}
+			if (matcher.find() && matcher.start() == 0) {
+				stepTo(currentPosition + matcher.end());
 			}
 		}
 
@@ -549,9 +547,9 @@ public class MessageTokenizer {
 		private UserMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getUserByID(Long.parseUnsignedLong(getContent().replaceAll("<@!?", "").replace(">", "")));
+			mention = tokenizer.getClient().getUserByID(Long.parseUnsignedLong(super.getContent().replaceAll("<@!?", "").replace(">", "")));
 
-			isNickname = getContent().contains("<@!");
+			isNickname = super.getContent().contains("<@!");
 		}
 
 		/**
@@ -576,7 +574,7 @@ public class MessageTokenizer {
 		private RoleMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getRoleByID(Long.parseUnsignedLong(getContent().replace("<@&", "").replace(">", "")));
+			mention = tokenizer.getClient().getRoleByID(Long.parseUnsignedLong(super.getContent().replace("<@&", "").replace(">", "")));
 		}
 	}
 
@@ -592,7 +590,7 @@ public class MessageTokenizer {
 		private ChannelMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
-			mention = tokenizer.getClient().getChannelByID(Long.parseUnsignedLong(getContent().replace("<#", "").replace(">", "")));
+			mention = tokenizer.getClient().getChannelByID(Long.parseUnsignedLong(super.getContent().replace("<#", "").replace(">", "")));
 		}
 	}
 
@@ -613,7 +611,7 @@ public class MessageTokenizer {
 		private CustomEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex);
 
-			final String content = getContent();
+			final String content = super.getContent();
 			final long emojiId = Long.parseUnsignedLong(content.substring(content.lastIndexOf(":") + 1, content.length()));
 
 			emoji = tokenizer.getClient().getGuilds().stream()
@@ -651,7 +649,7 @@ public class MessageTokenizer {
 			invite = RequestBuffer.request(() -> {
 				try {
 					return tokenizer.getClient()
-							.getInviteForCode(getContent().substring(getContent().lastIndexOf("/")));
+							.getInviteForCode(super.getContent().substring(super.getContent().lastIndexOf('/')));
 				} catch (DiscordException e) {
 					Discord4J.LOGGER.error(LogMarkers.UTIL, "Discord4J Internal Exception", e);
 				}
@@ -687,7 +685,7 @@ public class MessageTokenizer {
 		private UnicodeEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex);
 
-			String content = getContent();
+			String content = super.getContent();
 			boolean isUnicode = EmojiManager.isEmoji(content);
 			emoji = isUnicode ? EmojiManager.getByUnicode(content) : EmojiManager.getForAlias(content);
 		}
