@@ -45,302 +45,302 @@ import java.nio.ShortBuffer;
  */
 public interface Opus extends Library {
 
-    static String getNative() {
-        String lib = "/opus/" + Platform.RESOURCE_PREFIX;
-        if (lib.contains("darwin")) {
+	//  ****** Constants
+
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_LSB_DEPTH_REQUEST = (int) 4037;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_APPLICATION_REQUEST = (int) 4001;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_FORCE_CHANNELS_REQUEST = (int) 4023;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_VBR_REQUEST = (int) 4007;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_BANDWIDTH_REQUEST = (int) 4009;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_BITRATE_REQUEST = (int) 4002;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_BANDWIDTH_REQUEST = (int) 4008;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SIGNAL_MUSIC = (int) 3002;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_RESET_STATE = (int) 4028;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_FRAMESIZE_2_5_MS = (int) 5001;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_COMPLEXITY_REQUEST = (int) 4011;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_FRAMESIZE_40_MS = (int) 5005;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_PACKET_LOSS_PERC_REQUEST = (int) 4014;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_VBR_CONSTRAINT_REQUEST = (int) 4021;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_INBAND_FEC_REQUEST = (int) 4012;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_APPLICATION_RESTRICTED_LOWDELAY = (int) 2051;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BANDWIDTH_FULLBAND = (int) 1105;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_VBR_REQUEST = (int) 4006;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BANDWIDTH_SUPERWIDEBAND = (int) 1104;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_FORCE_CHANNELS_REQUEST = (int) 4022;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_APPLICATION_VOIP = (int) 2048;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SIGNAL_VOICE = (int) 3001;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_FINAL_RANGE_REQUEST = (int) 4031;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BUFFER_TOO_SMALL = (int) -2;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_COMPLEXITY_REQUEST = (int) 4010;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_FRAMESIZE_ARG = (int) 5000;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_LOOKAHEAD_REQUEST = (int) 4027;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_INBAND_FEC_REQUEST = (int) 4013;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BITRATE_MAX = (int) -1;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_FRAMESIZE_5_MS = (int) 5002;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BAD_ARG = (int) -1;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_PITCH_REQUEST = (int) 4033;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_SIGNAL_REQUEST = (int) 4024;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_FRAMESIZE_20_MS = (int) 5004;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_APPLICATION_AUDIO = (int) 2049;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_DTX_REQUEST = (int) 4017;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_FRAMESIZE_10_MS = (int) 5003;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_LSB_DEPTH_REQUEST = (int) 4036;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_UNIMPLEMENTED = (int) -5;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_PACKET_LOSS_PERC_REQUEST = (int) 4015;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_INVALID_STATE = (int) -6;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_EXPERT_FRAME_DURATION_REQUEST = (int) 4040;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_FRAMESIZE_60_MS = (int) 5006;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_BITRATE_REQUEST = (int) 4003;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_INTERNAL_ERROR = (int) -3;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_MAX_BANDWIDTH_REQUEST = (int) 4004;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_VBR_CONSTRAINT_REQUEST = (int) 4020;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_MAX_BANDWIDTH_REQUEST = (int) 4005;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BANDWIDTH_NARROWBAND = (int) 1101;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_GAIN_REQUEST = (int) 4034;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_PREDICTION_DISABLED_REQUEST = (int) 4042;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_APPLICATION_REQUEST = (int) 4000;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_SET_DTX_REQUEST = (int) 4016;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BANDWIDTH_MEDIUMBAND = (int) 1102;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_SAMPLE_RATE_REQUEST = (int) 4029;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_EXPERT_FRAME_DURATION_REQUEST = (int) 4041;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_AUTO = (int) -1000;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_SIGNAL_REQUEST = (int) 4025;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_LAST_PACKET_DURATION_REQUEST = (int) 4039;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_PREDICTION_DISABLED_REQUEST = (int) 4043;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_GET_GAIN_REQUEST = (int) 4045;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_BANDWIDTH_WIDEBAND = (int) 1103;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_INVALID_PACKET = (int) -4;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_ALLOC_FAIL = (int) -7;
+	/**
+	 * <i>native declaration : /tmp/opus_defines.h</i>
+	 */
+	public static final int OPUS_OK = (int) 0;
+
+	/**
+	 * <i>native declaration : /tmp/opus_multistream.h</i>
+	 */
+	public static final int OPUS_MULTISTREAM_GET_DECODER_STATE_REQUEST = (int) 5122;
+	/**
+	 * <i>native declaration : /tmp/opus_multistream.h</i>
+	 */
+	public static final int OPUS_MULTISTREAM_GET_ENCODER_STATE_REQUEST = (int) 5120;
+
+	static String getNative() {
+		String lib = "/opus/" + Platform.RESOURCE_PREFIX;
+		if (lib.contains("darwin")) {
 			lib += "/libopus.dylib";
 		} else if (lib.contains("win")) {
 			if (lib.endsWith("x86"))
 				lib += "-32";
 			lib += "/libopus.dll";
-        } else if (lib.contains("linux")) {
+		} else if (lib.contains("linux")) {
 			if (lib.endsWith("x86"))
 				lib += "-32";
-            lib += "/libopus.so";
-        } else {
-            throw new RuntimeException("We don't support audio for this operating system. Sorry!");
-        }
-        try {
-            NativeUtils.loadLibraryFromJar(lib);
-        } catch (IOException e) {
+			lib += "/libopus.so";
+		} else {
+			throw new RuntimeException("We don't support audio for this operating system. Sorry!");
+		}
+		try {
+			NativeUtils.loadLibraryFromJar(lib);
+		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.VOICE, "Discord4J Internal Exception", e);
-        }
-        return lib;
-    }
+		}
+		return lib;
+	}
 
     public static final Opus INSTANCE = (Opus) Native.loadLibrary(getNative(), Opus.class);
-
-    //  ****** Constants
-
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_LSB_DEPTH_REQUEST = (int) 4037;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_APPLICATION_REQUEST = (int) 4001;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_FORCE_CHANNELS_REQUEST = (int) 4023;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_VBR_REQUEST = (int) 4007;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_BANDWIDTH_REQUEST = (int) 4009;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_BITRATE_REQUEST = (int) 4002;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_BANDWIDTH_REQUEST = (int) 4008;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SIGNAL_MUSIC = (int) 3002;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_RESET_STATE = (int) 4028;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_FRAMESIZE_2_5_MS = (int) 5001;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_COMPLEXITY_REQUEST = (int) 4011;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_FRAMESIZE_40_MS = (int) 5005;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_PACKET_LOSS_PERC_REQUEST = (int) 4014;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_VBR_CONSTRAINT_REQUEST = (int) 4021;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_INBAND_FEC_REQUEST = (int) 4012;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_APPLICATION_RESTRICTED_LOWDELAY = (int) 2051;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BANDWIDTH_FULLBAND = (int) 1105;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_VBR_REQUEST = (int) 4006;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BANDWIDTH_SUPERWIDEBAND = (int) 1104;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_FORCE_CHANNELS_REQUEST = (int) 4022;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_APPLICATION_VOIP = (int) 2048;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SIGNAL_VOICE = (int) 3001;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_FINAL_RANGE_REQUEST = (int) 4031;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BUFFER_TOO_SMALL = (int) -2;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_COMPLEXITY_REQUEST = (int) 4010;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_FRAMESIZE_ARG = (int) 5000;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_LOOKAHEAD_REQUEST = (int) 4027;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_INBAND_FEC_REQUEST = (int) 4013;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BITRATE_MAX = (int) -1;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_FRAMESIZE_5_MS = (int) 5002;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BAD_ARG = (int) -1;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_PITCH_REQUEST = (int) 4033;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_SIGNAL_REQUEST = (int) 4024;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_FRAMESIZE_20_MS = (int) 5004;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_APPLICATION_AUDIO = (int) 2049;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_DTX_REQUEST = (int) 4017;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_FRAMESIZE_10_MS = (int) 5003;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_LSB_DEPTH_REQUEST = (int) 4036;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_UNIMPLEMENTED = (int) -5;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_PACKET_LOSS_PERC_REQUEST = (int) 4015;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_INVALID_STATE = (int) -6;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_EXPERT_FRAME_DURATION_REQUEST = (int) 4040;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_FRAMESIZE_60_MS = (int) 5006;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_BITRATE_REQUEST = (int) 4003;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_INTERNAL_ERROR = (int) -3;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_MAX_BANDWIDTH_REQUEST = (int) 4004;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_VBR_CONSTRAINT_REQUEST = (int) 4020;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_MAX_BANDWIDTH_REQUEST = (int) 4005;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BANDWIDTH_NARROWBAND = (int) 1101;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_GAIN_REQUEST = (int) 4034;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_PREDICTION_DISABLED_REQUEST = (int) 4042;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_APPLICATION_REQUEST = (int) 4000;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_SET_DTX_REQUEST = (int) 4016;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BANDWIDTH_MEDIUMBAND = (int) 1102;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_SAMPLE_RATE_REQUEST = (int) 4029;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_EXPERT_FRAME_DURATION_REQUEST = (int) 4041;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_AUTO = (int) -1000;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_SIGNAL_REQUEST = (int) 4025;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_LAST_PACKET_DURATION_REQUEST = (int) 4039;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_PREDICTION_DISABLED_REQUEST = (int) 4043;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_GET_GAIN_REQUEST = (int) 4045;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_BANDWIDTH_WIDEBAND = (int) 1103;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_INVALID_PACKET = (int) -4;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_ALLOC_FAIL = (int) -7;
-    /**
-     * <i>native declaration : /tmp/opus_defines.h</i>
-     */
-    public static final int OPUS_OK = (int) 0;
-
-    /**
-     * <i>native declaration : /tmp/opus_multistream.h</i>
-     */
-    public static final int OPUS_MULTISTREAM_GET_DECODER_STATE_REQUEST = (int) 5122;
-    /**
-     * <i>native declaration : /tmp/opus_multistream.h</i>
-     */
-    public static final int OPUS_MULTISTREAM_GET_ENCODER_STATE_REQUEST = (int) 5120;
 
     /**
      * Gets the size of an <code>OpusEncoder</code> structure.<br>
