@@ -25,11 +25,13 @@ import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
+import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
 import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.User;
+import sx.blah.discord.handle.impl.obj.VoiceState;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
@@ -400,6 +402,28 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void streaming(String playingText, String streamingUrl) {
 		getShards().forEach(s -> s.streaming(playingText, streamingUrl));
+	}
+
+	@Override
+	public void mute(IGuild guild, boolean isSelfMuted) {
+		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
+		String channelID = voiceState.getChannel() == null ? null : voiceState.getChannel().getStringID();
+
+		voiceState.setSelfMuted(isSelfMuted);
+
+		((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(
+				guild.getStringID(), channelID, isSelfMuted, voiceState.isSelfDeafened()));
+	}
+
+	@Override
+	public void deafen(IGuild guild, boolean isSelfDeafened) {
+		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
+		String channelID = voiceState.getChannel() == null ? null : voiceState.getChannel().getStringID();
+
+		voiceState.setSelfDeafened(isSelfDeafened);
+
+		((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(
+				guild.getStringID(), channelID, voiceState.isSelfMuted(), isSelfDeafened));
 	}
 
 	@Override
