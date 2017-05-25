@@ -30,8 +30,8 @@ public class VoiceState implements IVoiceState {
 	private final String sessionID;
 	private boolean isDeafened;
 	private boolean isMuted;
-	private final boolean isSelfDeafened;
-	private final boolean isSelfMuted;
+	private boolean isSelfDeafened;
+	private boolean isSelfMuted;
 	private final boolean isSuppressed;
 
 	public VoiceState(IGuild guild, IVoiceChannel channel, IUser user, String sessionID, boolean isDeafened, boolean isMuted, boolean isSelfDeafened, boolean isSelfMuted, boolean isSuppressed) {
@@ -93,9 +93,17 @@ public class VoiceState implements IVoiceState {
 		return isSelfDeafened;
 	}
 
+	public void setSelfDeafened(boolean isSelfDeafened) {
+		this.isSelfDeafened = isSelfDeafened;
+	}
+
 	@Override
 	public boolean isSelfMuted() {
 		return isSelfMuted;
+	}
+
+	public void setSelfMuted(boolean isSelfMuted) {
+		this.isSelfMuted = isSelfMuted;
 	}
 
 	@Override

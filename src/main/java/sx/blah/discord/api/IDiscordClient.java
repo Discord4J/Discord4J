@@ -156,6 +156,22 @@ public interface IDiscordClient {
 	void streaming(String playingText, String streamingUrl);
 
 	/**
+	 * Changes this user's self-muted state in a guild.
+	 *
+	 * @param guild The guild to mute this user in.
+	 * @param isSelfMuted The new self-muted state.
+	 */
+	void mute(IGuild guild, boolean isSelfMuted);
+
+	/**
+	 * Changes this user's self-deafened state in a guild.
+	 *
+	 * @param guild The guild to deafen this user in.
+	 * @param isSelfDeafened The new self-deafened state.
+	 */
+	void deafen(IGuild guild, boolean isSelfDeafened);
+
+	/**
 	 * Checks if the api is ready to be interacted with on all shards.
 	 * @see IShard#isReady()
 	 *
