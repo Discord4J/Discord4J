@@ -390,7 +390,9 @@ class DispatchHandler {
 			}
 
 			String oldNick = user.getNicknameForGuild(guild);
-			if (oldNick != null && !oldNick.equals(event.nick)) {
+			if ((oldNick == null ^ event.nick == null)
+					|| (oldNick != null && !oldNick.equals(event.nick))
+					|| event.nick != null && !event.nick.equals(oldNick)) {
 				user.addNick(guild.getLongID(), event.nick);
 				client.dispatcher.dispatch(new NickNameChangeEvent(guild, user, oldNick, event.nick));
 			}
