@@ -43,7 +43,7 @@ public class UDPVoiceSocket {
 	private DatagramSocket udpSocket;
 	private InetSocketAddress address;
 
-	private HighPrecisionRecurrentTask audioTask;
+	private volatile HighPrecisionRecurrentTask audioTask;
 
 	private byte[] secret;
 	private boolean isSpeaking = false;
