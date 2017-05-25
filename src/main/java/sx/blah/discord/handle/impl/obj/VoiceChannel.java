@@ -120,10 +120,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		DiscordUtils.checkPermissions(getClient().getOurUser(), this, EnumSet.of(Permissions.VOICE_CONNECT));
 
 		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
-		boolean isMuted = voiceState != null && voiceState.isMuted();
-		boolean isDeafened = voiceState != null && voiceState.isDeafened();
+		boolean isSelfMuted = voiceState != null && voiceState.isSelfMuted();
+		boolean isSelfDeafened = voiceState != null && voiceState.isSelfDeafened();
+
 		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
-				new VoiceStateUpdateRequest(getGuild().getStringID(), getStringID(), isMuted, isDeafened));
+				new VoiceStateUpdateRequest(getGuild().getStringID(), getStringID(), isSelfMuted, isSelfDeafened));
 	}
 
 	@Override
@@ -132,11 +133,11 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		if (!isConnected()) return;
 
 		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
-		boolean isMuted = voiceState != null && voiceState.isMuted();
-		boolean isDeafened = voiceState != null && voiceState.isDeafened();
+		boolean isSelfMuted = voiceState != null && voiceState.isSelfMuted();
+		boolean isSelfDeafened = voiceState != null && voiceState.isSelfDeafened();
 
 		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
-				new VoiceStateUpdateRequest(getGuild().getStringID(), null, isMuted, isDeafened));
+				new VoiceStateUpdateRequest(getGuild().getStringID(), null, isSelfMuted, isSelfDeafened));
 
 		DiscordVoiceWS vWS = ((ShardImpl) getShard()).voiceWebSockets.get(getGuild().getLongID());
 		if (vWS != null) {
