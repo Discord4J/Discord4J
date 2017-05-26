@@ -693,10 +693,15 @@ class DispatchHandler {
 		if (oldWS != null) {
 			oldWS.disconnect(VoiceDisconnectedEvent.Reason.SERVER_UPDATE);
 		}
-
-		DiscordVoiceWS vWS = new DiscordVoiceWS(shard, event);
-		shard.voiceWebSockets.put(vWS);
-		vWS.connect();
+		
+		if (event.endpoint == null) {
+			Discord4J.LOGGER.debug(LogMarkers.VOICE, "Awaiting endpoint to join voice channel in guild id {}...", event.guild_id);
+		} else {
+			Discord4J.LOGGER.trace(LogMarkers.VOICE, "Voice endpoint received! Connecting to {}...", event.endpoint);
+			DiscordVoiceWS vWS = new DiscordVoiceWS(shard, event);
+			shard.voiceWebSockets.put(vWS);
+			vWS.connect();
+		}
 	}
 
 	private void guildEmojisUpdate(GuildEmojiUpdateResponse event) {
