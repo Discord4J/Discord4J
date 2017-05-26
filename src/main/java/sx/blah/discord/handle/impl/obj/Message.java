@@ -138,7 +138,7 @@ public class Message implements IMessage {
 	/**
 	 * The ID of the webhook that sent this message
 	 */
-	protected final Long webhookID;
+	protected final long webhookID;
 
 	/**
 	 * The pattern for matching channel mentions.
@@ -153,7 +153,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embed> embeds, List<IReaction> reactions, Long webhookID) {
+				   boolean pinned, List<Embed> embeds, List<IReaction> reactions, long webhookID) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
