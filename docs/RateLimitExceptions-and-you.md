@@ -33,3 +33,17 @@ RequestBuffer.request(() -> {
     }
 });
 ``` 
+#### RequestBuilder
+
+Another alternative to solving RLEs is to use the `RequestBuilder` class. The main advantage to `RequestBuilder` over `RequestBuffer` is `RequestBuilder` will automatically log any exceptions thrown for you versus either letting exceptions be thrown or you having to do so manually.
+
+```java
+RequestBuilder builder = new RequestBuilder(client);
+builder.shouldBufferRequests(true);
+// You may optionally setup management to particular exceptions using methods such as onDiscordError(), onMissingPermissionsError(), etc.
+builder.doAction(() -> {
+    // Some code here
+    // Return true or false depending if the action "succeeded"
+});
+// Optionally, you can even chain more actions by using the andThen() method!
+```
