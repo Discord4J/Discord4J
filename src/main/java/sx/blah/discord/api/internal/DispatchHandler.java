@@ -61,7 +61,7 @@ class DispatchHandler {
 			try {
 				String type = event.get("t").asText();
 				JsonNode json = event.get("d");
-				switch (type) {
+				switch (type) { // TODO make this a map instead of a switch case
 					case "RESUMED":
 						resumed();
 						break;
@@ -669,8 +669,8 @@ class DispatchHandler {
 
 			user.voiceStates.put(DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(Long.parseUnsignedLong(json.guild_id)), json));
 
-			if (oldChannel != channel) {
-				if (channel == null) {
+			if (oldChannel != channel) { // Not a .equals as null cases are handled below and D4J does a good
+				if (channel == null) {   // job of reference equals.
 					client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
 				} else if (oldChannel == null) {
 					client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));

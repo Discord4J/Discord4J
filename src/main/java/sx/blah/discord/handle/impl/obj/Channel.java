@@ -774,7 +774,7 @@ public class Channel implements IChannel {
 						return;
 					}
 					try {
-						((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getLongID() + "/typing");
+						client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getLongID() + "/typing");
 					} catch (RateLimitException | DiscordException e) {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 					}
@@ -843,7 +843,7 @@ public class Channel implements IChannel {
 	public void delete() {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNELS));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id);
+		client.REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id);
 	}
 
 	@Override
@@ -888,8 +888,7 @@ public class Channel implements IChannel {
 		EnumSet<Permissions> base = role.getPermissions();
 		PermissionOverride override = roleOverrides.get(role.getLongID());
 
-		if (override == null) {
-			if ((override = roleOverrides.get(guild.getEveryoneRole().getLongID())) == null)
+		if (override == null && (override = roleOverrides.get(guild.getEveryoneRole().getLongID())) == null) {
 				return base;
 		}
 
@@ -903,7 +902,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IUser user) {
 		DiscordUtils.checkPermissions(client, this, user.getRolesForGuild(guild), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+user.getStringID());
+		client.REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + getStringID() + "/permissions/" + user.getStringID());
 
 		userOverrides.remove(user.getLongID());
 	}
@@ -912,7 +911,7 @@ public class Channel implements IChannel {
 	public void removePermissionsOverride(IRole role) {
 		DiscordUtils.checkPermissions(client, this, Collections.singletonList(role), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+role.getStringID());
+		client.REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + getStringID() + "/permissions/" + role.getStringID());
 
 		roleOverrides.remove(role.getLongID());
 	}
@@ -930,7 +929,7 @@ public class Channel implements IChannel {
 	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_PERMISSIONS));
 
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+		client.REQUESTS.PUT.makeRequest(
 				DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+id,
 				new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)));
 	}
@@ -974,7 +973,7 @@ public class Channel implements IChannel {
 	@Override
 	public List<IMessage> getPinnedMessages() {
 		List<IMessage> messages = new ArrayList<>();
-		MessageObject[] pinnedMessages = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+		MessageObject[] pinnedMessages = client.REQUESTS.GET.makeRequest(
 				DiscordEndpoints.CHANNELS + id + "/pins",
 				MessageObject[].class);
 
@@ -994,7 +993,7 @@ public class Channel implements IChannel {
 		if (message.isPinned())
 			throw new DiscordException("Message already pinned!");
 
-		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getStringID());
+		client.REQUESTS.PUT.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getStringID());
 	}
 
 	@Override
@@ -1007,7 +1006,7 @@ public class Channel implements IChannel {
 		if (!message.isPinned())
 			throw new DiscordException("Message already unpinned!");
 
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getStringID());
+		client.REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getStringID());
 	}
 
 	@Override
@@ -1045,7 +1044,7 @@ public class Channel implements IChannel {
 		if (name == null || name.length() < 2 || name.length() > 32)
 			throw new DiscordException("Webhook name can only be between 2 and 32 characters!");
 
-		WebhookObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+		WebhookObject response = client.REQUESTS.POST.makeRequest(
 				DiscordEndpoints.CHANNELS + getStringID() + "/webhooks",
 				new WebhookCreateRequest(name, avatar),
 				WebhookObject.class);
@@ -1070,7 +1069,7 @@ public class Channel implements IChannel {
 						.map(IWebhook::copy)
 						.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
-				WebhookObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+				WebhookObject[] response = client.REQUESTS.GET.makeRequest(
 						DiscordEndpoints.CHANNELS + getStringID() + "/webhooks",
 						WebhookObject[].class);
 
