@@ -515,6 +515,7 @@ public class Channel implements IChannel {
 
 		List<IMessage> toDelete = messages.stream()
 				.filter(msg -> msg.getLongID() >= (((System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000) - 1420070400000L) << 22)) // Taken from Jake
+				.distinct()
 				.collect(Collectors.toList());
 
 		if (toDelete.size() < 1)
