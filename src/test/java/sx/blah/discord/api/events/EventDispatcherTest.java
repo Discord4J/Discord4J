@@ -216,6 +216,28 @@ public class EventDispatcherTest {
 		assertTrue(handled.get());
 	}
 
+	@Test
+	public void testDispatcherBackpressure() throws Exception {
+		EventDispatcher eventDispatcher = new EventDispatcher(null);
+		AtomicBoolean backpressured = new AtomicBoolean(false);
+		Thread thisThread = Thread.currentThread();
+
+		eventDispatcher.registerListener((IListener<MyEvent>) evt -> {
+			if (Thread.currentThread() == thisThread) {
+				backpressured.set(true);
+			} else {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+		});
+		while (!backpressured.get()) {
+			eventDispatcher.dispatch(new MyEvent());
+		}
+	}
+
 	private AtomicReference<HashSet<Object>> getInternalRegistry(EventDispatcher dispatcher) throws Exception {
 		Field declaredField = EventDispatcher.class.getDeclaredField("listenersRegistry");
 		declaredField.setAccessible(true);
