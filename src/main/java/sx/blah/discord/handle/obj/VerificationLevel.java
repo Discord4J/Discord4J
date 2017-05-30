@@ -38,6 +38,10 @@ public enum VerificationLevel {
 	 */
 	HIGH,
 	/**
+	 * Represents a verification level of ┻━┻ ﾐヽ(ಠ益ಠ)ノ彡┻━┻
+	 */
+	EXTREME,
+	/**
 	 * Unknown verification level
 	 */
 	UNKNOWN;
