@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +53,7 @@ public class EventDispatcher {
 	private final AtomicReference<HashSet<EventHandler>> listenersRegistry = new AtomicReference<>(new HashSet<>());
 	private final ExecutorService defaultEventExecutor = new ThreadPoolExecutor(
 			Runtime.getRuntime().availableProcessors() * 2, Runtime.getRuntime().availableProcessors() * 2, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100),
-			DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"), new ThreadPoolExecutor.CallerRunsPolicy());
+			DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"), new CallerRunsPolicy());
 	/**
 	 * special executor used for waitFor.
 	 *
@@ -760,5 +761,23 @@ public class EventDispatcher {
 		public String toString() {
 			return listener.getClass().getSimpleName();
 		}
+	}
+
+	private class CallerRunsPolicy implements RejectedExecutionHandler {
+
+		long lastNotification = 0;
+
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			long now = System.currentTimeMillis();
+			synchronized(this)  {
+				if (now - lastNotification >= 5000) {
+					Discord4J.LOGGER.warn(LogMarkers.EVENTS, "Event buffer limit exceeded, refer to the class-level javadocs for sx.blah.discord.api.events.EventDispatcher for more information.");
+					lastNotification = now;
+				}
+			}
+			if (!executor.isShutdown()) r.run();
+		}
+
 	}
 }
