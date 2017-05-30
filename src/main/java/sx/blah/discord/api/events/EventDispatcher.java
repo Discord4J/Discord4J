@@ -46,6 +46,23 @@ import java.util.stream.Stream;
 
 /**
  * Manages event listeners and event logic.
+ * 
+ * The EventDispatcher stores a registry of listeners which are used on every event being dispatched. Dispatching of these events happens asynchronously
+ * either on user provided threadpools, or a default threadpool.
+ * <p/>
+ * When registering a listener, the client has the option of specifying the thread pool for that particular listener, this way, different listeners are effectively
+ * isolated in terms of threads, avoiding possible thread starvation.
+ * <p/>
+ * <b>Note on the default thread pool:</b>
+ * It is assumed that when the user doesn't specify a threadpool, it's D4J responsibility to ensure correct asynchronous behavior. Because we have no control
+ * whether a user blocks the thread belonging to the default executor or not, defensive measures must be taken not to overflow resources such as ram or cpu, which would
+ * ultimately lead to a dead JVM. In this regard, the default executor is instantiated to a sensible amount of threads depending on the available cores on the machine
+ * and supports a small events queue so as to handle bursts of events, nevertheless, if this queue gets filled up, it will slow down accordingly the producer of events
+ * by forcing them to execute the listeners themselves. This has the desired effect of causing the Gateway threads to not process any more events, until consumers are 
+ * available in the downstream listeners.
+ * <p/>
+ * You are encouraged to provide your own threadpool to your listeners to have proper control of resources, using a ThreadPoolExecutor.CallerRunsPolicy rejection policy
+ * to allow proper backpressure in case your threads are overwhelmed.
  */
 public class EventDispatcher {
 
