@@ -53,6 +53,10 @@ public class UDPVoiceSocket {
 
 	private int silenceToSend = 5;
 
+	// Used to ensure begin() must be called before shutdown(). A call to either method out of order will be ignored.
+	private boolean hasBegun = false;
+	private boolean wasShutdown = false;
+
 	private final Runnable sendRunnable = () -> {
 		try {
 			byte[] audio = ((AudioManager) voiceWS.getGuild().getAudioManager()).sendAudio();
@@ -139,24 +143,30 @@ public class UDPVoiceSocket {
 		}
 	}
 
-	void begin() {
-		audioTask = new HighPrecisionRecurrentTask(OpusUtil.OPUS_FRAME_TIME, 0.01f, () -> {
-			synchronized (udpSocket) { //while the the audio handling is happening, lock the socket so no concurrent shutdown happens
-				if (!udpSocket.isClosed()) {
-					sendRunnable.run();
-					receiveRunnable.run();
-					keepAliveRunnable.run();
+	synchronized void begin() {
+		if (!hasBegun && !wasShutdown) {
+			hasBegun = true;
+			audioTask = new HighPrecisionRecurrentTask(OpusUtil.OPUS_FRAME_TIME, 0.01f, () -> {
+				synchronized (udpSocket) { //while the the audio handling is happening, lock the socket so no concurrent shutdown happens
+					if (!udpSocket.isClosed()) {
+						sendRunnable.run();
+						receiveRunnable.run();
+						keepAliveRunnable.run();
+					}
 				}
-			}
-		});
-		audioTask.setDaemon(true);
-		audioTask.start();
+			});
+			audioTask.setDaemon(true);
+			audioTask.start();
+		}
 	}
 
-	void shutdown() {
-		audioTask.setStop(true);
-		synchronized (udpSocket) {
-			udpSocket.close();
+	synchronized void shutdown() {
+		if (hasBegun && !wasShutdown) {
+			wasShutdown = true;
+			audioTask.setStop(true);
+			synchronized (udpSocket) {
+				udpSocket.close();
+			}
 		}
 	}
 
