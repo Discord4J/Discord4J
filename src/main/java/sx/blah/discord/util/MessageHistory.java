@@ -137,8 +137,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 
 	public boolean contains(long id) {
 		return Arrays.stream(backing)
-				.filter(msg -> msg.getLongID() == id)
-				.count() > 0;
+				.anyMatch(msg -> msg.getLongID() == id);
 	}
 
 	/**
@@ -147,7 +146,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The new instance.
 	 */
 	public MessageHistory copy() {
-		return new MessageHistory(backing);
+		return new MessageHistory(Arrays.copyOf(backing, backing.length));
 	}
 
 	/**
