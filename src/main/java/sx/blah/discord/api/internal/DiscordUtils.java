@@ -117,7 +117,7 @@ public class DiscordUtils {
 	/**
 	 * Pattern for Discord's valid streaming URL strings passed to {@link IShard#streaming(String, String)}
 	 */
-	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://twitch\\.tv/.+");
+	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://(www\\.)?twitch\\.tv/.+");
 
 	/**
 	 * Converts a String timestamp into a java object timestamp.
