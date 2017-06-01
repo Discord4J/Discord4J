@@ -24,12 +24,15 @@ import sx.blah.discord.handle.impl.events.guild.channel.message.MessageEvent;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
+import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class EventDispatcherTest {
 
@@ -197,6 +200,42 @@ public class EventDispatcherTest {
 		eventDispatcher.dispatch(new MyEvent());
 		MyEvent result = interThreadExchange.poll(1, TimeUnit.MINUTES);
 		assertNotNull(result);
+	}
+
+	@Test
+	public void testDispatchWithCustomExecutor() throws Exception {
+		EventDispatcher eventDispatcher = new EventDispatcher(null);
+		AtomicBoolean handled = new AtomicBoolean(false); //doesn't need to be atomic at all, but it's the easiest mutable boolean I can use within a subclas
+		Executor localThreadExecutor = (Runnable command) -> {
+			command.run();
+			handled.set(true);
+		};
+		eventDispatcher.registerListener(localThreadExecutor, (IListener<MyEvent>) (MyEvent event) -> {
+		});
+		eventDispatcher.dispatch(new MyEvent());
+		assertTrue(handled.get());
+	}
+
+	@Test
+	public void testDispatcherBackpressure() throws Exception {
+		EventDispatcher eventDispatcher = new EventDispatcher(null);
+		AtomicBoolean backpressured = new AtomicBoolean(false);
+		Thread thisThread = Thread.currentThread();
+
+		eventDispatcher.registerListener((IListener<MyEvent>) evt -> {
+			if (Thread.currentThread() == thisThread) {
+				backpressured.set(true);
+			} else {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+		});
+		while (!backpressured.get()) {
+			eventDispatcher.dispatch(new MyEvent());
+		}
 	}
 
 	private AtomicReference<HashSet<Object>> getInternalRegistry(EventDispatcher dispatcher) throws Exception {
