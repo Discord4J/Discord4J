@@ -41,15 +41,13 @@ In your `build.gradle` add (without the ellipses):
 ```groovy
 ...
 repositories {
-  ...
   jcenter() //This prevents issues with transitive dependencies
   maven {
     url  "https://jitpack.io"
   }
 }
-...
+
 dependencies {
-  ...
   compile "com.github.austinv11:Discord4J:@VERSION@"
   //compile "com.github.austinv11:Discord4J:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)
 }
