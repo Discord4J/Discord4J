@@ -302,9 +302,9 @@ public class DiscordUtils {
 			if (json.channels != null)
 				for (ChannelObject channelResponse : json.channels) {
 					String channelType = channelResponse.type;
-					if (channelType.equalsIgnoreCase("text")) {
+					if ("text".equalsIgnoreCase(channelType)) {
 						guild.channels.put(getChannelFromJSON(guild, channelResponse));
-					} else if (channelType.equalsIgnoreCase("voice")) {
+					} else if ("voice".equalsIgnoreCase(channelType)) {
 						guild.voiceChannels.put(getVoiceChannelFromJSON(guild, channelResponse));
 					}
 				}
@@ -314,11 +314,12 @@ public class DiscordUtils {
 					final AtomicReference<IUser> user = new AtomicReference<>(guild.getUserByID(Long.parseUnsignedLong(voiceState.user_id)));
 					if (user.get() == null) {
 						new RequestBuilder(shard.getClient()).shouldBufferRequests(true).doAction(() -> {
-							if (user.get() == null) user.set(shard.fetchUser(Long.parseUnsignedLong(voiceState.user_id)));
+							if (user.get() == null)
+								user.set(shard.fetchUser(Long.parseUnsignedLong(voiceState.user_id)));
 							return true;
 						}).execute();
 					}
-					if (user.get()!= null)
+					if (user.get() != null)
 						((User) user.get()).voiceStates.put(DiscordUtils.getVoiceStateFromJson(guild, voiceState));
 				}
 			}
@@ -340,19 +341,14 @@ public class DiscordUtils {
 	 * @return The emoji object.
 	 */
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
-		EmojiImpl emoji = new EmojiImpl(guild, Long.parseUnsignedLong(json.id), json.name, json.require_colons, json.managed, json.roles);
-
-		return emoji;
+		return new EmojiImpl(guild, Long.parseUnsignedLong(json.id), json.name, json.require_colons, json.managed, json.roles);
 	}
 
 	public static IReaction getReactionFromJSON(IShard shard, MessageObject.ReactionObject object) {
-		Reaction reaction = new Reaction(shard, object.count, new CopyOnWriteArrayList<>(),
+		return new Reaction(shard, object.count, new CopyOnWriteArrayList<>(),
 				object.emoji.id != null
 						? object.emoji.id
 						: object.emoji.name, object.emoji.id != null);
-
-
-		return reaction;
 	}
 
 	public static List<IReaction> getReactionsFromJson(IShard shard, MessageObject.ReactionObject[] objects) {
@@ -361,8 +357,7 @@ public class DiscordUtils {
 		if (objects != null) {
 			for (MessageObject.ReactionObject obj : objects) {
 				IReaction r = getReactionFromJSON(shard, obj);
-				if (r != null)
-					reactions.add(r);
+				reactions.add(r);
 			}
 		}
 
@@ -378,6 +373,9 @@ public class DiscordUtils {
 	 */
 	public static IUser getUserFromGuildMemberResponse(IGuild guild, MemberObject json) {
 		User user = getUserFromJSON(guild.getShard(), json.user);
+		if (user == null) {
+			return null;
+		}
 		for (String role : json.roles) {
 			Role roleObj = (Role) guild.getRoleByID(Long.parseUnsignedLong(role));
 			if (roleObj != null && !user.getRolesForGuild(guild).contains(roleObj))
@@ -500,7 +498,7 @@ public class DiscordUtils {
 	 * Creates a webhook object from a json response.
 	 *
 	 * @param channel The webhook.
-	 * @param json The json response.
+	 * @param json    The json response.
 	 * @return The message object.
 	 */
 	public static IWebhook getWebhookFromJSON(IChannel channel, WebhookObject json) {
@@ -566,12 +564,12 @@ public class DiscordUtils {
 		Cache<IChannel.PermissionOverride> roleOverrides = new Cache<>(client, IChannel.PermissionOverride.class);
 
 		for (OverwriteObject overrides : overwrites) {
-			if (overrides.type.equalsIgnoreCase("role")) {
+			if ("role".equalsIgnoreCase(overrides.type)) {
 				roleOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
-			} else if (overrides.type.equalsIgnoreCase("member")) {
+						Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
+			} else if ("member".equalsIgnoreCase(overrides.type)) {
 				userOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
-								Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
+						Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
 			} else {
 				Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
 			}
@@ -650,7 +648,7 @@ public class DiscordUtils {
 	 * Creates a voice state object from a json response.
 	 *
 	 * @param guild The guild the voice state is in.
-	 * @param json The json response.
+	 * @param json  The json response.
 	 * @return The voice state object.
 	 */
 	public static IVoiceState getVoiceStateFromJson(IGuild guild, VoiceStateObject json) {
@@ -774,7 +772,7 @@ public class DiscordUtils {
 	 * @param required The permissions required.
 	 * @throws MissingPermissionsException This is thrown if the permissions required aren't present.
 	 */
-	public static void checkPermissions(IDiscordClient client, IChannel channel, List<IRole> roles, EnumSet<Permissions> required)  {
+	public static void checkPermissions(IDiscordClient client, IChannel channel, List<IRole> roles, EnumSet<Permissions> required) {
 		checkPermissions(client.getOurUser(), channel, roles, required);
 	}
 
@@ -819,7 +817,7 @@ public class DiscordUtils {
 			if (!contained.contains(requiredPermission))
 				missing.add(requiredPermission);
 		}
-		if (missing.size() > 0)
+		if (!missing.isEmpty())
 			throw new MissingPermissionsException(missing);
 	}
 
@@ -854,7 +852,7 @@ public class DiscordUtils {
 	 * This checks if user can interact with the set of provided roles by checking their role hierarchies.
 	 *
 	 * @param guild The guild to check from.
-	 * @param user The first user to check.
+	 * @param user  The first user to check.
 	 * @param roles The roles to check.
 	 * @return True if user's role hierarchy position > provided roles hierarchy.
 	 */
@@ -939,8 +937,6 @@ public class DiscordUtils {
 
 		if (!a.getClass().isAssignableFrom(b.getClass())) return false;
 
-		if (((IDiscordObject) a).getLongID() != ((IDiscordObject) b).getLongID()) return false;
-
-		return true;
+		return ((IDiscordObject) a).getLongID() == ((IDiscordObject) b).getLongID();
 	}
 }

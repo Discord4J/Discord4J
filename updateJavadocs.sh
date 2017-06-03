@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export JAVA_HOME="`/usr/libexec/java_home -v '1.8*'`" #Using 1.8 Java
+export JAVA_HOME="$(/usr/libexec/java_home -v '1.8*')" #Using 1.8 Java
 echo "Enter the version number to use"
 read
 DIR=${REPLY//./-} #Replaces the periods with dashes

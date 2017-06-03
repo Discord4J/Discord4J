@@ -100,7 +100,7 @@ public class MessageOutputStream extends OutputStream {
 
 		final AtomicReference<IOException> exceptionReference = new AtomicReference<>();
 
-		if (buf.get().size() > 0)
+		if (!buf.get().isEmpty())
 			RequestBuffer.request(() -> {
 				try {
 					IMessage currentMessage = getCurrentMessage();
@@ -110,11 +110,10 @@ public class MessageOutputStream extends OutputStream {
 					} else {
 						messages.add(channel.sendMessage(getStringFromCharBuffer(MAX_MESSAGE_LENGTH)));
 					}
+				} catch (RateLimitException rle) {
+					throw rle;
 				} catch (Exception e) {
-					if (e instanceof RateLimitException)
-						throw (RateLimitException) e;
-					else
-						exceptionReference.set(new IOException(e));
+					exceptionReference.set(new IOException(e));
 				}
 			});
 

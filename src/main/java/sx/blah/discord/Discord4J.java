@@ -96,22 +96,22 @@ public class Discord4J {
 		}
 
 		@Override
-		public void warn(String msg, Object... args) {}
+		public void warn(String msg, Object... args) { /* All logging is disabled */ }
 
 		@Override
-		public void warn(Throwable thrown) {}
+		public void warn(Throwable thrown) { /* All logging is disabled */ }
 
 		@Override
-		public void warn(String msg, Throwable thrown) {}
+		public void warn(String msg, Throwable thrown) { /* All logging is disabled */ }
 
 		@Override
-		public void info(String msg, Object... args) {}
+		public void info(String msg, Object... args) { /* All logging is disabled */ }
 
 		@Override
-		public void info(Throwable thrown) {}
+		public void info(Throwable thrown) { /* All logging is disabled */ }
 
 		@Override
-		public void info(String msg, Throwable thrown) {}
+		public void info(String msg, Throwable thrown) { /* All logging is disabled */ }
 
 		@Override
 		public boolean isDebugEnabled() {
@@ -119,19 +119,19 @@ public class Discord4J {
 		}
 
 		@Override
-		public void setDebugEnabled(boolean enabled) {}
+		public void setDebugEnabled(boolean enabled) { /* All logging is disabled */ }
 
 		@Override
-		public void debug(String msg, Object... args) {}
+		public void debug(String msg, Object... args) { /* All logging is disabled */ }
 
 		@Override
-		public void debug(String msg, long value) {}
+		public void debug(String msg, long value) { /* All logging is disabled */ }
 
 		@Override
-		public void debug(Throwable thrown) {}
+		public void debug(Throwable thrown) { /* All logging is disabled */ }
 
 		@Override
-		public void debug(String msg, Throwable thrown) {}
+		public void debug(String msg, Throwable thrown) { /* All logging is disabled */ }
 
 		@Override
 		public org.eclipse.jetty.util.log.Logger getLogger(String name) {
@@ -139,7 +139,7 @@ public class Discord4J {
 		}
 
 		@Override
-		public void ignore(Throwable ignored) {}
+		public void ignore(Throwable ignored) { /* All logging is disabled */ }
 	};
 
 	// Dynamically getting various information from maven
@@ -154,7 +154,7 @@ public class Discord4J {
 		}
 		NAME = properties.getProperty("application.name");
 		String branch = properties.getProperty("application.git.branch");
-		if (branch.equals("master"))
+		if ("master".equals(branch))
 			VERSION = properties.getProperty("application.version");
 		else
 			VERSION = String.format("%s (%s-%s)", properties.getProperty("application.version"), branch, properties.getProperty("application.git.commit"));
@@ -182,9 +182,13 @@ public class Discord4J {
 		try {
 			ClientBuilder builder = new ClientBuilder();
 			IDiscordClient client = builder.withToken(args[0]).login();
-			client.getDispatcher().registerListener((IListener<ReadyEvent>) (ReadyEvent e) -> {
-				LOGGER.info(LogMarkers.MAIN, "Logged in as {}", e.getClient().getOurUser().getName());
-			});
+			client.getDispatcher().registerListener(
+					(IListener<ReadyEvent>) (ReadyEvent e) -> LOGGER.info(
+							LogMarkers.MAIN,
+							"Logged in as {}",
+							e.getClient().getOurUser().getName()
+					)
+			);
 			//The modules should handle the rest
 		} catch (DiscordException e) {
 			LOGGER.error(LogMarkers.MAIN, "There was an error initializing the client", e);
@@ -265,7 +269,8 @@ public class Discord4J {
 
 		private final String name;
 		private volatile int level = Level.INFO.ordinal();
-		private volatile PrintStream standard, error;
+		private transient volatile PrintStream standard;
+		private transient volatile PrintStream error;
 
 		public Discord4JLogger(String name) {
 			this.name = name;
@@ -304,7 +309,7 @@ public class Discord4J {
 			if (level.ordinal() >= this.level) {
 				PrintStream stream = level.ordinal() >= Level.WARN.ordinal() ? this.error : standard;
 
-				stream.format("%s: [%s][%s][%s] - %s\n", LocalTime.now(), level, Thread.currentThread().getName(), name, message);
+				stream.format("%s: [%s][%s][%s] - %s%n", LocalTime.now(), level, Thread.currentThread().getName(), name, message);
 
 				if (error != null)
 					error.printStackTrace(stream);

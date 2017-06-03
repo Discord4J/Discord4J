@@ -102,7 +102,7 @@ public abstract class LongMap<T> {
 
 		@Override
 		public void clear() {
-
+			// Empty map constant doesn't need to be cleared
 		}
 
 		@Override
@@ -122,7 +122,7 @@ public abstract class LongMap<T> {
 
 		@Override
 		public void forEach(LongObjConsumer<? super T> action) {
-
+			// Nothing to do on an empty map
 		}
 
 		@Override
@@ -133,7 +133,7 @@ public abstract class LongMap<T> {
 
 	public static final class EmptyLongSet extends AbstractSet<Long> implements LongSet {
 
-		public static final LongSet INSTANCE = new EmptyLongSet();
+		protected static final LongSet INSTANCE = new EmptyLongSet();
 
 		@Override
 		public boolean contains(long l) {
@@ -155,7 +155,7 @@ public abstract class LongMap<T> {
 			return new LongCursor() {
 				@Override
 				public void forEachForward(LongConsumer longConsumer) {
-
+					// Nothing to do on empty set
 				}
 
 				@Override
@@ -177,12 +177,12 @@ public abstract class LongMap<T> {
 
 		@Override
 		public void forEach(Consumer<? super Long> consumer) {
-
+			// Nothing to do on empty set
 		}
 
 		@Override
 		public void forEach(LongConsumer longConsumer) {
-
+			// Nothing to do on empty set
 		}
 
 		@Override
@@ -235,12 +235,12 @@ public abstract class LongMap<T> {
 
 				@Override
 				public void forEachRemaining(Consumer<? super Long> consumer) {
-
+					// Nothing to do on empty set
 				}
 
 				@Override
 				public void forEachRemaining(LongConsumer longConsumer) {
-
+					// Nothing to do on empty set
 				}
 
 				@Override

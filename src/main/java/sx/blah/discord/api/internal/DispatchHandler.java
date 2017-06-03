@@ -61,7 +61,7 @@ class DispatchHandler {
 			try {
 				String type = event.get("t").asText();
 				JsonNode json = event.get("d");
-				switch (type) {
+				switch (type) { // TODO make this a map instead of a switch case
 					case "RESUMED":
 						resumed();
 						break;
@@ -107,10 +107,6 @@ class DispatchHandler {
 					case "CHANNEL_DELETE":
 						channelDelete(MAPPER.treeToValue(json, ChannelObject.class));
 						break;
-					case "CHANNEL_PINS_UPDATE": /* Implemented in MESSAGE_UPDATE. Ignored */
-						break;
-					case "CHANNEL_PINS_ACK": /* Ignored */
-						break;
 					case "USER_UPDATE":
 						userUpdate(MAPPER.treeToValue(json, UserUpdateEventResponse.class));
 						break;
@@ -155,16 +151,12 @@ class DispatchHandler {
 					case "MESSAGE_REACTION_REMOVE":
 						reactionRemove(MAPPER.treeToValue(json, ReactionEventResponse.class));
 						break;
-					case "MESSAGE_REACTION_REMOVE_ALL": /* REMOVE_ALL is 204 empty but REACTION_REMOVE is sent anyway */
-						break;
 					case "WEBHOOKS_UPDATE":
 						webhookUpdate(MAPPER.treeToValue(json, WebhookObject.class));
 						break;
-					case "PRESENCES_REPLACE": /* Ignored. Not meant for bot accounts. */
-						break;
 
 					default:
-						Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown message received: {}, REPORT THIS TO THE DISCORD4J DEV!", type);
+						Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Unknown or unused message received: {}", type);
 				}
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Unable to process JSON!", e);
@@ -315,6 +307,7 @@ class DispatchHandler {
 				}
 			} catch (InterruptedException e) {
 				Discord4J.LOGGER.error(LogMarkers.EVENTS, "Wait for AllUsersReceivedEvent on guild create was interrupted.", e);
+				Thread.currentThread().interrupt();
 			}
 			return true;
 		}).andThen(() -> {
@@ -361,7 +354,7 @@ class DispatchHandler {
 			List<IRole> oldRoles = user.getRolesForGuild(guild);
 			boolean rolesChanged = oldRoles.size() != event.roles.length + 1;//Add one for the @everyone role
 			if (!rolesChanged) {
-				rolesChanged = oldRoles.stream().filter(role -> {
+				rolesChanged = !oldRoles.stream().filter(role -> {
 					if (role.equals(guild.getEveryoneRole()))
 						return false;
 
@@ -372,7 +365,7 @@ class DispatchHandler {
 					}
 
 					return true;
-				}).collect(Collectors.toList()).size() > 0;
+				}).collect(Collectors.toList()).isEmpty();
 			}
 
 			if (rolesChanged) {
@@ -486,7 +479,7 @@ class DispatchHandler {
 			}
 		}
 
-		if (json.unavailable) { //Guild can't be reached
+		if (json.unavailable || guild == null) { //Guild can't be reached
 			Discord4J.LOGGER.warn(LogMarkers.WEBSOCKET, "Guild with id {} is unavailable, is there an outage?", json.id);
 			client.dispatcher.dispatch(new GuildUnavailableEvent(guildId));
 		} else {
@@ -510,11 +503,11 @@ class DispatchHandler {
 			String type = event.type;
 			Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
 			if (guild != null) {
-				if (type.equalsIgnoreCase("text")) { //Text channel
+				if ("text".equalsIgnoreCase(type)) { //Text channel
 					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(guild, event);
 					guild.channels.put(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
-				} else if (type.equalsIgnoreCase("voice")) {
+				} else if ("voice".equalsIgnoreCase(type)) { //Voice channel
 					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(guild, event);
 					guild.voiceChannels.put(channel);
 					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
@@ -524,7 +517,7 @@ class DispatchHandler {
 	}
 
 	private void channelDelete(ChannelObject json) {
-		if (json.type.equalsIgnoreCase("text")) {
+		if ("text".equalsIgnoreCase(json.type)) {
 			Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.id));
 			if (channel != null) {
 				if (!channel.isPrivate())
@@ -533,7 +526,7 @@ class DispatchHandler {
 					shard.privateChannels.remove(channel);
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
-		} else if (json.type.equalsIgnoreCase("voice")) {
+		} else if ("voice".equalsIgnoreCase(json.type)) {
 			VoiceChannel channel = (VoiceChannel) client.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
 			if (channel != null) {
 				((Guild) channel.getGuild()).voiceChannels.remove(channel);
@@ -553,7 +546,7 @@ class DispatchHandler {
 
 	private void channelUpdate(ChannelObject json) {
 		if (!json.is_private) {
-			if (json.type.equalsIgnoreCase("text")) {
+			if ("text".equalsIgnoreCase(json.type)) {
 				Channel toUpdate = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.id));
 				if (toUpdate != null) {
 					IChannel oldChannel = toUpdate.copy();
@@ -564,7 +557,7 @@ class DispatchHandler {
 
 					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 				}
-			} else if (json.type.equalsIgnoreCase("voice")) {
+			} else if ("voice".equalsIgnoreCase(json.type)) {
 				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
 				if (toUpdate != null) {
 					VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
@@ -676,8 +669,8 @@ class DispatchHandler {
 
 			user.voiceStates.put(DiscordUtils.getVoiceStateFromJson(shard.getGuildByID(Long.parseUnsignedLong(json.guild_id)), json));
 
-			if (oldChannel != channel) {
-				if (channel == null) {
+			if (oldChannel != channel) { // Not a .equals as null cases are handled below and D4J does a good
+				if (channel == null) {   // job of reference equals.
 					client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
 				} else if (oldChannel == null) {
 					client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));
@@ -721,12 +714,12 @@ class DispatchHandler {
 
 	private void reactionAdd(ReactionEventResponse event) {
 		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
+		if (channel != null && !channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
 			return;
 		if (channel != null) {
-			IMessage message = RequestBuffer.request(() -> {
-				return channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
-			}).get();
+			IMessage message = RequestBuffer.request(
+					(RequestBuffer.IRequest<IMessage>) () -> channel.getMessageByID(Long.parseUnsignedLong(event.message_id))
+			).get();
 
 			if (message != null) {
 				Reaction reaction = (Reaction) (event.emoji.id == null
@@ -757,7 +750,7 @@ class DispatchHandler {
 
 	private void reactionRemove(ReactionEventResponse event) {
 		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
+		if (channel != null && !channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
 			return;
 		if (channel != null) {
 			IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));

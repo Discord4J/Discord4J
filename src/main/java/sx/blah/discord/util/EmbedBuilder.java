@@ -80,7 +80,7 @@ public class EmbedBuilder {
 	 * Create a new EmbedBuilder. Set what you want with the withX/appendX methods, and call {@link #build()}.
 	 */
 	public EmbedBuilder() {
-
+		// Empty for the Builder Design Pattern
 	}
 
 	/**
@@ -438,7 +438,7 @@ public class EmbedBuilder {
 	 *
 	 * @return Itself for chaining
 	 */
-	public EmbedBuilder clearFields(){
+	public EmbedBuilder clearFields() {
 		fields.clear();
 		return this;
 	}
@@ -493,27 +493,22 @@ public class EmbedBuilder {
 	}
 
 	private void generateWarnings() {
-		if (embed.footer != null) {
-			// footer warnings
-			if (embed.footer.icon_url != null && (embed.footer.text == null || embed.footer.text.isEmpty())) {
-				Discord4J.LOGGER.warn(LogMarkers.UTIL,
-						"Embed object warning - footer icon without footer text - footer icon will not be " +
-								"visible");
-			}
+		if (embed.footer != null && embed.footer.icon_url != null && (embed.footer.text == null || embed.footer.text.isEmpty())) {
+			Discord4J.LOGGER.warn(LogMarkers.UTIL,
+					"Embed object warning - footer icon without footer text - footer icon will not be " +
+							"visible");
 		}
 
-		if (embed.author != null) {
-			if (embed.author.name == null || embed.author.name.isEmpty()) {
-				if (embed.author.icon_url != null) {
-					Discord4J.LOGGER.warn(LogMarkers.UTIL,
-							"Embed object warning - author icon without author name - author icon will not be " +
-									"visible");
-				}
-				if (embed.author.url != null) {
-					Discord4J.LOGGER.warn(LogMarkers.UTIL,
-							"Embed object warning - author URL without author name - URL is useless and cannot" + " " +
-									"be clicked");
-				}
+		if (embed.author != null && (embed.author.name == null || embed.author.name.isEmpty())) {
+			if (embed.author.icon_url != null) {
+				Discord4J.LOGGER.warn(LogMarkers.UTIL,
+						"Embed object warning - author icon without author name - author icon will not be " +
+								"visible");
+			}
+			if (embed.author.url != null) {
+				Discord4J.LOGGER.warn(LogMarkers.UTIL,
+						"Embed object warning - author URL without author name - URL is useless and cannot" + " " +
+								"be clicked");
 			}
 		}
 	}

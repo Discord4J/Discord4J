@@ -30,7 +30,7 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
 import sx.blah.discord.api.internal.json.requests.ResumeRequest;
-import sx.blah.discord.handle.impl.events.DisconnectedEvent;
+import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
@@ -125,10 +125,12 @@ public class DiscordWS extends WebSocketAdapter {
 					break;
 				case HEARTBEAT:
 					send(GatewayOps.HEARTBEAT, seq);
+					heartbeatHandler.ack(); // Fallthroughs are not advised
+					break;
 				case HEARTBEAT_ACK:
 					heartbeatHandler.ack();
 					break;
-				case UNKNOWN:
+				default:
 					Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Received unknown opcode, {}", message);
 					break;
 			}
