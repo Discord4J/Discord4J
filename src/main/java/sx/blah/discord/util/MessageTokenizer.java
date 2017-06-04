@@ -275,7 +275,7 @@ public class MessageTokenizer {
 		if (!hasNextRegex(pattern))
 			throw new IllegalStateException("No more occurrences found!");
 
-		Matcher matcher = ANY_MENTION_PATTERN.matcher(remaining);
+		Matcher matcher = pattern.matcher(remaining);
 		if (!matcher.find())
 			throw new IllegalStateException("Couldn't find any matches!");
 		final int start = currentPosition + matcher.start();
