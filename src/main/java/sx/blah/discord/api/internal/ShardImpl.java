@@ -165,6 +165,8 @@ public class ShardImpl implements IShard {
 	}
 
 	private void updatePresence(StatusType status, String playing, String streamUrl) {
+		checkLoggedIn("update presence");
+
 		if (streamUrl != null) {
 			if (!DiscordUtils.STREAM_URL_PATTERN.matcher(streamUrl).matches()) {
 				throw new IllegalArgumentException("Stream URL must be a twitch.tv url.");
