@@ -222,7 +222,7 @@ public class Channel implements IChannel {
 	@Override
 	public MessageHistory getMessageHistory(int messageCount) {
 		if (messageCount <= messages.size())
-			return new MessageHistory(new ArrayList<>(messages.values()));
+			return new MessageHistory(new ArrayList<>(messages.values()).subList(0, messageCount));
 		else {
 			final AtomicInteger remaining = new AtomicInteger(messageCount - messages.size());
 			final List<IMessage> retrieved = new ArrayList<>(messages.values());
