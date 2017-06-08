@@ -76,8 +76,281 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @param startDate The date to start gathering messages from (inclusive).
 	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBefore(LocalDateTime)}
 	 */
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate);
+	@Deprecated
+	default MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
+		return getMessageHistoryBefore(startDate);
+	}
+
+	/**
+	 * Gets the messages from a specified date to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBefore(LocalDateTime, int)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount) {
+		return getMessageHistoryBefore(startDate, maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages from now up until the specified date.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryAfter(LocalDateTime)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+		return getMessageHistoryAfter(endDate);
+	}
+
+	/**
+	 * Gets the messages from now up until the specified date.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryAfter(LocalDateTime, int)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxMessageCount) {
+		return getMessageHistoryAfter(endDate, maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBetween(LocalDateTime, LocalDateTime)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+		return getMessageHistoryBetween(startDate, endDate);
+	}
+
+	/**
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBetween(LocalDateTime, LocalDateTime, int)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount) {
+		return getMessageHistoryBetween(startDate, endDate, maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages from a specified message id to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to start gathering messages from (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBefore(long)} instead
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryFrom(String id) {
+		return getMessageHistoryBefore(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * Gets the messages from a specified message id to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to start gathering messages from (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBefore(long)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryFrom(long id) {
+		return getMessageHistoryBefore(id);
+	}
+
+	/**
+	 * Gets the messages from a specified message id to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to start gathering messages from (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBefore(long, int)} instead
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryFrom(String id, int maxMessageCount) {
+		return getMessageHistoryBefore(Long.parseUnsignedLong(id), maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages from a specified message id to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to start gathering messages from (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBefore(long, int)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryFrom(long id, int maxMessageCount) {
+		return getMessageHistoryBefore(id, maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages from now up until the specified message id.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryAfter(long)} instead
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryTo(String id) {
+		return getMessageHistoryAfter(Long.parseUnsignedLong(id));
+	}
+
+	/**
+	 * Gets the messages from now up until the specified message id.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryAfter(long)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryTo(long id) {
+		return getMessageHistoryAfter(id);
+	}
+
+	/**
+	 * Gets the messages from now up until the specified message id.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryAfter(long, int)} instead
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryTo(String id, int maxMessageCount) {
+		return getMessageHistoryAfter(Long.parseUnsignedLong(id), maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages from now up until the specified message id.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param id The id to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryAfter(long, int)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryTo(long id, int maxMessageCount) {
+		return getMessageHistoryAfter(id, maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param beginID The id to start gathering messages from (inclusive).
+	 * @param endID The id to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBetween(long, long)} instead
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryIn(String beginID, String endID) {
+		return getMessageHistoryBetween(Long.parseUnsignedLong(beginID), Long.parseUnsignedLong(endID));
+	}
+
+	/**
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param beginID The id to start gathering messages from (inclusive).
+	 * @param endID The id to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBetween(long, long)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryIn(long beginID, long endID) {
+		return getMessageHistoryBetween(beginID, endID);
+	}
+
+	/**
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param beginID The id to start gathering messages from (inclusive).
+	 * @param endID The id to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBetween(long, long, int)} instead
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryIn(String beginID, String endID, int maxMessageCount) {
+		return getMessageHistoryBetween(Long.parseUnsignedLong(beginID), Long.parseUnsignedLong(endID), maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param beginID The id to start gathering messages from (inclusive).
+	 * @param endID The id to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 * @deprecated Use {@link #getMessageHistoryBetween(long, long, int)}
+	 */
+	@Deprecated
+	default MessageHistory getMessageHistoryIn(long beginID, long endID, int maxMessageCount) {
+		return getMessageHistoryBetween(beginID, endID, maxMessageCount);
+	}
+
+	/**
+	 * Gets the messages from a specified date to the beginning of this channel.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryBefore(LocalDateTime startDate);
 
 	/**
 	 * Gets the messages from a specified date to the beginning of this channel.
@@ -88,7 +361,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The max number of messages to retrieve.
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount);
+	MessageHistory getMessageHistoryBefore(LocalDateTime startDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages from now up until the specified date.
@@ -98,7 +371,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param endDate The date to stop gathering messages at (inclusive).
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
+	MessageHistory getMessageHistoryAfter(LocalDateTime endDate);
 
 	/**
 	 * Gets the messages from now up until the specified date.
@@ -109,10 +382,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The max number of messages to retrieve.
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxMessageCount);
+	MessageHistory getMessageHistoryAfter(LocalDateTime endDate, int maxMessageCount);
 
 	/**
-	 * Gets the messages in the specified range of dates.
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
 	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
@@ -120,10 +394,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param endDate The date to stop gathering messages at (inclusive).
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+	MessageHistory getMessageHistoryBetween(LocalDateTime startDate, LocalDateTime endDate);
 
 	/**
-	 * Gets the messages in the specified range of dates.
+	 * Gets the messages starting at startDate and ending after either maxMessageCount messages are retrieved or
+	 * endDate is reached.
 	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
@@ -132,21 +407,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The max number of messages to retrieve.
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
-
-	/**
-	 * Gets the messages from a specified message id to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
-	 * the internal cache.
-	 *
-	 * @param id The id to start gathering messages from (inclusive).
-	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryFrom(long)} instead
-	 */
-	@Deprecated
-	default MessageHistory getMessageHistoryFrom(String id) {
-		return getMessageHistoryFrom(Long.parseUnsignedLong(id));
-	}
+	MessageHistory getMessageHistoryBetween(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages from a specified message id to the beginning of this channel.
@@ -156,22 +417,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param id The id to start gathering messages from (inclusive).
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryFrom(long id);
-
-	/**
-	 * Gets the messages from a specified message id to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
-	 * the internal cache.
-	 *
-	 * @param id The id to start gathering messages from (inclusive).
-	 * @param maxMessageCount The max number of messages to retrieve.
-	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryFrom(long, int)} instead
-	 */
-	@Deprecated
-	default MessageHistory getMessageHistoryFrom(String id, int maxMessageCount) {
-		return getMessageHistoryFrom(Long.parseUnsignedLong(id), maxMessageCount);
-	}
+	MessageHistory getMessageHistoryBefore(long id);
 
 	/**
 	 * Gets the messages from a specified message id to the beginning of this channel.
@@ -182,21 +428,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The max number of messages to retrieve.
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryFrom(long id, int maxMessageCount);
-
-	/**
-	 * Gets the messages from now up until the specified message id.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
-	 * the internal cache.
-	 *
-	 * @param id The id to stop gathering messages at (inclusive).
-	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryTo(long)} instead
-	 */
-	@Deprecated
-	default MessageHistory getMessageHistoryTo(String id) {
-		return getMessageHistoryTo(Long.parseUnsignedLong(id));
-	}
+	MessageHistory getMessageHistoryBefore(long id, int maxMessageCount);
 
 	/**
 	 * Gets the messages from now up until the specified message id.
@@ -206,25 +438,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param id The id to stop gathering messages at (inclusive).
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryTo(long id);
+	MessageHistory getMessageHistoryAfter(long id);
 
 	/**
-	 * Gets the messages from now up until the specified message id.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
-	 * the internal cache.
-	 *
-	 * @param id The id to stop gathering messages at (inclusive).
-	 * @param maxMessageCount The max number of messages to retrieve.
-	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryTo(long, int)} instead
-	 */
-	@Deprecated
-	default MessageHistory getMessageHistoryTo(String id, int maxMessageCount) {
-		return getMessageHistoryTo(Long.parseUnsignedLong(id), maxMessageCount);
-	}
-
-	/**
-	 * Gets the messages from now up until the specified message id.
+	 * Gets the messages from now until maxMessageCount messages are retrieved or the specified message id is reached.
 	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
@@ -232,25 +449,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The max number of messages to retrieve.
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryTo(long id, int maxMessageCount);
+	MessageHistory getMessageHistoryAfter(long id, int maxMessageCount);
 
 	/**
-	 * Gets the messages in the specified range of message ids.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
-	 * the internal cache.
-	 *
-	 * @param beginID The id to start gathering messages from (inclusive).
-	 * @param endID The id to stop gathering messages at (inclusive).
-	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryIn(long, long)} instead
-	 */
-	@Deprecated
-	default MessageHistory getMessageHistoryIn(String beginID, String endID) {
-		return getMessageHistoryIn(Long.parseUnsignedLong(beginID), Long.parseUnsignedLong(endID));
-	}
-
-	/**
-	 * Gets the messages in the specified range of message ids.
+	 * Gets the messages between beginID and endID.
 	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
@@ -258,26 +460,11 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param endID The id to stop gathering messages at (inclusive).
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryIn(long beginID, long endID);
+	MessageHistory getMessageHistoryBetween(long beginID, long endID);
 
 	/**
-	 * Gets the messages in the specified range of message ids.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
-	 * the internal cache.
-	 *
-	 * @param beginID The id to start gathering messages from (inclusive).
-	 * @param endID The id to stop gathering messages at (inclusive).
-	 * @param maxMessageCount The max number of messages to retrieve.
-	 * @return The messages.
-	 * @deprecated Use {@link #getMessageHistoryIn(long, long, int)} instead
-	 */
-	@Deprecated
-	default MessageHistory getMessageHistoryIn(String beginID, String endID, int maxMessageCount) {
-		return getMessageHistoryIn(Long.parseUnsignedLong(beginID), Long.parseUnsignedLong(endID), maxMessageCount);
-	}
-
-	/**
-	 * Gets the messages in the specified range of message ids.
+	 * Gets the messages starting at beginID and ending after either maxMessageCount messages are retrieved or
+	 * endID is reached.
 	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
@@ -286,7 +473,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The max number of messages to retrieve.
 	 * @return The messages.
 	 */
-	MessageHistory getMessageHistoryIn(long beginID, long endID, int maxMessageCount);
+	MessageHistory getMessageHistoryBetween(long beginID, long endID, int maxMessageCount);
 
 	/**
 	 * This attempts to get ALL messages in the channel.
