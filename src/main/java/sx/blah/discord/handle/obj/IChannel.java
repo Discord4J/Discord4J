@@ -61,7 +61,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the specified number of received messages.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param messageCount The amount of messages to go back by.
@@ -70,8 +70,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistory(int messageCount);
 
 	/**
-	 * Gets the messages from a specified date to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages <b>from</b> a specified date to the beginning of this channel. This starts from the provided date and
+	 * works its way back to the beginning of the channel.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param startDate The date to start gathering messages from (inclusive).
@@ -80,8 +81,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryFrom(LocalDateTime startDate);
 
 	/**
-	 * Gets the messages from a specified date to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages <b>from</b> a specified date to the beginning of this channel. This starts from the provided date and
+	 * works its way back to the beginning of the channel.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param startDate The date to start gathering messages from (inclusive).
@@ -91,8 +93,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount);
 
 	/**
-	 * Gets the messages from now up until the specified date.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from now up <b>to</b> the specified date. This goes from the most recent message to the last
+	 * message at the specified date.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param endDate The date to stop gathering messages at (inclusive).
@@ -101,8 +104,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
 
 	/**
-	 * Gets the messages from now up until the specified date.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from now up <b>to</b> the specified date. This goes from the most recent message to the last
+	 * message at the specified date.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param endDate The date to stop gathering messages at (inclusive).
@@ -113,7 +117,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the messages in the specified range of dates.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param startDate The date to start gathering messages from (inclusive).
@@ -124,7 +128,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the messages in the specified range of dates.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param startDate The date to start gathering messages from (inclusive).
@@ -135,8 +139,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
 
 	/**
-	 * Gets the messages from a specified message id to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from a specified message id to the beginning of this channel. This starts from the provided
+	 * message and works its way back to the beginning of the channel.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to start gathering messages from (inclusive).
@@ -149,8 +154,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	}
 
 	/**
-	 * Gets the messages from a specified message id to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from a specified message id to the beginning of this channel. This starts from the provided
+	 * message and works its way back to the beginning of the channel.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to start gathering messages from (inclusive).
@@ -159,8 +165,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryFrom(long id);
 
 	/**
-	 * Gets the messages from a specified message id to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from a specified message id to the beginning of this channel. This starts from the provided
+	 * message and works its way back to the beginning of the channel, taking into account the maximum provided.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to start gathering messages from (inclusive).
@@ -174,8 +181,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	}
 
 	/**
-	 * Gets the messages from a specified message id to the beginning of this channel.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from a specified message id to the beginning of this channel. This starts from the provided
+	 * message and works its way back to the beginning of the channel, taking into account the maximum provided.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to start gathering messages from (inclusive).
@@ -185,8 +193,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryFrom(long id, int maxMessageCount);
 
 	/**
-	 * Gets the messages from now up until the specified message id.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from now up until the specified message id. This starts with the most recent message, and goes
+	 * up to the specified message.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to stop gathering messages at (inclusive).
@@ -199,8 +208,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	}
 
 	/**
-	 * Gets the messages from now up until the specified message id.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from now up until the specified message id. This starts with the most recent message, and goes
+	 * up to the specified message.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to stop gathering messages at (inclusive).
@@ -209,8 +219,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryTo(long id);
 
 	/**
-	 * Gets the messages from now up until the specified message id.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from now up until the specified message id. This starts with the most recent message, and goes
+	 * up to the specified message, taking into account the maximum.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to stop gathering messages at (inclusive).
@@ -224,8 +235,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	}
 
 	/**
-	 * Gets the messages from now up until the specified message id.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * Gets the messages from now up until the specified message id. This starts with the most recent message, and goes
+	 * up to the specified message, taking into account the maximum.
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param id The id to stop gathering messages at (inclusive).
@@ -236,7 +248,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the messages in the specified range of message ids.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param beginID The id to start gathering messages from (inclusive).
@@ -251,7 +263,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the messages in the specified range of message ids.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param beginID The id to start gathering messages from (inclusive).
@@ -262,7 +274,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the messages in the specified range of message ids.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param beginID The id to start gathering messages from (inclusive).
@@ -278,7 +290,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * Gets the messages in the specified range of message ids.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @param beginID The id to start gathering messages from (inclusive).
@@ -290,9 +302,9 @@ public interface IChannel extends IDiscordObject<IChannel> {
 
 	/**
 	 * This attempts to get ALL messages in the channel.
-	 * NOTE: This will usually take awhile to run, so it is recommended to only run this method if ABSOLUTELY
+	 * <p>NOTE: This will usually take awhile to run, so it is recommended to only run this method if ABSOLUTELY
 	 * necessary.
-	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * <p>NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
 	 * the internal cache.
 	 *
 	 * @return The messages.
