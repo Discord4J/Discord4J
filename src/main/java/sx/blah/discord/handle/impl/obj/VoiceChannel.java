@@ -125,6 +125,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
 				new VoiceStateUpdateRequest(getGuild().getStringID(), getStringID(), isSelfMuted, isSelfDeafened));
+
+		((Guild) guild).connectingVoiceChannelID = getLongID();
 	}
 
 	@Override

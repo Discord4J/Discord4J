@@ -142,6 +142,12 @@ public class Guild implements IGuild {
 	 */
 	private int totalMemberCount;
 
+	/**
+	 * The ID of the voice channel that the bot is connecting to in this guild.
+	 * This is 0 if a voice connection has already been established in this guild or none was ever attempted.
+	 */
+	public long connectingVoiceChannelID;
+
 	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout, String region, int verification) {
 		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification,
 				new Cache<>((DiscordClientImpl) shard.getClient(), IRole.class), new Cache<>((DiscordClientImpl) shard.getClient(), IChannel.class),

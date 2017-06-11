@@ -30,6 +30,7 @@ import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
 import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
+import sx.blah.discord.handle.impl.obj.Guild;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.impl.obj.VoiceState;
 import sx.blah.discord.handle.obj.*;
@@ -407,10 +408,17 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void mute(IGuild guild, boolean isSelfMuted) {
 		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
-		String channelID = voiceState.getChannel() == null ? null : voiceState.getChannel().getStringID();
+
+		String channelID = null;
+		long connectingID = ((Guild) guild).connectingVoiceChannelID;
+		if (connectingID != 0) {
+			channelID = Long.toUnsignedString(connectingID);
+		} else if (voiceState.getChannel() != null) {
+			channelID = voiceState.getChannel().getStringID();
+		}
 
 		voiceState.setSelfMuted(isSelfMuted);
-
+		
 		((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(
 				guild.getStringID(), channelID, isSelfMuted, voiceState.isSelfDeafened()));
 	}
@@ -418,7 +426,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void deafen(IGuild guild, boolean isSelfDeafened) {
 		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
-		String channelID = voiceState.getChannel() == null ? null : voiceState.getChannel().getStringID();
+
+		String channelID = null;
+		long connectingID = ((Guild) guild).connectingVoiceChannelID;
+		if (connectingID != 0) {
+			channelID = Long.toUnsignedString(connectingID);
+		} else if (voiceState.getChannel() != null) {
+			channelID = voiceState.getChannel().getStringID();
+		}
 
 		voiceState.setSelfDeafened(isSelfDeafened);
 
