@@ -25,6 +25,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageHistory;
 import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.cache.Cache;
 
 import java.io.File;
@@ -78,7 +79,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public void edit(String name, int position, int bitrate, int userLimit) {
-		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS);
 
 		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new IllegalArgumentException("Channel name must be between 2 and 100 characters!");
@@ -117,7 +118,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		getShard().checkReady("join voice channel");
 
 		if (isConnected()) return;
-		DiscordUtils.checkPermissions(getClient().getOurUser(), this, EnumSet.of(Permissions.VOICE_CONNECT));
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.VOICE_CONNECT);
 
 		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
 		boolean isSelfMuted = voiceState != null && voiceState.isSelfMuted();
