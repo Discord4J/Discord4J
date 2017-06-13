@@ -25,9 +25,9 @@ import sx.blah.discord.handle.obj.IVoiceState;
 public class VoiceState implements IVoiceState {
 
 	private final IGuild guild;
-	private final IVoiceChannel channel;
 	private final IUser user;
 	private final String sessionID;
+	private IVoiceChannel channel;
 	private boolean isDeafened;
 	private boolean isMuted;
 	private boolean isSelfDeafened;
@@ -36,9 +36,9 @@ public class VoiceState implements IVoiceState {
 
 	public VoiceState(IGuild guild, IVoiceChannel channel, IUser user, String sessionID, boolean isDeafened, boolean isMuted, boolean isSelfDeafened, boolean isSelfMuted, boolean isSuppressed) {
 		this.guild = guild;
-		this.channel = channel;
 		this.user = user;
 		this.sessionID = sessionID;
+		this.channel = channel;
 		this.isDeafened = isDeafened;
 		this.isMuted = isMuted;
 		this.isSelfDeafened = isSelfDeafened;
@@ -58,6 +58,10 @@ public class VoiceState implements IVoiceState {
 	@Override
 	public IVoiceChannel getChannel() {
 		return channel;
+	}
+
+	public void setChannel(IVoiceChannel channel) {
+		this.channel = channel;
 	}
 
 	@Override

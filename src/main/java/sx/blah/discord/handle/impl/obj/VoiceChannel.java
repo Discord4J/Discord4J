@@ -134,9 +134,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		getShard().checkReady("leave voice channel");
 		if (!isConnected()) return;
 
-		IVoiceState voiceState = getClient().getOurUser().getVoiceStateForGuild(getGuild());
-		boolean isSelfMuted = voiceState != null && voiceState.isSelfMuted();
-		boolean isSelfDeafened = voiceState != null && voiceState.isSelfDeafened();
+		VoiceState voiceState = (VoiceState) getClient().getOurUser().getVoiceStateForGuild(getGuild());
+		boolean isSelfMuted = voiceState.isSelfMuted();
+		boolean isSelfDeafened = voiceState.isSelfDeafened();
 
 		((ShardImpl) getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE,
 				new VoiceStateUpdateRequest(getGuild().getStringID(), null, isSelfMuted, isSelfDeafened));
@@ -145,6 +145,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 		if (vWS != null) {
 			vWS.disconnect(VoiceDisconnectedEvent.Reason.LEFT_CHANNEL);
 		}
+
+		voiceState.setChannel(null);
 	}
 
 	@Override
