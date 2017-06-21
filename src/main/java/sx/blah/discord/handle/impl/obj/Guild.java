@@ -524,7 +524,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public void setMuteUser(IUser user, boolean mute) {
-		PermissionUtils.requireHierarchicalPermissions(this, client.getOurUser(), getRolesForUser(user), Permissions.VOICE_MOVE_MEMBERS);
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.VOICE_MUTE_MEMBERS);
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
