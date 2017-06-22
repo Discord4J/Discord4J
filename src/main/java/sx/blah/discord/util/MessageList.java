@@ -580,7 +580,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 	 * @throws MissingPermissionsException
 	 */
 	public void bulkDelete(List<IMessage> messages) {
-		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_MESSAGES));
+		PermissionUtils.requirePermissions(channel, client.getOurUser(), Permissions.MANAGE_MESSAGES);
 
 		if (channel.isPrivate())
 			throw new UnsupportedOperationException("Cannot bulk delete in private channels!");
@@ -667,7 +667,7 @@ public class MessageList extends AbstractList<IMessage> implements List<IMessage
 
 	private boolean hasPermissions() {
 		try {
-			DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY));
+			PermissionUtils.requirePermissions(channel, client.getOurUser(), Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY);
 			return true;
 		} catch (MissingPermissionsException e) {
 			if (!Discord4J.ignoreChannelWarnings.get())

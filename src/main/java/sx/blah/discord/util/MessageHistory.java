@@ -50,12 +50,12 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 
 	private final IMessage[] backing; //Backed by an array because they are faster than lists
 
-	public MessageHistory(IMessage... messages) {
+	private MessageHistory(IMessage[] messages) {
 		this.backing = messages;
 	}
 
 	public MessageHistory(Collection<IMessage> messages) {
-		this(messages.toArray(new IMessage[messages.size()]));
+		this(messages.stream().distinct().sorted(MessageComparator.REVERSED).toArray(IMessage[]::new));
 	}
 
 	/**
