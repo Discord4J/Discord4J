@@ -866,20 +866,22 @@ public class Channel implements IChannel {
 		List<IRole> roles = user.getRolesForGuild(guild);
 		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
 
-		PermissionOverride override = userOverrides.get(user.getLongID());
-		List<PermissionOverride> overrideRoles = roles.stream()
-				.filter(r -> roleOverrides.containsKey(r.getLongID()))
-				.map(role -> roleOverrides.get(role.getLongID()))
-				.collect(Collectors.toList());
-		Collections.reverse(overrideRoles);
-		for (PermissionOverride roleOverride : overrideRoles) {
-			permissions.addAll(roleOverride.allow());
-			permissions.removeAll(roleOverride.deny());
-		}
+		if (!permissions.contains(Permissions.ADMINISTRATOR)) {
+			PermissionOverride override = userOverrides.get(user.getLongID());
+			List<PermissionOverride> overrideRoles = roles.stream()
+					.filter(r -> roleOverrides.containsKey(r.getLongID()))
+					.map(role -> roleOverrides.get(role.getLongID()))
+					.collect(Collectors.toList());
+			Collections.reverse(overrideRoles);
+			for (PermissionOverride roleOverride : overrideRoles) {
+				permissions.addAll(roleOverride.allow());
+				permissions.removeAll(roleOverride.deny());
+			}
 
-		if (override != null) {
-			permissions.addAll(override.allow());
-			permissions.removeAll(override.deny());
+			if (override != null) {
+				permissions.addAll(override.allow());
+				permissions.removeAll(override.deny());
+			}
 		}
 
 		return permissions;
