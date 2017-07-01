@@ -47,12 +47,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Collection of internal Discord4J utilities.
@@ -323,49 +323,13 @@ public class DiscordUtils {
 			}
 		}
 
+		// emoji are always updated
 		guild.emojis.clear();
 		for (EmojiObject obj : json.emojis) {
 			guild.emojis.put(DiscordUtils.getEmojiFromJSON(guild, obj));
 		}
 
 		return guild;
-	}
-
-	/**
-	 * Creates an IEmoji object from the EmojiObj json data.
-	 *
-	 * @param guild The guild.
-	 * @param json  The json object data.
-	 * @return The emoji object.
-	 */
-	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
-		EmojiImpl emoji = new EmojiImpl(guild, Long.parseUnsignedLong(json.id), json.name, json.require_colons, json.managed, json.roles);
-
-		return emoji;
-	}
-
-	public static IReaction getReactionFromJSON(IShard shard, MessageObject.ReactionObject object) {
-		Reaction reaction = new Reaction(shard, object.count, new CopyOnWriteArrayList<>(),
-				object.emoji.id != null
-						? object.emoji.id
-						: object.emoji.name, object.emoji.id != null);
-
-
-		return reaction;
-	}
-
-	public static List<IReaction> getReactionsFromJson(IShard shard, MessageObject.ReactionObject[] objects) {
-		List<IReaction> reactions = new CopyOnWriteArrayList<>();
-
-		if (objects != null) {
-			for (MessageObject.ReactionObject obj : objects) {
-				IReaction r = getReactionFromJSON(shard, obj);
-				if (r != null)
-					reactions.add(r);
-			}
-		}
-
-		return reactions;
 	}
 
 	/**
@@ -446,16 +410,14 @@ public class DiscordUtils {
 					.filter(it -> it.getLongID() == authorId)
 					.findAny()
 					.orElseGet(() -> getUserFromJSON(channel.getShard(), json.author));
+
 			Message message = new Message(channel.getClient(), Long.parseUnsignedLong(json.id), json.content,
 					author, channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
-					getReactionsFromJson(channel.getShard(), json.reactions), json.webhook_id != null ? Long.parseUnsignedLong(json.webhook_id) : 0);
-
-			for (IReaction reaction : message.getReactions()) {
-				((Reaction) reaction).setMessage(message);
-			}
+					json.webhook_id != null ? Long.parseUnsignedLong(json.webhook_id) : 0);
+			message.setReactions(getReactionsFromJSON(message, json.reactions));
 
 			return message;
 		}
@@ -671,6 +633,28 @@ public class DiscordUtils {
 		obj.game = response.game;
 		obj.status = response.status;
 		return getPresenceFromJSON(obj);
+	}
+
+
+	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
+		long id = Long.parseUnsignedLong(json.id);
+		List<IRole> roles = Arrays.stream(json.roles)
+				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role)))
+				.collect(Collectors.toList());
+
+		return new EmojiImpl(id, guild, json.name, roles, json.require_colons, json.managed);
+	}
+
+	public static List<IReaction> getReactionsFromJSON(IMessage message, MessageObject.ReactionObject[] json) {
+		List<IReaction> reactions = new ArrayList<>();
+		if (json != null)
+			for (MessageObject.ReactionObject object : json) {
+				long id = object.emoji.id == null ? 0 : Long.parseUnsignedLong(object.emoji.id);
+				ReactionEmoji emoji = ReactionEmoji.fromGuildEmoji(object.emoji.name, id);
+				reactions.add(new Reaction(message, object.count, emoji));
+			}
+
+		return reactions;
 	}
 
 	/**

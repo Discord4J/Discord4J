@@ -20,6 +20,7 @@ package sx.blah.discord.handle.obj;
 import com.vdurmont.emoji.Emoji;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.handle.impl.obj.ReactionEmoji;
 
 import java.util.List;
 
@@ -36,32 +37,50 @@ public interface IReaction {
 	IMessage getMessage();
 
 	/**
+	 * The number of people that reacted.
+	 *
+	 * @return The number of people that reacted
+	 */
+	int getCount();
+
+	/**
+	 * Gets a the emoji of this reaction.
+	 *
+	 * @return The emoji of this reaction.
+	 */
+	ReactionEmoji getEmoji();
+
+	/**
 	 * Whether or not this reaction is a custom emoji.
 	 *
 	 * @return If this is a custom emoji
+	 *
+	 * @deprecated Use {@link #getEmoji()}.{@link ReactionEmoji#isUnicode() isUnicode()} instead.
 	 */
+	@Deprecated
 	boolean isCustomEmoji();
 
 	/**
 	 * The IEmoji object if this is a custom emoji reaction, or null otherwise
 	 *
 	 * @return The IEmoji object or null if it's not a custom emoji
+	 *
+	 * @deprecated Use {@link #getEmoji()} instead. This method will return incorrect information when the emoji on this
+	 * reaction is an external emoji that the bot cannot see. The only information that can be reliably returned in that
+	 * situation is the name and ID of the emoji.
 	 */
+	@Deprecated
 	IEmoji getCustomEmoji();
 
 	/**
 	 * The emoji-java Emoji object if this is a Unicode emoji reaction, or null otherwise
 	 *
 	 * @return The Emoji object or null if it's not a Unicode emoji
-	 */
-	Emoji getUnicodeEmoji();
-
-	/**
-	 * The amount of people that reacted.
 	 *
-	 * @return The amount of people that reacted
+	 * @deprecated Use {@link #getEmoji()}.{@link ReactionEmoji#getName() getName()} instead.
 	 */
-	int getCount();
+	@Deprecated
+	Emoji getUnicodeEmoji();
 
 	/**
 	 * Gets the users that reacted.
@@ -69,6 +88,24 @@ public interface IReaction {
 	 * @return A list of users that reacted
 	 */
 	List<IUser> getUsers();
+
+	/**
+	 * Returns true if the given user reacted to the emoji.
+	 *
+	 * @param user The user
+	 * @return True if the user reacted, false otherwise
+	 */
+	boolean getUserReacted(IUser user);
+
+	/**
+	 * Returns true if this client's user reacted to the emoji.
+	 *
+	 * @return True if we reacted, false otherwise
+	 *
+	 * @deprecated Use {@link #getUserReacted(IUser)} with {@link IDiscordClient#getOurUser()} instead.
+	 */
+	@Deprecated
+	boolean getClientReacted();
 
 	/**
 	 * Gets the {@link IDiscordClient} instance this object belongs to.
@@ -88,27 +125,4 @@ public interface IReaction {
 	 * @return The copied instance of this object.
 	 */
 	IReaction copy();
-
-	/**
-	 * Gets a string representation of the emoji. Either the actual emoji, or the IEmoji#toString.
-	 *
-	 * @return The emoji, either as the emoji itself or the IEmoji formatted string
-	 */
-	String toString();
-
-	/**
-	 * Returns true if the given user reacted to the emoji. You may need to call refreshUsers first.
-	 *
-	 * @param user The user
-	 * @return True if the user reacted, false otherwise
-	 */
-	boolean getUserReacted(IUser user);
-
-	/**
-	 * Returns true if this client's user reacted to the emoji. You may need to call refreshUsers first.
-	 *
-	 * @return True if we reacted, false otherwise
-	 */
-	boolean getClientReacted();
-
 }

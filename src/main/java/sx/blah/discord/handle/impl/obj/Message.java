@@ -149,8 +149,8 @@ public class Message implements IMessage {
 
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
-				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments,
-				   boolean pinned, List<Embed> embeds, List<IReaction> reactions, long webhookID) {
+				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
+				   List<Embed> embeds, List<IReaction> reactions, long webhookID) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -169,6 +169,14 @@ public class Message implements IMessage {
 		this.webhookID = webhookID;
 
 		setChannelMentions();
+	}
+
+	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
+				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
+				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
+				   List<Embed> embeds, long webhookID) {
+		this(client, id, content, user, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, roleMentions,
+				attachments, pinned, embeds, new ArrayList<>(), webhookID);
 	}
 
 	@Override
@@ -492,119 +500,98 @@ public class Message implements IMessage {
 
 	@Override
 	public IReaction getReactionByIEmoji(IEmoji emoji) {
-		if (emoji == null)
-			return null;
-		return reactions.stream().filter(r -> r != null && r.isCustomEmoji() && r.getCustomEmoji() != null &&
-				r.getCustomEmoji().equals(emoji)).findFirst().orElse(null);
+		return getReactionByEmoji(emoji);
 	}
 
 	@Override
-	public IReaction getReactionByUnicode(String name) {
-		if (name == null)
-			return null;
-		return reactions.stream().filter(r -> r != null && !r.isCustomEmoji() && r.toString().equals(name)).findFirst()
-				.orElse(null);
+	public IReaction getReactionByEmoji(IEmoji emoji) {
+		return getReactionByID(emoji.getLongID());
 	}
 
 	@Override
-	public IReaction getReactionByUnicode(Emoji emoji) {
-		return getReactionByUnicode(emoji.getUnicode());
+	public IReaction getReactionByEmoji(ReactionEmoji emoji) {
+		return getReactions().stream()
+				.filter(r -> r.getEmoji().equals(emoji))
+				.findFirst().orElse(null);
 	}
 
-	@Deprecated
+	@Override
+	public IReaction getReactionByID(long id) {
+		return getReactions().stream()
+				.filter(r -> r.getEmoji().getLongID() == id)
+				.findFirst().orElse(null);
+	}
+
+	@Override
+	public IReaction getReactionByUnicode(Emoji unicode) {
+		return getReactionByUnicode(unicode.getUnicode());
+	}
+
 	@Override
 	public IReaction getReactionByName(String name) {
 		return getReactionByUnicode(name);
 	}
 
 	@Override
-	public void removeAllReactions() {
-		PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
-
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
-				String.format(DiscordEndpoints.REACTIONS, this.getChannel().getStringID(), this.getStringID()));
+	public IReaction getReactionByUnicode(String unicode) {
+		return getReactions().stream()
+				.filter(r -> r.getEmoji().isUnicode() && r.getEmoji().getName().equals(unicode))
+				.findFirst().orElse(null);
 	}
 
 	@Override
 	public void addReaction(IReaction reaction) {
-		if (reaction == null)
-			throw new NullPointerException("Reaction argument cannot be null.");
-
-		if (!reaction.getMessage().equals(this))
-			throw new DiscordException("Reaction argument's message does not match this one.");
-
-		if (reaction.isCustomEmoji())
-			addReaction(reaction.getCustomEmoji());
-		else
-			addReaction(reaction.toString());
+		addReaction(reaction.getEmoji());
 	}
 
 	@Override
 	public void addReaction(IEmoji emoji) {
-		addReaction(emoji.toString());
-	}
-
-	@Override
-	public void addReaction(String emoji) {
-		String toEncode;
-
-		if (DiscordUtils.CUSTOM_EMOJI_PATTERN.matcher(emoji).matches()) {
-			// custom emoji
-			toEncode = emoji.replace("<", "").replace(">", "");
-		} else if (DiscordUtils.EMOJI_ALIAS_PATTERN.matcher(emoji).matches()) {
-			// Unicode alias
-			String alias = emoji.replace(":", "");
-			Emoji e = EmojiManager.getForAlias(alias);
-
-			if (e == null) {
-				throw new IllegalArgumentException("Tried to lookup alias " + alias +
-						" in emoji-java, got nothing. Please use the Unicode value (ex: ☑).");
-			}
-
-			toEncode = e.getUnicode();
-		} else if (EmojiManager.isEmoji(emoji)) {
-			// as-is
-			toEncode = emoji;
-		} else {
-			throw new IllegalArgumentException("Emoji argument (" + emoji +
-					") is malformed. Please use either Unicode (ex: ☑), an IEmoji toString (<:name:id>), or an alias " +
-					"(ex: :ballot_box_with_check:).");
-		}
-
-		if (this.getReactionByUnicode(emoji) == null)
-			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.ADD_REACTIONS);
-
-		try {
-			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
-					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getStringID(), getStringID(),
-							URLEncoder.encode(toEncode, "UTF-8").replace("+", "%20").replace("%3A", ":"), "@me"));
-		} catch (UnsupportedEncodingException e) {
-			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
-		}
+		addReaction(ReactionEmoji.fromGuildEmoji(emoji));
 	}
 
 	@Override
 	public void addReaction(Emoji emoji) {
-		addReaction(emoji.getUnicode());
+		addReaction(ReactionEmoji.fromUnicode(emoji.getUnicode()));
 	}
 
 	@Override
-	public void removeReaction(IUser user, IReaction reaction) {
-		IMessage message = reaction.getMessage();
-		if (!this.equals(message))
-			throw new DiscordException("Reaction argument's message does not match this one.");
+	public void addReaction(String emoji) {
+		if (EmojiManager.isEmoji(emoji)) { // unicode char
+			addReaction(EmojiManager.getByUnicode(emoji));
+		} else if (DiscordUtils.CUSTOM_EMOJI_PATTERN.matcher(emoji).matches()) { // custom emoji
+			String s = emoji.replaceAll("[<>]", "");
+			String name = s.substring(0, s.indexOf(":"));
+			long id = Long.parseUnsignedLong(s.substring(s.indexOf(":" + 1), s.length()));
 
-		if (!user.equals(client.getOurUser())) {
-			PermissionUtils.requirePermissions(message.getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
+			addReaction(ReactionEmoji.fromGuildEmoji(name, id));
+		} else if (DiscordUtils.EMOJI_ALIAS_PATTERN.matcher(emoji).matches()) { // unicode alias
+			String alias = emoji.replace(":", "");
+			Emoji e = EmojiManager.getForAlias(alias);
+
+			if (e == null) { // alias is wrong
+				throw new IllegalArgumentException("Emoji alias \"" + emoji + "\" could not be found.");
+			}
+
+			addReaction(e);
+		} else {
+			throw new IllegalArgumentException("Emoji \"" + emoji + "\" didn't match unicode char, unicode alias, or custom emoji string.");
+		}
+	}
+
+	@Override
+	public void addReaction(ReactionEmoji reactionEmoji) {
+		if (getReactionByEmoji(reactionEmoji) == null) { // only need perms when adding a new emoji
+			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.ADD_REACTIONS);
 		}
 
+		String emoji = reactionEmoji.isUnicode()
+				? reactionEmoji.getName()
+				: reactionEmoji.getName() + ":" + reactionEmoji.getStringID();
+
 		try {
-			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
-					String.format(DiscordEndpoints.REACTIONS_USER, message.getChannel().getStringID(), message.getStringID(),
-							reaction.isCustomEmoji()
-									? (reaction.getCustomEmoji().getName() + ":" + reaction.getCustomEmoji().getStringID())
-									: URLEncoder.encode(reaction.toString(), "UTF-8").replace("+", "%20"),
-							user.getLongID() == client.getOurUser().getLongID() ? "@me" : user.getStringID()));
+			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getStringID(), getStringID(),
+							URLEncoder.encode(emoji, "UTF-8"), "@me"));
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -612,7 +599,53 @@ public class Message implements IMessage {
 
 	@Override
 	public void removeReaction(IReaction reaction) {
-		removeReaction(client.getOurUser(), reaction);
+		removeReaction(getClient().getOurUser(), reaction);
+	}
+
+	@Override
+	public void removeReaction(IUser user, IReaction reaction) {
+		removeReaction(user, reaction.getEmoji());
+	}
+
+	@Override
+	public void removeReaction(IUser user, IEmoji emoji) {
+		removeReaction(user, ReactionEmoji.fromGuildEmoji(emoji));
+	}
+
+	@Override
+	public void removeReaction(IUser user, Emoji emoji) {
+		removeReaction(user, emoji.getUnicode());
+	}
+
+	@Override
+	public void removeReaction(IUser user, ReactionEmoji reactionEmoji) {
+		String emoji = reactionEmoji.isUnicode()
+				? reactionEmoji.getName()
+				: reactionEmoji.getName() + ":" + reactionEmoji.getStringID();
+		removeReaction(user, emoji);
+	}
+
+	@Override
+	public void removeReaction(IUser user, String emoji) {
+		if (!user.equals(client.getOurUser())) { // no perms for deleting our own reaction
+			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
+		}
+
+		try {
+			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
+					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getStringID(), getStringID(),
+							URLEncoder.encode(emoji, "UTF-8"), user.getStringID()));
+		} catch (UnsupportedEncodingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
+	public void removeAllReactions() {
+		PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
+
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
+				String.format(DiscordEndpoints.REACTIONS, getChannel().getStringID(), getStringID()));
 	}
 
 	@Override

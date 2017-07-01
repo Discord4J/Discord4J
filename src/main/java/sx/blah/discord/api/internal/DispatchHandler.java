@@ -26,6 +26,9 @@ import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
@@ -33,12 +36,14 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -706,85 +711,47 @@ class DispatchHandler {
 	}
 
 	private void guildEmojisUpdate(GuildEmojiUpdateResponse event) {
-		Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+		Guild guild = (Guild) shard.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+
 		if (guild != null) {
-			List<IEmoji> oldList = guild.getEmojis().stream().map(IEmoji::copy)
-					.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+			List<IEmoji> oldEmoji = guild.getEmojis();
+			List<IEmoji> newEmoji = Arrays.stream(event.emojis)
+					.map(e -> DiscordUtils.getEmojiFromJSON(guild, e))
+					.collect(Collectors.toList());
 
 			guild.emojis.clear();
-			for (EmojiObject obj : event.emojis) {
-				guild.emojis.put(DiscordUtils.getEmojiFromJSON(guild, obj));
-			}
+			guild.emojis.putAll(newEmoji);
 
-			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldList, guild.getEmojis()));
+			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldEmoji, newEmoji));
 		}
 	}
 
 	private void reactionAdd(ReactionEventResponse event) {
-		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
-			return;
-		if (channel != null) {
-			IMessage message = RequestBuffer.request(() -> {
-				return channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
-			}).get();
+		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		if (channel == null) return;
+		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
 
-			if (message != null) {
-				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByUnicode(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id))));
-				IUser user = message.getClient().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IReaction reaction = event.emoji.id == null
+				? message.getReactionByUnicode(event.emoji.name)
+				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
+		IUser user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 
-				if (reaction == null) {
-					List<IUser> list = new CopyOnWriteArrayList<>();
-					list.add(user);
-
-					reaction = new Reaction(message.getShard(), 1, list,
-							event.emoji.id != null ? event.emoji.id : event.emoji.name, event.emoji.id != null);
-
-					message.getReactions().add(reaction);
-				} else if (channel.getMessageHistory().contains(message.getLongID())) { //If the message is in the internal cache then it doesn't have the most up to date reaction count
-					reaction.setCount(reaction.getCount() + 1);
-					reaction.getCachedUsers().add(user);
-				}
-
-				reaction.setMessage(message);
-
-				client.dispatcher.dispatch(
-						new ReactionAddEvent(message, reaction, user));
-			}
-		}
+		client.dispatcher.dispatch(new ReactionAddEvent(message, reaction, user));
 	}
 
 	private void reactionRemove(ReactionEventResponse event) {
-		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
-			return;
-		if (channel != null) {
-			IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		if (channel == null) return;
+		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
 
-			if (message != null) {
-				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByUnicode(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id))));
-				IUser user = message.getClient().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IReaction reaction = event.emoji.id == null
+				? message.getReactionByUnicode(event.emoji.name)
+				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
+		IUser user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 
-				if (reaction != null) {
-					reaction.setMessage(message); // safeguard
-					reaction.setCount(reaction.getCount() - 1);
-					reaction.getCachedUsers().remove(user);
-
-					if (reaction.getCount() <= 0) {
-						message.getReactions().remove(reaction);
-					}
-				} else {
-					IEmoji custom = event.emoji.id == null ? null : channel.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id));
-					reaction = new Reaction(channel.getShard(), 0, new ArrayList<>(), custom != null ? custom.getStringID() : event.emoji.name, custom != null);
-				}
-
-				client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
-			}
-		}
+		client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 	}
 
 	private void webhookUpdate(WebhookObject event) {
