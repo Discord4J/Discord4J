@@ -749,6 +749,10 @@ class DispatchHandler {
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
+		if (reaction == null) { // the last reaction of the emoji was removed
+			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
+		}
 		IUser user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 
 		client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));

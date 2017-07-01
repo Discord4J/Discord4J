@@ -125,4 +125,9 @@ public class Reaction implements IReaction {
 	public IReaction copy() {
 		return new Reaction(message, count, emoji);
 	}
+
+	@Override
+	public String toString() {
+		return "Reaction(" + emoji + " : " + count + ")";
+	}
 }

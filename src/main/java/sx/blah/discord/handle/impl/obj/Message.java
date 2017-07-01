@@ -546,12 +546,12 @@ public class Message implements IMessage {
 
 	@Override
 	public void addReaction(IEmoji emoji) {
-		addReaction(ReactionEmoji.fromGuildEmoji(emoji));
+		addReaction(ReactionEmoji.of(emoji));
 	}
 
 	@Override
 	public void addReaction(Emoji emoji) {
-		addReaction(ReactionEmoji.fromUnicode(emoji.getUnicode()));
+		addReaction(ReactionEmoji.of(emoji.getUnicode()));
 	}
 
 	@Override
@@ -563,7 +563,7 @@ public class Message implements IMessage {
 			String name = s.substring(0, s.indexOf(":"));
 			long id = Long.parseUnsignedLong(s.substring(s.indexOf(":" + 1), s.length()));
 
-			addReaction(ReactionEmoji.fromGuildEmoji(name, id));
+			addReaction(ReactionEmoji.of(name, id));
 		} else if (DiscordUtils.EMOJI_ALIAS_PATTERN.matcher(emoji).matches()) { // unicode alias
 			String alias = emoji.replace(":", "");
 			Emoji e = EmojiManager.getForAlias(alias);
@@ -609,7 +609,7 @@ public class Message implements IMessage {
 
 	@Override
 	public void removeReaction(IUser user, IEmoji emoji) {
-		removeReaction(user, ReactionEmoji.fromGuildEmoji(emoji));
+		removeReaction(user, ReactionEmoji.of(emoji));
 	}
 
 	@Override

@@ -34,8 +34,8 @@ public class ReactionEmoji implements IIDLinkedObject {
 	 * @param emoji The emoji to get a name and ID from.
 	 * @return A reaction emoji with the name and ID of the given guild emoji.
 	 */
-	public static ReactionEmoji fromGuildEmoji(IEmoji emoji) {
-		return fromGuildEmoji(emoji.getName(), emoji.getLongID());
+	public static ReactionEmoji of(IEmoji emoji) {
+		return of(emoji.getName(), emoji.getLongID());
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class ReactionEmoji implements IIDLinkedObject {
 	 * @param id The ID of the emoji.
 	 * @return A reaction emoji with the given name and ID.
 	 */
-	public static ReactionEmoji fromGuildEmoji(String name, long id) {
+	public static ReactionEmoji of(String name, long id) {
 		return new ReactionEmoji(name, id);
 	}
 
@@ -55,7 +55,7 @@ public class ReactionEmoji implements IIDLinkedObject {
 	 * @param unicode The unicode emoji.
 	 * @return A reaction emoji with the given unicode emoji.
 	 */
-	public static ReactionEmoji fromUnicode(String unicode) {
+	public static ReactionEmoji of(String unicode) {
 		return new ReactionEmoji(unicode, 0L);
 	}
 
