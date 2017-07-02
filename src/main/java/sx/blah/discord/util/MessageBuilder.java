@@ -23,10 +23,7 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * Utility class designed to make message sending easier.
@@ -39,6 +36,7 @@ public class MessageBuilder {
 	private boolean tts = false;
 	private EmbedObject embed;
 	private InputStream stream;
+	private ByteArrayOutputStream outputStream;
 	private String fileName;
 
 	public MessageBuilder(IDiscordClient client) {
@@ -237,6 +235,18 @@ public class MessageBuilder {
 	}
 
 	/**
+	 * Gives an output stream you can write file data to.
+	 *
+	 * @param fileName the name of the file to be sent to Discord
+	 * @return an OutputStream to write file data to.
+	 */
+	public OutputStream fileOutputStream(String fileName) {
+		this.fileName = fileName;
+		this.outputStream = new ByteArrayOutputStream();
+		return this.outputStream;
+	}
+
+	/**
 	 * This gets the content of the message in its current form.
 	 *
 	 * @return The current content of the message.
@@ -286,6 +296,9 @@ public class MessageBuilder {
 	public IMessage build() {
 		if (null == content || null == channel)
 			throw new RuntimeException("You need content and a channel to send a message!");
+		if (outputStream != null) {
+			stream = new ByteArrayInputStream(outputStream.toByteArray());
+		}
 		if (stream == null) {
 			return channel.sendMessage(content, embed, tts);
 		} else {
