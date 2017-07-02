@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 /**
  * Manages event listeners and event logic.
- * 
+ *
  * The EventDispatcher stores a registry of listeners which are used on every event being dispatched. Dispatching of these events happens asynchronously
  * either on user provided threadpools, or a default threadpool.
  * <p/>
@@ -58,7 +58,7 @@ import java.util.stream.Stream;
  * whether a user blocks the thread belonging to the default executor or not, defensive measures must be taken not to overflow resources such as ram or cpu, which would
  * ultimately lead to a dead JVM. In this regard, the default executor is instantiated to a sensible amount of threads depending on the available cores on the machine
  * and supports a small events queue so as to handle bursts of events, nevertheless, if this queue gets filled up, it will slow down accordingly the producer of events
- * by forcing them to execute the listeners themselves. This has the desired effect of causing the Gateway threads to not process any more events, until consumers are 
+ * by forcing them to execute the listeners themselves. This has the desired effect of causing the Gateway threads to not process any more events, until consumers are
  * available in the downstream listeners.
  * <p/>
  * You are encouraged to provide your own threadpool to your listeners to have proper control of resources, using a ThreadPoolExecutor.CallerRunsPolicy rejection policy
@@ -68,9 +68,7 @@ public class EventDispatcher {
 
 	private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 	private final AtomicReference<HashSet<EventHandler>> listenersRegistry = new AtomicReference<>(new HashSet<>());
-	private final ExecutorService defaultEventExecutor = new ThreadPoolExecutor(
-			Runtime.getRuntime().availableProcessors() * 2, Runtime.getRuntime().availableProcessors() * 2, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100),
-			DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"), new CallerRunsPolicy());
+	private final ExecutorService defaultEventExecutor;
 	/**
 	 * special executor used for waitFor.
 	 *
@@ -79,8 +77,12 @@ public class EventDispatcher {
 	private final Executor callingThreadExecutor = (Runnable command) -> command.run();
 	private final IDiscordClient client;
 
-	public EventDispatcher(IDiscordClient client) {
+	public EventDispatcher(IDiscordClient client, RejectedExecutionHandler backpressureHandler, int minimumPoolSize,
+						   int maximumPoolSize, int overflowCapacity, long eventThreadTimeout, TimeUnit eventThreadTimeoutUnit) {
 		this.client = client;
+		this.defaultEventExecutor = new ThreadPoolExecutor(minimumPoolSize, maximumPoolSize, eventThreadTimeout,
+				eventThreadTimeoutUnit, new ArrayBlockingQueue<>(overflowCapacity),
+				DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"), backpressureHandler);
 	}
 
 	/**
@@ -780,7 +782,7 @@ public class EventDispatcher {
 		}
 	}
 
-	private class CallerRunsPolicy implements RejectedExecutionHandler {
+	public static class CallerRunsPolicy implements RejectedExecutionHandler {
 
 		long lastNotification = 0;
 

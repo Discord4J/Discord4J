@@ -40,6 +40,8 @@ import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -124,7 +126,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard) {
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard,
+							 RejectedExecutionHandler backpressureHandler, int minimumPoolSize, int maximumPoolSize,
+							 int overflowCapacity, long eventThreadTimeout, TimeUnit eventThreadTimeoutUnit) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
@@ -133,7 +137,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.maxCacheCount = maxCacheCount;
 		this.cacheProvider = provider;
 		this.shard = shard;
-		this.dispatcher = new EventDispatcher(this);
+		this.dispatcher = new EventDispatcher(this, backpressureHandler, minimumPoolSize, maximumPoolSize,
+				overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
 
