@@ -67,6 +67,31 @@ public interface IDiscordClient {
 	String getToken();
 
 	/**
+	 * Attach an object to this client which can later be retrieved with {@link #getClientData()}. Useful for retrieving
+	 * an application-specific object associated with the client (i.e. normally singleton client managers).
+	 *
+	 * @param userData Object to store.
+	 */
+	void setClientData(Object userData);
+
+	/**
+	 * Returns the object previously set with {@link #setClientData(Object)}. For a more type-safe version of this
+	 * method, refer to {@link #getClientData(Class)}.
+	 *
+	 * @return Object previously stored with {@link #setClientData(Object)}, may be null.
+	 */
+	Object getClientData();
+
+	/**
+	 * A more type-safe version of {@link #getClientData()}.
+	 *
+	 * @param type The type that the object will be "cast" under before returning.
+	 * @return Object previously stored with {@link #setClientData(Object)}, may be null.
+	 * @throws ClassCastException If the object is not of type T. This will not be thrown if the object is null.
+	 */
+	<T> T getClientData(Class<T> type);
+
+	/**
 	 * Logs in every shard this client manages.
 	 *
 	 * @throws DiscordException This is thrown if there is an error logging in.

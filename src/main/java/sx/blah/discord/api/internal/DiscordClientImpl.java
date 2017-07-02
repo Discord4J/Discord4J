@@ -56,6 +56,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final List<IShard> shards = new CopyOnWriteArrayList<>();
 
 	/**
+	 * Object to associate with the client.
+	 */
+	private volatile Object clientData;
+
+	/**
 	 * User we are logged in as
 	 */
 	volatile User ourUser;
@@ -123,7 +128,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard) {
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard, Object clientData) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
@@ -135,6 +140,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.dispatcher = new EventDispatcher(this);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
+		this.clientData = clientData;
 
 		final DiscordClientImpl instance = this;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -601,5 +607,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	public ICacheDelegateProvider getCacheProvider() {
 		return cacheProvider;
+	}
+
+	@Override
+	public Object getClientData() {
+		return clientData;
+	}
+
+	@Override
+	public <T> T getClientData(Class<T> type) {
+		return type.cast(clientData);
+	}
+
+	@Override
+	public void setClientData(Object clientData) {
+		this.clientData = clientData;
 	}
 }

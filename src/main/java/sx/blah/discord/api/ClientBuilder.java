@@ -43,6 +43,7 @@ public class ClientBuilder {
 	 */
 	public static final int DEFAULT_MESSAGE_CACHE_LIMIT = 256;
 
+	private Object clientData;
 	private int[] shard = null;
 	private boolean withRecomendedShardCount = false;
 	private int maxMissedPings = -1;
@@ -99,6 +100,17 @@ public class ClientBuilder {
 	 */
 	public ClientBuilder setDaemon(boolean isDaemon) {
 		this.isDaemon = isDaemon;
+		return this;
+	}
+
+	/**
+	 * Sets an object to be associated with the client.
+	 *
+	 * @param clientData Object to store.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withData(Object clientData) {
+		this.clientData = clientData;
 		return this;
 	}
 
@@ -278,7 +290,7 @@ public class ClientBuilder {
 		}
 
 		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon, maxMissedPings,
-				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard);
+				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, clientData);
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();
