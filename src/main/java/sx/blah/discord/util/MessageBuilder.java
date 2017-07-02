@@ -37,6 +37,7 @@ public class MessageBuilder {
 	private EmbedObject embed;
 	private InputStream stream;
 	private ByteArrayOutputStream outputStream;
+	private boolean useOutput = false;
 	private String fileName;
 
 	public MessageBuilder(IDiscordClient client) {
@@ -231,6 +232,7 @@ public class MessageBuilder {
 	public MessageBuilder withFile(InputStream stream, String fileName) {
 		this.stream = stream;
 		this.fileName = fileName;
+		this.useOutput = false;
 		return this;
 	}
 
@@ -243,6 +245,7 @@ public class MessageBuilder {
 	public OutputStream fileOutputStream(String fileName) {
 		this.fileName = fileName;
 		this.outputStream = new ByteArrayOutputStream();
+		this.useOutput = true;
 		return this.outputStream;
 	}
 
@@ -296,7 +299,7 @@ public class MessageBuilder {
 	public IMessage build() {
 		if (null == content || null == channel)
 			throw new RuntimeException("You need content and a channel to send a message!");
-		if (outputStream != null) {
+		if (useOutput && outputStream != null) {
 			stream = new ByteArrayInputStream(outputStream.toByteArray());
 		}
 		if (stream == null) {
