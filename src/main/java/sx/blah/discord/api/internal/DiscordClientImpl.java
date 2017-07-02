@@ -135,6 +135,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 							 RejectedExecutionHandler backpressureHandler, int minimumPoolSize, int maximumPoolSize,
 							 int overflowCapacity, long eventThreadTimeout, TimeUnit eventThreadTimeoutUnit) {
 		this.token = "Bot " + token;
+		this.clientData = clientData;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
@@ -146,7 +147,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 				overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
-		this.clientData = clientData;
 
 		final DiscordClientImpl instance = this;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
