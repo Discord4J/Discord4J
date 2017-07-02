@@ -18,7 +18,10 @@
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.AttachmentPartEntry;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
@@ -40,6 +43,18 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)),
 				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)));
 		this.recipient = recipient;
+	}
+
+	@Override
+	public IMessage sendMessage(String content, EmbedObject embed, boolean tts) {
+		if (recipient.isBot()) throw new DiscordException("Bots may not DM other bots.");
+		return super.sendMessage(content, embed, tts);
+	}
+
+	@Override
+	public IMessage sendFiles(String content, boolean tts, EmbedObject embed, AttachmentPartEntry... entries) {
+		if (recipient.isBot()) throw new DiscordException("Bots may not DM other bots.");
+		return super.sendFiles(content, tts, embed, entries);
 	}
 
 	@Override

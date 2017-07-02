@@ -680,6 +680,7 @@ class DispatchHandler {
 				if (channel == null) {
 					client.getDispatcher().dispatch(new UserVoiceChannelLeaveEvent(oldChannel, user));
 				} else if (oldChannel == null) {
+					((Guild) channel.getGuild()).connectingVoiceChannelID = 0;
 					client.getDispatcher().dispatch(new UserVoiceChannelJoinEvent(channel, user));
 				} else if (oldChannel.getGuild().equals(channel.getGuild())) {
 					client.getDispatcher().dispatch(new UserVoiceChannelMoveEvent(user, oldChannel, channel));
@@ -693,7 +694,7 @@ class DispatchHandler {
 		if (oldWS != null) {
 			oldWS.disconnect(VoiceDisconnectedEvent.Reason.SERVER_UPDATE);
 		}
-		
+
 		if (event.endpoint == null) {
 			Discord4J.LOGGER.debug(LogMarkers.VOICE, "Awaiting endpoint to join voice channel in guild id {}...", event.guild_id);
 		} else {

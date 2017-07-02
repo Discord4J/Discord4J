@@ -30,6 +30,7 @@ import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
 import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.ShardReadyEvent;
+import sx.blah.discord.handle.impl.obj.Guild;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.impl.obj.VoiceState;
 import sx.blah.discord.handle.obj.*;
@@ -39,6 +40,8 @@ import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -128,7 +131,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard, Object clientData) {
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard, Object clientData,
+							 RejectedExecutionHandler backpressureHandler, int minimumPoolSize, int maximumPoolSize,
+							 int overflowCapacity, long eventThreadTimeout, TimeUnit eventThreadTimeoutUnit) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
@@ -137,7 +142,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.maxCacheCount = maxCacheCount;
 		this.cacheProvider = provider;
 		this.shard = shard;
-		this.dispatcher = new EventDispatcher(this);
+		this.dispatcher = new EventDispatcher(this, backpressureHandler, minimumPoolSize, maximumPoolSize,
+				overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
 		this.clientData = clientData;
@@ -413,7 +419,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void mute(IGuild guild, boolean isSelfMuted) {
 		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
-		String channelID = voiceState.getChannel() == null ? null : voiceState.getChannel().getStringID();
+
+		String channelID = null;
+		long connectingID = ((Guild) guild).connectingVoiceChannelID;
+		if (connectingID != 0) {
+			channelID = Long.toUnsignedString(connectingID);
+		} else if (voiceState.getChannel() != null) {
+			channelID = voiceState.getChannel().getStringID();
+		}
 
 		voiceState.setSelfMuted(isSelfMuted);
 
@@ -424,7 +437,14 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void deafen(IGuild guild, boolean isSelfDeafened) {
 		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
-		String channelID = voiceState.getChannel() == null ? null : voiceState.getChannel().getStringID();
+
+		String channelID = null;
+		long connectingID = ((Guild) guild).connectingVoiceChannelID;
+		if (connectingID != 0) {
+			channelID = Long.toUnsignedString(connectingID);
+		} else if (voiceState.getChannel() != null) {
+			channelID = voiceState.getChannel().getStringID();
+		}
 
 		voiceState.setSelfDeafened(isSelfDeafened);
 

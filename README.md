@@ -1,6 +1,6 @@
 <img align="right" src="http://i.imgur.com/quyShBK.png" height="320" width="320">
 
-# Discord4J [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY) [![Documentation Status](https://readthedocs.org/projects/discord4j/badge/?version=latest)](http://discord4j.readthedocs.io/en/latest/?badge=latest)
+# Discord4J [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY) [![Documentation Status](https://readthedocs.org/projects/discord4j/badge/?version=latest)](http://discord4j.readthedocs.io/en/latest/?badge=latest&style=flat-square)
 
 Java interface for the official [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
@@ -29,7 +29,7 @@ In your `pom.xml` add (without the ellipses):
   ...
   <dependency>
     <groupId>com.github.austinv11</groupId>
-    <artifactId>Discord4j</artifactId>
+    <artifactId>Discord4J</artifactId>
     <version>@VERSION@</version>
    <!-- <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
   </dependency>
@@ -50,8 +50,8 @@ repositories {
 ...
 dependencies {
   ...
-  compile "com.github.austinv11:Discord4j:@VERSION@"
-  //compile "com.github.austinv11:Discord4j:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)
+  compile "com.github.austinv11:Discord4J:@VERSION@"
+  //compile "com.github.austinv11:Discord4J:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)
 }
 ...
 ```
@@ -158,7 +158,9 @@ See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/
 * Lavaplayer by [@sedmelluq](https://github.com/sedmelluq): A full-featured audio player for Discord4J and JDA (https://github.com/sedmelluq/lavaplayer)
 * Discordinator by [@alpha;helix](https://github.com/alphahelix00): A modularized command API (https://github.com/alphahelix00/Discordinator)
 * Instructability by [@Kaioru](https://github.com/Kaioru): A simple command API (https://github.com/Kaioru/Instructability)
-* C4A4D4J by [@Phanta](https://github.com/phantamanta44): An annotation based command API (https://github.com/phantamanta44/c4a4d4j)
+* BC4D4J by [@danthonywalker](https://github.com/danthonywalker): An annotation based command API written in Kotlin (https://github.com/danthonywalker/bc4d4j)
+* D4J-OAuth by [@xaanit](https://github.com/xaanit) and [@UnderMybrella](https://github.com/UnderMybrella): An OAuth extenssion to Discord4J (https://github.com/xaanit/D4J-OAuth)
+* DiscordEmoji4J by [@nerd](https://github.com/nerd/DiscordEmoji4J): An emoji library designed with Discord in mind (https://github.com/nerd/DiscordEmoji4J)
 
 ## Deprecation policy
 Due to the nature of the Discord API, any deprecations found in the API should not be expected to last past the current

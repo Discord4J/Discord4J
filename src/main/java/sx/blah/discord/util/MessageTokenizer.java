@@ -23,6 +23,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -275,7 +276,7 @@ public class MessageTokenizer {
 		if (!hasNextRegex(pattern))
 			throw new IllegalStateException("No more occurrences found!");
 
-		Matcher matcher = ANY_MENTION_PATTERN.matcher(remaining);
+		Matcher matcher = pattern.matcher(remaining);
 		if (!matcher.find())
 			throw new IllegalStateException("Couldn't find any matches!");
 		final int start = currentPosition + matcher.start();
@@ -614,10 +615,10 @@ public class MessageTokenizer {
 			super(tokenizer, startIndex, endIndex);
 
 			final String content = getContent();
-			final long emojiId = Long.parseUnsignedLong(content.substring(content.lastIndexOf(":") + 1, content.length()));
+			final long emojiId = Long.parseUnsignedLong(content.substring(content.lastIndexOf(":") + 1, content.lastIndexOf('>')));
 
 			emoji = tokenizer.getClient().getGuilds().stream()
-					.map(guild -> guild.getEmojiByID(emojiId)).findFirst()
+					.map(guild -> guild.getEmojiByID(emojiId)).filter(Objects::nonNull).findFirst()
 					.orElse(null);
 		}
 

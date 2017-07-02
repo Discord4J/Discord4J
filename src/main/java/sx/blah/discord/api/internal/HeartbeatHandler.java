@@ -80,6 +80,8 @@ class HeartbeatHandler {
 	}
 
 	void shutdown() {
+		missedPings.set(0);
+		waitingForAck.set(false);
 		keepAlive.shutdown();
 	}
 

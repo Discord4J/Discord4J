@@ -28,10 +28,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.api.internal.json.requests.MessageRequest;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MessageTokenizer;
-import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -339,7 +336,7 @@ public class Message implements IMessage {
 			throw new DiscordException("Cannot edit deleted messages!");
 
 		if (embed != null) {
-			DiscordUtils.checkPermissions(client, this.getChannel(), EnumSet.of(Permissions.EMBED_LINKS));
+			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.EMBED_LINKS);
 		}
 
 		((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
@@ -415,7 +412,7 @@ public class Message implements IMessage {
 			if (channel.isPrivate())
 				throw new DiscordException("Cannot delete the other person's message in a private channel!");
 
-			DiscordUtils.checkPermissions(client, getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
 		}
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + channel.getStringID() + "/messages/" + id);
@@ -522,7 +519,7 @@ public class Message implements IMessage {
 
 	@Override
 	public void removeAllReactions() {
-		DiscordUtils.checkPermissions(this.getClient().getOurUser(), this.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+		PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
 				String.format(DiscordEndpoints.REACTIONS, this.getChannel().getStringID(), this.getStringID()));
@@ -575,7 +572,7 @@ public class Message implements IMessage {
 		}
 
 		if (this.getReactionByUnicode(emoji) == null)
-			DiscordUtils.checkPermissions(getClient().getOurUser(), getChannel(), EnumSet.of(Permissions.ADD_REACTIONS));
+			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.ADD_REACTIONS);
 
 		try {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
@@ -598,7 +595,7 @@ public class Message implements IMessage {
 			throw new DiscordException("Reaction argument's message does not match this one.");
 
 		if (!user.equals(client.getOurUser())) {
-			DiscordUtils.checkPermissions(client.getOurUser(), message.getChannel(), EnumSet.of(Permissions.MANAGE_MESSAGES));
+			PermissionUtils.requirePermissions(message.getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
 		}
 
 		try {

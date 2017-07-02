@@ -50,12 +50,12 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 
 	private final IMessage[] backing; //Backed by an array because they are faster than lists
 
-	public MessageHistory(IMessage... messages) {
+	private MessageHistory(IMessage[] messages) {
 		this.backing = messages;
 	}
 
 	public MessageHistory(Collection<IMessage> messages) {
-		this(messages.toArray(new IMessage[messages.size()]));
+		this(messages.stream().distinct().sorted(MessageComparator.REVERSED).toArray(IMessage[]::new));
 	}
 
 	/**
@@ -137,8 +137,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 
 	public boolean contains(long id) {
 		return Arrays.stream(backing)
-				.filter(msg -> msg.getLongID() == id)
-				.count() > 0;
+				.anyMatch(msg -> msg.getLongID() == id);
 	}
 
 	/**
@@ -147,7 +146,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The new instance.
 	 */
 	public MessageHistory copy() {
-		return new MessageHistory(backing);
+		return new MessageHistory(Arrays.copyOf(backing, backing.length));
 	}
 
 	/**

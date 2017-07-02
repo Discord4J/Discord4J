@@ -31,6 +31,8 @@ import sx.blah.discord.util.cache.ICacheDelegateProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Use this as a factory to create {@link IDiscordClient} instances
@@ -45,7 +47,7 @@ public class ClientBuilder {
 
 	private Object clientData;
 	private int[] shard = null;
-	private boolean withRecomendedShardCount = false;
+	private boolean withRecommendedShardCount = false;
 	private int maxMissedPings = -1;
 	private String botToken;
 	private boolean isDaemon = false;
@@ -54,6 +56,12 @@ public class ClientBuilder {
 	private int retryCount = 5;
 	private int maxCacheCount = DEFAULT_MESSAGE_CACHE_LIMIT;
 	private ICacheDelegateProvider provider = Cache.DEFAULT_PROVIDER;
+	private RejectedExecutionHandler backpressureHandler = new EventDispatcher.CallerRunsPolicy();
+	private int minimumPoolSize = 1;
+	private int maximumPoolSize = Runtime.getRuntime().availableProcessors() * 4;
+	private long eventThreadTimeout = 60L;
+	private TimeUnit eventThreadTimeoutUnit = TimeUnit.SECONDS;
+	private int overflowCapacity = 128;
 
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
@@ -132,7 +140,7 @@ public class ClientBuilder {
 	 * @return The instance of the builder.
 	 */
 	public ClientBuilder withRecommendedShardCount(boolean useRecommended) {
-		this.withRecomendedShardCount = useRecommended;
+		this.withRecommendedShardCount = useRecommended;
 		return this;
 	}
 
@@ -271,6 +279,67 @@ public class ClientBuilder {
 	}
 
 	/**
+	 * Sets the policy to use in the case where the EventDispatcher cannot keep up with the volume of events being sent.
+	 *
+	 * @param handler The handler to call when this occurs.
+	 * @return The instance of the builder
+	 */
+	public ClientBuilder withEventBackpressureHandler(RejectedExecutionHandler handler) {
+		this.backpressureHandler = handler;
+		return this;
+	}
+
+	/**
+	 * Sets the minimum amount of threads which must be alive at any given time in the EventDispatcher. Higher values
+	 * are more expensive overall but lead to quicker availability of threads.
+	 *
+	 * @param minimumDispatchThreads The minimum number of threads to keep alive.
+	 * @return The instance of the builder
+	 */
+	public ClientBuilder withMinimumDispatchThreads(int minimumDispatchThreads) {
+		this.minimumPoolSize = minimumDispatchThreads;
+		return this;
+	}
+
+	/**
+	 * Sets the maximum amount of threads which may be alive at any given time in the EventDispatcher. Higher values
+	 * are more expensive overall but lead to quicker availability of threads.
+	 *
+	 * @param maximumDispatchThreads The maximum number of threads to keep alive.
+	 * @return The instance of the builder
+	 */
+	public ClientBuilder withMaximumDispatchThreads(int maximumDispatchThreads) {
+		this.maximumPoolSize = maximumDispatchThreads;
+		return this;
+	}
+
+	/**
+	 * Sets the amount of time of idleness before threads are killed in the EventDispatcher while the number of threads
+	 * is higher than the minimum allowed.
+	 *
+	 * @param time The amount of time.
+	 * @param unit The unit of time to use.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withIdleDispatchThreadTimeout(long time, TimeUnit unit) {
+		this.eventThreadTimeout = time;
+		this.eventThreadTimeoutUnit = unit;
+		return this;
+	}
+
+	/**
+	 * Sets the amount of events allowed to overflow by without calling the backpressure handler. This allows for easy
+	 * recovery in the event that there is a sudden, unexpected burst of events which the EventDispatcher cannot handle.
+	 *
+	 * @param overflowCapacity The overflow capacity.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withEventOverflowCapacity(int overflowCapacity) {
+		this.overflowCapacity = overflowCapacity;
+		return this;
+	}
+
+	/**
 	 * Creates the discord instance with the desired features
 	 *
 	 * @return The discord instance
@@ -281,16 +350,17 @@ public class ClientBuilder {
 		if (botToken == null)
 			throw new DiscordException("No login info present!");
 
-		if (withRecomendedShardCount && shard != null)
+		if (withRecommendedShardCount && shard != null)
 			throw new DiscordException("Cannot use recommend shard count options with a specific shard!");
 
-		if (withRecomendedShardCount){
+		if (withRecommendedShardCount){
 			GatewayBotResponse response = Requests.GENERAL_REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY + "/bot", GatewayBotResponse.class, new BasicNameValuePair("Authorization", "Bot " + botToken), new BasicNameValuePair("Content-Type", "application/json"));
 			shardCount = response.shards;
 		}
 
 		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon, maxMissedPings,
-				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, clientData);
+				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, clientData, backpressureHandler, minimumPoolSize,
+				maximumPoolSize, overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();

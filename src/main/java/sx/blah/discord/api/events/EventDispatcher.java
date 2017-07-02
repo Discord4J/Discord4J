@@ -32,9 +32,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -43,20 +46,49 @@ import java.util.stream.Stream;
 
 /**
  * Manages event listeners and event logic.
+ *
+ * The EventDispatcher stores a registry of listeners which are used on every event being dispatched. Dispatching of these events happens asynchronously
+ * either on user provided threadpools, or a default threadpool.
+ * <p/>
+ * When registering a listener, the client has the option of specifying the thread pool for that particular listener, this way, different listeners are effectively
+ * isolated in terms of threads, avoiding possible thread starvation.
+ * <p/>
+ * <b>Note on the default thread pool:</b>
+ * It is assumed that when the user doesn't specify a threadpool, it's D4J responsibility to ensure correct asynchronous behavior. Because we have no control
+ * whether a user blocks the thread belonging to the default executor or not, defensive measures must be taken not to overflow resources such as ram or cpu, which would
+ * ultimately lead to a dead JVM. In this regard, the default executor is instantiated to a sensible amount of threads depending on the available cores on the machine
+ * and supports a small events queue so as to handle bursts of events, nevertheless, if this queue gets filled up, it will slow down accordingly the producer of events
+ * by forcing them to execute the listeners themselves. This has the desired effect of causing the Gateway threads to not process any more events, until consumers are
+ * available in the downstream listeners.
+ * <p/>
+ * You are encouraged to provide your own threadpool to your listeners to have proper control of resources, using a ThreadPoolExecutor.CallerRunsPolicy rejection policy
+ * to allow proper backpressure in case your threads are overwhelmed.
  */
 public class EventDispatcher {
 
 	private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 	private final AtomicReference<HashSet<EventHandler>> listenersRegistry = new AtomicReference<>(new HashSet<>());
-	private final ExecutorService eventExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"));
+	private final ExecutorService defaultEventExecutor;
+	/**
+	 * special executor used for waitFor.
+	 *
+	 * Essentially forces the thread dispatching the event to execute the handler, because all wait for does is exchange with the blocking thread, this serves us well.
+	 */
+	private final Executor callingThreadExecutor = (Runnable command) -> command.run();
 	private final IDiscordClient client;
 
-	public EventDispatcher(IDiscordClient client) {
+	public EventDispatcher(IDiscordClient client, RejectedExecutionHandler backpressureHandler, int minimumPoolSize,
+						   int maximumPoolSize, int overflowCapacity, long eventThreadTimeout, TimeUnit eventThreadTimeoutUnit) {
 		this.client = client;
+		this.defaultEventExecutor = new ThreadPoolExecutor(minimumPoolSize, maximumPoolSize, eventThreadTimeout,
+				eventThreadTimeoutUnit, new ArrayBlockingQueue<>(overflowCapacity),
+				DiscordUtils.createDaemonThreadFactory("Event Dispatcher Handler"), backpressureHandler);
 	}
 
 	/**
 	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to this listener will be done asynchronously using a default thread pool configured by {@link java.util.concurrent.Executors}.newCachedThreadPool .
 	 * <p/>
 	 * Constraints:
 	 * <li>Only public methods are considered.</li>
@@ -70,11 +102,34 @@ public class EventDispatcher {
 		if (listener instanceof IListener)
 			registerListener((IListener) listener);
 		else
-			registerListener(listener.getClass(), listener, false);
+			registerListener(listener.getClass(), listener, false, defaultEventExecutor);
 	}
 
 	/**
 	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to this listener will be handled asynchronously over the passed executor.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the annotated instance methods of the passed listener.
+	 *
+	 * @param executor Executor that will used to handle the events.
+	 * @param listener The listener.
+	 */
+	public void registerListener(Executor executor, Object listener) {
+		if (listener instanceof IListener)
+			registerListener(executor, (IListener) listener);
+		else
+			registerListener(listener.getClass(), listener, false, executor);
+	}
+
+	/**
+	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to this listener will be done asynchronously using a default thread pool configured by {@link java.util.concurrent.Executors}.newCachedThreadPool .
 	 * <p/>
 	 * Constraints:
 	 * <li>Only public methods are considered.</li>
@@ -85,20 +140,54 @@ public class EventDispatcher {
 	 * @param listener The listener.
 	 */
 	public void registerListener(Class<?> listener) {
-		registerListener(listener, null, false);
+		registerListener(listener, null, false, defaultEventExecutor);
+	}
+
+	/**
+	 * Registers a listener using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to this listener will be handled asynchronously over the passed executor.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the annotated static methods of the passed listener.
+	 *
+	 * @param executor Executor that will used to handle the events.
+	 * @param listener The listener.
+	 */
+	public void registerListener(Executor executor, Class<?> listener) {
+		registerListener(listener, null, false, executor);
 	}
 
 	/**
 	 * Registers a single event listener.
 	 *
+	 * All events sent to this listener will be done asynchronously using a default thread pool configured by {@link java.util.concurrent.Executors}.newCachedThreadPool .
+	 *
 	 * @param listener The listener.
 	 */
 	public void registerListener(IListener listener) {
-		registerListener(listener, false);
+		registerListener(listener, false, defaultEventExecutor);
+	}
+
+	/**
+	 * Registers a single event listener.
+	 *
+	 * All events sent to this listener will be handled asynchronously over the passed executor.
+	 *
+	 * @param executor Executor that will used to handle the events.
+	 * @param listener The listener.
+	 */
+	public void registerListener(Executor executor, IListener listener) {
+		registerListener(listener, false, executor);
 	}
 
 	/**
 	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to this listener will be done asynchronously using a default thread pool configured by {@link java.util.concurrent.Executors}.newCachedThreadPool .
 	 * <p/>
 	 * Constraints:
 	 * <li>Only public methods are considered.</li>
@@ -114,6 +203,26 @@ public class EventDispatcher {
 
 	/**
 	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to these listeners will be handled asynchronously over the passed executor.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the instance methods of the passed listener.
+	 *
+	 * @param executor Executor that will used to handle the events.
+	 * @param listeners The listeners.
+	 */
+	public void registerListeners(Executor executor, Object... listeners) {
+		Arrays.stream(listeners).forEach(l -> registerListener(executor, l));
+	}
+
+	/**
+	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to this listener will be done asynchronously using a default thread pool configured by {@link java.util.concurrent.Executors}.newCachedThreadPool .
 	 * <p/>
 	 * Constraints:
 	 * <li>Only public methods are considered.</li>
@@ -128,7 +237,27 @@ public class EventDispatcher {
 	}
 
 	/**
+	 * Registers a set of listeners using {@link EventSubscriber} method annotations.
+	 *
+	 * All events sent to these listeners will be handled asynchronously over the passed executor.
+	 * <p/>
+	 * Constraints:
+	 * <li>Only public methods are considered.</li>
+	 * <li>Methods annotated with {@link EventSubscriber} must accept exactly one argument.</li>
+	 * <li>The argument to the method must be ${@link Event} or a subclass of it.</li>
+	 * Note: this method will only register the static methods of the passed listener.
+	 *
+	 * @param executor Executor that will used to handle the events.
+	 * @param listeners The listeners.
+	 */
+	public void registerListeners(Executor executor, Class<?>... listeners) {
+		Arrays.stream(listeners).forEach(l -> registerListener(executor, l));
+	}
+
+	/**
 	 * Registers a set of single event listeners.
+	 *
+	 * All events sent to this listener will be done asynchronously using a default thread pool configured by {@link java.util.concurrent.Executors}.newCachedThreadPool .
 	 *
 	 * @param listeners The listeners.
 	 */
@@ -136,10 +265,22 @@ public class EventDispatcher {
 		Arrays.stream(listeners).forEach(this::registerListener);
 	}
 
-	private void registerListener(Class<?> listenerClass, Object listener, boolean isTemporary) {
+	/**
+	 * Registers a set of single event listeners.
+	 *
+	 * All events sent to these listeners will be handled asynchronously over the passed executor.
+	 *
+	 * @param executor Executor that will used to handle the events.
+	 * @param listeners The listeners.
+	 */
+	public void registerListeners(Executor executor, IListener... listeners) {
+		Arrays.stream(listeners).forEach(l -> registerListener(executor, l));
+	}
+
+	private void registerListener(Class<?> listenerClass, Object listener, boolean isTemporary, Executor executor) {
 		if (IListener.class.isAssignableFrom(listenerClass)) {
 			Discord4J.LOGGER.warn(LogMarkers.EVENTS, "IListener was attempted to be registered as an annotation listener. The listener in question will now be registered as an IListener.");
-			registerListener((IListener) listener, isTemporary);
+			registerListener((IListener) listener, isTemporary, executor);
 			return;
 		}
 
@@ -162,7 +303,7 @@ public class EventDispatcher {
 			try {
 				MethodHandle methodHandle = lookup.unreflect(method);
 				if (listener != null) methodHandle = methodHandle.bindTo(listener);
-				return new MethodEventHandler(eventClass, methodHandle, method, listener, isTemporary);
+				return new MethodEventHandler(eventClass, methodHandle, method, listener, isTemporary, executor);
 			} catch (IllegalAccessException ex) {
 				throw new IllegalStateException("Method " + method + " is not accessible", ex);
 			}
@@ -180,11 +321,11 @@ public class EventDispatcher {
 		});
 	}
 
-	private <T extends Event> void registerListener(IListener<T> listener, boolean isTemporary) {
+	private <T extends Event> void registerListener(IListener<T> listener, boolean isTemporary, Executor executor) {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (!Event.class.isAssignableFrom(rawType)) throw new IllegalArgumentException("Type " + rawType + " is not a subclass of Event.");
 
-		ListenerEventHandler eventHandler = new ListenerEventHandler(isTemporary, rawType, listener);
+		ListenerEventHandler eventHandler = new ListenerEventHandler(isTemporary, rawType, listener, executor);
 		listenersRegistry.updateAndGet(set -> {
 			HashSet<EventHandler> updatedSet = (HashSet<EventHandler>) set.clone();
 			updatedSet.add(eventHandler);
@@ -194,8 +335,11 @@ public class EventDispatcher {
 	}
 
 	/**
-	 * This registers a temporary event listener using {@link EventSubscriber} method annotations. Meaning that when it listens to an event, it immediately unregisters itself.
-	 * See {@code registerListener} for the constraints.
+	 * This registers a temporary event listener using {@link EventSubscriber} method annotations.
+	 *
+	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 *
+	 * @see registerListener(Object) registerListener for the constraints
 	 *
 	 * @param listener The listener.
 	 */
@@ -203,27 +347,78 @@ public class EventDispatcher {
 		if (listener instanceof IListener)
 			registerTemporaryListener((IListener<? extends Event>) listener);
 		else
-			registerListener(listener.getClass(), listener, true);
+			registerListener(listener.getClass(), listener, true, defaultEventExecutor);
 	}
 
 	/**
-	 * This registers a temporary event listener using {@link EventSubscriber} method annotations. Meaning that when it listens to an event, it immediately unregisters itself.
-	 * See {@code registerListener} for the constraints.
+	 * This registers a temporary event listener using {@link EventSubscriber} method annotations and passed Executor.
+	 *
+	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 *
+	 * @see registerListener(Executor, Object) registerListener for the constraints
+	 *
+	 * @param executor The executor where events will be handled.
+	 * @param listener The listener.
+	 */
+	public void registerTemporaryListener(Executor executor, Object listener) {
+		if (listener instanceof IListener)
+			registerTemporaryListener(executor, (IListener<? extends Event>) listener);
+		else
+			registerListener(listener.getClass(), listener, true, executor);
+	}
+
+	/**
+	 * This registers a temporary event listener using {@link EventSubscriber} method annotations.
+	 *
+	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 *
+	 * @see registerListener(Object) registerListener for the constraints
 	 *
 	 * @param listener The listener.
 	 */
 	public void registerTemporaryListener(Class<?> listener) {
-		registerListener(listener, null, true);
+		registerListener(listener, null, true, defaultEventExecutor);
 	}
 
 	/**
-	 * This registers a temporary single event listener. Meaning that when it listens to an event, it immediately unregisters itself.
-	 * See {@code registerListener} for the constraints.
+	 * This registers a temporary event listener using {@link EventSubscriber} method annotations.
+	 *
+	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 *
+	 * @see registerListener(Executor, Object) registerListener for the constraints
+	 *
+	 * @param executor The executor where events will be handled.
+	 * @param listener The listener.
+	 */
+	public void registerTemporaryListener(Executor executor, Class<?> listener) {
+		registerListener(listener, null, true, executor);
+	}
+
+	/**
+	 * This registers a temporary single event listener.
+	 *
+	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 *
+	 * @see registerListener(Object) registerListener for the constraints
 	 *
 	 * @param listener The listener.
 	 */
 	public <T extends Event> void registerTemporaryListener(IListener<T> listener) {
-		registerListener(listener, true);
+		registerListener(listener, true, defaultEventExecutor);
+	}
+
+	/**
+	 * This registers a temporary single event listener.
+	 *
+	 * Meaning that when it listens to an event, it immediately unregisters itself.
+	 *
+	 * @see registerListener(Object) registerListener for the constraints
+	 *
+	 * @param executor The executor where events will be handled.
+	 * @param listener The listener.
+	 */
+	public <T extends Event> void registerTemporaryListener(Executor executor, IListener<T> listener) {
+		registerListener(listener, true, executor);
 	}
 
 	/**
@@ -347,7 +542,7 @@ public class EventDispatcher {
 		// we need to account for the fact that the predicate will have an implicit cast introduced by the compiler
 		// meanwhile new IListener<T> will erase to Object and there will be no compiler check, hence we manually introduce filterRawType.isInstance
 		Class<?> filterRawType = TypeResolver.resolveRawArgument(Predicate.class, filter.getClass());
-		registerListener(new IListener<T>() {
+		registerListener(callingThreadExecutor, new IListener<T>() {
 			@Override
 			public void handle(T event) {
 				if (filterRawType.isInstance(event) && filter.test(event)) {
@@ -450,11 +645,11 @@ public class EventDispatcher {
 	 * @param event The event.
 	 */
 	public void dispatch(Event event) {
-		eventExecutor.submit(() -> {
-			Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
-			event.client = client;
+		Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
+		event.client = client;
 
-			listenersRegistry.get().stream().filter(e -> e.accepts(event)).forEach(handler -> {
+		listenersRegistry.get().stream().filter(e -> e.accepts(event)).forEach(handler -> {
+			handler.getExecutor().execute(() -> {
 				try {
 					if (handler.isTemporary()) unregisterHandler(handler);
 					handler.handle(event);
@@ -476,16 +671,20 @@ public class EventDispatcher {
 
 		/**
 		 * Should the handler be removed after handling an event.
+		 *
 		 * @return
 		 */
 		boolean isTemporary();
 
 		/**
 		 * Checks whether the handler should process the given event.
+		 *
 		 * @param e
 		 * @return
 		 */
 		boolean accepts(Event e);
+
+		Executor getExecutor();
 
 		void handle(Event e) throws Throwable;
 	}
@@ -500,13 +699,15 @@ public class EventDispatcher {
 		private final Method method;
 		private final Object instance;
 		private final boolean temporary;
+		private final Executor executor;
 
-		public MethodEventHandler(Class<?> eventClass, MethodHandle methodHandle, Method method, Object instance, boolean temporary) {
+		public MethodEventHandler(Class<?> eventClass, MethodHandle methodHandle, Method method, Object instance, boolean temporary, Executor executor) {
 			this.eventClass = eventClass;
 			this.methodHandle = methodHandle;
 			this.method = method;
 			this.instance = instance;
 			this.temporary = temporary;
+			this.executor = executor;
 		}
 
 		@Override
@@ -525,6 +726,11 @@ public class EventDispatcher {
 		}
 
 		@Override
+		public Executor getExecutor() {
+			return executor;
+		}
+
+		@Override
 		public String toString() {
 			return method.toString();
 		}
@@ -533,6 +739,7 @@ public class EventDispatcher {
 
 	/**
 	 * EventHandler implementation that delegates to an IListener.
+	 *
 	 * @param <T>
 	 */
 	private static class ListenerEventHandler<T extends Event> implements EventHandler {
@@ -540,11 +747,13 @@ public class EventDispatcher {
 		private final boolean isTemporary;
 		private final Class<?> rawType;
 		private final IListener<T> listener;
+		private final Executor executor;
 
-		public ListenerEventHandler(boolean isTemporary, Class<?> rawType, IListener<T> listener) {
+		public ListenerEventHandler(boolean isTemporary, Class<?> rawType, IListener<T> listener, Executor executor) {
 			this.isTemporary = isTemporary;
 			this.rawType = rawType;
 			this.listener = listener;
+			this.executor = executor;
 		}
 
 		@Override
@@ -563,8 +772,31 @@ public class EventDispatcher {
 		}
 
 		@Override
+		public Executor getExecutor() {
+			return executor;
+		}
+
+		@Override
 		public String toString() {
 			return listener.getClass().getSimpleName();
 		}
+	}
+
+	public static class CallerRunsPolicy implements RejectedExecutionHandler {
+
+		long lastNotification = 0;
+
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			long now = System.currentTimeMillis();
+			synchronized(this)  {
+				if (now - lastNotification >= 5000) {
+					Discord4J.LOGGER.warn(LogMarkers.EVENTS, "Event buffer limit exceeded, refer to the class-level javadocs for sx.blah.discord.api.events.EventDispatcher for more information.");
+					lastNotification = now;
+				}
+			}
+			if (!executor.isShutdown()) r.run();
+		}
+
 	}
 }

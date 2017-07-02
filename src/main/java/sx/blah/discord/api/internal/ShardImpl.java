@@ -165,6 +165,14 @@ public class ShardImpl implements IShard {
 	}
 
 	private void updatePresence(StatusType status, String playing, String streamUrl) {
+		checkLoggedIn("update presence");
+
+		if (streamUrl != null) {
+			if (!DiscordUtils.STREAM_URL_PATTERN.matcher(streamUrl).matches()) {
+				throw new IllegalArgumentException("Stream URL must be a twitch.tv url.");
+			}
+		}
+
 		final boolean isIdle = status == StatusType.IDLE; // temporary until v6
 		IUser ourUser = getClient().getOurUser();
 
@@ -236,8 +244,8 @@ public class ShardImpl implements IShard {
 	public List<IUser> getUsers() {
 		List<IUser> guildUserList = guildCache.stream()
 				.map(IGuild::getUsers)
-				.distinct()
 				.flatMap(List::stream)
+				.distinct()
 				.collect(Collectors.toList());
 
 		if (client.getOurUser() != null && !guildUserList.contains(client.getOurUser()))
