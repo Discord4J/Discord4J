@@ -18,7 +18,9 @@
 package sx.blah.discord.handle.obj;
 
 import com.vdurmont.emoji.Emoji;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.impl.obj.ReactionEmoji;
 import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
@@ -230,109 +232,171 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	List<IReaction> getReactions();
 
 	/**
-	 * Gets a reaction by the IEmoji object.
+	 * Gets a reaction by a custom guild emoji.
 	 *
-	 * @param emoji The emoji
-	 * @return The reaction, or null if there aren't any that match
+	 * @param emoji The emoji of the reaction to find.
+	 * @return The reaction with the provided emoji.
+	 *
+	 * @deprecated Use {@link #getReactionByEmoji(IEmoji)} instead.
 	 */
+	@Deprecated
 	IReaction getReactionByIEmoji(IEmoji emoji);
 
 	/**
-	 * Gets a reaction by the emoji text. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
-	 * instead.
+	 * Gets a reaction by its custom guild emoji.
 	 *
-	 * @param name The emoji text (as Unicode)
-	 * @return The reaction, or null if there aren't any that match
-	 * @see IMessage#getReactionByIEmoji(IEmoji)
+	 * @param emoji The emoji of the reaction to find.
+	 * @return The reaction with the provided emoji.
 	 */
-	IReaction getReactionByUnicode(String name);
+	IReaction getReactionByEmoji(IEmoji emoji);
 
 	/**
-	 * Gets a reaction by the Unicode emoji. This will <b>not</b> work with custom emojis, use getReactionByIEmoji
-	 * instead. This simply calls {@link Emoji#getUnicode()} on the other overload of this method.
+	 * Gets a reaction by the ID of its guild emoji.
 	 *
-	 * @param emoji The emoji (as Unicode)
-	 * @return The reaction, or null if there aren't any that match
-	 * @see IMessage#getReactionByIEmoji(IEmoji)
+	 * @param id The ID of the emoji of the reaction to find.
+	 * @return The reaction with the provided ID.
 	 */
-	IReaction getReactionByUnicode(Emoji emoji);
+	IReaction getReactionByID(long id);
 
 	/**
-	 * @deprecated Use {@link #getReactionByUnicode(String)} instead
+	 * Gets a reaction by its unicode character emoji.
+	 *
+	 * @param unicode The unicode character.
+	 * @return The reaction with the provided emoji.
+	 */
+	IReaction getReactionByUnicode(Emoji unicode);
+
+	/**
+	 * Gets a reaction by its unicode character emoji.
+	 *
+	 * @param unicode The unicode character.
+	 * @return The reaction with the provided emoji.
+	 */
+	IReaction getReactionByUnicode(String unicode);
+
+	/**
+	 * Gets a reaction by its unicode character emoji.
+	 *
+	 * @param name The unicode character.
+	 * @return The reaction with the provided emoji.
+	 *
+	 * @deprecated Use {@link #getReactionByUnicode(String)} instead.
 	 */
 	@Deprecated
 	IReaction getReactionByName(String name);
 
 	/**
-	 * Delete all reactions. Requires the MANAGE_MESSAGES permission.
+	 * Gets a reaction by its emoji.
 	 *
-	 * @see Permissions#MANAGE_MESSAGES
+	 * @param emoji The emoji of the reaction to find.
+	 * @return The reaction with the provided emoji.
 	 */
-	void removeAllReactions();
+	IReaction getReactionByEmoji(ReactionEmoji emoji);
 
 	/**
-	 * Adds your reaction to an existing one.
+	 * Adds a reaction to the message.
+	 * Gets the emoji to react with from the passed reaction.
 	 *
-	 * @param reaction The reaction object
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param reaction The reaction to get the emoji to react with from.
 	 */
 	void addReaction(IReaction reaction);
 
 	/**
-	 * Adds your reaction as a custom emoji.
+	 * Adds a reaction to the message.
 	 *
-	 * @param emoji The custom emoji
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param emoji The emoji to react with.
 	 */
 	void addReaction(IEmoji emoji);
 
 	/**
-	 * Adds your reaction as a normal emoji. This can be either a Unicode emoji (☑), or an IEmoji formatted one (&lt;:name:id&gt;).
-	 * Alternatively, you can provide the emoji alias like you would in normal Discord (ex: :ballot_box_with_check:) and we'll
-	 * attempt to look it up in emoji-java (if it doesn't exist in emoji-java, you'll need to provide the Unicode version).
+	 * Adds a reaction to the message.
 	 *
-	 * @param emoji The string emoji
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 */
-	void addReaction(String emoji);
-
-	/**
-	 * Adds your reaction as a Unicode one. Use {@link com.vdurmont.emoji.EmojiManager#getForAlias(String)}
-	 * to retrieve an Emoji object.
-	 *
-	 * @param emoji The string emoji
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param emoji The emoji to react with.
 	 */
 	void addReaction(Emoji emoji);
 
 	/**
-	 * Removes a reaction for a user.
+	 * Adds a reaction to the message.
+	 * This method accepts a string in three forms:
+	 * <ul>
+	 *     <li>A unicode emoji alias (e.g. ":thinking:")</li>
+	 *     <li>A unicode emoji character (e.g. "\u1F914")</li>
+	 *     <li>A custom guild emoji mention (e.g. "<:rainblob:304759070680809474>")</li>
+	 * </ul>
 	 *
-	 * @param reaction The reaction to remove from
-	 * @param user The user
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @throws IllegalArgumentException If the passed emoji does not match any of the allowed formats or it matches the
+	 * format of a unicode alias and a corresponding emoji could not be found.
+	 *
+	 * @param emoji The emoji to react with.
+	 *
+	 * @deprecated Each form of accepted parameter to this method has its own method.
+	 * Use {@link #addReaction(ReactionEmoji)} or {@link #addReaction(Emoji)} instead.
+	 */
+	@Deprecated
+	void addReaction(String emoji);
+
+	/**
+	 * Adds a reaction to the message.
+	 *
+	 * @param emoji The emoji to react with.
+	 */
+	void addReaction(ReactionEmoji emoji);
+
+	/**
+	 * Removes a reaction from the message.
+	 *
+	 * @param reaction The reaction to remove.
+	 *
+	 * @deprecated This is an overload for {@link #removeReaction(IUser, IReaction)} with
+	 * {@link IDiscordClient#getOurUser()}. Use that instead.
+	 */
+	@Deprecated
+	void removeReaction(IReaction reaction);
+
+	/**
+	 * Removes a reaction from the message for the given user.
+	 *
+	 * @param user The user to remove the reaction for.
+	 * @param reaction The reaction to remove.
 	 */
 	void removeReaction(IUser user, IReaction reaction);
 
 	/**
-	 * Removes a reaction for yourself.
+	 * Removes a reaction from the message for the given user.
 	 *
-	 * @param reaction The reaction to remove from
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param user The user to remove the reaction for.
+	 * @param emoji The emoji for the reaction to be removed.
 	 */
-	void removeReaction(IReaction reaction);
+	void removeReaction(IUser user, ReactionEmoji emoji);
+
+	/**
+	 * Removes a reaction from the message for the given user.
+	 *
+	 * @param user The user to remove the reaction for.
+	 * @param emoji The emoji for the reaction to be removed.
+	 */
+	void removeReaction(IUser user, IEmoji emoji);
+
+	/**
+	 * Removes a reaction from the message for the given user.
+	 *
+	 * @param user The user to remove the reaction for.
+	 * @param emoji The emoji for the reaction to be removed.
+	 */
+	void removeReaction(IUser user, Emoji emoji);
+
+	/**
+	 * Removes a reaction from the message for the given user.
+	 *
+	 * @param user The user to remove the reaction for.
+	 * @param emoji The emoji for the reaction to be removed.
+	 */
+	void removeReaction(IUser user, String emoji);
+
+	/**
+	 * Removes all of the reactions on the message.
+	 */
+	void removeAllReactions();
 
 	/**
 	 * This creates a new {@link MessageTokenizer} instance with this message instance.

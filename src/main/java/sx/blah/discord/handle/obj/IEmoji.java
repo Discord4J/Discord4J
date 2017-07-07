@@ -27,11 +27,11 @@ import java.util.List;
 public interface IEmoji extends IDiscordObject<IEmoji> {
 
 	/**
-	 * Copies this emoji object.
+	 * Gets the guild for this emoji.
 	 *
-	 * @return A copy of this object.
+	 * @return The guild.
 	 */
-	IEmoji copy();
+	IGuild getGuild();
 
 	/**
 	 * Gets the emoji's name.
@@ -41,11 +41,11 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	String getName();
 
 	/**
-	 * Gets the guild for this emoji.
+	 * Gets the roles for this emoji. Possibly for integration, but unused at the moment.
 	 *
-	 * @return The guild.
+	 * @return The roles list.
 	 */
-	IGuild getGuild();
+	List<IRole> getRoles();
 
 	/**
 	 * Returns true if the emoji needs colons, false otherwise.
@@ -62,25 +62,9 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	boolean isManaged();
 
 	/**
-	 * Gets the roles for this emoji. Possibly for integration, but unused at the moment.
-	 *
-	 * @return The roles list.
-	 */
-	List<IRole> getRoles();
-
-	/**
 	 * Gets the image URL for this emoji.
 	 *
 	 * @return The image URL.
 	 */
 	String getImageUrl();
-
-	/**
-	 * The emoji as a properly formatted string. "&lt;:name:emoji_id&gt;"
-	 *
-	 * @return The formatted string.
-	 */
-	@Override
-	String toString();
-
 }
