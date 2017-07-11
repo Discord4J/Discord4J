@@ -17,18 +17,22 @@
 /**
  * This package contains all classes related to the Discord4J module "components" system.
  *
+ *
  * Components are a system which can be used to take advantage of IoC (inversion of control, aka Dependency Injection).
  * This allows for objects to not have an "hard" dependencies on something else. This allows for things like separating
  * interfaces from implementations and having optional dependencies without much effort.
+ *
  *
  * Components are injected by utilizing a provided {@link sx.blah.discord.util.components.IComponentProvider}. This
  * provider should produce {@link sx.blah.discord.util.components.IComponent}s whenever called (note that it can produce
  * null to signal that a component should not be injected into an injection site) in order to allow for fine grained
  * control in dependency injection.
  *
+ *
  * Note that injected objects must implement the marker interface {@link sx.blah.discord.util.components.IComponent}.
  * This is intentional. Forcing users to implement the marker interface will prevent likely conflicts (i.e. from
  * injecting frequently used objects like {@link java.lang.String}).
+ *
  *
  * Users can make use of this api in two ways:
  *
@@ -37,7 +41,9 @@
  *     <li>Dynamically</li>
  * </ol>
  *
+ *
  * <b>Programmatically</b>
+ *
  *
  * All clients have a {@link sx.blah.discord.util.components.ComponentRegistry} (accessible via
  * {@link sx.blah.discord.api.IDiscordClient#getComponentRegistry()}) which acts as an entry-point into the api. Users
@@ -49,11 +55,14 @@
  * {@link sx.blah.discord.util.components.ComponentRegistry.Injector#createComponent(java.lang.Class)} to generate a
  * component instance.
  *
+ *
  * Note: Users can force dynamic dependency injection via
  * {@link sx.blah.discord.util.components.ComponentRegistry#injectInto(java.lang.Object)} or
  * {@link sx.blah.discord.util.components.ComponentRegistry.Injector#injectInto(java.lang.Object)}.
  *
+ *
  * <b>Dynamically</b>
+ *
  *
  * Dependency injection sites (methods, method params, or fields) can be marked with the
  * {@link sx.blah.discord.util.components.ComponentInjection} annotation and providing the fully-qualified component
@@ -63,6 +72,7 @@
  * {@link sx.blah.discord.util.components.IComponentProvider}s <i>before</i> any modules are enabled in order to fairly
  * generate a set of components which are able to be injected. Then, once all component providers a retrieved, injection
  * sites will be dynamically used to provide components. After which, the module will be enabled.
+ *
  *
  * @see sx.blah.discord.util.components.ComponentInjection
  * @see sx.blah.discord.util.components.ComponentRegistry
