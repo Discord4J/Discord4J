@@ -42,7 +42,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int bitrate = 0;
 
 	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
-						int userLimit, int bitrate, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
+						int userLimit, int bitrate, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
 		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
