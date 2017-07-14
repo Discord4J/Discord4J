@@ -372,7 +372,7 @@ public class Channel implements IChannel {
 		final List<IMessage> retrieved = new ArrayList<>(subDeque(index, array.length, array));
 
 		if (index == -1)
-			retrieved.add(RequestBuffer.request(() -> {return getMessageByID(id);}).get()); //Ignore intellij on this line, the return statement is required for the IRequest to not resolve to an IVoidRequest
+			retrieved.add(RequestBuffer.request(() -> (IMessage) getMessageByID(id)).get());
 
 		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
 		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
@@ -450,7 +450,7 @@ public class Channel implements IChannel {
 		final List<IMessage> retrieved = new ArrayList<>(subDeque(startIndex, array.length, array));
 
 		if (startIndex == -1)
-			retrieved.add(RequestBuffer.request(() -> {return getMessageByID(id);}).get()); //Ignore intellij on this line, the return statement is required for the IRequest to not resolve to an IVoidRequest
+			retrieved.add(RequestBuffer.request(() -> (IMessage) getMessageByID(id)).get());
 
 		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
 
@@ -560,11 +560,11 @@ public class Channel implements IChannel {
 	public IMessage getMessageByID(long messageID) {
 		return messages.getOrElseGet(messageID, () -> {
 			PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY);
-			return RequestBuffer.request(() -> {
-				return DiscordUtils.getMessageFromJSON(this, client.REQUESTS.GET.makeRequest(
-						DiscordEndpoints.CHANNELS + this.getStringID() + "/messages/" + Long.toUnsignedString(messageID),
-						MessageObject.class));
-			}).get();
+			return RequestBuffer.request(() ->
+					(IMessage) DiscordUtils.getMessageFromJSON(this, client.REQUESTS.GET.makeRequest(
+							DiscordEndpoints.CHANNELS + this.getStringID() + "/messages/" + Long.toUnsignedString(messageID),
+							MessageObject.class))
+			).get();
 		});
 	}
 

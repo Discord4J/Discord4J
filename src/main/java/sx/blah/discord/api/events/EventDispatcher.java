@@ -74,7 +74,7 @@ public class EventDispatcher {
 	 *
 	 * Essentially forces the thread dispatching the event to execute the handler, because all wait for does is exchange with the blocking thread, this serves us well.
 	 */
-	private final Executor callingThreadExecutor = (Runnable command) -> command.run();
+	private final Executor callingThreadExecutor = Runnable::run;
 	private final IDiscordClient client;
 
 	public EventDispatcher(IDiscordClient client, RejectedExecutionHandler backpressureHandler, int minimumPoolSize,
