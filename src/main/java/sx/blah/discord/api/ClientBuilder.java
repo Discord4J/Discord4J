@@ -45,6 +45,7 @@ public class ClientBuilder {
 	 */
 	public static final int DEFAULT_MESSAGE_CACHE_LIMIT = 256;
 
+	private Object clientData;
 	private int[] shard = null;
 	private boolean withRecommendedShardCount = false;
 	private int maxMissedPings = -1;
@@ -61,7 +62,7 @@ public class ClientBuilder {
 	private long eventThreadTimeout = 60L;
 	private TimeUnit eventThreadTimeoutUnit = TimeUnit.SECONDS;
 	private int overflowCapacity = 128;
-	
+
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
 	private final List<Object> listeners = new ArrayList<>();
@@ -107,6 +108,17 @@ public class ClientBuilder {
 	 */
 	public ClientBuilder setDaemon(boolean isDaemon) {
 		this.isDaemon = isDaemon;
+		return this;
+	}
+
+	/**
+	 * Sets an object to be associated with the client.
+	 *
+	 * @param clientData Object to store.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder withData(Object clientData) {
+		this.clientData = clientData;
 		return this;
 	}
 
@@ -265,7 +277,7 @@ public class ClientBuilder {
 		this.shard = new int[]{shardIndex, totalShards};
 		return this;
 	}
-	
+
 	/**
 	 * Sets the policy to use in the case where the EventDispatcher cannot keep up with the volume of events being sent.
 	 *
@@ -276,7 +288,7 @@ public class ClientBuilder {
 		this.backpressureHandler = handler;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the minimum amount of threads which must be alive at any given time in the EventDispatcher. Higher values
 	 * are more expensive overall but lead to quicker availability of threads.
@@ -288,7 +300,7 @@ public class ClientBuilder {
 		this.minimumPoolSize = minimumDispatchThreads;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the maximum amount of threads which may be alive at any given time in the EventDispatcher. Higher values
 	 * are more expensive overall but lead to quicker availability of threads.
@@ -300,7 +312,7 @@ public class ClientBuilder {
 		this.maximumPoolSize = maximumDispatchThreads;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the amount of time of idleness before threads are killed in the EventDispatcher while the number of threads
 	 * is higher than the minimum allowed.
@@ -314,7 +326,7 @@ public class ClientBuilder {
 		this.eventThreadTimeoutUnit = unit;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the amount of events allowed to overflow by without calling the backpressure handler. This allows for easy
 	 * recovery in the event that there is a sudden, unexpected burst of events which the EventDispatcher cannot handle.
@@ -347,7 +359,7 @@ public class ClientBuilder {
 		}
 
 		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon, maxMissedPings,
-				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, backpressureHandler, minimumPoolSize,
+				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, clientData, backpressureHandler, minimumPoolSize,
 				maximumPoolSize, overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
 
 		//Registers events as soon as client is initialized

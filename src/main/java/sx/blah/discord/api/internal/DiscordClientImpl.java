@@ -59,6 +59,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final List<IShard> shards = new CopyOnWriteArrayList<>();
 
 	/**
+	 * Object to associate with the client.
+	 */
+	private volatile Object clientData;
+
+	/**
 	 * User we are logged in as
 	 */
 	volatile User ourUser;
@@ -126,10 +131,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final int maxCacheCount;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard,
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard, Object clientData,
 							 RejectedExecutionHandler backpressureHandler, int minimumPoolSize, int maximumPoolSize,
 							 int overflowCapacity, long eventThreadTimeout, TimeUnit eventThreadTimeoutUnit) {
 		this.token = "Bot " + token;
+		this.clientData = clientData;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
 		this.isDaemon = isDaemon;
@@ -423,7 +429,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		voiceState.setSelfMuted(isSelfMuted);
-		
+
 		((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(
 				guild.getStringID(), channelID, isSelfMuted, voiceState.isSelfDeafened()));
 	}
@@ -621,5 +627,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	public ICacheDelegateProvider getCacheProvider() {
 		return cacheProvider;
+	}
+
+	@Override
+	public Object getClientData() {
+		return clientData;
+	}
+
+	@Override
+	public <T> T getClientData(Class<T> type) {
+		return type.cast(clientData);
+	}
+
+	@Override
+	public void setClientData(Object clientData) {
+		this.clientData = clientData;
 	}
 }
