@@ -23,7 +23,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
-import sx.blah.discord.api.internal.json.objects.ReactionUserObject;
+import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.handle.obj.*;
 
 import java.util.ArrayList;
@@ -87,11 +87,11 @@ public class Reaction implements IReaction {
 		String after = "0";
 
 		while (users.size() < count) {
-			ReactionUserObject[] json = ((DiscordClientImpl) getClient()).REQUESTS.GET.makeRequest(
+			UserObject[] json = ((DiscordClientImpl) getClient()).REQUESTS.GET.makeRequest(
 					endpoint + "?after=" + after + "&limit=100",
-					ReactionUserObject[].class);
+					UserObject[].class);
 
-			for (ReactionUserObject obj : json) {
+			for (UserObject obj : json) {
 				users.add(getMessage().getChannel().getGuild().getUserByID(Long.parseUnsignedLong(obj.id)));
 			}
 
