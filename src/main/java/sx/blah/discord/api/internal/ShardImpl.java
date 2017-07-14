@@ -20,13 +20,14 @@ package sx.blah.discord.api.internal;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
-import sx.blah.discord.handle.impl.obj.PresenceImpl;
+import sx.blah.discord.handle.impl.obj.Presence;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
@@ -36,7 +37,6 @@ import sx.blah.discord.util.cache.Cache;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ShardImpl implements IShard {
@@ -173,19 +173,20 @@ public class ShardImpl implements IShard {
 			}
 		}
 
-		final boolean isIdle = status == StatusType.IDLE; // temporary until v6
 		IUser ourUser = getClient().getOurUser();
-
 		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new PresenceImpl(Optional.ofNullable(playing), Optional.ofNullable(streamUrl), status);
+		IPresence newPresence = new Presence(playing, streamUrl, status);
 
 		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
+		boolean isIdle = status == StatusType.IDLE; // temporary until v6
+		GameObject game = new GameObject(playing, streamUrl);
+
 		ws.send(GatewayOps.STATUS_UPDATE,
-				new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, ourUser.getPresence()));
+				new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game));
 	}
 
 	@Override
