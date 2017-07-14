@@ -157,9 +157,7 @@ public class PermissionUtils {
 	 * @return True if the user has all of the required permissions.
 	 */
 	public static boolean hasPermissions(IGuild guild, IUser user, EnumSet<Permissions> required) {
-		EnumSet<Permissions> copy = required.clone();
-		copy.removeAll(user.getPermissionsForGuild(guild));
-		return copy.isEmpty();
+		return user.getPermissionsForGuild(guild).containsAll(required);
 	}
 
 	/**
@@ -185,9 +183,7 @@ public class PermissionUtils {
 	 * @return True if the user has all of the required permissions.
 	 */
 	public static boolean hasPermissions(IChannel channel, IUser user, EnumSet<Permissions> required) {
-		EnumSet<Permissions> copy = required.clone();
-		copy.removeAll(channel.getModifiedPermissions(user));
-		return copy.isEmpty();
+		return channel.getModifiedPermissions(user).containsAll(required);
 	}
 
 	/**
