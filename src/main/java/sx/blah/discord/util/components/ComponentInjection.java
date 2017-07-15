@@ -23,6 +23,9 @@ import java.lang.annotation.*;
  * This annotation is used to inject components directly into an {@link sx.blah.discord.modules.IModule} object. This
  * can either be put on a field or a method which accepts only Component objects or a method parameters which
  * accept component objects (all other parameters must also have this annotation in this case as well).
+ *
+ * Passing a fully-qualified classname will override component type inference. This can be used to prevent hardcoding
+ * imports of completely optional integrations.
  */
 @Documented
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
@@ -34,5 +37,5 @@ public @interface ComponentInjection {
 	 *
 	 * @return The fully-qualified component class name (ex. "com.test.MyComponent").
 	 */
-	String value();
+	String value() default "";
 }

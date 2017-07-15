@@ -18,6 +18,7 @@
 package sx.blah.discord.util.components;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.InheritanceUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import sx.blah.discord.Discord4J;
@@ -26,10 +27,12 @@ import sx.blah.discord.util.LogMarkers;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * This is a central registry for components. Use this if you need components in a dynamic setting (i.e.
@@ -119,8 +122,8 @@ public class ComponentRegistry {
 					.peek(FieldUtils::removeFinalModifier)
 					.forEach(field -> {
 						try {
-							field.set(parent, createComponent((Class<? extends IComponent>) Class.forName(field.getAnnotation(ComponentInjection.class).value())));
-						} catch (IllegalAccessException | ClassNotFoundException e) {
+							field.set(parent, createComponent(getComponentForAnnotation(field.getAnnotation(ComponentInjection.class), field)));
+						} catch (IllegalAccessException e) {
 							Discord4J.LOGGER.error(LogMarkers.UTIL, "Could not inject into field!", e);
 						}
 					});
@@ -186,20 +189,62 @@ public class ComponentRegistry {
 					});
 		}
 		
+		private Class<?> getComponentForAnnotation(ComponentInjection annotation) throws ClassNotFoundException {
+			return annotation.value().isEmpty() ? null : Class.forName(annotation.value());
+		}
+		
+		private Class<? extends IComponent> getComponentForAnnotation(ComponentInjection annotation, Method method) {
+			return getComponentForAnnotation(annotation, method.getParameters()[0]);
+		}
+		
+		private Class<? extends IComponent> getComponentForAnnotation(ComponentInjection annotation, Field field) {
+			try {
+				Class<?> componentClass = getComponentForAnnotation(annotation);
+				if (componentClass != null)
+					return (Class<? extends IComponent>) componentClass;
+				
+				Class<?> fieldType = field.getType();
+				if (IComponent.class.isAssignableFrom(fieldType)) {
+					return (Class<? extends IComponent>) fieldType;
+				} else {
+					return null;
+				}
+			} catch (Exception e) {
+				return null;
+			}
+		}
+		
+		private Class<? extends IComponent> getComponentForAnnotation(ComponentInjection annotation, Parameter param) {
+			try {
+				Class<?> componentClass = getComponentForAnnotation(annotation);
+				if (componentClass != null)
+					return (Class<? extends IComponent>) componentClass;
+				
+				Class<?> paramType = param.getType();
+				if (IComponent.class.isAssignableFrom(paramType)) {
+					return (Class<? extends IComponent>) paramType;
+				} else {
+					return null;
+				}
+			} catch (Exception e) {
+				return null;
+			}
+		}
+		
 		private List<IComponent> getParamsOrEmpty(Method method, MethodType type) {
 			if (type.parameterCount() == 0)
 				return Collections.emptyList();
 			
 			try {
 				if (type.parameterCount() == 1 && method.isAnnotationPresent(ComponentInjection.class)) {
-					return Collections.singletonList(createComponent((Class<? extends IComponent>) Class.forName(method.getAnnotation(ComponentInjection.class).value())));
+					return Collections.singletonList(createComponent(getComponentForAnnotation(method.getAnnotation(ComponentInjection.class), method)));
 				} else {
 					List<IComponent> params = new LinkedList<>();
 					for (Parameter p : method.getParameters()) {
 						if (!p.isAnnotationPresent(ComponentInjection.class))
 							return Collections.emptyList();
 						
-						params.add(createComponent((Class<? extends IComponent>) Class.forName(p.getAnnotation(ComponentInjection.class).value())));
+						params.add(createComponent(getComponentForAnnotation(p.getAnnotation(ComponentInjection.class), p)));
 					}
 					
 					return params;
@@ -216,7 +261,33 @@ public class ComponentRegistry {
 		 * @return The component, or null if none could be provided.
 		 */
 		public <T extends IComponent> T createComponent(Class<T> componentType) {
-			IComponentProvider provider = providerMap.get(componentType);
+			IComponentProvider provider = null;
+			
+			if (componentType != null) {
+				Set<Class<? extends IComponent>> types = providerMap.keySet()
+						.stream()
+						.filter(componentType::isAssignableFrom)
+						.collect(Collectors.toSet());
+				
+				if (types.size() == 1) {
+					provider = providerMap.get(types.stream().findFirst().get());
+				} else if (types.size() > 1) {
+					for (Class<? extends IComponent> type : types) { //Prioritize the component type which exactly matches the request if there is any
+						if (type.equals(componentType)) {
+							provider = providerMap.get(componentType);
+							break;
+						}
+					}
+					
+					if (provider == null) {
+						Class<? extends IComponent> type = types.stream()
+								.sorted(Comparator.comparingInt(o -> InheritanceUtils.distance(o, componentType)))
+								.findFirst()
+								.get();
+						provider = providerMap.get(type);
+					}
+				}
+			}
 			
 			if (provider == null)
 				return null;

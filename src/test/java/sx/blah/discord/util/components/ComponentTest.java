@@ -69,6 +69,14 @@ public class ComponentTest {
 	}
 	
 	@Test
+	public void testInferredInjections() {
+		ComponentRegistry registry = getRegistry();
+		TestTypeInference site = new TestTypeInference();
+		registry.injectInto(site);
+		site.testFields();
+	}
+	
+	@Test
 	public void testModule() {
 		ComponentRegistry registry = new ComponentRegistry();
 		EventDispatcher dispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
@@ -335,7 +343,43 @@ public class ComponentTest {
 		ComponentRegistry registry = new ComponentRegistry();
 		registry.registerComponentProvider(IComponentProvider.singletonProvider(new TestComponent()));
 		registry.registerComponentProvider(IComponentProvider.singletonProvider(new TestComponent2()));
+		registry.registerComponentProvider(IComponentProvider.singletonProvider(new TestComponent3()));
 		return registry;
+	}
+	
+	public static class TestTypeInference {
+		
+		@ComponentInjection
+		IComponent obscureComponent;
+		
+		@ComponentInjection
+		TestComponent concreteComponent;
+		
+		@ComponentInjection
+		TestComponent3 concreteComponent2;
+		
+		public void testFields() {
+			assertNotNull(obscureComponent);
+			assertNotNull(concreteComponent);
+			assertNotNull(concreteComponent2);
+			assertFalse(concreteComponent instanceof TestComponent3);
+			assertFalse(concreteComponent == concreteComponent2);
+		}
+		
+		@ComponentInjection
+		public void methodInjection(TestComponent2 component) {
+			assertNotNull(component);
+		}
+		
+		public void methodInjection2(@ComponentInjection String invalid,
+									 @ComponentInjection TestComponent component,
+									 @ComponentInjection TestComponent3 component2) {
+			assertNull(invalid);
+			assertNotNull(component);
+			assertNotNull(component2);
+			assertFalse(component instanceof TestComponent3);
+			assertFalse(component == component2);
+		}
 	}
 	
 	public static class TestInjectionSite {
@@ -370,6 +414,10 @@ public class ComponentTest {
 	}
 	
 	public static class TestComponent2 implements IComponent {
+	
+	}
+	
+	public static class TestComponent3 extends TestComponent {
 	
 	}
 	
