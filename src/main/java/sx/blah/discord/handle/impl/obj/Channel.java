@@ -81,11 +81,6 @@ public class Channel implements IChannel {
 	protected volatile String topic;
 
 	/**
-	 * Whether or not the channel is flagged as nsfw.
-	 */
-	private boolean nsfw;
-
-	/**
 	 * Whether the bot should send out a typing status
 	 */
 	private AtomicBoolean isTyping = new AtomicBoolean(false);
@@ -125,13 +120,12 @@ public class Channel implements IChannel {
 	 */
 	protected final DiscordClientImpl client;
 
-	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, boolean nsfw, int position, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
+	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
 		this.guild = guild;
 		this.topic = topic;
-		this.nsfw = nsfw;
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
@@ -586,11 +580,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isNSFW() {
-		return nsfw;
-	}
-
-	public void setNSFW(boolean nsfw) {
-		this.nsfw = nsfw;
+		return DiscordUtils.NSFW_CHANNEL_PATTERN.matcher(name).find();
 	}
 
 	@Override
@@ -1124,8 +1114,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, guild, topic, nsfw, position,
-				new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
+		Channel channel = new Channel(client, name, id, guild, topic, position, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
 		channel.isTyping.set(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
