@@ -247,22 +247,22 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public int getMaxInternalCacheCount() {
-		throw new UnsupportedOperationException();
+			return 0;
 	}
 
 	@Override
 	public int getInternalCacheCount() {
-		throw new UnsupportedOperationException();
+		return 0;
 	}
 
 	@Override
 	public IMessage getMessageByID(long messageID) {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
 	public String getTopic() {
-		throw new UnsupportedOperationException();
+		return "";
 	}
 
 	@Override
@@ -302,7 +302,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public synchronized boolean getTypingStatus() {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
@@ -317,7 +317,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IMessage> getPinnedMessages() {
-		throw new UnsupportedOperationException();
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -382,6 +382,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public boolean isNSFW() {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 }
