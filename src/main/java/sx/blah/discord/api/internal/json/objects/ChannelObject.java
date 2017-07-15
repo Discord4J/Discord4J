@@ -73,4 +73,8 @@ public class ChannelObject {
 	 * Recipients of the channel if it is private type.
 	 */
 	public UserObject[] recipients;
+	/**
+	 * Whether or not the channel is flagged as nsfw.
+	 */
+	public boolean nsfw;
 }

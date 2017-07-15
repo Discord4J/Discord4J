@@ -503,13 +503,14 @@ public class DiscordUtils {
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			channel.setTopic(json.topic);
+			channel.setNSFW(json.nsfw);
 			channel.userOverrides.clear();
 			channel.userOverrides.putAll(userOverrides);
 			channel.roleOverrides.clear();
 			channel.roleOverrides.putAll(roleOverrides);
 		} else {
-			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id), guild, json.topic, json.position,
-					roleOverrides, userOverrides);
+			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id),
+					guild, json.topic, json.nsfw, json.position, roleOverrides, userOverrides);
 		}
 
 		return channel;
