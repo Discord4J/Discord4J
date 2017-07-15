@@ -28,8 +28,8 @@ import java.util.List;
  * Represents a voice channel.
  * <p>
  * Most methods from {@link IChannel}, when called, will always throw an exception due to the incompatible nature
- * between a text channel (what IChannel typically represents) and a voice channel. D4J v3 will fix this
- * incompatibility, but in the meantime avoid any and all deprecated methods defined by this interface.
+ * between a text channel (what IChannel typically represents) and a voice channel. All deprecated methods defined by
+ * this interface will throw an exception if invoked and should be avoided.
  */
 public interface IVoiceChannel extends IChannel {
 	/**
