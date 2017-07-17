@@ -146,7 +146,7 @@ public class DiscordUtils {
 			user.setDiscriminator(response.discriminator);
 		} else {
 			user = new User(shard, response.username, Long.parseUnsignedLong(response.id), response.discriminator, response.avatar,
-					new PresenceImpl(Optional.empty(), Optional.empty(), StatusType.OFFLINE), response.bot);
+					new Presence(null, null, StatusType.OFFLINE), response.bot);
 		}
 		return user;
 	}
@@ -621,19 +621,20 @@ public class DiscordUtils {
 	}
 
 	public static IPresence getPresenceFromJSON(PresenceObject presence) {
-		return new PresenceImpl(Optional.ofNullable(presence.game == null ? null : presence.game.name),
-				Optional.ofNullable(presence.game == null ? null : presence.game.url),
-				((presence.game != null && presence.game.type == GameObject.STREAMING)
-						? StatusType.STREAMING
-						: (StatusType.get(presence.status))));
+		return getPresenceFromJSON(presence.game, presence.status);
 	}
 
 	public static IPresence getPresenceFromJSON(PresenceUpdateEventResponse response) {
-		PresenceObject obj = new PresenceObject();
-		obj.game = response.game;
-		obj.status = response.status;
-		return getPresenceFromJSON(obj);
+		return getPresenceFromJSON(response.game, response.status);
 	}
+
+	private static IPresence getPresenceFromJSON(GameObject game, String status) {
+		return new Presence(
+				game == null ? null : game.name,
+				game == null ? null : game.url,
+				StatusType.get(status));
+	}
+
 
 
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
