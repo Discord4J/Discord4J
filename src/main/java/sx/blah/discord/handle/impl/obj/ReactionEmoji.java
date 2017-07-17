@@ -96,11 +96,12 @@ public class ReactionEmoji implements IIDLinkedObject {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (!this.getClass().isAssignableFrom(obj.getClass())) return false;
+	public boolean equals(Object other) {
+		if (other == null) return false;
+		if (!this.getClass().isAssignableFrom(other.getClass())) return false;
 
-		ReactionEmoji other = (ReactionEmoji) obj;
-		return other.name.equals(this.name) && other.id == this.id;
+		ReactionEmoji emoji = (ReactionEmoji) other;
+		return emoji.name.equals(this.name) && emoji.id == this.id;
 	}
 
 	@Override
