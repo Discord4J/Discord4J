@@ -45,8 +45,6 @@ public class ComponentRegistry {
 	
 	private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
 	
-	public ComponentRegistry() {}
-	
 	/**
 	 * This registers an {@link IComponentProvider} with the component registry.
 	 *
