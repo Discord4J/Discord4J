@@ -670,22 +670,6 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets invite codes from a message if it exists.
-	 *
-	 * @param message The message to parse.
-	 * @return The codes or empty if none are found.
-	 */
-	public static List<String> getInviteCodesFromMessage(String message) {
-		Matcher matcher = MessageTokenizer.INVITE_PATTERN.matcher(message);
-		List<String> strings = new ArrayList<>();
-		while (matcher.find()) {
-			strings.add(matcher.group(1));
-			matcher = MessageTokenizer.INVITE_PATTERN.matcher(matcher.replaceFirst(""));
-		}
-		return strings;
-	}
-
-	/**
 	 * This takes in an {@link AudioInputStream} and guarantees that it is PCM encoded.
 	 *
 	 * @param stream The original stream.
