@@ -18,6 +18,7 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.Image;
+import sx.blah.discord.util.cache.LongMap;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -44,7 +45,39 @@ public interface IPrivateChannel extends IChannel {
 	IPrivateChannel copy();
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	LongMap<PermissionOverride> getUserOverridesLong();
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	LongMap<PermissionOverride> getRoleOverridesLong();
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	void edit(String name, int position, String topic);
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	List<IExtendedInvite> getExtendedInvites();
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -52,7 +85,7 @@ public interface IPrivateChannel extends IChannel {
 	EnumSet<Permissions> getModifiedPermissions(IRole role);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -60,7 +93,7 @@ public interface IPrivateChannel extends IChannel {
 	void removePermissionsOverride(IUser user);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -68,7 +101,7 @@ public interface IPrivateChannel extends IChannel {
 	void removePermissionsOverride(IRole role);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -76,7 +109,7 @@ public interface IPrivateChannel extends IChannel {
 	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -84,7 +117,7 @@ public interface IPrivateChannel extends IChannel {
 	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -92,7 +125,7 @@ public interface IPrivateChannel extends IChannel {
 	List<IInvite> getInvites();
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -100,7 +133,7 @@ public interface IPrivateChannel extends IChannel {
 	void delete();
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -108,7 +141,7 @@ public interface IPrivateChannel extends IChannel {
 	int getPosition();
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -116,7 +149,7 @@ public interface IPrivateChannel extends IChannel {
 	void changeName(String name);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -124,7 +157,7 @@ public interface IPrivateChannel extends IChannel {
 	void changePosition(int position);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -132,7 +165,7 @@ public interface IPrivateChannel extends IChannel {
 	void changeTopic(String topic);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -140,7 +173,31 @@ public interface IPrivateChannel extends IChannel {
 	IExtendedInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	String getTopic();
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	IGuild getGuild();
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	List<IMessage> getPinnedMessages();
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -148,7 +205,7 @@ public interface IPrivateChannel extends IChannel {
 	List<IWebhook> getWebhooks();
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -156,7 +213,7 @@ public interface IPrivateChannel extends IChannel {
 	IWebhook getWebhookByID(long id);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -164,7 +221,7 @@ public interface IPrivateChannel extends IChannel {
 	List<IWebhook> getWebhooksByName(String name);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -172,7 +229,7 @@ public interface IPrivateChannel extends IChannel {
 	IWebhook createWebhook(String name);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
@@ -180,10 +237,26 @@ public interface IPrivateChannel extends IChannel {
 	IWebhook createWebhook(String name, Image avatar);
 
 	/**
-	 * @deprecated  See {@link IPrivateChannel} for details.
+	 * @deprecated See {@link IPrivateChannel} for details.
 	 * @throws UnsupportedOperationException Impossible to use as a private channel.
 	 */
 	@Override
 	@Deprecated
 	IWebhook createWebhook(String name, String avatar);
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	boolean isDeleted();
+
+	/**
+	 * @deprecated See {@link IPrivateChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a private channel.
+	 */
+	@Override
+	@Deprecated
+	boolean isNSFW();
 }
