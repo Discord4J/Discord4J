@@ -194,14 +194,6 @@ public interface IPrivateChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	List<IMessage> getPinnedMessages();
-
-	/**
-	 * @deprecated See {@link IPrivateChannel} for details.
-	 * @throws UnsupportedOperationException Impossible to use as a private channel.
-	 */
-	@Override
-	@Deprecated
 	List<IWebhook> getWebhooks();
 
 	/**
