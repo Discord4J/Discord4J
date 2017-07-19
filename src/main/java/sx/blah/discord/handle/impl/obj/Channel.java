@@ -1009,7 +1009,7 @@ public class Channel implements IChannel {
 			throw new DiscordException("Message channel doesn't match current channel!");
 
 		if (!message.isPinned())
-			throw new DiscordException("Message already unpinned!");
+			throw new DiscordException("Message is not pinned!");
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS + id + "/pins/" + message.getStringID());
 	}

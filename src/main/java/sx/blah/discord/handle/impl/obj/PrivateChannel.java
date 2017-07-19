@@ -171,11 +171,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public List<IMessage> getPinnedMessages() {
-		return new ArrayList<>();
-	}
-
-	@Override
 	public List<IWebhook> getWebhooks() {
 		throw new UnsupportedOperationException();
 	}
