@@ -51,10 +51,13 @@ public class ShardImpl implements IShard {
 	final Cache<IPrivateChannel> privateChannels;
 	public final Cache<DiscordVoiceWS> voiceWebSockets;
 
-	ShardImpl(IDiscordClient client, String gateway, int[] info) {
+	private final PresenceUpdateRequest identifyPresence;
+
+	ShardImpl(IDiscordClient client, String gateway, int[] info, PresenceUpdateRequest identifyPresence) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
 		this.info = info;
+		this.identifyPresence = identifyPresence;
 		this.guildCache = new Cache<>((DiscordClientImpl) client, IGuild.class);
 		this.privateChannels = new Cache<>((DiscordClientImpl) client, IPrivateChannel.class);
 		this.voiceWebSockets = new Cache<>((DiscordClientImpl) client, DiscordVoiceWS.class);
@@ -73,7 +76,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public void login() {
 		Discord4J.LOGGER.trace(LogMarkers.API, "Shard logging in.");
-		this.ws = new DiscordWS(this, gateway, client.maxMissedPings);
+		this.ws = new DiscordWS(this, gateway, client.maxMissedPings, identifyPresence);
 		this.ws.connect();
 	}
 
@@ -135,7 +138,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void streaming(String playingText, String streamingUrl) {
-		updatePresence(StatusType.STREAMING, playingText, streamingUrl);
+		updatePresence(StatusType.ONLINE, playingText, streamingUrl);
 	}
 
 	@Override
@@ -196,8 +199,7 @@ public class ShardImpl implements IShard {
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
-		GameObject game = playing == null && streamUrl == null ? null : new GameObject(playing, streamUrl);
-		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(game, status));
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, playing, streamUrl));
 	}
 
 	@Override

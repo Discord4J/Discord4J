@@ -29,6 +29,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
+import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.ResumeRequest;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
@@ -62,6 +63,8 @@ public class DiscordWS extends WebSocketAdapter {
 	private DispatchHandler dispatchHandler;
 	HeartbeatHandler heartbeatHandler;
 
+	private final PresenceUpdateRequest identifyPresence;
+
 	/**
 	 * When the bot has received all available guilds.
 	 */
@@ -72,12 +75,13 @@ public class DiscordWS extends WebSocketAdapter {
 	 */
 	public boolean hasReceivedReady = false;
 
-	DiscordWS(IShard shard, String gateway, int maxMissedPings) {
+	DiscordWS(IShard shard, String gateway, int maxMissedPings, PresenceUpdateRequest identifyPresence) {
 		this.client = (DiscordClientImpl) shard.getClient();
 		this.shard = (ShardImpl) shard;
 		this.gateway = gateway;
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
 		this.heartbeatHandler = new HeartbeatHandler(this, maxMissedPings);
+		this.identifyPresence = identifyPresence;
 		this.state = State.CONNECTING;
 	}
 
@@ -100,7 +104,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 					heartbeatHandler.begin(d.get("heartbeat_interval").intValue());
 					if (this.state != State.RESUMING) {
-						send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+						send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo(), identifyPresence));
 					} else {
 						client.reconnectManager.onReconnectSuccess();
 						send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
@@ -123,7 +127,7 @@ public class DiscordWS extends WebSocketAdapter {
 					this.state = State.RECONNECTING;
 					client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.INVALID_SESSION_OP, shard));
 					invalidate();
-					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo(), null)); // TODO: try to maintain previous presence?
 					break;
 				case HEARTBEAT:
 					send(GatewayOps.HEARTBEAT, seq);

@@ -27,10 +27,9 @@ public class PresenceUpdateRequest {
 	public String status;
 	public boolean afk = false;
 
-
-	public PresenceUpdateRequest(GameObject obj, StatusType status) {
+	public PresenceUpdateRequest(StatusType status, String playingText, String streamUrl) {
 		this.since = status == StatusType.IDLE ? System.currentTimeMillis() : null;
-		this.game = obj;
+		this.game = playingText == null && streamUrl == null ? null : new GameObject(playingText, streamUrl);
 		this.status = status.name().toLowerCase();
 	}
 }
