@@ -139,6 +139,21 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
+	public void dnd(String playingText) {
+		updatePresence(StatusType.DND, playingText);
+	}
+
+	@Override
+	public void dnd() {
+		dnd(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+	}
+
+	@Override
+	public void invisible() {
+		updatePresence(StatusType.OFFLINE, null);
+	}
+
+	@Override
 	@Deprecated
 	public void changeStatus(Status status) {
 		// old functionality just in case
@@ -181,11 +196,14 @@ public class ShardImpl implements IShard {
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
-		boolean isIdle = status == StatusType.IDLE; // temporary until v6
-		GameObject game = new GameObject(playing, streamUrl);
+		GameObject game = playing == null && streamUrl == null ? null : new GameObject(playing, streamUrl);
 
-		ws.send(GatewayOps.STATUS_UPDATE,
-				new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, game));
+		String type = status == StatusType.OFFLINE ? "invisible" : status.name().toLowerCase();
+		System.out.println(type);
+
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(
+				status == StatusType.IDLE ? System.currentTimeMillis() : null,
+				game, type, status == StatusType.IDLE));
 	}
 
 	@Override

@@ -47,6 +47,8 @@ import java.util.zip.InflaterInputStream;
 
 public class DiscordWS extends WebSocketAdapter {
 
+	public static final String GATEWAY_VERSION = "6";
+
 	State state;
 	private WebSocketClient wsClient;
 

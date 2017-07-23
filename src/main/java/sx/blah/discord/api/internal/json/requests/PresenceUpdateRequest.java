@@ -23,15 +23,21 @@ public class PresenceUpdateRequest {
 	/**
 	 * The time (in epoch milliseconds) since the user became idle or null if not idle
 	 */
-	public Long idle_since; // This must be the boxed Long because it can be null
+	public Long since; // This must be the boxed Long because it can be null
 
 	/**
 	 * The game the user is playing, or null if no game
 	 */
 	public GameObject game;
 
-	public PresenceUpdateRequest(Long idle_since, GameObject obj) {
-		this.idle_since = idle_since;
+	public String status;
+	public boolean afk;
+
+
+	public PresenceUpdateRequest(Long since, GameObject obj, String status, boolean afk) {
+		this.since = since;
 		this.game = obj;
+		this.status = status;
+		this.afk = afk;
 	}
 }

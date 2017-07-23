@@ -36,15 +36,11 @@ public class ChannelObject {
 	/**
 	 * The type of the channel.
 	 */
-	public String type;
+	public int type;
 	/**
 	 * The position of the channel.
 	 */
 	public int position;
-	/**
-	 * Whether the channel is private or not.
-	 */
-	public boolean is_private;
 	/**
 	 * Array of permission overwrites.
 	 */
@@ -73,4 +69,12 @@ public class ChannelObject {
 	 * Recipients of the channel if it is private type.
 	 */
 	public UserObject[] recipients;
+
+	public static class Type {
+		public static final int GUILD_TEXT     = 0;
+		public static final int PRIVATE        = 1;
+		public static final int GUILD_VOICE    = 2;
+		public static final int GROUP_PRIVATE  = 3;
+		public static final int GUILD_CATEGORY = 4;
+	}
 }

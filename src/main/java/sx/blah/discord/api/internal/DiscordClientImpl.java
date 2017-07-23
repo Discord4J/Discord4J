@@ -287,7 +287,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		String gateway = null;
 		try {
 			GatewayResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY, GatewayResponse.class);
-			gateway = response.url + "?encoding=json&v=5";
+			gateway = response.url + "?encoding=json&v=" + DiscordWS.GATEWAY_VERSION;
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
@@ -411,6 +411,21 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	public void dnd(String playingText) {
+		getShards().forEach(s -> s.dnd(playingText));
+	}
+
+	@Override
+	public void dnd() {
+		getShards().forEach(IShard::dnd);
+	}
+
+	@Override
+	public void invisible() {
+		getShards().forEach(IShard::invisible);
+	}
+
+	@Override
 	public void mute(IGuild guild, boolean isSelfMuted) {
 		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
 
@@ -423,7 +438,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		voiceState.setSelfMuted(isSelfMuted);
-		
+
 		((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(
 				guild.getStringID(), channelID, isSelfMuted, voiceState.isSelfDeafened()));
 	}

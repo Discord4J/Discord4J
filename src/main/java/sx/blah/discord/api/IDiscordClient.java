@@ -155,6 +155,13 @@ public interface IDiscordClient {
 	 */
 	void streaming(String playingText, String streamingUrl);
 
+
+	void dnd(String playingText);
+
+	void dnd();
+
+	void invisible();
+
 	/**
 	 * Changes this user's self-muted state in a guild.
 	 *

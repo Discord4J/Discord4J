@@ -300,10 +300,10 @@ public class DiscordUtils {
 
 			if (json.channels != null)
 				for (ChannelObject channelResponse : json.channels) {
-					String channelType = channelResponse.type;
-					if (channelType.equalsIgnoreCase("text")) {
+					int channelType = channelResponse.type;
+					if (channelType == ChannelObject.Type.GUILD_TEXT) {
 						guild.channels.put(getChannelFromJSON(guild, channelResponse));
-					} else if (channelType.equalsIgnoreCase("voice")) {
+					} else if (channelType == ChannelObject.Type.GUILD_VOICE) {
 						guild.voiceChannels.put(getVoiceChannelFromJSON(guild, channelResponse));
 					}
 				}

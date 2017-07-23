@@ -27,9 +27,15 @@ public enum StatusType {
 	 */
 	ONLINE,
 	/**
+	 * Represents that the user is in 'do not disturb' mode.
+	 */
+	DND,
+	/**
 	 * Represents that the user is idle.
 	 */
 	IDLE,
+
+	INVISIBLE,
 	/**
 	 * Represents that the user is offline.
 	 */
@@ -38,10 +44,7 @@ public enum StatusType {
 	 * Represents that the user is streaming.
 	 */
 	STREAMING,
-	/**
-	 * Represents that the user is in 'do not disturb' mode.
-	 */
-	DND,
+
 	/**
 	 * Unknown presence.
 	 */
