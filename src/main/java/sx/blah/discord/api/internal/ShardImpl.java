@@ -150,7 +150,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void invisible() {
-		updatePresence(StatusType.OFFLINE, null);
+		updatePresence(StatusType.INVISIBLE, null);
 	}
 
 	@Override
@@ -197,13 +197,7 @@ public class ShardImpl implements IShard {
 		}
 
 		GameObject game = playing == null && streamUrl == null ? null : new GameObject(playing, streamUrl);
-
-		String type = status == StatusType.OFFLINE ? "invisible" : status.name().toLowerCase();
-		System.out.println(type);
-
-		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(
-				status == StatusType.IDLE ? System.currentTimeMillis() : null,
-				game, type, status == StatusType.IDLE));
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(game, status));
 	}
 
 	@Override
