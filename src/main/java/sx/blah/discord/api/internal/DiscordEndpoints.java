@@ -25,6 +25,9 @@ import sx.blah.discord.Discord4J;
  */
 public final class DiscordEndpoints {
 
+	/**
+	 * The version of the Discord REST API that is used by Discord4J.
+	 */
 	public static final String API_VERSION = "6";
 
 	/**

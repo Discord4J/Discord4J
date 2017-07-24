@@ -48,6 +48,9 @@ import java.util.zip.InflaterInputStream;
 
 public class DiscordWS extends WebSocketAdapter {
 
+	/**
+	 * The version of the Discord Gateway that is used by Discord4J.
+	 */
 	public static final String GATEWAY_VERSION = "6";
 
 	State state;

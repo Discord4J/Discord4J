@@ -333,38 +333,91 @@ public class ClientBuilder {
 		return this;
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to online.
+	 *
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder online() {
 		return online(null);
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to online with the given playing text.
+	 *
+	 * @param playingText The game playing text.
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder online(String playingText) {
 		return setPresence(StatusType.ONLINE, playingText, null);
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to idle.
+	 *
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder idle() {
 		return idle(null);
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to idle with the given playing text.
+	 *
+	 * @param playingText The game playing text.
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder idle(String playingText) {
 		return setPresence(StatusType.IDLE, playingText, null);
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to do not disturb.
+	 *
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder dnd() {
 		return dnd(null);
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to do not disturb with the given playing text.
+	 *
+	 * @param playingText The game playing text.
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder dnd(String playingText) {
 		return setPresence(StatusType.DND, playingText, null);
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to invisible.
+	 *
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder invisible() {
 		return setPresence(StatusType.INVISIBLE, null, null);
 	}
 
+	/**
+	 * Sets the status to be sent to Discord on login to streaming with the given playing text and stream url.
+	 *
+	 * @param playingText The game playing text.
+	 * @param streamUrl The valid twitch.tv streaming url.
+	 * @return The instance of the builder.
+	 */
 	public ClientBuilder streaming(String playingText, String streamUrl) {
 		return setPresence(StatusType.ONLINE, playingText, streamUrl);
 	}
 
+	/**
+	 * Sets the presence to be sent to Discord on login.
+	 *
+	 * @param status The status type.
+	 * @param playingText The optional game playing text.
+	 * @param streamUrl The optional stream url.
+	 * @return The instance of the builder.
+	 */
 	private ClientBuilder setPresence(StatusType status, String playingText, String streamUrl) {
 		this.status = status;
 		this.playingText = playingText;

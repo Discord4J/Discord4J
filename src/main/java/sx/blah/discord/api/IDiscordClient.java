@@ -155,11 +155,21 @@ public interface IDiscordClient {
 	 */
 	void streaming(String playingText, String streamingUrl);
 
-
+	/**
+	 * Set this user/all shards' presences to be do not disturb, with the playing text.
+	 *
+	 * @param playingText The game playing text
+	 */
 	void dnd(String playingText);
 
+	/**
+	 * Set this user/all shards' presences to be do not disturb, retaining the original playing text (if any).
+	 */
 	void dnd();
 
+	/**
+	 * Set this user/all shards' presences to be invisible.
+	 */
 	void invisible();
 
 	/**
