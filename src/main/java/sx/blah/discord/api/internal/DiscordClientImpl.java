@@ -30,7 +30,7 @@ import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
 import sx.blah.discord.api.internal.json.responses.GatewayResponse;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.ShardReadyEvent;
+import sx.blah.discord.handle.impl.events.shard.ShardReadyEvent;
 import sx.blah.discord.handle.impl.obj.Guild;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.impl.obj.VoiceState;
@@ -158,10 +158,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.loader = new ModuleLoader(this);
 		this.identifyPresence = identifyPresence;
 
-		final DiscordClientImpl instance = this;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			if (instance.keepAlive != null)
-				instance.keepAlive.cancel();
+			if (this.keepAlive != null)
+				this.keepAlive.cancel();
 		}));
 	}
 
@@ -380,20 +379,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public boolean isReady() {
 		return getShards().size() == getShardCount() && getShards().stream().map(IShard::isReady).allMatch(bool -> bool);
-	}
-
-	@Override
-	@Deprecated
-	public void changeStatus(Status status) {
-		// old functionality just in case
-		getShards().forEach(s -> s.changeStatus(status));
-	}
-
-	@Override
-	@Deprecated
-	public void changePresence(boolean isIdle) {
-		// old functionality just in case
-		getShards().forEach(s -> s.changePresence(isIdle));
 	}
 
 	@Override

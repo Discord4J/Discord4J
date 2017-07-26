@@ -361,8 +361,11 @@ public class RequestBuilder {
 			boolean result = false;
 
 			try {
-				if (waitBefore != null)
-					client.getDispatcher().waitFor(waitBefore, waitBeforeTimeout, TimeUnit.MILLISECONDS, timeoutHandler);
+				if (waitBefore != null) {
+					if (client.getDispatcher().waitFor(waitBefore, waitBeforeTimeout, TimeUnit.MILLISECONDS) == null) {
+						timeoutHandler.invoke();
+					}
+				}
 
 				if (bufferRequests) {
 					Future<Boolean> futureResult = RequestBuffer.request(() -> {
@@ -385,8 +388,11 @@ public class RequestBuilder {
 					result = action.execute();
 				}
 
-				if (waitAfter != null)
-					client.getDispatcher().waitFor(waitAfter, waitAfterTimeout, TimeUnit.MILLISECONDS, timeoutHandler);
+				if (waitAfter != null) {
+					if (client.getDispatcher().waitFor(waitAfter, waitAfterTimeout, TimeUnit.MILLISECONDS) == null) {
+						timeoutHandler.invoke();
+					}
+				}
 
 			} catch (RateLimitException e) {
 				rateLimitHandler.accept(e);

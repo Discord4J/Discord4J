@@ -23,17 +23,6 @@ package sx.blah.discord.handle.obj;
 public interface IIDLinkedObject {
 
 	/**
-	 * Gets the unique snowflake ID of the object.
-	 *
-	 * @return The unique snowflake ID of the object.
-	 * @deprecated Use {@link #getStringID()} instead. This this will return a <code>long</code> in future versions.
-	 */
-	@Deprecated
-	default String getID() {
-		return getStringID();
-	}
-
-	/**
 	 * Gets the unique snowflake ID of the object. This value is <b>unsigned</b>.
 	 *
 	 * @return The unique snowflake ID of the object.

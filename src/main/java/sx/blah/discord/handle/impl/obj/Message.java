@@ -302,12 +302,6 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	@Deprecated
-	public List<IEmbed> getEmbedded() {
-		return getEmbeds();
-	}
-
-	@Override
 	public List<IEmbed> getEmbeds() {
 		List<IEmbed> copy = new ArrayList<>(embeds.size());
 		copy.addAll(embeds);
@@ -357,31 +351,9 @@ public class Message implements IMessage {
 	 * Gets a list of the unique snowflake IDs of the users mentioned in the message.
 	 *
 	 * @return A list of the unique snowflake IDs of the users mentioned in the message.
-	 * @deprecated Use {@link #getRawMentionsLong()} instead.
-	 */
-	@Deprecated
-	public List<String> getRawMentions() {
-		return getRawMentionsLong().stream().map(Long::toUnsignedString).collect(Collectors.toList());
-	}
-
-	/**
-	 * Gets a list of the unique snowflake IDs of the users mentioned in the message.
-	 *
-	 * @return A list of the unique snowflake IDs of the users mentioned in the message.
 	 */
 	public List<Long> getRawMentionsLong() {
 		return mentions;
-	}
-
-	/**
-	 * Gets a list of the unique snowflake IDs of the roles mentioned in the message.
-	 *
-	 * @return A list of the unique snowflake IDs of the roles mentioned in the message.
-	 * @deprecated Use {@link #getRawRoleMentionsLong()} instead.
-	 */
-	@Deprecated
-	public List<String> getRawRoleMentions() {
-		return getRawRoleMentionsLong().stream().map(Long::toUnsignedString).collect(Collectors.toList());
 	}
 
 	/**
@@ -529,11 +501,6 @@ public class Message implements IMessage {
 	@Override
 	public IReaction getReactionByUnicode(Emoji unicode) {
 		return getReactionByUnicode(unicode.getUnicode());
-	}
-
-	@Override
-	public IReaction getReactionByName(String name) {
-		return getReactionByUnicode(name);
 	}
 
 	@Override

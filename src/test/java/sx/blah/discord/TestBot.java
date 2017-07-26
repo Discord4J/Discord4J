@@ -22,8 +22,8 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
@@ -198,15 +198,15 @@ public class TestBot {
 										e.printStackTrace();
 									}
 								} else if (m.getContent().startsWith(".presence")) {
-									client.changePresence(!client.getOurUser().getPresence().equals(Presences.IDLE));
+									client.idle();
 								} else if (m.getContent().startsWith(".game")) {
 									String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
-									client.changeStatus(Status.game(game));
+									client.changePlayingText(game);
 								} else if (m.getContent().startsWith(".type")) {
 									m.getChannel().toggleTypingStatus();
 								} else if (m.getContent().startsWith(".invite")) {
 									try {
-										m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
+										m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getCode());
 									} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 										e.printStackTrace();
 									}
@@ -313,7 +313,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.reply(message.getClient().fetchUser(message.getContent().split(" ")[1]).mention());
+						message.reply(message.getClient().fetchUser(Long.parseUnsignedLong(message.getContent().split(" ")[1])).mention());
 					}
 				});
 			}

@@ -30,9 +30,9 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.*;
-import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
-import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
-import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.Cache;
@@ -45,7 +45,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -154,12 +153,6 @@ public class Channel implements IChannel {
 	@Override
 	public long getLongID() {
 		return id;
-	}
-
-	@Override
-	@Deprecated
-	public MessageList getMessages() {
-		return new MessageList(client, this);
 	}
 
 	/**
@@ -567,14 +560,6 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	@Deprecated
-	public IMessage getMessageByID(String messageID) {
-		if (messageID == null)
-			return null;
-		return getMessageByID(Long.parseUnsignedLong(messageID));
-	}
-
-	@Override
 	public IMessage getMessageByID(long messageID) {
 		return messages.getOrElseGet(messageID, () -> {
 			PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY);
@@ -968,20 +953,6 @@ public class Channel implements IChannel {
 		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 				DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+id,
 				new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)));
-	}
-
-	@Override
-	public List<IInvite> getInvites() {
-		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNEL);
-		ExtendedInviteObject[] response = client.REQUESTS.GET.makeRequest(
-				DiscordEndpoints.CHANNELS + id + "/invites",
-				ExtendedInviteObject[].class);
-
-		List<IInvite> invites = new ArrayList<>();
-		for (ExtendedInviteObject inviteResponse : response)
-			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
-
-		return invites;
 	}
 
 	@Override

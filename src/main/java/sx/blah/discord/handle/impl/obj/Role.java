@@ -33,7 +33,6 @@ import sx.blah.discord.util.PermissionUtils;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
@@ -299,7 +298,7 @@ public class Role implements IRole {
 
 	@Override
 	public String mention() {
-		return isMentionable() ? (isEveryoneRole() ? "@everyone" : "<@&"+id+">") : name;
+		return isEveryoneRole() ? "@everyone" : "<@&"+id+">";
 	}
 
 	@Override

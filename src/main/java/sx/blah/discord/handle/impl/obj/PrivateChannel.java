@@ -26,7 +26,6 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -100,11 +99,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<IInvite> getInvites() {
 		throw new UnsupportedOperationException();
 	}
 

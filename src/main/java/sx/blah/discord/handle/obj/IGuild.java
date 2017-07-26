@@ -18,8 +18,8 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.audio.IAudioManager;
-import sx.blah.discord.handle.audio.impl.AudioManager;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.Ban;
+import sx.blah.discord.util.Image;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,17 +28,6 @@ import java.util.List;
  * A Discord guild.
  */
 public interface IGuild extends IDiscordObject<IGuild> {
-
-	/**
-	 * Gets the unique snowflake ID of the owner of the guild.
-	 *
-	 * @return The unique snowflake ID of the owner of the guild.
-	 * @deprecated Use {@link #getOwnerLongID()} instead.
-	 */
-	@Deprecated
-	default String getOwnerID() {
-		return Long.toUnsignedString(getOwnerLongID());
-	}
 
 	/**
 	 * Gets the unique snowflake ID of the owner of the guild.
@@ -80,19 +69,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The ID of the desired channel.
 	 * @return The text channel with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getChannelByID(long)} instead.
-	 */
-	@Deprecated
-	default IChannel getChannelByID(String id) {
-		if (id == null) return null;
-		return getChannelByID(Long.parseUnsignedLong(id));
-	}
-
-	/**
-	 * Gets a text channel by its unique snowflake ID from the guild's text channel cache.
-	 *
-	 * @param id The ID of the desired channel.
-	 * @return The text channel with the provided ID (or null if one was not found).
 	 */
 	IChannel getChannelByID(long id);
 
@@ -102,19 +78,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The guild's members.
 	 */
 	List<IUser> getUsers();
-
-	/**
-	 * Gets a user by its unique snowflake ID from the guild's user cache.
-	 *
-	 * @param id The ID of the desired user.
-	 * @return The user with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getUserByID(long)}
-	 */
-	@Deprecated
-	default IUser getUserByID(String id) {
-		if (id == null) return null;
-		return getUserByID(Long.parseUnsignedLong(id));
-	}
 
 	/**
 	 * Gets a user by its unique snowflake ID from the guild's user cache.
@@ -194,19 +157,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The ID of the desired role.
 	 * @return The role with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getRoleByID(long)} instead
-	 */
-	@Deprecated
-	default IRole getRoleByID(String id) {
-		if (id == null) return null;
-		return getRoleByID(Long.parseUnsignedLong(id));
-	}
-
-	/**
-	 * Gets a role by its unique snowflake ID from the guild's role cache.
-	 *
-	 * @param id The ID of the desired role.
-	 * @return The role with the provided ID (or null if one was not found).
 	 */
 	IRole getRoleByID(long id);
 
@@ -224,19 +174,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The guild's vocie channels sorted by their effective positions.
 	 */
 	List<IVoiceChannel> getVoiceChannels();
-
-	/**
-	 * Gets a voice channel by its unique snowflake ID from the guild's voice channel cache.
-	 *
-	 * @param id The ID of the desired channel.
-	 * @return The voice channel with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getVoiceChannelByID(long)} instead.
-	 */
-	@Deprecated
-	default IVoiceChannel getVoiceChannelByID(String id) {
-		if (id == null) return null;
-		return getVoiceChannelByID(Long.parseUnsignedLong(id));
-	}
 
 	/**
 	 * Gets a voice channel by its unique snowflake ID from the guild's voice channel cache.
@@ -325,35 +262,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * Bans a user from the guild.
 	 *
 	 * @param userID The snowflake ID of the user to ban.
-	 *
-	 * @deprecated Use {@link #banUser(long)} instead.
-	 */
-	@Deprecated
-	default void banUser(String userID) {
-		if (userID == null) return;
-		banUser(Long.parseUnsignedLong(userID));
-	}
-
-	/**
-	 * Bans a user from the guild.
-	 *
-	 * @param userID The snowflake ID of the user to ban.
 	 */
 	void banUser(long userID);
-
-	/**
-	 * Bans a user from the guild.
-	 *
-	 * @param userID The snowflake ID of the user to ban.
-	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
-	 *
-	 * @deprecated Use {@link #banUser(long, int)} instead.
-	 */
-	@Deprecated
-	default void banUser(String userID, int deleteMessagesForDays) {
-		if (userID == null) return;
-		banUser(Long.parseUnsignedLong(userID), deleteMessagesForDays);
-	}
 
 	/**
 	 * Bans a user from the guild.
@@ -379,19 +289,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
 	 */
 	void banUser(long userID, String reason, int deleteMessagesForDays);
-
-	/**
-	 * Unbans a user.
-	 *
-	 * @param userID The user to unban.
-	 *
-	 * @deprecated Use {@link #pardonUser(long)} instead.
-	 */
-	@Deprecated
-	default void pardonUser(String userID) {
-		if (userID == null) return;
-		pardonUser(Long.parseUnsignedLong(userID));
-	}
 
 	/**
 	 * Ubans a user.
@@ -502,22 +399,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void changeAFKTimeout(int timeout);
 
 	/**
-	 * Deletes the guild.
-	 *
-	 * @deprecated Marked for removal. Can never succeed as a bot cannot own a guild.
-	 */
-	@Deprecated
-	void deleteGuild();
-
-	/**
-	 * Leaves the guild.
-	 *
-	 * @deprecated Use {@link #leave()} instead.
-	 */
-	@Deprecated
-	void leaveGuild();
-
-	/**
 	 * Leaves the guild.
 	 */
 	void leave();
@@ -565,15 +446,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The default channel for the guild (or null if the bot does not have permission to read the default channel.)
 	 */
 	IChannel getGeneralChannel();
-
-	/**
-	 * Gets all of the invites to the guild.
-	 *
-	 * @return All of the invites to the guild.
-	 * @deprecated Use {@link #getExtendedInvites()} instead.
-	 */
-	@Deprecated
-	List<IInvite> getInvites();
 
 	/**
 	 * Gets all of the invites to the guild.
@@ -632,19 +504,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param id The ID of the desired message.
 	 * @return The message with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getMessageByID(long)} instead.
-	 */
-	@Deprecated
-	default IMessage getMessageByID(String id) {
-		if (id == null) return null;
-		return getMessageByID(Long.parseUnsignedLong(id));
-	}
-
-	/**
-	 * Gets a message by its unique snowflake ID from the guild's message cache.
-	 *
-	 * @param id The ID of the desired message.
-	 * @return The message with the provided ID (or null if one was not found).
 	 */
 	IMessage getMessageByID(long id);
 
@@ -654,19 +513,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The guild's emojis.
 	 */
 	List<IEmoji> getEmojis();
-
-	/**
-	 * Gets an emoji by its unique snowflake ID from the guild's emoji cache.
-	 *
-	 * @param id The ID of the desired emoji.
-	 * @return The emoji with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getEmojiByID(long)} instead.
-	 */
-	@Deprecated
-	default IEmoji getEmojiByID(String id) {
-		if (id == null) return null;
-		return getEmojiByID(Long.parseUnsignedLong(id));
-	}
 
 	/**
 	 * Gets an emoji by its unique snowflake ID from the guild's emoji cache.
@@ -683,19 +529,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The emoji with the given name (or null if one was not found).
 	 */
 	IEmoji getEmojiByName(String name);
-
-	/**
-	 * Gets a webhook by its unique snowflake ID from the channels's webhook cache.
-	 *
-	 * @param id The ID of the desired webhook.
-	 * @return The webhook with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getWebhookByID(long)} instead.
-	 */
-	@Deprecated
-	default IWebhook getWebhookByID(String id) {
-		if (id == null) return null;
-		return getWebhookByID(Long.parseUnsignedLong(id));
-	}
 
 	/**
 	 * Gets a webhook by its unique snowflake ID from the channels's webhook cache.

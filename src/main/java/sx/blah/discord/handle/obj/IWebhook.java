@@ -17,10 +17,7 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 /**
  * A webhook in a guild text {@link IChannel channel}.

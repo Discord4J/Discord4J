@@ -51,17 +51,6 @@ public class GuildUnavailableEvent extends GuildEvent {
 	 * Gets the ID of the guild that became unavailable.
 	 *
 	 * @return The ID of the guild that became unavailable.
-	 * @deprecated Use {@link #getGuildLongID()} instead.
-	 */
-	@Deprecated
-	public String getGuildID() {
-		return Long.toUnsignedString(id);
-	}
-
-	/**
-	 * Gets the ID of the guild that became unavailable.
-	 *
-	 * @return The ID of the guild that became unavailable.
 	 */
 	public long getGuildLongID() {
 		return id;

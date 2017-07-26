@@ -21,7 +21,6 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.Procedure;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -32,13 +31,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -460,25 +453,7 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> T waitFor(Class<T> eventClass, long time, TimeUnit unit) throws InterruptedException {
-		return (T) waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time, unit, null);
-	}
-
-	/**
-	 * This causes the currently executing thread to wait until the specified event is dispatched.
-	 *
-	 * @param eventClass The class of the event to wait for.
-	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the event fired.
-	 * @param unit The unit for the time parameter.
-	 * @param onTimeout The procedure to execute when the timeout is reached.
-	 * @param <T> The event type to wait for.
-	 * @return The event found.
-	 *
-	 * @throws InterruptedException
-	 * @deprecated use the version of waitFor that return the value.
-	 */
-	@Deprecated
-	public <T extends Event> T waitFor(Class<T> eventClass, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
-		return (T) waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time, unit, onTimeout);
+		return (T) waitFor((Event event) -> eventClass.isAssignableFrom(event.getClass()), time, unit);
 	}
 
 	/**
@@ -505,7 +480,7 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> T waitFor(Predicate<T> filter, long time) throws InterruptedException {
-		return waitFor(filter, time, TimeUnit.MILLISECONDS, null);
+		return waitFor(filter, time, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -520,24 +495,6 @@ public class EventDispatcher {
 	 * @throws InterruptedException
 	 */
 	public <T extends Event> T waitFor(Predicate<T> filter, long time, TimeUnit unit) throws InterruptedException {
-		return waitFor(filter, time, unit, null);
-	}
-
-	/**
-	 * This causes the currently executing thread to wait until the specified event is dispatched and the provided {@link Predicate} returns true.
-	 *
-	 * @param filter This is called to determine whether the thread should be resumed as a result of this event.
-	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the event fired.
-	 * @param unit The unit for the time parameter.
-	 * @param onTimeout The procedure to execute when the timeout is reached.
-	 * @param <T> The event type to wait for.
-	 * @return The event found.
-	 *
-	 * @throws InterruptedException
-	 * @deprecated use the version of waitFor that return the value.
-	 */
-	@Deprecated
-	public <T extends Event> T waitFor(Predicate<T> filter, long time, TimeUnit unit, Procedure onTimeout) throws InterruptedException {
 		SynchronousQueue<T> result = new SynchronousQueue<>();
 		// we need to account for the fact that the predicate will have an implicit cast introduced by the compiler
 		// meanwhile new IListener<T> will erase to Object and there will be no compiler check, hence we manually introduce filterRawType.isInstance
@@ -551,9 +508,7 @@ public class EventDispatcher {
 				}
 			}
 		});
-		T event = result.poll(time, unit);
-		if (event == null && onTimeout != null) onTimeout.invoke();
-		return event;
+		return result.poll(time, unit);
 	}
 
 	/**

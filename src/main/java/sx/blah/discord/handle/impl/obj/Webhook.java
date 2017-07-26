@@ -24,12 +24,11 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.WebhookObject;
 import sx.blah.discord.api.internal.json.requests.WebhookEditRequest;
-import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.PermissionUtils;
 
-import java.util.EnumSet;
 import java.util.Objects;
 
 /**

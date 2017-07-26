@@ -32,9 +32,9 @@ import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
-import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
-import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
-import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.Cache;
@@ -619,24 +619,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	@Deprecated
-	public void deleteGuild() {
-		if (ownerID != client.getOurUser().getLongID())
-			throw new MissingPermissionsException("You must be the guild owner to delete guilds!", EnumSet.noneOf(Permissions.class));
-
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+getStringID());
-	}
-
-	@Override
-	@Deprecated
-	public void leaveGuild() {
-		if (ownerID == client.getOurUser().getLongID())
-			throw new DiscordException("Guild owners cannot leave their own guilds! Use deleteGuild() instead.");
-
-		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+getStringID());
-	}
-
-	@Override
 	public void leave() {
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+getStringID());
 	}
@@ -715,20 +697,6 @@ public class Guild implements IGuild {
 	@Override
 	public IChannel getGeneralChannel() {
 		return getChannelByID(this.id);
-	}
-
-	@Override
-	public List<IInvite> getInvites() {
-		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_SERVER);
-		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
-				DiscordEndpoints.GUILDS+ getStringID() + "/invites",
-				ExtendedInviteObject[].class);
-
-		List<IInvite> invites = new ArrayList<>();
-		for (ExtendedInviteObject inviteResponse : response)
-			invites.add(DiscordUtils.getInviteFromJSON(client, inviteResponse));
-
-		return invites;
 	}
 
 	@Override

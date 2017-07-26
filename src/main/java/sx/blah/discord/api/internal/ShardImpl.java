@@ -20,13 +20,12 @@ package sx.blah.discord.api.internal;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
-import sx.blah.discord.handle.impl.events.DisconnectedEvent;
-import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
+import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
+import sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent;
 import sx.blah.discord.handle.impl.obj.Presence;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
@@ -179,27 +178,6 @@ public class ShardImpl implements IShard {
 	@Override
 	public void invisible() {
 		updatePresence(StatusType.INVISIBLE, null);
-	}
-
-	@Override
-	@Deprecated
-	public void changeStatus(Status status) {
-		// old functionality just in case
-		if (status.getType() == Status.StatusType.STREAM) {
-			streaming(status.getStatusMessage(), status.getUrl().orElse(null));
-		} else {
-			changePlayingText(status.getStatusMessage());
-		}
-	}
-
-	@Override
-	@Deprecated
-	public void changePresence(boolean isIdle) {
-		// old functionality just in case
-		if (isIdle)
-			idle();
-		else
-			online();
 	}
 
 	private void updatePresence(StatusType status, String playing) {

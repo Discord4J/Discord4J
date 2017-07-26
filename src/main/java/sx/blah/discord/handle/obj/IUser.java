@@ -17,15 +17,10 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.cache.LongMap;
 
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A Discord user.
@@ -59,15 +54,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return The user's presence.
 	 */
 	IPresence getPresence();
-
-	/**
-	 * Gets the user's status.
-	 *
-	 * @return The user's status.
-	 * @deprecated Use {@link #getPresence()} instead.
-	 */
-	@Deprecated
-	Status getStatus();
 
 	/**
 	 * Gets the user's display name. This is their nickname or their username if they do not have a nickname.
@@ -132,19 +118,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return The user's voice state for the given guild.
 	 */
 	IVoiceState getVoiceStateForGuild(IGuild guild);
-
-	/**
-	 * Gets the user's voice states for every guild. (Key = Guild ID).
-	 *
-	 * @return The user's voice states for every guild.
-	 * @deprecated Use {@link #getVoiceStatesLong()} instead.
-	 */
-	@Deprecated
-	default Map<String, IVoiceState> getVoiceStates() {
-		Map<String, IVoiceState> map = new HashMap<>();
-		getVoiceStatesLong().forEach((key, value) -> map.put(Long.toUnsignedString(key), value));
-		return map;
-	}
 
 	/**
 	 * Gets the user's voice states for every guild. (Key = Guild ID).

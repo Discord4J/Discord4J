@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.impl.events.shard;
 
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.handle.impl.events.ReadyEvent;
 
 /**
  * Dispatched when a shard has established an initial connection to the Discord gateway.

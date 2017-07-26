@@ -46,17 +46,6 @@ public class RateLimitException extends RuntimeException {
 	}
 
 	/**
-	 * Gets the bucket (set of requests) the exception covers.
-	 *
-	 * @return The bucket the exception covers.
-	 * @deprecated Use {@link #getMethod()} instead.
-	 */
-	@Deprecated
-	public String getBucket() {
-		return method;
-	}
-
-	/**
 	 * Gets the HTTP method the rate limit was in response to.
 	 *
 	 * @return The HTTP method the rate limit was in response to.

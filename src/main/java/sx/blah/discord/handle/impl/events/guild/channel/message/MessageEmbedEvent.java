@@ -34,22 +34,12 @@ public class MessageEmbedEvent extends MessageEvent {
 		super(message);
 
 		List<IEmbed> tempArray = new ArrayList<>();
-		for (IEmbed attachment : message.getEmbedded()) {
+		for (IEmbed attachment : message.getEmbeds()) {
 			if (!oldEmbeds.contains(attachment)) {
 				tempArray.add(attachment);
 			}
 		}
 		newEmbeds = tempArray;
-	}
-
-	/**
-	 * Gets the new embeds that have been added to the message.
-	 *
-	 * @return The new embeds that have been added to the message.
-	 */
-	@Deprecated
-	public List<IEmbed> getNewEmbed() {
-		return newEmbeds;
 	}
 
 	/**

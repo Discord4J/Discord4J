@@ -126,18 +126,6 @@ public class MessageTokenizer {
 	 *
 	 * @param index The index to move to.
 	 * @return The new pointer position.
-	 * @deprecated Use {@link #stepTo(int)} instead.
-	 */
-	@Deprecated
-	public int stepForwardTo(int index) {
-		return stepTo(index);
-	}
-
-	/**
-	 * Moves the pointer forward to the given position.
-	 *
-	 * @param index The index to move to.
-	 * @return The new pointer position.
 	 */
 	public int stepTo(int index) {
 		currentPosition = Math.max(0, Math.min(index, content.length()));

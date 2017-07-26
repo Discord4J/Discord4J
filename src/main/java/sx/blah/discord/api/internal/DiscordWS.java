@@ -32,7 +32,7 @@ import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.ResumeRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
-import sx.blah.discord.handle.impl.events.DisconnectedEvent;
+import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;

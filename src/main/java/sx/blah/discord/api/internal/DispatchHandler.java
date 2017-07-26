@@ -25,17 +25,34 @@ import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
-import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
+import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.*;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.TypingEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.*;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
+import sx.blah.discord.handle.impl.events.guild.member.*;
+import sx.blah.discord.handle.impl.events.guild.role.RoleCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.role.RoleDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.role.RoleUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
+import sx.blah.discord.handle.impl.events.shard.LoginEvent;
+import sx.blah.discord.handle.impl.events.shard.ResumedEvent;
+import sx.blah.discord.handle.impl.events.shard.ShardReadyEvent;
+import sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent;
+import sx.blah.discord.handle.impl.events.user.UserUpdateEvent;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
@@ -208,9 +225,6 @@ class DispatchHandler {
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			ws.sessionId = ready.session_id;
 
-			if (MessageList.getEfficiency(client) == null) //User did not manually set the efficiency
-				MessageList.setEfficiency(client, MessageList.EfficiencyLevel.getEfficiencyForGuilds(ready.guilds.length));
-
 			Set<UnavailableGuildObject> waitingGuilds = ConcurrentHashMap.newKeySet(ready.guilds.length);
 			waitingGuilds.addAll(Arrays.asList(ready.guilds));
 
@@ -297,7 +311,7 @@ class DispatchHandler {
 					message.getChannel().setTypingStatus(false); //Messages being sent should stop the bot from typing
 				} else {
 					client.dispatcher.dispatch(new MessageReceivedEvent(message));
-					if (!message.getEmbedded().isEmpty()) {
+					if (!message.getEmbeds().isEmpty()) {
 						client.dispatcher.dispatch(new MessageEmbedEvent(message, new ArrayList<>()));
 					}
 				}
@@ -419,7 +433,7 @@ class DispatchHandler {
 					|| (oldNick != null && !oldNick.equals(event.nick))
 					|| event.nick != null && !event.nick.equals(oldNick)) {
 				user.addNick(guild.getLongID(), event.nick);
-				client.dispatcher.dispatch(new NickNameChangeEvent(guild, user, oldNick, event.nick));
+				client.dispatcher.dispatch(new NicknameChangedEvent(guild, user, oldNick, event.nick));
 			}
 		}
 	}
@@ -442,8 +456,8 @@ class DispatchHandler {
 			client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
 		} else if (json.pinned != null && !oldMessage.isPinned() && json.pinned) {
 			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
-		} else if (oldMessage.getEmbedded().size() < toUpdate.getEmbedded().size()) {
-			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbedded()));
+		} else if (oldMessage.getEmbeds().size() < toUpdate.getEmbeds().size()) {
+			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbeds()));
 		} else if (json.content != null && !oldMessage.getContent().equals(json.content)) {
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		}
@@ -670,7 +684,7 @@ class DispatchHandler {
 		Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
 		if (guild != null) {
 			IUser user = DiscordUtils.getUserFromJSON(shard, event.user);
-			if (client.getUserByID(user.getID()) != null) {
+			if (guild.getUserByID(user.getLongID()) != null) {
 				guild.users.remove(user);
 				guild.joinTimes.remove(user);
 			}

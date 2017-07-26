@@ -19,12 +19,9 @@ package sx.blah.discord.util;
 
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.*;
-import java.io.File;
-import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -343,18 +340,6 @@ public class EmbedBuilder {
 	 */
 	public EmbedBuilder withUrl(String url) {
 		embed.url = url;
-		return this;
-	}
-
-	/**
-	 * Sets the builder to be lenient.
-	 *
-	 * @return The builder instance.
-	 * @deprecated Use {@link #setLenient(boolean)} instead.
-	 */
-	@Deprecated
-	public EmbedBuilder ignoreNullEmptyFields() {
-		lenient = true;
 		return this;
 	}
 

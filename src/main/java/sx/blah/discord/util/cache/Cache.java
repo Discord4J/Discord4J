@@ -24,11 +24,13 @@ import com.koloboke.function.LongObjPredicate;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.handle.obj.IIDLinkedObject;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
