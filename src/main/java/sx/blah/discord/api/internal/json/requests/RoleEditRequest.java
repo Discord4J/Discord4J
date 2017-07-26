@@ -23,7 +23,7 @@ import java.awt.*;
 import java.util.EnumSet;
 
 /**
- * This is sent in order to edit a role.
+ * Sent to edit a role's properties.
  */
 public class RoleEditRequest {
 
@@ -38,8 +38,8 @@ public class RoleEditRequest {
 		/**
 		 * Sets the new color for the role.
 		 *
-		 * @param color the new color.
-		 * @return this builder, for chaining.
+		 * @param color The new color.
+		 * @return This builder, for chaining.
 		 */
 		public Builder color(Color color) {
 			this.color = color;
@@ -49,8 +49,8 @@ public class RoleEditRequest {
 		/**
 		 * Sets whether to hoist the role.
 		 *
-		 * @param hoist if the role should be hoisted.
-		 * @return this builder, for chaining.
+		 * @param hoist If the role should be hoisted.
+		 * @return This builder, for chaining.
 		 */
 		public Builder hoist(boolean hoist) {
 			this.hoist = hoist;
@@ -60,8 +60,8 @@ public class RoleEditRequest {
 		/**
 		 * Sets a new name for this role.
 		 *
-		 * @param name the new name for the role.
-		 * @return this builder, for chaining.
+		 * @param name The new name for the role.
+		 * @return This builder, for chaining.
 		 */
 		public Builder name(String name) {
 			this.name = name;
@@ -71,8 +71,8 @@ public class RoleEditRequest {
 		/**
 		 * Sets the new permissions for this role.
 		 *
-		 * @param permissions an EnumSet of Permissions for this role.
-		 * @return this builder, for chaining.
+		 * @param permissions An EnumSet of Permissions for this role.
+		 * @return This builder, for chaining.
 		 */
 		public Builder permissions(EnumSet<Permissions> permissions) {
 			this.permissions = permissions;
@@ -82,8 +82,8 @@ public class RoleEditRequest {
 		/**
 		 * Sets whether the role is mentionable.
 		 *
-		 * @param mentionable if the role is mentionable.
-		 * @return this builder, for chaining.
+		 * @param mentionable If the role is mentionable.
+		 * @return This builder, for chaining.
 		 */
 		public Builder mentionable(boolean mentionable) {
 			this.mentionable = mentionable;
@@ -93,17 +93,32 @@ public class RoleEditRequest {
 		/**
 		 * Builds the request object.
 		 *
-		 * @return the role edit request.
+		 * @return The role edit request.
 		 */
 		public RoleEditRequest build() {
 			return new RoleEditRequest(color, hoist, name, permissions, mentionable);
 		}
 	}
 
+	/**
+	 * The new color of the role.
+	 */
 	private final Integer color;
+	/**
+	 * Whether the role is hoisted.
+	 */
 	private final Boolean hoist;
+	/**
+	 * The new name of the role.
+	 */
 	private final String name;
+	/**
+	 * The new permissions of the role.
+	 */
 	private final Integer permissions;
+	/**
+	 * Whether the role is mentionable.
+	 */
 	private final Boolean mentionable;
 
 	RoleEditRequest(Color color, Boolean hoist, String name, EnumSet<Permissions> permissions, Boolean mentionable) {

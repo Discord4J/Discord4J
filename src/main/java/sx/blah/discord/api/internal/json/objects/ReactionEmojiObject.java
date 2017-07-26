@@ -26,7 +26,7 @@ public class ReactionEmojiObject {
 	 */
 	public String name;
 	/**
-	 * The id of the emoji.
+	 * The ID of the emoji.
 	 */
 	public String id;
 }

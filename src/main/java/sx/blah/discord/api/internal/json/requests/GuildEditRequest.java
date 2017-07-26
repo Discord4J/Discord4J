@@ -18,7 +18,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
 /**
- * This is sent to request that a guild be edited.
+ * Sent to edit a guild's properties.
  */
 public class GuildEditRequest {
 
@@ -28,27 +28,27 @@ public class GuildEditRequest {
 	public String name;
 
 	/**
-	 * The new region for the guild.
+	 * The new region of the guild.
 	 */
 	public String region;
 
 	/**
-	 * The new verification for the guild.
+	 * The new verification of the guild.
 	 */
 	public int verification_level;
 
 	/**
-	 * The new icon.
+	 * The new icon of the guild.
 	 */
 	public String icon;
 
 	/**
-	 * The afk channel id.
+	 * The new ID of the afk channel of the guild.
 	 */
 	public String afk_channel_id;
 
 	/**
-	 * The afk timeout.
+	 * The new afk timeout of the guild.
 	 */
 	public int afk_timeout;
 

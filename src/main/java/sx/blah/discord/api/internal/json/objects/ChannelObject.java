@@ -22,11 +22,11 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class ChannelObject {
 	/**
-	 * The id of the channel.
+	 * The ID of the channel.
 	 */
 	public String id;
 	/**
-	 * The id of the guild this channel is in.
+	 * The ID of the guild this channel is in.
 	 */
 	public String guild_id;
 	/**
@@ -50,11 +50,11 @@ public class ChannelObject {
 	 */
 	public String topic;
 	/**
-	 * ID of the last message sent in the channel.
+	 * The ID of the last message sent in the channel.
 	 */
 	public String last_message_id;
 	/**
-	 * When the last pin was made in the channel.
+	 * The ISO-8601 timestamp of when the last pin was made in the channel.
 	 */
 	public String last_pin_timestamp;
 	/**

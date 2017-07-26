@@ -25,10 +25,8 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.util.*;
 
 /**
- * This represents a READ-ONLY collection holding {@link IMessage}s. MessageHistory instances are NOT dynamically
- * updated by the client. Meaning it may contain deleted messages if you create a MessageHistory and store it before
- * someone deletes their message. Additionally, every MessageHistory instance is independent of other instances,
- * meaning that mutating this instance will not effect other instances even if they are from the same channel.
+ * A READ-ONLY collection of {@link IMessage messages}. A MessageHistory is a view of the requested range of messages at
+ * the time is was created.
  *
  * @see IChannel#getMessageHistory()
  * @see IChannel#getFullMessageHistory()
@@ -48,6 +46,9 @@ import java.util.*;
  */
 public class MessageHistory extends AbstractList<IMessage> implements List<IMessage>, RandomAccess {
 
+	/**
+	 * The underlying collection of messages.
+	 */
 	private final IMessage[] backing; //Backed by an array because they are faster than lists
 
 	private MessageHistory(IMessage[] messages) {
@@ -58,26 +59,20 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 		this(messages.stream().distinct().sorted(MessageComparator.REVERSED).toArray(IMessage[]::new));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public IMessage get(int index) {
 		return backing[index];
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int size() {
 		return backing.length;
 	}
 
 	/**
-	 * This gets the earliest sent message in this set of messages.
+	 * Gets the oldest message in the collection.
 	 *
-	 * @return The earliest message.
+	 * @return The oldest message in the collection.
 	 */
 	public IMessage getEarliestMessage() {
 		IMessage[] sorted = Arrays.copyOf(backing, backing.length);
@@ -86,9 +81,9 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * This gets the latest sent message in this set of messages.
+	 * Gets the youngest message in the collection.
 	 *
-	 * @return The latest message.
+	 * @return The youngest message in the collection.
 	 */
 	public IMessage getLatestMessage() {
 		IMessage[] sorted = Arrays.copyOf(backing, backing.length);
@@ -97,11 +92,11 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * This gets a message by its id.
+	 * Gets a message by its unique snowflake ID.
 	 *
-	 * @param id The id.
-	 * @return The message if found, else null.
-	 * @deprecated Use {@link #get(long)} instead
+	 * @param id The ID of the desired role.
+	 * @return The message with the provided ID (or null if one was not found).
+	 * @deprecated Use {@link #get(long)} instead.
 	 */
 	@Deprecated
 	public IMessage get(String id) {
@@ -110,10 +105,10 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * This gets a message by its id.
+	 * Gets a message by its unique snowflake ID.
 	 *
-	 * @param id The id.
-	 * @return The message if found, else null.
+	 * @param id The ID of the desired role.
+	 * @return The message with the provided ID (or null if one was not found).
 	 */
 	public IMessage get(long id) {
 		return Arrays.stream(backing)
@@ -123,11 +118,11 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * This checks if this has a message with the specified id stored.
+	 * Gets whether the collection contains a message with the given ID.
 	 *
-	 * @param id The id to look for.
-	 * @return True if the specified id is stored, false otherwise.
-	 * @deprecated Use {@link #contains(long)} instead
+	 * @param id The ID to search for.
+	 * @return Whether the collection contains a message with the given ID.
+	 * @deprecated Use {@link #contains(long)} instead.
 	 */
 	@Deprecated
 	public boolean contains(String id) {
@@ -135,25 +130,30 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 		return contains(Long.parseUnsignedLong(id));
 	}
 
+	/**
+	 * Gets whether the collection contains a message with the given ID.
+	 *
+	 * @param id The ID to search for.
+	 * @return Whether the collection contains a message with the given ID.
+	 */
 	public boolean contains(long id) {
 		return Arrays.stream(backing)
 				.anyMatch(msg -> msg.getLongID() == id);
 	}
 
 	/**
-	 * This creates a new instance of MessageHistory independent of this one.
+	 * Creates a copy of the collection.
 	 *
-	 * @return The new instance.
+	 * @return A copy of the collection.
 	 */
 	public MessageHistory copy() {
 		return new MessageHistory(Arrays.copyOf(backing, backing.length));
 	}
 
 	/**
-	 * This creates a new instance of MessageHistory independent of this one as well as creating new and independent
-	 * instances of the messages sorted.
+	 * Creates a copy of the collection made up of copies of the individual messages in the collection.
 	 *
-	 * @return The new instance.
+	 * @return A copy of the collection made up of copies of the individual messages in the collection.
 	 */
 	public MessageHistory deepCopy() {
 		IMessage[] copied = new IMessage[backing.length];
@@ -163,51 +163,46 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * This gets the guild if the channel this belongs to has a guild.
+	 * The parent guild of the channel the messages were sent in.
 	 *
-	 * @return The guild, or null if the channel is not associated with a guild.
+	 * @return The parent guild of the channel the messages were sent in.
 	 */
 	public IGuild getGuild() {
 		return getChannel().getGuild();
 	}
 
 	/**
-	 * This gets the channel this history is associated with.
+	 * Gets the channel the messages were sent in.
 	 *
-	 * @return The channel.
+	 * @return The channel the messages were sent in.
 	 */
 	public IChannel getChannel() {
 		return backing[0].getChannel();
 	}
 
 	/**
-	 * This gets the client this history is associated with.
+	 * Gets the client the history belongs to.
 	 *
-	 * @return The client.
+	 * @return The client the history belongs to.
 	 */
 	public IDiscordClient getClient() {
 		return backing[0].getClient();
 	}
 
 	/**
-	 * This converts the history into an array.
+	 * Gets the history as an array.
 	 *
-	 * @return An independent array of {@link IMessage}s in the current order.
+	 * @return The history as an array.
 	 */
 	public IMessage[] asArray() {
 		return Arrays.copyOf(backing, backing.length);
 	}
 
 	/**
-	 * This deletes the message at the specified index. This does NOT remove the deleted message from this
-	 * MessageHistory instance.
+	 * Deletes the message at the specified index. The deleted message is NOT removed from the collection.
 	 *
-	 * @param index The index to delete at.
-	 * @return The message deleted.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
+	 * @param index The index of the message to delete.
+	 * @return The deleted message.
 	 */
 	public IMessage delete(int index) {
 		IMessage message = get(index);
@@ -216,16 +211,11 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * This deletes the message with the specified id This does NOT remove the deleted message from thi MessageHistory
-	 * instance.
+	 * Deletes the message with the given ID. The deleted message is NOT removed from the collection.
 	 *
-	 * @param id The id of the message to delete.
-	 * @return The message deleted or null if the message couldn't be found.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
-	 * @deprecated Use {@link #delete(long)} instead
+	 * @param id The ID of the message to delete.
+	 * @return The deleted message (or null if no message was found).
+	 * @deprecated Use {@link #delete(long)} instead.
 	 */
 	@Deprecated
 	public IMessage delete(String id) {
@@ -234,15 +224,10 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * This deletes the message with the specified id This does NOT remove the deleted message from thi MessageHistory
-	 * instance.
+	 * Deletes the message with the given ID. The deleted message is NOT removed from the collection.
 	 *
-	 * @param id The id of the message to delete.
-	 * @return The message deleted or null if the message couldn't be found.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
+	 * @param id The ID of the message to delete.
+	 * @return The deleted message (or null if no message was found).
 	 */
 	public IMessage delete(long id) {
 		IMessage message = get(id);
@@ -254,18 +239,16 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 		return message;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void sort(Comparator<? super IMessage> c) {
 		Arrays.sort(backing, c);
 	}
 
 	/**
-	 * This attempts to bulk deletes the messages in this MessageHistory set.
+	 * Bulk deletes the messages in the collection.
 	 *
 	 * @return The messages that were deleted.
+	 * @see IChannel#bulkDelete()
 	 */
 	public List<IMessage> bulkDelete() {
 		return getChannel().bulkDelete(this);

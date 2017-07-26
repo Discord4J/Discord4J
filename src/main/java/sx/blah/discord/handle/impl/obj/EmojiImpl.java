@@ -28,13 +28,34 @@ import sx.blah.discord.handle.obj.IRole;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The default implementation of {@link IEmoji}.
+ */
 public class EmojiImpl implements IEmoji {
 
+	/**
+	 * The unique snowflake ID of the emoji.
+	 */
 	private final long id;
+	/**
+	 * The parent guild of the emoji.
+	 */
 	private final IGuild guild;
+	/**
+	 * the name of the emoji.
+	 */
 	private final String name;
+	/**
+	 * The roles which are allowed to use the emoji.
+	 */
 	private final List<IRole> roles;
+	/**
+	 * Whether the emoji needs colons in chat.
+	 */
 	private final boolean requiresColons;
+	/**
+	 * Whether the emoji is managed by an external service.
+	 */
 	private final boolean isManaged;
 
 	public EmojiImpl(long id, IGuild guild, String name, List<IRole> roles, boolean requiresColons, boolean isManaged) {

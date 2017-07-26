@@ -20,7 +20,7 @@ package sx.blah.discord.handle.impl.events.guild.channel.webhook;
 import sx.blah.discord.handle.obj.IWebhook;
 
 /**
- * This event is dispatched whenever a webhook is updated.
+ * Dispatched when a webhook is updated.
  */
 public class WebhookUpdateEvent extends WebhookEvent {
 
@@ -33,18 +33,18 @@ public class WebhookUpdateEvent extends WebhookEvent {
 	}
 
 	/**
-	 * Gets the original version of the webhook.
+	 * Gets the webhook before it was updated.
 	 *
-	 * @return The old webhook.
+	 * @return The webhook before it was updated.
 	 */
 	public IWebhook getOldWebhook() {
 		return oldWebhook;
 	}
 
 	/**
-	 * Gets the new version of the webhook.
+	 * Gets the webhook after it was updated.
 	 *
-	 * @return The new webhook.
+	 * @return The webhook after it was updated.
 	 */
 	public IWebhook getNewWebhook() {
 		return newWebhook;

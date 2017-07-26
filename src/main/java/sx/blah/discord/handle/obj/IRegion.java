@@ -18,28 +18,28 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * This represents a discord server region, used for voice and guild management.
+ * A Discord guild voice region.
  */
 public interface IRegion {
 
 	/**
-	 * Gets the region id.
+	 * Gets ID of the region.
 	 *
-	 * @return The id.
+	 * @return The ID of the region.
 	 */
 	String getID();
 
 	/**
 	 * Gets the name of the region.
 	 *
-	 * @return The region name.
+	 * @return The name of the region.
 	 */
 	String getName();
 
 	/**
-	 * Gets whether the region is for VIPs.
+	 * Gets whether the region is for VIP guilds.
 	 *
-	 * @return True if it's for VIPs, false if otherwise.
+	 * @return Whether the region is for VIP guilds.
 	 */
 	boolean isVIPOnly();
 }

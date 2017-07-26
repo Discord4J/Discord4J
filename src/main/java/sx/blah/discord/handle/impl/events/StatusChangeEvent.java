@@ -23,7 +23,8 @@ import sx.blah.discord.handle.obj.Status;
 
 /**
  * This event was dispatched when a user's status changed.
- * @deprecated Use {@link sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent} instead.
+ * @deprecated Use {@link sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent} instead. This event is <b>no
+ * longer dispatched.</b>
  */
 @Deprecated
 public class StatusChangeEvent extends UserEvent {

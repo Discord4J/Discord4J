@@ -23,10 +23,13 @@ import java.util.EnumSet;
 import java.util.StringJoiner;
 
 /**
- * This exception is thrown when a user is missing the required permissions to perform an action.
+ * Thrown when an action is attempted that the user does not have the required permissions for.
  */
 public class MissingPermissionsException extends RuntimeException {
 
+	/**
+	 * The permissions that are missing to perform the action.
+	 */
 	private final EnumSet<Permissions> missing;
 
 	public MissingPermissionsException(String reason, EnumSet<Permissions> missing) {
@@ -39,6 +42,12 @@ public class MissingPermissionsException extends RuntimeException {
 		missing = permissionsMissing;
 	}
 
+	/**
+	 * Gets the error message with the missing permissions as a string.
+	 *
+	 * @param permissions The missing permissions.
+	 * @return The error message with the missing permissions as a string.
+	 */
 	private static String getMessage(EnumSet<Permissions> permissions) {
 		StringJoiner joiner = new StringJoiner(", ");
 		permissions.stream()
@@ -50,7 +59,7 @@ public class MissingPermissionsException extends RuntimeException {
 	/**
 	 * Gets the missing permissions.
 	 *
-	 * @return The permissions.
+	 * @return The missing permissions.
 	 */
 	public EnumSet<Permissions> getMissingPermissions() {
 		return missing;
@@ -59,7 +68,7 @@ public class MissingPermissionsException extends RuntimeException {
 	/**
 	 * Gets the formatted error message.
 	 *
-	 * @return The message.
+	 * @return The formatted error message.
 	 */
 	public String getErrorMessage() {
 		if (missing == null)

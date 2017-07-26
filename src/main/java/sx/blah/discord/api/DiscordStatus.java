@@ -28,7 +28,7 @@ import sx.blah.discord.util.RateLimitException;
 import java.time.LocalDateTime;
 
 /**
- * This class is used to get general information about the status regarding discord servers
+ * Utility class used for fetching status information about the Discord API.
  */
 public class DiscordStatus {
 

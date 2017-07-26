@@ -75,6 +75,7 @@ public class DiscordUtils {
 			.enable(JsonParser.Feature.ALLOW_MISSING_VALUES)
 			.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
 			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
 	/**
 	 * Like {@link #MAPPER} but it doesn't serialize nulls.
 	 */
@@ -94,35 +95,35 @@ public class DiscordUtils {
 			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
 	/**
-	 * Used to determine age based on discord ids
+	 * The unix time that represents Discord's epoch. (January 1, 2015).
 	 */
 	public static final long DISCORD_EPOCH = 1420070400000L;
 
 	/**
-	 * Pattern for Discord's custom emoji
+	 * Pattern for Discord's custom emoji.
 	 */
 	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
 
 	/**
-	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:)
+	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:).
 	 */
 	public static final Pattern EMOJI_ALIAS_PATTERN = Pattern.compile(":.+:");
 
 	/**
-	 * Pattern for Discord's nsfw channel name indicator
+	 * Pattern for Discord's nsfw channel name indicator.
 	 */
 	public static final Pattern NSFW_CHANNEL_PATTERN = Pattern.compile("^nsfw(-|$)");
 
 	/**
-	 * Pattern for Discord's valid streaming URL strings passed to {@link IShard#streaming(String, String)}
+	 * Pattern for Discord's valid streaming URL strings passed to {@link IShard#streaming(String, String)}.
 	 */
 	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://(www\\.)?twitch\\.tv/.+");
 
 	/**
-	 * Converts a String timestamp into a java object timestamp.
+	 * Converts a String timestamp into a {@link LocalDateTime}.
 	 *
-	 * @param time The String timestamp.
-	 * @return The java object representing the timestamp.
+	 * @param time The string timestamp.
+	 * @return The LocalDateTime representing the timestamp.
 	 */
 	public static LocalDateTime convertFromTimestamp(String time) {
 		if (time == null) {
@@ -133,7 +134,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Returns a user from the java form of the raw JSON data.
+	 * Converts a json {@link UserObject} to a {@link User}. This method first checks the internal user cache and returns
+	 * that object with updated information if it exists. Otherwise, it constructs a new user.
+	 *
+	 * @param shard The shard the user belongs to.
+	 * @param response The json object representing the user.
+	 * @return The converted user object.
 	 */
 	public static User getUserFromJSON(IShard shard, UserObject response) {
 		if (response == null)
@@ -152,32 +158,32 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a java {@link Invite} object for a json response.
+	 * Converts a json {@link InviteObject} to an {@link IInvite}.
 	 *
-	 * @param client The discord client to use.
-	 * @param json   The json response to use.
-	 * @return The java invite object.
+	 * @param client The client the invite belongs to.
+	 * @param json   The json object representing the invite.
+	 * @return The converted invite object.
 	 */
 	public static IInvite getInviteFromJSON(IDiscordClient client, InviteObject json) {
 		return new Invite(client, json);
 	}
 
 	/**
-	 * Creates a java {@link ExtendedInvite} object for a json response.
+	 * Converts a json {@link ExtendedInviteObject} to an {@link IExtendedInvite}.
 	 *
-	 * @param client The discord client to use.
-	 * @param json   The json response to use.
-	 * @return The java extended invite object.
+	 * @param client The client the invite belongs to.
+	 * @param json   The json object representing the invite.
+	 * @return The converted extended invite object.
 	 */
 	public static IExtendedInvite getExtendedInviteFromJSON(IDiscordClient client, ExtendedInviteObject json) {
 		return new ExtendedInvite(client, json);
 	}
 
 	/**
-	 * Gets the users mentioned from a message json object.
+	 * Gets the users mentioned in a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The list of mentioned users.
+	 * @return The list of IDs of mentioned users.
 	 */
 	public static List<Long> getMentionsFromJSON(MessageObject json) {
 		List<Long> mentions = new ArrayList<>();
@@ -189,10 +195,10 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the roles mentioned from a message json object.
+	 * Gets the roles mentioned in a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The list of mentioned roles.
+	 * @return The list IDs of mentioned roles.
 	 */
 	public static List<Long> getRoleMentionsFromJSON(MessageObject json) {
 		List<Long> mentions = new ArrayList<>();
@@ -207,7 +213,7 @@ public class DiscordUtils {
 	 * Gets the attachments on a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The attached messages.
+	 * @return The attachments.
 	 */
 	public static List<IMessage.Attachment> getAttachmentsFromJSON(MessageObject json) {
 		List<IMessage.Attachment> attachments = new ArrayList<>();
@@ -220,10 +226,10 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the embedded attachments on a message.
+	 * Gets the embeds on a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The embedded messages.
+	 * @return The embeds.
 	 */
 	public static List<Embed> getEmbedsFromJSON(MessageObject json) {
 		List<Embed> embeds = new ArrayList<>();
@@ -239,11 +245,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a guild object from a json response.
+	 * Converts a json {@link GuildObject} to a {@link IGuild}. This method first checks the internal guild cache and returns
+	 * that object with updated information if it exists. Otherwise, it constructs a new guild.
 	 *
-	 * @param shard The shard this guild is on
-	 * @param json  The json response.
-	 * @return The guild object.
+	 * @param shard The shard the guild belongs to.
+	 * @param json The json object representing the guild.
+	 * @return The converted guild object.
 	 */
 	public static IGuild getGuildFromJSON(IShard shard, GuildObject json) {
 		Guild guild;
@@ -333,11 +340,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a user object from a guild member json response.
+	 * Converts a json {@link MemberObject} to a {@link IUser}. This method uses {@link #getUserFromJSON(IShard, UserObject)}
+	 * to get or create a {@link IUser} and then updates the guild's appropriate member caches for that user.
 	 *
 	 * @param guild The guild the member belongs to.
-	 * @param json  The json response.
-	 * @return The user object.
+	 * @param json The json object representing the member.
+	 * @return The converted user object.
 	 */
 	public static IUser getUserFromGuildMemberResponse(IGuild guild, MemberObject json) {
 		User user = getUserFromJSON(guild.getShard(), json.user);
@@ -358,11 +366,13 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a private channel object from a json response.
+	 * Converts a json {@link PrivateChannelObject} to a {@link IPrivateChannel}. This method first checks the internal
+	 * private channel cache and returns that object with updated information if it exists. Otherwise, it constructs a
+	 * new private channel.
 	 *
-	 * @param shard The shard this channel is on.
-	 * @param json  The json response.
-	 * @return The private channel object.
+	 * @param shard The shard the private channel belongs to.
+	 * @param json The json object representing the private channel.
+	 * @return The converted private channel object.
 	 */
 	public static IPrivateChannel getPrivateChannelFromJSON(IShard shard, PrivateChannelObject json) {
 		IPrivateChannel channel = ((ShardImpl) shard).privateChannels.get(json.id);
@@ -378,11 +388,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a message object from a json response.
+	 * Converts a json {@link MessageObject} to a {@link IMessage}. This method first checks the internal message cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new message.
 	 *
-	 * @param channel The channel.
-	 * @param json    The json response.
-	 * @return The message object.
+	 * @param channel The channel the message belongs to.
+	 * @param json The json object representing the message.
+	 * @return The converted message object.
 	 */
 	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
 		if (json == null)
@@ -424,11 +435,11 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Updates a message object with the non-null or non-empty contents of a json response.
+	 * Updates a {@link IMessage} object with the non-null or non-empty contents of a json {@link MessageObject}.
 	 *
-	 * @param toUpdate The message.
-	 * @param json     The json response.
-	 * @return The message object.
+	 * @param toUpdate The message to update.
+	 * @param json The json object representing the message.
+	 * @return The updated message object.
 	 */
 	public static IMessage getUpdatedMessageFromJSON(IMessage toUpdate, MessageObject json) {
 		if (toUpdate == null)
@@ -458,11 +469,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a webhook object from a json response.
+	 * Converts a json {@link WebhookObject} to a {@link IWebhook}. This method first checks the internal webhook cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new webhook.
 	 *
-	 * @param channel The webhook.
-	 * @param json The json response.
-	 * @return The message object.
+	 * @param channel The channel the webhook belongs to.
+	 * @param json The json object representing the webhook.
+	 * @return The converted webhook object.
 	 */
 	public static IWebhook getWebhookFromJSON(IChannel channel, WebhookObject json) {
 		long webhookId = Long.parseUnsignedLong(json.id);
@@ -485,11 +497,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a channel object from a json response.
+	 * Converts a json {@link ChannelObject} to a {@link IChannel}. This method first checks the internal channel cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new channel.
 	 *
-	 * @param guild the guild.
-	 * @param json  The json response.
-	 * @return The channel object.
+	 * @param guild The guild the channel belongs to.
+	 * @param json The json object representing the channel.
+	 * @return The converted channel object.
 	 */
 	public static IChannel getChannelFromJSON(IGuild guild, ChannelObject json) {
 		Channel channel;
@@ -516,9 +529,9 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Generates permission override sets from an array of json responses.
+	 * Converts an array of json {@link OverwriteObject}s to sets of user and role overrides.
 	 *
-	 * @param overwrites The overwrites.
+	 * @param overwrites The array of json overwrite objects.
 	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
 	 */
 	public static Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>>
@@ -542,11 +555,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a role object from a json response.
+	 * Converts a json {@link RoleObject} to a {@link IRole}. This method first checks the internal role cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new role.
 	 *
-	 * @param guild the guild.
-	 * @param json  The json response.
-	 * @return The role object.
+	 * @param guild The guild the role belongs to.
+	 * @param json The json object representing the role.
+	 * @return The converted role object.
 	 */
 	public static IRole getRoleFromJSON(IGuild guild, RoleObject json) {
 		Role role;
@@ -566,21 +580,23 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a region object from a json response.
+	 * Converts a json {@link VoiceRegionObject} to an {@link IRegion}.
 	 *
-	 * @param json The json response.
-	 * @return The region object.
+	 * @param json The json object representing the region.
+	 * @return The converted region object.
 	 */
 	public static IRegion getRegionFromJSON(VoiceRegionObject json) {
 		return new Region(json.id, json.name, json.vip);
 	}
 
 	/**
-	 * Creates a channel object from a json response.
+	 * Converts a json {@link ChannelObject} to a {@link IVoiceChannel}. This method first checks the internal voice
+	 * channel cache and returns that object with updated information if it exists. Otherwise, it constructs a new voice
+	 * channel.
 	 *
-	 * @param guild the guild.
-	 * @param json  The json response.
-	 * @return The channel object.
+	 * @param guild The guild the voice channel belongs to.
+	 * @param json The json object representing the voice channel.
+	 * @return The converted voice channel object.
 	 */
 	public static IVoiceChannel getVoiceChannelFromJSON(IGuild guild, ChannelObject json) {
 		VoiceChannel channel;
@@ -608,11 +624,11 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a voice state object from a json response.
+	 * Converts a json {@link VoiceStateObject} to a {@link IVoiceState}.
 	 *
 	 * @param guild The guild the voice state is in.
-	 * @param json The json response.
-	 * @return The voice state object.
+	 * @param json The json object representing the voice state.
+	 * @return The converted voice state object.
 	 */
 	public static IVoiceState getVoiceStateFromJson(IGuild guild, VoiceStateObject json) {
 		IVoiceChannel channel = json.channel_id != null ? guild.getVoiceChannelByID(Long.parseUnsignedLong(json.channel_id)) : null;
@@ -620,14 +636,33 @@ public class DiscordUtils {
 				json.session_id, json.deaf, json.mute, json.self_deaf, json.self_mute, json.suppress);
 	}
 
+	/**
+	 * Converts a json {@link PresenceObject} to a {@link IPresence}.
+	 *
+	 * @param presence The json object representing the presence.
+	 * @return The converted presence object.
+	 */
 	public static IPresence getPresenceFromJSON(PresenceObject presence) {
 		return getPresenceFromJSON(presence.game, presence.status);
 	}
 
+	/**
+	 * Converts a json {@link PresenceUpdateEventResponse} to a {@link IPresence}.
+	 *
+	 * @param response The event response with presence information.
+	 * @return The converted presence object.
+	 */
 	public static IPresence getPresenceFromJSON(PresenceUpdateEventResponse response) {
 		return getPresenceFromJSON(response.game, response.status);
 	}
 
+	/**
+	 * Creates a {@link IPresence} from a {@link GameObject game} and status type.
+	 *
+	 * @param game The game of the presence.
+	 * @param status The status of the presence.
+	 * @return The presence object with the given game and status.
+	 */
 	private static IPresence getPresenceFromJSON(GameObject game, String status) {
 		return new Presence(
 				game == null ? null : game.name,
@@ -635,8 +670,13 @@ public class DiscordUtils {
 				StatusType.get(status));
 	}
 
-
-
+	/**
+	 * Converts a json {@link EmojiObject} to a {@link IEmoji}.
+	 *
+	 * @param guild The guild the emoji belongs to.
+	 * @param json The json object representing the emoji.
+	 * @return The converted emoji object.
+	 */
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
 		long id = Long.parseUnsignedLong(json.id);
 		List<IRole> roles = Arrays.stream(json.roles)
@@ -646,6 +686,13 @@ public class DiscordUtils {
 		return new EmojiImpl(id, guild, json.name, roles, json.require_colons, json.managed);
 	}
 
+	/**
+	 * Converts an array of json {@link MessageObject.ReactionObject}s to a list of {@link IReaction}s.
+	 *
+	 * @param message The message the reactions belong to.
+	 * @param json The json objects representing the reactions.
+	 * @return The converted reaction objects.
+	 */
 	public static List<IReaction> getReactionsFromJSON(IMessage message, MessageObject.ReactionObject[] json) {
 		List<IReaction> reactions = new ArrayList<>();
 		if (json != null)
@@ -659,10 +706,10 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the time at which a discord id was created.
+	 * Gets the timestamp portion of a Snowflake ID as a {@link LocalDateTime} using the system's default timezone.
 	 *
-	 * @param id The id.
-	 * @return The time the id was created.
+	 * @param id The Snowflake ID.
+	 * @return The timestamp portion of the ID.
 	 */
 	public static LocalDateTime getSnowflakeTimeFromID(long id) {
 		long milliseconds = DISCORD_EPOCH + (id >>> 22);
@@ -670,10 +717,10 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets invite codes from a message if it exists.
+	 * Gets all of the invite codes from invite URLs in a message.
 	 *
-	 * @param message The message to parse.
-	 * @return The codes or empty if none are found.
+	 * @param message The message content to parse.
+	 * @return A list of the invite codes in the message.
 	 */
 	public static List<String> getInviteCodesFromMessage(String message) {
 		Matcher matcher = MessageTokenizer.INVITE_PATTERN.matcher(message);
@@ -686,7 +733,7 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * This takes in an {@link AudioInputStream} and guarantees that it is PCM encoded.
+	 * Converts an {@link AudioInputStream} to 48000Hz 16 bit stereo signed Big Endian PCM format.
 	 *
 	 * @param stream The original stream.
 	 * @return The PCM encoded stream.
@@ -713,9 +760,9 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
+	 * Creates a {@link ThreadFactory} which produces threads which run as daemons.
 	 *
-	 * @return The new thread factory.
+	 * @return The new daemon thread factory.
 	 */
 	public static ThreadFactory createDaemonThreadFactory() {
 		return createDaemonThreadFactory(null);
@@ -724,8 +771,8 @@ public class DiscordUtils {
 	/**
 	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
 	 *
-	 * @param threadName The name to place on created threads.
-	 * @return The new thread factory.
+	 * @param threadName The name of threads created by the returned factory.
+	 * @return The new daemon thread factory.
 	 */
 	public static ThreadFactory createDaemonThreadFactory(String threadName) {
 		return (runnable) -> { //Ensures all threads are daemons
@@ -738,7 +785,7 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Used to check equality between two {@link IDiscordObject}s using their IDs.
+	 * Checks equality between two {@link IDiscordObject}s using their IDs.
 	 * If one of the given objects is not a discord object, it will use the {@link Object#equals(Object)} method of that
 	 * object instead.
 	 *

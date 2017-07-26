@@ -20,11 +20,26 @@ package sx.blah.discord.api.internal.json.requests;
 import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.handle.obj.StatusType;
 
+/**
+ * Sent to update the bot's presence.
+ */
 public class PresenceUpdateRequest {
 
+	/**
+	 * The unix time of when the bot became idle or null if the bot is not idle.
+	 */
 	public Long since;
+	/**
+	 * The game the bot is playing.
+	 */
 	public GameObject game;
+	/**
+	 * The status of the bot.
+	 */
 	public String status;
+	/**
+	 * Whether the bot is afk.
+	 */
 	public boolean afk = false;
 
 	public PresenceUpdateRequest(StatusType status, String playingText, String streamUrl) {

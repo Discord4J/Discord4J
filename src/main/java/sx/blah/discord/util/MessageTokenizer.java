@@ -28,50 +28,75 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A utility class to traverse through a message's contents and step through tokens like mentions, characters, words,
- * etc. The tokenizer has an internal pointer of where it's at in the message. Everytime you call nextX, the internal
- * pointer will move <b>past</b> the token it found. For example, if the string is <code>this is a string of
- * words</code>, when {@link #nextWord()} is first called, it will return <code>this</code>, and move to the first
- * space. Calling {@link #nextChar()} will return that space, and move to <code>i</code>, in <code>is a...</code>,
- * and so forth.
+ * Used to traverse through a message's content and step through tokens like mentions, characters, words, etc.
+ *
+ * <p>The tokenizer has a pointer of the index it is at in the message. Every time a next method is called, the
+ * pointer moves <b>past</b> the next found token.
+ *
+ * <p>For example, if the content is <code>this is a string of words</code>, when {@link #nextWord()} is first called,
+ * it will return <code>this</code>, and move to the first space. Calling {@link #nextChar()} will return that space
+ * and move to <code>i</code>.
  *
  * @author chrislo27
  */
 public class MessageTokenizer {
 
+	/**
+	 * Regex for matching any Discord mention format.
+	 */
 	public static final String ANY_MENTION_REGEX = "<(?:(?:@[!&]?)|#)(\\d+)>";
+	/**
+	 * Regex for matching custom emoji.
+	 */
 	public static final String CUSTOM_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
+	/**
+	 * Regex for matching invite URLs.
+	 */
 	public static final String INVITE_REGEX = "(?:discord\\.gg/)([\\w-]+)";
+	/**
+	 * Regex for matching a word.
+	 */
 	public static final String WORD_REGEX = "(?:\\s|\\n)+";
+
+	/**
+	 * Pattern for Discord's mention formats.
+	 */
 	public static final Pattern ANY_MENTION_PATTERN = Pattern.compile(ANY_MENTION_REGEX);
+	/**
+	 * Pattern for Discord's custom emoji.
+	 */
 	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile(CUSTOM_EMOJI_REGEX);
+	/**
+	 * Pattern for Discord invite URLs.
+	 */
 	public static final Pattern INVITE_PATTERN = Pattern.compile(INVITE_REGEX);
+	/**
+	 * Pattern for words.
+	 */
 	public static final Pattern WORD_PATTERN = Pattern.compile(WORD_REGEX);
 
+	/**
+	 * The content of the message that is being tokenized.
+	 */
 	private final String content;
+	/**
+	 * The client that owns the tokenizer.
+	 */
 	private final IDiscordClient client;
+	/**
+	 * The current position of the pointer in the message.
+	 */
 	private volatile int currentPosition = 0;
+
 	/**
 	 * The remaining substring.
 	 */
 	private volatile String remaining;
 
-	/**
-	 * Initializes using the message contents and client.
-	 *
-	 * @param message The message object
-	 */
 	public MessageTokenizer(IMessage message) {
 		this(message.getClient(), message.getContent());
 	}
 
-	/**
-	 * Initializes with the string contents.
-	 *
-	 * @param content What you want to traverse
-	 * @param client  The Discord client that will be used to get objects from
-	 * @throws IllegalArgumentException If content is null, empty, or client is null
-	 */
 	public MessageTokenizer(IDiscordClient client, String content) {
 		if (content == null)
 			throw new IllegalArgumentException("Content cannot be null!");
@@ -87,22 +112,21 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Steps forward the current position and updates the internal remaining string.
+	 * Moves the pointer forward by the given amount.
 	 *
-	 * @param amount The amount to step forward
-	 * @return The new current position
+	 * @param amount The amount to move forward.
+	 * @return The new pointer position.
 	 */
 	public int stepForward(int amount) {
 		return stepTo(currentPosition + amount);
 	}
 
 	/**
-	 * Steps to the position provided and updates the internal remaining string.
+	 * Moves the pointer forward to the given position.
 	 *
-	 * @param index The index to step to
-	 * @return The new current position
-	 * * @see MessageTokenizer#stepTo(int)
-	 * @deprecated Use {@link #stepTo(int)}
+	 * @param index The index to move to.
+	 * @return The new pointer position.
+	 * @deprecated Use {@link #stepTo(int)} instead.
 	 */
 	@Deprecated
 	public int stepForwardTo(int index) {
@@ -110,10 +134,10 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Steps to the position provided and updates the internal remaining string.
+	 * Moves the pointer forward to the given position.
 	 *
-	 * @param index The index to step to
-	 * @return The new current position
+	 * @param index The index to move to.
+	 * @return The new pointer position.
 	 */
 	public int stepTo(int index) {
 		currentPosition = Math.max(0, Math.min(index, content.length()));
@@ -123,29 +147,30 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if the traverser isn't at the end of the string.
+	 * Gets whether the pointer is not at the end of the content.
 	 *
-	 * @return True if we have another char to step to
+	 * @return Whether the pointer is not at the end of the content.
 	 */
 	public boolean hasNext() {
 		return currentPosition < content.length();
 	}
 
 	/**
-	 * Exactly the same as {@link MessageTokenizer#hasNext()}. Returns true if there is another char to step to.
+	 * Gets whether the pointer is not at the end of the content.
 	 *
-	 * @return True if there is more to step to
-	 * @see MessageTokenizer#hasNext()
+	 * <p>This is equivalent to {@link #hasNext()}.
+	 *
+	 * @return Whether the pointer is not at the end of the content.
 	 */
 	public boolean hasNextChar() {
 		return hasNext();
 	}
 
 	/**
-	 * Returns the next character, stepping forward the tokenizer.
+	 * Gets the next character in the content and moves the pointer forward.
 	 *
-	 * @return The next char
-	 * @throws IllegalStateException If there aren't more chars to go to
+	 * @return The next character in the content.
+	 * @throws IllegalStateException If there is no next character.
 	 */
 	public char nextChar() {
 		if (!hasNextChar())
@@ -157,18 +182,20 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if the tokenizer has the sequence provided.
-	 * @param sequence The string sequence to look for
-	 * @return True if it contains the sequence
+	 * Gets whether the content has the given string sequence.
+	 *
+	 * @param sequence The string sequence to look for.
+	 * @return Whether the content has the given string sequence.
 	 */
 	public boolean hasNextSequence(String sequence) {
 		return remaining.contains(sequence);
 	}
 
 	/**
-	 * Returns a Token of the following sequence.
-	 * @param sequence The string sequence to look for
-	 * @return The token
+	 * Gets the next sequence as a token.
+	 *
+	 * @param sequence The string sequence to look for.
+	 * @return The next sequence as a token.
 	 */
 	public Token nextSequence(String sequence) {
 		if (!hasNextSequence(sequence))
@@ -183,19 +210,20 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is another word to go to. A word is delimited by whitespace or newlines.
+	 * Gets whether the content has a next word. A word is delimited by whitespace.
 	 *
-	 * @return True if there is another word to step to
+	 * <p>This is equivalent to {@link #hasNext()}.
+	 *
+	 * @return Whether the content has a next word.
 	 */
 	public boolean hasNextWord() {
 		return hasNext();
 	}
 
 	/**
-	 * Returns the next word, stepping forward the tokenizer to the next non-space character. A word is delimited by
-	 * whitespace/newlines.
+	 * Gets the next word in the content and moves the pointer forward.
 	 *
-	 * @return The next word
+	 * @return The next word in the content.
 	 */
 	public Token nextWord() {
 		if (!hasNextWord())
@@ -228,18 +256,20 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is a line to go to.
+	 * Gets whether the pointer is not at the end of the content.
 	 *
-	 * @return True if there is a line available
+	 * <p>This is equivalent to {@link #hasNext()}.
+	 *
+	 * @return Whether the pointer is not at the end of the content.
 	 */
 	public boolean hasNextLine() {
 		return hasNext();
 	}
 
 	/**
-	 * Returns the current text, up to the next newline/end, stepping forward the tokenizer to the next line.
+	 * Gets the next line of content as a token.
 	 *
-	 * @return The line
+	 * @return The next line of content as a token.
 	 */
 	public Token nextLine() {
 		if (!hasNextLine())
@@ -257,20 +287,20 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if an occurence of the regex pattern exists.
+	 * Gets whether the content matches the given pattern.
 	 *
-	 * @param pattern The regex pattern
-	 * @return True if there is an occurence
+	 * @param pattern The pattern to match with.
+	 * @return Whether the content matches the given pattern.
 	 */
 	public boolean hasNextRegex(Pattern pattern) {
 		return hasNext() && pattern.matcher(remaining).find();
 	}
 
 	/**
-	 * Returns the next occurrence of the regular expression, stepping forward the tokenizer to the next line.
+	 * Gets the next string of the content that matches the given pattern as a token.
 	 *
-	 * @param pattern The regex pattern
-	 * @return The token of the regex occurrence
+	 * @param pattern The pattern to match with.
+	 * @return The next string of the content that matches the given pattern as a token.
 	 */
 	public Token nextRegex(Pattern pattern) {
 		if (!hasNextRegex(pattern))
@@ -288,14 +318,21 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is an invite to go to.
+	 * Gets whether the content has an invite.
 	 *
-	 * @return True if there is an invite to go to.
+	 * <p>This is equivalent to <code>hasNextRegex(INVITE_PATTERN)</code>
+	 *
+	 * @return Whether the content has an invite.
 	 */
 	public boolean hasNextInvite() {
 		return hasNextRegex(INVITE_PATTERN);
 	}
 
+	/**
+	 * Gets the next invite in the content and moves the pointer forward.
+	 *
+	 * @return The next invite in the content.
+	 */
 	public InviteToken nextInvite() {
 		if (!hasNextInvite())
 			throw new IllegalStateException("No more invites found!");
@@ -312,19 +349,20 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is a mention to go to.
+	 * Gets whether the content has a mention.
 	 *
-	 * @return True if there is a mention to go to.
+	 * <p>This is equivalent to <code>hasNextRegex(ANY_MENTION_PATTERN)</code>
+	 *
+	 * @return Whether the content has a mention.
 	 */
 	public boolean hasNextMention() {
 		return hasNextRegex(ANY_MENTION_PATTERN);
 	}
 
 	/**
-	 * Returns the next mention, stepping forward the tokenizer to the end of the mention (exclusive).
+	 * Gets the next mention in the content and moves the pointer forward.
 	 *
-	 * @return The next mention token
-	 * @see MentionToken
+	 * @return The next mention in the content.
 	 */
 	public MentionToken nextMention() {
 		if (!hasNextMention())
@@ -351,19 +389,20 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is another custom emoji to go to.
+	 * Gets whether the content has a custom emoji.
 	 *
-	 * @return True if there is another custom emoji.
+	 * <p>This is equivalent to <code>hasNextRegex(CUSTOM_EMOJI_PATTERN)</code>
+	 *
+	 * @return Whether the content has a custom emoji.
 	 */
 	public boolean hasNextEmoji() {
 		return hasNextRegex(CUSTOM_EMOJI_PATTERN);
 	}
 
 	/**
-	 * Returns the next custom emoji, stepping forward the tokenizer to the end of the emoji (exclusive).
+	 * Gets the next custom emoji in the content and moves the pointer forward.
 	 *
-	 * @return The next custom emoji token
-	 * @see CustomEmojiToken
+	 * @return The next custom emoji in the content.
 	 */
 	public CustomEmojiToken nextEmoji() {
 		if (!hasNextEmoji())
@@ -377,73 +416,84 @@ public class MessageTokenizer {
 	}
 
 	/**
-	 * Returns true if there is a Unicode emoji that is the same as the provided one to go to.
+	 * Gets whether the content has a unicode emoji.
 	 *
-	 * @param emoji The emoji to look for
-	 * @return True if there is another custom emoji.
+	 * @param emoji The unicode emoji to search for.
+	 * @return Whether the content has a unicode emoji.
 	 */
 	public boolean hasNextUnicodeEmoji(Emoji emoji) {
 		return hasNextSequence(emoji.getUnicode());
 	}
 
+	/**
+	 * Gets the next unicode emoji in the content and moves the pointer forward.
+	 *
+	 * @param emoji The unicode emoji to search for.
+	 * @return The next unicode emoji in the content.
+	 */
 	public UnicodeEmojiToken nextUnicodeEmoji(Emoji emoji) {
 		Token t = nextSequence(emoji.getUnicode());
 		return new UnicodeEmojiToken(this, t.startIndex, t.endIndex);
 	}
 
 	/**
-	 * Returns the content that the tokenizer is traversing.
+	 * Gets the content of the tokenizer.
 	 *
-	 * @return The content that is being traversed
+	 * @return The content of the tokenizer.
 	 */
 	public String getContent() {
 		return content;
 	}
 
 	/**
-	 * Returns the Discord client this tokenizer uses.
+	 * Gets the client that owns the tokenizer.
 	 *
-	 * @return The Discord client
+	 * @return The client that owns the tokenizer.
 	 */
 	public IDiscordClient getClient() {
 		return client;
 	}
 
 	/**
-	 * Returns the current position/index this tokenizer is at.
+	 * Gets the current position of the pointer in the message.
 	 *
-	 * @return The current position/index
+	 * @return The current position of the pointer in the message.
 	 */
 	public int getCurrentPosition() {
 		return currentPosition;
 	}
 
 	/**
-	 * Returns the internal substring based on the current position.
+	 * Gets the remaining substring of the original content.
 	 *
-	 * @return The remaining content
+	 * @return The remaining substring.
 	 */
 	public String getRemainingContent() {
 		return remaining;
 	}
 
 	/**
-	 * Represents a part of a message with the content and position.
+	 * A part of a message with the content and position.
 	 */
 	public static class Token {
 
+		/**
+		 * The tokenizer which produced the token.
+		 */
 		private final MessageTokenizer tokenizer;
+		/**
+		 * The start index of the tokenizer's contents. (Inclusive)
+		 */
 		private final int startIndex;
+		/**
+		 * The end index of the tokenizer's contents. (Exclusive)
+		 */
 		private final int endIndex;
+		/**
+		 * The content of the token.
+		 */
 		private final String content;
 
-		/**
-		 * A part of a message with content and position.
-		 *
-		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 */
 		Token(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			if (startIndex < 0 || startIndex >= tokenizer.getContent().length())
 				throw new IllegalArgumentException("Start index must be within range of content! (Got " + startIndex +
@@ -465,38 +515,36 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Gets the tokenizer object this token is associated with.
+		 * Gets the tokenizer which produced the token.
 		 *
-		 * @return The tokenizer
+		 * @return The tokenizer which produced the token.
 		 */
 		public MessageTokenizer getTokenizer() {
 			return tokenizer;
 		}
 
 		/**
-		 * Gets the content that makes up this token.
+		 * Gets the content of the token.
 		 *
-		 * @return The string of content
+		 * @return The content of the token.
 		 */
 		public String getContent() {
 			return content;
 		}
 
 		/**
-		 * Gets the start index which is where this token starts in the tokenizer's contents.
+		 * Gets the start index of the tokenizer's contents. (Inclusive)
 		 *
-		 * @return The start index
+		 * @return The start index of the tokenizer's contents.
 		 */
 		public int getStartIndex() {
 			return startIndex;
 		}
 
 		/**
-		 * Get the end index which is the index at which this token terminates, exclusive. Acts like the second
-		 * parameter in
-		 * {@link String#substring(int, int)}.
+		 * Gets the end index of the tokenizer's contents. (Exclusive)
 		 *
-		 * @return The end index
+		 * @return The end index of the tokenizer's contents.
 		 */
 		public int getEndIndex() {
 			return endIndex;
@@ -508,18 +556,18 @@ public class MessageTokenizer {
 		}
 	}
 
+	/**
+	 * A token for a mention.
+	 *
+	 * @param <T> The type of object that is mentioned.
+	 */
 	public static abstract class MentionToken<T extends IDiscordObject> extends Token {
 
+		/**
+		 * The mentioned object.
+		 */
 		protected T mention;
 
-		/**
-		 * A mention of any type with its content and position.
-		 *
-		 * @param tokenizer     The tokenizer
-		 * @param startIndex    The start index of the tokenizer's contents
-		 * @param endIndex      The end index of the tokenizer's contents, exclusive
-		 * @param mentionObject The object the mention is associated with
-		 */
 		private MentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex, T mentionObject) {
 			super(tokenizer, startIndex, endIndex);
 
@@ -527,26 +575,25 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Returns the object associated with the mention (IUser, IRole, IChannel, etc).
+		 * Gets the mentioned object.
 		 *
-		 * @return The object associated with the mention
+		 * @return The mentioned object.
 		 */
 		public T getMentionObject() {
 			return mention;
 		}
 	}
 
+	/**
+	 * A mention token for a user.
+	 */
 	public static class UserMentionToken extends MentionToken<IUser> {
 
+		/**
+		 * Whether the mention was a nickname mention.
+		 */
 		private final boolean isNickname;
 
-		/**
-		 * A user mention with its content and position. It will grab the user from the content.
-		 *
-		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 */
 		private UserMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
@@ -556,24 +603,20 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Returns true if the mention type is for nicknames. (<@!)
+		 * Gets whether the mention was a nickname mention.
 		 *
-		 * @return True if the mention is for nicknames, false if it's for the username
+		 * @return Whether the mention was a nickname mention.
 		 */
 		public boolean isNickname() {
 			return isNickname;
 		}
 	}
 
+	/**
+	 * A mention token for a role.
+	 */
 	public static class RoleMentionToken extends MentionToken<IRole> {
 
-		/**
-		 * A role mention with its content and position. It will grab the role from the content.
-		 *
-		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 */
 		private RoleMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
@@ -581,15 +624,11 @@ public class MessageTokenizer {
 		}
 	}
 
+	/**
+	 * A mention token for a channel.
+	 */
 	public static class ChannelMentionToken extends MentionToken<IChannel> {
 
-		/**
-		 * A channel mention with its content and position. It will grab the channel from the content.
-		 *
-		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 */
 		private ChannelMentionToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex, null);
 
@@ -597,20 +636,16 @@ public class MessageTokenizer {
 		}
 	}
 
+	/**
+	 * A token for a custom emoji.
+	 */
 	public static class CustomEmojiToken extends Token {
 
 		/**
-		 * The emoji.
+		 * The custom emoji.
 		 */
 		private final IEmoji emoji;
 
-		/**
-		 * A custom server emoji from a message with content and position.
-		 *
-		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 */
 		private CustomEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex);
 
@@ -623,15 +658,18 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Return the emoji.
+		 * Gets the custom emoji.
 		 *
-		 * @return The emoji
+		 * @return The custom emoji.
 		 */
 		public IEmoji getEmoji() {
 			return emoji;
 		}
 	}
 
+	/**
+	 * A token for an invite.
+	 */
 	public static class InviteToken extends Token {
 
 		/**
@@ -639,13 +677,6 @@ public class MessageTokenizer {
 		 */
 		private final IInvite invite;
 
-		/**
-		 * An invite link from a message with content and position.
-		 *
-		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 */
 		private InviteToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex);
 
@@ -662,7 +693,7 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Return the invite.
+		 * Gets the invite.
 		 *
 		 * @return The invite.
 		 */
@@ -671,20 +702,16 @@ public class MessageTokenizer {
 		}
 	}
 
+	/**
+	 * A token for a unicode emoji.
+	 */
 	public static class UnicodeEmojiToken extends Token {
 
 		/**
-		 * The {@link Emoji}.
+		 * The unicode emoji.
 		 */
 		private final Emoji emoji;
 
-		/**
-		 * A Unicode {@link Emoji} from a message with content and position.
-		 *
-		 * @param tokenizer  The tokenizer
-		 * @param startIndex The start index of the tokenizer's contents
-		 * @param endIndex   The end index of the tokenizer's contents, exclusive
-		 */
 		private UnicodeEmojiToken(MessageTokenizer tokenizer, int startIndex, int endIndex) {
 			super(tokenizer, startIndex, endIndex);
 
@@ -694,10 +721,9 @@ public class MessageTokenizer {
 		}
 
 		/**
-		 * Return the emoji object.
+		 * Gets the unicode emoji.
 		 *
-		 * @return The emoji.
-		 * @see Emoji
+		 * @return The unicode emoji.
 		 */
 		public Emoji getEmoji() {
 			return emoji;

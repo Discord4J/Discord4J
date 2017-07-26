@@ -22,7 +22,6 @@ import java.util.concurrent.locks.LockSupport;
  * Custom Thread that executes the passed task every specified period.
  *
  * Time of execution is held in account when calculating the time to sleep until the next execution.
- *
  */
 public class HighPrecisionRecurrentTask extends Thread {
 
@@ -32,10 +31,9 @@ public class HighPrecisionRecurrentTask extends Thread {
 	private volatile boolean stop;
 
 	/**
-	 *
-	 * @param periodInMilis Every what time the task is executed.
-	 * @param percentageOfSleepSpinning Of the total millis to sleep, what percentage of it should be done spinning to increase accuracy.
-	 * @param target Task to run
+	 * @param periodInMilis The period in milliseconds of the task execution.
+	 * @param percentageOfSleepSpinning The percentage of total sleeping that should be done spinning to increase accuracy.
+	 * @param target The task to run.
 	 */
 	public HighPrecisionRecurrentTask(int periodInMilis, float percentageOfSleepSpinning, Runnable target) {
 		super("D4J AudioThread");

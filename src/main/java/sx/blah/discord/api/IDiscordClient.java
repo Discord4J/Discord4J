@@ -29,80 +29,81 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Represents the main discord api.
+ * The main method by which interaction with Discord is done.
+ *
+ * <p>This represents a "client" which can manage multiple {@link IShard} instances. Most methods which interact
+ * directly with Discord simply execute the equivalent method in all of the managed {@link IShard}s.
  */
 public interface IDiscordClient {
 
 	/**
-	 * Gets the {@link EventDispatcher} instance for this client. Use this to handle events.
+	 * Gets the {@link EventDispatcher} responsible for managing events for the client.
 	 *
-	 * @return The event dispatcher instance.
+	 * @return The event dispatcher for the client.
 	 */
 	EventDispatcher getDispatcher();
 
 	/**
-	 * Gets the {@link ModuleLoader} instance for this client.
+	 * Gets the {@link ModuleLoader} responsible for loading modules for the client.
 	 *
-	 * @return The module loader instance.
+	 * @return The module loader for the client.
 	 */
 	ModuleLoader getModuleLoader();
 
 	/**
-	 * Gets the list of shards this client manages.
-	 * @return The shards.
+	 * Gets the shards which the client manages. After login, this is always at least of size <code>1</code>.
+	 *
+	 * @return The shards managed by the client.
 	 */
 	List<IShard> getShards();
 
 	/**
-	 * Gets the total number of shards this client manages. Purely for convenience.
-	 * @return The shard count.
+	 * Gets the total number of shards the client manages. This is not necessarily the same as
+	 * <code>getShards().size()</code> because shards are not created and added to the list until login.
+	 *
+	 * @return The total number of shards the client manages.
 	 */
 	int getShardCount();
 
 	/**
-	 * Gets the authorization token for this client.
+	 * Gets the authentication token for the client.
 	 *
-	 * @return The authorization token.
+	 * @return The authentication token for the client.
 	 */
 	String getToken();
 
 	/**
-	 * Logs in every shard this client manages.
-	 *
-	 * @throws DiscordException This is thrown if there is an error logging in.
+	 * Begins the login process for every managed shard.
 	 */
 	void login();
 
 	/**
-	 * Logs out every shard this client manages.
+	 * Gracefully disconnects every managed shard.
 	 *
-	 * @throws DiscordException
+	 * <p>This will automatically attempt to disconnect from any connected voice channels and cancels any threads
+	 * controlled by the client.
 	 */
 	void logout();
 
 	/**
-	 * Changes this client's account's username.
+	 * Makes a request to Discord to change the username of the bot.
 	 *
 	 * @param username The new username.
-	 * @throws DiscordException
-	 * @throws RateLimitException
 	 */
 	void changeUsername(String username);
 
 	/**
-	 * Changes this client's account's avatar.
+	 * Makes a request to Discord to change the avatar of the bot.
 	 *
 	 * @param avatar The new avatar.
-	 * @throws DiscordException
-	 * @throws RateLimitException
 	 */
 	void changeAvatar(Image avatar);
 
 	/**
-	 * Changes this user's presence on all shards.
+	 * Changes the presence of the bot on all shards.
 	 *
-	 * @param isIdle If true, this user becomes idle, or online if false.
-	 * @deprecated Use {@link #online()} or {@link #idle()}
+	 * @param isIdle If true, the bot becomes idle, or online if false.
+	 * @deprecated Use {@link #online()} or {@link #idle()}.
 	 */
 	@Deprecated
 	void changePresence(boolean isIdle);
@@ -110,148 +111,155 @@ public interface IDiscordClient {
 	/**
 	 * Changes the status of the bot user on all shards.
 	 *
-	 * @param status The new status to use.
-	 * @deprecated Use {@link #streaming(String, String)} or the online/idle methods with the playing text
+	 * @param status The new status.
+	 * @deprecated Use {@link #streaming(String, String)}, {@link #online(String)}, or {@link #idle(String)}.
 	 */
 	@Deprecated
 	void changeStatus(Status status);
 
 	/**
-	 * Set this user/all shards' presence to have this playing text while retaining the status. Can be null.
+	 * Changes the playing text of the bot on all shards. The previously-set online status will be maintained.
 	 *
-	 * @param playingText The (nullable) playing text
+	 * <p>Note: Due to the fact that Discord doesn't send updates for the bot user's presence, it is possible that using
+	 * this method will overwrite an online status set by a different gateway connection.
+	 *
+	 * @param playingText The nullable playing text.
 	 */
 	void changePlayingText(String playingText);
 
 	/**
-	 * Set this user/all shards' presences to be online, with the playing text.
+	 * Changes the online status of the bot to online with the given playing text in all shards.
 	 *
-	 * @param playingText The game playing text
+	 * @param playingText The nullable playing text.
 	 */
 	void online(String playingText);
 
 	/**
-	 * Set this user/all shards' presences to be online, retaining the original playing text (if any).
+	 * Changes the online status of the bot to online in all shards.
 	 */
 	void online();
 
 	/**
-	 * Set this user/all shards' presences to be idle, with the playing text.
+	 * Changes the online status of the bot to idle with the given playing text in all shards.
 	 *
-	 * @param playingText The game playing text
+	 * @param playingText The nullable playing text.
 	 */
 	void idle(String playingText);
 
 	/**
-	 * Set this user/all shards' presences to be idle, retaining the original playing text (if any).
+	 * Changes the online status of the bot to idle in all shards.
 	 */
 	void idle();
 
 	/**
-	 * Set this user/all shards' presences to be streaming, using the provided game playing text and streaming URL.
+	 * Changes the online status of the bot to streaming with the given playing text and stream url in all shards.
 	 *
-	 * @param playingText The game playing text
-	 * @param streamingUrl The streaming URL (Twitch)
+	 * @param playingText The nullable playing text.
+	 * @param streamingUrl The valid twitch.tv streaming url.
 	 */
 	void streaming(String playingText, String streamingUrl);
 
 	/**
-	 * Set this user/all shards' presences to be do not disturb, with the playing text.
+	 * Changes the online status of the bot to do not disturb with the given playing text in all shards.
 	 *
-	 * @param playingText The game playing text
+	 * @param playingText The nullable playing text.
 	 */
 	void dnd(String playingText);
 
 	/**
-	 * Set this user/all shards' presences to be do not disturb, retaining the original playing text (if any).
+	 * Changes the online status of the bot to do not disturb in all shards.
 	 */
 	void dnd();
 
 	/**
-	 * Set this user/all shards' presences to be invisible.
+	 * Changes the online status of the bot to invisible in all shards.
 	 */
 	void invisible();
 
 	/**
-	 * Changes this user's self-muted state in a guild.
+	 * Changes the bot user's self-muted state in a guild.
 	 *
-	 * @param guild The guild to mute this user in.
+	 * @param guild The guild to self mute the bot user in.
 	 * @param isSelfMuted The new self-muted state.
 	 */
 	void mute(IGuild guild, boolean isSelfMuted);
 
 	/**
-	 * Changes this user's self-deafened state in a guild.
+	 * Changes the bot user's self-deafened state in a guild.
 	 *
-	 * @param guild The guild to deafen this user in.
+	 * @param guild The guild to deafen the bot user in.
 	 * @param isSelfDeafened The new self-deafened state.
 	 */
 	void deafen(IGuild guild, boolean isSelfDeafened);
 
 	/**
-	 * Checks if the api is ready to be interacted with on all shards.
-	 * @see IShard#isReady()
+	 * Gets whether the the client is fully logged in on all shards. All functionality of the client is not available
+	 * until this is true.
 	 *
-	 * @return True if ready, false if otherwise.
+	 * @return Whether the client is fully logged in on all shards.
 	 */
 	boolean isReady();
 
 	/**
-	 * Ensures the client is ready to interact with the api.
+	 * Throws an exception if the client is not ready.
 	 *
 	 * @param action The action that is being attempted. (i.e. "send message")
-	 * @throws DiscordException
+	 * @see #isReady()
 	 */
 	default void checkReady(String action) {
 		if (!isReady()) throw new DiscordException("Attempt to " + action + " before client is ready!");
 	}
 
 	/**
-	 * Checks if the client has established a connection with the Discord gateway on all shards.
-	 * @see IShard#isLoggedIn()
+	 * Gets whether every shard has received the READY payload on the gateway.
 	 *
-	 * @return True if logged in, false if otherwise.
+	 * <p>This is <b>not the same</b> as {@link #isReady()}. A small subset of the functionality of the client is
+	 * available if this is true, but not all.
+	 *
+	 * @return Whether every shard has begun its connection process with Discord.
 	 */
 	boolean isLoggedIn();
 
 	/**
-	 * Ensures that the client has established a connection with the Discord gateway on all shards.
+	 * Throws an exception if the client is not logged in.
 	 *
 	 * @param action The action that is being attempted. (i.e. "send message")
-	 * @throws DiscordException
+	 * @see #isLoggedIn()
 	 */
 	default void checkLoggedIn(String action) {
 		if (!isLoggedIn()) throw new DiscordException("Attempt to " + action + " before client has logged in!");
 	}
 
 	/**
-	 * Gets the {@link User} this bot is representing.
+	 * Gets the {@link IUser} which represents the client in Discord.
 	 *
-	 * @return The user object.
+	 * @return The user which represents the client in Discord.
 	 */
 	IUser getOurUser();
 
 	/**
-	 * Gets a set of all channels visible to the bot user.
+	 * Gets a list of all text channels visible to the bot user on every shard.
 	 *
-	 * @param includePrivate Whether to include private channels in the set.
-	 * @return A {@link Collection} of all {@link Channel} objects.
+	 * @param includePrivate Whether to include private channels.
+	 * @return A list of all visible text channels.
 	 */
 	List<IChannel> getChannels(boolean includePrivate);
 
 	/**
-	 * Gets a set of all channels visible to the bot user.
+	 * Gets a list of all non-private text channels visible to the bot user on every shard.
 	 *
-	 * @return A {@link Collection} of all non-private {@link Channel} objects.
+	 * <p>This is equivalent to <code>getChannels(false)</code>.
+	 *
+	 * @return A list of all visible, non-private text channels.
 	 */
 	List<IChannel> getChannels();
 
 	/**
-	 * Gets a channel by its unique id.
+	 * Gets a text channel by its unique snowflake ID from the client's text channel cache.
 	 *
-	 * @param channelID The id of the desired channel.
-	 * @return The {@link Channel} object with the provided id.
-	 * @deprecated Use {@link #getChannelByID(long)} instead
+	 * @param channelID The ID of the desired channel.
+	 * @return The text channel with the provided ID (or null if one was not found).
+	 * @deprecated Use {@link #getChannelByID(long)} instead.
 	 */
 	@Deprecated
 	default IChannel getChannelByID(String channelID) {
@@ -260,26 +268,26 @@ public interface IDiscordClient {
 	}
 
 	/**
-	 * Gets a channel by its unique id.
+	 * Gets a text channel by its unique snowflake ID from the client's text channel cache.
 	 *
-	 * @param channelID The id of the desired channel.
-	 * @return The {@link Channel} object with the provided id.
+	 * @param channelID The ID of the desired channel.
+	 * @return The text channel with the provided ID (or null if one was not found).
 	 */
 	IChannel getChannelByID(long channelID);
 
 	/**
-	 * Gets a set of all voice channels visible to the bot user.
+	 * Gets a list of all voice channels visible to the bot user on every shard.
 	 *
-	 * @return A {@link Collection} of all {@link VoiceChannel} objects.
+	 * @return A list of all visible voice channels.
 	 */
 	List<IVoiceChannel> getVoiceChannels();
 
 	/**
-	 * Gets a voice channel from a given id.
+	 * Gets a voice channel by its unique snowflake ID from the client's voice channel cache.
 	 *
-	 * @param id The voice channel id.
-	 * @return The voice channel (or null if not found).
-	 * @deprecated Use {@link #getVoiceChannelByID(long)} instead
+	 * @param id The ID of the desired channel.
+	 * @return The voice channel with the provided ID (or null if one was not found).
+	 * @deprecated Use {@link #getVoiceChannelByID(long)} instead.
 	 */
 	@Deprecated
 	default IVoiceChannel getVoiceChannelByID(String id) {
@@ -288,26 +296,26 @@ public interface IDiscordClient {
 	}
 
 	/**
-	 * Gets a voice channel from a given id.
+	 * Gets a voice channel by its unique snowflake ID from the client's voice channel cache.
 	 *
-	 * @param id The voice channel id.
-	 * @return The voice channel (or null if not found).
+	 * @param id The ID of the desired channel.
+	 * @return The voice channel with the provided ID (or null if one was not found).
 	 */
 	IVoiceChannel getVoiceChannelByID(long id);
 
 	/**
-	 * Gets all the guilds the user the api represents is connected to.
+	 * Gets a list of all guilds on every shard the bot user is a member of.
 	 *
-	 * @return The list of {@link Guild}s the api is connected to.
+	 * @return A list of all guilds on every shard the bot user is a member of.
 	 */
 	List<IGuild> getGuilds();
 
 	/**
-	 * Gets a guild by its unique id.
+	 * Gets a guild by its unique snowflake ID from the client's guild cache.
 	 *
-	 * @param guildID The id of the desired guild.
-	 * @return The {@link Guild} object with the provided id.
-	 * @deprecated Use {@link #getGuildByID(long)} instead
+	 * @param guildID The ID of the desired guild.
+	 * @return The guild with the provided ID (or null if one was not found).
+	 * @deprecated Use {@link #getGuildByID(long)} instead.
 	 */
 	@Deprecated
 	default IGuild getGuildByID(String guildID) {
@@ -316,27 +324,31 @@ public interface IDiscordClient {
 	}
 
 	/**
-	 * Gets a guild by its unique id.
+	 * Gets a guild by its unique snowflake ID from the client's guild cache.
 	 *
-	 * @param guildID The id of the desired guild.
-	 * @return The {@link Guild} object with the provided id.
+	 * @param guildID The ID of the desired guild.
+	 * @return The guild with the provided ID (or null if one was not found).
 	 */
 	IGuild getGuildByID(long guildID);
 
 	/**
-	 * Gets a set of all users visible to the bot user.
+	 * Gets a list of all users visible to the bot user on every shard.
 	 *
-	 * @return A {@link Collection} of all {@link User} objects.
+	 * <p>Note: This list <b>does</b> contain the bot user.
+	 *
+	 * @return A list of all visible users.
 	 */
 	List<IUser> getUsers();
 
 	/**
-	 * Gets a cached user by its unique id.
+	 * Gets a user by its unique snowflake ID from the client's user cache.
 	 *
-	 * @param userID The id of the desired user.
-	 * @return The {@link User} object with the provided id.
+	 * <p>Note: This method only searches the client's list of <b>cached</b> users. Discord allows the fetching of users
+	 * which the bot cannot directly see (they share no mutual guilds, so they are not cached). This functionality is
+	 * exposed through {@link #fetchUser(String)}.
 	 *
-	 * @see #fetchUser(String)
+	 * @param userID The ID of the desired user.
+	 * @return The user with the provided ID (or null if one was not found).
 	 * @deprecated Use {@link #getUserByID(long)}
 	 */
 	@Deprecated
@@ -346,26 +358,28 @@ public interface IDiscordClient {
 	}
 
 	/**
-	 * Gets a cached user by its unique id.
+	 * Gets a user by its unique snowflake ID from the client's user cache.
 	 *
-	 * @param userID The id of the desired user.
-	 * @return The {@link User} object with the provided id.
+	 * <p>Note: This method only searches the client's list of <b>cached</b> users. Discord allows the fetching of users
+	 * which the bot cannot directly see (they share no mutual guilds, so they are not cached). This functionality is
+	 * exposed through {@link #fetchUser(long)}.
 	 *
-	 * @see #fetchUser(long)
+	 * @param userID The ID of the desired user.
+	 * @return The user with the provided ID (or null if one was not found).
 	 */
 	IUser getUserByID(long userID);
 
 	/**
-	 * This attempts to retrieve a user by its id by first checking the api's internal cache, if the user is not found,
-	 * a REST request is performed.
+	 * Gets a user by its unique snowflake ID from the client's user cache <b>or</b> by fetching it from Discord.
 	 *
-	 * @param id The id of the user to find.
-	 * @return Ths user fetched, if found.
+	 * <p>Discord allows the fetching of users the bot cannot directly see (they share no mutual guilds, so they are not
+	 * cached). This method first checks the client's user cache and if there is no such user with the provided ID, it
+	 * is requested from Discord.
 	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * <p>Use {@link #getUserByID(String)} to only search the client's user cache.
 	 *
-	 * @see #getUserByID(String)
+	 * @param id The ID of the desired user.
+	 * @return The user with the provided ID (or null if one was not found).
 	 * @deprecated Use {@link #fetchUser(long)} instead
 	 */
 	@Deprecated
@@ -375,49 +389,51 @@ public interface IDiscordClient {
 	}
 
 	/**
-	 * This attempts to retrieve a user by its id by first checking the api's internal cache, if the user is not found,
-	 * a REST request is performed.
+	 * Gets a user by its unique snowflake ID from the client's user cache <b>or</b> by fetching it from Discord.
 	 *
-	 * @param id The id of the user to find.
-	 * @return Ths user fetched, if found.
+	 * <p>Discord allows the fetching of users the bot cannot directly see (they share no mutual guilds, so they are not
+	 * cached). This method first checks the client's user cache and if there is no such user with the provided ID, it
+	 * is requested from Discord.
 	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * <p>Use {@link #getUserByID(long)} to only search the client's user cache.
 	 *
-	 * @see #getUserByID(long)
+	 * @param id The ID of the desired user.
+	 * @return The user with the provided ID (or null if one was not found).
 	 */
 	IUser fetchUser(long id);
 
 	/**
-	 * Gets a set of users by their name, case-sensitive.
+	 * Gets a list of users by their name.
 	 *
-	 * @param name The name of the desired user(s).
-	 * @return A {@link Collection} of {@link User} objects with the provided name.
+	 * <p>This is equivalent to <code>getUsersByName(name, false)</code>
+	 *
+	 * @param name The case-sensitive name of the desired users.
+	 * @return A list of users with the provided name.
 	 */
 	List<IUser> getUsersByName(String name);
 
 	/**
-	 * Gets a set of users by their name.
+	 * Gets a list of users by their name.
 	 *
-	 * @param name The name of the desired user(s).
+	 * @param name The name of the desired users.
 	 * @param ignoreCase Whether to ignore the case of the user's name.
-	 * @return A {@link Collection} of {@link User} objects with the provided name.
+	 * @return A list of users with the provided name.
 	 */
 	List<IUser> getUsersByName(String name, boolean ignoreCase);
 
 	/**
-	 * Gets a set of all roles visible to the bot user.
+	 * Gets a list of all roles visible to the bot user on every shard.
 	 *
-	 * @return A {@link Collection} of all {@link Role} objects.
+	 * @return A list of all visible roles.
 	 */
 	List<IRole> getRoles();
 
 	/**
-	 * Gets a role by its unique id.
+	 * Gets a role by its unique snowflake ID from the client's role cache.
 	 *
-	 * @param roleID The id of the desired role.
-	 * @return The {@link Role} object
-	 * @deprecated Use {@link #getRoleByID(long)} instead
+	 * @param roleID The ID of the desired role.
+	 * @return The role with the provided ID (or null if one was not found).
+	 * @deprecated Use {@link #getRoleByID(long)} instead.
 	 */
 	@Deprecated
 	default IRole getRoleByID(String roleID) {
@@ -426,36 +442,36 @@ public interface IDiscordClient {
 	}
 
 	/**
-	 * Gets a role by its unique id.
+	 * Gets a role by its unique snowflake ID from the client's role cache.
 	 *
-	 * @param roleID The id of the desired role.
-	 * @return The {@link Role} object
+	 * @param roleID The ID of the desired role.
+	 * @return The role with the provided ID (or null if one was not found).
 	 */
 	IRole getRoleByID(long roleID);
 
 	/**
-	 * This gets all messages stored internally by the bot.
+	 * Gets a list of all messages in the client's message cache.
 	 *
-	 * @param includePrivate Whether to include private messages or not.
-	 * @return A collection of all messages.
+	 * @param includePrivate Whether to include private messages.
+	 * @return A list of all cached messages.
 	 */
 	List<IMessage> getMessages(boolean includePrivate);
 
 	/**
-	 * This gets all messages stored internally by the bot (including from private channels).
+	 * Gets a list of all messages in the client's message cache.
 	 *
-	 * @return A collection of all messages.
+	 * <p>This is equivalent to <code>getMessages(true)</code>
+	 *
+	 * @return A list of all cached messages.
 	 */
 	List<IMessage> getMessages();
 
 	/**
-	 * This attempts to search all guilds/private channels for a message.
-	 * <b>NOTE:</b> This only checks already cached messages, see {@link IChannel#getMessageByID(String)} if you want
-	 * to retrieve messages which aren't cached already.
+	 * Gets a message by its unique snowflake ID from the client's message cache.
 	 *
-	 * @param messageID The message id of the message to find.
-	 * @return The message or null if not found.
-	 * @deprecated Use {@link #getMessageByID(long)} instead
+	 * @param messageID The ID of the desired message.
+	 * @return The message with the provided ID (or null if one was not found).
+	 * @deprecated Use {@link #getMessageByID(long)} instead.
 	 */
 	@Deprecated
 	default IMessage getMessageByID(String messageID) {
@@ -464,101 +480,90 @@ public interface IDiscordClient {
 	}
 
 	/**
-	 * This attempts to search all guilds/private channels for a message.
-	 * <b>NOTE:</b> This only checks already cached messages, see {@link IChannel#getMessageByID(long)} if you want
-	 * to retrieve messages which aren't cached already.
+	 * Gets a message by its unique snowflake ID from the client's message cache.
 	 *
-	 * @param messageID The message id of the message to find.
-	 * @return The message or null if not found.
+	 * @param messageID The ID of the desired message.
+	 * @return The message with the provided ID (or null if one was not found).
 	 */
 	IMessage getMessageByID(long messageID);
 
 	/**
-	 * Gets a {@link IPrivateChannel} for the provided recipient.
+	 * Gets the private channel for a user or creates it if one doesn't exist.
 	 *
-	 * @param user The user who will be the recipient of the private channel.
-	 * @return The {@link IPrivateChannel} object.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @param user The user to get the private channel for.
+	 * @return The private channel for the given user.
 	 */
 	IPrivateChannel getOrCreatePMChannel(IUser user);
 
 	/**
-	 * Gets the invite for a code.
+	 * Makes a request to Discord for an invite with the given unique code.
 	 *
 	 * @param code The invite code.
-	 * @return The invite, or null if it doesn't exist.
+	 * @return The invite for the given code (or null if one was not found).
 	 */
 	IInvite getInviteForCode(String code);
 
 	/**
-	 * Gets the regions available for discord.
+	 * Gets a list of available voice regions from Discord.
 	 *
-	 * @return The list of available regions.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @return The list of available voice regions.
 	 */
 	List<IRegion> getRegions();
 
 	/**
-	 * Gets the corresponding region for a given id.
+	 * Gets a voice region by its unique ID.
 	 *
-	 * @param regionID The region id.
-	 * @return The region (or null if not found).
+	 * @param regionID The region ID.
+	 * @return The region for the given ID (or null if one was not found).
 	 */
 	IRegion getRegionByID(String regionID);
 
 	/**
-	 * Gets the connected voice channels.
+	 * Gets a list of voice channels the client is connected to on every shard.
 	 *
-	 * @return The voice channels.
+	 * <p>A bot may be connected to one voice channel per guild.
+	 *
+	 * @return A list of connected voice channels.
 	 */
 	List<IVoiceChannel> getConnectedVoiceChannels();
 
 	/**
-	 * Gets the application description for this bot.
+	 * Gets the bot's associated application's description.
 	 *
 	 * @return The application's description.
-	 *
-	 * @throws DiscordException
+	 * @see <a href=https://discordapp.com/developers/applications/me>Applications</a>
 	 */
 	String getApplicationDescription();
 
 	/**
-	 * Gets the url leading to this bot's application's icon.
+	 * Gets the bot's associated application's icon image url.
 	 *
 	 * @return The application's icon url.
-	 *
-	 * @throws DiscordException
+	 * @see <a href=https://discordapp.com/developers/applications/me>Applications</a>
 	 */
 	String getApplicationIconURL();
 
 	/**
-	 * Gets the bot's application's client id.
+	 * Gets the bot's associated application's client ID.
 	 *
-	 * @return The application's client id.
-	 *
-	 * @throws DiscordException
+	 * @return The application's client ID.
+	 * @see <a href=https://discordapp.com/developers/applications/me>Applications</a>
 	 */
 	String getApplicationClientID();
 
 	/**
-	 * Gets the bot's application's name.
+	 * Gets the bot's associated application's name.
 	 *
 	 * @return The application's name.
-	 *
-	 * @throws DiscordException
+	 * @see <a href=https://discordapp.com/developers/applications/me>Applications</a>
 	 */
 	String getApplicationName();
 
 	/**
-	 * Gets the bot's application's owner.
+	 * Gets the bot's associated application's owner.
 	 *
 	 * @return The application's owner.
-	 *
-	 * @throws DiscordException
+	 * @see <a href=https://discordapp.com/developers/applications/me>Applications</a>
 	 */
 	IUser getApplicationOwner();
 }

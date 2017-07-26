@@ -28,215 +28,204 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Represents a discord message.
+ * A Discord message in a text channel.
  */
 public interface IMessage extends IDiscordObject<IMessage> {
 
 	/**
-	 * The maximum length of a discord message.
+	 * The maximum length of a Discord message.
 	 */
 	int MAX_MESSAGE_LENGTH = 2000;
 
 	/**
-	 * Gets the string content of the message.
+	 * Gets the raw content of the message.
 	 *
-	 * @return The content of the message
+	 * <p>Use {@link #getFormattedContent()} to get the content with human-readable mentions.
+	 *
+	 * @return The raw content of the message.
 	 */
 	String getContent();
 
 	/**
-	 * Gets the channel that this message belongs to.
+	 * Gets the channel the message was sent in.
 	 *
-	 * @return The channel.
+	 * @return The channel the message was sent in.
 	 */
 	IChannel getChannel();
 
 	/**
-	 * Gets the user who authored this message.
+	 * Gets the author of the message.
 	 *
-	 * @return The author.
+	 * @return The author of the message.
 	 */
 	IUser getAuthor();
 
 	/**
-	 * Gets the timestamp for when this message was sent/edited.
+	 * Gets the timestamp of when the message was sent.
 	 *
-	 * @return The timestamp.
+	 * @return The timestamp of when the message was sent.
 	 */
 	LocalDateTime getTimestamp();
 
 	/**
-	 * Gets the users mentioned in this message.
+	 * Gets the users mentioned in the message.
 	 *
-	 * @return The users mentioned.
+	 * @return The users mentioned in the message.
 	 */
 	List<IUser> getMentions();
 
 	/**
-	 * Gets the roles mentioned in this message.
+	 * Gets the roles mentioned in the message.
 	 *
-	 * @return The roles mentioned.
+	 * @return The roles mentioned in the message.
 	 */
 	List<IRole> getRoleMentions();
 
 	/**
-	 * Gets the channels mentioned in this message.
+	 * Gets the channels mentioned in the message.
 	 *
-	 * @return The channels mentioned.
+	 * @return The channels mentioned in the message.
 	 */
 	List<IChannel> getChannelMentions();
 
 	/**
-	 * Gets the attachments in this message.
+	 * Gets the attachments in the message.
 	 *
-	 * @return The attachments.
+	 * @return The attachments in the message.
 	 */
 	List<Attachment> getAttachments();
 
 	/**
-	 * Gets the embeds in this message.
+	 * Gets the embeds in the message.
 	 *
-	 * @return The embeds.
+	 * @return The embeds in the message.
 	 * @deprecated Use {@link #getEmbeds()} instead.
 	 */
 	@Deprecated
 	List<IEmbed> getEmbedded();
 
 	/**
-	 * Gets the embeds in this message.
+	 * Gets the embeds in the message.
 	 *
-	 * @return The embeds.
+	 * @return The embeds in the message.
 	 */
 	List<IEmbed> getEmbeds();
 
 	/**
-	 * Adds an "@mention," to the author of the referenced Message
-	 * object before your content
+	 * Sends a message in the message's channel replying to the author of the message. This is indicated by prefixing
+	 * the message with "@author, ".
 	 *
-	 * @param content Message to send.
-	 * @return The message object representing the sent message
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param content The content of the message.
+	 * @return The sent message object.
 	 */
 	IMessage reply(String content);
 
 	/**
-	 * Adds an "@mention," to the author of the referenced Message
-	 * object before your content.
+	 * Sends a message in the message's channel replying to the author of the message. This is indicated by prefixing
+	 * the message with "@author, ".
 	 *
-	 * @param content Message content to send.
-	 * @param embed The embed object
-	 * @return The message object representing the sent message
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param content The content of the message.
+	 * @param embed The embed in the message.
+	 * @return The sent message object.
 	 *
 	 * @see EmbedBuilder
 	 */
 	IMessage reply(String content, EmbedObject embed);
 
 	/**
-	 * Edits the message. NOTE: Discord only supports editing YOUR OWN messages!
+	 * Edits the message.
 	 *
-	 * @param content The new content for the message to contain.
-	 * @return The new message (this).
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
+	 * <p>The bot may only edit <b>its own</b> messages.
+	 *
+	 * @param content The new content of the message.
+	 * @return The new message object.
 	 */
 	IMessage edit(String content);
 
 	/**
-	 * Edits the message with an embed object. NOTE: Discord only supports editing YOUR OWN messages!
+	 * Edits the message.
 	 *
-	 * @param content The new content for the message to contain.
-	 * @param embed The embed object
-	 * @return The new message (this).
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
+	 * <p>The bot may only edit <b>its own</b> messages.
+	 *
+	 * @param content The new content of the message.
+	 * @param embed The new embed in the message.
+	 * @return The new message object.
 	 *
 	 * @see EmbedBuilder
 	 */
 	IMessage edit(String content, EmbedObject embed);
 
 	/**
-	 * Edits the message with only an embed object. NOTE: Discord only supports editing YOUR OWN messages!
+	 * Edits the message.
 	 *
-	 * @param embed The embed object
-	 * @return The new message (this).
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
+	 * <p>The bot may only edit <b>its own</b> messages.
+	 *
+	 * @param embed The new embed in the message.
+	 * @return The new message object.
 	 *
 	 * @see EmbedBuilder
 	 */
 	IMessage edit(EmbedObject embed);
 
 	/**
-	 * Returns whether this message mentions everyone through @everyone.
+	 * Gets whether the message mentions everyone through @everyone.
 	 *
-	 * @return True if it mentions everyone, false if otherwise.
+	 * @return Whether the message mentions everyone.
 	 */
 	boolean mentionsEveryone();
 
 	/**
-	 * Returns whether this message mentions the online users through @here.
+	 * Gets whether the message mentions all online users through @here.
 	 *
-	 * @return True if it mentions all the online users, false if otherwise.
+	 * @return Gets whether the message mentions all online users.
 	 */
 	boolean mentionsHere();
 
 	/**
 	 * Deletes the message.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
 	void delete();
 
 	/**
-	 * Gets the time that this message was last edited.
+	 * Gets the timestamp of when the message was last edited.
 	 *
-	 * @return The edited timestamp.
+	 * @return The timestamp of when the message was last edited.
 	 */
 	Optional<LocalDateTime> getEditedTimestamp();
 
 	/**
-	 * Returns whether this message has been pinned on its channel or not.
+	 * Gets whether the message is pinned in its channel.
 	 *
-	 * @return True if pinned, false is otherwise.
+	 * @return Whether the message is pinned in its channel.
 	 */
 	boolean isPinned();
 
 	/**
-	 * Gets the guild this message is from.
+	 * Gets the guild the message is in.
 	 *
-	 * @return The guild.
+	 * @return The guild the message is in.
 	 */
 	IGuild getGuild();
 
 	/**
-	 * Gets formatted content. All user, channel, and role mentions are converted to a readable form.
+	 * Gets the message's content with human-readable mentions.
 	 *
-	 * @return The formatted content.
+	 * @return The message's content with human-readable mentions.
 	 */
 	String getFormattedContent();
 
 	/**
-	 * Gets the reactions for this message.
+	 * Gets the reactions on the message.
 	 *
-	 * @return A list of reactions
+	 * @return The reactions on the message.
 	 */
 	List<IReaction> getReactions();
 
 	/**
-	 * Gets a reaction by a custom guild emoji.
+	 * Gets a reaction by its custom guild emoji.
 	 *
-	 * @param emoji The emoji of the reaction to find.
-	 * @return The reaction with the provided emoji.
-	 *
+	 * @param emoji The emoji of the desired reaction.
+	 * @return The reaction with the provided emoji (or null if one was not found).
 	 * @deprecated Use {@link #getReactionByEmoji(IEmoji)} instead.
 	 */
 	@Deprecated
@@ -245,41 +234,40 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Gets a reaction by its custom guild emoji.
 	 *
-	 * @param emoji The emoji of the reaction to find.
-	 * @return The reaction with the provided emoji.
+	 * @param emoji The emoji of the desired reaction.
+	 * @return The reaction with the provided emoji (or null if one was not found).
 	 */
 	IReaction getReactionByEmoji(IEmoji emoji);
 
 	/**
-	 * Gets a reaction by the ID of its guild emoji.
+	 * Gets a reaction by the ID of its custom guild emoji.
 	 *
-	 * @param id The ID of the emoji of the reaction to find.
-	 * @return The reaction with the provided ID.
+	 * @param id The ID of the emoji of the desired reaction.
+	 * @return The reaction with the provided ID (or null if one was not found).
 	 */
 	IReaction getReactionByID(long id);
 
 	/**
 	 * Gets a reaction by its unicode character emoji.
 	 *
-	 * @param unicode The unicode character.
-	 * @return The reaction with the provided emoji.
+	 * @param unicode The unicode character of the desired reaction.
+	 * @return The reaction with the provided emoji (or null if one was not found).
 	 */
 	IReaction getReactionByUnicode(Emoji unicode);
 
 	/**
 	 * Gets a reaction by its unicode character emoji.
 	 *
-	 * @param unicode The unicode character.
-	 * @return The reaction with the provided emoji.
+	 * @param unicode The unicode character of the desired reaction.
+	 * @return The reaction with the provided emoji (or null if one was not found).
 	 */
 	IReaction getReactionByUnicode(String unicode);
 
 	/**
 	 * Gets a reaction by its unicode character emoji.
 	 *
-	 * @param name The unicode character.
-	 * @return The reaction with the provided emoji.
-	 *
+	 * @param name The unicode character of the desired reaction.
+	 * @return The reaction with the provided emoji (or null if one was not found).
 	 * @deprecated Use {@link #getReactionByUnicode(String)} instead.
 	 */
 	@Deprecated
@@ -288,14 +276,13 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Gets a reaction by its emoji.
 	 *
-	 * @param emoji The emoji of the reaction to find.
-	 * @return The reaction with the provided emoji.
+	 * @param emoji The emoji of the desired reaction.
+	 * @return The reaction with the provided emoji (or null if one was not found).
 	 */
 	IReaction getReactionByEmoji(ReactionEmoji emoji);
 
 	/**
 	 * Adds a reaction to the message.
-	 * Gets the emoji to react with from the passed reaction.
 	 *
 	 * @param reaction The reaction to get the emoji to react with from.
 	 */
@@ -317,7 +304,8 @@ public interface IMessage extends IDiscordObject<IMessage> {
 
 	/**
 	 * Adds a reaction to the message.
-	 * This method accepts a string in three forms:
+	 *
+	 * <p>This method accepts a string in three forms:
 	 * <ul>
 	 *     <li>A unicode emoji alias (e.g. ":thinking:")</li>
 	 *     <li>A unicode emoji character (e.g. "\u1F914")</li>
@@ -399,24 +387,24 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	void removeAllReactions();
 
 	/**
-	 * This creates a new {@link MessageTokenizer} instance with this message instance.
+	 * Creates a message tokenizer for the message.
 	 *
-	 * @return A new tokenizer.
+	 * @return A message tokenizer for the message.
 	 */
 	MessageTokenizer tokenize();
 
 	/**
-	 * Checks to see is this message deleted.
+	 * Gets whether the message was deleted.
 	 *
-	 * @return True if this message is deleted
+	 * @return Whether the message was deleted.
 	 */
 	boolean isDeleted();
 
 	/**
-	 * Gets the ID of the webhook that sent this message. May be null.
+	 * Gets the ID of the webhook that sent the message.
 	 *
-	 * @return The webhook ID.
-	 * @deprecated Use {@link #getWebhookLongID()} instead
+	 * @return The nullable ID of the webhook that sent the message.
+	 * @deprecated Use {@link #getWebhookLongID()} instead.
 	 */
 	@Deprecated
 	default String getWebhookID() {
@@ -424,14 +412,15 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	}
 
 	/**
-	 * Gets the ID of the webhook that sent this message. May be null.
+	 * Gets the ID of the webhook that sent the message.
 	 *
-	 * @return The webhook ID.
+	 * @return The ID of the webhook that sent the message. This is <code>0</code> if the message was not sent by
+	 * a webhook.
 	 */
 	long getWebhookLongID();
 
 	/**
-	 * Represents an attachment included in the message.
+	 * An attachment included in a message.
 	 */
 	class Attachment implements IIDLinkedObject {
 
@@ -441,17 +430,17 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		protected final String filename;
 
 		/**
-		 * The size, in bytes of the attachment.
+		 * The size, in bytes, of the attachment.
 		 */
 		protected final int filesize;
 
 		/**
-		 * The attachment id.
+		 * The ID of the attachment.
 		 */
 		protected final long id;
 
 		/**
-		 * The download link for the attachment.
+		 * The download link of the attachment.
 		 */
 		protected final String url;
 
@@ -463,7 +452,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		}
 
 		/**
-		 * Gets the file name for the attachment.
+		 * Gets the file name of the attachment.
 		 *
 		 * @return The file name of the attachment.
 		 */
@@ -472,39 +461,34 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		}
 
 		/**
-		 * Gets the size of the attachment.
+		 * Gets the size, in bytes, of the attachment.
 		 *
-		 * @return The size, in bytes of the attachment.
+		 * @return The size, in bytes, of the attachment.
 		 */
 		public int getFilesize() {
 			return filesize;
 		}
 
 		/**
-		 * Gets the id of the attachment.
+		 * Gets the unique snowflake ID for the attachment.
 		 *
-		 * @return The attachment id.
-		 * @deprecated Use {@link #getLongID()} or {@link #getStringID()} instead
+		 * @return The unique snowflake ID for the attachment.
+		 * @deprecated Use {@link #getLongID()} or {@link #getStringID()} instead.
 		 */
 		@Deprecated
 		public String getId() {
 			return getStringID();
 		}
 
-		/**
-		 * Gets the id of the attachment.
-		 *
-		 * @return The attachment id.
-		 */
 		@Override
 		public long getLongID() {
 			return id;
 		}
 
 		/**
-		 * Gets the direct link to the attachment.
+		 * Gets the download link of the attachment.
 		 *
-		 * @return The download link for the attachment.
+		 * @return The download link of the attachment.
 		 */
 		public String getUrl() {
 			return url;

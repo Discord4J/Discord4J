@@ -23,8 +23,8 @@ import sx.blah.discord.handle.obj.IIDLinkedObject;
 import java.util.Objects;
 
 /**
- * Represents an emoji on a reaction. This can either be a unicode or custom guild emoji. In the case of the former,
- * {@link #id} is 0. This is a value-based class.
+ * An emoji on a reaction. This can either be a unicode or custom guild emoji. In the case of the former,
+ * {@link #id} is <code>0</code>. This is a value-based class.
  */
 public class ReactionEmoji implements IIDLinkedObject {
 
@@ -59,7 +59,13 @@ public class ReactionEmoji implements IIDLinkedObject {
 		return new ReactionEmoji(unicode, 0L);
 	}
 
+	/**
+	 * The name of the reaction emoji.
+	 */
 	private final String name;
+	/**
+	 * The unique snowflake ID of the reaction emoji. The the emoji is a unicode emoji, this value is <code>0</code>.
+	 */
 	private final long id;
 
 	private ReactionEmoji(String name, long id) {
@@ -68,7 +74,7 @@ public class ReactionEmoji implements IIDLinkedObject {
 	}
 
 	/**
-	 * Gets the name of the emoji. If this emoji is a unicode emoji, it returns the unicode character.
+	 * Gets the name of the emoji. If the emoji is a unicode emoji, it returns the unicode character.
 	 *
 	 * @return The name of the emoji or the unicode character.
 	 */
@@ -77,7 +83,7 @@ public class ReactionEmoji implements IIDLinkedObject {
 	}
 
 	/**
-	 * Whether the emoji is a unicode emoji.
+	 * Gets whether the emoji is a unicode emoji.
 	 *
 	 * @return Whether the emoji is a unicode emoji.
 	 */

@@ -17,10 +17,25 @@
 
 package sx.blah.discord.api.internal.json.requests.voice;
 
+/**
+ * Sent to begin a voice websocket connection.
+ */
 public class VoiceIdentifyRequest {
+	/**
+	 * The ID of the guild the connection is being established in.
+	 */
 	private String server_id;
+	/**
+	 * Our user's ID.
+	 */
 	private String user_id;
+	/**
+	 * The main gateway session ID.
+	 */
 	private String session_id;
+	/**
+	 * The token received in the voice state update.
+	 */
 	private String token;
 
 	public VoiceIdentifyRequest(String server_id, String user_id, String session_id, String token) {

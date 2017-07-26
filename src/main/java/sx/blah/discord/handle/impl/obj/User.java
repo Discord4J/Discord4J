@@ -36,65 +36,67 @@ import sx.blah.discord.util.cache.LongMap;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * The default implementation of {@link IUser}.
+ */
 public class User implements IUser {
 
 	/**
-	 * User ID.
+	 * The unique snowflake ID of the user.
 	 */
 	protected final long id;
 
 	/**
-	 * The client that created this object.
+	 * The client the user belongs to.
 	 */
 	protected final IDiscordClient client;
 
 	/**
-	 * The shard this object belongs to.
+	 * The shard the user belongs to.
 	 */
 	protected final IShard shard;
 
 	/**
-	 * Display name of the user.
+	 * The user's name.
 	 */
 	protected volatile String name;
 
 	/**
-	 * The user's avatar location.
+	 * The user's avatar hash.
 	 */
 	protected volatile String avatar;
 
 	/**
-	 * User discriminator.
-	 * Distinguishes users with the same name.
+	 * The user's discriminator.
 	 */
 	protected volatile String discriminator;
 
 	/**
-	 * Whether this user is a bot or not.
+	 * Whether the user is a bot.
 	 */
 	protected volatile boolean isBot;
 
 	/**
-	 * This user's presence.
+	 * The user's presence.
 	 */
 	protected volatile IPresence presence;
 	/**
-	 * The user's avatar in URL form.
+	 * The user's avatar URL.
 	 */
 	protected volatile String avatarURL;
 
 	/**
-	 * The roles the user is a part of. (Key = guild id).
+	 * The roles the user has in each guild.
 	 */
 	public final Cache<RolesHolder> roles;
 
 	/**
-	 * The nicknames this user has. (Key = guild id).
+	 * The nickname the user has in each guild.
 	 */
 	public final Cache<NickHolder> nicks;
 
 	/**
-	 * The voice states this user has.
+	 * The voice state the user has in each guild.
 	 */
 	public final Cache<IVoiceState> voiceStates;
 
@@ -127,9 +129,9 @@ public class User implements IUser {
 	}
 
 	/**
-	 * Sets the user's CACHED username.
+	 * Sets the CACHED name of the user.
 	 *
-	 * @param name The username.
+	 * @param name The name.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -147,9 +149,9 @@ public class User implements IUser {
 	}
 
 	/**
-	 * Sets the user's CACHED avatar id.
+	 * Sets the CACHED avatar of the user.
 	 *
-	 * @param avatar The user's avatar id.
+	 * @param avatar The avatar.
 	 */
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
@@ -171,7 +173,7 @@ public class User implements IUser {
 	/**
 	 * Sets the CACHED presence of the user.
 	 *
-	 * @param presence The new presence.
+	 * @param presence The presence.
 	 */
 	public void setPresence(IPresence presence) {
 		this.presence = presence;
@@ -201,9 +203,9 @@ public class User implements IUser {
 	}
 
 	/**
-	 * Sets the CACHED discriminator for the user.
+	 * Sets the CACHED discriminator of the user.
 	 *
-	 * @param discriminator The user's new discriminator.
+	 * @param discriminator The discriminator.
 	 */
 	public void setDiscriminator(String discriminator) {
 		this.discriminator = discriminator;
@@ -267,20 +269,20 @@ public class User implements IUser {
 	}
 
 	/**
-	 * CACHES a nickname to the user.
+	 * Sets the CACHED nickname of the user in a guild.
 	 *
-	 * @param guildID The guild the nickname is for.
-	 * @param nick    The nickname, or null to remove it.
+	 * @param guildID The unique snowflake ID of the guild to cache the nickname for.
+	 * @param nick The nickname.
 	 */
 	public void addNick(long guildID, String nick) {
 		nicks.put(new NickHolder(guildID, nick));
 	}
 
 	/**
-	 * CACHES a role to the user.
+	 * Adds a CACHEDED role of the user in a guild.
 	 *
-	 * @param guildID The guild the role is for.
-	 * @param role    The role.
+	 * @param guildID The unique snowflake ID of the guild to cache the role for.
+	 * @param role The role.
 	 */
 	public void addRole(long guildID, IRole role) {
 		roles.putIfAbsent(guildID, () -> new RolesHolder(guildID, new CopyOnWriteArraySet<>()));
@@ -345,6 +347,9 @@ public class User implements IUser {
 	}
 }
 
+/**
+ * Associates a guild ID to the roles a user has in the guild.
+ */
 class RolesHolder extends IDLinkedObjectWrapper<Collection<IRole>> {
 
 	RolesHolder(long id, Collection<IRole> roles) {
@@ -352,6 +357,9 @@ class RolesHolder extends IDLinkedObjectWrapper<Collection<IRole>> {
 	}
 }
 
+/**
+ * Associates a guild ID to the nickname a user has in the guild.
+ */
 class NickHolder extends IDLinkedObjectWrapper<String> {
 
 	NickHolder(long id, String string) {

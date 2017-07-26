@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Defines the client. This class receives and sends messages, as well as holds our user data.
+ * The default implementation of {@link IDiscordClient}.
  */
 public final class DiscordClientImpl implements IDiscordClient {
 
@@ -60,37 +60,37 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final List<IShard> shards = new CopyOnWriteArrayList<>();
 
 	/**
-	 * User we are logged in as
+	 * The user that represents the bot account.
 	 */
 	volatile User ourUser;
 
 	/**
-	 * Our token, so we can send XHR to Discord.
+	 * The authentication token for this account.
 	 */
 	protected volatile String token;
 
 	/**
-	 * Event dispatcher.
+	 * The client's event dispatcher.
 	 */
 	volatile EventDispatcher dispatcher;
 
 	/**
-	 * Reconnect manager.
+	 * The client's reconnect manager.
 	 */
 	volatile ReconnectManager reconnectManager;
 
 	/**
-	 * The module loader for this client.
+	 * The client's module loader.
 	 */
 	private volatile ModuleLoader loader;
 
 	/**
-	 * Caches the available regions for discord.
+	 * The cache of the available voice regions.
 	 */
 	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
-	 * The maximum amount of pings discord can miss before a new session is created.
+	 * The maximum number of heartbeats that Discord can miss before a reconnect begins.
 	 */
 	final int maxMissedPings;
 
@@ -105,12 +105,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private int shardCount;
 
 	/**
-	 * Provides cache objects used by this api.
+	 * Provides cache objects used by this client.
 	 */
 	private final ICacheDelegateProvider cacheProvider;
 
 	/**
-	 * The specific shard (if there is one) that the client is running on.
+	 * The sharding information for this client.
 	 */
 	private final int[] shard;
 
@@ -123,9 +123,20 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Timer to keep the program alive if the client is not daemon
 	 */
 	volatile Timer keepAlive;
+
+	/**
+	 * The number of times the client will retry on a 5xx HTTP response from Discord.
+	 */
 	private final int retryCount;
+
+	/**
+	 * The maximum number of messages that will be cached per channel.
+	 */
 	private final int maxCacheCount;
 
+	/**
+	 * The presence object that should be sent to Discord when identifying.
+	 */
 	private final PresenceUpdateRequest identifyPresence;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,

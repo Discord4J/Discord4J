@@ -20,26 +20,28 @@ package sx.blah.discord.handle.audio;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * Handles the receiving of audio from Discord.
+ * Receives audio from Discord.
  */
 @FunctionalInterface
 public interface IAudioReceiver {
 
 	/**
-	 * Called when audio is received.
+	 * Called every 20ms while audio is being received.
 	 *
-	 * @param audio The packet of audio. Format depends on {{@link #getAudioEncodingType()}}
-	 * @param user The user this audio was received from.
-	 * @param sequence The sequence from the RTP header of this packet.
-	 * @param timestamp The timestamp from the RTP header of this packet.
+	 * @param audio The received audio, encoded according to {@link #getAudioEncodingType()}.
+	 * @param user The user the audio was received from.
+	 * @param sequence The sequence of the RTP header for the packet.
+	 *                 See {@link sx.blah.discord.api.internal.OpusPacket.RTPHeader#sequence}.
+	 * @param timestamp The timestamp of the RTP header for the packet.
+	 *                  See {@link sx.blah.discord.api.internal.OpusPacket.RTPHeader#timestamp}.
 	 */
 	void receive(byte[] audio, IUser user, char sequence, int timestamp);
 
 	/**
-	 * This is called to determine the type of audio data provided by this receiver. This determines how the audio data
-	 * is processed.
+	 * Gets the encoding type of the audio that should be sent to the receiver.
+	 * By default, {@link AudioEncodingType#PCM}.
 	 *
-	 * @return The audio encoding type. By default this returns {@link AudioEncodingType#PCM}.
+	 * @return The encoding type of the audio that should be sent to the receiver.
 	 */
 	default AudioEncodingType getAudioEncodingType() {
 		return AudioEncodingType.PCM;

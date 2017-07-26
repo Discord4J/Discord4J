@@ -21,21 +21,21 @@ import sx.blah.discord.handle.impl.events.guild.GuildEvent;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**
- * This represents a generic channel event.
+ * A generic channel-related event.
  */
 public abstract class ChannelEvent extends GuildEvent {
-	
+
 	private final IChannel channel;
-	
+
 	public ChannelEvent(IChannel channel) {
 		super(channel.getGuild());
 		this.channel = channel;
 	}
-	
+
 	/**
-	 * This gets the channel involved in this event.
+	 * Gets the channel involved in the event.
 	 *
-	 * @return The channel.
+	 * @return The channel involved.
 	 */
 	public IChannel getChannel() {
 		return channel;

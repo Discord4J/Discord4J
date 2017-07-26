@@ -22,30 +22,32 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This represents a generic message event.
+ * A generic message-related event.
  */
 public abstract class MessageEvent extends ChannelEvent {
-	
+
 	private final IMessage message;
-	
+
 	public MessageEvent(IMessage message) {
 		super(message.getChannel());
 		this.message = message;
 	}
-	
+
 	/**
-	 * This gets the message involved in this event.
+	 * Gets the message involved in the event.
 	 *
-	 * @return The message.
+	 * @return The message involved.
 	 */
 	public IMessage getMessage() {
 		return message;
 	}
-	
+
 	/**
-	 * This gets the author of the message.
+	 * Gets the author of the message.
 	 *
-	 * @return The author.
+	 * <p>This is equivalent to <code>getMessage().getAuthor()</code>
+	 *
+	 * @return The author of the message.
 	 */
 	public IUser getAuthor() {
 		return message.getAuthor();

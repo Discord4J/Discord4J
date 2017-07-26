@@ -33,21 +33,24 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * This represents an internal data structure for storing discord id, object pairs.
+ * An internal data structure for storing {@link IIDLinkedObject}s.
  *
- * @param <T> The object held by the cache
+ * @param <T> The type of object stored by the cache.
  */
 public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 
 	/**
-	 * This represents the default {@link ICacheDelegateProvider} used by Discord4J.
+	 * The default cache delegate provider used by Discord4J.
 	 */
 	public static final ICacheDelegateProvider DEFAULT_PROVIDER = new DefaultCacheDelegateProvider();
 	/**
-	 * This represents an implementation of {@link ICacheDelegateProvider} which stores nothing.
+	 * A cache delegate provider which stores nothing.
 	 */
 	public static final ICacheDelegateProvider IGNORING_PROVIDER = new IgnoringCacheDelegateProvider();
 
+	/**
+	 * The cache's underlying delegate.
+	 */
 	private volatile ICacheDelegate<T> delegate;
 
 	public Cache(ICacheDelegate<T> delegate) {
@@ -59,8 +62,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * Sets the {@link ICacheDelegate} used.
-	 * NOTE: No data is copied from the old delegate to the new one.
+	 * Sets the cache's delegate.
+	 *
+	 * <p>NOTE: No data is copied from the old delegate to the new one.
 	 *
 	 * @param delegate The new delegate.
 	 */
@@ -69,36 +73,37 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * Gets the {@link ICacheDelegate} used by this cache.
+	 * Gets the cache's delegate.
 	 *
-	 * @return The current delegate.
+	 * @return The cache delegate.
 	 */
 	public ICacheDelegate<T> getDelegate() {
 		return delegate;
 	}
 
 	/**
-	 * Gets the amount of elements stored in this cache.
+	 * Gets the number of elements stored in the cache.
 	 *
-	 * @return The number of contained elements.
+	 * @return The number of elements stored in the cache.
 	 */
 	public int size() {
 		return delegate.size();
 	}
 
 	/**
-	 * Checks if the cache is empty.
+	 * Gets whether the cache is empty.
 	 *
-	 * @return True if the cache is empty, false if otherwise.
+	 * @return Whether the cache is empty.
 	 */
 	public boolean isEmpty() {
 		return size() < 1;
 	}
 
 	/**
-	 * Checks whether a key is present in the cache.
+	 * Gets whether the given key is present in the cache.
 	 *
-	 * @return True if the key is present, false if otherwise.
+	 * @param key The key to search for.
+	 * @return Whether the given key is present in the cache.
 	 */
 	public boolean containsKey(Object key) {
 		if (key instanceof String) {
@@ -111,30 +116,30 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * An implementation of {@link #containsKey(Object)} which accepts a primitive long key.
+	 * Gets whether the given key is present in the cache.
 	 *
 	 * @param key The key to search for.
-	 * @return True if the key exists, false if otherwise.
-	 *
-	 * @see #containsKey(Object)
+	 * @return Whether the given key is present in the cache.
 	 */
 	public boolean containsKey(long key) {
 		return delegate.contains(key);
 	}
 
 	/**
-	 * Checks whether a value is existent in the cache.
+	 * Gets whether the given value is present in the cache.
 	 *
-	 * @return True if the value exists, false if otherwise.
+	 * @param value The value to search for.
+	 * @return Whether the given value is present in the cache.
 	 */
 	public boolean containsValue(Object value) {
 		return value instanceof IIDLinkedObject && delegate.contains((T) value);
 	}
 
 	/**
-	 * Gets an object by the specified id.
+	 * Gets an object by its unique snowflake ID.
 	 *
-	 * @return The object, or null if not found.
+	 * @param key The ID of the desired object.
+	 * @return The object with the provided ID (or null if one was not found).
 	 */
 	public T get(Object key) {
 		if (key instanceof String) {
@@ -147,23 +152,21 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * An implementation of {@link #get(Object)} which accepts a primitive long key.
+	 * Gets an object by its unique snowflake ID.
 	 *
-	 * @param key The key to search for.
-	 * @return The object if it exists, or null if it doesn't.
-	 *
-	 * @see #get(Object)
+	 * @param key The ID of the desired object.
+	 * @return The object with the provided ID (or null if one was not found).
 	 */
 	public T get(long key) {
 		return delegate.retrieve(key).orElse(null);
 	}
 
 	/**
-	 * This attempts to get an object, if there is no object then the supplier is invoked.
+	 * Gets an object by its unique snowflake ID. If no object is found, the supplier must supply the object instead.
 	 *
-	 * @param key The key to search for.
-	 * @param supplier The supplier to use when the key is nonexistent.
-	 * @return The object or null if not found.
+	 * @param key The ID of the desired object.
+	 * @param supplier The supplier to invoke if no object is found.
+	 * @return The object with provided ID (or the result of the supplier).
 	 */
 	public T getOrElseGet(Object key, Supplier<? extends T> supplier) {
 		T val = get(key);
@@ -171,11 +174,11 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * This attempts to get an object, if there is no object then the supplier is invoked.
+	 * Gets an object by its unique snowflake ID. If no object is found, the supplier must supply the object instead.
 	 *
-	 * @param key The key to search for.
-	 * @param supplier The supplier to use when the key is nonexistent.
-	 * @return The object or null if not found.
+	 * @param key The ID of the desired object.
+	 * @param supplier The supplier to invoke if no object is found.
+	 * @return The object with provided ID (or the result of the supplier).
 	 */
 	public T getOrElseGet(long key, Supplier<? extends T> supplier) {
 		T val = get(key);
@@ -183,21 +186,21 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * An puts an object into the cache.
+	 * Puts an object into the cache.
 	 *
-	 * @param value The key to search for.
-	 * @return The previous object if it exists, or null if it doesn't.
+	 * @param value The object to put.
+	 * @return The previous object that had the same ID or null if there was not one.
 	 */
 	public T put(T value) {
 		return delegate.put(value).orElse(null);
 	}
 
 	/**
-	 * Puts a value into the cache if there is no value associated with it already.
+	 * Puts an object into the cache if there is not already a value associated with the given key.
 	 *
-	 * @param id The id associated with the object.
-	 * @param valueSupplier The supplier to use if there is no object.
-	 * @return The previous object if it exists, or null if it doesn't.
+	 * @param id The ID to associate with the value.
+	 * @param valueSupplier The supplier to invoke if the key is absent.
+	 * @return Null.
 	 */
 	public T putIfAbsent(String id, Supplier<T> valueSupplier) {
 		if (containsKey(id))
@@ -207,11 +210,11 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * Puts a value into the cache if there is no value associated with it already.
+	 * Puts an object into the cache if there is not already a value associated with the given key.
 	 *
-	 * @param id The id associated with the object.
-	 * @param valueSupplier The supplier to use if there is no object.
-	 * @return The previous object if it exists, or null if it doesn't.
+	 * @param id The ID to associate with the value.
+	 * @param valueSupplier The supplier to invoke if the key is absent.
+	 * @return Null.
 	 */
 	public T putIfAbsent(long id, Supplier<T> valueSupplier) {
 		if (containsKey(id))
@@ -221,10 +224,10 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * Attempts to remove an object from the cache.
+	 * Removes an object from the cache.
 	 *
-	 * @param obj The object removed, this could either be a key or the object itself.
-	 * @return The object removed.
+	 * @param obj The ID of the object to remove or the object itself.
+	 * @return The object that was removed.
 	 */
 	public T remove(Object obj) {
 		if (obj instanceof String) {
@@ -239,131 +242,126 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * An implementation of {@link #remove(Object)} which accepts a primitive long key.
+	 * Removes an object from the cache.
 	 *
-	 * @param key The key to search for.
-	 * @return The previous object if it exists, or null if it doesn't.
-	 *
-	 * @see #remove(Object)
+	 * @param key The ID of the object to remove.
+	 * @return The object that was removed.
 	 */
 	public T remove(long key) {
 		return delegate.remove(key).orElse(null);
 	}
 
 	/**
-	 * This is called to place a cache of objects into the cache.
+	 * Puts every element of the given cache into the cache.
 	 *
-	 * @param objs The cache to insert.
-	 * @return The objects replaced by this operation.
+	 * @param objs The objects to insert.
+	 * @return Any objects that were replaced by the operation.
 	 */
 	public Collection<T> putAll(Cache<T> objs) {
 		return putAll(objs.values());
 	}
 
 	/**
-	 * This is called to place a collection of objects into the cache.
+	 * Puts every element of the given collection into the cache.
 	 *
 	 * @param objs The objects to insert.
-	 * @return The objects replaced by this operation.
+	 * @return Any objects that were replaced by the operation.
 	 */
 	public Collection<T> putAll(Collection<T> objs) {
 		return delegate.putAll(objs);
 	}
 
 	/**
-	 * This clears the cache.
+	 * Clears the cache.
 	 */
 	public void clear() {
 		delegate.clear();
 	}
 
 	/**
-	 * This gets a collection of ids which correspond to stored objects in this cache.
+	 * Gets the IDs of every object in the cache.
 	 *
-	 * @return A collection of ids of objects present.
+	 * @return The IDs of every object in the cache.
 	 */
 	public Collection<String> ids() {
 		return delegate.ids();
 	}
 
 	/**
-	 * This gets a collection of primitive ids which correspond to stored objects in this cache.
+	 * Gets the IDs of every object in the cache.
 	 *
-	 * @return A collection of ids of objects present.
+	 * @return The IDs of every object in the cache.
 	 */
 	public Collection<Long> longIDs() {
 		return delegate.longIDs();
 	}
 
 	/**
-	 * Gets a collection of the values stored by this cache.
+	 * Gets every value in the cache.
 	 *
-	 * @return The values stored in this cache.
+	 * @return Every value in the cache.
 	 */
 	public Collection<T> values() {
 		return delegate.values();
 	}
 
 	/**
-	 * Gets a stream of values from this cache.
-	 *
-	 * @return The stream of values.
+	 * See {@link Collection#stream()}.
 	 */
 	public Stream<T> stream() {
 		return delegate.stream();
 	}
 
 	/**
-	 * Gets a stream of values from this cache.
-	 *
-	 * @return The stream of values.
+	 * See {@link Collection#parallelStream()}.
 	 */
 	public Stream<T> parallelStream() {
 		return delegate.parallelStream();
 	}
 
 	/**
-	 * This gets a copy of this cache.
+	 * Gets a copy of the cache.
 	 *
-	 * @return The new copy of the cache.
+	 * @return A copy of the cache.
 	 */
 	public Cache<T> copy() {
 		return new Cache<>(delegate.copy());
 	}
 
 	/**
-	 * Creates a copy of this cache in a {@link Map}.
+	 * Gets a copy of the cache as a long map.
 	 *
-	 * @return The copy of the cache.
+	 * @return A copy of the cache as a long map.
 	 */
 	public LongMap<T> mapCopy() {
 		return delegate.mapCopy();
 	}
 
 	/**
-	 * Optimized version of {@link #forEach(Consumer)}
+	 * Performs the given action for each pair of key and value in the cache.
 	 *
-	 * @param action Action to do with pairs of keys and values
+	 * @param action The action to perform for each pair of key and value in the cache.
 	 */
 	public void forEach(LongObjConsumer<? super T> action) {
 		delegate.forEach(action);
 	}
 
 	/**
-	 * Just like {@link #forEach(LongObjConsumer)}, but it stops when predicate returns false
+	 * Performs the given action for each pair of key and value in the cache while the function returns true.
 	 *
-	 * @param predicate Predicate, that consumes keys and values and produces false when iterating should be stopped
-	 * @return true if iterating was interrupted
+	 * @param predicate The action to perform for each pair of key and value in the cache.
+	 * @return Whether iterating was interrupted (whether the predicate ever returned false).
 	 */
 	public boolean forEachWhile(LongObjPredicate<? super T> predicate) {
 		return delegate.forEachWhile(predicate);
 	}
 
 	/**
-	 * Helper to do searching with transformation
+	 * Gets the first non-null value produced by the given function which is applied to every pair of keys and values
+	 * in the cache.
 	 *
-	 * @param function Function, that accepts pair of key and value and produce some result
-	 * @return First non-null result
+	 * @param function The function to apply to each pair.
+	 * @return The first non-null value produced by the given function
 	 */
 	public <Z> Z findResult(LongObjFunction<? super T, ? extends Z> function) {
 		return delegate.findResult(function);
@@ -378,11 +376,17 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * This represents an implementation of {@link ICacheDelegate} which is backed by a map.
+	 * A cache delegate which is backed by a map.
 	 */
 	public static class MapCacheDelegate<T extends IIDLinkedObject> implements ICacheDelegate<T> {
 
+		/**
+		 * The backing map.
+		 */
 		private final LongMap<T> backing;
+		/**
+		 * The lock used for read and write operations.
+		 */
 		private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
 		public MapCacheDelegate() {
@@ -393,9 +397,6 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 			this.backing = backing;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Optional<T> retrieve(long id) {
 			lock.readLock().lock();
@@ -406,9 +407,6 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Optional<T> put(T obj) {
 			lock.writeLock().lock();
@@ -429,9 +427,6 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Collection<T> clear() {
 			lock.writeLock().lock();
@@ -444,9 +439,6 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean contains(long id) {
 			lock.readLock().lock();
@@ -457,9 +449,6 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public int size() {
 			lock.readLock().lock();
@@ -470,33 +459,21 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Iterator<T> iterator() {
 			return backing.values().iterator();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public LongSet longIDs() {
 			return backing.keySet();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Collection<T> values() {
 			return backing.values();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public ICacheDelegate<T> copy() {
 			return new MapCacheDelegate<>(mapCopy());
@@ -538,12 +515,14 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 
 	/**
-	 * This represents an implementation of {@link ICacheDelegate} which ignores all objects.
+	 * A cache delegate which stores nothing.
 	 */
 	public static class IgnoringCacheDelegate<T extends IIDLinkedObject> implements ICacheDelegate<T> {
 
 		/**
-		 * {@inheritDoc}
+		 * Returns an empty optional.
+		 *
+		 * @return An empty optional.
 		 */
 		@Override
 		public Optional<T> retrieve(long id) {
@@ -551,7 +530,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns an empty optional.
+		 *
+		 * @return An empty optional.
 		 */
 		@Override
 		public Optional<T> put(T obj) {
@@ -559,7 +540,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns an empty optional.
+		 *
+		 * @return An empty optional.
 		 */
 		@Override
 		public Optional<T> remove(long id) {
@@ -567,7 +550,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns an empty set.
+		 *
+		 * @return An empty set.
 		 */
 		@Override
 		public Collection<T> clear() {
@@ -575,7 +560,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns 0.
+		 *
+		 * @return 0.
 		 */
 		@Override
 		public int size() {
@@ -583,7 +570,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns an empty iterator.
+		 *
+		 * @return An empty iterator.
 		 */
 		@Override
 		public Iterator<T> iterator() {
@@ -591,7 +580,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns an empty long set.
+		 *
+		 * @return An empty long set.
 		 */
 		@Override
 		public LongSet longIDs() {
@@ -599,7 +590,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns an empty set.
+		 *
+		 * @return An empty set.
 		 */
 		@Override
 		public Collection<T> values() {
@@ -607,28 +600,46 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Returns the same cache delegate instance.
+		 *
+		 * @return The same cache delegate instance.
 		 */
 		@Override
 		public ICacheDelegate<T> copy() {
 			return this;
 		}
 
+		/**
+		 * Returns an empty long map.
+		 *
+		 * @return An empty long map.
+		 */
 		@Override
 		public LongMap<T> mapCopy() {
 			return LongMap.emptyMap();
 		}
 
+		/**
+		 * No-op. Does nothing.
+		 */
 		@Override
-		public void forEach(LongObjConsumer<? super T> action) {
+		public void forEach(LongObjConsumer<? super T> action) {}
 
-		}
-
+		/**
+		 * No-op. Does nothing.
+		 *
+		 * @return True.
+		 */
 		@Override
 		public boolean forEachWhile(LongObjPredicate<? super T> predicate) {
 			return true;
 		}
 
+		/**
+		 * No-op. Does nothing.
+		 *
+		 * @return Null.
+		 */
 		@Override
 		public <Z> Z findResult(LongObjFunction<? super T, ? extends Z> function) {
 			return null;
@@ -636,6 +647,9 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 	}
 }
 
+/**
+ * The default cache delegate provider used by Discord4J. Always provides a {@link Cache.MapCacheDelegate}.
+ */
 class DefaultCacheDelegateProvider implements ICacheDelegateProvider {
 
 	@Override
@@ -644,6 +658,9 @@ class DefaultCacheDelegateProvider implements ICacheDelegateProvider {
 	}
 }
 
+/**
+ * A cache delegate provider which always provides {@link Cache.IgnoringCacheDelegate}.
+ */
 class IgnoringCacheDelegateProvider implements ICacheDelegateProvider {
 
 	@Override

@@ -24,11 +24,23 @@ import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+/**
+ * Stores information describing an audio packet sent or received from Discord on a {@link UDPVoiceSocket}.
+ */
 class OpusPacket {
 
+	/**
+	 * The RTP header of the packet.
+	 */
 	final RTPHeader header;
+	/**
+	 * The audio data in the packet. This data can be either encrypted or decrypted depending on {@link #isEncrypted}.
+	 */
 	private byte[] audio;
 
+	/**
+	 * Whether the data in {@link #audio} is encrypted.
+	 */
 	private boolean isEncrypted = false;
 
 	OpusPacket(DatagramPacket udpPacket) {
@@ -46,6 +58,11 @@ class OpusPacket {
 		this.audio = audio;
 	}
 
+	/**
+	 * Encrypts the data in {@link #audio} with the given key using {@link TweetNaCl#secretbox(byte[], byte[], byte[])}.
+	 *
+	 * @param secret The secret key to use in encryption.
+	 */
 	void encrypt(byte[] secret) {
 		if (isEncrypted) throw new IllegalStateException("Attempt to encrypt already-encrypted audio packet.");
 
@@ -53,6 +70,11 @@ class OpusPacket {
 		isEncrypted = true;
 	}
 
+	/**
+	 * Decrypts the data in {@link #audio} with the given key using {@link TweetNaCl#secretbox_open(byte[], byte[], byte[])}.
+	 *
+	 * @param secret The secret key to use in decryption.
+	 */
 	void decrypt(byte[] secret) {
 		if (!isEncrypted) throw new IllegalStateException("Attempt to decrypt unencrypted audio packet.");
 
@@ -60,26 +82,63 @@ class OpusPacket {
 		isEncrypted = false;
 	}
 
+	/**
+	 * Gets the packet as a byte array. The array first contains the {@link #header} an then the audio data.
+	 *
+	 * @return The packet as a byte array.
+	 */
 	byte[] asByteArray() {
 		return ArrayUtils.addAll(header.asByteArray(), audio);
 	}
 
+	/**
+	 * Gets a copy of the audio data in the packet.
+	 *
+	 * @return A copy of the audio data in the packet.
+	 */
 	byte[] getAudio() {
 		return ArrayUtils.clone(audio);
 	}
 
+	/**
+	 * Gets the nonce used for encryption. This is the {@link #header} as a byte array with 12 0s appended to the end.
+	 *
+	 * @return The nonce used for encryption.
+	 */
 	private byte[] getNonce() {
 		return ArrayUtils.addAll(header.asByteArray(), new byte[12]);
 	}
 
+	/**
+	 * Contains information about an audio packet excluding the actual audio.
+	 * @see <a href="https://tools.ietf.org/html/rfc3550">https://tools.ietf.org/html/rfc3550</a>
+	 */
 	static class RTPHeader {
 
+		/**
+		 * The length of the header in bytes.
+		 */
 		static final int LENGTH = 12;
 
+		/**
+		 * The type of the packet. Always 0x80
+		 */
 		final byte type = (byte) 0x80;
+		/**
+		 * The version of the packet. Always 0x78.
+		 */
 		final byte version = (byte) 0x78;
+		/**
+		 * Incremented for each packet received on the socket.
+		 */
 		final char sequence;
+		/**
+		 * Incremented for each packet received on the socket.
+		 */
 		final int timestamp;
+		/**
+		 * Unique number used to identify the user speaking.
+		 */
 		final int ssrc;
 
 		RTPHeader(byte[] header) {
@@ -95,6 +154,11 @@ class OpusPacket {
 			this.ssrc = ssrc;
 		}
 
+		/**
+		 * Gets the header as a byte array of length {@link #LENGTH}.
+		 *
+		 * @return The header as a byte array.
+		 */
 		byte[] asByteArray() {
 			return ByteBuffer.allocate(LENGTH)
 					.put(0, type)

@@ -21,9 +21,22 @@ import sx.blah.discord.handle.obj.IRegion;
 
 import java.util.Objects;
 
+/**
+ * The default implementation of {@link IRegion}.
+ */
 public class Region implements IRegion {
 
-	private final String id, name;
+	/**
+	 * The ID of the region.
+	 */
+	private final String id;
+	/**
+	 * The name of the region.
+	 */
+	private final String name;
+	/**
+	 * Whether the region is for VIP guilds.
+	 */
 	private final boolean vip;
 
 	public Region(String id, String name, boolean vip) {

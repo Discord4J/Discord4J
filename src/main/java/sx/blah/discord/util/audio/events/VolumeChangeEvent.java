@@ -20,7 +20,7 @@ package sx.blah.discord.util.audio.events;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This is dispatched when {@link AudioPlayer#setVolume(float)} is called.
+ * Dispatched when {@link AudioPlayer#setVolume(float)} is called.
  */
 public class VolumeChangeEvent extends AudioPlayerEvent {
 
@@ -33,7 +33,7 @@ public class VolumeChangeEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This gets the old volume for the player.
+	 * Gets the old volume of the player.
 	 *
 	 * @return The old volume.
 	 */
@@ -42,7 +42,7 @@ public class VolumeChangeEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This gets the new volume for the player.
+	 * Gets the new volume of the player.
 	 *
 	 * @return The new volume.
 	 */

@@ -22,17 +22,21 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.util.Comparator;
 
 /**
- * This is a comparator built to compare messages based on their timestamps
+ * Compares messages based on their creation timestamps.
  */
 public class MessageComparator implements Comparator<IMessage> {
 
 	/**
-	 * The singleton instance of the reversed message comparator
+	 * Singleton instance of the reversed message comparator.
+	 *
+	 * <p>This comparator defines messages in reverse chronological order. <b>Older</b> messages are <b>last</b>.
 	 */
 	public static final MessageComparator REVERSED = new MessageComparator(true);
 
 	/**
-	 * The singleton instance of the default message comparator
+	 * Singleton instance of the default message comparator.
+	 *
+	 * <p>This comparator defines messages in chronological order. <b>Older</b> messages are <b>first</b>.
 	 */
 	public static final MessageComparator DEFAULT = new MessageComparator(false);
 

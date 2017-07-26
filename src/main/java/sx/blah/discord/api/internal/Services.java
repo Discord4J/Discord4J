@@ -32,7 +32,14 @@ import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+/**
+ * Used to load audio SPIs used by Discord4J's audio system.
+ */
 public class Services {
+
+	/**
+	 *  Unpacks and loads the audio SPIs used by Discord4J's audio system.
+	 */
 	static void load() {
 		try {
 			File servicesJar = Files.createTempFile("discord4j-services", ".jar").toFile();

@@ -31,10 +31,13 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
+/**
+ * The default implementation of {@link IPrivateChannel}.
+ */
 public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	/**
-	 * The recipient of this private channel.
+	 * The recipient user of the channel.
 	 */
 	protected final IUser recipient;
 

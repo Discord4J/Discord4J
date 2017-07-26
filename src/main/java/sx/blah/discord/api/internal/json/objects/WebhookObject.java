@@ -22,15 +22,15 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class WebhookObject {
 	/**
-	 * The id of the webhook.
+	 * The ID of the webhook.
 	 */
 	public String id;
 	/**
-	 * The id of the guild this webhook is in.
+	 * The ID of the guild this webhook is in.
 	 */
 	public String guild_id;
 	/**
-	 * The id of the channel this webhook can post to.
+	 * The ID of the channel this webhook can post to.
 	 */
 	public String channel_id;
 	/**

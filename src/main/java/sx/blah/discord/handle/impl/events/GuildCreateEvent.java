@@ -20,12 +20,17 @@ package sx.blah.discord.handle.impl.events;
 import sx.blah.discord.handle.obj.IGuild;
 
 /**
- * This event is dispatched when a guild is created/ the bot joins the guild.
+ * Dispatched when a guild is received from Discord. This can happen in a number of scenarios:
+ * <ul>
+ *     <li>When connecting to the gateway.</li>
+ *     <li>When the bot is added to a guild.</li>
+ *     <li>When a previously-unavailable guild becomes available.</li>
+ * </ul>
  * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.GuildCreateEvent} instead.
  */
 @Deprecated
 public class GuildCreateEvent extends sx.blah.discord.handle.impl.events.guild.GuildCreateEvent {
-	
+
 	public GuildCreateEvent(IGuild guild) {
 		super(guild);
 	}

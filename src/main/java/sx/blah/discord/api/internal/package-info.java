@@ -16,6 +16,6 @@
  */
 
 /**
- * This package contains all internal Discord4J apis. NOT MEANT FOR NORMAL USERS.
+ * This package contains all internal Discord4J APIs. The use of these APIs by Discord4J users is heavily discouraged.
  */
 package sx.blah.discord.api.internal;

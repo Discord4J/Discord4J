@@ -17,7 +17,16 @@
 
 package sx.blah.discord.api.internal.json.responses.voice;
 
+/**
+ * Describes the voice session.
+ */
 public class VoiceDescriptionResponse {
+	/**
+	 * The key used for voice data encryption.
+	 */
 	public byte[] secret_key;
+	/**
+	 * The encryption mode.
+	 */
 	public String mode;
 }

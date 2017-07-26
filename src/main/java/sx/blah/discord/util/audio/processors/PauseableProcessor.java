@@ -23,26 +23,32 @@ import sx.blah.discord.handle.audio.IAudioProvider;
 import sx.blah.discord.handle.audio.impl.DefaultProvider;
 
 /**
- * This processor implementation allows for audio providers to be paused.
+ * An audio processor which allows for audio providers to be paused.
  */
 public class PauseableProcessor implements IAudioProcessor {
 
+	/**
+	 * The audio provider wrapped by the processor.
+	 */
 	private volatile IAudioProvider provider = new DefaultProvider();
+	/**
+	 * Whether the processor is paused.
+	 */
 	private volatile boolean isPaused = false;
 
 	/**
-	 * This gets whether this processor is paused.
+	 * Gets whether the processor is paused.
 	 *
-	 * @return True if paused, false if otherwise.
+	 * @return Whether the processor is paused.
 	 */
 	public boolean isPaused() {
 		return isPaused;
 	}
 
 	/**
-	 * This sets whether this processor is paused.
+	 * Sets whether the processor is paused.
 	 *
-	 * @param isPaused True to pause, false to resume.
+	 * @param isPaused Whether the processor is paused.
 	 */
 	public void setPaused(boolean isPaused) {
 		this.isPaused = isPaused;

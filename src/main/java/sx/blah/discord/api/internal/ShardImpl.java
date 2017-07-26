@@ -39,16 +39,41 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Default implementation of {@link IShard}.
+ */
 public class ShardImpl implements IShard {
 
+	/**
+	 * The gateway connection for this shard.
+	 */
 	public volatile DiscordWS ws;
 
+	/**
+	 * The gateway endpoint obtained for this shard.
+	 */
 	private final String gateway;
+	/**
+	 * The shard info.
+	 * @see <a href=https://discordapp.com/developers/docs/topics/gateway#sharding>Sharding</a>
+	 */
 	private final int[] info;
 
+	/**
+	 * The client that manages this shard.
+	 */
 	private final DiscordClientImpl client;
+	/**
+	 * All of the guilds this shard manages.
+	 */
 	final Cache<IGuild> guildCache;
+	/**
+	 * The private channels on this shard. Only populated if this is shard 0.
+	 */
 	final Cache<IPrivateChannel> privateChannels;
+	/**
+	 * The voice gateways for guilds on this shard.
+	 */
 	public final Cache<DiscordVoiceWS> voiceWebSockets;
 
 	private final PresenceUpdateRequest identifyPresence;

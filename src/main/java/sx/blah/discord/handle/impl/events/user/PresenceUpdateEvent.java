@@ -21,7 +21,7 @@ import sx.blah.discord.handle.obj.IPresence;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This event is dispatched when a user changes his/her presence.
+ * Dispatched when a user's presence changes.
  */
 public class PresenceUpdateEvent extends UserEvent {
 
@@ -36,7 +36,7 @@ public class PresenceUpdateEvent extends UserEvent {
 	/**
 	 * Gets the user's new presence.
 	 *
-	 * @return The presence.
+	 * @return The user's new presence.
 	 */
 	public IPresence getNewPresence() {
 		return newPresence;
@@ -45,7 +45,7 @@ public class PresenceUpdateEvent extends UserEvent {
 	/**
 	 * Gets the user's old presence.
 	 *
-	 * @return The presence.
+	 * @return The user's old presence.
 	 */
 	public IPresence getOldPresence() {
 		return oldPresence;

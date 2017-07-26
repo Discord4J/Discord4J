@@ -20,11 +20,30 @@ package sx.blah.discord.api.internal.json.requests;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import sx.blah.discord.Discord4J;
 
+/**
+ * Sent to trigger the initial handshake with the gateway.
+ */
 public class IdentifyRequest {
+	/**
+	 * The bot's authentication token.
+	 */
 	private final String token;
+	/**
+	 * Connection properties.
+	 */
 	private final Properties properties;
+	/**
+	 * Whether this connection supports compression of the initial ready packet.
+	 */
 	private final boolean compress;
+	/**
+	 * Total number of members at which the gateway will stop sending offline members in the guild member list. Must be
+	 * between 50 and 250.
+	 */
 	private final int large_threshold;
+	/**
+	 * Sharding information.
+	 */
 	private final int[] shard;
 	private final PresenceUpdateRequest presence;
 
@@ -41,15 +60,33 @@ public class IdentifyRequest {
 		this.presence = presence;
 	}
 
+	/**
+	 * Inner connection properties object.
+	 */
 	private static class Properties {
+		/**
+		 * The operating system this program is running on.
+		 */
 		@JsonProperty("$os")
 		private final String os;
+		/**
+		 * The name of the library. ("Discord4J")
+		 */
 		@JsonProperty("$browser")
 		private final String browser;
+		/**
+		 * The name of the library. ("Discord4J")
+		 */
 		@JsonProperty("$device")
 		private final String device;
+		/**
+		 * Always an empty string.
+		 */
 		@JsonProperty("$referrer")
 		private final String referrer;
+		/**
+		 * Always an empty string.
+		 */
 		@JsonProperty("$referring_domain")
 		private final String referring_domain;
 

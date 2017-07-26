@@ -18,12 +18,13 @@
 package sx.blah.discord.api.internal.json.responses;
 
 /**
- * This is received on HELLO (op 10)
+ * Received on the gateway with op 10.
+ * @see sx.blah.discord.api.internal.GatewayOps#HELLO
  */
 public class HelloResponse {
 
 	/**
-	 * How long to wait in between heartbeats
+	 * How long to wait in between heartbeats.
 	 */
 	public long heartbeat_interval;
 }

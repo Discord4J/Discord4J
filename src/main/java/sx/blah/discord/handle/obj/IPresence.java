@@ -20,37 +20,35 @@ package sx.blah.discord.handle.obj;
 import java.util.Optional;
 
 /**
- * Represents a user's presence - the online status (online, streaming, idle, etc.) and their playing text (along with
- * a streaming URL if they're in STREAMING mode).
+ * A user's presence. This consists of an online status, an optional playing text, and an optional streaming URL.
  */
 public interface IPresence {
 
 	/**
-	 * Returns the optional playing text. This is shown as the text after the <i>Playing</i> text.
+	 * Gets the playing text. This is the text shown after <i>Playing</i> in the Discord client.
 	 *
-	 * @return The playing text
+	 * @return The playing text.
 	 */
 	Optional<String> getPlayingText();
 
 	/**
-	 * Returns the optional streaming URL, which is used when a user is in the
-	 * {@link StatusType#STREAMING STREAMING} {@link StatusType status type}.
+	 * Gets the streaming URL.
 	 *
-	 * @return The streaming URL
+	 * @return The streaming URL.
 	 */
 	Optional<String> getStreamingUrl();
 
 	/**
-	 * Returns the online status of the user, which is the ONLINE or IDLE indicators.
+	 * Gets the online status.
 	 *
-	 * @return The online status
+	 * @return The online status.
 	 */
 	StatusType getStatus();
 
 	/**
-	 * Create a copy of this object.
+	 * Creates a copy of the object.
 	 *
-	 * @return A copy of this object
+	 * @return A copy of the object.
 	 */
 	IPresence copy();
 

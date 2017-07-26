@@ -23,7 +23,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import java.util.List;
 
 /**
- * Fired whenever emojis change in a guild.
+ * Dispatched when emoji are updated.
  */
 public class GuildEmojisUpdateEvent extends GuildEvent {
 
@@ -37,18 +37,18 @@ public class GuildEmojisUpdateEvent extends GuildEvent {
 	}
 
 	/**
-	 * Gets the list of old emojis prior to the change.
+	 * Gets the emoji before they were updated.
 	 *
-	 * @return The old emojis.
+	 * @return The emoji before they were updated.
 	 */
 	public List<IEmoji> getOldEmojis() {
 		return oldEmojis;
 	}
 
 	/**
-	 * Gets the new list of emojis.
+	 * Gets the emoji after they were updated.
 	 *
-	 * @return The old emojis.
+	 * @return The emoji after they were updated.
 	 */
 	public List<IEmoji> getNewEmojis() {
 		return newEmojis;

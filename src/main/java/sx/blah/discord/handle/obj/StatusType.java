@@ -18,34 +18,36 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * The online statuses a user can be, such as ONLINE or IDLE.
+ * The online statuses a user can have.
  */
 public enum StatusType {
 
 	/**
-	 * Represents that the user is online.
+	 * A status of Online.
 	 */
 	ONLINE,
 	/**
-	 * Represents that the user is in 'do not disturb' mode.
+	 * A status of Do Not Disturb.
 	 */
 	DND,
 	/**
-	 * Represents that the user is idle.
+	 * A status of AFK.
 	 */
 	IDLE,
 	/**
-	 * Represents that a user is invisible. Note: Another user will never appear to have this status, as Discord does
-	 * not send this information. Instead, they will appear to be {@link #OFFLINE}. This status is used only for sending
-	 * the bot's own status to Discord.
+	 * A status of Invisible.
+	 *
+	 * <p>Note: Another user will never appear to have this status, as Discord does not send this information. Instead,
+	 * they will appear to be {@link #OFFLINE}. This status is used only for sending the bot's own invisible status to
+	 * Discord.
 	 */
 	INVISIBLE,
 	/**
-	 * Represents that the user is offline.
+	 * A status of Offline.
 	 */
 	OFFLINE,
 	/**
-	 * Represents that the user is streaming.
+	 * A status of Streaming.
 	 *
 	 * @deprecated There is no such thing as streaming status. A user will <b>never</b> appear to have this status.
 	 * Instead, they will have {@link #ONLINE} status with a streaming url.
@@ -53,10 +55,16 @@ public enum StatusType {
 	@Deprecated
 	STREAMING,
 	/**
-	 * Unknown presence.
+	 * An unknown presence.
 	 */
 	UNKNOWN;
 
+	/**
+	 * Gets a status by its name.
+	 *
+	 * @param name The name of the status to get.
+	 * @return The corresponding status or {@link #UNKNOWN} if the name did not match any known status.
+	 */
 	public static StatusType get(String name) {
 		try {
 			return valueOf(name.toUpperCase());

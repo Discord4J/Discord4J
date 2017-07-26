@@ -22,21 +22,21 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This represents a generic guild user event.
+ * A generic guild member-related event.
  */
 public abstract class GuildMemberEvent extends GuildEvent {
-	
+
 	private final IUser user;
-	
+
 	public GuildMemberEvent(IGuild guild, IUser user) {
 		super(guild);
 		this.user = user;
 	}
-	
+
 	/**
-	 * This gets the guild user object involved in this event.
+	 * Gets the user involved in the event.
 	 *
-	 * @return The guild user.
+	 * @return The user involved.
 	 */
 	public IUser getUser() {
 		return user;

@@ -21,20 +21,20 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.Event;
 
 /**
- * This represents a generic shard event.
+ * A generic shard-related event.
  */
 public abstract class ShardEvent extends Event {
-	
+
 	private final IShard shard;
-	
+
 	public ShardEvent(IShard shard) {
 		this.shard = shard;
 	}
-	
+
 	/**
-	 * This gets the shard object involved in this event.
+	 * Gets the shard involved in the event.
 	 *
-	 * @return The shard.
+	 * @return The shard involved.
 	 */
 	public IShard getShard() {
 		return shard;

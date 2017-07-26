@@ -21,7 +21,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This event is dispatched when a guild's ownership is transferred.
+ * Dispatched when the owner of a guild changes.
  */
 public class GuildTransferOwnershipEvent extends GuildEvent {
 
@@ -36,7 +36,7 @@ public class GuildTransferOwnershipEvent extends GuildEvent {
 	/**
 	 * Gets the original owner of the guild.
 	 *
-	 * @return The original owner.
+	 * @return The original owner of the guild.
 	 */
 	public IUser getOldOwner() {
 		return oldOwner;
@@ -45,7 +45,7 @@ public class GuildTransferOwnershipEvent extends GuildEvent {
 	/**
 	 * Gets the new owner of the guild.
 	 *
-	 * @return The new owner.
+	 * @return The new owner of the guild.
 	 */
 	public IUser getNewOwner() {
 		return newOwner;

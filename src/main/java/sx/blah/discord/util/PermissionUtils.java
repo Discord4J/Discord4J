@@ -24,6 +24,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.OptionalInt;
 
+/**
+ * Utility for permission checking.
+ */
 public class PermissionUtils {
 	/**
 	 * Throws a {@link MissingPermissionsException} if user1 is not higher in the role hierarchy than user2 in the given guild.
@@ -315,7 +318,6 @@ public class PermissionUtils {
 	 * @param user1 The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param user2 The user who must be lower in the role hierarchy.
 	 * @param required The permissions user1 must have.
-	 *
 	 * @return True if user1 is higher in the role hierarchy than user2 and user1 has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IGuild guild, IUser user1, IUser user2, Permissions... required) {
@@ -331,7 +333,6 @@ public class PermissionUtils {
 	 * @param user1 The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param user2 The user who must be lower in the role hierarchy.
 	 * @param required The permissions user1 must have.
-	 *
 	 * @return True if user1 is higher in the role hierarchy than user2 and user1 has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IGuild guild, IUser user1, IUser user2, EnumSet<Permissions> required) {
@@ -347,7 +348,6 @@ public class PermissionUtils {
 	 * @param user The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param roles The roles which must be lower in the role hierarchy.
 	 * @param required The permissions the user must have.
-	 *
 	 * @return True if the user is higher in the role hierarchy than every role in roles and the user has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IGuild guild, IUser user, List<IRole> roles, Permissions... required) {
@@ -363,7 +363,6 @@ public class PermissionUtils {
 	 * @param user The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param roles The roles which must be lower in the role hierarchy.
 	 * @param required The permissions the user must have.
-	 *
 	 * @return True if the user is higher in the role hierarchy than every role in roles and the user has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IGuild guild, IUser user, List<IRole> roles, EnumSet<Permissions> required) {
@@ -380,7 +379,6 @@ public class PermissionUtils {
 	 * @param user1 The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param user2 The user who must be lower in the role hierarchy.
 	 * @param required The permissions user1 must have.
-	 *
 	 * @return True if user1 is higher in the role hierarchy than user2 and user1 has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IChannel channel, IUser user1, IUser user2, Permissions... required) {
@@ -397,7 +395,6 @@ public class PermissionUtils {
 	 * @param user1 The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param user2 The user who must be lower in the role hierarchy.
 	 * @param required The permissions user1 must have.
-	 *
 	 * @return True if user1 is higher in the role hierarchy than user2 and user1 has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IChannel channel, IUser user1, IUser user2, EnumSet<Permissions> required) {
@@ -414,7 +411,6 @@ public class PermissionUtils {
 	 * @param user The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param roles The roles which must be lower in the role hierarchy.
 	 * @param required The permissions the user must have.
-	 *
 	 * @return True if the user is higher in the role hierarchy than every role in roles and the user has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IChannel channel, IUser user, List<IRole> roles, Permissions... required) {
@@ -431,7 +427,6 @@ public class PermissionUtils {
 	 * @param user The user who must be higher in the role hierarchy and have all of the required permissions.
 	 * @param roles The roles which must be lower in the role hierarchy.
 	 * @param required The permissions the user must have.
-	 *
 	 * @return True if the user is higher in the role hierarchy than every role in roles and the user has all of the required permissions.
 	 */
 	public static boolean hasHierarchicalPermissions(IChannel channel, IUser user, List<IRole> roles, EnumSet<Permissions> required) {
@@ -443,7 +438,6 @@ public class PermissionUtils {
 	 *
 	 * @param roles1 The list of roles whose highest role's position must be greater.
 	 * @param roles2 The list of roles whose highest role's position must be less.
-	 *
 	 * @return True if the position of role1s's highest role is greater than the position of roles2's highest role.
 	 */
 	private static boolean hasHigherRoles(List<IRole> roles1, List<IRole> roles2) {

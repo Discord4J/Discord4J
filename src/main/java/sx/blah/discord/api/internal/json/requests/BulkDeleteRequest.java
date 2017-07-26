@@ -23,12 +23,12 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.util.List;
 
 /**
- * This request is sent to discord to delete a set of messages.
+ * Sent to delete a set of messages.
  */
 public class BulkDeleteRequest {
 
 	/**
-	 * The array of message ids to delete.
+	 * The array of message IDs to delete.
 	 */
 	public String[] messages;
 

@@ -28,13 +28,15 @@ public class GameObject {
 		 */
 		private static final int GAME = 0;
 		/**
-		 * The GameObject type integer for streaming a game.
+		 * The GameObject type integer for streaming.
 		 */
 		private static final int STREAMING = 1;
 	}
 
 	/**
-	 * The type of the game.
+	 * The type of the game object.
+	 *
+	 * @see Type
 	 */
 	public int type;
 	/**
@@ -42,7 +44,7 @@ public class GameObject {
 	 */
 	public String name;
 	/**
-	 * The url if the type is stream.
+	 * The streaming url.
 	 */
 	public String url;
 

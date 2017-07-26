@@ -24,37 +24,58 @@ import sx.blah.discord.handle.audio.impl.DefaultProvider;
 import sx.blah.discord.util.TimedValue;
 
 /**
- * GlobalProvider allows for an {@link IAudioProvider} to provide the same audio across multiple
- * {@link sx.blah.discord.handle.audio.IAudioManager} instances.
+ * An audio provider which which allows the providing of audio across multiple
+ * {@link sx.blah.discord.handle.audio.IAudioManager}s.
  */
 public class GlobalProvider implements IAudioProvider {
 
+	/**
+	 * The underlying audio provider.
+	 */
 	private static volatile IAudioProvider provider;
 
+	/**
+	 * Whether the provider is ready. This value is lazily updated every {@value OpusUtil#OPUS_FRAME_TIME} milliseconds.
+	 */
 	private static final TimedValue<Boolean> isReady = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME,
 			() -> provider.isReady());
+	/**
+	 * The audio data that will be provided. This value is lazily updated every {@value OpusUtil#OPUS_FRAME_TIME}
+	 * milliseconds.
+	 */
 	private static final TimedValue<byte[]> provide = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME,
 			() -> provider.provide());
+	/**
+	 * The number of channels in the audio. This value is lazily updated every {@value OpusUtil#OPUS_FRAME_TIME}
+	 * milliseconds.
+	 */
 	private static final TimedValue<Integer> channels = new TimedValue<>(OpusUtil.OPUS_FRAME_TIME,
 			() -> provider.getChannels());
+	/**
+	 * The audio encoding type of the audio. This value is lazily updated every {@value OpusUtil#OPUS_FRAME_TIME}
+	 * milliseconds.
+	 */
 	private static final TimedValue<AudioEncodingType> audioEncodingType
 			= new TimedValue<>(OpusUtil.OPUS_FRAME_TIME, () -> provider.getAudioEncodingType());
 
+	/**
+	 * Singleton instance of the global provider.
+	 */
 	private static final GlobalProvider instance = new GlobalProvider(); //Singleton instance
 
 	private GlobalProvider() {} //Encourage the use of singletons
 
 	/**
-	 * Gets the singleton instance of this provider.
+	 * Gets the singleton instance of the global provider.
 	 *
-	 * @return The instance.
+	 * @return The singleton global provider.
 	 */
 	public static GlobalProvider getInstance() {
 		return instance;
 	}
 
 	/**
-	 * Sets the provider to broadcast.
+	 * Sets the provider that audio will be pulled from.
 	 *
 	 * @param provider The provider.
 	 */

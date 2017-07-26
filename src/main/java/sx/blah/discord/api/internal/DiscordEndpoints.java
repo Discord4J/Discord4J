@@ -20,8 +20,7 @@ package sx.blah.discord.api.internal;
 import sx.blah.discord.Discord4J;
 
 /**
- * Static class that contains
- * URLs useful to us.
+ * Utility class containing constants for Discord API endpoints.
  */
 public final class DiscordEndpoints {
 
@@ -44,37 +43,37 @@ public final class DiscordEndpoints {
 	}
 
 	/**
-	 * The base API location on Discord's servers.
+	 * The base API URL.
 	 */
 	public static final String APIBASE = BASE+"api/v" + API_VERSION;
 
+	/**
+	 * The gateway endpoint.
+	 */
 	public static final String GATEWAY = APIBASE+"/gateway";
 
+	/**
+	 * The users endpoint.
+	 */
 	public static final String USERS = APIBASE+"/users/";
 
 	/**
-	 * Used for logging in.
-	 */
-	public static final String LOGIN = APIBASE+"/auth/login";
-	/**
-	 * Used for logging out.
-	 */
-	public static final String LOGOUT = APIBASE+"/auth/logout";
-
-	/**
-	 * Guilds URL
+	 * The guilds endpoint.
 	 */
 	public static final String GUILDS = APIBASE+"/guilds/";
 
+	/**
+	 * The channels endpoint.
+	 */
 	public static final String CHANNELS = APIBASE+"/channels/";
 
 	/**
-	 * Webhooks URL
+	 * The webhooks endpoint.
 	 */
 	public static final String WEBHOOKS = APIBASE+"/webhooks/";
 
 	/**
-	 * Used for accepting invites
+	 * The invite endpoint.
 	 */
 	public static final String INVITE = APIBASE+"/invite/";
 
@@ -99,7 +98,7 @@ public final class DiscordEndpoints {
 	public static final String STATUS = "https://status.discordapp.com/api/v2/scheduled-maintenances/%s.json";
 
 	/**
-	 * Voice url.
+	 * The voice endpoint.
 	 */
 	public static final String VOICE = APIBASE+"/voice/";
 
@@ -114,7 +113,7 @@ public final class DiscordEndpoints {
 	public static final String APPLICATIONS = OAUTH+"applications";
 
 	/**
-	 * Application icon url.
+	 * Formatted string for getting application icons.
 	 */
 	public static final String APPLICATION_ICON = "https://cdn.discordapp.com/app-icons/%s/%s.jpg";
 
@@ -124,7 +123,7 @@ public final class DiscordEndpoints {
 	public static final String AUTHORIZE = "https://discordapp.com/oauth2/authorize";
 
 	/**
-	 * The emoji image URL.
+	 * Formatted string for getting emoji images.
 	 */
 	public static final String EMOJI_IMAGE = "https://cdn.discordapp.com/emojis/%s.png";
 
@@ -145,7 +144,7 @@ public final class DiscordEndpoints {
 	public static final String REACTIONS_USER = REACTIONS_USER_LIST + "/%s";
 
 	/**
-	 * Default avatars (arg 1 is <code>discrim % 5</code>)
+	 * Default avatars url (arg 1 is <code>discrim % 5</code>)
 	 */
 	public static final String DEFAULT_AVATAR = "https://cdn.discordapp.com/embed/avatars/%d.png";
 

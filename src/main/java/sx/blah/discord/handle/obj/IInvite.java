@@ -20,53 +20,67 @@ package sx.blah.discord.handle.obj;
 import sx.blah.discord.api.IDiscordClient;
 
 /**
- * Represents an invite into a channel.
+ * An invite to a guild channel.
  */
 public interface IInvite {
 
 	/**
-	 * @return The invite code for this invite.
+	 * Gets the invite code for the invite.
+	 *
+	 * @return The invite code for the invite.
 	 */
 	String getCode();
 
 	/**
-	 * @return The guild this invite is for.
+	 * Gets the guild the invite is for.
+	 *
+	 * @return The guild the invite is for.
 	 */
 	IGuild getGuild();
 
 	/**
-	 * @return The channel this invite is for.
+	 * Gets the channel the invite is for.
+	 *
+	 * @return The channel the invite is for.
 	 */
 	IChannel getChannel();
 
 	/**
-	 * Note: This is null for vanity url invites and invites for widgets.
-	 * @return The user who created this invite.
+	 * Gets the user who created the invite.
+	 *
+	 * <p>This is null for vanity url invites and widget invites.
+	 *
+	 * @return The user who created the invite.
 	 */
 	IUser getInviter();
 
 	/**
-	 * @return The client this invite is tied to.
+	 * Gets the client the invite belongs to.
+	 *
+	 * @return The client the invite belongs to.
 	 */
 	IDiscordClient getClient();
 
 	/**
-	 * Deletes this invite.
+	 * Deletes the invite.
 	 */
 	void delete();
 
 	/**
-	 * @return The invite code for this invite.
+	 * Gets the invite code for the invite.
 	 *
+	 * @return The invite code for the invite.
 	 * @deprecated Use {@link #getCode()} instead.
 	 */
 	@Deprecated
 	String getInviteCode();
 
 	/**
-	 * @return An {@link InviteResponse} containing the invite's details.
+	 * Gets extra details about the invite.
 	 *
-	 * @deprecated This is no longer needed as the same information and more can be obtained with methods in {@link IInvite} and {@link IExtendedInvite}.
+	 * @return Extra details about the invite.
+	 * @deprecated <b>This method always returns null.</b> This is no longer needed as the same information and more can
+	 * be obtained with methods in {@link IInvite} and {@link IExtendedInvite}.
 	 */
 	@Deprecated
 	InviteResponse details();

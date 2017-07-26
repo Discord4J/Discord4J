@@ -29,6 +29,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Manages the reconnection process for all of the shards of a client. This ensures that shards obey the identify
+ * ratelimit when reconnecting.
+ */
 class ReconnectManager {
 
 	/**
@@ -70,6 +74,7 @@ class ReconnectManager {
 	/**
 	 * Adds a {@link DiscordWS} to the reconnection queue.
 	 * If there is only one WS in the queue, the reconnection process will begin immediately.
+	 *
 	 * @param ws The websocket to reconnect.
 	 */
 	synchronized void scheduleReconnect(DiscordWS ws) {

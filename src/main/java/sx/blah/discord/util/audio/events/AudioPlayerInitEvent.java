@@ -20,7 +20,7 @@ package sx.blah.discord.util.audio.events;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This event is dispatched when an {@link AudioPlayer} instance is initialized.
+ * Dispatched when an audio player is initialized.
  */
 public class AudioPlayerInitEvent extends AudioPlayerEvent {
 

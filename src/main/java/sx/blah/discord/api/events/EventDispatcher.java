@@ -70,7 +70,7 @@ public class EventDispatcher {
 	private final AtomicReference<HashSet<EventHandler>> listenersRegistry = new AtomicReference<>(new HashSet<>());
 	private final ExecutorService defaultEventExecutor;
 	/**
-	 * special executor used for waitFor.
+	 * Special executor used for waitFor.
 	 *
 	 * Essentially forces the thread dispatching the event to execute the handler, because all wait for does is exchange with the blocking thread, this serves us well.
 	 */

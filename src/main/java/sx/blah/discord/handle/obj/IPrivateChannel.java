@@ -18,14 +18,14 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * Represents a private channel where you could direct message a user.
+ * A private channel with another user.
  */
 public interface IPrivateChannel extends IChannel {
 
 	/**
-	 * Indicates the user with whom you are communicating.
+	 * Gets the the recipient user of the channel.
 	 *
-	 * @return The user.
+	 * @return The recipient user of the channel.
 	 */
 	IUser getRecipient();
 

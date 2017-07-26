@@ -18,12 +18,12 @@
 package sx.blah.discord.api.internal.json.requests;
 
 /**
- * Represents a request to create a new webhook.
+ * Sent to create a webhook.
  */
 public class WebhookCreateRequest {
 
 	/**
-	 * The name of the webhook. Must be 2-32 characters long
+	 * The name of the webhook. Must be 2-32 characters long.
 	 */
 	public String name;
 

@@ -29,16 +29,37 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 /**
- * Utility class designed to make message sending easier.
+ * Used to configure and send a {@link IMessage}.
  */
 public class MessageBuilder {
 
+	/**
+	 * The raw content of the message.
+	 */
 	private String content = "";
+	/**
+	 * The channel the message will be sent in.
+	 */
 	private IChannel channel;
+	/**
+	 * The client the message belongs to.
+	 */
 	private IDiscordClient client;
+	/**
+	 * Whether the message should use text-to-speech.
+	 */
 	private boolean tts = false;
+	/**
+	 * The embed in the message.
+	 */
 	private EmbedObject embed;
+	/**
+	 * The input stream to read and attach.
+	 */
 	private InputStream stream;
+	/**
+	 * The name of the attachment that should be shown in Discord.
+	 */
 	private String fileName;
 
 	public MessageBuilder(IDiscordClient client) {
@@ -46,10 +67,10 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sets the content of the message.
+	 * Sets the raw content of the message.
 	 *
-	 * @param content The message contents.
-	 * @return The message builder instance.
+	 * @param content The raw content of the message.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withContent(String content) {
 		this.content = "";
@@ -57,11 +78,11 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sets the content of the message with a given style.
+	 * Sets the raw content of the message.
 	 *
-	 * @param content The message contents.
-	 * @param styles The styles to be applied to the content.
-	 * @return The message builder instance.
+	 * @param content The raw content of the message.
+	 * @param styles The styles to apply to the content.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withContent(String content, Styles... styles) {
 		this.content = "";
@@ -69,10 +90,10 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Appends extra text to the current content.
+	 * Appends content to the message.
 	 *
 	 * @param content The content to append.
-	 * @return The message builder instance.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder appendContent(String content) {
 		this.content += content;
@@ -80,11 +101,11 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Appends extra text to the current content with given style.
+	 * Appends content to the message.
 	 *
 	 * @param content The content to append.
-	 * @param styles The styles to be applied to the new content.
-	 * @return The message builder instance.
+	 * @param styles The styles to apply to the content.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder appendContent(String content, Styles... styles) {
 		for (Styles style : styles)
@@ -100,11 +121,11 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sets the channel that the message should go to.
+	 * Sets the channel the message will be sent in.
 	 *
-	 * @param channelID The channel to send the message to.
-	 * @return The message builder instance.
-	 * @deprecated Use {@link #withChannel(long)} instead
+	 * @param channelID The channel the message will be sent in.
+	 * @return The builder instance.
+	 * @deprecated Use {@link #withChannel(long)} instead.
 	 */
 	@Deprecated
 	public MessageBuilder withChannel(String channelID) {
@@ -112,10 +133,10 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sets the channel that the message should go to.
+	 * Sets the channel the message will be sent in.
 	 *
-	 * @param channelID The channel to send the message to.
-	 * @return The message builder instance.
+	 * @param channelID The channel the message will be sent in.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withChannel(long channelID) {
 		this.channel = client.getChannelByID(channelID);
@@ -123,10 +144,10 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sets the channel that the message should go to.
+	 * Sets the channel the message will be sent in.
 	 *
-	 * @param channel The channel to send the mssage to.
-	 * @return The message builder instance.
+	 * @param channel The channel the message will be sent in.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withChannel(IChannel channel) {
 		this.channel = channel;
@@ -134,9 +155,10 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sets the message to have tts enabled or disabled.
+	 * Sets whether the message should use text-to-speech.
 	 *
-	 * @return The message builder instance.
+	 * @param tts Whether the message should use text-to-speech.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withTTS(boolean tts) {
 		this.tts = tts;
@@ -144,40 +166,40 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sets the message to have tts enabled.
+	 * Sets the message to use text-to-speech.
 	 *
-	 * @return The message builder instance.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withTTS() {
 		return withTTS(true);
 	}
 
 	/**
-	 * This sets the content to a multiline code block with no language highlighting.
+	 * Sets the content to a multiline code block with no language highlighting.
 	 *
 	 * @param content The content inside the code block.
-	 * @return The message builder instance.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withQuote(String content) {
 		return withCode("", content);
 	}
 
 	/**
-	 * Adds a multiline code block with no language highlighting.
+	 * Appends a multiline code block with no language highlighting to the message.
 	 *
 	 * @param content The content inside the code block.
-	 * @return The message builder instance.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder appendQuote(String content) {
 		return appendCode("", content);
 	}
 
 	/**
-	 * Sets the content to a multiline code block with specific language syntax highlighting.
+	 * Sets the content to a multiline code block.
 	 *
-	 * @param language The language to do syntax highlighting for.
-	 * @param content The content of the code block.
-	 * @return The message builder instance.
+	 * @param language The language to syntax highlight the code block with.
+	 * @param content The content inside the code block.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withCode(String language, String content) {
 		this.content = "";
@@ -185,22 +207,21 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Adds a multiline code block with specific language syntax highlighting.
+	 * Appends a multiline code block to the message.
 	 *
-	 * @param language The language to do syntax highlighting for.
-	 * @param content The content of the code block.
-	 * @return The message builder instance.
+	 * @param language The language to syntax highlight the code block with.
+	 * @param content The content inside the code block.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder appendCode(String language, String content) {
 		return appendContent(language+"\n"+content, Styles.CODE_WITH_LANG);
 	}
 
 	/**
-	 * Sets the embed to be used (can be null).
+	 * Sets the embed in the message.
 	 *
-	 * @param embed The embed object (build with EmbedBuilder)
-	 * @return The message builder instance.
-	 * @see EmbedBuilder
+	 * @param embed The embed in the message.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withEmbed(EmbedObject embed) {
 		this.embed = embed;
@@ -208,12 +229,12 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Adds a file to be sent with the message.
+	 * Sets the attachment to be sent with the message.
 	 *
-	 * @param file The file to be sent with the message
-	 * @return The message builder instance.
+	 * @param file The attachment to send.
+	 * @return The builder instance.
 	 *
-	 * @throws FileNotFoundException
+	 * @throws FileNotFoundException If the file cannot be found.
 	 */
 	public MessageBuilder withFile(File file) throws FileNotFoundException {
 		if (file == null)
@@ -224,11 +245,11 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Adds a file to be sent with the message.
+	 * Sets the attachment to be sent with the message.
 	 *
-	 * @param stream the stream of data of the file
-	 * @param fileName the name of the file to be sent to Discord
-	 * @return The message builder instance.
+	 * @param stream The input stream to read and attach.
+	 * @param fileName The name of the attachment that should be shown in Discord.
+	 * @return The builder instance.
 	 */
 	public MessageBuilder withFile(InputStream stream, String fileName) {
 		this.stream = stream;
@@ -237,51 +258,45 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * This gets the content of the message in its current form.
+	 * Gets the raw content of the message.
 	 *
-	 * @return The current content of the message.
+	 * @return The The raw content of the message.
 	 */
 	public String getContent() {
 		return content;
 	}
 
 	/**
-	 * This gets the channel the message will be sent to.
+	 * Gets the channel the message will be sent in.
 	 *
-	 * @return The channel.
+	 * @return The channel the message will be sent in.
 	 */
 	public IChannel getChannel() {
 		return channel;
 	}
 
 	/**
-	 * This gets the embed object for the message. May be null.
+	 * Gets the embed in the message.
 	 *
-	 * @return The embed object.
+	 * @return The embed in the message.
 	 */
 	public EmbedObject getEmbedObject() {
 		return embed;
 	}
 
 	/**
-	 * This gets if the builder will have TTS enabled.
+	 * Gets whether the message should use text-to-speech.
 	 *
-	 * @return If TTS will be used
+	 * @return Whether the message should use text-to-speech.
 	 */
 	public boolean isUsingTTS() {
 		return tts;
 	}
 
 	/**
-	 * Galactic law requires I have a build() method in
-	 * my builder classes.
-	 * Sends and creates the message object.
+	 * Sends the message as configured by the builder.
 	 *
-	 * @return The message object representing the sent message.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @return The sent message object.
 	 */
 	public IMessage build() {
 		if (null == content || null == channel)
@@ -294,20 +309,18 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * Sends the message, does the same thing as {@link #build()}.
+	 * Sends the message as configured by the builder.
 	 *
-	 * @return The message object representing the sent message.
+	 * <p>This is an alias for {@link #build()}.
 	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @return The sent message object.
 	 */
 	public IMessage send() {
 		return build();
 	}
 
 	/**
-	 * Enum describing Markdown formatting that can be used in chat.
+	 * The Markdown formatting styles that can be used in messages.
 	 */
 	public enum Styles {
 		ITALICS("*"),
@@ -339,7 +352,7 @@ public class MessageBuilder {
 		}
 
 		/**
-		 * Reverses the markdown formatting to be appended to the end of a formatted string.
+		 * Gets the reversed markdown formatting to be appended to the end of a formatted string.
 		 *
 		 * @return The reversed markdown formatting.
 		 */
