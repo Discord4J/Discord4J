@@ -718,22 +718,6 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets all of the invite codes from invite URLs in a message.
-	 *
-	 * @param message The message content to parse.
-	 * @return A list of the invite codes in the message.
-	 */
-	public static List<String> getInviteCodesFromMessage(String message) {
-		Matcher matcher = MessageTokenizer.INVITE_PATTERN.matcher(message);
-		List<String> strings = new ArrayList<>();
-		while (matcher.find()) {
-			strings.add(matcher.group(1));
-			matcher = MessageTokenizer.INVITE_PATTERN.matcher(matcher.replaceFirst(""));
-		}
-		return strings;
-	}
-
-	/**
 	 * Converts an {@link AudioInputStream} to 48000Hz 16 bit stereo signed Big Endian PCM format.
 	 *
 	 * @param stream The original stream.

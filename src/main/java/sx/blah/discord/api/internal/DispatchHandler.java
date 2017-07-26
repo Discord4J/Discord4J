@@ -290,16 +290,6 @@ class DispatchHandler {
 				Discord4J.LOGGER.debug(LogMarkers.MESSAGES, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
-				//TODO remove
-				List<String> inviteCodes = DiscordUtils.getInviteCodesFromMessage(json.content);
-				if (!inviteCodes.isEmpty()) {
-					List<IInvite> invites = inviteCodes.stream()
-							.map(s -> client.getInviteForCode(s))
-							.filter(Objects::nonNull)
-							.collect(Collectors.toList());
-					if (!invites.isEmpty()) client.getDispatcher().dispatch(new InviteReceivedEvent(invites.toArray(new IInvite[invites.size()]), message));
-				}
-
 				if (mentioned) {
 					client.dispatcher.dispatch(new MentionEvent(message));
 				}
