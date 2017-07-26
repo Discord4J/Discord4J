@@ -18,11 +18,23 @@
 package sx.blah.discord.api.internal.json.responses.voice;
 
 /**
- *
+ * Received when the voice gateway is ready.
  */
 public class VoiceReadyResponse {
+	/**
+	 * The unique ssrc of the bot user.
+	 */
 	public int ssrc;
+	/**
+	 * The port audio is sent to.
+	 */
 	public int port;
+	/**
+	 * The encryption modes allowed.
+	 */
 	public String[] modes;
+	/**
+	 * The heartbeat interval of the gateway.
+	 */
 	public int heartbeat_interval;
 }
