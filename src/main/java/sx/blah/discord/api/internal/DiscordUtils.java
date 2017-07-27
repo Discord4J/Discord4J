@@ -503,13 +503,14 @@ public class DiscordUtils {
 			channel.setName(json.name);
 			channel.setPosition(json.position);
 			channel.setTopic(json.topic);
+			channel.setNSFW(json.nsfw);
 			channel.userOverrides.clear();
 			channel.userOverrides.putAll(userOverrides);
 			channel.roleOverrides.clear();
 			channel.roleOverrides.putAll(roleOverrides);
 		} else {
-			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id), guild, json.topic, json.position,
-					roleOverrides, userOverrides);
+			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id),
+					guild, json.topic, json.position, json.nsfw, roleOverrides, userOverrides);
 		}
 
 		return channel;
@@ -595,12 +596,13 @@ public class DiscordUtils {
 			channel.setBitrate(json.bitrate);
 			channel.setName(json.name);
 			channel.setPosition(json.position);
+			channel.setNSFW(json.nsfw);
 			channel.userOverrides.clear();
 			channel.userOverrides.putAll(userOverrides);
 			channel.roleOverrides.clear();
 			channel.roleOverrides.putAll(roleOverrides);
 		} else {
-			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id), guild, json.topic, json.position,
+			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id), guild, json.topic, json.position, json.nsfw,
 					json.user_limit, json.bitrate, roleOverrides, userOverrides);
 		}
 

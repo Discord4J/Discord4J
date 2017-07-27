@@ -41,9 +41,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int userLimit = 0;
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
+	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW,
 						int userLimit, int bitrate, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
-		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
+		super(client, name, id, guild, topic, position, isNSFW, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
 	}
@@ -357,7 +357,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, guild, topic, position, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
+		return new VoiceChannel(client, name, id, guild, topic, position, isNSFW, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
 	}
 
 	@Override
@@ -378,10 +378,5 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public boolean isDeleted() {
 		return getGuild().getVoiceChannelByID(getLongID()) != this;
-	}
-
-	@Override
-	public boolean isNSFW() {
-		return false;
 	}
 }
