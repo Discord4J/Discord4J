@@ -20,8 +20,7 @@ package sx.blah.discord.api.internal;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.json.objects.GameObject;
-import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
@@ -326,11 +325,11 @@ public class ShardImpl implements IShard {
 		if (channel != null)
 			return channel;
 
-		PrivateChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
+		ChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
 				DiscordEndpoints.USERS+getClient().getOurUser().getStringID()+"/channels",
 				new PrivateChannelCreateRequest(user.getStringID()),
-				PrivateChannelObject.class);
-		channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
+				ChannelObject.class);
+		channel = (IPrivateChannel) DiscordUtils.getChannelFromJSON(this, null, pmChannel);
 		privateChannels.put(channel);
 		return channel;
 	}
