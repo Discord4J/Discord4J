@@ -777,6 +777,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	void changeTopic(String topic);
 
 	/**
+	 * Changes the nsfw state of the channel.
+	 *
+	 * @param isNSFW The new nsfw state of the channel.
+	 */
+	void changeNSFW(boolean isNSFW);
+
+	/**
 	 * Gets the position of the channel on the channel list.
 	 *
 	 * @return The position.

@@ -489,6 +489,7 @@ public class DiscordUtils {
 			if (channel != null) {
 				channel.setName(json.name);
 				channel.setPosition(json.position);
+				channel.setNSFW(json.nsfw);
 				channel.userOverrides.clear();
 				channel.roleOverrides.clear();
 				channel.userOverrides.putAll(overrides.getLeft());
@@ -502,11 +503,11 @@ public class DiscordUtils {
 					vc.setBitrate(json.bitrate);
 				}
 			} else if (json.type == ChannelObject.Type.GUILD_TEXT) {
-				channel = new Channel(client, json.name, id, guild, json.topic, json.position, overrides.getRight(),
-						overrides.getLeft());
+				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
+						overrides.getRight(), overrides.getLeft());
 			} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
-				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.user_limit,
-						json.bitrate, overrides.getRight(), overrides.getLeft());
+				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
+						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft());
 			}
 		}
 

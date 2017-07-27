@@ -36,6 +36,7 @@ public class ChannelObject {
 	public String icon;
 	public String owner_id;
 	public String application_id;
+	public boolean nsfw;
 
 	public static class Type {
 		public static final int GUILD_TEXT     = 0;
@@ -44,4 +45,5 @@ public class ChannelObject {
 		public static final int GROUP_PRIVATE  = 3;
 		public static final int GUILD_CATEGORY = 4;
 	}
+
 }

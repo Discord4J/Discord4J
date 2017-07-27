@@ -39,7 +39,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	protected final IUser recipient;
 
 	public PrivateChannel(DiscordClientImpl client, IUser recipient, long id) {
-		super(client, recipient.getName(), id, null, null, 0,
+		super(client, recipient.getName(), id, null, null, 0, false,
 				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)),
 				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)));
 		this.recipient = recipient;

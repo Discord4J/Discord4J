@@ -116,11 +116,16 @@ public class Channel implements IChannel {
 	protected final Cache<IWebhook> webhooks;
 
 	/**
+	 * Whether the channel is nsfw.
+	 */
+	protected boolean isNSFW;
+
+	/**
 	 * The client that created this object.
 	 */
 	protected final DiscordClientImpl client;
 
-	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
+	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -129,6 +134,7 @@ public class Channel implements IChannel {
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
+		this.isNSFW = isNSFW;
 		this.messages = new Cache<>(client, IMessage.class);
 		this.webhooks = new Cache<>(client, IWebhook.class);
 	}
@@ -580,7 +586,16 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isNSFW() {
-		return DiscordUtils.NSFW_CHANNEL_PATTERN.matcher(name).find();
+		return isNSFW || DiscordUtils.NSFW_CHANNEL_PATTERN.matcher(name).find();
+	}
+
+	/**
+	 * Sets the CACHED nsfw state for the channel.
+	 *
+	 * @param isNSFW The new channel nsfw state.
+	 */
+	public void setNSFW(boolean isNSFW) {
+		this.isNSFW = isNSFW;
 	}
 
 	@Override
@@ -825,6 +840,11 @@ public class Channel implements IChannel {
 	@Override
 	public void changeTopic(String topic) {
 		edit(new ChannelEditRequest.Builder().topic(topic).build());
+	}
+
+	@Override
+	public void changeNSFW(boolean isNSFW) {
+		edit(new ChannelEditRequest.Builder().nsfw(isNSFW).build());
 	}
 
 	@Override
@@ -1114,7 +1134,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, guild, topic, position, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
+		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
 		channel.isTyping.set(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
