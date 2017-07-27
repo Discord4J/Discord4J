@@ -118,6 +118,14 @@ public class DiscordUtils {
 	 */
 	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://(www\\.)?twitch\\.tv/.+");
 
+	public static long getSnowflakeFromTimestamp(long unixTime) {
+		return (unixTime - DISCORD_EPOCH) << 22;
+	}
+
+	public static long getSnowflakeFromTimestamp(LocalDateTime date) {
+		return getSnowflakeFromTimestamp(date.atZone(ZoneId.systemDefault()).toEpochSecond());
+	}
+
 	/**
 	 * Converts a String timestamp into a java object timestamp.
 	 *
