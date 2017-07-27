@@ -377,9 +377,4 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	public boolean isDeleted() {
 		return getGuild().getVoiceChannelByID(getLongID()) != this;
 	}
-
-	@Override
-	public boolean isNSFW() {
-		throw new UnsupportedOperationException();
-	}
 }
