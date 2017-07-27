@@ -23,6 +23,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.ModuleDisabledEvent;
 import sx.blah.discord.handle.impl.events.ModuleEnabledEvent;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.components.IComponentProvider;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -104,8 +105,11 @@ public class ModuleLoader {
 		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
 			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
 			while (toLoad.size() > 0) {
+				for (IModule module : toLoad)
+					loadModule(module, true, true);
+				
 				for (IModule module : toLoad) {
-					if (loadModule(module))
+					if (loadModule(module, false, false))
 						toLoad.remove(module);
 				}
 			}
@@ -130,7 +134,7 @@ public class ModuleLoader {
 	public static List<Class<? extends IModule>> getModules() {
 		return modules;
 	}
-
+	
 	/**
 	 * Manually loads a module.
 	 *
@@ -138,9 +142,13 @@ public class ModuleLoader {
 	 * @return true if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
 	 */
 	public boolean loadModule(IModule module) {
-                if (!loadedModules.contains(module) && !canModuleLoad(module)) {
+		return loadModule(module, false, true);
+	}
+	
+	private boolean loadModule(IModule module, boolean dryRun, boolean registerComponents) {
+		if (!loadedModules.contains(module) && !canModuleLoad(module)) {
 			return false;
-                }
+		}
 		Class<? extends IModule> clazz = module.getClass();
 		if (clazz.isAnnotationPresent(Requires.class)) {
 			Requires annotation = clazz.getAnnotation(Requires.class);
@@ -148,15 +156,30 @@ public class ModuleLoader {
 				return false;
 			}
 		}
-		boolean enabled = module.enable(client);
-		if (enabled) {
-			client.getDispatcher().registerListener(module);
-			if (!loadedModules.contains(module))
-				loadedModules.add(module);
-
-			client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
+		
+		if (registerComponents) {
+			for (IComponentProvider provider : module.provideComponents(client)) {
+				try {
+					client.getComponentRegistry().registerComponentProvider(provider);
+				} catch (IllegalStateException e) {
+					Discord4J.LOGGER.error(LogMarkers.MODULES, "Attempted to register a duplicate component provider!", e);
+				}
+			}
 		}
-
+		
+		if (!dryRun) {
+			client.getComponentRegistry().injectInto(module);
+			
+			boolean enabled = module.enable(client);
+			if (enabled) {
+				client.getDispatcher().registerListener(module);
+				if (!loadedModules.contains(module))
+					loadedModules.add(module);
+				
+				client.getDispatcher().dispatch(new ModuleEnabledEvent(module));
+			}
+		}
+		
 		return true;
 	}
 

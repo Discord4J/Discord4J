@@ -20,6 +20,7 @@ package sx.blah.discord.modules;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.events.IListener;
+import sx.blah.discord.util.components.IComponentProvider;
 
 /**
  * This class represents a Discord4J "module", implement it to create a new Module. When enabled, modules are registered
@@ -31,7 +32,7 @@ import sx.blah.discord.api.events.IListener;
  * NOTE: This module must respect the enable() and disable() methods. And it <b>MUST</b> have a default constructor.
  */
 public interface IModule {
-
+	
 	/**
 	 * This is called to enable the module. NOTE: A new instance of this class is created for each enable() call.
 	 *
@@ -44,6 +45,17 @@ public interface IModule {
 	 * This is called to disable the module.
 	 */
 	void disable();
+	
+	/**
+	 * This is called to get component providers from this module. This allows the module to provide components before
+	 * anything is initialized, which helps prevent race conditions on initialization of modules.
+	 *
+	 * @param client The client the components will be provided for.
+	 * @return The providers this module contains.
+	 */
+	default IComponentProvider[] provideComponents(IDiscordClient client) {
+		return new IComponentProvider[0];
+	}
 
 	/**
 	 * This should return the name of the module.

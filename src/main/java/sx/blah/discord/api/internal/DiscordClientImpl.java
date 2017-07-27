@@ -37,6 +37,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.ICacheDelegateProvider;
+import sx.blah.discord.util.components.ComponentRegistry;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -112,6 +113,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * The specific shard (if there is one) that the client is running on.
 	 */
 	private final int[] shard;
+	
+	/**
+	 * The component registry singleton for this client.
+	 */
+	private final ComponentRegistry componentRegistry = new ComponentRegistry();
 
 	/**
 	 * The requests holder object.
@@ -609,6 +615,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public IInvite getInviteForCode(String code) {
 		checkLoggedIn("get invite");
 		return DiscordUtils.getInviteFromJSON(this, REQUESTS.GET.makeRequest(DiscordEndpoints.INVITE + code, InviteObject.class));
+	}
+	
+	@Override
+	public ComponentRegistry getComponentRegistry() {
+		return this.componentRegistry;
 	}
 
 	public int getRetryCount() {

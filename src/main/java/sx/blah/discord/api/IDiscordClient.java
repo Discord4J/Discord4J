@@ -24,6 +24,7 @@ import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.components.ComponentRegistry;
 
 import java.util.Collection;
 import java.util.List;
@@ -544,4 +545,11 @@ public interface IDiscordClient {
 	 * @throws DiscordException
 	 */
 	IUser getApplicationOwner();
+	
+	/**
+	 * This gets the {@link ComponentRegistry} instance this client is using.
+	 *
+	 * @return The {@link ComponentRegistry} corresponding to this client.
+	 */
+	ComponentRegistry getComponentRegistry();
 }
