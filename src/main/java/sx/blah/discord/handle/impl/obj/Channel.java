@@ -182,6 +182,8 @@ public class Channel implements IChannel {
 	}
 
 	private IMessage[] getHistory(long before, int limit) {
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES);
+
 		String query = "?before=" + Long.toUnsignedString(before) + "&limit=" + limit;
 		MessageObject[] messages = client.REQUESTS.GET.makeRequest(
 				DiscordEndpoints.CHANNELS + getStringID() + "/messages" + query,
@@ -282,6 +284,9 @@ public class Channel implements IChannel {
 		IMessage[] chunk;
 		do {
 			chunk = getHistory(lastMessage.get() + 1, chunkSize); // add 1 to make the beginID inclusive
+
+			if (chunk.length == 0) break; // no more messages
+
 			lastMessage.set(chunk[chunk.length - 1].getLongID());
 			Collections.addAll(retrieved, chunk);
 		} while (chunk.length >= chunkSize && retrieved.size() < maxCount && retrieved.stream().noneMatch(m -> m.getLongID() <= endID));
@@ -295,16 +300,11 @@ public class Channel implements IChannel {
 		} else {
 			return new MessageHistory(retrieved);
 		}
-
-
 	}
 
 	@Override
 	public MessageHistory getFullMessageHistory() {
-		return getMessageHistoryIn(
-				DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()),
-				DiscordUtils.getSnowflakeFromTimestamp(getCreationDate()),
-				Integer.MAX_VALUE);
+		return getMessageHistoryTo(getCreationDate());
 	}
 
 	@Override
