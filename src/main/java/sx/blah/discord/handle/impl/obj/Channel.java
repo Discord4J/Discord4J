@@ -181,21 +181,10 @@ public class Channel implements IChannel {
 		}
 	}
 
-	private IMessage[] getHistoryAround(long around, int limit) {
-		return getHistory("around=" + Long.toUnsignedString(around), limit);
-	}
-
-	private IMessage[] getHistoryBefore(long before, int limit) {
-		return getHistory("before=" + Long.toUnsignedString(before), limit);
-	}
-
-	private IMessage[] getHistoryAfter(long after, int limit) {
-		return getHistory("after=" + Long.toUnsignedString(after), limit);
-	}
-
-	private IMessage[] getHistory(String query, int limit) {
+	private IMessage[] getHistory(long before, int limit) {
+		String query = "?before=" + Long.toUnsignedString(before) + "&limit=" + limit;
 		MessageObject[] messages = client.REQUESTS.GET.makeRequest(
-				DiscordEndpoints.CHANNELS + getStringID() + "/messages?" + query + "&limit=" + limit,
+				DiscordEndpoints.CHANNELS + getStringID() + "/messages" + query,
 				MessageObject[].class);
 
 		return Arrays.stream(messages).map(m -> DiscordUtils.getMessageFromJSON(this, m)).toArray(IMessage[]::new);
@@ -217,7 +206,7 @@ public class Channel implements IChannel {
 
 			while (retrieved.size() < messageCount) { // while we dont have messageCount messages
 				IMessage[] chunk = RequestBuffer.request(() ->
-					(IMessage[]) getHistoryBefore(lastMessage.get(), chunkSize)
+					(IMessage[]) getHistory(lastMessage.get(), chunkSize)
 				).get();
 
 				lastMessage.set(chunk[chunk.length - 1].getLongID());
@@ -245,9 +234,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(long id, int maxCount) {
-		MessageHistory to = getMessageHistoryTo(id, maxCount);
-		to.sort(MessageComparator.DEFAULT);
-		return to;
+		return getMessageHistoryIn(id, DiscordUtils.getSnowflakeFromTimestamp(getCreationDate()), maxCount);
 	}
 
 	@Override
@@ -292,25 +279,32 @@ public class Channel implements IChannel {
 		AtomicLong lastMessage = new AtomicLong(beginID);
 		int chunkSize = maxCount < MESSAGE_CHUNK_COUNT ? maxCount : MESSAGE_CHUNK_COUNT;
 
-		while (retrieved.stream().noneMatch(m -> m.getLongID() == endID) && retrieved.size() < maxCount) {
-			IMessage[] chunk = RequestBuffer.request(() ->
-					(IMessage[]) getHistoryBefore(lastMessage.get(), chunkSize)
-			).get();
-
+		IMessage[] chunk;
+		do {
+			chunk = getHistory(lastMessage.get() + 1, chunkSize); // add 1 to make the beginID inclusive
 			lastMessage.set(chunk[chunk.length - 1].getLongID());
 			Collections.addAll(retrieved, chunk);
+		} while (chunk.length >= chunkSize && retrieved.size() < maxCount && retrieved.stream().noneMatch(m -> m.getLongID() <= endID));
+
+		final OptionalInt index = IntStream.range(0, retrieved.size())
+				.filter(i -> retrieved.get(i).getLongID() == endID)
+				.findFirst();
+
+		if (index.isPresent()) {
+			return new MessageHistory(retrieved.subList(0, index.getAsInt() + 1));
+		} else {
+			return new MessageHistory(retrieved);
 		}
 
-		int index = IntStream.range(0, retrieved.size())
-				.filter(i -> retrieved.get(i).getLongID() == endID)
-				.findFirst().orElseThrow(IllegalStateException::new);
 
-		return new MessageHistory(retrieved.subList(0, index));
 	}
 
 	@Override
 	public MessageHistory getFullMessageHistory() {
-		return getMessageHistoryTo(getCreationDate());
+		return getMessageHistoryIn(
+				DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()),
+				DiscordUtils.getSnowflakeFromTimestamp(getCreationDate()),
+				Integer.MAX_VALUE);
 	}
 
 	@Override
