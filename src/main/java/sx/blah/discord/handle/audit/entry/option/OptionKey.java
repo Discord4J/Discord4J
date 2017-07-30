@@ -15,21 +15,22 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.handle.impl.events.guild.channel.message;
+package sx.blah.discord.handle.audit.entry.option;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
+public final class OptionKey<T> {
+	public static final OptionKey<Integer> DELETE_MEMBER_DAYS = newKey();
+	public static final OptionKey<Integer> MEMBERS_REMOVED = newKey();
+	public static final OptionKey<Long> CHANNEL_ID = newKey();
+	public static final OptionKey<Integer> COUNT = newKey();
+	public static final OptionKey<Long> ID = newKey();
+	public static final OptionKey<String> TYPE = newKey();
+	public static final OptionKey<String> ROLE_NAME = newKey();
 
-/**
- * This event is dispatched whenever a message is deleted.
- */
-public class MessageDeleteEvent extends MessageEvent {
-
-	public MessageDeleteEvent(IMessage message) {
-		super(message);
+	private static <T> OptionKey<T> newKey() {
+		return new OptionKey<>();
 	}
 
-	public MessageDeleteEvent(IChannel channel, long messageID) {
-		super(channel, messageID);
+	private OptionKey() {
+
 	}
 }

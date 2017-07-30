@@ -15,21 +15,10 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.handle.impl.events.guild.channel.message;
+package sx.blah.discord.api.internal.json.objects.audit;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-
-/**
- * This event is dispatched whenever a message is deleted.
- */
-public class MessageDeleteEvent extends MessageEvent {
-
-	public MessageDeleteEvent(IMessage message) {
-		super(message);
-	}
-
-	public MessageDeleteEvent(IChannel channel, long messageID) {
-		super(channel, messageID);
-	}
+public class AuditLogChangeObject {
+	public Object new_value;
+	public Object old_value;
+	public String key;
 }

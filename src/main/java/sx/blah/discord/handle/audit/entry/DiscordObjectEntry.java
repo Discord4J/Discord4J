@@ -15,21 +15,25 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.handle.impl.events.guild.channel.message;
+package sx.blah.discord.handle.audit.entry;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.entry.change.ChangeMap;
+import sx.blah.discord.handle.audit.entry.option.OptionMap;
+import sx.blah.discord.handle.obj.IDiscordObject;
+import sx.blah.discord.handle.obj.IUser;
 
-/**
- * This event is dispatched whenever a message is deleted.
- */
-public class MessageDeleteEvent extends MessageEvent {
+public class DiscordObjectEntry<T extends IDiscordObject<T>> extends TargetedEntry {
 
-	public MessageDeleteEvent(IMessage message) {
-		super(message);
+	private final T target;
+
+	public DiscordObjectEntry(T target, long id, IUser user, ChangeMap changes, String reason, ActionType actionType, OptionMap options) {
+		super(id, user, changes, reason, actionType, options, target.getLongID());
+		this.target = target;
 	}
 
-	public MessageDeleteEvent(IChannel channel, long messageID) {
-		super(channel, messageID);
+	public T getTarget() {
+		return target;
 	}
+
 }

@@ -25,6 +25,8 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
 import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
 import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
@@ -32,6 +34,8 @@ import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
@@ -46,6 +50,8 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static sx.blah.discord.util.LongMapCollector.toLongMap;
 
 public class Guild implements IGuild {
 	/**
@@ -934,6 +940,50 @@ public class Guild implements IGuild {
 
 	public void setTotalMemberCount(int totalMemberCount){
 		this.totalMemberCount = totalMemberCount;
+	}
+
+	@Override
+	public AuditLog getAuditLog() {
+		return getAuditLog(null, null);
+	}
+
+	@Override
+	public AuditLog getAuditLog(ActionType actionType) {
+		return getAuditLog(null, actionType);
+	}
+
+	@Override
+	public AuditLog getAuditLog(IUser user) {
+		return getAuditLog(user, null);
+	}
+
+	@Override
+	public AuditLog getAuditLog(IUser user, ActionType actionType) {
+		return getAuditLog(user, actionType, (System.currentTimeMillis() - DiscordUtils.DISCORD_EPOCH) << 22);
+	}
+
+	private AuditLog getAuditLog(IUser user, ActionType actionType, long before) {
+		List<AuditLog> retrieved = new ArrayList<>();
+
+		AuditLogEntryObject[] chunk;
+
+		do {
+			String query = "?limit=100&before=" + before;
+			if (user != null) query += "&user_id=" + Long.toUnsignedString(user.getLongID());
+			if (actionType != null) query += "&action_type=" + actionType.getRaw();
+
+			AuditLogObject auditLog = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+					DiscordEndpoints.GUILDS + getStringID() + "/audit-logs" + query,
+					AuditLogObject.class);
+			chunk = auditLog.audit_log_entries;
+
+			if (chunk.length == 0) break;
+
+			retrieved.add(DiscordUtils.getAuditLogFromJSON(this, auditLog));
+			before = Long.parseLong(auditLog.audit_log_entries[auditLog.audit_log_entries.length - 1].id);
+		} while (chunk.length == 100);
+
+		return new AuditLog(retrieved.stream().map(AuditLog::getEntries).flatMap(Collection::stream).collect(toLongMap()));
 	}
 
 	@Override

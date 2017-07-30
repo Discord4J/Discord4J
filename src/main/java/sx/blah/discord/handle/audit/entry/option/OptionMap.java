@@ -15,21 +15,29 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.handle.impl.events.guild.channel.message;
+package sx.blah.discord.handle.audit.entry.option;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * This event is dispatched whenever a message is deleted.
- */
-public class MessageDeleteEvent extends MessageEvent {
+@SuppressWarnings("unchecked")
+public class OptionMap {
 
-	public MessageDeleteEvent(IMessage message) {
-		super(message);
+	private final Map<OptionKey<?>, Object> backing;
+
+	public OptionMap() {
+		this(new HashMap<>());
 	}
 
-	public MessageDeleteEvent(IChannel channel, long messageID) {
-		super(channel, messageID);
+	private OptionMap(Map<OptionKey<?>, Object> backing) {
+		this.backing = backing;
+	}
+
+	public <V> V get(OptionKey<V> key) {
+		return (V) backing.get(key);
+	}
+
+	public <V> V put(OptionKey<V> key, V value) {
+		return (V) backing.put(key, value);
 	}
 }

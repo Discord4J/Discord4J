@@ -15,21 +15,25 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.handle.impl.events.guild.channel.message;
+package sx.blah.discord.handle.audit.entry.change;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
+import java.util.Optional;
 
-/**
- * This event is dispatched whenever a message is deleted.
- */
-public class MessageDeleteEvent extends MessageEvent {
+public class AuditLogChange<T> {
 
-	public MessageDeleteEvent(IMessage message) {
-		super(message);
+	private final T oldValue;
+	private final T newValue;
+
+	public AuditLogChange(T oldValue, T newValue) {
+		this.oldValue = oldValue;
+		this.newValue = newValue;
 	}
 
-	public MessageDeleteEvent(IChannel channel, long messageID) {
-		super(channel, messageID);
+	public Optional<T> getOldValue() {
+		return Optional.ofNullable(oldValue);
+	}
+
+	public Optional<T> getNewValue() {
+		return Optional.ofNullable(newValue);
 	}
 }

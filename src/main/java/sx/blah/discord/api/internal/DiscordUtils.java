@@ -31,12 +31,23 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
+import sx.blah.discord.handle.audit.AuditLog;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.entry.AuditLogEntry;
+import sx.blah.discord.handle.audit.entry.DiscordObjectEntry;
+import sx.blah.discord.handle.audit.entry.TargetedEntry;
+import sx.blah.discord.handle.audit.entry.change.ChangeMap;
+import sx.blah.discord.handle.audit.entry.option.OptionKey;
+import sx.blah.discord.handle.audit.entry.option.OptionMap;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.RequestBuilder;
 import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -53,6 +64,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static sx.blah.discord.handle.audit.entry.change.ChangeMap.Collector.toChangeMap;
+import static sx.blah.discord.util.LongMapCollector.*;
 
 /**
  * Collection of internal Discord4J utilities.
@@ -658,6 +672,107 @@ public class DiscordUtils {
 			}
 
 		return reactions;
+	}
+
+	public static AuditLog getAuditLogFromJSON(IGuild guild, AuditLogObject json) {
+		LongMap<IUser> users = Arrays.stream(json.users)
+				.map(u -> DiscordUtils.getUserFromJSON(guild.getShard(), u))
+				.collect(toLongMap());
+
+		LongMap<IWebhook> webhooks = Arrays.stream(json.webhooks)
+				.map(w -> DiscordUtils.getWebhookFromJSON(guild.getChannelByID(Long.parseUnsignedLong(w.channel_id)), w))
+				.collect(toLongMap());
+
+		LongMap<AuditLogEntry> entries = Arrays.stream(json.audit_log_entries)
+				.map(e -> DiscordUtils.getAuditLogEntryFromJSON(guild, users, webhooks, e))
+				.collect(toLongMap());
+
+		return new AuditLog(entries);
+	}
+
+	public static AuditLogEntry getAuditLogEntryFromJSON(IGuild guild, LongMap<IUser> users, LongMap<IWebhook> webhooks, AuditLogEntryObject json) {
+		long targetID = json.target_id == null ? 0 : Long.parseUnsignedLong(json.target_id);
+		long id = Long.parseUnsignedLong(json.id);
+		IUser user = users.get(Long.parseUnsignedLong(json.user_id));
+
+		ChangeMap changes = json.changes == null ? new ChangeMap() : Arrays.stream(json.changes).collect(toChangeMap());
+
+		OptionMap options = new OptionMap();
+		if (json.options != null) {
+			if (json.options.delete_member_days != null) options.put(OptionKey.DELETE_MEMBER_DAYS, Integer.parseInt(json.options.delete_member_days));
+			if (json.options.members_removed != null) options.put(OptionKey.MEMBERS_REMOVED, Integer.parseInt(json.options.members_removed));
+			if (json.options.channel_id != null) options.put(OptionKey.CHANNEL_ID, Long.parseUnsignedLong(json.options.channel_id));
+			if (json.options.count != null) options.put(OptionKey.COUNT, Integer.parseInt(json.options.count));
+			if (json.options.id != null) options.put(OptionKey.ID, Long.parseUnsignedLong(json.options.id));
+			if (json.options.type != null) options.put(OptionKey.TYPE, json.options.type);
+			if (json.options.role_name != null) options.put(OptionKey.ROLE_NAME, json.options.role_name);
+		}
+
+		ActionType actionType = ActionType.fromRaw(json.action_type);
+		switch (actionType) {
+			case GUILD_UPDATE:
+				return new DiscordObjectEntry<>(guild, id, user, changes, json.reason, actionType, options);
+			case CHANNEL_CREATE:
+			case CHANNEL_UPDATE:
+			case CHANNEL_OVERWRITE_CREATE:
+			case CHANNEL_OVERWRITE_UPDATE:
+			case CHANNEL_OVERWRITE_DELETE:
+				IChannel channel = guild.getChannelByID(targetID);
+				if (channel == null) channel = guild.getVoiceChannelByID(targetID);
+
+				if (channel == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(channel, id, user, changes, json.reason, actionType, options);
+			case MEMBER_KICK:
+			case MEMBER_BAN_ADD:
+			case MEMBER_BAN_REMOVE:
+			case MEMBER_UPDATE:
+			case MEMBER_ROLE_UPDATE:
+			case MESSAGE_DELETE: // message delete target is the author of the message
+				IUser target = users.get(targetID);
+
+				if (target == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(target, id, user, changes, json.reason, actionType, options);
+			case ROLE_CREATE:
+			case ROLE_UPDATE:
+				IRole role = guild.getRoleByID(targetID);
+
+				if (role == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(role, id, user, changes, json.reason, actionType, options);
+			case WEBHOOK_CREATE:
+			case WEBHOOK_UPDATE:
+				IWebhook webhook = webhooks.get(targetID);
+
+				if (webhook == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(webhook, id, user, changes, json.reason, actionType, options);
+			case EMOJI_CREATE:
+			case EMOJI_UPDATE:
+				IEmoji emoji = guild.getEmojiByID(targetID);
+
+				if (emoji == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(emoji, id, user, changes, json.reason, actionType, options);
+			case CHANNEL_DELETE:
+			case ROLE_DELETE:
+			case WEBHOOK_DELETE:
+			case EMOJI_DELETE:
+				return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+			case INVITE_CREATE:
+			case INVITE_DELETE:
+			case INVITE_UPDATE:
+			case MEMBER_PRUNE:
+				return new AuditLogEntry(id, user, changes, json.reason, actionType, options);
+		}
+
+		return null;
 	}
 
 	/**

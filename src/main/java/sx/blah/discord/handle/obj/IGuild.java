@@ -19,6 +19,8 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.util.*;
 
 import java.time.LocalDateTime;
@@ -875,4 +877,12 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The count of members on the guild
 	 */
 	int getTotalMemberCount();
+
+	AuditLog getAuditLog();
+
+	AuditLog getAuditLog(ActionType actionType);
+
+	AuditLog getAuditLog(IUser user);
+
+	AuditLog getAuditLog(IUser user, ActionType actionType);
 }
