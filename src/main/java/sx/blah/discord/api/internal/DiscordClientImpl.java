@@ -292,7 +292,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		String gateway = null;
 		try {
 			GatewayResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY, GatewayResponse.class);
-			gateway = response.url + "?encoding=json&v=" + DiscordWS.GATEWAY_VERSION;
+			gateway = response.url + "?encoding=json&v=" + DiscordUtils.API_VERSION;
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}

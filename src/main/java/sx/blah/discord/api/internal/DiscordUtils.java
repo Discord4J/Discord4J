@@ -60,6 +60,11 @@ import java.util.stream.Collectors;
 public class DiscordUtils {
 
 	/**
+	 * The version of Discord's API and Gateway used by Discord4J.
+	 */
+	public static final String API_VERSION = "6";
+
+	/**
 	 * Re-usable instance of jackson.
 	 */
 	public static final ObjectMapper MAPPER = new ObjectMapper()

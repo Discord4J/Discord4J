@@ -39,10 +39,10 @@ public class ChannelObject {
 	public boolean nsfw;
 
 	public static class Type {
-		public static final int GUILD_TEXT     = 0;
-		public static final int PRIVATE        = 1;
-		public static final int GUILD_VOICE    = 2;
-		public static final int GROUP_PRIVATE  = 3;
+		public static final int GUILD_TEXT = 0;
+		public static final int PRIVATE = 1;
+		public static final int GUILD_VOICE = 2;
+		public static final int GROUP_PRIVATE = 3;
 		public static final int GUILD_CATEGORY = 4;
 	}
 
