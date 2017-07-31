@@ -705,6 +705,13 @@ public class Guild implements IGuild {
 	}
 
 	@Override
+	public IChannel getDefaultChannel() {
+		return getChannels().stream()
+				.filter(c -> PermissionUtils.hasPermissions(c, client.getOurUser(), Permissions.READ_MESSAGES))
+				.findFirst().orElse(null);
+	}
+
+	@Override
 	public List<IInvite> getInvites() {
 		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_SERVER);
 		ExtendedInviteObject[] response = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
