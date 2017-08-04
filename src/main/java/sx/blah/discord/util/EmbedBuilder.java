@@ -64,7 +64,7 @@ public class EmbedBuilder {
 	/**
 	 * The maximum character limit across all visible fields.
 	 */
-	public static final int MAX_CHAR_LIMIT = 4000;
+	public static final int MAX_CHAR_LIMIT = 6000;
 
 	private final EmbedObject embed = new EmbedObject(null, "rich", null, null, null, 0, null, null, null, null, null,
 			null, null);
