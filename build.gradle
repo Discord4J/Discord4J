@@ -1,0 +1,129 @@
+plugins {
+    id "com.github.hierynomus.license" version "0.14.0"
+}
+
+ext {
+    // Project constants
+    github_org = 'Discord4J'
+    project_name = 'Discord4J'
+    artifact_group = 'com.discord4j'
+    project_version = '3.0.0-SNAPSHOT'
+    project_description = 'Java interface for the Discord API'
+    project_jdk = '1.8'
+
+    project_pom = {
+        name project_name
+        description project_description
+        url "https://github.com/${github_org}/${project_name}"
+        developers {
+            developer {
+                id 'austinv11'
+                name 'austinv11'
+            }
+        }
+        licenses {
+            license {
+                name 'LGPLv3'
+                url 'https://opensource.org/licenses/LGPL-3.0'
+                distribution 'repo'
+            }
+        }
+        scm {
+            url "https://github.com/${github_org}/${project_name}.git"
+            connection "scm:git:https://github.com/${github_org}/${project_name}.git"
+            developerConnection "scm:git:git@github.com:${github_org}/${project_name}.git"
+        }
+        organization {
+            name github_org
+            url "https://github.com/${github_org}"
+        }
+    }
+
+    /** Function returns a new manifest that can be customized per module */
+    defaultManifest = {
+        return manifest {
+            def git_cmd = 'git rev-parse HEAD'
+            def git_proc = git_cmd.execute()
+            attributes 'SCM-Revision': git_proc.text.trim()
+            attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
+            attributes 'Build-Host': InetAddress.localHost.hostName
+        }
+    }
+
+    /** Used where gradle task evaluation would fail because of an undefined value, even if the task wasn't targeted. */
+    defaultBlank = { closure ->
+        try {
+            closure()
+        } catch (MissingPropertyException e) {
+            ''
+        }
+    }
+}
+
+allprojects {
+
+    group = artifact_group
+    version = project_version
+
+    apply plugin: 'java'
+    sourceCompatibility = project_jdk
+    targetCompatibility = project_jdk
+
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    license { header rootProject.file('src/license/HEADER') }
+    assemble.dependsOn(licenseFormat)
+
+    repositories {
+		jcenter()
+        mavenCentral()
+		maven { url "https://repo.spring.io/milestone" }
+    }
+
+    jar { doFirst { manifest = defaultManifest() } }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from 'build/docs/javadoc'
+        doFirst { manifest = defaultManifest() }
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+        doFirst { manifest = defaultManifest() }
+    }
+
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    signing {
+        required { !version.endsWith('SNAPSHOT') && gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        dependsOn licenseFormat
+        enabled false
+
+        repositories.mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: defaultBlank({ deployUrl })) {
+                // If these are not defined assemble needlessly fails for unrelated tasks, hence, defaultBlank.
+                authentication(userName: defaultBlank({ deployUser }), password: defaultBlank({ deployPass }))
+            }
+
+            pom.project project_pom
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0'
+    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.0-all.zip'
+}
