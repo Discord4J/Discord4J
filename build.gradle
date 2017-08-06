@@ -77,9 +77,10 @@ allprojects {
     assemble.dependsOn(licenseFormat)
 
     repositories {
-		jcenter()
+        jcenter()
         mavenCentral()
-		maven { url "https://repo.spring.io/milestone" }
+        maven { url "https://repo.spring.io/milestone" }
+        maven { url 'https://jitpack.io' }
     }
 
     dependencies {

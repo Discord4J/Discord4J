@@ -1,0 +1,6 @@
+dependencies {
+    compile project(':rest')
+    compile project(':gateway')
+
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+}
