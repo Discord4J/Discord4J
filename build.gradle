@@ -71,6 +71,7 @@ allprojects {
 
     apply plugin: 'maven'
     apply plugin: 'signing'
+    apply plugin: 'license'
 
     license { header rootProject.file('src/license/HEADER') }
     assemble.dependsOn(licenseFormat)
