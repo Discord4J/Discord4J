@@ -19,7 +19,7 @@ Well users can manually add them by right clicking on a message or hitting the l
 This is for if you have a custom emoji and want to react with it (`IEmoji` are emojis that are guild specific).
 
 - `ReactionEmoji.of(String)`
-This one is for the unicode of an emoji.
+This one is for the unicode of an emoji. (For instance, `❤` is the unicode for `:heart:`. This can be gotten on any non-custom emoji as `\:emoji:`, in this case `\:heart:`)
 
 - `ReactionEmoji.of(String, long)`
 This is for custom emojis from other servers. Since bots can do that now. I took the :eyesR: emoji from one of the servers my bot is in and used it for this. To get the name (String) and the ID (long), you just type this into your chat: `\:emoji:`, so in my case `\:eyesR:`. This gives me `<:eyesR:284174731261902850>`. It'll be different for every server. Using the following code I can achieve the following image:
@@ -33,20 +33,18 @@ Code:
 ```
 
 
-### Unicode Emojis
+### Emoji Manager
 
-### ReactionEmoji is preffered.
-
-Unicode emojis are just the unicode version of the emoji (this method doesn't work with server added emojis). To grab this all you need to do is send a message in Discord. Take the emoji name `:heart:`, and just add a backslash. Like `\:heart:`. Now copy and paste that into an IMessage#addReaction(String) and proof! Suddenly it works. Example here:
-
-![Reaction_By_Unicode](https://i.imgur.com/pZmhITs.gif)
+Emoji Manager uses the [Emoji-Java](https://github.com/vdurmont/emoji-java) library. This way is really simple. Just use `EmojiManager#getForAlias(String)`. For the above result just simple do this:
 
 Code:
 ```java
-message.addReaction("❤");
+Emoji e = EmojiManager.getForAlias("heart");
+message.addReaction(e);
 ```
 
+Remember to not use colons when grabbing it by alias. Unfortunatley EmojiJava doesn't support all emojis, such as `:track_next:`.
 
 ### Final Note
 
-Unicode should really only be used when you have to get the unicode by shortcode. Ohterwise, it's best to use ReactionEmoji. 
+EmojiManager should really only be used when you have to get the `Emoji` by shortcode (for instance, the word `heart` in `:heart:`). Ohterwise, use ReactionEmoji, it's much better.. 
