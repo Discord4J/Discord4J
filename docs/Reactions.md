@@ -35,7 +35,7 @@ Code:
 
 ### Emoji Manager
 
-Emoji Manager uses the [Emoji-Java](https://github.com/vdurmont/emoji-java) library. This way is really simple. Just use `EmojiManager#getForAlias(String)`. For the above result just simple do this:
+EmojiManager, from the [Emoji-Java](https://github.com/vdurmont/emoji-java) library, can be used to get an emoji by its shortcode. It returns an `Emoji` object which can be directly used in `IMessage#addReaction()` instead of `ReactionEmoji`. This should only be used when you have to get a unicode emoji by its name. All other forms are supported through `ReactionEmoji` and are much cleaner. For the same result as above just, just do this:
 
 Code:
 ```java
@@ -43,8 +43,5 @@ Emoji e = EmojiManager.getForAlias("heart");
 message.addReaction(e);
 ```
 
-Remember to not use colons when grabbing it by alias. Unfortunatley EmojiJava doesn't support all emojis, such as `:track_next:`.
+Remember to not use colons when grabbing it by alias. Unfortunatley EmojiJava doesn't support all emojis, such as `:track_next:`, and you can find the unicode online or by using the method explained in the section above.
 
-### Final Note
-
-EmojiManager should really only be used when you have to get the `Emoji` by shortcode (for instance, the word `heart` in `:heart:`). Ohterwise, use ReactionEmoji, it's much better.. 
