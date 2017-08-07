@@ -695,8 +695,18 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * so it may not actually be named 'general'.
 	 *
 	 * @return The default/general channel.
+	 *
+	 * @deprecated Use {@link #getDefaultChannel()} instead.
 	 */
+	@Deprecated
 	IChannel getGeneralChannel();
+
+	/**
+	 * Gets the channel in the guild with the highest position that the bot user can read.
+	 *
+	 * @return The channel in the guild with the highest position that the bot user can read.
+	 */
+	IChannel getDefaultChannel();
 
 	/**
 	 * This gets all the currently available invites for this guild.

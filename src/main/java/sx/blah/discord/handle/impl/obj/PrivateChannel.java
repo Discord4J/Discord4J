@@ -59,12 +59,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public LongMap<PermissionOverride> getUserOverridesLong() {
-		return LongMap.emptyMap();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public LongMap<PermissionOverride> getRoleOverridesLong() {
-		return LongMap.emptyMap();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -73,6 +73,16 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 			return EnumSet.allOf(Permissions.class);
 
 		return EnumSet.noneOf(Permissions.class);
+	}
+
+	@Override
+	public void edit(String name, int position, String topic) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IExtendedInvite> getExtendedInvites() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -152,12 +162,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public String getTopic() {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public IGuild getGuild() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -227,11 +237,11 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean isNSFW() {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 }

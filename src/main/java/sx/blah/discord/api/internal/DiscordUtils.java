@@ -389,7 +389,8 @@ public class DiscordUtils {
 			return message;
 		} else {
 			long authorId = Long.parseUnsignedLong(json.author.id);
-			IUser author = channel.getGuild() == null ? getUserFromJSON(channel.getShard(), json.author) : channel.getGuild()
+			IGuild guild = channel.isPrivate() ? null : channel.getGuild();
+			IUser author = guild == null ? getUserFromJSON(channel.getShard(), json.author) : guild
 					.getUsers()
 					.stream()
 					.filter(it -> it.getLongID() == authorId)

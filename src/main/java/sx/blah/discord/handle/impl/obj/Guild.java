@@ -244,19 +244,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IUser getUserByID(long id) {
-		if (users == null)
-			return null;
-
-		IUser user = users.get(id);
-
-		if (user == null) {
-			if (client.getOurUser() != null && id == client.getOurUser().getLongID())
-				user = client.getOurUser();
-			else if (id == ownerID)
-				user = getOwner();
-		}
-
-		return user;
+		return users.get(id);
 	}
 
 	@Override
@@ -702,6 +690,13 @@ public class Guild implements IGuild {
 	@Override
 	public IChannel getGeneralChannel() {
 		return getChannelByID(this.id);
+	}
+
+	@Override
+	public IChannel getDefaultChannel() {
+		return getChannels().stream()
+				.filter(c -> PermissionUtils.hasPermissions(c, client.getOurUser(), Permissions.READ_MESSAGES))
+				.findFirst().orElse(null);
 	}
 
 	@Override
