@@ -629,7 +629,7 @@ public class Guild implements IGuild {
 				new ChannelCreateRequest(name, "text"),
 				ChannelObject.class);
 
-		IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
+		IChannel channel = DiscordUtils.getChannelFromJSON(getShard(), this, response);
 		channels.put(channel);
 
 		return channel;
@@ -648,7 +648,7 @@ public class Guild implements IGuild {
 				new ChannelCreateRequest(name, "voice"),
 				ChannelObject.class);
 
-		IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
+		IVoiceChannel channel = (IVoiceChannel) DiscordUtils.getChannelFromJSON(getShard(), this, response);
 		channels.put(channel);
 
 		return channel;

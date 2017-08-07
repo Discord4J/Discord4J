@@ -26,9 +26,19 @@ import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.TypingEvent;
+import sx.blah.discord.handle.impl.events.VoiceChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.VoiceChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.*;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.*;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
@@ -107,7 +117,7 @@ class DispatchHandler {
 						guildDelete(MAPPER.treeToValue(json, GuildObject.class));
 						break;
 					case "CHANNEL_CREATE":
-						channelCreate(json);
+						channelCreate(MAPPER.treeToValue(json, ChannelObject.class));
 						break;
 					case "CHANNEL_DELETE":
 						channelDelete(MAPPER.treeToValue(json, ChannelObject.class));
@@ -204,8 +214,8 @@ class DispatchHandler {
 			return true;
 		}).andThen(() -> {
 			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard 0
-				for (PrivateChannelObject pmObj : ready.private_channels) {
-					IPrivateChannel pm = DiscordUtils.getPrivateChannelFromJSON(shard, pmObj);
+				for (ChannelObject pmObj : ready.private_channels) {
+					IPrivateChannel pm = (IPrivateChannel) DiscordUtils.getChannelFromJSON(shard, null, pmObj);
 					shard.privateChannels.put(pm);
 				}
 			}
@@ -500,36 +510,28 @@ class DispatchHandler {
 		}
 	}
 
-	private void channelCreate(JsonNode json) throws JsonProcessingException {
-		boolean isPrivate = json.get("is_private").asBoolean(false);
-
-		if (isPrivate) { // PM channel.
-			PrivateChannelObject event = MAPPER.treeToValue(json, PrivateChannelObject.class);
-			if (shard.privateChannels.containsKey(event.id))
-				return; // we already have this PM channel; no need to create another.
-
-			shard.privateChannels.put(DiscordUtils.getPrivateChannelFromJSON(shard, event));
-
-		} else { // Regular channel.
-			ChannelObject event = MAPPER.treeToValue(json, ChannelObject.class);
-			String type = event.type;
-			Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+	private void channelCreate(ChannelObject json) {
+		if (json.type == ChannelObject.Type.PRIVATE) {
+			if (!shard.privateChannels.containsKey(json.id)) {
+				shard.privateChannels.put((IPrivateChannel) DiscordUtils.getChannelFromJSON(shard, null, json));
+			}
+		} else {
+			Guild guild = (Guild) shard.getGuildByID(Long.parseUnsignedLong(json.guild_id));
 			if (guild != null) {
-				if (type.equalsIgnoreCase("text")) { //Text channel
-					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(guild, event);
+				IChannel channel = DiscordUtils.getChannelFromJSON(shard, guild, json);
+				if (json.type == ChannelObject.Type.GUILD_TEXT) {
 					guild.channels.put(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
-				} else if (type.equalsIgnoreCase("voice")) {
-					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(guild, event);
-					guild.voiceChannels.put(channel);
-					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
+				} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
+					guild.voiceChannels.put((IVoiceChannel) channel);
+					client.dispatcher.dispatch(new VoiceChannelCreateEvent((IVoiceChannel) channel));
 				}
 			}
 		}
 	}
 
 	private void channelDelete(ChannelObject json) {
-		if (json.type.equalsIgnoreCase("text")) {
+		if (json.type == ChannelObject.Type.GUILD_TEXT) {
 			Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.id));
 			if (channel != null) {
 				if (!channel.isPrivate())
@@ -538,7 +540,7 @@ class DispatchHandler {
 					shard.privateChannels.remove(channel);
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
-		} else if (json.type.equalsIgnoreCase("voice")) {
+		} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 			VoiceChannel channel = (VoiceChannel) client.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
 			if (channel != null) {
 				((Guild) channel.getGuild()).voiceChannels.remove(channel);
@@ -557,27 +559,20 @@ class DispatchHandler {
 	}
 
 	private void channelUpdate(ChannelObject json) {
-		if (!json.is_private) {
-			if (json.type.equalsIgnoreCase("text")) {
-				Channel toUpdate = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.id));
-				if (toUpdate != null) {
-					IChannel oldChannel = toUpdate.copy();
-
-					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(toUpdate.getGuild(), json);
-
-					toUpdate.loadWebhooks();
-
-					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
-				}
-			} else if (json.type.equalsIgnoreCase("voice")) {
-				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
-				if (toUpdate != null) {
-					VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
-
-					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(toUpdate.getGuild(), json);
-
-					client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
-				}
+		if (json.type == ChannelObject.Type.GUILD_TEXT) {
+			Channel toUpdate = (Channel) shard.getChannelByID(Long.parseUnsignedLong(json.id));
+			if (toUpdate != null) {
+				IChannel oldChannel = toUpdate.copy();
+				toUpdate = (Channel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
+				toUpdate.loadWebhooks();
+				client.dispatcher.dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+			}
+		} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
+			IVoiceChannel toUpdate = shard.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
+			if (toUpdate != null) {
+				IVoiceChannel oldChannel = toUpdate.copy();
+				toUpdate = (IVoiceChannel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
+				client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 			}
 		}
 	}

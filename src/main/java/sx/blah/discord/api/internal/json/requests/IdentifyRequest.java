@@ -26,17 +26,19 @@ public class IdentifyRequest {
 	private final boolean compress;
 	private final int large_threshold;
 	private final int[] shard;
+	private final PresenceUpdateRequest presence;
 
-	public IdentifyRequest(String token, int[] shard) {
-		this(token, new Properties(), true, 250, shard);
+	public IdentifyRequest(String token, int[] shard, PresenceUpdateRequest presence) {
+		this(token, new Properties(), true, 250, shard, presence);
 	}
 
-	private IdentifyRequest(String token, Properties properties, boolean compress, int large_threshold, int[] shard) {
+	private IdentifyRequest(String token, Properties properties, boolean compress, int large_threshold, int[] shard, PresenceUpdateRequest presence) {
 		this.token = token;
 		this.properties = properties;
 		this.compress = compress;
 		this.large_threshold = large_threshold;
 		this.shard = shard;
+		this.presence = presence;
 	}
 
 	private static class Properties {

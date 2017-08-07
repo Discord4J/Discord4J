@@ -23,7 +23,9 @@ import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.Requests;
+import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.responses.GatewayBotResponse;
+import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.ICacheDelegateProvider;
@@ -61,7 +63,11 @@ public class ClientBuilder {
 	private long eventThreadTimeout = 60L;
 	private TimeUnit eventThreadTimeoutUnit = TimeUnit.SECONDS;
 	private int overflowCapacity = 128;
-	
+
+	private StatusType status;
+	private String playingText;
+	private String streamUrl;
+
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
 	private final List<Object> listeners = new ArrayList<>();
@@ -265,7 +271,7 @@ public class ClientBuilder {
 		this.shard = new int[]{shardIndex, totalShards};
 		return this;
 	}
-	
+
 	/**
 	 * Sets the policy to use in the case where the EventDispatcher cannot keep up with the volume of events being sent.
 	 *
@@ -276,7 +282,7 @@ public class ClientBuilder {
 		this.backpressureHandler = handler;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the minimum amount of threads which must be alive at any given time in the EventDispatcher. Higher values
 	 * are more expensive overall but lead to quicker availability of threads.
@@ -288,7 +294,7 @@ public class ClientBuilder {
 		this.minimumPoolSize = minimumDispatchThreads;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the maximum amount of threads which may be alive at any given time in the EventDispatcher. Higher values
 	 * are more expensive overall but lead to quicker availability of threads.
@@ -300,7 +306,7 @@ public class ClientBuilder {
 		this.maximumPoolSize = maximumDispatchThreads;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the amount of time of idleness before threads are killed in the EventDispatcher while the number of threads
 	 * is higher than the minimum allowed.
@@ -314,7 +320,7 @@ public class ClientBuilder {
 		this.eventThreadTimeoutUnit = unit;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the amount of events allowed to overflow by without calling the backpressure handler. This allows for easy
 	 * recovery in the event that there is a sudden, unexpected burst of events which the EventDispatcher cannot handle.
@@ -324,6 +330,98 @@ public class ClientBuilder {
 	 */
 	public ClientBuilder withEventOverflowCapacity(int overflowCapacity) {
 		this.overflowCapacity = overflowCapacity;
+		return this;
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to online.
+	 *
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder online() {
+		return online(null);
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to online with the given playing text.
+	 *
+	 * @param playingText The game playing text.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder online(String playingText) {
+		return setPresence(StatusType.ONLINE, playingText, null);
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to idle.
+	 *
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder idle() {
+		return idle(null);
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to idle with the given playing text.
+	 *
+	 * @param playingText The game playing text.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder idle(String playingText) {
+		return setPresence(StatusType.IDLE, playingText, null);
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to do not disturb.
+	 *
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder dnd() {
+		return dnd(null);
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to do not disturb with the given playing text.
+	 *
+	 * @param playingText The game playing text.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder dnd(String playingText) {
+		return setPresence(StatusType.DND, playingText, null);
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to invisible.
+	 *
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder invisible() {
+		return setPresence(StatusType.INVISIBLE, null, null);
+	}
+
+	/**
+	 * Sets the status to be sent to Discord on login to streaming with the given playing text and stream url.
+	 *
+	 * @param playingText The game playing text.
+	 * @param streamUrl The valid twitch.tv streaming url.
+	 * @return The instance of the builder.
+	 */
+	public ClientBuilder streaming(String playingText, String streamUrl) {
+		return setPresence(StatusType.ONLINE, playingText, streamUrl);
+	}
+
+	/**
+	 * Sets the presence to be sent to Discord on login.
+	 *
+	 * @param status The status type.
+	 * @param playingText The optional game playing text.
+	 * @param streamUrl The optional stream url.
+	 * @return The instance of the builder.
+	 */
+	private ClientBuilder setPresence(StatusType status, String playingText, String streamUrl) {
+		this.status = status;
+		this.playingText = playingText;
+		this.streamUrl = streamUrl;
 		return this;
 	}
 
@@ -346,9 +444,10 @@ public class ClientBuilder {
 			shardCount = response.shards;
 		}
 
-		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon, maxMissedPings,
-				maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, backpressureHandler, minimumPoolSize,
-				maximumPoolSize, overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
+		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon,
+				maxMissedPings, maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, backpressureHandler,
+				minimumPoolSize, maximumPoolSize, overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit,
+				status == null ? null : new PresenceUpdateRequest(status, playingText, streamUrl));
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();

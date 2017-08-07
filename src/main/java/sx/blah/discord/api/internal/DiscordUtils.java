@@ -60,6 +60,11 @@ import java.util.stream.Collectors;
 public class DiscordUtils {
 
 	/**
+	 * The version of Discord's API and Gateway used by Discord4J.
+	 */
+	public static final String API_VERSION = "6";
+
+	/**
 	 * Re-usable instance of jackson.
 	 */
 	public static final ObjectMapper MAPPER = new ObjectMapper()
@@ -299,12 +304,12 @@ public class DiscordUtils {
 				}
 
 			if (json.channels != null)
-				for (ChannelObject channelResponse : json.channels) {
-					String channelType = channelResponse.type;
-					if (channelType.equalsIgnoreCase("text")) {
-						guild.channels.put(getChannelFromJSON(guild, channelResponse));
-					} else if (channelType.equalsIgnoreCase("voice")) {
-						guild.voiceChannels.put(getVoiceChannelFromJSON(guild, channelResponse));
+				for (ChannelObject channelJSON : json.channels) {
+					IChannel channel = getChannelFromJSON(shard, guild, channelJSON);
+					if (channelJSON.type == ChannelObject.Type.GUILD_TEXT) {
+						guild.channels.put(channel);
+					} else if (channelJSON.type == ChannelObject.Type.GUILD_VOICE) {
+						guild.voiceChannels.put((IVoiceChannel) channel);
 					}
 				}
 
@@ -355,26 +360,6 @@ public class DiscordUtils {
 
 		((Guild) guild).joinTimes.put(new Guild.TimeStampHolder(user.getLongID(), convertFromTimestamp(json.joined_at)));
 		return user;
-	}
-
-	/**
-	 * Creates a private channel object from a json response.
-	 *
-	 * @param shard The shard this channel is on.
-	 * @param json  The json response.
-	 * @return The private channel object.
-	 */
-	public static IPrivateChannel getPrivateChannelFromJSON(IShard shard, PrivateChannelObject json) {
-		IPrivateChannel channel = ((ShardImpl) shard).privateChannels.get(json.id);
-		if (channel == null) {
-			User recipient = (User) shard.getUserByID(Long.parseUnsignedLong(json.id));
-			if (recipient == null)
-				recipient = getUserFromJSON(shard, json.recipient);
-
-			channel = new PrivateChannel((DiscordClientImpl) shard.getClient(), recipient, Long.parseUnsignedLong(json.id));
-		}
-
-		return channel;
 	}
 
 	/**
@@ -488,30 +473,48 @@ public class DiscordUtils {
 	/**
 	 * Creates a channel object from a json response.
 	 *
-	 * @param guild the guild.
+	 * @param shard the shard.
 	 * @param json  The json response.
 	 * @return The channel object.
 	 */
-	public static IChannel getChannelFromJSON(IGuild guild, ChannelObject json) {
-		Channel channel;
+	public static IChannel getChannelFromJSON(IShard shard, IGuild guild, ChannelObject json) {
+		DiscordClientImpl client = (DiscordClientImpl) shard.getClient();
+		long id = Long.parseUnsignedLong(json.id);
+		Channel channel = (Channel) shard.getChannelByID(id);
+		if (channel == null) channel = (Channel) shard.getVoiceChannelByID(id);
 
-		Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs((DiscordClientImpl) guild.getClient(), json.permission_overwrites);
-		Cache<IChannel.PermissionOverride> userOverrides = overrides.getLeft();
-		Cache<IChannel.PermissionOverride> roleOverrides = overrides.getRight();
+		if (json.type == ChannelObject.Type.PRIVATE) {
+			if (channel == null) {
+				User recipient = getUserFromJSON(shard, json.recipients[0]);
+				channel = new PrivateChannel(client, recipient, id);
+			}
+		} else if (json.type == ChannelObject.Type.GUILD_TEXT || json.type == ChannelObject.Type.GUILD_VOICE) {
+			Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
+					getPermissionOverwritesFromJSONs(client, json.permission_overwrites);
 
-		if ((channel = (Channel) guild.getChannelByID(Long.parseUnsignedLong(json.id))) != null) {
-			channel.setName(json.name);
-			channel.setPosition(json.position);
-			channel.setTopic(json.topic);
-			channel.setNSFW(json.nsfw);
-			channel.userOverrides.clear();
-			channel.userOverrides.putAll(userOverrides);
-			channel.roleOverrides.clear();
-			channel.roleOverrides.putAll(roleOverrides);
-		} else {
-			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id),
-					guild, json.topic, json.position, json.nsfw, roleOverrides, userOverrides);
+			if (channel != null) {
+				channel.setName(json.name);
+				channel.setPosition(json.position);
+				channel.setNSFW(json.nsfw);
+				channel.userOverrides.clear();
+				channel.roleOverrides.clear();
+				channel.userOverrides.putAll(overrides.getLeft());
+				channel.roleOverrides.putAll(overrides.getRight());
+
+				if (json.type == ChannelObject.Type.GUILD_TEXT) {
+					channel.setTopic(json.topic);
+				} else {
+					VoiceChannel vc = (VoiceChannel) channel;
+					vc.setUserLimit(json.user_limit);
+					vc.setBitrate(json.bitrate);
+				}
+			} else if (json.type == ChannelObject.Type.GUILD_TEXT) {
+				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
+						overrides.getRight(), overrides.getLeft());
+			} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
+				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
+						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft());
+			}
 		}
 
 		return channel;
@@ -575,39 +578,6 @@ public class DiscordUtils {
 	 */
 	public static IRegion getRegionFromJSON(VoiceRegionObject json) {
 		return new Region(json.id, json.name, json.vip);
-	}
-
-	/**
-	 * Creates a channel object from a json response.
-	 *
-	 * @param guild the guild.
-	 * @param json  The json response.
-	 * @return The channel object.
-	 */
-	public static IVoiceChannel getVoiceChannelFromJSON(IGuild guild, ChannelObject json) {
-		VoiceChannel channel;
-
-		Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs((DiscordClientImpl) guild.getClient(), json.permission_overwrites);
-		Cache<IChannel.PermissionOverride> userOverrides = overrides.getLeft();
-		Cache<IChannel.PermissionOverride> roleOverrides = overrides.getRight();
-
-		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(Long.parseUnsignedLong(json.id))) != null) {
-			channel.setUserLimit(json.user_limit);
-			channel.setBitrate(json.bitrate);
-			channel.setName(json.name);
-			channel.setPosition(json.position);
-			channel.setNSFW(json.nsfw);
-			channel.userOverrides.clear();
-			channel.userOverrides.putAll(userOverrides);
-			channel.roleOverrides.clear();
-			channel.roleOverrides.putAll(roleOverrides);
-		} else {
-			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id), guild, json.topic, json.position, json.nsfw,
-					json.user_limit, json.bitrate, roleOverrides, userOverrides);
-		}
-
-		return channel;
 	}
 
 	/**

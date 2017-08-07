@@ -18,20 +18,18 @@
 package sx.blah.discord.api.internal.json.requests;
 
 import sx.blah.discord.api.internal.json.objects.GameObject;
+import sx.blah.discord.handle.obj.StatusType;
 
 public class PresenceUpdateRequest {
-	/**
-	 * The time (in epoch milliseconds) since the user became idle or null if not idle
-	 */
-	public Long idle_since; // This must be the boxed Long because it can be null
 
-	/**
-	 * The game the user is playing, or null if no game
-	 */
+	public Long since;
 	public GameObject game;
+	public String status;
+	public boolean afk = false;
 
-	public PresenceUpdateRequest(Long idle_since, GameObject obj) {
-		this.idle_since = idle_since;
-		this.game = obj;
+	public PresenceUpdateRequest(StatusType status, String playingText, String streamUrl) {
+		this.since = status == StatusType.IDLE ? System.currentTimeMillis() : null;
+		this.game = playingText == null && streamUrl == null ? null : new GameObject(playingText, streamUrl);
+		this.status = status.name().toLowerCase();
 	}
 }
