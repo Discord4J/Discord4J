@@ -19,6 +19,9 @@ package sx.blah.discord.handle.audit;
 
 import java.util.Arrays;
 
+/**
+ * The types of actions in an audit log.
+ */
 public enum ActionType {
 	GUILD_UPDATE(1),
 	CHANNEL_CREATE(10),
@@ -55,10 +58,20 @@ public enum ActionType {
 		this.raw = raw;
 	}
 
+	/**
+	 * Gets the value that Discord uses to represent the action type.
+	 * @return The value that Discord uses to represent the action type.
+	 */
 	public int getRaw() {
 		return raw;
 	}
 
+	/**
+	 * Gets the action type represented by the given raw action type.
+	 *
+	 * @param raw The value that Discord uses to represent the action type.
+	 * @return The action type represented by the given raw action type.
+	 */
 	public static ActionType fromRaw(int raw) {
 		return Arrays.stream(values()).filter(a -> a.raw == raw).findFirst().orElse(UNKNOWN);
 	}

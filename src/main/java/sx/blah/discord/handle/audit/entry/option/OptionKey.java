@@ -17,6 +17,12 @@
 
 package sx.blah.discord.handle.audit.entry.option;
 
+/**
+ * The keys used in an {@link OptionMap}. Use these with
+ * {@link sx.blah.discord.handle.audit.entry.AuditLogEntry#getOptionByKey(OptionKey)}.
+ *
+ * @param <T> The type of the value associated with the key.
+ */
 public final class OptionKey<T> {
 	public static final OptionKey<Integer> DELETE_MEMBER_DAYS = newKey();
 	public static final OptionKey<Integer> MEMBERS_REMOVED = newKey();

@@ -28,6 +28,9 @@ import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Optional;
 
+/**
+ * An entry in an {@link sx.blah.discord.handle.audit.AuditLog}.
+ */
 public class AuditLogEntry implements IIDLinkedObject {
 
 	private final long id;
@@ -51,30 +54,69 @@ public class AuditLogEntry implements IIDLinkedObject {
 		return id;
 	}
 
+	/**
+	 * Gets the user responsible for the action represented by the entry.
+	 *
+	 * @return The user responsible for the action represented by the entry.
+	 */
 	public IUser getResponsibleUser() {
 		return user;
 	}
 
+	/**
+	 * Gets the map of changes made in the entry.
+	 *
+	 * @return The map of changes made in the entry.
+	 */
 	public ChangeMap getChanges() {
 		return changes;
 	}
 
+	/**
+	 * Gets the reason given for the entry, if it exists.
+	 *
+	 * @return The reason given for the entry, if it exists.
+	 */
 	public Optional<String> getReason() {
 		return Optional.ofNullable(reason);
 	}
 
+	/**
+	 * Gets the type of action represented by the entry.
+	 *
+	 * @return The type of action represented by the entry.
+	 */
 	public ActionType getActionType() {
 		return actionType;
 	}
 
+	/**
+	 * Gets the map of options for the entry.
+	 *
+	 * @return The map of options for the entry.
+	 */
 	public OptionMap getOptions() {
 		return options;
 	}
 
+	/**
+	 * Gets a change for the given key from the changes map.
+	 *
+	 * @param key The key to get the change for.
+	 * @param <T> The type of the change.
+	 * @return The change for the given key.
+	 */
 	public <T> AuditLogChange<T> getChangeByKey(ChangeKey<T> key) {
 		return getChanges().get(key);
 	}
 
+	/**
+	 * Gets an option for the given key from the options map.
+	 *
+	 * @param key The key to get the option for.
+	 * @param <T> The type of the option.
+	 * @return The option for the given key.
+	 */
 	public <T> T getOptionByKey(OptionKey<T> key) {
 		return getOptions().get(key);
 	}

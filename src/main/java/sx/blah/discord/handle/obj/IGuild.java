@@ -888,11 +888,35 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 */
 	int getTotalMemberCount();
 
+	/**
+	 * Gets the full audit log for the guild.
+	 *
+	 * @return The full audit log for the guild.
+	 */
 	AuditLog getAuditLog();
 
+	/**
+	 * Gets the audit log with entries for the given action type.
+	 *
+	 * @param actionType The action type of the desired entries.
+	 * @return The audit log with entries for the given action type.
+	 */
 	AuditLog getAuditLog(ActionType actionType);
 
+	/**
+	 * Gets the audit log with entries with the given responsible user.
+	 *
+	 * @param user The responsible user of the desired entries.
+	 * @return The audit log with entries with the given responsible user.
+	 */
 	AuditLog getAuditLog(IUser user);
 
+	/**
+	 * Gets the audit log with entries with the given responsible user and the given action type.
+	 *
+	 * @param user The responsible user of the desired entries.
+	 * @param actionType The action type of the desired entries.
+	 * @return The audit log with entries with the given responsible user and the given action type.
+	 */
 	AuditLog getAuditLog(IUser user, ActionType actionType);
 }

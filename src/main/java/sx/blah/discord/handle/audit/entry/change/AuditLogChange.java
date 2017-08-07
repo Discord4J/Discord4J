@@ -19,6 +19,11 @@ package sx.blah.discord.handle.audit.entry.change;
 
 import java.util.Optional;
 
+/**
+ * A change of a value in an {@link sx.blah.discord.handle.audit.entry.AuditLogEntry}.
+ *
+ * @param <T> The type of the object changed.
+ */
 public class AuditLogChange<T> {
 
 	private final T oldValue;
@@ -29,10 +34,24 @@ public class AuditLogChange<T> {
 		this.newValue = newValue;
 	}
 
+	/**
+	 * The old value, if it existed.
+	 *
+	 * <p>This will not be present on action types like entity creations.
+	 *
+	 * @return The old value, if it existed.
+	 */
 	public Optional<T> getOldValue() {
 		return Optional.ofNullable(oldValue);
 	}
 
+	/**
+	 * The new value, if it exists.
+	 *
+	 * <p>This will not be present on action types like entity deletion.
+	 *
+	 * @return The new value, if it exists.
+	 */
 	public Optional<T> getNewValue() {
 		return Optional.ofNullable(newValue);
 	}

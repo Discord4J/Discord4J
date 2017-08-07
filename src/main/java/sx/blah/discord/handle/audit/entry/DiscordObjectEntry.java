@@ -23,6 +23,11 @@ import sx.blah.discord.handle.audit.entry.option.OptionMap;
 import sx.blah.discord.handle.obj.IDiscordObject;
 import sx.blah.discord.handle.obj.IUser;
 
+/**
+ * An audit log entry which has a <b>known</b> {@link IDiscordObject} target.
+ *
+ * @param <T> The type of discord object the entry targets.
+ */
 public class DiscordObjectEntry<T extends IDiscordObject<T>> extends TargetedEntry {
 
 	private final T target;
@@ -32,6 +37,11 @@ public class DiscordObjectEntry<T extends IDiscordObject<T>> extends TargetedEnt
 		this.target = target;
 	}
 
+	/**
+	 * Gets the never-null target of the entry.
+	 *
+	 * @return The never-null target of the entry.
+	 */
 	public T getTarget() {
 		return target;
 	}

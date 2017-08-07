@@ -20,6 +20,12 @@ package sx.blah.discord.handle.audit.entry.option;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A map of {@link OptionKey OptionKeys} to objects.
+ *
+ * <p>This is a utility to ensure type-safe access of options. As long as only {@link #put(OptionKey, Object)} is used
+ * to write to the map, and only the pre-defined {@link OptionKey OptionKeys} are used, type-safe access is guaranteed.
+ */
 @SuppressWarnings("unchecked")
 public class OptionMap {
 

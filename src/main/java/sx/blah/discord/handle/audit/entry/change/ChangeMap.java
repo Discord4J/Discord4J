@@ -29,6 +29,13 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * A map of {@link ChangeKey ChangeKeys} to {@link AuditLogChange AuditLogChanges}.
+ *
+ * <p>This is a utility to ensure type-safe access of audit log changes. As long as only
+ * {@link #put(ChangeKey, AuditLogChange)} is used to write to the map, and only the pre-defined
+ * {@link ChangeKey ChangeKeys} are used, type-safe access is guaranteed.
+ */
 @SuppressWarnings("unchecked")
 public class ChangeMap {
 
@@ -50,11 +57,18 @@ public class ChangeMap {
 		return (AuditLogChange<V>) backing.put(key, value);
 	}
 
+	/**
+	 * A collector to build a {@link ChangeMap} from a stream of {@link AuditLogChangeObject AuditLogChangeObjects}.
+	 */
 	public static class Collector implements java.util.stream.Collector<AuditLogChangeObject, Map<ChangeKey<?>, AuditLogChange<?>>, ChangeMap> {
 
 		private static final BinaryOperator<AuditLogChange<?>> mergeFunction = (u, v) -> {
 			throw new IllegalStateException(String.format("Duplicate key %s", u));
 		};
+
+		private Collector() {
+
+		}
 
 		@Override
 		public Supplier<Map<ChangeKey<?>, AuditLogChange<?>>> supplier() {

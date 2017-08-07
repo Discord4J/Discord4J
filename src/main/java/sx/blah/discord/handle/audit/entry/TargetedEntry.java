@@ -22,6 +22,9 @@ import sx.blah.discord.handle.audit.entry.change.ChangeMap;
 import sx.blah.discord.handle.audit.entry.option.OptionMap;
 import sx.blah.discord.handle.obj.IUser;
 
+/**
+ * An audit log entry which has a target.
+ */
 public class TargetedEntry extends AuditLogEntry {
 
 	private final long targetID;
@@ -31,6 +34,11 @@ public class TargetedEntry extends AuditLogEntry {
 		this.targetID = targetID;
 	}
 
+	/**
+	 * Gets the ID of the target.
+	 *
+	 * @return The ID of the target.
+	 */
 	public long getTargetID() {
 		return targetID;
 	}

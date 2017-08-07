@@ -17,9 +17,17 @@
 
 package sx.blah.discord.handle.audit.entry.change;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.util.LogMarkers;
 
+/**
+ * The keys used in an {@link ChangeMap}. Use these with
+ * {@link sx.blah.discord.handle.audit.entry.AuditLogEntry#getChangeByKey(ChangeKey)}.
+ *
+ * @param <T> The type of the value associated with the key.
+ */
 public final class ChangeKey<T> {
 	public static final ChangeKey<String> NAME = newKey();
 	public static final ChangeKey<String> ICON_HASH = newKey();
@@ -69,7 +77,7 @@ public final class ChangeKey<T> {
 		try {
 			key = (ChangeKey) ChangeKey.class.getDeclaredField(rawKey.toUpperCase()).get(null);
 		} catch (NoSuchFieldException | IllegalAccessException e) {
-			e.printStackTrace(); // TODO: log
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Failed to find change key from raw string: {}", rawKey, e);
 		}
 		return key;
 	}
