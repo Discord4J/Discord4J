@@ -19,11 +19,14 @@ package sx.blah.discord.api.internal;
 
 import sx.blah.discord.Discord4J;
 
+import static sx.blah.discord.api.internal.DiscordUtils.API_VERSION;
+
 /**
  * Static class that contains
  * URLs useful to us.
  */
 public final class DiscordEndpoints {
+
 	/**
 	 * The base URL.
 	 */
@@ -40,7 +43,7 @@ public final class DiscordEndpoints {
 	/**
 	 * The base API location on Discord's servers.
 	 */
-	public static final String APIBASE = BASE+"api";
+	public static final String APIBASE = BASE+"api/v" + API_VERSION;
 
 	public static final String GATEWAY = APIBASE+"/gateway";
 

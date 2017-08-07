@@ -27,21 +27,31 @@ public enum StatusType {
 	 */
 	ONLINE,
 	/**
+	 * Represents that the user is in 'do not disturb' mode.
+	 */
+	DND,
+	/**
 	 * Represents that the user is idle.
 	 */
 	IDLE,
+	/**
+	 * Represents that a user is invisible. Note: Another user will never appear to have this status, as Discord does
+	 * not send this information. Instead, they will appear to be {@link #OFFLINE}. This status is used only for sending
+	 * the bot's own status to Discord.
+	 */
+	INVISIBLE,
 	/**
 	 * Represents that the user is offline.
 	 */
 	OFFLINE,
 	/**
 	 * Represents that the user is streaming.
+	 *
+	 * @deprecated There is no such thing as streaming status. A user will <b>never</b> appear to have this status.
+	 * Instead, they will have {@link #ONLINE} status with a streaming url.
 	 */
+	@Deprecated
 	STREAMING,
-	/**
-	 * Represents that the user is in 'do not disturb' mode.
-	 */
-	DND,
 	/**
 	 * Unknown presence.
 	 */

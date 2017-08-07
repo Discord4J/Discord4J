@@ -28,7 +28,7 @@ public abstract class ChannelEvent extends GuildEvent {
 	private final IChannel channel;
 
 	public ChannelEvent(IChannel channel) {
-		super(channel.getGuild());
+		super(channel.isPrivate() ? null : channel.getGuild());
 		this.channel = channel;
 	}
 

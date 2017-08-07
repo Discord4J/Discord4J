@@ -31,8 +31,6 @@ import sx.blah.discord.util.cache.Cache;
 import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -247,22 +245,22 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public int getMaxInternalCacheCount() {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int getInternalCacheCount() {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public IMessage getMessageByID(long messageID) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String getTopic() {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -302,7 +300,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public synchronized boolean getTypingStatus() {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -317,7 +315,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IMessage> getPinnedMessages() {
-		return new ArrayList<>();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

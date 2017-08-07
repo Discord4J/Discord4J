@@ -80,9 +80,9 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The earliest message.
 	 */
 	public IMessage getEarliestMessage() {
-		IMessage[] sorted = Arrays.copyOf(backing, backing.length);
-		Arrays.sort(sorted, MessageComparator.DEFAULT);
-		return sorted[0];
+		return Arrays.stream(backing)
+				.min(MessageComparator.DEFAULT)
+				.orElse(null);
 	}
 
 	/**
@@ -91,9 +91,9 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The latest message.
 	 */
 	public IMessage getLatestMessage() {
-		IMessage[] sorted = Arrays.copyOf(backing, backing.length);
-		Arrays.sort(sorted, MessageComparator.REVERSED);
-		return sorted[0];
+		return Arrays.stream(backing)
+				.max(MessageComparator.DEFAULT)
+				.orElse(null);
 	}
 
 	/**

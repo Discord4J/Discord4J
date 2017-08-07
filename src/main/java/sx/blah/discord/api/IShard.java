@@ -132,26 +132,24 @@ public interface IShard {
 	 */
 	void streaming(String playingText, String streamingUrl);
 
-	// Future presences
+	/**
+	 * Set this shard's presence to be in do not disturb mode, using the provided playing text.
+	 * Note that this doesn't stop events from occurring.
+	 *
+	 * @param playingText The game playing text
+	 */
+	void dnd(String playingText);
 
-//	/**
-//	 * Set this shard's presence to be in do not disturb mode, using the provided playing text.
-//	 * Note that this doesn't stop events from occurring.
-//	 *
-//	 * @param playingText The game playing text
-//	 */
-//	void dnd(String playingText);
-//
-//	/**
-//	 * Set this shard's presence to be in do not disturb mode, using the original playing text (if any).
-//	 * Note that this doesn't stop events from occurring.
-//	 */
-//	void dnd();
-//
-//	/**
-//	 * Set this shard's presence to be invisible (appear offline to others).
-//	 */
-//	void invisible();
+	/**
+	 * Set this shard's presence to be in do not disturb mode, using the original playing text (if any).
+	 * Note that this doesn't stop events from occurring.
+	 */
+	void dnd();
+
+	/**
+	 * Set this shard's presence to be invisible (appear offline to others).
+	 */
+	void invisible();
 
 	/**
 	 * Changes this user's presence.
