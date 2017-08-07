@@ -19,7 +19,7 @@ Well users can manually add them by right clicking on a message or hitting the l
 This is for if you have a custom emoji and want to react with it (`IEmoji` are emojis that are guild specific).
 
 - `ReactionEmoji.of(String)`
-This one is for the unicode of an emoji. (For instance, `❤` is the unicode for `:heart:`. This can be gotten on any non-custom emoji as `\:emoji:`, in this case `\:heart:`)
+This one is for the unicode of an emoji. (For instance, `❤` is the unicode for `:heart:`. This can be gotten on any non-custom emoji as `\:emoji:`, in this case `\:heart:`. See below for more details.)
 
 - `ReactionEmoji.of(String, long)`
 This is for custom emojis from other servers. Since bots can do that now. I took the :eyesR: emoji from one of the servers my bot is in and used it for this. To get the name (String) and the ID (long), you just type this into your chat: `\:emoji:`, so in my case `\:eyesR:`. This gives me `<:eyesR:284174731261902850>`. It'll be different for every server. Using the following code I can achieve the following image:
