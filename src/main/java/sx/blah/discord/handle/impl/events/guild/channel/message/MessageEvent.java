@@ -43,7 +43,7 @@ public abstract class MessageEvent extends ChannelEvent {
 	}
 
 	/**
-	 * This gets the message involved in this event.
+	 * This gets the message involved in this event. This may be null if the message was not cached.
 	 *
 	 * @return The message.
 	 */
@@ -52,14 +52,19 @@ public abstract class MessageEvent extends ChannelEvent {
 	}
 
 	/**
-	 * This gets the author of the message.
+	 * This gets the author of the message. This may be null if the message was not cached.
 	 *
 	 * @return The author.
 	 */
 	public IUser getAuthor() {
-		return message.getAuthor();
+		return message == null ? null : message.getAuthor();
 	}
 
+	/**
+	 * Gets the ID of the message involved in the event. This is always present.
+	 *
+	 * @return The ID of the message involved in the event.
+	 */
 	public long getMessageID() {
 		return messageID;
 	}
