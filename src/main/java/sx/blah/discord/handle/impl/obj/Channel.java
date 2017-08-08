@@ -950,7 +950,6 @@ public class Channel implements IChannel {
 
 	@Override
 	public IShard getShard() {
-		if (isPrivate()) return getClient().getShards().get(0);
 		return getGuild().getShard();
 	}
 

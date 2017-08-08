@@ -278,8 +278,10 @@ public class Message implements IMessage {
 
 	@Override
 	public List<IUser> getMentions() {
-		if (mentionsEveryone)
-			return channel.getGuild().getUsers();
+		if (mentionsEveryone) {
+			return channel.isPrivate() ? channel.getUsersHere() : channel.getGuild().getUsers();
+		}
+
 		return mentions.stream()
 				.map(client::getUserByID)
 				.collect(Collectors.toList());
@@ -462,7 +464,7 @@ public class Message implements IMessage {
 
 	@Override
 	public IGuild getGuild() {
-		return getChannel().getGuild();
+		return getChannel().isPrivate() ? null : getChannel().getGuild();
 	}
 
 	@Override

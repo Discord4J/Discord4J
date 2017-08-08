@@ -17,6 +17,7 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.*;
@@ -26,10 +27,7 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
 public class PrivateChannel extends Channel implements IPrivateChannel {
 
@@ -217,7 +215,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public List<IUser> getUsersHere() {
-		return Collections.singletonList(recipient);
+		return Arrays.asList(recipient, getClient().getOurUser());
 	}
 
 	@Override
@@ -243,5 +241,10 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	@Override
 	public boolean isNSFW() {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IShard getShard() {
+		return getClient().getShards().get(0);
 	}
 }

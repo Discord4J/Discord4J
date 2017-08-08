@@ -737,7 +737,12 @@ class DispatchHandler {
 			message.getReactions().add(reaction);
 		}
 
-		IUser user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IUser user;
+		if (channel.isPrivate()) {
+			user = ((PrivateChannel) channel).getRecipient();
+		} else {
+			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		}
 
 		client.dispatcher.dispatch(new ReactionAddEvent(message, reaction, user));
 	}
@@ -757,7 +762,12 @@ class DispatchHandler {
 			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
 		}
 
-		IUser user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IUser user;
+		if (channel.isPrivate()) {
+			user = ((PrivateChannel) channel).getRecipient();
+		} else {
+			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		}
 
 		client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 	}

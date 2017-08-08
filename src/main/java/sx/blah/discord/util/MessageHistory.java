@@ -168,7 +168,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The guild, or null if the channel is not associated with a guild.
 	 */
 	public IGuild getGuild() {
-		return getChannel().getGuild();
+		return getChannel().isPrivate() ? null : getChannel().getGuild();
 	}
 
 	/**
