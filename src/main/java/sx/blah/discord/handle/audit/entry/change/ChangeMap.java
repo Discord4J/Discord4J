@@ -33,8 +33,8 @@ import java.util.function.Supplier;
  * A map of {@link ChangeKey ChangeKeys} to {@link AuditLogChange AuditLogChanges}.
  *
  * <p>This is a utility to ensure type-safe access of audit log changes. As long as only
- * {@link #put(ChangeKey, AuditLogChange)} is used to write to the map, and only the pre-defined
- * {@link ChangeKey ChangeKeys} are used, type-safe access is guaranteed.
+ * {@link Collector} is used to construct the backing map, and only the pre-defined {@link ChangeKey ChangeKeys} are
+ * used, type-safe access is guaranteed.
  */
 @SuppressWarnings("unchecked")
 public class ChangeMap {
@@ -51,10 +51,6 @@ public class ChangeMap {
 
 	public <V> AuditLogChange<V> get(ChangeKey<V> key) {
 		return (AuditLogChange<V>) backing.get(key);
-	}
-
-	public <V> AuditLogChange<V> put(ChangeKey<V> key, AuditLogChange<V> value) {
-		return (AuditLogChange<V>) backing.put(key, value);
 	}
 
 	/**

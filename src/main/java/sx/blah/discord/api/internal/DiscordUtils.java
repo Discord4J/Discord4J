@@ -39,11 +39,11 @@ import sx.blah.discord.handle.audit.entry.AuditLogEntry;
 import sx.blah.discord.handle.audit.entry.DiscordObjectEntry;
 import sx.blah.discord.handle.audit.entry.TargetedEntry;
 import sx.blah.discord.handle.audit.entry.change.ChangeMap;
-import sx.blah.discord.handle.audit.entry.option.OptionKey;
 import sx.blah.discord.handle.audit.entry.option.OptionMap;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.LongMapCollector;
 import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.RequestBuilder;
 import sx.blah.discord.util.cache.Cache;
@@ -64,9 +64,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static sx.blah.discord.handle.audit.entry.change.ChangeMap.Collector.toChangeMap;
-import static sx.blah.discord.util.LongMapCollector.*;
 
 /**
  * Collection of internal Discord4J utilities.
@@ -674,15 +671,15 @@ public class DiscordUtils {
 	public static AuditLog getAuditLogFromJSON(IGuild guild, AuditLogObject json) {
 		LongMap<IUser> users = Arrays.stream(json.users)
 				.map(u -> DiscordUtils.getUserFromJSON(guild.getShard(), u))
-				.collect(toLongMap());
+				.collect(LongMapCollector.toLongMap());
 
 		LongMap<IWebhook> webhooks = Arrays.stream(json.webhooks)
 				.map(w -> DiscordUtils.getWebhookFromJSON(guild.getChannelByID(Long.parseUnsignedLong(w.channel_id)), w))
-				.collect(toLongMap());
+				.collect(LongMapCollector.toLongMap());
 
 		LongMap<AuditLogEntry> entries = Arrays.stream(json.audit_log_entries)
 				.map(e -> DiscordUtils.getAuditLogEntryFromJSON(guild, users, webhooks, e))
-				.collect(toLongMap());
+				.collect(LongMapCollector.toLongMap());
 
 		return new AuditLog(entries);
 	}
@@ -692,18 +689,9 @@ public class DiscordUtils {
 		long id = Long.parseUnsignedLong(json.id);
 		IUser user = users.get(Long.parseUnsignedLong(json.user_id));
 
-		ChangeMap changes = json.changes == null ? new ChangeMap() : Arrays.stream(json.changes).collect(toChangeMap());
+		ChangeMap changes = json.changes == null ? new ChangeMap() : Arrays.stream(json.changes).collect(ChangeMap.Collector.toChangeMap());
 
-		OptionMap options = new OptionMap();
-		if (json.options != null) {
-			if (json.options.delete_member_days != null) options.put(OptionKey.DELETE_MEMBER_DAYS, Integer.parseInt(json.options.delete_member_days));
-			if (json.options.members_removed != null) options.put(OptionKey.MEMBERS_REMOVED, Integer.parseInt(json.options.members_removed));
-			if (json.options.channel_id != null) options.put(OptionKey.CHANNEL_ID, Long.parseUnsignedLong(json.options.channel_id));
-			if (json.options.count != null) options.put(OptionKey.COUNT, Integer.parseInt(json.options.count));
-			if (json.options.id != null) options.put(OptionKey.ID, Long.parseUnsignedLong(json.options.id));
-			if (json.options.type != null) options.put(OptionKey.TYPE, json.options.type);
-			if (json.options.role_name != null) options.put(OptionKey.ROLE_NAME, json.options.role_name);
-		}
+		OptionMap options = new OptionMap(json.options);
 
 		ActionType actionType = ActionType.fromRaw(json.action_type);
 		switch (actionType) {

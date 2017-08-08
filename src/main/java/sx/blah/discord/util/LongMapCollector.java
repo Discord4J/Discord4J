@@ -10,6 +10,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+/**
+ * A collector to build a {@link LongMap} from a stream of {@link IIDLinkedObject IIDLinkedObjects}.
+ *
+ * @param <T> The type of ID linked object.
+ */
 public class LongMapCollector<T extends IIDLinkedObject> implements Collector<T, List<T>, LongMap<T>> {
 
 	private LongMapCollector() {

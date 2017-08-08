@@ -17,6 +17,8 @@
 
 package sx.blah.discord.handle.audit.entry.option;
 
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,8 +33,17 @@ public class OptionMap {
 
 	private final Map<OptionKey<?>, Object> backing;
 
-	public OptionMap() {
+	public OptionMap(AuditLogEntryObject.Options options) {
 		this(new HashMap<>());
+		if (options != null) {
+			if (options.delete_member_days != null) put(OptionKey.DELETE_MEMBER_DAYS, Integer.parseInt(options.delete_member_days));
+			if (options.members_removed != null) put(OptionKey.MEMBERS_REMOVED, Integer.parseInt(options.members_removed));
+			if (options.channel_id != null) put(OptionKey.CHANNEL_ID, Long.parseUnsignedLong(options.channel_id));
+			if (options.count != null) put(OptionKey.COUNT, Integer.parseInt(options.count));
+			if (options.id != null) put(OptionKey.ID, Long.parseUnsignedLong(options.id));
+			if (options.type != null) put(OptionKey.TYPE, options.type);
+			if (options.role_name != null) put(OptionKey.ROLE_NAME, options.role_name);
+		}
 	}
 
 	private OptionMap(Map<OptionKey<?>, Object> backing) {
@@ -43,7 +54,7 @@ public class OptionMap {
 		return (V) backing.get(key);
 	}
 
-	public <V> V put(OptionKey<V> key, V value) {
+	private <V> V put(OptionKey<V> key, V value) {
 		return (V) backing.put(key, value);
 	}
 }
