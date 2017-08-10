@@ -33,6 +33,7 @@ import sx.blah.discord.handle.impl.events.VoiceChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.VoiceChannelUpdateEvent;
 import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.*;
 import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
@@ -440,21 +441,19 @@ class DispatchHandler {
 	}
 
 	private void messageDelete(MessageDeleteEventResponse event) {
-		String id = event.id;
-		String channelID = event.channel_id;
-		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(channelID));
+		long id = Long.parseUnsignedLong(event.id);
+		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		IMessage message = null;
 
 		if (channel != null) {
-			Message message = (Message) channel.getMessageByID(Long.parseUnsignedLong(id));
-			if (message != null) {
-				if (message.isPinned()) {
-					message.setPinned(false); //For consistency with the event
-					client.dispatcher.dispatch(new MessageUnpinEvent(message));
-				}
-				message.setDeleted(true);
-				channel.messages.remove(message);
-				client.dispatcher.dispatch(new MessageDeleteEvent(message));
-			}
+			message = channel.messages.get(id);
+		}
+
+		if (message == null) { // we dont have the message cached. The only thing we know about the message is its ID and its channel's ID.
+			client.dispatcher.dispatch(new MessageDeleteEvent(channel, id));
+		} else {
+			channel.messages.remove(id);
+			client.dispatcher.dispatch(new MessageDeleteEvent(message));
 		}
 	}
 
