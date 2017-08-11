@@ -15,26 +15,13 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.api.internal.json.objects;
+package sx.blah.discord.api.internal.json.objects.audit;
 
-/**
- * Represents a json private channel object.
- */
-public class PrivateChannelObject {
-	/**
-	 * The ID of the last message sent in the channel.
-	 */
-	public String last_message_id;
-	/**
-	 * The recipient of the channel.
-	 */
-	public UserObject recipient;
-	/**
-	 * The ID of the channel.
-	 */
-	public String id;
-	/**
-	 * Whether the channel is private.
-	 */
-	public boolean is_private;
+import sx.blah.discord.api.internal.json.objects.UserObject;
+import sx.blah.discord.api.internal.json.objects.WebhookObject;
+
+public class AuditLogObject {
+	public WebhookObject[] webhooks;
+	public UserObject[] users;
+	public AuditLogEntryObject[] audit_log_entries;
 }

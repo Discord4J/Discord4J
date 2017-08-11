@@ -21,60 +21,29 @@ package sx.blah.discord.api.internal.json.objects;
  * Represents a json channel object.
  */
 public class ChannelObject {
-	/**
-	 * The ID of the channel.
-	 */
+
 	public String id;
-	/**
-	 * The ID of the guild this channel is in.
-	 */
-	public String guild_id;
-	/**
-	 * The name of the channel.
-	 */
-	public String name;
-	/**
-	 * The type of the channel.
-	 */
 	public int type;
-	/**
-	 * The position of the channel.
-	 */
-	public int position;
-	/**
-	 * Array of permission overwrites.
-	 */
+	public String guild_id;
+	public Integer position;
 	public OverwriteObject[] permission_overwrites;
-	/**
-	 * Topic of the channel.
-	 */
+	public String name;
 	public String topic;
-	/**
-	 * The ID of the last message sent in the channel.
-	 */
 	public String last_message_id;
-	/**
-	 * The ISO-8601 timestamp of when the last pin was made in the channel.
-	 */
-	public String last_pin_timestamp;
-	/**
-	 * Bitrate of the channel if it is voice type.
-	 */
-	public int bitrate;
-	/**
-	 * Maximum number of users allowed in the channel if it is voice type.
-	 */
-	public int user_limit;
-	/**
-	 * Recipients of the channel if it is private type.
-	 */
+	public Integer bitrate;
+	public Integer user_limit;
 	public UserObject[] recipients;
+	public String icon;
+	public String owner_id;
+	public String application_id;
+	public boolean nsfw;
 
 	public static class Type {
-		public static final int GUILD_TEXT     = 0;
-		public static final int PRIVATE        = 1;
-		public static final int GUILD_VOICE    = 2;
-		public static final int GROUP_PRIVATE  = 3;
+		public static final int GUILD_TEXT = 0;
+		public static final int PRIVATE = 1;
+		public static final int GUILD_VOICE = 2;
+		public static final int GROUP_PRIVATE = 3;
 		public static final int GUILD_CATEGORY = 4;
 	}
+
 }

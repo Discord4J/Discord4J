@@ -31,8 +31,6 @@ import sx.blah.discord.util.cache.Cache;
 import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,9 +48,9 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	 */
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
+	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW,
 						int userLimit, int bitrate, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
-		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
+		super(client, name, id, guild, topic, position, isNSFW, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
 	}
@@ -256,22 +254,22 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public int getMaxInternalCacheCount() {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int getInternalCacheCount() {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public IMessage getMessageByID(long messageID) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String getTopic() {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -311,7 +309,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public synchronized boolean getTypingStatus() {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -326,7 +324,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IMessage> getPinnedMessages() {
-		return new ArrayList<>();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -366,7 +364,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, guild, topic, position, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
+		return new VoiceChannel(client, name, id, guild, topic, position, isNSFW, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
 	}
 
 	@Override
@@ -387,10 +385,5 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public boolean isDeleted() {
 		return getGuild().getVoiceChannelByID(getLongID()) != this;
-	}
-
-	@Override
-	public boolean isNSFW() {
-		return false;
 	}
 }

@@ -75,9 +75,9 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The oldest message in the collection.
 	 */
 	public IMessage getEarliestMessage() {
-		IMessage[] sorted = Arrays.copyOf(backing, backing.length);
-		Arrays.sort(sorted, MessageComparator.DEFAULT);
-		return sorted[0];
+		return Arrays.stream(backing)
+				.min(MessageComparator.DEFAULT)
+				.orElse(null);
 	}
 
 	/**
@@ -86,9 +86,9 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The youngest message in the collection.
 	 */
 	public IMessage getLatestMessage() {
-		IMessage[] sorted = Arrays.copyOf(backing, backing.length);
-		Arrays.sort(sorted, MessageComparator.REVERSED);
-		return sorted[0];
+		return Arrays.stream(backing)
+				.max(MessageComparator.DEFAULT)
+				.orElse(null);
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @return The parent guild of the channel the messages were sent in.
 	 */
 	public IGuild getGuild() {
-		return getChannel().getGuild();
+		return getChannel().isPrivate() ? null : getChannel().getGuild();
 	}
 
 	/**

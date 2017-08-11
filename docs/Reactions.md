@@ -8,23 +8,34 @@ Whenever a message is sent in Discord, users can add "reactions" to the message.
 
 ### How do I add them?
 
-Well users can manually add them by right clicking on a message or hitting the little face next to the message when they hover over it. But a bot needs to add them a little differently. To add an reaction there's a few ways to do it. You can either use the unicode version, or EmojiManager. (Custom emojis we will get to later)
+Well users can manually add them by right clicking on a message or hitting the little face next to the message when they hover over it. But a bot needs to add them a little differently. To add an reaction there's a few ways to do it. You can either use the unicode version, or `ReactionEmoji`.
 
-### Unicode Emojis
 
-Unicode emojis are just the unicode version of the emoji (this method doesn't work with server added emojis). To grab this all you need to do is send a message in Discord. Take the emoji name `:heart:`, and just add a backslash. Like `\:heart:`. Now copy and paste that into an IMessage#addReaction(String) and proof! Suddenly it works. Example here:
+### Reaction Emoji
 
-![Reaction_By_Unicode](https://i.imgur.com/pZmhITs.gif)
+`ReactionEmoji` is a class made to make reactions easier. To get a `ReactionEmoji` you can use any of the three `ReactionEmoji#of` methods. You can react to any message with `IMessage#react(ReactionEmoji)`
+
+- `ReactionEmoji.of(IEmoji)`
+This is for if you have a custom emoji and want to react with it (`IEmoji` are emojis that are guild specific).
+
+- `ReactionEmoji.of(String)`
+This one is for the unicode of an emoji. (For instance, `❤` is the unicode for `:heart:`. This can be gotten on any non-custom emoji as `\:emoji:`, in this case `\:heart:`. You need to type this into your chat in Discord.)
+
+- `ReactionEmoji.of(String, long)`
+This is for custom emojis from other servers. Since bots can do that now. I took the :eyesR: emoji from one of the servers my bot is in and used it for this. To get the name (String) and the ID (long), this is the same as above except for custom emojis you'll get the name and ID instead of the unicode, so in my case `\:eyesR:`. This gives me `<:eyesR:284174731261902850>`. It'll be different for every server. Using the following code I can achieve the following image:
+
+![eyesR](https://i.imgur.com/A9HkAo5.gif)
 
 Code:
 ```java
-message.addReaction("❤");
+        ReactionEmoji reaction = ReactionEmoji.of("eyesR", 284174731261902850L);
+        message.addReaction(reaction);
 ```
 
 
 ### Emoji Manager
 
-Emoji Manager uses the [Emoji-Java](https://github.com/vdurmont/emoji-java) library. This way is really simple. Just use EmojiManager#getForAlias(String). For the above result just simple do this:
+EmojiManager, from the [Emoji-Java](https://github.com/vdurmont/emoji-java) library, can be used to get an emoji by its shortcode. It returns an `Emoji` object which can be directly used in `IMessage#addReaction()` instead of `ReactionEmoji`. This should only be used when you have to get a unicode emoji by its name. All other forms are supported through `ReactionEmoji` and are much cleaner. For the same result as above just, just do this:
 
 Code:
 ```java
@@ -32,20 +43,5 @@ Emoji e = EmojiManager.getForAlias("heart");
 message.addReaction(e);
 ```
 
-Remember to not use colons when grabbing it by alias. Unfortunatley EmojiJava doesn't support all emojis, such as `:track_next:`.
+Remember to not use colons when grabbing it by alias. Unfortunatley EmojiJava doesn't support all emojis, such as `:track_next:`, and you can find the unicode online or by using the method explained in the section above.
 
-### Custom Emojis
-
-Custom server emojis are a little different. Trying to grab the unicode version of my custom emoji `:NootLikeThis:` returns `<:NootLikeThis:306996261075288065>` so we can't use that, and EmojiManager doesn't support that. The best way to accomplish this is by using a mix of IMessage#addReaction(IEmoji) and IGuild#getEmojiByName(String). I can grab and add `:NootLikeThis:` with this:
-
-![Custom_Emoji](https://i.imgur.com/5si0e23.gif)
-
-Code:
-```java
-IEmoji e = guild.getEmojiByName("NootLikeThis"); 
-message.addReaction(e);
-```
-
-### Final Note
-
-Unicode is likely the best way to go. You can find a large list of unicode emojis [here.](http://unicode.org/emoji/charts/full-emoji-list.html)

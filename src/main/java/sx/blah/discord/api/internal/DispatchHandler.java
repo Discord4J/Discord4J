@@ -26,9 +26,20 @@ import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.TypingEvent;
+import sx.blah.discord.handle.impl.events.VoiceChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.VoiceChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.*;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.*;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
@@ -127,7 +138,7 @@ class DispatchHandler {
 						guildDelete(MAPPER.treeToValue(json, GuildObject.class));
 						break;
 					case "CHANNEL_CREATE":
-						channelCreate(json);
+						channelCreate(MAPPER.treeToValue(json, ChannelObject.class));
 						break;
 					case "CHANNEL_DELETE":
 						channelDelete(MAPPER.treeToValue(json, ChannelObject.class));
@@ -224,8 +235,8 @@ class DispatchHandler {
 			return true;
 		}).andThen(() -> {
 			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard 0
-				for (PrivateChannelObject pmObj : ready.private_channels) {
-					IPrivateChannel pm = DiscordUtils.getPrivateChannelFromJSON(shard, pmObj);
+				for (ChannelObject pmObj : ready.private_channels) {
+					IPrivateChannel pm = (IPrivateChannel) DiscordUtils.getChannelFromJSON(shard, null, pmObj);
 					shard.privateChannels.put(pm);
 				}
 			}
@@ -450,21 +461,19 @@ class DispatchHandler {
 	}
 
 	private void messageDelete(MessageDeleteEventResponse event) {
-		String id = event.id;
-		String channelID = event.channel_id;
-		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(channelID));
+		long id = Long.parseUnsignedLong(event.id);
+		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		IMessage message = null;
 
 		if (channel != null) {
-			Message message = (Message) channel.getMessageByID(Long.parseUnsignedLong(id));
-			if (message != null) {
-				if (message.isPinned()) {
-					message.setPinned(false); //For consistency with the event
-					client.dispatcher.dispatch(new MessageUnpinEvent(message));
-				}
-				message.setDeleted(true);
-				channel.messages.remove(message);
-				client.dispatcher.dispatch(new MessageDeleteEvent(message));
-			}
+			message = channel.messages.get(id);
+		}
+
+		if (message == null) { // we dont have the message cached. The only thing we know about the message is its ID and its channel's ID.
+			client.dispatcher.dispatch(new MessageDeleteEvent(channel, id));
+		} else {
+			channel.messages.remove(id);
+			client.dispatcher.dispatch(new MessageDeleteEvent(message));
 		}
 	}
 
@@ -520,29 +529,21 @@ class DispatchHandler {
 		}
 	}
 
-	private void channelCreate(JsonNode json) throws JsonProcessingException {
-		boolean isPrivate = json.get("is_private").asBoolean(false);
-
-		if (isPrivate) { // PM channel.
-			PrivateChannelObject event = MAPPER.treeToValue(json, PrivateChannelObject.class);
-			if (shard.privateChannels.containsKey(event.id))
-				return; // we already have this PM channel; no need to create another.
-
-			shard.privateChannels.put(DiscordUtils.getPrivateChannelFromJSON(shard, event));
-
-		} else { // Regular channel.
-			ChannelObject event = MAPPER.treeToValue(json, ChannelObject.class);
-			int type = event.type;
-			Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+	private void channelCreate(ChannelObject json) {
+		if (json.type == ChannelObject.Type.PRIVATE) {
+			if (!shard.privateChannels.containsKey(json.id)) {
+				shard.privateChannels.put((IPrivateChannel) DiscordUtils.getChannelFromJSON(shard, null, json));
+			}
+		} else {
+			Guild guild = (Guild) shard.getGuildByID(Long.parseUnsignedLong(json.guild_id));
 			if (guild != null) {
-				if (type == ChannelObject.Type.GUILD_TEXT) { //Text channel
-					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(guild, event);
+				IChannel channel = DiscordUtils.getChannelFromJSON(shard, guild, json);
+				if (json.type == ChannelObject.Type.GUILD_TEXT) {
 					guild.channels.put(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
-				} else if (type == ChannelObject.Type.GUILD_VOICE) {
-					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(guild, event);
-					guild.voiceChannels.put(channel);
-					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
+				} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
+					guild.voiceChannels.put((IVoiceChannel) channel);
+					client.dispatcher.dispatch(new VoiceChannelCreateEvent((IVoiceChannel) channel));
 				}
 			}
 		}
@@ -578,24 +579,19 @@ class DispatchHandler {
 
 	private void channelUpdate(ChannelObject json) {
 		if (json.type == ChannelObject.Type.GUILD_TEXT) {
-			Channel toUpdate = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.id));
+			Channel toUpdate = (Channel) shard.getChannelByID(Long.parseUnsignedLong(json.id));
 			if (toUpdate != null) {
 				IChannel oldChannel = toUpdate.copy();
-
-				toUpdate = (Channel) DiscordUtils.getChannelFromJSON(toUpdate.getGuild(), json);
-
+				toUpdate = (Channel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
 				toUpdate.loadWebhooks();
-
-				client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+				client.dispatcher.dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
 			}
 		} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
-			VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
+			IVoiceChannel toUpdate = shard.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
 			if (toUpdate != null) {
-				VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
-
-				toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(toUpdate.getGuild(), json);
-
-				client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
+				IVoiceChannel oldChannel = toUpdate.copy();
+				toUpdate = (IVoiceChannel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
+				client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 			}
 		}
 	}
@@ -760,7 +756,12 @@ class DispatchHandler {
 			message.getReactions().add(reaction);
 		}
 
-		IUser user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IUser user;
+		if (channel.isPrivate()) {
+			user = ((PrivateChannel) channel).getRecipient();
+		} else {
+			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		}
 
 		client.dispatcher.dispatch(new ReactionAddEvent(message, reaction, user));
 	}
@@ -780,7 +781,12 @@ class DispatchHandler {
 			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
 		}
 
-		IUser user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IUser user;
+		if (channel.isPrivate()) {
+			user = ((PrivateChannel) channel).getRecipient();
+		} else {
+			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		}
 
 		client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 	}

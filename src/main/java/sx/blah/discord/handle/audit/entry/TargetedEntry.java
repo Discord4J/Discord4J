@@ -15,29 +15,31 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.handle.impl.events.guild.channel;
+package sx.blah.discord.handle.audit.entry;
 
-import sx.blah.discord.handle.impl.events.guild.GuildEvent;
-import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.entry.change.ChangeMap;
+import sx.blah.discord.handle.audit.entry.option.OptionMap;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
- * A generic channel-related event.
+ * An audit log entry which has a target.
  */
-public abstract class ChannelEvent extends GuildEvent {
+public class TargetedEntry extends AuditLogEntry {
 
-	private final IChannel channel;
+	private final long targetID;
 
-	public ChannelEvent(IChannel channel) {
-		super(channel.isPrivate() ? null : channel.getGuild());
-		this.channel = channel;
+	public TargetedEntry(long id, IUser user, ChangeMap changes, String reason, ActionType actionType, OptionMap options, long targetID) {
+		super(id, user, changes, reason, actionType, options);
+		this.targetID = targetID;
 	}
 
 	/**
-	 * Gets the channel involved in the event.
+	 * Gets the ID of the target.
 	 *
-	 * @return The channel involved.
+	 * @return The ID of the target.
 	 */
-	public IChannel getChannel() {
-		return channel;
+	public long getTargetID() {
+		return targetID;
 	}
 }

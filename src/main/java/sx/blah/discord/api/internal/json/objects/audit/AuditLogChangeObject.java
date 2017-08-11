@@ -15,29 +15,10 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.handle.impl.events.guild.channel;
+package sx.blah.discord.api.internal.json.objects.audit;
 
-import sx.blah.discord.handle.impl.events.guild.GuildEvent;
-import sx.blah.discord.handle.obj.IChannel;
-
-/**
- * A generic channel-related event.
- */
-public abstract class ChannelEvent extends GuildEvent {
-
-	private final IChannel channel;
-
-	public ChannelEvent(IChannel channel) {
-		super(channel.isPrivate() ? null : channel.getGuild());
-		this.channel = channel;
-	}
-
-	/**
-	 * Gets the channel involved in the event.
-	 *
-	 * @return The channel involved.
-	 */
-	public IChannel getChannel() {
-		return channel;
-	}
+public class AuditLogChangeObject {
+	public Object new_value;
+	public Object old_value;
+	public String key;
 }

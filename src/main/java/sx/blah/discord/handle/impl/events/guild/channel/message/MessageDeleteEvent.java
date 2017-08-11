@@ -17,6 +17,7 @@
 
 package sx.blah.discord.handle.impl.events.guild.channel.message;
 
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
@@ -26,5 +27,9 @@ public class MessageDeleteEvent extends MessageEvent {
 
 	public MessageDeleteEvent(IMessage message) {
 		super(message);
+	}
+
+	public MessageDeleteEvent(IChannel channel, long messageID) {
+		super(channel, messageID);
 	}
 }

@@ -18,6 +18,7 @@
 package sx.blah.discord.handle.impl.events.guild.channel.message;
 
 import sx.blah.discord.handle.impl.events.guild.channel.ChannelEvent;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -27,10 +28,18 @@ import sx.blah.discord.handle.obj.IUser;
 public abstract class MessageEvent extends ChannelEvent {
 
 	private final IMessage message;
+	private final long messageID;
 
 	public MessageEvent(IMessage message) {
 		super(message.getChannel());
 		this.message = message;
+		this.messageID = message.getLongID();
+	}
+
+	public MessageEvent(IChannel channel, long messageID) {
+		super(channel);
+		this.message = null;
+		this.messageID = messageID;
 	}
 
 	/**
@@ -50,6 +59,15 @@ public abstract class MessageEvent extends ChannelEvent {
 	 * @return The author of the message.
 	 */
 	public IUser getAuthor() {
-		return message.getAuthor();
+		return message == null ? null : message.getAuthor();
+	}
+
+	/**
+	 * Gets the ID of the message involved in the event. This is always present.
+	 *
+	 * @return The ID of the message involved in the event.
+	 */
+	public long getMessageID() {
+		return messageID;
 	}
 }

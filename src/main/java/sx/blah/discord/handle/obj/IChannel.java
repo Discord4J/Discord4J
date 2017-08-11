@@ -92,50 +92,6 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount);
 
 	/**
-	 * Gets the messages from the current time to the given date.
-	 *
-	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
-	 *
-	 * @param endDate The date to stop at. (Inclusive)
-	 * @return The messages from the current time to the given date.
-	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
-
-	/**
-	 * Gets the messages from the current time to the given date.
-	 *
-	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
-	 *
-	 * @param endDate The date to stop at. (Inclusive)
-	 * @param maxMessageCount The maximum number of messages to retrieve.
-	 * @return The messages from the current time to the given date.
-	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxMessageCount);
-
-	/**
-	 * Gets the messages in the given range of dates.
-	 *
-	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
-	 *
-	 * @param startDate The date to start at. (Inclusive)
-	 * @param endDate The date to stop at (Inclusive)
-	 * @return The messages in the given range of dates.
-	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
-
-	/**
-	 * Gets the messages in the specified range of dates.
-	 *
-	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
-	 *
-	 * @param startDate The date to start at. (Inclusive)
-	 * @param endDate The date to stop at (Inclusive)
-	 * @param maxMessageCount The maximum number of messages to retrieve.
-	 * @return The messages in the given range of dates.
-	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
-
-	/**
 	 * Gets the messages from a given message ID to the beginning of the channel.
 	 *
 	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
@@ -186,6 +142,27 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	MessageHistory getMessageHistoryFrom(long id, int maxMessageCount);
 
 	/**
+	 * Gets the messages from now up until the specified date.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
+
+	/**
+	 * Gets the messages from now up until the specified date.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxMessageCount);
+
+	/**
 	 * Gets the messages from the current time to the given message ID.
 	 *
 	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
@@ -234,6 +211,30 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The messages from the current time to the specified message ID.
 	 */
 	MessageHistory getMessageHistoryTo(long id, int maxMessageCount);
+
+	/**
+	 * Gets the messages in the specified range of dates.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+
+	/**
+	 * Gets the messages in the specified range of dates.
+	 * NOTE: This can block the current thread if messages need to be requested from Discord instead of fetched from
+	 * the internal cache.
+	 *
+	 * @param startDate The date to start gathering messages from (inclusive).
+	 * @param endDate The date to stop gathering messages at (inclusive).
+	 * @param maxMessageCount The max number of messages to retrieve.
+	 * @return The messages.
+	 */
+	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
+
 
 	/**
 	 * Gets the messages in the given range of message IDs.
@@ -707,6 +708,13 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param topic The topic of the channel.
 	 */
 	void changeTopic(String topic);
+
+	/**
+	 * Changes the nsfw state of the channel.
+	 *
+	 * @param isNSFW The new nsfw state of the channel.
+	 */
+	void changeNSFW(boolean isNSFW);
 
 	/**
 	 * Gets the position of the channel in the channel list.
