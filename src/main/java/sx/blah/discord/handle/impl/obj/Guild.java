@@ -997,7 +997,7 @@ public class Guild implements IGuild {
 			before = Long.parseLong(auditLog.audit_log_entries[auditLog.audit_log_entries.length - 1].id);
 		} while (chunk.length == 100);
 
-		return new AuditLog(retrieved.stream().map(AuditLog::getEntries).flatMap(Collection::stream).collect(toLongMap()));
+		return new AuditLog(retrieved.stream().map(AuditLog::getEntries).flatMap(Collection::stream).collect(LongMapCollector.toLongMap()));
 	}
 
 	@Override
