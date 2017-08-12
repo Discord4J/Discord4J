@@ -122,14 +122,6 @@ public interface IPrivateChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	List<IInvite> getInvites();
-
-	/**
-	 * @deprecated See {@link IPrivateChannel} for details.
-	 * @throws UnsupportedOperationException Impossible to use as a private channel.
-	 */
-	@Override
-	@Deprecated
 	void delete();
 
 	/**
