@@ -107,7 +107,7 @@ public class Reaction implements IReaction {
 					UserObject[].class);
 
 			for (UserObject obj : json) {
-				users.add(getMessage().getChannel().getGuild().getUserByID(Long.parseUnsignedLong(obj.id)));
+				users.add(getMessage().getShard().getUserByID(Long.parseUnsignedLong(obj.id)));
 			}
 
 			after = json[json.length - 1].id;

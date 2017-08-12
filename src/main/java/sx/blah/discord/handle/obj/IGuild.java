@@ -19,6 +19,8 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.util.Ban;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.util.Image;
 
 import java.time.LocalDateTime;
@@ -291,7 +293,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void banUser(long userID, String reason, int deleteMessagesForDays);
 
 	/**
-	 * Ubans a user.
+	 * Unbans a user.
 	 *
 	 * @param userID The user to unban.
 	 */
@@ -445,6 +447,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @return The default channel for the guild (or null if the bot does not have permission to read the default channel.)
 	 */
+	@Deprecated
 	IChannel getGeneralChannel();
 
 	/**
@@ -562,4 +565,36 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The total number of members the guild has.
 	 */
 	int getTotalMemberCount();
+
+	/**
+	 * Gets the full audit log for the guild.
+	 *
+	 * @return The full audit log for the guild.
+	 */
+	AuditLog getAuditLog();
+
+	/**
+	 * Gets the audit log with entries for the given action type.
+	 *
+	 * @param actionType The action type of the desired entries.
+	 * @return The audit log with entries for the given action type.
+	 */
+	AuditLog getAuditLog(ActionType actionType);
+
+	/**
+	 * Gets the audit log with entries with the given responsible user.
+	 *
+	 * @param user The responsible user of the desired entries.
+	 * @return The audit log with entries with the given responsible user.
+	 */
+	AuditLog getAuditLog(IUser user);
+
+	/**
+	 * Gets the audit log with entries with the given responsible user and the given action type.
+	 *
+	 * @param user The responsible user of the desired entries.
+	 * @param actionType The action type of the desired entries.
+	 * @return The audit log with entries with the given responsible user and the given action type.
+	 */
+	AuditLog getAuditLog(IUser user, ActionType actionType);
 }

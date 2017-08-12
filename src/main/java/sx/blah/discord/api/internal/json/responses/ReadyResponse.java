@@ -17,7 +17,7 @@
 
 package sx.blah.discord.api.internal.json.responses;
 
-import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.objects.UnavailableGuildObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 
@@ -44,7 +44,7 @@ public class ReadyResponse {
 	/**
 	 * Array of DM channels the bot has.
 	 */
-	public PrivateChannelObject[] private_channels;
+	public ChannelObject[] private_channels;
 	/**
 	 * Array of unavailable guilds.
 	 */

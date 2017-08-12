@@ -43,9 +43,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * The default implementation of {@link IChannel}.
@@ -118,11 +120,16 @@ public class Channel implements IChannel {
 	protected final Cache<IWebhook> webhooks;
 
 	/**
+	 * Whether the channel is nsfw.
+	 */
+	protected boolean isNSFW;
+
+	/**
 	 * The client that owns the channel object.
 	 */
 	protected final DiscordClientImpl client;
 
-	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
+	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -131,6 +138,7 @@ public class Channel implements IChannel {
 		this.position = position;
 		this.roleOverrides = roleOverrides;
 		this.userOverrides = userOverrides;
+		this.isNSFW = isNSFW;
 		this.messages = new Cache<>(client, IMessage.class);
 		this.webhooks = new Cache<>(client, IWebhook.class);
 	}
@@ -179,33 +187,15 @@ public class Channel implements IChannel {
 	 * @param limit The maximum number of messages to request.
 	 * @return The received messages.
 	 */
-	private IMessage[] requestHistory(Long before, int limit) {
-		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY);
+	private IMessage[] getHistory(long before, int limit) {
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES);
 
-		String queryParams = "?limit=" + limit;
+		String query = "?before=" + Long.toUnsignedString(before) + "&limit=" + limit;
+		MessageObject[] messages = client.REQUESTS.GET.makeRequest(
+				DiscordEndpoints.CHANNELS + getStringID() + "/messages" + query,
+				MessageObject[].class);
 
-		if (before != null) {
-			queryParams += "&before=" + Long.toUnsignedString(before);
-		}
-//		} else if (around != null) {
-//			queryParams += "&around="+around;
-//		} else if (after != null) {
-//			queryParams += "&after="+after;
-//		}
-
-		MessageObject[] messages = client.REQUESTS.GET.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages" + queryParams, MessageObject[].class);
-
-		if (messages.length == 0) {
-			return new IMessage[0];
-		}
-
-		IMessage[] messageObjs = new IMessage[messages.length];
-
-		for (int i = 0; i < messages.length; i++) {
-			messageObjs[i] = DiscordUtils.getMessageFromJSON(this, messages[i]);
-		}
-
-		return messageObjs;
+		return Arrays.stream(messages).map(m -> DiscordUtils.getMessageFromJSON(this, m)).toArray(IMessage[]::new);
 	}
 
 	@Override
@@ -213,298 +203,111 @@ public class Channel implements IChannel {
 		return new MessageHistory(messages.values());
 	}
 
-	/**
-	 * Creates a sublist from a message array.
-	 *
-	 * @param from The beginning index, inclusive.
-	 * @param end The ending index, exclusive.
-	 * @param array The array to get messages from.
-	 * @return A message list containing the messages from the array.
-	 */
-	private static Collection<IMessage> subDeque(int from, int end, IMessage[] array) {
-		List<IMessage> list = new ArrayList<>();
-		if (from >= 0 || end < from) { //Skip this step if the indexes are invalid
-			for (int i = from; i < end; i++)
-				list.add(array[i]);
-		}
-		return list;
-	}
-
 	@Override
 	public MessageHistory getMessageHistory(int messageCount) {
-		if (messageCount <= messages.size())
-			return new MessageHistory(new ArrayList<>(messages.values()).subList(0, messageCount));
-		else {
-			final AtomicInteger remaining = new AtomicInteger(messageCount - messages.size());
-			final List<IMessage> retrieved = new ArrayList<>(messages.values());
-			while (remaining.get() > 0) {
-				RequestBuffer.request(() -> {
-					int requestCount = Math.min(remaining.get(), MESSAGE_CHUNK_COUNT);
-					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, requestCount);
+		if (messageCount <= messages.size()) { // we already have all of the wanted messages in the cache
+			return new MessageHistory(messages.values().stream().limit(messageCount).collect(Collectors.toList()));
+		} else {
+			List<IMessage> retrieved = new ArrayList<>(messageCount);
+			AtomicLong lastMessage = new AtomicLong(DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()));
+			int chunkSize = messageCount < MESSAGE_CHUNK_COUNT ? messageCount : MESSAGE_CHUNK_COUNT;
 
-					if (requestCount != chunk.length)
-						remaining.set(0); //Got all possible messages already
-					else
-						remaining.addAndGet(-chunk.length);
-
-					retrieved.addAll(Arrays.asList(chunk));
-				}).get();
+			while (retrieved.size() < messageCount) { // while we dont have messageCount messages
+				IMessage[] chunk = getHistory(lastMessage.get(), chunkSize);
+				lastMessage.set(chunk[chunk.length - 1].getLongID());
+				Collections.addAll(retrieved, chunk);
 			}
 
-			return new MessageHistory(retrieved);
+			return new MessageHistory(retrieved.size() > messageCount ? retrieved.subList(0, messageCount) : retrieved);
 		}
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
-		return getMessageHistoryFrom(startDate, -1);
+		return getMessageHistoryFrom(startDate, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
-				.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
-				.collect(Collectors.toList()));
-
-		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
-		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
-			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
-
-				List<IMessage> toAdd = Arrays.stream(chunk)
-						.filter(msg -> msg.getTimestamp().compareTo(startDate) <= 0)
-						.collect(Collectors.toList());
-
-				retrieved.addAll(toAdd);
-
-				if (chunk.length > 0)
-					lastID.set(chunk[chunk.length-1].getLongID());
-
-				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount);//Done when the messages retrieved are not matching the requested count
-			}).get())
-				break;
-		}
-
-		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
-		else
-			return new MessageHistory(retrieved);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
-		return getMessageHistoryTo(endDate, -1);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
-				.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
-				.collect(Collectors.toList()));
-
-		if (messages.size() == retrieved.size()) { //All elements were copied over, meaning that we're likely not done finding messages
-			while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
-				if (RequestBuffer.request(() -> {
-					IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, MESSAGE_CHUNK_COUNT);
-
-					List<IMessage> toAdd = Arrays.stream(chunk)
-							.filter(msg -> msg.getTimestamp().compareTo(endDate) >= 0)
-							.collect(Collectors.toList());
-
-					retrieved.addAll(toAdd);
-
-					return toAdd.size() != chunk.length || chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
-				}).get())
-					break;
-			}
-		}
-
-		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
-		else
-			return new MessageHistory(retrieved);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
-		return getMessageHistoryIn(startDate, endDate, -1);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>(messages.stream()
-				.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
-				.collect(Collectors.toList()));
-
-		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
-
-		if (((IMessage) messages.values().toArray()[messages.size()-1]).getTimestamp().compareTo(endDate) <= 0) { //When the last message cached matches the criteria there may still be more in history
-			while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
-				if (RequestBuffer.request(() -> {
-					IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
-
-					List<IMessage> toAdd = Arrays.stream(chunk)
-							.filter(msg -> msg.getTimestamp().compareTo(startDate) >= 0 && msg.getTimestamp().compareTo(endDate) <= 0)
-							.collect(Collectors.toList());
-
-					retrieved.addAll(toAdd);
-
-					if (chunk.length > 0)
-						lastID.set(chunk[chunk.length-1].getLongID());
-
-					return toAdd.size() != chunk.length || chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
-				}).get())
-					break;
-			}
-		}
-
-		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
-		else
-			return new MessageHistory(retrieved);
+		return getMessageHistoryFrom(DiscordUtils.getSnowflakeFromTimestamp(startDate), maxCount);
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(long id) {
-		return getMessageHistoryFrom(id, -1);
+		return getMessageHistoryFrom(id, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(long id, int maxCount) {
-		IMessage[] array = messages.values().toArray(new IMessage[messages.size()]);
-		int index = -1;
-		for (int i = 0; i < array.length; i++) {
-			if (array[i].getLongID() == id) {
-				index = i;
-				break;
-			}
-		}
+		return getMessageHistoryIn(id, DiscordUtils.getSnowflakeFromTimestamp(getCreationDate()), maxCount);
+	}
 
-		final List<IMessage> retrieved = new ArrayList<>(subDeque(index, array.length, array));
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+		return getMessageHistoryTo(endDate, Integer.MAX_VALUE);
+	}
 
-		if (index == -1)
-			retrieved.add(RequestBuffer.request(() -> (IMessage) getMessageByID(id)).get());
-
-		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
-		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
-			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
-
-				retrieved.addAll(Arrays.asList(chunk));
-
-				if (chunk.length > 0)
-					lastID.set(chunk[chunk.length-1].getLongID());
-
-				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
-			}).get())
-				break;
-		}
-
-		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
-		else
-			return new MessageHistory(retrieved);
+	@Override
+	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
+		return getMessageHistoryTo(DiscordUtils.getSnowflakeFromTimestamp(endDate), maxCount);
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryTo(long id) {
-		return getMessageHistoryTo(id, -1);
+		return getMessageHistoryTo(id, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryTo(long id, int maxCount) {
-		final List<IMessage> retrieved = new ArrayList<>();
+		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()), id, maxCount);
+	}
 
-		for (IMessage message : messages.values()) {
-			retrieved.add(message);
-			if (message.getLongID() == id)
-				return new MessageHistory(retrieved); //Let's end early since we reached the target
-		}
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+		return getMessageHistoryIn(startDate, endDate, Integer.MAX_VALUE);
+	}
 
-		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
-			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, MESSAGE_CHUNK_COUNT);
-
-				for (IMessage message : chunk) {
-					retrieved.add(message);
-					if (message.getLongID() == id)
-						return true; //Finish early
-				}
-
-				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
-			}).get())
-				break;
-		}
-
-		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
-		else
-			return new MessageHistory(retrieved);
+	@Override
+	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(startDate),
+				DiscordUtils.getSnowflakeFromTimestamp(endDate), maxCount);
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryIn(long beginID, long endID) {
-		return getMessageHistoryIn(beginID, endID, -1);
+		return getMessageHistoryIn(beginID, endID, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount) {
-		IMessage[] array = messages.values().toArray(new IMessage[messages.size()]);
-		int startIndex = -1;
-		for (int i = 0; i < array.length; i++) {
-			if (array[i].getLongID() == id) {
-				startIndex = i;
-				break;
-			}
-		}
+		List<IMessage> retrieved = new ArrayList<>();
+		AtomicLong lastMessage = new AtomicLong(beginID);
+		int chunkSize = maxCount < MESSAGE_CHUNK_COUNT ? maxCount : MESSAGE_CHUNK_COUNT;
 
-		final List<IMessage> retrieved = new ArrayList<>(subDeque(startIndex, array.length, array));
+		IMessage[] chunk;
+		do {
+			chunk = getHistory(lastMessage.get() + 1, chunkSize); // add 1 to make the beginID inclusive
 
-		if (startIndex == -1)
-			retrieved.add(RequestBuffer.request(() -> (IMessage) getMessageByID(id)).get());
+			if (chunk.length == 0) break; // no more messages
 
-		final AtomicReference<Long> lastID = new AtomicReference<>(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null);
+			lastMessage.set(chunk[chunk.length - 1].getLongID());
+			Collections.addAll(retrieved, chunk);
+		} while (chunk.length >= chunkSize && retrieved.size() < maxCount && retrieved.stream().noneMatch(m -> m.getLongID() <= endID));
 
-		while ((maxCount > 0 && retrieved.size() < maxCount) || maxCount <= 0) {
-			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(lastID.get(), MESSAGE_CHUNK_COUNT);
+		final OptionalInt index = IntStream.range(0, retrieved.size())
+				.filter(i -> retrieved.get(i).getLongID() == endID)
+				.findFirst();
 
-				for (IMessage message : chunk) {
-					retrieved.add(message);
-					if (message.getLongID() == id)
-						return true; //Finish early
-				}
-
-				if (chunk.length > 0)
-					lastID.set(chunk[chunk.length-1].getLongID());
-
-				return chunk.length != MESSAGE_CHUNK_COUNT || (maxCount > 0 && retrieved.size() >= maxCount); //We reached the end of the history or we reached the specified end date
-			}).get())
-				break;
-		}
-
-		if (maxCount > 0)
-			return new MessageHistory(retrieved.subList(0, Math.min(retrieved.size(), maxCount)));
-		else
+		if (index.isPresent()) {
+			return new MessageHistory(retrieved.subList(0, index.getAsInt() + 1));
+		} else {
 			return new MessageHistory(retrieved);
+		}
 	}
 
 	@Override
 	public MessageHistory getFullMessageHistory() {
-		final List<IMessage> retrieved = new ArrayList<>(messages.values());
-
-		while (true) {
-			if (RequestBuffer.request(() -> {
-				IMessage[] chunk = requestHistory(retrieved.size() > 0 ? retrieved.get(retrieved.size()-1).getLongID() : null, MESSAGE_CHUNK_COUNT);
-
-				retrieved.addAll(Arrays.asList(chunk));
-
-				return chunk.length != MESSAGE_CHUNK_COUNT; //We reached the end of the history or we reached the specified end date
-			}).get())
-				break;
-		}
-
-		return new MessageHistory(retrieved);
+		return getMessageHistoryTo(getCreationDate());
 	}
 
 	@Override
@@ -583,7 +386,16 @@ public class Channel implements IChannel {
 
 	@Override
 	public boolean isNSFW() {
-		return DiscordUtils.NSFW_CHANNEL_PATTERN.matcher(name).find();
+		return isNSFW || DiscordUtils.NSFW_CHANNEL_PATTERN.matcher(name).find();
+	}
+
+	/**
+	 * Sets the CACHED nsfw state for the channel.
+	 *
+	 * @param isNSFW The new channel nsfw state.
+	 */
+	public void setNSFW(boolean isNSFW) {
+		this.isNSFW = isNSFW;
 	}
 
 	@Override
@@ -833,6 +645,11 @@ public class Channel implements IChannel {
 	@Override
 	public void changeTopic(String topic) {
 		edit(new ChannelEditRequest.Builder().topic(topic).build());
+	}
+
+	@Override
+	public void changeNSFW(boolean isNSFW) {
+		edit(new ChannelEditRequest.Builder().nsfw(isNSFW).build());
 	}
 
 	@Override
@@ -1119,7 +936,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, guild, topic, position, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
+		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
 		channel.isTyping.set(isTyping.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
@@ -1133,7 +950,6 @@ public class Channel implements IChannel {
 
 	@Override
 	public IShard getShard() {
-		if (isPrivate()) return getClient().getShards().get(0);
 		return getGuild().getShard();
 	}
 

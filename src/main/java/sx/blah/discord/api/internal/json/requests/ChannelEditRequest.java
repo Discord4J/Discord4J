@@ -27,6 +27,7 @@ public class ChannelEditRequest {
 		private String name;
 		private Integer position;
 		private String topic;
+		private Boolean nsfw;
 
 		/**
 		 * Sets the new name of the channel.
@@ -62,12 +63,23 @@ public class ChannelEditRequest {
 		}
 
 		/**
+		 * Sets the new nsfw state of the channel.
+		 *
+		 * @param nsfw the nsfw state.
+		 * @return this builder, for chaining.
+		 */
+		public Builder nsfw(boolean nsfw) {
+			this.nsfw = nsfw;
+			return this;
+		}
+
+		/**
 		 * Builds the channel edit request.
 		 *
 		 * @return The channel edit request.
 		 */
 		public ChannelEditRequest build() {
-			return new ChannelEditRequest(name, position, topic);
+			return new ChannelEditRequest(name, position, topic, nsfw);
 		}
 	}
 
@@ -83,10 +95,12 @@ public class ChannelEditRequest {
 	 * The new topic of the channel.
 	 */
 	private final String topic;
+	private final Boolean nsfw;
 
-	ChannelEditRequest(String name, Integer position, String topic) {
+	ChannelEditRequest(String name, Integer position, String topic, Boolean nsfw) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;
+		this.nsfw = nsfw;
 	}
 }

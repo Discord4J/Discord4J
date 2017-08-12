@@ -25,6 +25,8 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
 import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
 import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
@@ -32,6 +34,8 @@ import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookUpdateEvent;
@@ -247,19 +251,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IUser getUserByID(long id) {
-		if (users == null)
-			return null;
-
-		IUser user = users.get(id);
-
-		if (user == null) {
-			if (client.getOurUser() != null && id == client.getOurUser().getLongID())
-				user = client.getOurUser();
-			else if (id == ownerID)
-				user = getOwner();
-		}
-
-		return user;
+		return users.get(id);
 	}
 
 	@Override
@@ -636,7 +628,7 @@ public class Guild implements IGuild {
 				new ChannelCreateRequest(name, "text"),
 				ChannelObject.class);
 
-		IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
+		IChannel channel = DiscordUtils.getChannelFromJSON(getShard(), this, response);
 		channels.put(channel);
 
 		return channel;
@@ -655,7 +647,7 @@ public class Guild implements IGuild {
 				new ChannelCreateRequest(name, "voice"),
 				ChannelObject.class);
 
-		IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
+		IVoiceChannel channel = (IVoiceChannel) DiscordUtils.getChannelFromJSON(getShard(), this, response);
 		channels.put(channel);
 
 		return channel;
@@ -697,6 +689,13 @@ public class Guild implements IGuild {
 	@Override
 	public IChannel getGeneralChannel() {
 		return getChannelByID(this.id);
+	}
+
+	@Override
+	public IChannel getDefaultChannel() {
+		return getChannels().stream()
+				.filter(c -> PermissionUtils.hasPermissions(c, client.getOurUser(), Permissions.READ_MESSAGES))
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -923,6 +922,50 @@ public class Guild implements IGuild {
 	 */
 	public void setTotalMemberCount(int totalMemberCount){
 		this.totalMemberCount = totalMemberCount;
+	}
+
+	@Override
+	public AuditLog getAuditLog() {
+		return getAuditLog(null, null);
+	}
+
+	@Override
+	public AuditLog getAuditLog(ActionType actionType) {
+		return getAuditLog(null, actionType);
+	}
+
+	@Override
+	public AuditLog getAuditLog(IUser user) {
+		return getAuditLog(user, null);
+	}
+
+	@Override
+	public AuditLog getAuditLog(IUser user, ActionType actionType) {
+		return getAuditLog(user, actionType, (System.currentTimeMillis() - DiscordUtils.DISCORD_EPOCH) << 22);
+	}
+
+	private AuditLog getAuditLog(IUser user, ActionType actionType, long before) {
+		List<AuditLog> retrieved = new ArrayList<>();
+
+		AuditLogEntryObject[] chunk;
+
+		do {
+			String query = "?limit=100&before=" + before;
+			if (user != null) query += "&user_id=" + Long.toUnsignedString(user.getLongID());
+			if (actionType != null) query += "&action_type=" + actionType.getRaw();
+
+			AuditLogObject auditLog = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+					DiscordEndpoints.GUILDS + getStringID() + "/audit-logs" + query,
+					AuditLogObject.class);
+			chunk = auditLog.audit_log_entries;
+
+			if (chunk.length == 0) break;
+
+			retrieved.add(DiscordUtils.getAuditLogFromJSON(this, auditLog));
+			before = Long.parseLong(auditLog.audit_log_entries[auditLog.audit_log_entries.length - 1].id);
+		} while (chunk.length == 100);
+
+		return new AuditLog(retrieved.stream().map(AuditLog::getEntries).flatMap(Collection::stream).collect(LongMapCollector.toLongMap()));
 	}
 
 	@Override

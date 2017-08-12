@@ -19,15 +19,12 @@ package sx.blah.discord.api.internal;
 
 import sx.blah.discord.Discord4J;
 
+import static sx.blah.discord.api.internal.DiscordUtils.API_VERSION;
+
 /**
  * Utility class containing constants for Discord API endpoints.
  */
 public final class DiscordEndpoints {
-
-	/**
-	 * The version of the Discord REST API that is used by Discord4J.
-	 */
-	public static final String API_VERSION = "6";
 
 	/**
 	 * The base URL.
