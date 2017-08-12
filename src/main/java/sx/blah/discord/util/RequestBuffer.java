@@ -218,7 +218,9 @@ public class RequestBuffer {
 		@Override
 		public T get() {
 			try {
-				while (!isDone() && !isCancelled()) {}
+				while (!isDone() && !isCancelled()) {
+					Thread.sleep(50);
+				}
 
 				return backing.get();
 			} catch (Exception e) {
@@ -232,7 +234,9 @@ public class RequestBuffer {
 		public T get(long timeout, TimeUnit unit) {
 			long timeoutTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
 			try {
-				while (!isDone() && !isCancelled() && System.currentTimeMillis() <= timeoutTime) {}
+				while (!isDone() && !isCancelled() && System.currentTimeMillis() <= timeoutTime) {
+					Thread.sleep(50);
+				}
 
 				if (System.currentTimeMillis() > timeoutTime)
 					throw new TimeoutException();
