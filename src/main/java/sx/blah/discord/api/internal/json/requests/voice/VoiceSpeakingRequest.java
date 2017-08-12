@@ -18,11 +18,16 @@
 package sx.blah.discord.api.internal.json.requests.voice;
 
 /**
- * Used to indicate whether or not the bot is transmitting audio.
+ * Sent to indicate whether or not the bot is transmitting audio.
  */
 public class VoiceSpeakingRequest {
-
+	/**
+	 * The delay before the bot should be shown as speaking.
+	 */
 	public int delay = 0;
+	/**
+	 * Whether the bot is speaking.
+	 */
 	public boolean speaking;
 
 	public VoiceSpeakingRequest(boolean speaking) {

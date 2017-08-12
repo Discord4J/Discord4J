@@ -20,134 +20,133 @@ package sx.blah.discord.handle.obj;
 import java.util.EnumSet;
 
 /**
- * This represents Discord permissions.
+ * The Discord permissions.
  */
 public enum Permissions {
 
 	/**
-	 * Allows the user to create invites.
+	 * Allows the creation of instant invites.
 	 */
 	CREATE_INVITE(0),
 	/**
-	 * Allows the user to kick users.
+	 * Allows kicking members.
 	 */
 	KICK(1),
 	/**
-	 * Allows the user to ban users.
+	 * Allows banning members.
 	 */
 	BAN(2),
 	/**
-	 * Allows the user to manage roles.
-	 * NOTE: This supercedes any other permissions if true.
+	 * Allows all permissions and bypasses channel permission overrides.
 	 */
 	ADMINISTRATOR(3),
 	/**
-	 * Allows the user to manage channels.
+	 * Allows management and editing of channels.
 	 */
 	MANAGE_CHANNELS(4),
 	/**
-	 * Allows the user to manage a specific channel.
+	 * Allows management and editing of a channel.
 	 */
 	MANAGE_CHANNEL(4),
 	/**
-	 * Allows the user to manage a server.
+	 * Allows management and editing of the guild.
 	 */
 	MANAGE_SERVER(5),
 	/**
-	 * Allows the user to add emoji reactions.
+	 * Allows for the addition of reactions to messages.
 	 */
 	ADD_REACTIONS(6),
 	/**
-	 * Allows the user to read the audit log.
+	 * Allows for viewing of audit logs.
 	 */
 	VIEW_AUDIT_LOG(7),
 	/**
-	 * Allows the user to read messages.
+	 * Allows reading of messages in a channel.
 	 */
 	READ_MESSAGES(10),
 	/**
-	 * Allows the user to send messages.
+	 * Allows for sending messages in a channel.
 	 */
 	SEND_MESSAGES(11),
 	/**
-	 * Allows the user to send messages with tts.
+	 * Allows for sending of text-to-speech messages.
 	 */
 	SEND_TTS_MESSAGES(12),
 	/**
-	 * Allows the user to manage messages.
+	 * Allows for deletion of other users messages.
 	 */
 	MANAGE_MESSAGES(13),
 	/**
-	 * Allows the user to embed links in messages.
+	 * Allows links sent by the user to be automatically embedded.
 	 */
 	EMBED_LINKS(14),
 	/**
-	 * Allows the user to attach files in chat.
+	 * Allows for uploading of images and files.
 	 */
 	ATTACH_FILES(15),
 	/**
-	 * Allows the user to read message history.
+	 * Allows for reading of message history.
 	 */
 	READ_MESSAGE_HISTORY(16),
 	/**
-	 * Allows the user to @mention everyone.
+	 * Allows for using the @everyone tag to notify all users and the @here tag to notify all online users in a channel.
 	 */
 	MENTION_EVERYONE(17),
 	/**
-	 * Allows the user to use emojis from external servers in a given one.
+	 * Allows the usage of custom emojis from other servers.
 	 */
 	USE_EXTERNAL_EMOJIS(18),
 	/**
-	 * Allows the user to connect to a voice channel.
+	 * Allows for joining of a voice channel.
 	 */
 	VOICE_CONNECT(20),
 	/**
-	 * Allows the user to speak in a voice channel.
+	 * Allows for muting members in a voice channel.
 	 */
 	VOICE_SPEAK(21),
 	/**
-	 * Allows the user to globally mute users in a voice channel.
+	 * Allows for muting members in a voice channel.
 	 */
 	VOICE_MUTE_MEMBERS(22),
 	/**
-	 * Allows the user to globally deafen users in a voice channel.
+	 * Allows for deafening of members in a voice channel.
 	 */
 	VOICE_DEAFEN_MEMBERS(23),
 	/**
-	 * Allows the user to move users to different voice channels.
+	 * Allows for moving of members between voice channels.
 	 */
 	VOICE_MOVE_MEMBERS(24),
 	/**
-	 * Allows the user to use "voice activation detection".
+	 * Allows for using voice-activity-detection in a voice channel.
 	 */
 	VOICE_USE_VAD(25),
 	/**
-	 * Allows the user to change his/her own nicknames.
+	 * Allows for modification of a user's own nickname.
 	 */
 	CHANGE_NICKNAME(26),
 	/**
-	 * Allows the user to manage nicknames.
+	 * Allows for modification of other users nicknames.
 	 */
 	MANAGE_NICKNAMES(27),
 	/**
-	 * Allows the user to manage roles below yours.
+	 * Allows for management and editing of roles.
 	 */
 	MANAGE_ROLES(28),
 	/**
-	 * Allows the user to manage permissions.
+	 * Allows for management and editing of permissions.
 	 */
 	MANAGE_PERMISSIONS(28),
 	/**
-	 * Allows the user to manage webhooks.
+	 * Allows for management and editing of webhooks.
 	 */
 	MANAGE_WEBHOOKS(29),
 	/**
-	 * Allows the user to manage server emojis.
+	 * Allows for management and editing of emojis.
 	 */
 	MANAGE_EMOJIS(30);
 
 	/**
-	 * The bit offset in the permissions number
+	 * The bit offset for the permission.
 	 */
 	private final int offset;
 
@@ -156,11 +155,11 @@ public enum Permissions {
 	}
 
 	/**
-	 * Checks whether a provided "permissions number" contains this permission.
+	 * Gets whether the given "permissions number" contains the permission.
 	 *
 	 * @param permissionsNumber The raw permissions number.
-	 * @param checkAdmin Set to true in order to have the ADMINISTRATOR permission supersede the provided permissions.
-	 * @return True if the user has this permission, false if otherwise.
+	 * @param checkAdmin Whether the check should take into account the permissionsNumber having administrator permission.
+	 * @return Whether the given permissions number contains the permission.
 	 */
 	public boolean hasPermission(int permissionsNumber, boolean checkAdmin) {
 		if ((1 << offset & permissionsNumber) > 0)
@@ -171,20 +170,22 @@ public enum Permissions {
 	}
 
 	/**
-	 * Checks whether a provided "permissions number" contains this permission. Same as calling #hasPermission(number, true).
+	 * Gets whether the given "permissions number" contains the permission.
+	 *
+	 * <p>Equivalent to <code>hasPermission(number, true)</code>
 	 *
 	 * @param permissionsNumber The raw permissions number.
-	 * @return True if the user has this permission, false if otherwise.
+	 * @return Whether the given permissions number contains the permission.
 	 */
 	public boolean hasPermission(int permissionsNumber) {
 		return hasPermission(permissionsNumber, true);
 	}
 
 	/**
-	 * Generates a set of allowed permissions represented by the given raw permissions number.
+	 * Gets a set of allowed permissions represented by the given raw permissions number.
 	 *
 	 * @param permissionsNumber The raw permissions number.
-	 * @return The set of permissions represented by the number.
+	 * @return A set of allowed permissions represented by the given raw permissions number.
 	 */
 	public static EnumSet<Permissions> getAllowedPermissionsForNumber(int permissionsNumber) {
 		EnumSet<Permissions> permissionsSet = EnumSet.noneOf(Permissions.class);
@@ -198,10 +199,10 @@ public enum Permissions {
 	}
 
 	/**
-	 * Generates a set of denied permissions represented by the given raw permissions number.
+	 * Gets a set of denied permissions represented by the given raw permissions number.
 	 *
 	 * @param permissionsNumber The raw permissions number.
-	 * @return The set of permissions represented by the number.
+	 * @return A set of denied permissions represented by the given raw permissions number.
 	 */
 	public static EnumSet<Permissions> getDeniedPermissionsForNumber(int permissionsNumber) {
 		EnumSet<Permissions> permissionsSet = EnumSet.noneOf(Permissions.class);
@@ -215,10 +216,10 @@ public enum Permissions {
 	}
 
 	/**
-	 * Generates a raw permissions number for the provided set of permissions.
+	 * Gets the raw permissions number for the given set of permissions.
 	 *
 	 * @param permissions The permissions.
-	 * @return The raw permissions number.
+	 * @return The raw permissions number for the given set of permissions.
 	 */
 	public static int generatePermissionsNumber(EnumSet<Permissions> permissions) {
 		if (permissions == null)

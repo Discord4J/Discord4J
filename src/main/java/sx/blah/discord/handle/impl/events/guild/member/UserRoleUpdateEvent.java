@@ -24,12 +24,12 @@ import sx.blah.discord.handle.obj.IUser;
 import java.util.List;
 
 /**
- * This event is dispatched when a guild updates a user's roles.
+ * Dispatched when a member's roles are updated.
  */
 public class UserRoleUpdateEvent extends GuildMemberEvent {
 
 	private final List<IRole> oldRoles, newRoles;
-	
+
 	public UserRoleUpdateEvent(IGuild guild, IUser user, List<IRole> oldRoles, List<IRole> newRoles) {
 		super(guild, user);
 		this.oldRoles = oldRoles;

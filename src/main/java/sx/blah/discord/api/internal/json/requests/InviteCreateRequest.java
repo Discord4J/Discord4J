@@ -18,7 +18,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
 /**
- * The request sent to create an invite for a channel.
+ * Sent to create an invite for a channel.
  */
 public class InviteCreateRequest {
 
@@ -28,17 +28,17 @@ public class InviteCreateRequest {
 	public int max_age;
 
 	/**
-	 * The maximum amount of new users this invite can be used on. Set to 0 for an infinite amount of users.
+	 * The maximum number of times this invite can be used. Set to 0 for no limit.
 	 */
 	public int max_uses;
 
 	/**
-	 * Whether the users added through this invite are temporary or not.
+	 * Whether the users added through this invite are temporary.
 	 */
 	public boolean temporary;
 
 	/**
-	 * Whether to reuse similar invites or not.
+	 * Whether to reuse similar invites.
 	 */
 	public boolean unique;
 

@@ -21,6 +21,9 @@ import sx.blah.discord.handle.obj.IRole;
 
 import java.util.Arrays;
 
+/**
+ * Sent to edit a guild member's properties.
+ */
 public class MemberEditRequest {
 
 	public static class Builder {
@@ -34,8 +37,8 @@ public class MemberEditRequest {
 		/**
 		 * Sets the roles for the user to have.
 		 *
-		 * @param roles an array of Role objects.
-		 * @return this builder, for chaining.
+		 * @param roles An array of Role objects.
+		 * @return This builder, for chaining.
 		 */
 		public Builder roles(IRole[] roles) {
 			this.roles = roles;
@@ -45,8 +48,8 @@ public class MemberEditRequest {
 		/**
 		 * Sets the user's nickname.
 		 *
-		 * @param nick the new user nickname.
-		 * @return this builder, for chaining.
+		 * @param nick The new user nickname.
+		 * @return This builder, for chaining.
 		 */
 		public Builder nick(String nick) {
 			this.nick = nick;
@@ -56,8 +59,8 @@ public class MemberEditRequest {
 		/**
 		 * Sets whether to mute the user.
 		 *
-		 * @param mute if the user should be muted.
-		 * @return this builder, for chaining.
+		 * @param mute If the user should be muted.
+		 * @return This builder, for chaining.
 		 */
 		public Builder mute(boolean mute) {
 			this.mute = mute;
@@ -67,8 +70,8 @@ public class MemberEditRequest {
 		/**
 		 * Sets whether to deafen the user.
 		 *
-		 * @param deafen if the user should be deafened.
-		 * @return this builder, for chaining.
+		 * @param deafen If the user should be deafened.
+		 * @return This builder, for chaining.
 		 */
 		public Builder deafen(boolean deafen) {
 			this.deafen = deafen;
@@ -78,8 +81,8 @@ public class MemberEditRequest {
 		/**
 		 * Sets the voice channel to move the user to.
 		 *
-		 * @param channelID the target voice channel ID to move the user to.
-		 * @return this builder, for chaining.
+		 * @param channelID The target voice channel ID to move the user to.
+		 * @return This builder, for chaining.
 		 */
 		public Builder channel(String channelID) {
 			this.channelID = channelID;
@@ -89,17 +92,32 @@ public class MemberEditRequest {
 		/**
 		 * Builds the request object.
 		 *
-		 * @return the member edit request.
+		 * @return The member edit request.
 		 */
 		public MemberEditRequest build() {
 			return new MemberEditRequest(roles, nick, mute, deafen, channelID);
 		}
 	}
 
+	/**
+	 * The member's roles.
+	 */
 	private final String[] roles;
+	/**
+	 * The member's nickname.
+	 */
 	private final String nick;
+	/**
+	 * Whether the member is muted.
+	 */
 	private final Boolean mute;
+	/**
+	 * Whether the member is deafened.
+	 */
 	private final Boolean deaf;
+	/**
+	 * The ID the voice channel the member is in.
+	 */
 	private final String channel_id;
 
 	MemberEditRequest(IRole[] roles, String nick, Boolean mute, Boolean deaf, String channelID) {

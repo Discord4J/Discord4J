@@ -19,86 +19,87 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.util.cache.Cache;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The default implementation of {@link IEmoji}.
+ */
 public class EmojiImpl implements IEmoji {
 
 	/**
-	 * The guild.
+	 * The unique snowflake ID of the emoji.
 	 */
-	protected final IGuild guild;
+	private final long id;
 	/**
-	 * The ID.
+	 * The parent guild of the emoji.
 	 */
-	protected final long id;
+	private final IGuild guild;
 	/**
-	 * Roles for integration?
+	 * the name of the emoji.
 	 */
-	protected final Cache<IRole> roles;
+	private final String name;
 	/**
-	 * The name.
+	 * The roles which are allowed to use the emoji.
 	 */
-	protected volatile String name;
+	private final List<IRole> roles;
 	/**
-	 * If it requires colons :X:
+	 * Whether the emoji needs colons in chat.
 	 */
-	protected volatile boolean requiresColons;
+	private final boolean requiresColons;
 	/**
-	 * If it's managed externally.
+	 * Whether the emoji is managed by an external service.
 	 */
-	protected volatile boolean isManaged;
+	private final boolean isManaged;
 
-	public EmojiImpl(IGuild guild, long id, String name, boolean requiresColons, boolean isManaged, String[] roles) {
-		this(guild, id, name, requiresColons, isManaged, convertStringsToLongs(roles));
-	}
-
-	public EmojiImpl(IGuild guild, long id, String name, boolean requiresColons, boolean isManaged, IRole[] roles) {
-		this(guild, id, name, requiresColons, isManaged, convertRolesToIDs(roles));
-	}
-
-	public EmojiImpl(IGuild guild, long id, String name, boolean requiresColons, boolean isManaged, long[] roleIds) {
-		this.guild = guild;
+	public EmojiImpl(long id, IGuild guild, String name, List<IRole> roles, boolean requiresColons, boolean isManaged) {
 		this.id = id;
+		this.guild = guild;
 		this.name = name;
+		this.roles = roles;
 		this.requiresColons = requiresColons;
 		this.isManaged = isManaged;
-		this.roles = new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class);
-
-		for (long roleId : roleIds) {
-			IRole role = guild.getRoleByID(roleId);
-
-			if (role != null) {
-				this.roles.put(role);
-			}
-		}
-	}
-
-	private static long[] convertRolesToIDs(IRole[] roles) {
-		return Arrays.stream(roles).filter(role -> role != null).mapToLong(IRole::getLongID).toArray();
-	}
-
-	private static long[] convertStringsToLongs(String[] roles) {
-		return Arrays.stream(roles).mapToLong(Long::parseUnsignedLong).toArray();
-	}
-
-	public void setRequiresColons(boolean requiresColons) {
-		this.requiresColons = requiresColons;
 	}
 
 	@Override
 	public long getLongID() {
 		return id;
+	}
+
+	@Override
+	public IGuild getGuild() {
+		return guild;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public List<IRole> getRoles() {
+		return roles;
+	}
+
+	@Override
+	public boolean requiresColons() {
+		return requiresColons;
+	}
+
+	@Override
+	public boolean isManaged() {
+		return isManaged;
+	}
+
+	@Override
+	public String getImageUrl() {
+		return String.format(DiscordEndpoints.EMOJI_IMAGE, getStringID());
 	}
 
 	@Override
@@ -113,45 +114,7 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public IEmoji copy() {
-		return new EmojiImpl(guild, id, name, requiresColons, isManaged, roles.values().toArray(new IRole[roles.size()]));
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public IGuild getGuild() {
-		return guild;
-	}
-
-	@Override
-	public boolean requiresColons() {
-		return requiresColons;
-	}
-
-	@Override
-	public boolean isManaged() {
-		return isManaged;
-	}
-
-	public void setManaged(boolean managed) {
-		isManaged = managed;
-	}
-
-	@Override
-	public List<IRole> getRoles() {
-		return new LinkedList<>(roles.values());
-	}
-
-	@Override
-	public String getImageUrl() {
-		return String.format(DiscordEndpoints.EMOJI_IMAGE, getStringID());
+		return new EmojiImpl(id, guild, name, roles, requiresColons, isManaged);
 	}
 
 	@Override

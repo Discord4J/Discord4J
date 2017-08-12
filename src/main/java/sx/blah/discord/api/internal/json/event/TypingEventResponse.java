@@ -18,22 +18,22 @@
 package sx.blah.discord.api.internal.json.event;
 
 /**
- * A response sent when a user starts typing
+ * The object received on the gateway when a user starts typing.
  */
 public class TypingEventResponse {
 
 	/**
-	 * The user's id who started typing
+	 * The ID of the user who started typing.
 	 */
 	public String user_id;
 
 	/**
-	 * The timestamp when the event was launching, in epoch milliseconds
+	 * The unix timestamp of when the user started typing.
 	 */
 	public long timestamp;
 
 	/**
-	 * The channel id for where this is occurring
+	 * The ID of the channel where the user is typing.
 	 */
 	public String channel_id;
 }

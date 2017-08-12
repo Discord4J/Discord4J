@@ -26,6 +26,20 @@ import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
+import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.TypingEvent;
+import sx.blah.discord.handle.impl.events.VoiceChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.VoiceChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
+import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.*;
+import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.*;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
@@ -33,21 +47,38 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageList;
-import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static sx.blah.discord.api.internal.DiscordUtils.MAPPER;
 
+/**
+ * Handles {@link GatewayOps#DISPATCH} payloads on the Gateway.
+ */
 class DispatchHandler {
+	/**
+	 * The associated websocket connection.
+	 */
 	private DiscordWS ws;
+	/**
+	 * The associated shard.
+	 */
 	private ShardImpl shard;
+	/**
+	 * The associated client.
+	 */
 	private DiscordClientImpl client;
+	/**
+	 * The thread on which every payload is handled.
+	 */
 	private final ExecutorService dispatchExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("Dispatch Handler"));
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
@@ -56,6 +87,11 @@ class DispatchHandler {
 		this.client = (DiscordClientImpl) shard.getClient();
 	}
 
+	/**
+	 * Deserializes the given payload and passes it to the appropriate method depending on the event name.
+	 *
+	 * @param event The json payload.
+	 */
 	public void handle(final JsonNode event) {
 		dispatchExecutor.submit(() -> {
 			try {
@@ -102,7 +138,7 @@ class DispatchHandler {
 						guildDelete(MAPPER.treeToValue(json, GuildObject.class));
 						break;
 					case "CHANNEL_CREATE":
-						channelCreate(json);
+						channelCreate(MAPPER.treeToValue(json, ChannelObject.class));
 						break;
 					case "CHANNEL_DELETE":
 						channelDelete(MAPPER.treeToValue(json, ChannelObject.class));
@@ -199,8 +235,8 @@ class DispatchHandler {
 			return true;
 		}).andThen(() -> {
 			if (this.shard.getInfo()[0] == 0) { // pms are only sent to shard 0
-				for (PrivateChannelObject pmObj : ready.private_channels) {
-					IPrivateChannel pm = DiscordUtils.getPrivateChannelFromJSON(shard, pmObj);
+				for (ChannelObject pmObj : ready.private_channels) {
+					IPrivateChannel pm = (IPrivateChannel) DiscordUtils.getChannelFromJSON(shard, null, pmObj);
 					shard.privateChannels.put(pm);
 				}
 			}
@@ -425,21 +461,19 @@ class DispatchHandler {
 	}
 
 	private void messageDelete(MessageDeleteEventResponse event) {
-		String id = event.id;
-		String channelID = event.channel_id;
-		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(channelID));
+		long id = Long.parseUnsignedLong(event.id);
+		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		IMessage message = null;
 
 		if (channel != null) {
-			Message message = (Message) channel.getMessageByID(Long.parseUnsignedLong(id));
-			if (message != null) {
-				if (message.isPinned()) {
-					message.setPinned(false); //For consistency with the event
-					client.dispatcher.dispatch(new MessageUnpinEvent(message));
-				}
-				message.setDeleted(true);
-				channel.messages.remove(message);
-				client.dispatcher.dispatch(new MessageDeleteEvent(message));
-			}
+			message = channel.messages.get(id);
+		}
+
+		if (message == null) { // we dont have the message cached. The only thing we know about the message is its ID and its channel's ID.
+			client.dispatcher.dispatch(new MessageDeleteEvent(channel, id));
+		} else {
+			channel.messages.remove(id);
+			client.dispatcher.dispatch(new MessageDeleteEvent(message));
 		}
 	}
 
@@ -495,36 +529,28 @@ class DispatchHandler {
 		}
 	}
 
-	private void channelCreate(JsonNode json) throws JsonProcessingException {
-		boolean isPrivate = json.get("is_private").asBoolean(false);
-
-		if (isPrivate) { // PM channel.
-			PrivateChannelObject event = MAPPER.treeToValue(json, PrivateChannelObject.class);
-			if (shard.privateChannels.containsKey(event.id))
-				return; // we already have this PM channel; no need to create another.
-
-			shard.privateChannels.put(DiscordUtils.getPrivateChannelFromJSON(shard, event));
-
-		} else { // Regular channel.
-			ChannelObject event = MAPPER.treeToValue(json, ChannelObject.class);
-			String type = event.type;
-			Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+	private void channelCreate(ChannelObject json) {
+		if (json.type == ChannelObject.Type.PRIVATE) {
+			if (!shard.privateChannels.containsKey(json.id)) {
+				shard.privateChannels.put((IPrivateChannel) DiscordUtils.getChannelFromJSON(shard, null, json));
+			}
+		} else {
+			Guild guild = (Guild) shard.getGuildByID(Long.parseUnsignedLong(json.guild_id));
 			if (guild != null) {
-				if (type.equalsIgnoreCase("text")) { //Text channel
-					Channel channel = (Channel) DiscordUtils.getChannelFromJSON(guild, event);
+				IChannel channel = DiscordUtils.getChannelFromJSON(shard, guild, json);
+				if (json.type == ChannelObject.Type.GUILD_TEXT) {
 					guild.channels.put(channel);
 					client.dispatcher.dispatch(new ChannelCreateEvent(channel));
-				} else if (type.equalsIgnoreCase("voice")) {
-					VoiceChannel channel = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(guild, event);
-					guild.voiceChannels.put(channel);
-					client.dispatcher.dispatch(new VoiceChannelCreateEvent(channel));
+				} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
+					guild.voiceChannels.put((IVoiceChannel) channel);
+					client.dispatcher.dispatch(new VoiceChannelCreateEvent((IVoiceChannel) channel));
 				}
 			}
 		}
 	}
 
 	private void channelDelete(ChannelObject json) {
-		if (json.type.equalsIgnoreCase("text")) {
+		if (json.type == ChannelObject.Type.GUILD_TEXT) {
 			Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.id));
 			if (channel != null) {
 				if (!channel.isPrivate())
@@ -533,7 +559,7 @@ class DispatchHandler {
 					shard.privateChannels.remove(channel);
 				client.dispatcher.dispatch(new ChannelDeleteEvent(channel));
 			}
-		} else if (json.type.equalsIgnoreCase("voice")) {
+		} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 			VoiceChannel channel = (VoiceChannel) client.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
 			if (channel != null) {
 				((Guild) channel.getGuild()).voiceChannels.remove(channel);
@@ -552,27 +578,20 @@ class DispatchHandler {
 	}
 
 	private void channelUpdate(ChannelObject json) {
-		if (!json.is_private) {
-			if (json.type.equalsIgnoreCase("text")) {
-				Channel toUpdate = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.id));
-				if (toUpdate != null) {
-					IChannel oldChannel = toUpdate.copy();
-
-					toUpdate = (Channel) DiscordUtils.getChannelFromJSON(toUpdate.getGuild(), json);
-
-					toUpdate.loadWebhooks();
-
-					client.getDispatcher().dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
-				}
-			} else if (json.type.equalsIgnoreCase("voice")) {
-				VoiceChannel toUpdate = (VoiceChannel) client.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
-				if (toUpdate != null) {
-					VoiceChannel oldChannel = (VoiceChannel) toUpdate.copy();
-
-					toUpdate = (VoiceChannel) DiscordUtils.getVoiceChannelFromJSON(toUpdate.getGuild(), json);
-
-					client.getDispatcher().dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
-				}
+		if (json.type == ChannelObject.Type.GUILD_TEXT) {
+			Channel toUpdate = (Channel) shard.getChannelByID(Long.parseUnsignedLong(json.id));
+			if (toUpdate != null) {
+				IChannel oldChannel = toUpdate.copy();
+				toUpdate = (Channel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
+				toUpdate.loadWebhooks();
+				client.dispatcher.dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+			}
+		} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
+			IVoiceChannel toUpdate = shard.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
+			if (toUpdate != null) {
+				IVoiceChannel oldChannel = toUpdate.copy();
+				toUpdate = (IVoiceChannel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
+				client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 			}
 		}
 	}
@@ -706,85 +725,70 @@ class DispatchHandler {
 	}
 
 	private void guildEmojisUpdate(GuildEmojiUpdateResponse event) {
-		Guild guild = (Guild) client.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+		Guild guild = (Guild) shard.getGuildByID(Long.parseUnsignedLong(event.guild_id));
+
 		if (guild != null) {
-			List<IEmoji> oldList = guild.getEmojis().stream().map(IEmoji::copy)
-					.collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+			List<IEmoji> oldEmoji = guild.getEmojis();
+			List<IEmoji> newEmoji = Arrays.stream(event.emojis)
+					.map(e -> DiscordUtils.getEmojiFromJSON(guild, e))
+					.collect(Collectors.toList());
 
 			guild.emojis.clear();
-			for (EmojiObject obj : event.emojis) {
-				guild.emojis.put(DiscordUtils.getEmojiFromJSON(guild, obj));
-			}
+			guild.emojis.putAll(newEmoji);
 
-			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldList, guild.getEmojis()));
+			client.dispatcher.dispatch(new GuildEmojisUpdateEvent(guild, oldEmoji, newEmoji));
 		}
 	}
 
 	private void reactionAdd(ReactionEventResponse event) {
-		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
-			return;
-		if (channel != null) {
-			IMessage message = RequestBuffer.request(() -> {
-				return channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
-			}).get();
+		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		if (channel == null) return;
+		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
 
-			if (message != null) {
-				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByUnicode(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id))));
-				IUser user = message.getClient().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IReaction reaction = event.emoji.id == null
+				? message.getReactionByUnicode(event.emoji.name)
+				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
 
-				if (reaction == null) {
-					List<IUser> list = new CopyOnWriteArrayList<>();
-					list.add(user);
-
-					reaction = new Reaction(message.getShard(), 1, list,
-							event.emoji.id != null ? event.emoji.id : event.emoji.name, event.emoji.id != null);
-
-					message.getReactions().add(reaction);
-				} else if (channel.getMessageHistory().contains(message.getLongID())) { //If the message is in the internal cache then it doesn't have the most up to date reaction count
-					reaction.setCount(reaction.getCount() + 1);
-					reaction.getCachedUsers().add(user);
-				}
-
-				reaction.setMessage(message);
-
-				client.dispatcher.dispatch(
-						new ReactionAddEvent(message, reaction, user));
-			}
+		if (reaction == null) { // Only happens in the case of a cached message with a new reaction
+			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+			reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
+			message.getReactions().add(reaction);
 		}
+
+		IUser user;
+		if (channel.isPrivate()) {
+			user = ((PrivateChannel) channel).getRecipient();
+		} else {
+			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		}
+
+		client.dispatcher.dispatch(new ReactionAddEvent(message, reaction, user));
 	}
 
 	private void reactionRemove(ReactionEventResponse event) {
-		IChannel channel = client.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES))
-			return;
-		if (channel != null) {
-			IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
+		if (channel == null) return;
+		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
 
-			if (message != null) {
-				Reaction reaction = (Reaction) (event.emoji.id == null
-						? message.getReactionByUnicode(event.emoji.name)
-						: message.getReactionByIEmoji(message.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id))));
-				IUser user = message.getClient().getUserByID(Long.parseUnsignedLong(event.user_id));
+		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IReaction reaction = event.emoji.id == null
+				? message.getReactionByUnicode(event.emoji.name)
+				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
 
-				if (reaction != null) {
-					reaction.setMessage(message); // safeguard
-					reaction.setCount(reaction.getCount() - 1);
-					reaction.getCachedUsers().remove(user);
-
-					if (reaction.getCount() <= 0) {
-						message.getReactions().remove(reaction);
-					}
-				} else {
-					IEmoji custom = event.emoji.id == null ? null : channel.getGuild().getEmojiByID(Long.parseUnsignedLong(event.emoji.id));
-					reaction = new Reaction(channel.getShard(), 0, new ArrayList<>(), custom != null ? custom.getStringID() : event.emoji.name, custom != null);
-				}
-
-				client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
-			}
+		if (reaction == null) { // the last reaction of the emoji was removed
+			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
 		}
+
+		IUser user;
+		if (channel.isPrivate()) {
+			user = ((PrivateChannel) channel).getRecipient();
+		} else {
+			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
+		}
+
+		client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 	}
 
 	private void webhookUpdate(WebhookObject event) {

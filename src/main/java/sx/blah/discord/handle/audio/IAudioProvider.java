@@ -18,41 +18,38 @@
 package sx.blah.discord.handle.audio;
 
 /**
- * This represents a class which can provide audio to discord.
+ * Provides audio to Discord.
  */
 public interface IAudioProvider {
 
 	/**
-	 * This is called to determine whether the audio provider is ready to provide audio or not. When it is not ready, no
-	 * audio data queries will be attempted.
+	 * Used to determine whether the audio provider is ready to provide audio. If the provider is not ready, no calls to
+	 * {@link #provide()} should be made.
 	 *
-	 * @return True if ready, false if otherwise.
+	 * @return Whether the audio provider is ready to provide audio.
 	 */
 	boolean isReady();
 
 	/**
-	 * This is called to retrieve the actual audio data. This should attempt to return 20 ms of data. The audio must
-	 * also respect the encoding type returned by {@link #getAudioEncodingType()}.
+	 * Provides the audio data to be sent to Discord.
 	 *
-	 * @return The audio data.
+	 * @return 20ms of audio encoded according to {@link #getAudioEncodingType()}.
 	 */
 	byte[] provide();
 
 	/**
-	 * Gets the number of channels in this audio. NOTE: This only matters if {@link #getAudioEncodingType()} does not
-	 * return {@link AudioEncodingType#OPUS}.
+	 * Gets the number of channels in the audio being provided by the provider. By default, <code>2</code>.
 	 *
-	 * @return The number of channels. It returns 2 (stereo) by default.
+	 * @return The number of channels.
 	 */
 	default int getChannels() {
 		return 2;
 	}
 
 	/**
-	 * This is called to determine the type of audio data provided by this provider. This determines how the audio data
-	 * is processed.
+	 * Gets the encoding type of the audio being provided by the provider. By default, {@link AudioEncodingType#PCM}.
 	 *
-	 * @return The audio encoding type. By default this returns {@link AudioEncodingType#PCM}.
+	 * @return The encoding type of the audio being provided by the provider.
 	 */
 	default AudioEncodingType getAudioEncodingType() {
 		return AudioEncodingType.PCM;

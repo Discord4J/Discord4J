@@ -18,7 +18,7 @@
 package sx.blah.discord.api.events;
 
 /**
- * Used to represent a class that handles only one event.
+ * An event listener to be registered with a client's {@link EventDispatcher}.
  * <b>WARNING: Due to an issue in TypeTools, using this class through a lambda expression *may* slow your bot down.</b>
  *
  * @param <T> The event type to handle.
@@ -27,7 +27,7 @@ package sx.blah.discord.api.events;
 public interface IListener <T extends Event> {
 
 	/**
-	 * Called when the event is sent.
+	 * Invoked when the {@link EventDispatcher} this listener is registered with fires an event of type {@link T}.
 	 *
 	 * @param event The event object.
 	 */

@@ -22,14 +22,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+/**
+ * A pair of a file name and file data used for sending files to Discord.
+ *
+ * @see sx.blah.discord.handle.obj.IChannel#sendFile(File) Channel sendFile methods
+ */
 public class AttachmentPartEntry {
 	/**
-	 * The name of this file
+	 * The name of the file that will be shown in Discord.
 	 */
 	private final String fileName;
 
 	/**
-	 * The InputStream containing data for this attachment
+	 * The stream of data that can be read and sent to Discord.
 	 */
 	private final InputStream fileData;
 
@@ -39,34 +44,42 @@ public class AttachmentPartEntry {
 	}
 
 	/**
-	 * @return an InputStream containing the data for this attachment
+	 * Gets the stream of data that can be read and sent to Discord.
+	 *
+	 * @return The stream of data that can be read and sent to Discord.
 	 */
 	public InputStream getFileData() {
 		return fileData;
 	}
 
 	/**
-	 * @return The name of this attachment
+	 * Gets the name of the file that will be shown in Discord.
+	 *
+	 * @return The name of the file that will be shown in Discord.
 	 */
 	public String getFileName() {
 		return fileName;
 	}
 
 	/**
-	 * Creates an AttachmentPartEntry for a given File.
-	 * @param file The file for constructing the AttachmentPartEntry.
-	 * @return an AttachmentPartEntry
-	 * @throws FileNotFoundException
+	 * Creates an attachment part entry from a file.
+	 *
+	 * @param file The file to get a name and data from.
+	 * @return An attachment part entry with the given file's name and data.
+	 *
+	 * @throws FileNotFoundException If the file cannot be found.
 	 */
 	public static AttachmentPartEntry from(File file) throws FileNotFoundException {
 		return new AttachmentPartEntry(file.getName(), new FileInputStream(file));
 	}
 
 	/**
-	 * Creates an AttachmentPartEntry array for a given File array.
-	 * @param files The files for constructing AttachmentPartEntries.
-	 * @return an AttachmentPartEntry for all provided files.
-	 * @throws FileNotFoundException
+	 * Creates an array of attachment part entries from an array of files.
+	 *
+	 * @param files The files to get name and data from.
+	 * @return An array of attachment part entries with the given files' names and data.
+	 *
+	 * @throws FileNotFoundException If one of the files cannot be found.
 	 */
 	public static AttachmentPartEntry[] from(File... files) throws FileNotFoundException {
 		AttachmentPartEntry[] entries = new AttachmentPartEntry[files.length];

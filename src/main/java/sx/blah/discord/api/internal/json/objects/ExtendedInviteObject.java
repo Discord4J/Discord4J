@@ -18,19 +18,19 @@
 package sx.blah.discord.api.internal.json.objects;
 
 /**
- * Represents a json invite with metadata.
+ * Represents a json invite object with metadata.
  */
 public class ExtendedInviteObject extends InviteObject {
 	/**
-	 * Number of times this invite has been used.
+	 * The number of times this invite has been used.
 	 */
 	public int uses;
 	/**
-	 * Max number of times this invite can be used.
+	 * The max number of times this invite can be used.
 	 */
 	public int max_uses;
 	/**
-	 * Duration (in seconds) after which the invite expires.
+	 * The duration (in seconds) after which the invite expires.
 	 */
 	public int max_age;
 	/**
@@ -38,7 +38,7 @@ public class ExtendedInviteObject extends InviteObject {
 	 */
 	public boolean temporary;
 	/**
-	 * When this invite was created.
+	 * The ISO-8601 timestamp of when this invite was created.
 	 */
 	public String created_at;
 	/**

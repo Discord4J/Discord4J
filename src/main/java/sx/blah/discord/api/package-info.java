@@ -16,6 +16,6 @@
  */
 
 /**
- * This package contains all Discord4J-related apis.
+ * This package contains the main client APIs for Discord4J.
  */
 package sx.blah.discord.api;

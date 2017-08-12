@@ -16,6 +16,6 @@
  */
 
 /**
- * This package actually contains the Discord API part of this Discord API wrapper!
+ * This package contains the Discord4J API.
  */
 package sx.blah.discord;

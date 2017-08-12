@@ -23,41 +23,43 @@ import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This represents a generic reaction event.
+ * A generic reaction-related event.
  */
 public abstract class ReactionEvent extends MessageEvent {
-	
+
 	private final IReaction reaction;
 	private final IUser user;
-	
+
 	public ReactionEvent(IMessage message, IReaction reaction, IUser user) {
 		super(message);
 		this.reaction = reaction;
 		this.user = user;
 	}
-	
+
 	/**
-	 * Gets the reaction object.
+	 * Gets the reaction object for the event.
 	 *
 	 * @return The reaction object.
 	 */
 	public IReaction getReaction() {
 		return reaction;
 	}
-	
+
 	/**
-	 * Gets the user that did this action.
+	 * Gets the user involved in the event.
 	 *
-	 * @return The acting user
+	 * @return The user involved.
 	 */
 	public IUser getUser() {
 		return user;
 	}
-	
+
 	/**
-	 * Gets the user count for this reaction.
+	 * Gets the number of users who have reacted with the same reaction.
 	 *
-	 * @return The user count
+	 * <p>This is equivalent to <code>getReaction().getCount()</code>
+	 *
+	 * @return The number of users who have reacted with the same reaction.
 	 */
 	public int getCount() {
 		return reaction.getCount();

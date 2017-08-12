@@ -18,12 +18,12 @@
 package sx.blah.discord.api.internal.json.responses;
 
 /**
- * This is received as a response for pruning guild members.
+ * Received in response to pruning guild members.
  */
 public class PruneResponse {
 
 	/**
-	 * The amount of users pruned.
+	 * The number of users pruned.
 	 */
 	public int pruned;
 }

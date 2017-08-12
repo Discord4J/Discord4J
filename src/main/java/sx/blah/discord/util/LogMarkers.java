@@ -23,8 +23,7 @@ import org.slf4j.MarkerFactory;
 import java.util.Iterator;
 
 /**
- * This class contains all the SLF4J log {@link org.slf4j.Marker}s used in the Discord4J logger.
- * Each marker enum implements {@link org.slf4j.Marker} and is named after the value of {@link LogMarkers#toString()}.
+ * The SLF4J {@link org.slf4j.Marker log markers} used by Discord4J.
  */
 public enum LogMarkers implements Marker {
 

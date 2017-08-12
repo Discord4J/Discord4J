@@ -30,11 +30,11 @@ public class MemberObject {
 	 */
 	public String nick;
 	/**
-	 * The roles of the member.
+	 * The IDs of the member's roles.
 	 */
 	public String[] roles;
 	/**
-	 * When the member joined the guild.
+	 * The ISO-8601 timestamp of when the member joined the guild.
 	 */
 	public String joined_at;
 	/**

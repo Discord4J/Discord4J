@@ -28,13 +28,23 @@ import sx.blah.discord.util.audio.providers.AudioInputStreamProvider;
 import java.io.IOException;
 
 /**
- * This processor allows for the volume of {@link sx.blah.discord.util.audio.providers.AudioInputStreamProvider}s to be
- * changed. NOTE: This is ONLY compatible with {@link sx.blah.discord.util.audio.providers.AudioInputStreamProvider}.
+ * An audio processor which allows for change in volume.
+ *
+ * <p>This processor <b>ONLY</b> compatible with {@link sx.blah.discord.util.audio.providers.AudioInputStreamProvider}.
  */
 public class VolumeProcessor implements IAudioProcessor {
 
+	/**
+	 * The audio stream which wraps the audio input stream provider and changes the volume of the audio data.
+	 */
 	private volatile AmplitudeAudioInputStream stream;
+	/**
+	 * The audio provider wrapped by the processor.
+	 */
 	private volatile IAudioProvider provider = null;
+	/**
+	 * The volume of the processor.
+	 */
 	private volatile float volume = 1.0F;
 
 	/**

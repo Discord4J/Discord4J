@@ -31,12 +31,23 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
+import sx.blah.discord.handle.audit.AuditLog;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.entry.AuditLogEntry;
+import sx.blah.discord.handle.audit.entry.DiscordObjectEntry;
+import sx.blah.discord.handle.audit.entry.TargetedEntry;
+import sx.blah.discord.handle.audit.entry.change.ChangeMap;
+import sx.blah.discord.handle.audit.entry.option.OptionMap;
 import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
+import sx.blah.discord.util.LongMapCollector;
 import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.RequestBuilder;
 import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -47,17 +58,22 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Collection of internal Discord4J utilities.
  */
 public class DiscordUtils {
+
+	/**
+	 * The version of Discord's API and Gateway used by Discord4J.
+	 */
+	public static final String API_VERSION = "6";
 
 	/**
 	 * Re-usable instance of jackson.
@@ -75,6 +91,7 @@ public class DiscordUtils {
 			.enable(JsonParser.Feature.ALLOW_MISSING_VALUES)
 			.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
 			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
 	/**
 	 * Like {@link #MAPPER} but it doesn't serialize nulls.
 	 */
@@ -94,35 +111,61 @@ public class DiscordUtils {
 			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
 	/**
-	 * Used to determine age based on discord ids
+	 * The unix time that represents Discord's epoch. (January 1, 2015).
 	 */
 	public static final long DISCORD_EPOCH = 1420070400000L;
 
 	/**
-	 * Pattern for Discord's custom emoji
+	 * Pattern for Discord's custom emoji.
 	 */
 	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
 
 	/**
-	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:)
+	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:).
 	 */
 	public static final Pattern EMOJI_ALIAS_PATTERN = Pattern.compile(":.+:");
 
 	/**
-	 * Pattern for Discord's nsfw channel name indicator
+	 * Pattern for Discord's nsfw channel name indicator.
 	 */
 	public static final Pattern NSFW_CHANNEL_PATTERN = Pattern.compile("^nsfw(-|$)");
 
 	/**
-	 * Pattern for Discord's valid streaming URL strings passed to {@link IShard#streaming(String, String)}
+	 * Pattern for Discord's valid streaming URL strings passed to {@link IShard#streaming(String, String)}.
 	 */
 	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://(www\\.)?twitch\\.tv/.+");
 
 	/**
-	 * Converts a String timestamp into a java object timestamp.
+	 * Gets a snowflake from a unix timestamp.
 	 *
-	 * @param time The String timestamp.
-	 * @return The java object representing the timestamp.
+	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
+	 * The returned snowflake is only one of many that could exist at the given timestamp.
+	 *
+	 * @param unixTime The unix timestamp that should be used in the snowflake.
+	 * @return A snowflake with the given timestamp.
+	 */
+	public static long getSnowflakeFromTimestamp(long unixTime) {
+		return (unixTime - DISCORD_EPOCH) << 22;
+	}
+
+	/**
+	 * Gets a snowflake from a unix timestamp.
+	 *
+	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
+	 * The returned snowflake is only one of many that could exist at the given timestamp.
+	 *
+	 * @param date The date that should be converted to a unix timestamp for use in the snowflake.
+	 * @return A snowflake with the given timestamp.
+	 */
+	public static long getSnowflakeFromTimestamp(LocalDateTime date) {
+		return getSnowflakeFromTimestamp(date.atZone(ZoneId.systemDefault()).toEpochSecond());
+	}
+
+	/**
+	 * Converts a String timestamp into a {@link LocalDateTime}.
+	 *
+	 * @param time The string timestamp.
+	 * @return The LocalDateTime representing the timestamp.
 	 */
 	public static LocalDateTime convertFromTimestamp(String time) {
 		if (time == null) {
@@ -133,7 +176,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Returns a user from the java form of the raw JSON data.
+	 * Converts a json {@link UserObject} to a {@link User}. This method first checks the internal user cache and returns
+	 * that object with updated information if it exists. Otherwise, it constructs a new user.
+	 *
+	 * @param shard The shard the user belongs to.
+	 * @param response The json object representing the user.
+	 * @return The converted user object.
 	 */
 	public static User getUserFromJSON(IShard shard, UserObject response) {
 		if (response == null)
@@ -146,38 +194,38 @@ public class DiscordUtils {
 			user.setDiscriminator(response.discriminator);
 		} else {
 			user = new User(shard, response.username, Long.parseUnsignedLong(response.id), response.discriminator, response.avatar,
-					new PresenceImpl(Optional.empty(), Optional.empty(), StatusType.OFFLINE), response.bot);
+					new Presence(null, null, StatusType.OFFLINE), response.bot);
 		}
 		return user;
 	}
 
 	/**
-	 * Creates a java {@link Invite} object for a json response.
+	 * Converts a json {@link InviteObject} to an {@link IInvite}.
 	 *
-	 * @param client The discord client to use.
-	 * @param json   The json response to use.
-	 * @return The java invite object.
+	 * @param client The client the invite belongs to.
+	 * @param json   The json object representing the invite.
+	 * @return The converted invite object.
 	 */
 	public static IInvite getInviteFromJSON(IDiscordClient client, InviteObject json) {
 		return new Invite(client, json);
 	}
 
 	/**
-	 * Creates a java {@link ExtendedInvite} object for a json response.
+	 * Converts a json {@link ExtendedInviteObject} to an {@link IExtendedInvite}.
 	 *
-	 * @param client The discord client to use.
-	 * @param json   The json response to use.
-	 * @return The java extended invite object.
+	 * @param client The client the invite belongs to.
+	 * @param json   The json object representing the invite.
+	 * @return The converted extended invite object.
 	 */
 	public static IExtendedInvite getExtendedInviteFromJSON(IDiscordClient client, ExtendedInviteObject json) {
 		return new ExtendedInvite(client, json);
 	}
 
 	/**
-	 * Gets the users mentioned from a message json object.
+	 * Gets the users mentioned in a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The list of mentioned users.
+	 * @return The list of IDs of mentioned users.
 	 */
 	public static List<Long> getMentionsFromJSON(MessageObject json) {
 		List<Long> mentions = new ArrayList<>();
@@ -189,10 +237,10 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the roles mentioned from a message json object.
+	 * Gets the roles mentioned in a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The list of mentioned roles.
+	 * @return The list IDs of mentioned roles.
 	 */
 	public static List<Long> getRoleMentionsFromJSON(MessageObject json) {
 		List<Long> mentions = new ArrayList<>();
@@ -207,7 +255,7 @@ public class DiscordUtils {
 	 * Gets the attachments on a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The attached messages.
+	 * @return The attachments.
 	 */
 	public static List<IMessage.Attachment> getAttachmentsFromJSON(MessageObject json) {
 		List<IMessage.Attachment> attachments = new ArrayList<>();
@@ -220,10 +268,10 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the embedded attachments on a message.
+	 * Gets the embeds on a message.
 	 *
 	 * @param json The json response to use.
-	 * @return The embedded messages.
+	 * @return The embeds.
 	 */
 	public static List<Embed> getEmbedsFromJSON(MessageObject json) {
 		List<Embed> embeds = new ArrayList<>();
@@ -239,11 +287,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a guild object from a json response.
+	 * Converts a json {@link GuildObject} to a {@link IGuild}. This method first checks the internal guild cache and returns
+	 * that object with updated information if it exists. Otherwise, it constructs a new guild.
 	 *
-	 * @param shard The shard this guild is on
-	 * @param json  The json response.
-	 * @return The guild object.
+	 * @param shard The shard the guild belongs to.
+	 * @param json The json object representing the guild.
+	 * @return The converted guild object.
 	 */
 	public static IGuild getGuildFromJSON(IShard shard, GuildObject json) {
 		Guild guild;
@@ -299,12 +348,12 @@ public class DiscordUtils {
 				}
 
 			if (json.channels != null)
-				for (ChannelObject channelResponse : json.channels) {
-					String channelType = channelResponse.type;
-					if (channelType.equalsIgnoreCase("text")) {
-						guild.channels.put(getChannelFromJSON(guild, channelResponse));
-					} else if (channelType.equalsIgnoreCase("voice")) {
-						guild.voiceChannels.put(getVoiceChannelFromJSON(guild, channelResponse));
+				for (ChannelObject channelJSON : json.channels) {
+					IChannel channel = getChannelFromJSON(shard, guild, channelJSON);
+					if (channelJSON.type == ChannelObject.Type.GUILD_TEXT) {
+						guild.channels.put(channel);
+					} else if (channelJSON.type == ChannelObject.Type.GUILD_VOICE) {
+						guild.voiceChannels.put((IVoiceChannel) channel);
 					}
 				}
 
@@ -323,6 +372,7 @@ public class DiscordUtils {
 			}
 		}
 
+		// emoji are always updated
 		guild.emojis.clear();
 		for (EmojiObject obj : json.emojis) {
 			guild.emojis.put(DiscordUtils.getEmojiFromJSON(guild, obj));
@@ -332,48 +382,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates an IEmoji object from the EmojiObj json data.
-	 *
-	 * @param guild The guild.
-	 * @param json  The json object data.
-	 * @return The emoji object.
-	 */
-	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
-		EmojiImpl emoji = new EmojiImpl(guild, Long.parseUnsignedLong(json.id), json.name, json.require_colons, json.managed, json.roles);
-
-		return emoji;
-	}
-
-	public static IReaction getReactionFromJSON(IShard shard, MessageObject.ReactionObject object) {
-		Reaction reaction = new Reaction(shard, object.count, new CopyOnWriteArrayList<>(),
-				object.emoji.id != null
-						? object.emoji.id
-						: object.emoji.name, object.emoji.id != null);
-
-
-		return reaction;
-	}
-
-	public static List<IReaction> getReactionsFromJson(IShard shard, MessageObject.ReactionObject[] objects) {
-		List<IReaction> reactions = new CopyOnWriteArrayList<>();
-
-		if (objects != null) {
-			for (MessageObject.ReactionObject obj : objects) {
-				IReaction r = getReactionFromJSON(shard, obj);
-				if (r != null)
-					reactions.add(r);
-			}
-		}
-
-		return reactions;
-	}
-
-	/**
-	 * Creates a user object from a guild member json response.
+	 * Converts a json {@link MemberObject} to a {@link IUser}. This method uses {@link #getUserFromJSON(IShard, UserObject)}
+	 * to get or create a {@link IUser} and then updates the guild's appropriate member caches for that user.
 	 *
 	 * @param guild The guild the member belongs to.
-	 * @param json  The json response.
-	 * @return The user object.
+	 * @param json The json object representing the member.
+	 * @return The converted user object.
 	 */
 	public static IUser getUserFromGuildMemberResponse(IGuild guild, MemberObject json) {
 		User user = getUserFromJSON(guild.getShard(), json.user);
@@ -394,31 +408,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a private channel object from a json response.
+	 * Converts a json {@link MessageObject} to a {@link IMessage}. This method first checks the internal message cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new message.
 	 *
-	 * @param shard The shard this channel is on.
-	 * @param json  The json response.
-	 * @return The private channel object.
-	 */
-	public static IPrivateChannel getPrivateChannelFromJSON(IShard shard, PrivateChannelObject json) {
-		IPrivateChannel channel = ((ShardImpl) shard).privateChannels.get(json.id);
-		if (channel == null) {
-			User recipient = (User) shard.getUserByID(Long.parseUnsignedLong(json.id));
-			if (recipient == null)
-				recipient = getUserFromJSON(shard, json.recipient);
-
-			channel = new PrivateChannel((DiscordClientImpl) shard.getClient(), recipient, Long.parseUnsignedLong(json.id));
-		}
-
-		return channel;
-	}
-
-	/**
-	 * Creates a message object from a json response.
-	 *
-	 * @param channel The channel.
-	 * @param json    The json response.
-	 * @return The message object.
+	 * @param channel The channel the message belongs to.
+	 * @param json The json object representing the message.
+	 * @return The converted message object.
 	 */
 	public static IMessage getMessageFromJSON(Channel channel, MessageObject json) {
 		if (json == null)
@@ -440,33 +435,32 @@ public class DiscordUtils {
 			return message;
 		} else {
 			long authorId = Long.parseUnsignedLong(json.author.id);
-			IUser author = channel.getGuild() == null ? getUserFromJSON(channel.getShard(), json.author) : channel.getGuild()
+			IGuild guild = channel.isPrivate() ? null : channel.getGuild();
+			IUser author = guild == null ? getUserFromJSON(channel.getShard(), json.author) : guild
 					.getUsers()
 					.stream()
 					.filter(it -> it.getLongID() == authorId)
 					.findAny()
 					.orElseGet(() -> getUserFromJSON(channel.getShard(), json.author));
+
 			Message message = new Message(channel.getClient(), Long.parseUnsignedLong(json.id), json.content,
 					author, channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
-					getReactionsFromJson(channel.getShard(), json.reactions), json.webhook_id != null ? Long.parseUnsignedLong(json.webhook_id) : 0);
-
-			for (IReaction reaction : message.getReactions()) {
-				((Reaction) reaction).setMessage(message);
-			}
+					json.webhook_id != null ? Long.parseUnsignedLong(json.webhook_id) : 0);
+			message.setReactions(getReactionsFromJSON(message, json.reactions));
 
 			return message;
 		}
 	}
 
 	/**
-	 * Updates a message object with the non-null or non-empty contents of a json response.
+	 * Updates a {@link IMessage} object with the non-null or non-empty contents of a json {@link MessageObject}.
 	 *
-	 * @param toUpdate The message.
-	 * @param json     The json response.
-	 * @return The message object.
+	 * @param toUpdate The message to update.
+	 * @param json The json object representing the message.
+	 * @return The updated message object.
 	 */
 	public static IMessage getUpdatedMessageFromJSON(IMessage toUpdate, MessageObject json) {
 		if (toUpdate == null)
@@ -496,11 +490,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a webhook object from a json response.
+	 * Converts a json {@link WebhookObject} to a {@link IWebhook}. This method first checks the internal webhook cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new webhook.
 	 *
-	 * @param channel The webhook.
-	 * @param json The json response.
-	 * @return The message object.
+	 * @param channel The channel the webhook belongs to.
+	 * @param json The json object representing the webhook.
+	 * @return The converted webhook object.
 	 */
 	public static IWebhook getWebhookFromJSON(IChannel channel, WebhookObject json) {
 		long webhookId = Long.parseUnsignedLong(json.id);
@@ -523,40 +518,60 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a channel object from a json response.
+	 * Converts a json {@link ChannelObject} to a {@link IChannel}. This method first checks the internal channel cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new channel.
 	 *
-	 * @param guild the guild.
-	 * @param json  The json response.
-	 * @return The channel object.
+	 * @param shard The shard the channel belongs to.
+	 * @param json  The json object representing the channel.
+	 * @return The converted channel object.
 	 */
-	public static IChannel getChannelFromJSON(IGuild guild, ChannelObject json) {
-		Channel channel;
+	public static IChannel getChannelFromJSON(IShard shard, IGuild guild, ChannelObject json) {
+		DiscordClientImpl client = (DiscordClientImpl) shard.getClient();
+		long id = Long.parseUnsignedLong(json.id);
+		Channel channel = (Channel) shard.getChannelByID(id);
+		if (channel == null) channel = (Channel) shard.getVoiceChannelByID(id);
 
-		Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs((DiscordClientImpl) guild.getClient(), json.permission_overwrites);
-		Cache<IChannel.PermissionOverride> userOverrides = overrides.getLeft();
-		Cache<IChannel.PermissionOverride> roleOverrides = overrides.getRight();
+		if (json.type == ChannelObject.Type.PRIVATE) {
+			if (channel == null) {
+				User recipient = getUserFromJSON(shard, json.recipients[0]);
+				channel = new PrivateChannel(client, recipient, id);
+			}
+		} else if (json.type == ChannelObject.Type.GUILD_TEXT || json.type == ChannelObject.Type.GUILD_VOICE) {
+			Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
+					getPermissionOverwritesFromJSONs(client, json.permission_overwrites);
 
-		if ((channel = (Channel) guild.getChannelByID(Long.parseUnsignedLong(json.id))) != null) {
-			channel.setName(json.name);
-			channel.setPosition(json.position);
-			channel.setTopic(json.topic);
-			channel.userOverrides.clear();
-			channel.userOverrides.putAll(userOverrides);
-			channel.roleOverrides.clear();
-			channel.roleOverrides.putAll(roleOverrides);
-		} else {
-			channel = new Channel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id), guild, json.topic, json.position,
-					roleOverrides, userOverrides);
+			if (channel != null) {
+				channel.setName(json.name);
+				channel.setPosition(json.position);
+				channel.setNSFW(json.nsfw);
+				channel.userOverrides.clear();
+				channel.roleOverrides.clear();
+				channel.userOverrides.putAll(overrides.getLeft());
+				channel.roleOverrides.putAll(overrides.getRight());
+
+				if (json.type == ChannelObject.Type.GUILD_TEXT) {
+					channel.setTopic(json.topic);
+				} else {
+					VoiceChannel vc = (VoiceChannel) channel;
+					vc.setUserLimit(json.user_limit);
+					vc.setBitrate(json.bitrate);
+				}
+			} else if (json.type == ChannelObject.Type.GUILD_TEXT) {
+				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
+						overrides.getRight(), overrides.getLeft());
+			} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
+				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
+						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft());
+			}
 		}
 
 		return channel;
 	}
 
 	/**
-	 * Generates permission override sets from an array of json responses.
+	 * Converts an array of json {@link OverwriteObject}s to sets of user and role overrides.
 	 *
-	 * @param overwrites The overwrites.
+	 * @param overwrites The array of json overwrite objects.
 	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
 	 */
 	public static Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>>
@@ -580,11 +595,12 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a role object from a json response.
+	 * Converts a json {@link RoleObject} to a {@link IRole}. This method first checks the internal role cache
+	 * and returns that object with updated information if it exists. Otherwise, it constructs a new role.
 	 *
-	 * @param guild the guild.
-	 * @param json  The json response.
-	 * @return The role object.
+	 * @param guild The guild the role belongs to.
+	 * @param json The json object representing the role.
+	 * @return The converted role object.
 	 */
 	public static IRole getRoleFromJSON(IGuild guild, RoleObject json) {
 		Role role;
@@ -604,53 +620,21 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Creates a region object from a json response.
+	 * Converts a json {@link VoiceRegionObject} to an {@link IRegion}.
 	 *
-	 * @param json The json response.
-	 * @return The region object.
+	 * @param json The json object representing the region.
+	 * @return The converted region object.
 	 */
 	public static IRegion getRegionFromJSON(VoiceRegionObject json) {
 		return new Region(json.id, json.name, json.vip);
 	}
 
 	/**
-	 * Creates a channel object from a json response.
-	 *
-	 * @param guild the guild.
-	 * @param json  The json response.
-	 * @return The channel object.
-	 */
-	public static IVoiceChannel getVoiceChannelFromJSON(IGuild guild, ChannelObject json) {
-		VoiceChannel channel;
-
-		Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
-				getPermissionOverwritesFromJSONs((DiscordClientImpl) guild.getClient(), json.permission_overwrites);
-		Cache<IChannel.PermissionOverride> userOverrides = overrides.getLeft();
-		Cache<IChannel.PermissionOverride> roleOverrides = overrides.getRight();
-
-		if ((channel = (VoiceChannel) guild.getVoiceChannelByID(Long.parseUnsignedLong(json.id))) != null) {
-			channel.setUserLimit(json.user_limit);
-			channel.setBitrate(json.bitrate);
-			channel.setName(json.name);
-			channel.setPosition(json.position);
-			channel.userOverrides.clear();
-			channel.userOverrides.putAll(userOverrides);
-			channel.roleOverrides.clear();
-			channel.roleOverrides.putAll(roleOverrides);
-		} else {
-			channel = new VoiceChannel((DiscordClientImpl) guild.getClient(), json.name, Long.parseUnsignedLong(json.id), guild, json.topic, json.position,
-					json.user_limit, json.bitrate, roleOverrides, userOverrides);
-		}
-
-		return channel;
-	}
-
-	/**
-	 * Creates a voice state object from a json response.
+	 * Converts a json {@link VoiceStateObject} to a {@link IVoiceState}.
 	 *
 	 * @param guild The guild the voice state is in.
-	 * @param json The json response.
-	 * @return The voice state object.
+	 * @param json The json object representing the voice state.
+	 * @return The converted voice state object.
 	 */
 	public static IVoiceState getVoiceStateFromJson(IGuild guild, VoiceStateObject json) {
 		IVoiceChannel channel = json.channel_id != null ? guild.getVoiceChannelByID(Long.parseUnsignedLong(json.channel_id)) : null;
@@ -658,26 +642,188 @@ public class DiscordUtils {
 				json.session_id, json.deaf, json.mute, json.self_deaf, json.self_mute, json.suppress);
 	}
 
+	/**
+	 * Converts a json {@link PresenceObject} to a {@link IPresence}.
+	 *
+	 * @param presence The json object representing the presence.
+	 * @return The converted presence object.
+	 */
 	public static IPresence getPresenceFromJSON(PresenceObject presence) {
-		return new PresenceImpl(Optional.ofNullable(presence.game == null ? null : presence.game.name),
-				Optional.ofNullable(presence.game == null ? null : presence.game.url),
-				((presence.game != null && presence.game.type == GameObject.STREAMING)
-						? StatusType.STREAMING
-						: (StatusType.get(presence.status))));
-	}
-
-	public static IPresence getPresenceFromJSON(PresenceUpdateEventResponse response) {
-		PresenceObject obj = new PresenceObject();
-		obj.game = response.game;
-		obj.status = response.status;
-		return getPresenceFromJSON(obj);
+		return getPresenceFromJSON(presence.game, presence.status);
 	}
 
 	/**
-	 * Gets the time at which a discord id was created.
+	 * Converts a json {@link PresenceUpdateEventResponse} to a {@link IPresence}.
 	 *
-	 * @param id The id.
-	 * @return The time the id was created.
+	 * @param response The event response with presence information.
+	 * @return The converted presence object.
+	 */
+	public static IPresence getPresenceFromJSON(PresenceUpdateEventResponse response) {
+		return getPresenceFromJSON(response.game, response.status);
+	}
+
+	/**
+	 * Creates a {@link IPresence} from a {@link GameObject game} and status type.
+	 *
+	 * @param game The game of the presence.
+	 * @param status The status of the presence.
+	 * @return The presence object with the given game and status.
+	 */
+	private static IPresence getPresenceFromJSON(GameObject game, String status) {
+		return new Presence(
+				game == null ? null : game.name,
+				game == null ? null : game.url,
+				StatusType.get(status));
+	}
+
+	/**
+	 * Converts a json {@link EmojiObject} to a {@link IEmoji}.
+	 *
+	 * @param guild The guild the emoji belongs to.
+	 * @param json The json object representing the emoji.
+	 * @return The converted emoji object.
+	 */
+	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
+		long id = Long.parseUnsignedLong(json.id);
+		List<IRole> roles = Arrays.stream(json.roles)
+				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role)))
+				.collect(Collectors.toList());
+
+		return new EmojiImpl(id, guild, json.name, roles, json.require_colons, json.managed);
+	}
+
+	/**
+	 * Converts an array of json {@link MessageObject.ReactionObject}s to a list of {@link IReaction}s.
+	 *
+	 * @param message The message the reactions belong to.
+	 * @param json The json objects representing the reactions.
+	 * @return The converted reaction objects.
+	 */
+	public static List<IReaction> getReactionsFromJSON(IMessage message, MessageObject.ReactionObject[] json) {
+		List<IReaction> reactions = new ArrayList<>();
+		if (json != null)
+			for (MessageObject.ReactionObject object : json) {
+				long id = object.emoji.id == null ? 0 : Long.parseUnsignedLong(object.emoji.id);
+				ReactionEmoji emoji = ReactionEmoji.of(object.emoji.name, id);
+				reactions.add(new Reaction(message, object.count, emoji));
+			}
+
+		return reactions;
+	}
+
+	/**
+	 * Converts a json {@link AuditLogObject} to a {@link AuditLog}.
+	 *
+	 * @param guild The guild the audit log belongs to.
+	 * @param json The json object representing the audit log.
+	 * @return The converted audit log object.
+	 */
+	public static AuditLog getAuditLogFromJSON(IGuild guild, AuditLogObject json) {
+		LongMap<IUser> users = Arrays.stream(json.users)
+				.map(u -> DiscordUtils.getUserFromJSON(guild.getShard(), u))
+				.collect(LongMapCollector.toLongMap());
+
+		LongMap<IWebhook> webhooks = Arrays.stream(json.webhooks)
+				.map(w -> DiscordUtils.getWebhookFromJSON(guild.getChannelByID(Long.parseUnsignedLong(w.channel_id)), w))
+				.collect(LongMapCollector.toLongMap());
+
+		LongMap<AuditLogEntry> entries = Arrays.stream(json.audit_log_entries)
+				.map(e -> DiscordUtils.getAuditLogEntryFromJSON(guild, users, webhooks, e))
+				.collect(LongMapCollector.toLongMap());
+
+		return new AuditLog(entries);
+	}
+
+	/**
+	 * Converts a json {@link AuditLogEntry} to a {@link AuditLogEntry}.
+	 *
+	 * @param guild The guild the entry belongs to.
+	 * @param users The users of the parent audit log.
+	 * @param webhooks The webhooks of the parent audit log.
+	 * @param json The converted audit log entry object.
+	 * @return The converted audit log entry.
+	 */
+	public static AuditLogEntry getAuditLogEntryFromJSON(IGuild guild, LongMap<IUser> users, LongMap<IWebhook> webhooks, AuditLogEntryObject json) {
+		long targetID = json.target_id == null ? 0 : Long.parseUnsignedLong(json.target_id);
+		long id = Long.parseUnsignedLong(json.id);
+		IUser user = users.get(Long.parseUnsignedLong(json.user_id));
+
+		ChangeMap changes = json.changes == null ? new ChangeMap() : Arrays.stream(json.changes).collect(ChangeMap.Collector.toChangeMap());
+
+		OptionMap options = new OptionMap(json.options);
+
+		ActionType actionType = ActionType.fromRaw(json.action_type);
+		switch (actionType) {
+			case GUILD_UPDATE:
+				return new DiscordObjectEntry<>(guild, id, user, changes, json.reason, actionType, options);
+			case CHANNEL_CREATE:
+			case CHANNEL_UPDATE:
+			case CHANNEL_OVERWRITE_CREATE:
+			case CHANNEL_OVERWRITE_UPDATE:
+			case CHANNEL_OVERWRITE_DELETE:
+				IChannel channel = guild.getChannelByID(targetID);
+				if (channel == null) channel = guild.getVoiceChannelByID(targetID);
+
+				if (channel == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(channel, id, user, changes, json.reason, actionType, options);
+			case MEMBER_KICK:
+			case MEMBER_BAN_ADD:
+			case MEMBER_BAN_REMOVE:
+			case MEMBER_UPDATE:
+			case MEMBER_ROLE_UPDATE:
+			case MESSAGE_DELETE: // message delete target is the author of the message
+				IUser target = users.get(targetID);
+
+				if (target == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(target, id, user, changes, json.reason, actionType, options);
+			case ROLE_CREATE:
+			case ROLE_UPDATE:
+				IRole role = guild.getRoleByID(targetID);
+
+				if (role == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(role, id, user, changes, json.reason, actionType, options);
+			case WEBHOOK_CREATE:
+			case WEBHOOK_UPDATE:
+				IWebhook webhook = webhooks.get(targetID);
+
+				if (webhook == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(webhook, id, user, changes, json.reason, actionType, options);
+			case EMOJI_CREATE:
+			case EMOJI_UPDATE:
+				IEmoji emoji = guild.getEmojiByID(targetID);
+
+				if (emoji == null) {
+					return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+				}
+				return new DiscordObjectEntry<>(emoji, id, user, changes, json.reason, actionType, options);
+			case CHANNEL_DELETE:
+			case ROLE_DELETE:
+			case WEBHOOK_DELETE:
+			case EMOJI_DELETE:
+				return new TargetedEntry(id, user, changes, json.reason, actionType, options, targetID);
+			case INVITE_CREATE:
+			case INVITE_DELETE:
+			case INVITE_UPDATE:
+			case MEMBER_PRUNE:
+				return new AuditLogEntry(id, user, changes, json.reason, actionType, options);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets the timestamp portion of a Snowflake ID as a {@link LocalDateTime} using the system's default timezone.
+	 *
+	 * @param id The Snowflake ID.
+	 * @return The timestamp portion of the ID.
 	 */
 	public static LocalDateTime getSnowflakeTimeFromID(long id) {
 		long milliseconds = DISCORD_EPOCH + (id >>> 22);
@@ -685,10 +831,10 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets invite codes from a message if it exists.
+	 * Gets all of the invite codes from invite URLs in a message.
 	 *
-	 * @param message The message to parse.
-	 * @return The codes or empty if none are found.
+	 * @param message The message content to parse.
+	 * @return A list of the invite codes in the message.
 	 */
 	public static List<String> getInviteCodesFromMessage(String message) {
 		Matcher matcher = MessageTokenizer.INVITE_PATTERN.matcher(message);
@@ -701,7 +847,7 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * This takes in an {@link AudioInputStream} and guarantees that it is PCM encoded.
+	 * Converts an {@link AudioInputStream} to 48000Hz 16 bit stereo signed Big Endian PCM format.
 	 *
 	 * @param stream The original stream.
 	 * @return The PCM encoded stream.
@@ -728,9 +874,9 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
+	 * Creates a {@link ThreadFactory} which produces threads which run as daemons.
 	 *
-	 * @return The new thread factory.
+	 * @return The new daemon thread factory.
 	 */
 	public static ThreadFactory createDaemonThreadFactory() {
 		return createDaemonThreadFactory(null);
@@ -739,8 +885,8 @@ public class DiscordUtils {
 	/**
 	 * This creates a {@link ThreadFactory} which produces threads which run as daemons.
 	 *
-	 * @param threadName The name to place on created threads.
-	 * @return The new thread factory.
+	 * @param threadName The name of threads created by the returned factory.
+	 * @return The new daemon thread factory.
 	 */
 	public static ThreadFactory createDaemonThreadFactory(String threadName) {
 		return (runnable) -> { //Ensures all threads are daemons
@@ -753,7 +899,7 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Used to check equality between two {@link IDiscordObject}s using their IDs.
+	 * Checks equality between two {@link IDiscordObject}s using their IDs.
 	 * If one of the given objects is not a discord object, it will use the {@link Object#equals(Object)} method of that
 	 * object instead.
 	 *

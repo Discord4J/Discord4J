@@ -16,6 +16,6 @@
  */
 
 /**
- * This package contains events and the implemented Discord objects.
+ * This package contains the implementation of events and the objects in {@link sx.blah.discord.handle.obj}.
  */
 package sx.blah.discord.handle.impl;

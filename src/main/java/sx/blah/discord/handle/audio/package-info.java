@@ -16,8 +16,9 @@
  */
 
 /**
- * This package contains all audio-related components. See the {@link sx.blah.discord.handle.audio.impl} package for
- * default implementations of interfaces and {@link sx.blah.discord.util.audio} package for extra implementations of
- * interfaces.
+ * This package contains front-facing APIs related to sending and receiving audio from Discord.
+ *
+ * <p>See {@link sx.blah.discord.handle.audio.impl} for default implementations.
+ * <p>See {@link sx.blah.discord.util.audio} for extra utility implementations.
  */
 package sx.blah.discord.handle.audio;

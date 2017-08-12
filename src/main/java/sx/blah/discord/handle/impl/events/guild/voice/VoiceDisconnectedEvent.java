@@ -21,7 +21,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This event is dispatched when either the client loses connection to discord or is logged out.
+ * Dispatched when the bot user disconnects from a voice channel.
  */
 public class VoiceDisconnectedEvent extends VoiceChannelEvent {
 
@@ -38,28 +38,28 @@ public class VoiceDisconnectedEvent extends VoiceChannelEvent {
 	}
 
 	/**
-	 * Gets the reason this client disconnected.
+	 * Gets the reason the client disconnected.
 	 *
-	 * @return The reason.
+	 * @return The reason the client disconnected.
 	 */
 	public Reason getReason() {
 		return reason;
 	}
 
 	/**
-	 * This enum represents the possible reasons for discord being disconnected.
+	 * The possible reasons for disconnecting from the voice channel.
 	 */
 	public enum Reason {
 		/**
-		 * The user left the voice channel.
+		 * The user intentionally left the voice channel.
+		 *
+		 * @see IVoiceChannel#leave()
 		 */
 		LEFT_CHANNEL,
-
 		/**
-		 * The voice server has been updated and is moving. (Most likely voice region change)
+		 * The voice server was updated and is moving. (Most likely voice region change)
 		 */
 		SERVER_UPDATE,
-
 		/**
 		 * Something unknown caused the websocket to close. The connection will be abandoned.
 		 */

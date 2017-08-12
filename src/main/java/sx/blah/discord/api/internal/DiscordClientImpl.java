@@ -25,6 +25,7 @@ import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
+import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
 import sx.blah.discord.api.internal.json.responses.ApplicationInfoResponse;
 import sx.blah.discord.api.internal.json.responses.GatewayResponse;
@@ -40,10 +41,12 @@ import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Defines the client. This class receives and sends messages, as well as holds our user data.
+ * The default implementation of {@link IDiscordClient}.
  */
 public final class DiscordClientImpl implements IDiscordClient {
 
@@ -57,37 +60,37 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final List<IShard> shards = new CopyOnWriteArrayList<>();
 
 	/**
-	 * User we are logged in as
+	 * The user that represents the bot account.
 	 */
 	volatile User ourUser;
 
 	/**
-	 * Our token, so we can send XHR to Discord.
+	 * The authentication token for this account.
 	 */
 	protected volatile String token;
 
 	/**
-	 * Event dispatcher.
+	 * The client's event dispatcher.
 	 */
 	volatile EventDispatcher dispatcher;
 
 	/**
-	 * Reconnect manager.
+	 * The client's reconnect manager.
 	 */
 	volatile ReconnectManager reconnectManager;
 
 	/**
-	 * The module loader for this client.
+	 * The client's module loader.
 	 */
 	private volatile ModuleLoader loader;
 
 	/**
-	 * Caches the available regions for discord.
+	 * The cache of the available voice regions.
 	 */
 	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
 
 	/**
-	 * The maximum amount of pings discord can miss before a new session is created.
+	 * The maximum number of heartbeats that Discord can miss before a reconnect begins.
 	 */
 	final int maxMissedPings;
 
@@ -102,12 +105,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private int shardCount;
 
 	/**
-	 * Provides cache objects used by this api.
+	 * Provides cache objects used by this client.
 	 */
 	private final ICacheDelegateProvider cacheProvider;
 
 	/**
-	 * The specific shard (if there is one) that the client is running on.
+	 * The sharding information for this client.
 	 */
 	private final int[] shard;
 
@@ -120,11 +123,27 @@ public final class DiscordClientImpl implements IDiscordClient {
 	 * Timer to keep the program alive if the client is not daemon
 	 */
 	volatile Timer keepAlive;
+
+	/**
+	 * The number of times the client will retry on a 5xx HTTP response from Discord.
+	 */
 	private final int retryCount;
+
+	/**
+	 * The maximum number of messages that will be cached per channel.
+	 */
 	private final int maxCacheCount;
 
+	/**
+	 * The presence object that should be sent to Discord when identifying.
+	 */
+	private final PresenceUpdateRequest identifyPresence;
+
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
-							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard) {
+							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard,
+							 RejectedExecutionHandler backpressureHandler, int minimumPoolSize, int maximumPoolSize,
+							 int overflowCapacity, long eventThreadTimeout, TimeUnit eventThreadTimeoutUnit,
+							 PresenceUpdateRequest identifyPresence) {
 		this.token = "Bot " + token;
 		this.retryCount = retryCount;
 		this.maxMissedPings = maxMissedPings;
@@ -133,9 +152,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 		this.maxCacheCount = maxCacheCount;
 		this.cacheProvider = provider;
 		this.shard = shard;
-		this.dispatcher = new EventDispatcher(this);
+		this.dispatcher = new EventDispatcher(this, backpressureHandler, minimumPoolSize, maximumPoolSize,
+				overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
+		this.identifyPresence = identifyPresence;
 
 		final DiscordClientImpl instance = this;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -282,7 +303,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		String gateway = null;
 		try {
 			GatewayResponse response = REQUESTS.GET.makeRequest(DiscordEndpoints.GATEWAY, GatewayResponse.class);
-			gateway = response.url + "?encoding=json&v=5";
+			gateway = response.url + "?encoding=json&v=" + DiscordUtils.API_VERSION;
 		} catch (RateLimitException | DiscordException e) {
 			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
 		}
@@ -307,7 +328,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		String gateway = obtainGateway();
 		new RequestBuilder(this).setAsync(true).doAction(() -> {
 			if (shard != null) {
-				ShardImpl shardObj = new ShardImpl(this, gateway, new int[]{shard[0], shard[1]});
+				ShardImpl shardObj = new ShardImpl(this, gateway, new int[]{shard[0], shard[1]}, identifyPresence);
 				getShards().add(shardObj);
 				shardObj.login();
 
@@ -315,7 +336,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 			} else {
 				for (int i = 0; i < shardCount; i++) {
 					final int shardNum = i;
-					ShardImpl shard = new ShardImpl(this, gateway, new int[]{shardNum, shardCount});
+					ShardImpl shard = new ShardImpl(this, gateway, new int[]{shardNum, shardCount}, identifyPresence);
 					getShards().add(shardNum, shard);
 					shard.login();
 
@@ -406,6 +427,21 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
+	public void dnd(String playingText) {
+		getShards().forEach(s -> s.dnd(playingText));
+	}
+
+	@Override
+	public void dnd() {
+		getShards().forEach(IShard::dnd);
+	}
+
+	@Override
+	public void invisible() {
+		getShards().forEach(IShard::invisible);
+	}
+
+	@Override
 	public void mute(IGuild guild, boolean isSelfMuted) {
 		VoiceState voiceState = (VoiceState) ourUser.getVoiceStateForGuild(guild);
 
@@ -418,7 +454,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 		}
 
 		voiceState.setSelfMuted(isSelfMuted);
-		
+
 		((ShardImpl) guild.getShard()).ws.send(GatewayOps.VOICE_STATE_UPDATE, new VoiceStateUpdateRequest(
 				guild.getStringID(), channelID, isSelfMuted, voiceState.isSelfDeafened()));
 	}

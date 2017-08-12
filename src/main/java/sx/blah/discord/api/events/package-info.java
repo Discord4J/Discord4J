@@ -17,5 +17,7 @@
 
 /**
  * The classes in this package relate to the Discord4J event system.
+ *
+ * <p>See {@link sx.blah.discord.handle.impl.events} for a list of default events.
  */
 package sx.blah.discord.api.events;

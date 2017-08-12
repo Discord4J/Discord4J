@@ -18,7 +18,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
 /**
- * This is sent to request that a webhook be edited.
+ * Sent to edit a webhook's properties.
  */
 public class WebhookEditRequest {
 
@@ -28,7 +28,7 @@ public class WebhookEditRequest {
 	public String name;
 
 	/**
-	 * The new icon.
+	 * The new default avatar of the webhook.
 	 */
 	public String avatar;
 

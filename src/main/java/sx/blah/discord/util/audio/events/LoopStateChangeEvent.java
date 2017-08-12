@@ -20,7 +20,7 @@ package sx.blah.discord.util.audio.events;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This event is fired whenever {@link AudioPlayer#setLoop(boolean)} is called.
+ * Dispatched when {@link AudioPlayer#setLoop(boolean)} is called.
  */
 public class LoopStateChangeEvent extends AudioPlayerEvent {
 
@@ -32,7 +32,7 @@ public class LoopStateChangeEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This returns the new loop state.
+	 * Gets the new loop state.
 	 *
 	 * @return The new loop state.
 	 */
@@ -41,7 +41,7 @@ public class LoopStateChangeEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This returns the old loop state.
+	 * Gets the old loop state.
 	 *
 	 * @return The old loop state.
 	 */

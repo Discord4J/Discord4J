@@ -20,7 +20,7 @@ package sx.blah.discord.handle.impl.events.guild.channel;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**
- * This event is dispatched when a channel's information is updated.
+ * Dispatched when a channel is updated.
  */
 public class ChannelUpdateEvent extends ChannelEvent {
 
@@ -33,18 +33,18 @@ public class ChannelUpdateEvent extends ChannelEvent {
 	}
 
 	/**
-	 * Gets the original channel.
+	 * Gets the channel before it was updated.
 	 *
-	 * @return The un-updated instance of the channel.
+	 * @return The channel before it was updated.
 	 */
 	public IChannel getOldChannel() {
 		return oldChannel;
 	}
 
 	/**
-	 * Gets the new channel.
+	 * Gets the channel after it was updated.
 	 *
-	 * @return The updated instance of the channel.
+	 * @return The channel after it was updated.
 	 */
 	public IChannel getNewChannel() {
 		return newChannel;

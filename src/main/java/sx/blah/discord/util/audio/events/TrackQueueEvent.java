@@ -20,7 +20,7 @@ package sx.blah.discord.util.audio.events;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This is dispatched whenever a track is queued.
+ * Dispatched when a track is queued.
  */
 public class TrackQueueEvent extends AudioPlayerEvent {
 
@@ -32,9 +32,9 @@ public class TrackQueueEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This gets the {@link sx.blah.discord.util.audio.AudioPlayer.Track} instance queued.
+	 * Gets the track that was queued.
 	 *
-	 * @return The track.
+	 * @return The track that was queued.
 	 */
 	public AudioPlayer.Track getTrack() {
 		return track;

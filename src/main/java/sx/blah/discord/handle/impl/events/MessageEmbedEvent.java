@@ -23,7 +23,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import java.util.List;
 
 /**
- * This event is dispatched whenever a message is edited and the embeds Discord generates change.
+ * Dispatched when a message is created with embeds or a message is updated to have embeds.
  * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.channel.message.MessageEmbedEvent} instead.
  */
 @Deprecated

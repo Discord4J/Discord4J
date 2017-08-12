@@ -20,7 +20,7 @@ package sx.blah.discord.util.audio.events;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This event is fired whenever {@link AudioPlayer#setPaused(boolean)} is called.
+ * Dispatched when {@link AudioPlayer#setPaused(boolean)} is called.
  */
 public class PauseStateChangeEvent extends AudioPlayerEvent {
 
@@ -32,7 +32,7 @@ public class PauseStateChangeEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This returns the new pause state.
+	 * Gets the new pause state.
 	 *
 	 * @return The new pause state.
 	 */
@@ -41,7 +41,7 @@ public class PauseStateChangeEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This returns the old pause state.
+	 * Gets the old pause state.
 	 *
 	 * @return The old pause state.
 	 */

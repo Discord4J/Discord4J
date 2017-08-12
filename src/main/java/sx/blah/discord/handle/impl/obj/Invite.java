@@ -26,9 +26,18 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.handle.obj.IUser;
 
+/**
+ * The default implementation of {@link IInvite}.
+ */
 public class Invite implements IInvite {
 
+	/**
+	 * The client the invite belongs to.
+	 */
 	private final IDiscordClient client;
+	/**
+	 * The backing JSON object which holds all of the information about the invite.
+	 */
 	private final InviteObject backing;
 
 	public Invite(IDiscordClient client, InviteObject backing) {

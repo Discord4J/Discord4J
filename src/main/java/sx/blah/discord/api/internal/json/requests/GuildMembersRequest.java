@@ -17,17 +17,18 @@
 
 package sx.blah.discord.api.internal.json.requests;
 
+/**
+ * Sent to request offline members on the gateway for a guild.
+ */
 public class GuildMembersRequest {
 	/**
-	 * The guild's id
+	 * The ID of the guild.
 	 */
 	public String guild_id;
-
 	/**
 	 * String the username starts with or empty for all users.
 	 */
 	public String query = "";
-
 	/**
 	 * The limit on users to receive or 0 for max.
 	 */

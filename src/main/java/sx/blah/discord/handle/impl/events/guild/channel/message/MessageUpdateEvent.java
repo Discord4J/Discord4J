@@ -20,10 +20,7 @@ package sx.blah.discord.handle.impl.events.guild.channel.message;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
- * This event is dispatched whenever a message is edited.
- * NOTE: This event will be fired on pin/unpins and when embedded content is added when the message is
- * not present in Discord4J's cache. Additionally, in that case, {@link #getOldMessage()} will return
- * null.
+ * Dispatched when a message's content is edited.
  */
 public class MessageUpdateEvent extends MessageEvent {
 
@@ -36,18 +33,18 @@ public class MessageUpdateEvent extends MessageEvent {
 	}
 
 	/**
-	 * The original message.
+	 * Gets the message before it was updated.
 	 *
-	 * @return The message.
+	 * @return The message before it was updated.
 	 */
 	public IMessage getOldMessage() {
 		return oldMessage;
 	}
 
 	/**
-	 * The new message.
+	 * Gets the message after it was updated.
 	 *
-	 * @return The message.
+	 * @return The message after it was updated.
 	 */
 	public IMessage getNewMessage() {
 		return newMessage;

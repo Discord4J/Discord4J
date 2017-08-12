@@ -18,17 +18,17 @@
 package sx.blah.discord.api.internal.json.event;
 
 /**
- * This response is received when a message is deleted
+ * The object received on the gateway when a message is deleted.
  */
 public class MessageDeleteEventResponse {
 
 	/**
-	 * The message id
+	 * The ID of the message.
 	 */
 	public String id;
 
 	/**
-	 * The channel the message was deleted from
+	 * The ID of the channel the message belonged to.
 	 */
 	public String channel_id;
 

@@ -15,27 +15,31 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.api.internal.json.objects;
+package sx.blah.discord.handle.audit.entry;
+
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.entry.change.ChangeMap;
+import sx.blah.discord.handle.audit.entry.option.OptionMap;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
- * Represents a json private channel object.
- * Used for convenience.
+ * An audit log entry which has a target.
  */
-public class PrivateChannelObject {
+public class TargetedEntry extends AuditLogEntry {
+
+	private final long targetID;
+
+	public TargetedEntry(long id, IUser user, ChangeMap changes, String reason, ActionType actionType, OptionMap options, long targetID) {
+		super(id, user, changes, reason, actionType, options);
+		this.targetID = targetID;
+	}
+
 	/**
-	 * The id of the last message sent in the channel.
+	 * Gets the ID of the target.
+	 *
+	 * @return The ID of the target.
 	 */
-	public String last_message_id;
-	/**
-	 * the recipient of the channel.
-	 */
-	public UserObject recipient;
-	/**
-	 * The id of the channel.
-	 */
-	public String id;
-	/**
-	 * Whether the channel is private.
-	 */
-	public boolean is_private;
+	public long getTargetID() {
+		return targetID;
+	}
 }

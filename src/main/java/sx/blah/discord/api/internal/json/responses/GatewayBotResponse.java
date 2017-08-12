@@ -18,12 +18,11 @@
 package sx.blah.discord.api.internal.json.responses;
 
 /**
- * The response received when obtaining a websocket
- * url to get the recommended shards count
+ * Received when requesting the websocket URL with recommended shard count.
  */
 public class GatewayBotResponse extends GatewayResponse {
 	/**
-	 * The recommended number of shards to connect with
+	 * The recommended number of shards to connect with.
 	 */
 	public int shards;
 }

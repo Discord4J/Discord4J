@@ -20,7 +20,7 @@ package sx.blah.discord.handle.impl.events.guild.voice;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This event is dispatched when a voice heartbeat is received.
+ * Dispatched when a voice heartbeat is received.
  */
 public class VoicePingEvent extends VoiceChannelEvent {
 	/**

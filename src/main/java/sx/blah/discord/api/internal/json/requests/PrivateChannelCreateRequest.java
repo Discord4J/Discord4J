@@ -19,12 +19,12 @@ package sx.blah.discord.api.internal.json.requests;
 
 
 /**
- * This is used to request a private channel be created with a user
+ * Sent to create a private channel with another user.
  */
 public class PrivateChannelCreateRequest {
 
 	/**
-	 * The user id of the user the channel directed towards
+	 * The ID of the user the channel is directed towards.
 	 */
 	public String recipient_id;
 

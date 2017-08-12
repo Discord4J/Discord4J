@@ -30,195 +30,195 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * This represents a cache delegate. These objects are used to back {@link Cache} objects.
- * <b>NOTE:</b> it is expected that implementations handle concurrent access.
+ * A backing object an {@link Cache}.
+ *
+ * <p>Implementors <b>must</b> be thread safe.
  */
 public interface ICacheDelegate<T extends IIDLinkedObject> extends RandomAccess, Iterable<T> {
 
 	/**
-	 * This is called to retrieve an object from an associated id.
+	 * Gets an object by its unique snowflake ID.
 	 *
-	 * @param id The id to retrieve the object for.
-	 * @return The result of the query.
+	 * @param id The ID of the desired object.
+	 * @return The object with the provided ID (or null if one was not found).
 	 */
 	default Optional<T> retrieve(String id) {
 		return retrieve(Long.parseUnsignedLong(id));
 	}
 
 	/**
-	 * This is called to retrieve an object from an associated id.
+	 * Gets an object by its unique snowflake ID.
 	 *
-	 * @param id The id to retrieve the object for.
-	 * @return The result of the query.
+	 * @param id The ID of the desired object.
+	 * @return The object with the provided ID (or null if one was not found).
 	 */
 	Optional<T> retrieve(long id);
 
 	/**
-	 * This is called to put an object into the cache.
+	 * Puts an object into the cache.
 	 *
-	 * @param obj The object to insert.
-	 * @return The previous value.
+	 * @param obj The object to put.
+	 * @return The previous object that had the same ID or null if there was not one.
 	 */
 	Optional<T> put(T obj);
 
 	/**
-	 * This is called to place a collection of objects into the cache.
+	 * Puts every element of the given cache into the cache.
 	 *
 	 * @param objs The objects to insert.
-	 * @return The objects replaced by this operation.
+	 * @return Any objects that were replaced by the operation.
 	 */
 	default Collection<T> putAll(Collection<T> objs) {
 		return objs.stream().map(obj -> put(obj).orElse(null)).filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 
 	/**
-	 * This is called to remove a key, value pair associated with the specified id.
+	 * Removes an object from the cache.
 	 *
-	 * @param id The id to remove from the cache.
-	 * @return The object removed from this operation.
+	 * @param id The ID of the object to remove.
+	 * @return The object that was removed.
 	 */
 	default Optional<T> remove(String id) {
 		return remove(Long.parseUnsignedLong(id));
 	}
 
 	/**
-	 * This is called to remove a key, value pair associated with the specified id.
+	 * Removes an object from the cache.
 	 *
-	 * @param id The id to remove from the cache.
-	 * @return The object removed from this operation.
+	 * @param id The ID of the object to remove.
+	 * @return The object that was removed.
 	 */
 	Optional<T> remove(long id);
 
 	/**
-	 * This is called to remove a key, value pair associated with the specified object.
+	 * Removes an object from the cache.
 	 *
-	 * @param obj The object to remove from the cache.
-	 * @return The object removed from this operation.
+	 * @param obj The object to remove.
+	 * @return The object that was removed.
 	 */
 	default Optional<T> remove(T obj) {
 		return remove(obj.getLongID());
 	}
 
 	/**
-	 * This is called to clear the cache.
+	 * Clears the cache.
 	 *
-	 * @return The objects removed from this operation.
+	 * @return The cache.
 	 */
 	Collection<T> clear();
 
 	/**
-	 * This is called to check if a value is associated with the provided id.
+	 * Gets whether the given key is present in the cache.
 	 *
-	 * @param id The id to check for.
-	 * @return True if an object is present or false if otherwise.
+	 * @param id The key to search for.
+	 * @return Whether the given key is present in the cache.
 	 */
 	default boolean contains(String id) {
 		return contains(Long.parseUnsignedLong(id));
 	}
 
 	/**
-	 * This is called to check if a value is associated with the provided id.
+	 * Gets whether the given key is present in the cache.
 	 *
-	 * @param id The id to check for.
-	 * @return True if an object is present or false if otherwise.
+	 * @param id The key to search for.
+	 * @return Whether the given key is present in the cache.
 	 */
 	default boolean contains(long id) {
 		return retrieve(id).isPresent();
 	}
 
 	/**
-	 * This is called to check if a value is stored in this cache.
+	 * Gets whether the given value is present in the cache.
 	 *
-	 * @param obj The obj to check for.
-	 * @return True if an object is present or false if otherwise.
+	 * @param obj The value to search for.
+	 * @return Whether the given value is present in the cache.
 	 */
 	default boolean contains(T obj) {
 		return contains(obj.getLongID());
 	}
 
 	/**
-	 * This is called to get the size of the cache.
+	 * Gets the number of elements stored in the cache.
 	 *
-	 * @return The size of the cache.
+	 * @return The number of elements stored in the cache.
 	 */
 	int size();
 
 	/**
-	 * This is called to get the ids stored in this cache.
+	 * Gets the IDs of every object in the cache.
 	 *
-	 * @return The ids stored.
+	 * @return The IDs of every object in the cache.
 	 */
 	default Collection<String> ids() {
 		return longIDs().stream().map(Long::toUnsignedString).collect(Collectors.toSet());
 	}
 
 	/**
-	 * This is called to get the ids stored in this cache.
+	 * Gets the IDs of every object in the cache.
 	 *
-	 * @return The ids stored.
+	 * @return The IDs of every object in the cache.
 	 */
 	LongSet longIDs();
 
 	/**
-	 * This is called to get the values stored in this cache.
+	 * Gets every value in the cache.
 	 *
-	 * @return The values stored.
+	 * @return Every value in the cache.
 	 */
 	Collection<T> values();
 
 	/**
-	 * This is called to (deep) copy this delegate.
+	 * Gets a copy of the cache.
 	 *
-	 * @return The copy of the delegate.
+	 * @return A copy of the cache.
 	 */
 	ICacheDelegate<T> copy();
 
 	/**
-	 * This is called to copy (or produce) copy of underlying map
+	 * Gets a copy of the cache as a long map.
 	 *
-	 * @return The copy of the map
+	 * @return A copy of the cache as a long map.
 	 */
 	LongMap<T> mapCopy();
 
 	/**
-	 * Optimized version of {@link #forEach(Consumer)}
+	 * Performs the given action for each pair of key and value in the cache.
 	 *
-	 * @param action Action to do with pairs of keys and values
+	 * @param action The action to perform for each pair of key and value in the cache.
 	 */
 	void forEach(LongObjConsumer<? super T> action);
 
 	/**
-	 * Just like {@link #forEach(LongObjConsumer)}, but it stops when predicate returns false
+	 * Performs the given action for each pair of key and value in the cache while the function returns true.
 	 *
-	 * @param predicate Predicate, that consumes keys and values and produces false when iterating should be stopped
-	 * @return true if iterating was interrupted
+	 * @param predicate The action to perform for each pair of key and value in the cache.
+	 * @return Whether iterating was interrupted (whether the predicate ever returned false).
 	 */
 	boolean forEachWhile(LongObjPredicate<? super T> predicate);
 
 	/**
-	 * Helper to do searching with transformation
+	 * Gets the first non-null value produced by the given function which is applied to every pair of keys and values
+	 * in the cache.
 	 *
-	 * @param function Function, that accepts pair of key and value and produce some result
-	 * @return First non-null result
+	 * @param function The function to apply to each pair.
+	 * @return The first non-null value produced by the given function
 	 */
 	<Z> Z findResult(LongObjFunction<? super T, ? extends Z> function);
 
-	/**
-	 * @see Collection#spliterator()
-	 */
+	@Override
 	default Spliterator<T> spliterator() {
 		return Spliterators.spliterator(values(), 0);
 	}
 
 	/**
-	 * @see Collection#stream()
+	 * See {@link Collection#stream()}.
 	 */
 	default Stream<T> stream() {
 		return StreamSupport.stream(spliterator(), false);
 	}
 
 	/**
-	 * @see Collection#parallelStream()
+	 * See {@link Collection#parallelStream()}.
 	 */
 	default Stream<T> parallelStream() {
 		return StreamSupport.stream(spliterator(), true);

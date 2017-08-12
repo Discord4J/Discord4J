@@ -29,7 +29,9 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
 import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
+import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.ResumeRequest;
+import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
@@ -45,37 +47,78 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
 
+/**
+ * Facilitates a websocket connection between the client and Discord's Gateway.
+ */
 public class DiscordWS extends WebSocketAdapter {
 
+	/**
+	 * The version of the Discord Gateway that is used by Discord4J.
+	 */
+	public static final String GATEWAY_VERSION = "6";
+
+	/**
+	 * The current state of the connection.
+	 */
 	State state;
+	/**
+	 * The websocket client used to communicate with the gateway.
+	 */
 	private WebSocketClient wsClient;
 
+	/**
+	 * The client associated with the gateway connection.
+	 */
 	DiscordClientImpl client;
+	/**
+	 * The shard associated with the gateway connection.
+	 */
 	ShardImpl shard;
+	/**
+	 * The websocket host URL.
+	 */
 	private String gateway;
 
+	/**
+	 * The last sequence number received in an event from Discord.
+	 */
 	long seq = 0;
+	/**
+	 * The ID of the current gateway session. Used for resuming.
+	 */
 	String sessionId;
 
+	/**
+	 * The handler for OP 0 event dispatches from Discord.
+	 */
 	private DispatchHandler dispatchHandler;
+	/**
+	 * The handler for heartbeat information.
+	 */
 	HeartbeatHandler heartbeatHandler;
 
 	/**
-	 * When the bot has received all available guilds.
+	 * The presence object that should be sent to Discord when identifying.
+	 */
+	private final PresenceUpdateRequest identifyPresence;
+
+	/**
+	 * Indicates whether the bot has received all available guilds.
 	 */
 	public boolean isReady = false;
 
 	/**
-	 * When the bot has received the initial Ready payload from Discord.
+	 * Indicates whether the bot has received the initial Ready payload from Discord.
 	 */
 	public boolean hasReceivedReady = false;
 
-	DiscordWS(IShard shard, String gateway, int maxMissedPings) {
+	DiscordWS(IShard shard, String gateway, int maxMissedPings, PresenceUpdateRequest identifyPresence) {
 		this.client = (DiscordClientImpl) shard.getClient();
 		this.shard = (ShardImpl) shard;
 		this.gateway = gateway;
 		this.dispatchHandler = new DispatchHandler(this, this.shard);
 		this.heartbeatHandler = new HeartbeatHandler(this, maxMissedPings);
+		this.identifyPresence = identifyPresence;
 		this.state = State.CONNECTING;
 	}
 
@@ -98,7 +141,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 					heartbeatHandler.begin(d.get("heartbeat_interval").intValue());
 					if (this.state != State.RESUMING) {
-						send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+						send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo(), identifyPresence));
 					} else {
 						client.reconnectManager.onReconnectSuccess();
 						send(GatewayOps.RESUME, new ResumeRequest(client.getToken(), sessionId, seq));
@@ -121,7 +164,7 @@ public class DiscordWS extends WebSocketAdapter {
 					this.state = State.RECONNECTING;
 					client.getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.INVALID_SESSION_OP, shard));
 					invalidate();
-					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo()));
+					send(GatewayOps.IDENTIFY, new IdentifyRequest(client.getToken(), shard.getInfo(), null)); // TODO: try to maintain previous presence?
 					break;
 				case HEARTBEAT:
 					send(GatewayOps.HEARTBEAT, seq);
@@ -192,6 +235,10 @@ public class DiscordWS extends WebSocketAdapter {
 		}
 	}
 
+	/**
+	 * Opens the initial websocket connection with the gateway.
+	 * If a connection was already open (in the case of reconnecting), it will be asynchronously closed.
+	 */
 	void connect() {
 		WebSocketClient previous = wsClient; // for cleanup
 		try {
@@ -216,6 +263,9 @@ public class DiscordWS extends WebSocketAdapter {
 		}
 	}
 
+	/**
+	 * Closes the websocket connection and resets state.
+	 */
 	void shutdown() {
 		Discord4J.LOGGER.debug(LogMarkers.WEBSOCKET, "Shard {} shutting down.", shard.getInfo()[0]);
 		this.state = State.DISCONNECTING;
@@ -231,6 +281,9 @@ public class DiscordWS extends WebSocketAdapter {
 		}
 	}
 
+	/**
+	 * Invalidates all information of this connection and associated shard.
+	 */
 	private void invalidate() {
 		this.isReady = false;
 		this.hasReceivedReady = false;
@@ -240,10 +293,21 @@ public class DiscordWS extends WebSocketAdapter {
 		this.shard.privateChannels.clear();
 	}
 
+	/**
+	 * Sends a message on the websocket.
+	 *
+	 * @param op The opcode for the message.
+	 * @param payload The data payload to use for {@link GatewayPayload#d}.
+	 */
 	public void send(GatewayOps op, Object payload) {
 		send(new GatewayPayload(op, payload));
 	}
 
+	/**
+	 * Sends a message on the websocket.
+	 *
+	 * @param payload The message to serialize and send.
+	 */
 	public void send(GatewayPayload payload) {
 		try {
 			send(DiscordUtils.MAPPER.writeValueAsString(payload));
@@ -252,6 +316,11 @@ public class DiscordWS extends WebSocketAdapter {
 		}
 	}
 
+	/**
+	 * Sends a message on the websocket.
+	 *
+	 * @param message The message to send.
+	 */
 	public void send(String message) {
 		String filteredMessage = message.replace(client.getToken(), "hunter2");
 
@@ -263,12 +332,42 @@ public class DiscordWS extends WebSocketAdapter {
 		}
 	}
 
+	/**
+	 * Represents the state of the websocket connection.
+	 */
 	enum State {
+		/**
+		 * Indicates that the websocket isn't connected and is idle.
+		 */
 		IDLE,
+
+		/**
+		 * Indicates that the websocket is attempting to connect.
+		 */
 		CONNECTING,
+
+		/**
+		 * Indicates that the Ready payload was received from Discord.
+		 * @see DispatchHandler#ready(ReadyResponse).
+		 */
 		READY,
+
+		/**
+		 * Indicates that the websocket is attempting to reconnect to the gateway.
+		 * This is set on {@link GatewayOps#INVALID_SESSION} and when the heartbeat handler detects a zombie connection.
+		 */
 		RECONNECTING,
+
+		/**
+		 * Indicates that the websocket is attempting to resume on the gateway.
+		 * This is set on {@link GatewayOps#RECONNECT} and when the underlying websocket connection is abruptly closed.
+		 */
 		RESUMING,
+
+		/**
+		 * Indicates that the websocket is intentionally disconnecting.
+		 * This is set by {@link #shutdown()}.
+		 */
 		DISCONNECTING
 	}
 }

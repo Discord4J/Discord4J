@@ -23,7 +23,7 @@ import sx.blah.discord.handle.obj.IUser;
 import java.util.Optional;
 
 /**
- * This is fired once a nickname is changed.
+ * Dispatched when the nickname of a member is changed.
  */
 public class NicknameChangedEvent extends GuildMemberEvent {
 
@@ -36,7 +36,7 @@ public class NicknameChangedEvent extends GuildMemberEvent {
 	}
 
 	/**
-	 * This gets the old nickname.
+	 * Gets the old nickname.
 	 *
 	 * @return The old nickname.
 	 */
@@ -45,7 +45,7 @@ public class NicknameChangedEvent extends GuildMemberEvent {
 	}
 
 	/**
-	 * This gets the new nickname.
+	 * Gets the new nickname.
 	 *
 	 * @return The new nickname.
 	 */

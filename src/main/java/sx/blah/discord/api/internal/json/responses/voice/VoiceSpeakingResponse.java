@@ -17,8 +17,20 @@
 
 package sx.blah.discord.api.internal.json.responses.voice;
 
+/**
+ * Received when a user starts or stops speaking in a voice channel.
+ */
 public class VoiceSpeakingResponse {
+	/**
+	 * Whether the user is speaking.
+	 */
 	public boolean speaking;
+	/**
+	 * The unique ssrc of the user.
+	 */
 	public int ssrc;
+	/**
+	 * The ID of the user.
+	 */
 	public String user_id;
 }

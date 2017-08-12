@@ -24,8 +24,14 @@ import sx.blah.discord.handle.obj.IExtendedInvite;
 
 import java.time.LocalDateTime;
 
+/**
+ * The default implementation of {@link IExtendedInvite}.
+ */
 public class ExtendedInvite extends Invite implements IExtendedInvite {
 
+	/**
+	 * The backing JSON object which holds all of the information about the invite.
+	 */
 	private final ExtendedInviteObject backing;
 
 	public ExtendedInvite(IDiscordClient client, ExtendedInviteObject backing) {

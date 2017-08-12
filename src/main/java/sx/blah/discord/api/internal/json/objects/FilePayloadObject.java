@@ -17,9 +17,21 @@
 
 package sx.blah.discord.api.internal.json.objects;
 
+/**
+ * Represents a json file payload object used when sending message content with a file upload.
+ */
 public class FilePayloadObject {
+	/**
+	 * The content of the message.
+	 */
 	public String content;
+	/**
+	 * Whether the message should use text-to-speech.
+	 */
 	public boolean tts;
+	/**
+	 * The embed to be displayed with the message.
+	 */
 	public EmbedObject embed;
 
 	public FilePayloadObject() {}

@@ -25,6 +25,8 @@ import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
+import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
 import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
 import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
 import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
@@ -32,6 +34,8 @@ import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.handle.impl.events.WebhookCreateEvent;
 import sx.blah.discord.handle.impl.events.WebhookDeleteEvent;
 import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
@@ -47,24 +51,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * The default implementation of {@link IGuild}.
+ */
 public class Guild implements IGuild {
 	/**
-	 * All text channels in the guild.
+	 * The guild's text channels.
 	 */
 	public final Cache<IChannel> channels;
 
 	/**
-	 * All voice channels in the guild.
+	 * The guild's voice channels.
 	 */
 	public final Cache<IVoiceChannel> voiceChannels;
 
 	/**
-	 * All users connected to the guild.
+	 * The guild's members.
 	 */
 	public final Cache<IUser> users;
 
 	/**
-	 * The joined timetamps for users.
+	 * The timestamps of when users joined the guild.
 	 */
 	public final Cache<TimeStampHolder> joinTimes;
 
@@ -74,46 +81,46 @@ public class Guild implements IGuild {
 	protected volatile String name;
 
 	/**
-	 * The ID of this guild.
+	 * The unique snowflake ID of the guild.
 	 */
 	protected final long id;
 
 	/**
-	 * The location of the guild icon
+	 * The guild's icon hash.
 	 */
 	protected volatile String icon;
 
 	/**
-	 * The url pointing to the guild icon
+	 * The guild's icon URL.
 	 */
 	protected volatile String iconURL;
 
 	/**
-	 * The user id for the owner of the guild
+	 * The unique snowflake ID of the owner of the guild.
 	 */
 	protected volatile long ownerID;
 
 	/**
-	 * The roles the guild contains.
+	 * The guild's roles.
 	 */
 	public final Cache<IRole> roles;
 
 	/**
-	 * The channel where those who are afk are moved to.
+	 * The unique snowflake ID of the voice channel where AFK users are moved to (or 0 if one is not set).
 	 */
 	protected volatile long afkChannel;
 	/**
-	 * The time in seconds for a user to be idle to be determined as "afk".
+	 * The timeout (in seconds) before a user is moved to the AFK voice channel.
 	 */
 	protected volatile int afkTimeout;
 
 	/**
-	 * The region this guild is located in.
+	 * The guild's voice region.
 	 */
 	protected volatile String regionID;
 
 	/**
-	 * The verification level of this guild
+	 * The guild's verification level.
 	 */
 	protected volatile VerificationLevel verification;
 
@@ -123,28 +130,28 @@ public class Guild implements IGuild {
 	protected volatile AudioManager audioManager;
 
 	/**
-	 * The client that created this object.
+	 * The client the guild belongs to.
 	 */
 	protected final IDiscordClient client;
 
 	/**
-	 * The shard this object belongs to.
+	 * The shard the guild belongs to.
 	 */
 	private final IShard shard;
 
 	/**
-	 * The list of emojis.
+	 * The guild's emojis.
 	 */
 	public final Cache<IEmoji> emojis;
 
 	/**
-	 * The total number of members in this guild
+	 * The total number of members the guild has.
 	 */
 	private int totalMemberCount;
 
 	/**
-	 * The ID of the voice channel that the bot is connecting to in this guild.
-	 * This is 0 if a voice connection has already been established in this guild or none was ever attempted.
+	 * The ID of the voice channel that the bot is connecting to in the guild.
+	 * This is 0 if a voice connection has already been established in the guild or none was ever attempted.
 	 */
 	public long connectingVoiceChannelID;
 
@@ -189,9 +196,9 @@ public class Guild implements IGuild {
 	}
 
 	/**
-	 * Sets the CACHED owner id.
+	 * Sets the CACHED owner ID of the guild.
 	 *
-	 * @param id The user if of the new owner.
+	 * @param id The owner ID.
 	 */
 	public void setOwnerID(long id) {
 		ownerID = id;
@@ -208,9 +215,9 @@ public class Guild implements IGuild {
 	}
 
 	/**
-	 * Sets the CACHED icon id for the guild.
+	 * Sets the CACHED icon hash of the guild.
 	 *
-	 * @param icon The icon id.
+	 * @param icon The icon hash.
 	 */
 	public void setIcon(String icon) {
 		this.icon = icon;
@@ -244,19 +251,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IUser getUserByID(long id) {
-		if (users == null)
-			return null;
-
-		IUser user = users.get(id);
-
-		if (user == null) {
-			if (client.getOurUser() != null && id == client.getOurUser().getLongID())
-				user = client.getOurUser();
-			else if (id == ownerID)
-				user = getOwner();
-		}
-
-		return user;
+		return users.get(id);
 	}
 
 	@Override
@@ -383,10 +378,20 @@ public class Guild implements IGuild {
 		return afkTimeout;
 	}
 
+	/**
+	 * Sets the CACHED AFK voice channel ID of the guild.
+	 *
+	 * @param id The AFK voice channel ID.
+	 */
 	public void setAFKChannel(long id) {
 		this.afkChannel = id;
 	}
 
+	/**
+	 * Sets the CACHED AFK timeout.
+	 *
+	 * @param timeout The AFK timeout.
+	 */
 	public void setAfkTimeout(int timeout) {
 		this.afkTimeout = timeout;
 	}
@@ -641,7 +646,7 @@ public class Guild implements IGuild {
 				new ChannelCreateRequest(name, "text"),
 				ChannelObject.class);
 
-		IChannel channel = DiscordUtils.getChannelFromJSON(this, response);
+		IChannel channel = DiscordUtils.getChannelFromJSON(getShard(), this, response);
 		channels.put(channel);
 
 		return channel;
@@ -660,7 +665,7 @@ public class Guild implements IGuild {
 				new ChannelCreateRequest(name, "voice"),
 				ChannelObject.class);
 
-		IVoiceChannel channel = DiscordUtils.getVoiceChannelFromJSON(this, response);
+		IVoiceChannel channel = (IVoiceChannel) DiscordUtils.getChannelFromJSON(getShard(), this, response);
 		channels.put(channel);
 
 		return channel;
@@ -672,9 +677,9 @@ public class Guild implements IGuild {
 	}
 
 	/**
-	 * CACHES the region for this guild.
+	 * Sets thee CACHED voice region of the guild.
 	 *
-	 * @param regionID The region.
+	 * @param regionID The voice region.
 	 */
 	public void setRegion(String regionID) {
 		this.regionID = regionID;
@@ -686,7 +691,7 @@ public class Guild implements IGuild {
 	}
 
 	/**
-	 * CACHES the verification for this guild.
+	 * Sets the CACHED verification level of the guild.
 	 *
 	 * @param verification The verification level.
 	 */
@@ -702,6 +707,13 @@ public class Guild implements IGuild {
 	@Override
 	public IChannel getGeneralChannel() {
 		return getChannelByID(this.id);
+	}
+
+	@Override
+	public IChannel getDefaultChannel() {
+		return getChannels().stream()
+				.filter(c -> PermissionUtils.hasPermissions(c, client.getOurUser(), Permissions.READ_MESSAGES))
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -878,6 +890,9 @@ public class Guild implements IGuild {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Forcibly loads and caches all webhooks for the channel.
+	 */
 	public void loadWebhooks() {
 		try {
 			PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_WEBHOOKS);
@@ -932,8 +947,57 @@ public class Guild implements IGuild {
 		return totalMemberCount;
 	}
 
+	/**
+	 * Sets the CACHED total member count of the guild.
+	 *
+	 * @param totalMemberCount The total member count.
+	 */
 	public void setTotalMemberCount(int totalMemberCount){
 		this.totalMemberCount = totalMemberCount;
+	}
+
+	@Override
+	public AuditLog getAuditLog() {
+		return getAuditLog(null, null);
+	}
+
+	@Override
+	public AuditLog getAuditLog(ActionType actionType) {
+		return getAuditLog(null, actionType);
+	}
+
+	@Override
+	public AuditLog getAuditLog(IUser user) {
+		return getAuditLog(user, null);
+	}
+
+	@Override
+	public AuditLog getAuditLog(IUser user, ActionType actionType) {
+		return getAuditLog(user, actionType, (System.currentTimeMillis() - DiscordUtils.DISCORD_EPOCH) << 22);
+	}
+
+	private AuditLog getAuditLog(IUser user, ActionType actionType, long before) {
+		List<AuditLog> retrieved = new ArrayList<>();
+
+		AuditLogEntryObject[] chunk;
+
+		do {
+			String query = "?limit=100&before=" + before;
+			if (user != null) query += "&user_id=" + Long.toUnsignedString(user.getLongID());
+			if (actionType != null) query += "&action_type=" + actionType.getRaw();
+
+			AuditLogObject auditLog = ((DiscordClientImpl) client).REQUESTS.GET.makeRequest(
+					DiscordEndpoints.GUILDS + getStringID() + "/audit-logs" + query,
+					AuditLogObject.class);
+			chunk = auditLog.audit_log_entries;
+
+			if (chunk.length == 0) break;
+
+			retrieved.add(DiscordUtils.getAuditLogFromJSON(this, auditLog));
+			before = Long.parseLong(auditLog.audit_log_entries[auditLog.audit_log_entries.length - 1].id);
+		} while (chunk.length == 100);
+
+		return new AuditLog(retrieved.stream().map(AuditLog::getEntries).flatMap(Collection::stream).collect(LongMapCollector.toLongMap()));
 	}
 
 	@Override
@@ -951,6 +1015,9 @@ public class Guild implements IGuild {
 		return DiscordUtils.equals(this, other);
 	}
 
+	/**
+	 * Associates a user ID to their join time.
+	 */
 	public static class TimeStampHolder extends IDLinkedObjectWrapper<LocalDateTime> {
 
 		public TimeStampHolder(long id, LocalDateTime obj) {

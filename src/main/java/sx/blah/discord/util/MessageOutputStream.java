@@ -33,22 +33,32 @@ import java.util.concurrent.atomic.AtomicReference;
 import static sx.blah.discord.handle.obj.IMessage.MAX_MESSAGE_LENGTH;
 
 /**
- * This represents an {@link OutputStream} which will take any input and write it to a message, this message will be be
- * edited whenever bytes are written to it until its length exceeds the maximum ({@link IMessage#MAX_MESSAGE_LENGTH}).
- * In which case a new message will be sent.
- * <b>Note: Messages only get written/edited when either {@link #flush()} or {@link #close()} are called.</b>
+ * An output stream which will take any input and write it to a message.
+ *
+ * <p>This message written by the stream will be be edited whenever bytes are written to it until its length exceeds
+ * {@value IMessage#MAX_MESSAGE_LENGTH}. When the length is exceeded, a new message is sent.
+ *
+ * <p>Messages only get written/edited when either {@link #flush()} or {@link #close()} are called.
  */
 public class MessageOutputStream extends OutputStream {
-	private final IChannel channel;
-	private final List<IMessage> messages = new CopyOnWriteArrayList<>();
-	private final AtomicReference<Queue<Character>> buf = new AtomicReference<>(new ConcurrentLinkedQueue<>());
-	private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
 	/**
-	 * Creates the output stream instance.
-	 *
-	 * @param channel The channel to send messages to.
+	 * The channel to send the message to.
 	 */
+	private final IChannel channel;
+	/**
+	 * The messages written by the output stream.
+	 */
+	private final List<IMessage> messages = new CopyOnWriteArrayList<>();
+	/**
+	 * A buffer of characters to write.
+	 */
+	private final AtomicReference<Queue<Character>> buf = new AtomicReference<>(new ConcurrentLinkedQueue<>());
+	/**
+	 * Whether the stream is closed.
+	 */
+	private final AtomicBoolean isClosed = new AtomicBoolean(false);
+
 	public MessageOutputStream(IChannel channel) {
 		this.channel = channel;
 	}
@@ -67,27 +77,27 @@ public class MessageOutputStream extends OutputStream {
 	}
 
 	/**
-	 * This gets the messages created by this stream.
+	 * Gets the messages created by the stream.
 	 *
-	 * @return The messages.
+	 * @return The messages created by the stream.
 	 */
 	public List<IMessage> getMessages() {
 		return new ArrayList<>(messages);
 	}
 
 	/**
-	 * This gets the most recent message created by the stream.
+	 * Gets the most recent message created by the stream.
 	 *
-	 * @return The most recent message or null if none exist.
+	 * @return The most recent message created by the stream.
 	 */
 	public IMessage getCurrentMessage() {
 		return messages.stream().findFirst().orElse(null);
 	}
 
 	/**
-	 * This gets the channel associated with the stream.
+	 * Gets the channel the stream sends messages to.
 	 *
-	 * @return The channel.
+	 * @return The channel the stream sends messages to.
 	 */
 	public IChannel getChannel() {
 		return channel;
@@ -122,6 +132,12 @@ public class MessageOutputStream extends OutputStream {
 			throw exceptionReference.get();
 	}
 
+	/**
+	 * Gets a string from the stream's buffered characters.
+	 *
+	 * @param length The length of the string to get.
+	 * @return A string from the stream's buffered characters.
+	 */
 	private String getStringFromCharBuffer(int length) {
 		Queue<Character> buffer = buf.get();
 		if (length < 0)

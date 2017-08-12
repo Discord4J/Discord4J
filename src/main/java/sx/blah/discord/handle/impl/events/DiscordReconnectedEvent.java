@@ -21,7 +21,7 @@ import sx.blah.discord.api.events.Event;
 
 /**
  * This event is dispatched when the client is forced to reconnect to discord.
- * @deprecated Use {@link ReconnectSuccessEvent}
+ * @deprecated Use {@link ReconnectSuccessEvent}. This event is <b>no longer dispatched.</b>
  */
 public class DiscordReconnectedEvent extends Event {
 }

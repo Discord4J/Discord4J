@@ -20,7 +20,7 @@ package sx.blah.discord.handle.impl.events.guild;
 import sx.blah.discord.handle.obj.IGuild;
 
 /**
- * This event is dispatched when a guild is edited by its owner.
+ * Dispatched when a guild is updated.
  */
 public class GuildUpdateEvent extends GuildEvent {
 
@@ -33,18 +33,18 @@ public class GuildUpdateEvent extends GuildEvent {
 	}
 
 	/**
-	 * Gets the unupdated guild.
+	 * Gets the guild before it was updated.
 	 *
-	 * @return The old guild.
+	 * @return The guild before it was updated.
 	 */
 	public IGuild getOldGuild() {
 		return oldGuild;
 	}
 
 	/**
-	 * Gets the updated guild.
+	 * Gets the guild after it was updated.
 	 *
-	 * @return The new guild.
+	 * @return The guild after it was updated.
 	 */
 	public IGuild getNewGuild() {
 		return newGuild;

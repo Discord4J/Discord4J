@@ -24,36 +24,37 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import java.time.LocalDateTime;
 
 /**
- * This represents a generic discord object.
+ * An object that is identifiable by a unique snowflake ID and belongs to a {@link IDiscordClient}.
  */
 public interface IDiscordObject<SELF extends IDiscordObject<SELF>> extends IIDLinkedObject { //The SELF thing is just a hack to get copy() to work correctly because self types don't exist in java >.>
 
 	/**
-	 * Gets the {@link IDiscordClient} instance this object belongs to.
+	 * Gets the client the object belongs to.
 	 *
-	 * @return The client instance.
+	 * @return The client the object belongs to.
 	 */
 	IDiscordClient getClient();
 
 	/**
-	 * Get the {@link IShard} instance this object belongs to.
+	 * Gets the shard the object belongs to.
+	 *
+	 * @return The shard the object belongs to.
 	 */
 	IShard getShard();
 
 	/**
-	 * Gets the {@link LocalDateTime} this object was created at. This is calculated by reversing the snowflake
-	 * algorithm on the object's id.
+	 * Gets the time at which the object was created.
 	 *
-	 * @return The creation date of this object.
+	 * @return The time at which the object was created.
 	 */
 	default LocalDateTime getCreationDate() {
 		return DiscordUtils.getSnowflakeTimeFromID(getLongID());
 	}
 
 	/**
-	 * Creates a new instance of this object with all the current properties.
+	 * Creates a new instance of the object with all the current properties.
 	 *
-	 * @return The copied instance of this object.
+	 * @return The copied instance of the object.
 	 */
 	SELF copy();
 }

@@ -17,6 +17,7 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.*;
@@ -26,20 +27,20 @@ import sx.blah.discord.util.Image;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
+/**
+ * The default implementation of {@link IPrivateChannel}.
+ */
 public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	/**
-	 * The recipient of this private channel.
+	 * The recipient user of the channel.
 	 */
 	protected final IUser recipient;
 
 	public PrivateChannel(DiscordClientImpl client, IUser recipient, long id) {
-		super(client, recipient.getName(), id, null, null, 0,
+		super(client, recipient.getName(), id, null, null, 0, false,
 				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)),
 				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)));
 		this.recipient = recipient;
@@ -59,12 +60,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public LongMap<PermissionOverride> getUserOverridesLong() {
-		return LongMap.emptyMap();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public LongMap<PermissionOverride> getRoleOverridesLong() {
-		return LongMap.emptyMap();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -73,6 +74,16 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 			return EnumSet.allOf(Permissions.class);
 
 		return EnumSet.noneOf(Permissions.class);
+	}
+
+	@Override
+	public void edit(String name, int position, String topic) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IExtendedInvite> getExtendedInvites() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -152,12 +163,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public String getTopic() {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public IGuild getGuild() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -168,11 +179,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	@Override
 	public void setName(String name) {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<IMessage> getPinnedMessages() {
-		return new ArrayList<>();
 	}
 
 	@Override
@@ -212,7 +218,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public List<IUser> getUsersHere() {
-		return Collections.singletonList(recipient);
+		return Arrays.asList(recipient, getClient().getOurUser());
 	}
 
 	@Override
@@ -232,11 +238,16 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean isNSFW() {
-		return false;
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IShard getShard() {
+		return getClient().getShards().get(0);
 	}
 }

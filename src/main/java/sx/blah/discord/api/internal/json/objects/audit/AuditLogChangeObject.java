@@ -15,12 +15,10 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.api.internal.json.objects;
+package sx.blah.discord.api.internal.json.objects.audit;
 
-public class ReactionUserObject {
-	public String username;
-	public String discriminator;
-	public boolean bot;
-	public String id;
-	public String avatar;
+public class AuditLogChangeObject {
+	public Object new_value;
+	public Object old_value;
+	public String key;
 }

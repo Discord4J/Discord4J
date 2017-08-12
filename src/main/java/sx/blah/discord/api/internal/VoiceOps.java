@@ -17,43 +17,46 @@
 
 package sx.blah.discord.api.internal;
 
+/**
+ * Represents OP codes sent on the voice gateway. The {@link #ordinal()} of these objects is the op code sent to Discord.
+ */
 public enum VoiceOps {
 
 	/**
 	 * Used to begin a voice websocket connection
 	 */
 	IDENTIFY,
-
 	/**
 	 * Used to select the voice protocol
 	 */
 	SELECT_PROTOCOL,
-
 	/**
 	 * Used to complete the websocket handshake
 	 */
 	READY,
-
 	/**
 	 * Used to keep the websocket connection alive
 	 */
 	HEARTBEAT,
-
 	/**
 	 * Used to describe the session
 	 */
 	SESSION_DESCRIPTION,
-
 	/**
 	 * Used to indicate which users are speaking
 	 */
 	SPEAKING,
-
 	/**
 	 * Unknown opcode.
 	 */
 	UNKNOWN;
 
+	/**
+	 * Gets a VoiceOps from an opcode or {@link #UNKNOWN} if an unknown code is passed.
+	 *
+	 * @param opcode The integer opcode.
+	 * @return The appropriate VoiceOps or {@link #UNKNOWN}.
+	 */
 	public static VoiceOps get(int opcode) {
 		if (opcode >= values().length) {
 			return UNKNOWN;

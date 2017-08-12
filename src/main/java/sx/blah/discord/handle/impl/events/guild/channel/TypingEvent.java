@@ -21,7 +21,7 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This event is dispatched if a user is typing.
+ * Dispatched when a user begins typing.
  */
 public class TypingEvent extends ChannelEvent {
 
@@ -33,9 +33,9 @@ public class TypingEvent extends ChannelEvent {
 	}
 
 	/**
-	 * The user involved.
+	 * Gets the user who is typing.
 	 *
-	 * @return The user.
+	 * @return The user who is typing.
 	 */
 	public IUser getUser() {
 		return user;

@@ -24,8 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 
 /**
- * This extension of {@link AudioInputStreamProvider} attempts to create an {@link AudioInputStream} from the provided
- * url and then provide based on that.
+ * An audio provider which extracts an {@link AudioInputStream} from a URL.
  */
 public class URLProvider extends AudioInputStreamProvider {
 

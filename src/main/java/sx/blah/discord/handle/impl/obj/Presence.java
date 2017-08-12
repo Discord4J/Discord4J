@@ -20,18 +20,28 @@ package sx.blah.discord.handle.impl.obj;
 import sx.blah.discord.handle.obj.IPresence;
 import sx.blah.discord.handle.obj.StatusType;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Implementation of {@link sx.blah.discord.handle.obj.IPresence}
+ * The default implementation of {@link IPresence}.
  */
-public class PresenceImpl implements IPresence {
+public class Presence implements IPresence {
 
-	private final Optional<String> playingText;
-	private final Optional<String> streamingUrl;
+	/**
+	 * The nullable playing text of the presence.
+	 */
+	private final String playingText;
+	/**
+	 * The nullable streaming url of the presence.
+	 */
+	private final String streamingUrl;
+	/**
+	 * The type of status of the presence.
+	 */
 	private final StatusType status;
 
-	public PresenceImpl(Optional<String> playingText, Optional<String> streamingUrl, StatusType status) {
+	public Presence(String playingText, String streamingUrl, StatusType status) {
 		this.playingText = playingText;
 		this.streamingUrl = streamingUrl;
 		this.status = status;
@@ -39,12 +49,12 @@ public class PresenceImpl implements IPresence {
 
 	@Override
 	public Optional<String> getPlayingText() {
-		return playingText;
+		return Optional.ofNullable(playingText);
 	}
 
 	@Override
 	public Optional<String> getStreamingUrl() {
-		return streamingUrl;
+		return Optional.ofNullable(streamingUrl);
 	}
 
 	@Override
@@ -54,19 +64,17 @@ public class PresenceImpl implements IPresence {
 
 	@Override
 	public IPresence copy() {
-		return new PresenceImpl(playingText, streamingUrl, status);
+		return new Presence(playingText, streamingUrl, status);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof PresenceImpl) {
-			PresenceImpl other = (PresenceImpl) obj;
+		if (!Presence.class.isAssignableFrom(obj.getClass())) return false;
 
-			return other.playingText.equals(playingText) && other.streamingUrl.equals(streamingUrl) &&
-					other.status == status;
-		}
-
-		return super.equals(obj);
+		Presence other = (Presence) obj;
+		return Objects.equals(other.playingText, this.playingText)
+				&& Objects.equals(other.streamingUrl, this.streamingUrl)
+				&& other.status == this.status;
 	}
 
 	@Override

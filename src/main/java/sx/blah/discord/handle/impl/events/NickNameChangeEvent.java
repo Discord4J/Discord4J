@@ -22,7 +22,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This is fired once a nickname is changed.
+ * Dispatched when the nickname of a member is changed.
  * @deprecated Use {@link NicknameChangedEvent} instead.
  */
 @Deprecated

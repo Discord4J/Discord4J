@@ -22,7 +22,7 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class GuildObject {
 	/**
-	 * The id of the guild.
+	 * The ID of the guild.
 	 */
 	public String id;
 	/**
@@ -34,7 +34,7 @@ public class GuildObject {
 	 */
 	public String icon;
 	/**
-	 * The id of the user that owns the guild.
+	 * The ID of the user who owns the guild.
 	 */
 	public String owner_id;
 	/**
@@ -42,11 +42,11 @@ public class GuildObject {
 	 */
 	public String region;
 	/**
-	 * The id of the afk voice channel.
+	 * The ID of the AFK voice channel.
 	 */
 	public String afk_channel_id;
 	/**
-	 * The timeout for moving people to the afk voice channel.
+	 * The timeout for moving people to the AFK voice channel.
 	 */
 	public int afk_timeout;
 	/**
@@ -54,19 +54,19 @@ public class GuildObject {
 	 */
 	public boolean embed_enabled;
 	/**
-	 * The id of the embedded channel.
+	 * The ID of the embedded channel.
 	 */
 	public String embed_channel_id;
 	/**
-	 * Level of verification.
+	 * The level of verification.
 	 */
 	public int verification_level;
 	/**
-	 * Default message notifications level.
+	 * The default message notifications level.
 	 */
 	public int default_messages_notifications;
 	/**
-	 * Array of role objects
+	 * Array of role objects.
 	 */
 	public RoleObject[] roles;
 	/**
@@ -78,11 +78,11 @@ public class GuildObject {
 	 */
 	public String[] features;
 	/**
-	 * Required MFA level for the guild.
+	 * The required MFA level for the guild.
 	 */
 	public int mfa_level;
 	/**
-	 * The date the self user joined the guild.
+	 * The ISO-8601 timestamp of when our user joined the guild.
 	 */
 	public String joined_at;
 	/**
@@ -94,7 +94,7 @@ public class GuildObject {
 	 */
 	public boolean unavailable;
 	/**
-	 * Number of members in the guild.
+	 * The number of members in the guild.
 	 */
 	public int member_count;
 	/**

@@ -42,33 +42,33 @@ import java.util.concurrent.atomic.AtomicLong;
 import static sx.blah.discord.Discord4J.*;
 
 /**
- * Represents request types to be sent.
+ * Used to send HTTP requests to Discord.
  */
 public class Requests {
 
 	/**
-	 * This is used when the requests class must be used from a static context.
+	 * A Requests instance that has no client associated with it.
 	 */
 	public static final Requests GENERAL_REQUESTS = new Requests(null);
 
 	/**
-	 * Used to send POST Requests
+	 * Used to send POST requests.
 	 */
 	public final Request POST;
 	/**
-	 * Used to send GET requests
+	 * Used to send GET requests.
 	 */
 	public final Request GET;
 	/**
-	 * Used to send DELETE requests
+	 * Used to send DELETE requests.
 	 */
 	public final Request DELETE;
 	/**
-	 * Used to send PATCH requests
+	 * Used to send PATCH requests.
 	 */
 	public final Request PATCH;
 	/**
-	 * Used to send PUT requests
+	 * Used to send PUT requests.
 	 */
 	public final Request PUT;
 
@@ -88,11 +88,11 @@ public class Requests {
 	}
 
 	/**
-	 * This represents a specific request.
+	 * A specific HTTP method request type.
 	 */
 	public final class Request {
 		/**
-		 * The user-agent, as per @Jake's request
+		 * The user agent used for requests.
 		 */
 		private final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
 
@@ -101,11 +101,14 @@ public class Requests {
 		 */
 		private final DiscordClientImpl client;
 
+		/**
+		 * The HTTP client requests are made on.
+		 */
 		//Same as HttpClients.createDefault() but with the proper user-agent
 		private final CloseableHttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
 
 		/**
-		 * The class of the request type used for the request
+		 * The class of the method type used for the request
 		 */
 		final Class<? extends HttpUriRequest> requestClass;
 
@@ -128,13 +131,11 @@ public class Requests {
 		 * Makes a request.
 		 *
 		 * @param url The url to make the request to.
-		 * @param entity Any data to send with the request.
-		 * @param clazz The class of the object to transform the json response into.
-		 * @param headers The headers to include in the response.
-		 * @param <T> The type of the object to transform the json response into.
-		 * @return The transformed object.
-		 * @throws DiscordException
-		 * @throws RateLimitException
+		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param clazz The class of the object to deserialize the json response into.
+		 * @param headers The headers to include in the request.
+		 * @param <T> The type of the object to deserialize the json response into.
+		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, Object entity, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
@@ -144,6 +145,16 @@ public class Requests {
 			}
 		}
 
+		/**
+		 * Makes a request.
+		 *
+		 * @param url The url to make the request to.
+		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param clazz The class of the object to deserialize the json response into.
+		 * @param headers The headers to include in the request.
+		 * @param <T> The type of the object to deserialize the json response into.
+		 * @return The deserialized response.
+		 */
 		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
 				byte[] response = makeRequest(url, entity, headers);
@@ -157,12 +168,10 @@ public class Requests {
 		 * Makes a request.
 		 *
 		 * @param url The url to make the request to.
-		 * @param clazz The class of the object to transform the json response into.
-		 * @param headers The headers to include in the response.
-		 * @param <T> The type of the object to transform the json response into.
-		 * @return The transformed object.
-		 * @throws DiscordException
-		 * @throws RateLimitException
+		 * @param clazz The class of the object to deserialize the json response into.
+		 * @param headers The headers to include in the request.
+		 * @param <T> The type of the object to deserialize the json response into.
+		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
@@ -177,11 +186,8 @@ public class Requests {
 		 * Makes a request.
 		 *
 		 * @param url The url to make the request to.
-		 * @param entity Any data to send with the request.
-		 * @param headers The headers to include in the response.
-		 * @return The result (if any) returned by the request.
-		 * @throws DiscordException
-		 * @throws RateLimitException
+		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param headers The headers to include in the request.
 		 */
 		public void makeRequest(String url, Object entity, BasicNameValuePair... headers) {
 			try {
@@ -195,11 +201,9 @@ public class Requests {
 		 * Makes a request.
 		 *
 		 * @param url The url to make the request to.
-		 * @param entity Any data to send with the request.
-		 * @param headers The headers to include in the response.
-		 * @return The result (if any) returned by the request.
-		 * @throws DiscordException
-		 * @throws RateLimitException
+		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param headers The headers to include in the request.
+		 * @return The response as a byte array.
 		 */
 		public byte[] makeRequest(String url, String entity, BasicNameValuePair... headers) {
 			return makeRequest(url, new StringEntity(entity, "UTF-8"), headers);
@@ -210,9 +214,7 @@ public class Requests {
 		 *
 		 * @param url The url to make the request to.
 		 * @param headers The headers to include in the request.
-		 * @return The result (if any) returned by the request.
-		 * @throws RateLimitException
-		 * @throws DiscordException
+		 * @return The response as a byte array.
 		 */
 		public byte[] makeRequest(String url, BasicNameValuePair... headers) {
 			try {
@@ -233,11 +235,9 @@ public class Requests {
 		 * Makes a request.
 		 *
 		 * @param url The url to make the request to.
-		 * @param entity Any data to send with the request.
+		 * @param entity Any data to serialize and send in the body of the request.
 		 * @param headers The headers to include in the request.
-		 * @return The result (if any) returned by the request.
-		 * @throws RateLimitException
-		 * @throws DiscordException
+		 * @return The response as a byte array.
 		 */
 		public byte[] makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) {
 			try {

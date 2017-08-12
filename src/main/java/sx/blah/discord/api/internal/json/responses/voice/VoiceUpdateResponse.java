@@ -18,10 +18,19 @@
 package sx.blah.discord.api.internal.json.responses.voice;
 
 /**
- * The response from the join voice channel request
+ * Received when initially connecting to voice and when the current voice instance fails over to a new server.
  */
 public class VoiceUpdateResponse {
+	/**
+	 * The voice connection token.
+	 */
 	public String token;
+	/**
+	 * The ID of the guild this server update is for.
+	 */
 	public String guild_id;
+	/**
+	 * The voice server host.
+	 */
 	public String endpoint;
 }

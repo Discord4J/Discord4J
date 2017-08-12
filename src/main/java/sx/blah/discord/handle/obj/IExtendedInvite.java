@@ -20,37 +20,49 @@ package sx.blah.discord.handle.obj;
 import java.time.LocalDateTime;
 
 /**
- * Represents an invite to a channel which extra metadata.
+ * An invite to a guild channel with extra metadata.
  */
 public interface IExtendedInvite extends IInvite {
 
 	/**
-	 * @return The number of times this invite has been used.
+	 * Gets the number of times the invite has been used.
+	 *
+	 * @return The number of times the invite has been used.
 	 */
 	int getUses();
 
 	/**
-	 * @return The maximum number of times this invite can be used. 0 if infinite.
+	 * Gets the maximum number of times the invite can be used. 0 indicates infinite uses.
+	 *
+	 * @return The maximum number of times the invite can be used.
 	 */
 	int getMaxUses();
 
 	/**
-	 * @return The duration (in seconds) after which this invite expires.
+	 * Gets the duration (in seconds) after which the invite expires.
+	 *
+	 * @return The duration (in seconds) after which the invite expires.
 	 */
 	int getMaxAge();
 
 	/**
-	 * @return Whether this invite only grants temporary membership.
+	 * Gets whether membership granted by the invite is temporary.
+	 *
+	 * @return Whether membership granted by the invite is temporary.
 	 */
 	boolean isTemporary();
 
 	/**
-	 * @return The time at which this invite was created.
+	 * Gets the time at which the invite was created.
+	 *
+	 * @return The time at which the invite was created.
 	 */
 	LocalDateTime getCreationTime();
 
 	/**
-	 * @return Whether this invite is revoked.
+	 * Gets whether the invite is revoked.
+	 *
+	 * @return Whether the invite is revoked.
 	 */
 	boolean isRevoked();
 }

@@ -17,82 +17,73 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 
+import java.io.File;
+import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Represents a voice channel.
+ * A voice channel in a {@link IGuild}.
+ *
+ * <p>Most methods from {@link IChannel}, when called, will always throw an exception due to the incompatible nature
+ * between a text channel (what IChannel typically represents) and a voice channel. All deprecated methods defined by
+ * this interface will throw an exception if invoked and should be avoided.
  */
 public interface IVoiceChannel extends IChannel {
 	/**
-	 * This gets the maximum amount of users allowed in this voice channel.
+	 * Gets the maximum number of users allowed in the voice channel at once. <code>0</code> indicates no limit.
 	 *
-	 * @return The maximum amount of users allowed (or 0 if there is not set limit)
+	 * @return The maximum number of users allowed in the voice channel at once.
 	 */
 	int getUserLimit();
 
 	/**
-	 * Gets the current bitrate of this voice channel.
+	 * Gets the bitrate of the voice channel (in bits).
 	 *
-	 * @return The bitrate of this voice channel in bits.
+	 * @return The bitrate of the voice channel.
      */
 	int getBitrate();
 
 	/**
-	 * Edits all properties of this voice channel.
+	 * Edits all properties of the voice channel.
 	 *
-	 * @param name The new name of the channel.
-	 * @param position The new position of the channel.
-	 * @param bitrate The new bitrate of the channel (in bits).
-	 * @param userLimit The new user limit of the channel.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @param name The name of the channel.
+	 * @param position The position of the channel.
+	 * @param bitrate The bitrate of the channel (in bits).
+	 * @param userLimit The user limit of the channel.
 	 */
 	void edit(String name, int position, int bitrate, int userLimit);
 
 	/**
-	 * Changes the bitrate of the channel
+	 * Changes the bitrate of the channel.
 	 *
-	 * @param bitrate The new bitrate of the channel (in bits).
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param bitrate The bitrate of the channel (in bits).
 	 */
 	void changeBitrate(int bitrate);
 
 	/**
-	 * Changes the user limit of the channel
+	 * Changes the user limit of the channel.
 	 *
-	 * @param limit The new user limit of the channel.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param limit The user limit of the channel.
 	 */
 	void changeUserLimit(int limit);
 
 	/**
-	 * Makes the bot user join this voice channel.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
+	 * Makes the bot user join the voice channel.
 	 */
 	void join();
 
 	/**
-	 * Makes the bot user leave this voice channel.
+	 * Makes the bot user leave the voice channel.
 	 */
 	void leave();
 
 	/**
-	 * Checks if this voice channel is connected to by our user.
+	 * Gets whether the bot user is connected to the voice channel.
 	 *
-	 * @return True if connected, false if otherwise.
+	 * @return Whether the bot user is connected to the voice channel.
 	 */
 	boolean isConnected();
 
@@ -102,9 +93,321 @@ public interface IVoiceChannel extends IChannel {
 	IVoiceChannel copy();
 
 	/**
-	 * This collects all users connected to this voice channel and returns them in a list.
+	 * Gets the users who are connected to the voice channel.
 	 *
-	 * @return The connected users.
+	 * @return The users who are connected to the voice channel.
 	 */
 	List<IUser> getConnectedUsers();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageList getMessages();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryFrom(long id, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryTo(long id, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistory();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistory(int messageCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryFrom(LocalDateTime startDate);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryFrom(long id);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryTo(long id);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryIn(long beginID, long endID);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getFullMessageHistory();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	List<IMessage> bulkDelete();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	List<IMessage> bulkDelete(List<IMessage> messages);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	int getMaxInternalCacheCount();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	int getInternalCacheCount();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IMessage getMessageByID(long messageID);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	String getTopic();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IMessage sendMessage(String content);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IMessage sendMessage(String content, boolean tts);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IMessage sendFile(File file);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IMessage sendFile(String content, File file);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IMessage sendFile(String content, boolean tts, InputStream file, String fileName);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	void toggleTypingStatus();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	boolean getTypingStatus();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	void changeTopic(String topic);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	void edit(String name, int position, String topic);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	List<IMessage> getPinnedMessages();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	List<IWebhook> getWebhooks();
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IWebhook getWebhookByID(long id);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	List<IWebhook> getWebhooksByName(String name);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IWebhook createWebhook(String name);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IWebhook createWebhook(String name, Image avatar);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	IWebhook createWebhook(String name, String avatar);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	boolean isNSFW();
 }

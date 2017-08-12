@@ -27,13 +27,23 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * This is an {@link IAudioProcessor} implementation which can combine multiple processors.
- * Note: The higher the processor index, the later the processor is used in the queue.
+ * An audio processor which combines the affects of multiple other processors.
+ *
+ * <p>Processors earlier in the queue (lower index) have higher priority processors later in the queue.
  */
 public class MultiProcessor implements IAudioProcessor {
 
+	/**
+	 * The child processors.
+	 */
 	private final CopyOnWriteArrayList<IAudioProcessor> processors = new CopyOnWriteArrayList<>();
+	/**
+	 * The audio provider wrapped by the processor.
+	 */
 	private volatile IAudioProvider provider = new DefaultProvider();
+	/**
+	 * The processor which provides from each previous processor in the processor queue.
+	 */
 	private volatile IAudioProcessor finalProcessor;
 
 	public MultiProcessor() {
@@ -90,10 +100,10 @@ public class MultiProcessor implements IAudioProcessor {
 	}
 
 	/**
-	 * Gets the processor at the specified position.
+	 * Gets the processor at the given index.
 	 *
-	 * @param index The position to get the processor from.
-	 * @return The processor.
+	 * @param index The index to get the processor from.
+	 * @return The processor at the given index.
 	 */
 	public synchronized IAudioProcessor get(int index) {
 		return processors.get(index);
@@ -109,16 +119,20 @@ public class MultiProcessor implements IAudioProcessor {
 	}
 
 	/**
-	 * Inserts a processor in the specified position.
+	 * Sets the processor in the given position.
 	 *
-	 * @param index The position to insert the processor into.
-	 * @param processor The processor to insert.
+	 * @param index The index to set the processor at.
+	 * @param processor The processor to set.
 	 */
 	public synchronized void set(int index, IAudioProcessor processor) {
 		processors.set(index, processor);
 		buildFinalProcessor();
 	}
 
+	/**
+	 * Sets the providers of processors in the queue to the previous processor and builds the final processor which
+	 * provides from all processors in the queue.
+	 */
 	private void buildFinalProcessor() {
 		finalProcessor = null;
 

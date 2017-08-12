@@ -22,7 +22,7 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class UserObject {
 	/**
-	 * The username of the user.
+	 * The name of the user.
 	 */
 	public String username;
 	/**
@@ -30,7 +30,7 @@ public class UserObject {
 	 */
 	public String discriminator;
 	/**
-	 * The id of the user.
+	 * The ID of the user.
 	 */
 	public String id;
 	/**

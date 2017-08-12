@@ -21,10 +21,10 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This is dispatched when a user starts or stops speaking
+ * Dispatched when a user starts or stops speaking.
  */
 public class UserSpeakingEvent extends UserVoiceChannelEvent {
-	
+
 	private final int ssrc;
     private final boolean speaking;
 
@@ -35,18 +35,18 @@ public class UserSpeakingEvent extends UserVoiceChannelEvent {
     }
 
 	/**
-	 * Gets the ssrc-a unique number per user.
+	 * Gets the user's ssrc. Each user in a voice channel has a unique ssrc.
 	 *
-	 * @return The ssrc.
+	 * @return The user's ssrc.
 	 */
     public int getSsrc() {
         return ssrc;
     }
 
 	/**
-	 * Whether the user is now speaking or not.
+	 * Gets whether the user is now speaking.
 	 *
-	 * @return True if the user is speaking, false if otherwise.
+	 * @return Whether the user is now speaking.
 	 */
     public boolean isSpeaking() {
         return speaking;

@@ -46,44 +46,85 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * This is a general purpose audio player. This wraps the provided {@link sx.blah.discord.handle.audio.IAudioManager}.
- * So if you are using this, it is recommended (all though not necessary) to not interact with the audio manager after
- * an AudioPlayer instance is created.
+ * A general purpose audio player.
  *
- * AudioPlayer also dispatches events. These events are located in the {@link sx.blah.discord.util.audio.events} package.
+ * <p>Because the player wraps the given {@link IAudioManager}, it is recommended (although not required) to not
+ * interact with the audio manager after creating an audio player with it.
  *
- * NOTE: The goal of this class is to provide a wide variety of tools which works on a wide variety of use-cases. As
+ * <p>AudioPlayer dispatches events located in {@link sx.blah.discord.util.audio.events}.
+ *
+ * <p>NOTE: The goal of this class is to provide a wide variety of tools which work for a wide variety of use-cases. As
  * such, the feature set has a wide breadth but not necessarily depth.
+ *
+ * <p>The player supports all audio formats supported by {@link javax.sound.sampled.AudioSystem}. By default, Discord4J
+ * includes <a href=https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html>Service Provider Interfaces</a> for
+ * Mpeg and Flac formats. See {@link sx.blah.discord.api.internal.Services}.
  */
 public class AudioPlayer implements IAudioProvider {
 
+	/**
+	 * The audio players for each guild.
+	 */
 	private final static Map<IGuild, AudioPlayer> playerInstances = new ConcurrentHashMap<>();
 
+	/**
+	 * The underlying audio manager.
+	 */
 	private final IAudioManager manager;
+	/**
+	 * The client the guild belongs to.
+	 */
 	private final IDiscordClient client;
 
+	/**
+	 * The audio manager's original provider.
+	 */
 	private volatile IAudioProvider backupProvider;
+	/**
+	 * The audio manager's original processor.
+	 */
 	private volatile IAudioProcessor backupProcessor;
 
+	/**
+	 * The audio player's audio processor.
+	 */
 	private final MultiProcessor playerProcessor = new MultiProcessor();
 
 	//Controls
+	/**
+	 * The audio player's pause processor.
+	 */
 	private final PauseableProcessor pauseController = new PauseableProcessor();
 
+	/**
+	 * The queue of tracks in the audio player.
+	 */
 	private final List<Track> trackQueue = new CopyOnWriteArrayList<>();
 
+	/**
+	 * Whether the tracks are looping.
+	 */
 	private volatile boolean loop = false;
+	/**
+	 * Whether the audio player was ready as of the last isReady() check.
+	 */
 	private volatile boolean wasReadyLast = false;
+	/**
+	 * The track of the audio player as of the last isReady() check.
+	 */
 	private volatile Track lastTrack;
 
+	/**
+	 * The volume of the audio player.
+	 */
 	private volatile float volume = 1.0F;
 
 	/**
-	 * This gets an AudioPlayer instance for the given {@link IGuild}. It will first attempt to find an injected player
-	 * instance cached in an internal map, otherwise it'll construct a new instance.
+	 * Gets an audio player for the given guild. It will first attempt to find an injected player cached in the internal
+	 * map, otherwise it will construct a new instance.
 	 *
-	 * @param guild The guild for which the player belongs.
-	 * @return The player.
+	 * @param guild The guild the audio player belongs to.
+	 * @return The audio player for the given guild.
 	 */
 	public static AudioPlayer getAudioPlayerForGuild(IGuild guild) {
 		if (playerInstances.containsKey(guild)) {
@@ -94,11 +135,11 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This gets an AudioPlayer instance for the given {@link IAudioManager}. It will first attempt to find an injected
-	 * player instance cached in an internal map, otherwise it'll construct a new instance.
+	 * Gets an audio player for the given audio manager. It will first attempt to find an injected player cached in the
+	 * internal map, otherwise it will construct a new instance.
 	 *
-	 * @param manager The manager for which the player belongs.
-	 * @return The player.
+	 * @param manager The audio manager the audio player belongs to.
+	 * @return The audio player for the given audio manager.
 	 */
 	public static AudioPlayer getAudioPlayerForAudioManager(IAudioManager manager) {
 		return getAudioPlayerForGuild(manager.getGuild());
@@ -115,9 +156,9 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This is used to wrap this player around the audio manager. This recreates all the internal controls and caches.
-	 * NOTE: This is automatically called in the constructor, you should only manually call this if {@link #clean()}
-	 * was previously called.
+	 * Wraps the audio manager. This recreates all the internal controls and caches.
+	 *
+	 * <p>This is automatically called in the constructor. It should only be called again if {@link #clean()} is called.
 	 */
 	public void inject() {
 		//Backs up the previous provider and processor
@@ -136,6 +177,9 @@ public class AudioPlayer implements IAudioProvider {
 		client.getDispatcher().dispatch(new AudioPlayerInitEvent(this));
 	}
 
+	/**
+	 * Adds the pause processor to the player's multiprocessor.
+	 */
 	private void setupControls() {
 		playerProcessor.add(pauseController);
 	}
@@ -145,6 +189,8 @@ public class AudioPlayer implements IAudioProvider {
 	 * loads the previously used {@link sx.blah.discord.handle.audio.IAudioProvider} and
 	 * {@link sx.blah.discord.handle.audio.IAudioProcessor}.
 	 * NOTE: You will need to call {@link #inject()} if you wish to use this player instance again.
+	 *
+	 * Removes
 	 */
 	public void clean() {
 		//Restores the previous provider and processor
@@ -159,8 +205,7 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This clears the current playlist. It should be noted that this closes the stream that provides the audio to each
-	 * {@link Track} object (if it exists). Which prevents these objects from being reused reliably.
+	 * Closes every track in the queue and clears the queue.
 	 */
 	public void clear() {
 		trackQueue.forEach(Track::close);
@@ -168,18 +213,18 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This gets the guild this AudioPlayer instance is associated to.
+	 * Gets the parent guild of the audio player.
 	 *
-	 * @return The guild.
+	 * @return The parent guild of the audio player.
 	 */
 	public IGuild getGuild() {
 		return manager.getGuild();
 	}
 
 	/**
-	 * Sets whether this player is paused or not.
+	 * Sets whether the player is paused.
 	 *
-	 * @param isPaused True to pause, false to resume.
+	 * @param isPaused Whether the player is paused.
 	 */
 	public void setPaused(boolean isPaused) {
 		if (isPaused != this.isPaused()) {
@@ -189,8 +234,9 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This toggles the pause state on or off.
-	 * This is a convenience shortcut for {@code setPaused(!isPaused())}.
+	 * Toggles the pause state.
+	 *
+	 * <p>This is equivalent to <code>setPaused(!isPaused())</code>
 	 *
 	 * @return The new pause state.
 	 */
@@ -201,38 +247,34 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * Gets whether this player is paused or not.
+	 * Gets whether the player is paused.
 	 *
-	 * @return True if paused, false if not.
+	 * @return Whether the player is paused.
 	 */
 	public boolean isPaused() {
 		return pauseController.isPaused();
 	}
 
 	/**
-	 * This queues an AudioInputStream for the AudioPlayer.
-	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
-	 *
-	 * @param stream The stream to queue.
-	 * @return The {@link Track} object representing this stream.
-	 *
-	 * @throws IOException
+	 * Queues an audio track.
+
+	 * @param stream The stream to wrap in a track and queue.
+	 * @return The track that was queued.
 	 */
-	public Track queue(AudioInputStream stream) throws IOException {
+	public Track queue(AudioInputStream stream) {
 		Track track = new Track(stream);
 		queue(track);
 		return track;
 	}
 
 	/**
-	 * This queues a file for the AudioPlayer.
-	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
+	 * Queues an audio track.
+
+	 * @param file The file to wrap in a track and queue.
+	 * @return The track that was queued.
 	 *
-	 * @param file The file to queue.
-	 * @return The {@link Track} object representing this file.
-	 *
-	 * @throws IOException
-	 * @throws UnsupportedAudioFileException
+	 * @throws IOException If an error occurs while constructing the FileProvider.
+	 * @throws UnsupportedAudioFileException The the provided file is of an unsupported audio format.
 	 */
 	public Track queue(File file) throws IOException, UnsupportedAudioFileException {
 		Track track = new Track(new FileProvider(file));
@@ -242,14 +284,13 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This queues a url for the AudioPlayer.
-	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
+	 * Queues an audio track.
+
+	 * @param url The url to wrap in a track and queue.
+	 * @return The track that was queued.
 	 *
-	 * @param url The url to queue.
-	 * @return The {@link Track} object representing this url.
-	 *
-	 * @throws IOException
-	 * @throws UnsupportedAudioFileException
+	 * @throws IOException If an error occurs while constructing the URLProvider.
+	 * @throws UnsupportedAudioFileException The the provided file is of an unsupported audio format.
 	 */
 	public Track queue(URL url) throws IOException, UnsupportedAudioFileException {
 		Track track = new Track(new URLProvider(url));
@@ -259,11 +300,10 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This queues an audio provider for the AudioPlayer.
-	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
-	 *
-	 * @param provider The audio provider to queue.
-	 * @return The {@link Track} object representing this audio provider.
+	 * Queues an audio track.
+
+	 * @param provider The provider to wrap in a track and queue.
+	 * @return The track that was queued.
 	 */
 	public Track queue(IAudioProvider provider) {
 		Track track = new Track(provider);
@@ -272,8 +312,7 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This queues a track for the AudioPlayer.
-	 * Can use file formats supported by {@link javax.sound.sampled.AudioSystem}
+	 * Queues an audio track.
 	 *
 	 * @param track The track to queue.
 	 */
@@ -284,7 +323,7 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This adds an {@link IAudioProcessor} to this player.
+	 * Adds an audio processor to the player.
 	 *
 	 * @param processor The processor to add.
 	 */
@@ -295,7 +334,7 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This removes an {@link IAudioProcessor} to this player.
+	 * Removes an audio processor from the player.
 	 *
 	 * @param processor The processor to remove.
 	 */
@@ -306,9 +345,9 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This sets whether this player should loop its playlist. This is disabled by default.
+	 * Sets whether the player should loop its queue. This is disabled by default.
 	 *
-	 * @param loop True to loop, false to not.
+	 * @param loop Whether the player should loop its queue.
 	 */
 	public void setLoop(boolean loop) {
 		if (this.loop != loop) {
@@ -319,16 +358,16 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This gets whether this playlist is being looped.
+	 * Gets whether the player's queue is being looped.
 	 *
-	 * @return True if looped, false if otherwise.
+	 * @return Whether the player's queue is being looped.
 	 */
 	public boolean isLooping() {
 		return loop;
 	}
 
 	/**
-	 * This shuffles the playlist in the queue.
+	 * Shuffles the player's track queue.
 	 */
 	public synchronized void shuffle() {
 		if (trackQueue.size() > 0) {
@@ -340,9 +379,9 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This skips the current track.
+	 * Skips the current track.
 	 *
-	 * @return The track skipped. (null if the playlist is empty)
+	 * @return The track skipped (or null if the queue is empty).
 	 */
 	public Track skip() {
 		if (trackQueue.size() > 0) {
@@ -364,10 +403,10 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This skips until the playlist is playing the specified track.
+	 * Skips all tracks until the given given queue index.
 	 *
-	 * @param desiredPosition The playlist spot to skip to.
-	 * @return A list of all tracks skipped (if any)
+	 * @param desiredPosition The index to skip to.
+	 * @return The list of tracks that were skipped.
 	 */
 	public List<Track> skipTo(int desiredPosition) {
 		desiredPosition = Math.max(0, desiredPosition);
@@ -387,9 +426,9 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * Gets the list representing the playlist.
+	 * Gets the track queue.
 	 *
-	 * @return The playlist. NOTE: This is mutable and is the same instance used in the player.
+	 * @return The track queue.
 	 */
 	public List<Track> getPlaylist() {
 		return trackQueue;
@@ -414,8 +453,9 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * Sets the volume of the player. NOTE: This only works on tracks with an {@link AudioInputStream} rather than a
-	 * direct {@link IAudioProvider}.
+	 * Sets the volume of the player.
+	 *
+	 * <p>This only works on tracks with an {@link AudioInputStream} rather than a direct {@link IAudioProvider}.
 	 *
 	 * @param volume The volume (1.0 is the default value).
 	 */
@@ -452,6 +492,11 @@ public class AudioPlayer implements IAudioProvider {
 		return wasReadyLast = ready;
 	}
 
+	/**
+	 * Gets whether the player is ready.
+	 *
+	 * @return Whether the player is ready.
+	 */
 	private boolean calculateReady() {
 		return trackQueue.size() > 0 && getCurrentTrack().isReady();
 	}
@@ -476,15 +521,33 @@ public class AudioPlayer implements IAudioProvider {
 	}
 
 	/**
-	 * This object represents the audio being played by this player.
+	 * An audio track for the player.
 	 */
 	public static class Track implements IAudioProvider { //TODO: Figure out a way to dispatch events on track scrubbing
 
+		/**
+		 * The length of the track in milliseconds.
+		 */
 		private volatile long totalTrackTime = -1;
+		/**
+		 * The amount of time in milliseconds that the track as progressed.
+		 */
 		private volatile long currentTrackTime = 0;
+		/**
+		 * The underlying provider of audio.
+		 */
 		private final IAudioProvider provider;
+		/**
+		 * The underlying audio stream.
+		 */
 		private final AmplitudeAudioInputStream stream;
+		/**
+		 * The audio that has been cached for the track.
+		 */
 		private final List<byte[]> audioCache = new CopyOnWriteArrayList<>(); //key = ms timestamp / 20 ms
+		/**
+		 * A map that can be used to store arbitrary metadata with the track.
+		 */
 		private final Map<String, Object> metadata = new ConcurrentHashMap<>();
 
 		public Track(IAudioProvider provider) {
@@ -509,6 +572,9 @@ public class AudioPlayer implements IAudioProvider {
 			this(new AudioInputStreamProvider(stream));
 		}
 
+		/**
+		 * Closes the underlying audio stream.
+		 */
 		protected void close() {
 			if (stream != null && provider.isReady())
 				try {
@@ -519,13 +585,15 @@ public class AudioPlayer implements IAudioProvider {
 		}
 
 		/**
-		 * This returns a mutable map representing arbitrary metadata attached to this track.
-		 * If the track was created through a File, a key of "file" will have a {@link File} object which represents the
-		 * source of the audio.
-		 * If the track was created through a URL, a key of "url" will have a {@link URL} object which represents the
-		 * source of the audio.
+		 * Returns a mutable map that can be used to store arbitrary metadata with the track.
 		 *
-		 * @return The metadata.
+		 * <p>Default metadata includes:
+		 * <ul>
+		 *     <li>Key "file" to a {@link File} if the track was queued as a file.</li>
+		 *     <li>Key "url" to a {@link URL} if the track was queued as a URL.</li>
+		 * </ul>
+		 *
+		 * @return A map that can be used to store arbitrary metadata with the track.
 		 */
 		public Map<String, Object> getMetadata() {
 			return metadata;
@@ -543,34 +611,36 @@ public class AudioPlayer implements IAudioProvider {
 		/**
 		 * Gets the stream backing the track.
 		 *
-		 * @return The stream. This can be null!
+		 * @return The nullable stream.
 		 */
 		public AudioInputStream getStream() {
 			return stream;
 		}
 
 		/**
-		 * This gets the total track time in milliseconds.
+		 * The length of the track in milliseconds.
 		 *
-		 * @return The total track time. If -1, it is unknown at the time, else it should always be >= currentTrack
-		 * time. NOTE: This value can change. If the track is able to continue playing past the original total track,
+		 * <p>If this value is <code>-1</code>, it is unknown at the time. Otherwise, it is always >= currentTrackTime.
+		 * NOTE: This value can change. If the track is able to continue playing past the original total track,
 		 * the total track time will be updated.
+		 *
+		 * @return The length of the track in milliseconds.
 		 */
 		public long getTotalTrackTime() {
 			return totalTrackTime;
 		}
 
 		/**
-		 * This gets the current timestamp the player.
+		 * Gets the amount of time in milliseconds that the track as progressed.
 		 *
-		 * @return The current timestamp.
+		 * @return The amount of time in milliseconds that the track as progressed.
 		 */
 		public long getCurrentTrackTime() {
 			return currentTrackTime;
 		}
 
 		/**
-		 * This rewinds the track by the specified amount of time.
+		 * Rewinds the track by the given amount of time.
 		 *
 		 * @param rewindTime The amount of time (in ms) to rewind by.
 		 */
@@ -579,7 +649,7 @@ public class AudioPlayer implements IAudioProvider {
 		}
 
 		/**
-		 * This rewinds the track to a specified time.
+		 * Rewinds the track to the given time.
 		 *
 		 * @param time The time (in ms).
 		 */
@@ -593,7 +663,7 @@ public class AudioPlayer implements IAudioProvider {
 		}
 
 		/**
-		 * This fast forwards the track by the specified amount of time.
+		 * Fast forwards the track by the given amount of time.
 		 *
 		 * @param fastForwardTime The amount of time (in ms) to fast forward by.
 		 */
@@ -602,7 +672,7 @@ public class AudioPlayer implements IAudioProvider {
 		}
 
 		/**
-		 * This tries to fast forward the track to a specified time.
+		 * Fast forwards the track to the given time.
 		 *
 		 * @param time The time (in ms).
 		 */

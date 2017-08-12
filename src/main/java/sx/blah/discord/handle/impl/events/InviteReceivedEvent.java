@@ -22,7 +22,7 @@ import sx.blah.discord.handle.obj.IInvite;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
- * This event is dispatched when a message the bot receives includes an invite link.
+ * Dispatched when a message the bot receives includes an invite link.
  *
  * @deprecated This event is marked for removal in future versions. Parsing invites on every received message is a
  * potentially very expensive operation. It also has very limited functionality for bot accounts. If it is necessary that

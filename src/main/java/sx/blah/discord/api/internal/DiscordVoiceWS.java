@@ -47,17 +47,44 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Facilitates a websocket connection between the client and Discord's Voice Gateway.
+ */
 public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject {
 
+	/**
+	 * The websocket client used to communicate with the gateway.
+	 */
 	private WebSocketClient wsClient;
+	/**
+	 * The executor on which heartbeat information is handled.
+	 */
 	private ScheduledExecutorService heartbeat = Executors.newSingleThreadScheduledExecutor(DiscordUtils.createDaemonThreadFactory("Discord Voice WS Heartbeat"));
+	/**
+	 * The socket on which voice data is transmitted and received.
+	 */
 	private UDPVoiceSocket voiceSocket = new UDPVoiceSocket(this);
 
+	/**
+	 * The shard associated with this gateway connection.
+	 */
 	private final ShardImpl shard;
+	/**
+	 * The websocket host URL.
+	 */
 	private final String endpoint;
+	/**
+	 * The unique authentication token used to handshake with the voice gateway.
+	 */
 	private final String token;
+	/**
+	 * The guild associated with this gateway connection.
+	 */
 	private final IGuild guild;
 
+	/**
+	 * A map associated unique ssrc numbers with cached users. This is used to identify who is speaking in a voice channel.
+	 */
 	final Map<Integer, IUser> users = new ConcurrentHashMap<>();
 
 	DiscordVoiceWS(IShard shard, VoiceUpdateResponse event) {
@@ -67,6 +94,9 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 		this.guild = shard.getGuildByID(Long.parseUnsignedLong(event.guild_id));
 	}
 
+	/**
+	 * Opens the initial websocket connection with the gateway.
+	 */
 	void connect() {
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
@@ -132,10 +162,21 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 		disconnect(VoiceDisconnectedEvent.Reason.ABNORMAL_CLOSE); // TODO: Reconnect?
 	}
 
+	/**
+	 * Schedules heartbeats on the {@link #heartbeat} executor.
+	 *
+	 * @param interval The interval at which heartbeats should be sent.
+	 */
 	private void beginHeartbeat(int interval) {
 		heartbeat.scheduleAtFixedRate(() -> send(VoiceOps.HEARTBEAT, System.currentTimeMillis()), 0, interval, TimeUnit.MILLISECONDS);
 	}
 
+	/**
+	 * Closes the websocket connection and removes this voice websocket instance from the {@link #shard}'s list of
+	 * connections. A {@link VoiceDisconnectedEvent} is dispatched.
+	 *
+	 * @param reason The reason to use in the dispatched {@link VoiceDisconnectedEvent}.
+	 */
 	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
 		try {
 			shard.getClient().getDispatcher().dispatch(new VoiceDisconnectedEvent(getGuild(), reason));
@@ -152,10 +193,21 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket Disconnected.");
 	}
 
+	/**
+	 * Sends a message on the websocket.
+	 *
+	 * @param op The opcode for the message.
+	 * @param payload The data payload to use for {@link GatewayPayload#d}.
+	 */
 	public void send(VoiceOps op, Object payload) {
 		send(new GatewayPayload(op, payload));
 	}
 
+	/**
+	 * Sends a message on the websocket.
+	 *
+	 * @param payload The message to serialize and send.
+	 */
 	private void send(GatewayPayload payload) {
 		try {
 			send(DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(payload));
@@ -164,6 +216,11 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 		}
 	}
 
+	/**
+	 * Sends a message on the websocket.
+	 *
+	 * @param message The message to send.
+	 */
 	public void send(String message) {
 		if (getSession() != null && getSession().isOpen()) {
 			getSession().getRemote().sendStringByFuture(message);
@@ -172,6 +229,11 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 		}
 	}
 
+	/**
+	 * Gets the guild associated with this connection. Each {@link IGuild} should only have one associated{@link DiscordVoiceWS}.
+	 *
+	 * @return The associated guild.
+	 */
 	IGuild getGuild() {
 		return this.guild;
 	}

@@ -20,16 +20,20 @@ package sx.blah.discord.api.events;
 import sx.blah.discord.api.IDiscordClient;
 
 /**
- * Used to represent an event.
+ * The superclass of all events fired by a {@link EventDispatcher}. These can be events received from
+ * Discord, events sent by Discord4J, or custom events.
  */
 public abstract class Event {
 
+	/**
+	 * The client that the {@link EventDispatcher} this event was fired from is associated with.
+	 */
 	protected IDiscordClient client;
 
 	/**
-	 * Gets the client instance this event was fired from.
+	 * Gets the client associated with this event's {@link EventDispatcher}.
 	 *
-	 * @return The client instance.
+	 * @return The associated client.
 	 */
 	public IDiscordClient getClient() {
 		return client;

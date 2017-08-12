@@ -22,11 +22,21 @@ import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * Fired when a reaction gets removed from a message.
+ * Dispatched when a reaction gets removed from a message.
  */
 public class ReactionRemoveEvent extends ReactionEvent {
-	
+
 	public ReactionRemoveEvent(IMessage message, IReaction reaction, IUser user) {
 		super(message, reaction, user);
+	}
+
+	/**
+	 * Gets the user who removed the reaction.
+	 *
+	 * @return The user who removed the reaction.
+	 */
+	@Override
+	public IUser getUser() {
+		return super.getUser();
 	}
 }

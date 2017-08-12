@@ -20,13 +20,13 @@ package sx.blah.discord.api.internal;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
 import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
-import sx.blah.discord.handle.impl.obj.PresenceImpl;
+import sx.blah.discord.handle.impl.obj.Presence;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
@@ -36,25 +36,52 @@ import sx.blah.discord.util.cache.Cache;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Default implementation of {@link IShard}.
+ */
 public class ShardImpl implements IShard {
 
+	/**
+	 * The gateway connection for this shard.
+	 */
 	public volatile DiscordWS ws;
 
+	/**
+	 * The gateway endpoint obtained for this shard.
+	 */
 	private final String gateway;
+	/**
+	 * The shard info.
+	 * @see <a href=https://discordapp.com/developers/docs/topics/gateway#sharding>Sharding</a>
+	 */
 	private final int[] info;
 
+	/**
+	 * The client that manages this shard.
+	 */
 	private final DiscordClientImpl client;
+	/**
+	 * All of the guilds this shard manages.
+	 */
 	final Cache<IGuild> guildCache;
+	/**
+	 * The private channels on this shard. Only populated if this is shard 0.
+	 */
 	final Cache<IPrivateChannel> privateChannels;
+	/**
+	 * The voice gateways for guilds on this shard.
+	 */
 	public final Cache<DiscordVoiceWS> voiceWebSockets;
 
-	ShardImpl(IDiscordClient client, String gateway, int[] info) {
+	private final PresenceUpdateRequest identifyPresence;
+
+	ShardImpl(IDiscordClient client, String gateway, int[] info, PresenceUpdateRequest identifyPresence) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
 		this.info = info;
+		this.identifyPresence = identifyPresence;
 		this.guildCache = new Cache<>((DiscordClientImpl) client, IGuild.class);
 		this.privateChannels = new Cache<>((DiscordClientImpl) client, IPrivateChannel.class);
 		this.voiceWebSockets = new Cache<>((DiscordClientImpl) client, DiscordVoiceWS.class);
@@ -73,7 +100,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public void login() {
 		Discord4J.LOGGER.trace(LogMarkers.API, "Shard logging in.");
-		this.ws = new DiscordWS(this, gateway, client.maxMissedPings);
+		this.ws = new DiscordWS(this, gateway, client.maxMissedPings, identifyPresence);
 		this.ws.connect();
 	}
 
@@ -82,13 +109,12 @@ public class ShardImpl implements IShard {
 		checkLoggedIn("logout");
 
 		Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
-		getConnectedVoiceChannels().forEach(channel -> {
-			RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
+		getConnectedVoiceChannels().forEach(channel ->
+			RequestBuffer.request(() -> {
 				channel.leave();
 				return channel;
-			});
-			request.get();
-		});
+			}).get()
+		);
 		getClient().getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, this));
 		ws.shutdown();
 	}
@@ -136,7 +162,22 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void streaming(String playingText, String streamingUrl) {
-		updatePresence(StatusType.STREAMING, playingText, streamingUrl);
+		updatePresence(StatusType.ONLINE, playingText, streamingUrl);
+	}
+
+	@Override
+	public void dnd(String playingText) {
+		updatePresence(StatusType.DND, playingText);
+	}
+
+	@Override
+	public void dnd() {
+		dnd(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+	}
+
+	@Override
+	public void invisible() {
+		updatePresence(StatusType.INVISIBLE, null);
 	}
 
 	@Override
@@ -173,19 +214,16 @@ public class ShardImpl implements IShard {
 			}
 		}
 
-		final boolean isIdle = status == StatusType.IDLE; // temporary until v6
 		IUser ourUser = getClient().getOurUser();
-
 		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new PresenceImpl(Optional.ofNullable(playing), Optional.ofNullable(streamUrl), status);
+		IPresence newPresence = new Presence(playing, streamUrl, status);
 
 		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
-		ws.send(GatewayOps.STATUS_UPDATE,
-				new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, ourUser.getPresence()));
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, playing, streamUrl));
 	}
 
 	@Override
@@ -312,11 +350,11 @@ public class ShardImpl implements IShard {
 		if (channel != null)
 			return channel;
 
-		PrivateChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
+		ChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
 				DiscordEndpoints.USERS+getClient().getOurUser().getStringID()+"/channels",
 				new PrivateChannelCreateRequest(user.getStringID()),
-				PrivateChannelObject.class);
-		channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
+				ChannelObject.class);
+		channel = (IPrivateChannel) DiscordUtils.getChannelFromJSON(this, null, pmChannel);
 		privateChannels.put(channel);
 		return channel;
 	}

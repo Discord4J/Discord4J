@@ -15,45 +15,13 @@
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sx.blah.discord.api.internal.json.responses;
+package sx.blah.discord.api.internal.json.objects.audit;
 
-/**
- * A response received when changing account info
- */
-public class AccountInfoChangeResponse {
+import sx.blah.discord.api.internal.json.objects.UserObject;
+import sx.blah.discord.api.internal.json.objects.WebhookObject;
 
-	/**
-	 * The new username
-	 */
-	public String username;
-
-	/**
-	 * Whether the user has been verified
-	 */
-	public boolean verified;
-
-	/**
-	 * The user's id
-	 */
-	public String id;
-
-	/**
-	 * The new login token
-	 */
-	public String token;
-
-	/**
-	 * The new avatar id
-	 */
-	public String avatar;
-
-	/**
-	 * The user's new discriminator
-	 */
-	public String discriminator;
-
-	/**
-	 * The user's new email
-	 */
-	public String email;
+public class AuditLogObject {
+	public WebhookObject[] webhooks;
+	public UserObject[] users;
+	public AuditLogEntryObject[] audit_log_entries;
 }

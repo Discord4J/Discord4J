@@ -31,19 +31,26 @@ import sx.blah.discord.util.cache.Cache;
 import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The default implementation of {@link IVoiceChannel}.
+ */
 public class VoiceChannel extends Channel implements IVoiceChannel {
 
+	/**
+	 * The maximum number of users allowed in the voice channel at once.
+	 */
 	protected volatile int userLimit = 0;
+	/**
+	 * The bitrate of the voice channel.
+	 */
 	protected volatile int bitrate = 0;
 
-	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
-						int userLimit, int bitrate, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
-		super(client, name, id, guild, topic, position, roleOverrides, userOverrides);
+	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW,
+						int userLimit, int bitrate, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
+		super(client, name, id, guild, topic, position, isNSFW, roleOverrides, userOverrides);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
 	}
@@ -62,18 +69,18 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	/**
-	 * Sets the CACHED user limit.
+	 * Sets the CACHED user limit of the voice channel.
 	 *
-	 * @param limit The new user limit.
+	 * @param limit The user limit.
 	 */
 	public void setUserLimit(int limit) {
 		this.userLimit = limit;
 	}
 
 	/**
-	 * Sets the CACHED bitrate.
+	 * Sets the CACHED bitrate of the voice channel.
 	 *
-	 * @param bitrate The new bitrate.
+	 * @param bitrate The bitrate.
 	 */
 	public void setBitrate(int bitrate) { this.bitrate = bitrate; }
 
@@ -247,22 +254,22 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public int getMaxInternalCacheCount() {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int getInternalCacheCount() {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public IMessage getMessageByID(long messageID) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String getTopic() {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -302,7 +309,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public synchronized boolean getTypingStatus() {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -317,7 +324,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public List<IMessage> getPinnedMessages() {
-		return new ArrayList<>();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -357,7 +364,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, guild, topic, position, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
+		return new VoiceChannel(client, name, id, guild, topic, position, isNSFW, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
 	}
 
 	@Override
@@ -378,10 +385,5 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public boolean isDeleted() {
 		return getGuild().getVoiceChannelByID(getLongID()) != this;
-	}
-
-	@Override
-	public boolean isNSFW() {
-		return false;
 	}
 }
