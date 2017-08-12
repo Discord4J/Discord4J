@@ -20,7 +20,7 @@ package sx.blah.discord.util;
 import sx.blah.discord.handle.obj.IIDLinkedObject;
 
 /**
- * This represents an object which can wrap objects which themselves don't have an id but can be associated with one.
+ * An object which doesn't have an ID but can be associated with one in a limited context.
  */
 public class IDLinkedObjectWrapper<T> implements IIDLinkedObject {
 
@@ -32,18 +32,15 @@ public class IDLinkedObjectWrapper<T> implements IIDLinkedObject {
 		this.obj = obj;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public long getLongID() {
 		return id;
 	}
 
 	/**
-	 * Gets the object associated with this wrapper.
+	 * Gets the object stored by the wrapper.
 	 *
-	 * @return The object.
+	 * @return The object stored by the wrapper.
 	 */
 	public T getObject() {
 		return obj;

@@ -25,35 +25,35 @@ import sx.blah.discord.handle.impl.obj.ReactionEmoji;
 import java.util.List;
 
 /**
- * Represents a single emoji with the users that reacted.
+ * A reaction on a {@link IMessage}.
  */
 public interface IReaction {
 
 	/**
-	 * Gets the message for this reaction.
+	 * Gets the message the reaction is on.
 	 *
-	 * @return The message object
+	 * @return The message the reaction is on.
 	 */
 	IMessage getMessage();
 
 	/**
-	 * The number of people that reacted.
+	 * Gets the number of people who reacted.
 	 *
-	 * @return The number of people that reacted
+	 * @return The number of people who reacted.
 	 */
 	int getCount();
 
 	/**
-	 * Gets a the emoji of this reaction.
+	 * Gets a the emoji of the reaction.
 	 *
-	 * @return The emoji of this reaction.
+	 * @return The emoji of the reaction.
 	 */
 	ReactionEmoji getEmoji();
 
 	/**
-	 * Whether or not this reaction is a custom emoji.
+	 * Gets whether the emoji of the reaction is a custom guild emoji.
 	 *
-	 * @return If this is a custom emoji
+	 * @return Whether the emoji of the reaction is a custom guild emoji.
 	 *
 	 * @deprecated Use {@link #getEmoji()}.{@link ReactionEmoji#isUnicode() isUnicode()} instead.
 	 */
@@ -61,21 +61,21 @@ public interface IReaction {
 	boolean isCustomEmoji();
 
 	/**
-	 * The IEmoji object if this is a custom emoji reaction, or null otherwise
+	 * Gets the custom emoji of the reaction.
 	 *
-	 * @return The IEmoji object or null if it's not a custom emoji
+	 * @return The custom emoji of the reaction (or null if the emoji is not a custom emoji).
 	 *
 	 * @deprecated Use {@link #getEmoji()} instead. This method will return incorrect information when the emoji on this
 	 * reaction is an external emoji that the bot cannot see. The only information that can be reliably returned in that
-	 * situation is the name and ID of the emoji.
+	 * case is the name and ID of the emoji.
 	 */
 	@Deprecated
 	IEmoji getCustomEmoji();
 
 	/**
-	 * The emoji-java Emoji object if this is a Unicode emoji reaction, or null otherwise
+	 * Gets the unicode emoji of the reaction.
 	 *
-	 * @return The Emoji object or null if it's not a Unicode emoji
+	 * @return The unicode emoji of the reaction (or null if the emoji is not a unicode emoji).
 	 *
 	 * @deprecated Use {@link #getEmoji()}.{@link ReactionEmoji#getName() getName()} instead.
 	 */
@@ -83,46 +83,47 @@ public interface IReaction {
 	Emoji getUnicodeEmoji();
 
 	/**
-	 * Gets the users that reacted.
+	 * Gets the users who reacted with the same emoji.
 	 *
-	 * @return A list of users that reacted
+	 * @return A list of users who reacted with the same emoji.
 	 */
 	List<IUser> getUsers();
 
 	/**
-	 * Returns true if the given user reacted to the emoji.
+	 * Gets whether the given user reacted with the same emoji.
 	 *
-	 * @param user The user
-	 * @return True if the user reacted, false otherwise
+	 * @param user The user.
+	 * @return Whether the given user reacted with the same emoji.
 	 */
 	boolean getUserReacted(IUser user);
 
 	/**
-	 * Returns true if this client's user reacted to the emoji.
+	 * Gets whether the bot user reacted with the same emoji.
 	 *
-	 * @return True if we reacted, false otherwise
-	 *
+	 * @return Whether the bot user reacted with the same emoji.
 	 * @deprecated Use {@link #getUserReacted(IUser)} with {@link IDiscordClient#getOurUser()} instead.
 	 */
 	@Deprecated
 	boolean getClientReacted();
 
 	/**
-	 * Gets the {@link IDiscordClient} instance this object belongs to.
+	 * Gets the client the object belongs to.
 	 *
-	 * @return The client instance.
+	 * @return The client the object belongs to.
 	 */
 	IDiscordClient getClient();
 
 	/**
-	 * Get the {@link IShard} instance this object belongs to.
+	 * Gets the shard the object belongs to.
+	 *
+	 * @return The shard the object belongs to.
 	 */
 	IShard getShard();
 
 	/**
-	 * Creates a new instance of this object with all the current properties.
+	 * Creates a new instance of the reaction with all the current properties.
 	 *
-	 * @return The copied instance of this object.
+	 * @return The copied instance of the reaction.
 	 */
 	IReaction copy();
 }

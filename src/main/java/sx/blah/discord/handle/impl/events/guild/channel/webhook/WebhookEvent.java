@@ -21,21 +21,21 @@ import sx.blah.discord.handle.impl.events.guild.channel.ChannelEvent;
 import sx.blah.discord.handle.obj.IWebhook;
 
 /**
- * This represents a generic webhook event.
+ * A generic webhook-related event.
  */
 public abstract class WebhookEvent extends ChannelEvent {
-	
+
 	private final IWebhook webhook;
-	
+
 	public WebhookEvent(IWebhook webhook) {
 		super(webhook.getChannel());
 		this.webhook = webhook;
 	}
-	
+
 	/**
-	 * This gets the webhook involved in this event.
+	 * Gets the webhook involved in the event.
 	 *
-	 * @return The webhook.
+	 * @return The webhook involved.
 	 */
 	public IWebhook getWebhook() {
 		return webhook;

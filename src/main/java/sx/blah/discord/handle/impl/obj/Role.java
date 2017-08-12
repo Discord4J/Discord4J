@@ -38,50 +38,53 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
 
+/**
+ * The default implementation of {@link IRole}.
+ */
 public class Role implements IRole {
 
 	/**
-	 * Where the role should be displayed. -1 is @everyone, it is always last
+	 * The position of the role.
 	 */
 	protected volatile int position;
 
 	/**
-	 * The permissions the role has.
+	 * The permissions granted to the role.
 	 */
 	protected volatile EnumSet<Permissions> permissions;
 
 	/**
-	 * The role name
+	 * The name of the role.
 	 */
 	protected volatile String name;
 
 	/**
-	 * Whether this role is managed via plugins like twitch
+	 * Whether the role is managed by an external service.
 	 */
 	protected volatile boolean managed;
 
 	/**
-	 * The role id
+	 * The unique snowflake ID of the role.
 	 */
 	protected volatile long id;
 
 	/**
-	 * Whether to display this role separately from others
+	 * Whether the role is hoisted.
 	 */
 	protected volatile boolean hoist;
 
 	/**
-	 * The DECIMAL format for the color
+	 * The color of the role.
 	 */
 	protected volatile Color color;
 
 	/**
-	 * Whether you can @mention this role.
+	 * Whether the role is mentionable.
 	 */
 	protected volatile boolean mentionable;
 
 	/**
-	 * The guild this role belongs to
+	 * The parent guild of the role.
 	 */
 	protected volatile IGuild guild;
 
@@ -117,9 +120,9 @@ public class Role implements IRole {
 	}
 
 	/**
-	 * Sets the CACHED enabled permissions.
+	 * Sets the CACHED permissions by the raw permissions number.
 	 *
-	 * @param permissions The permissions number.
+	 * @param permissions The raw permissions number.
 	 */
 	public void setPermissions(int permissions) {
 		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
@@ -133,7 +136,7 @@ public class Role implements IRole {
 	/**
 	 * Sets the CACHED role name.
 	 *
-	 * @param name The name.
+	 * @param name The role name.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -155,9 +158,9 @@ public class Role implements IRole {
 	}
 
 	/**
-	 * Sets whether this role is hoisted in the CACHE.
+	 * Sets the CACHED hoist value.
 	 *
-	 * @param hoist True if hoisted, false if otherwise.
+	 * @param hoist The hoist value.
 	 */
 	public void setHoist(boolean hoist) {
 		this.hoist = hoist;
@@ -171,7 +174,7 @@ public class Role implements IRole {
 	/**
 	 * Sets the CACHED role color.
 	 *
-	 * @param color The color decimal number.
+	 * @param color The role color.
 	 */
 	public void setColor(int color) {
 		this.color = new Color(color);
@@ -183,9 +186,9 @@ public class Role implements IRole {
 	}
 
 	/**
-	 * Sets whether this role is mentionable in the CACHE.
+	 * Sets the CACHED mentionable value.
 	 *
-	 * @param mentionable True if mentionable, false if otherwise.
+	 * @param mentionable The mentionable value.
 	 */
 	public void setMentionable(boolean mentionable) {
 		this.mentionable = mentionable;
@@ -196,6 +199,11 @@ public class Role implements IRole {
 		return guild;
 	}
 
+	/**
+	 * Sends a request to edit the role.
+	 *
+	 * @param request The request object describing the changes to make.
+	 */
 	private void edit(RoleEditRequest request) {
 		PermissionUtils.requireHierarchicalPermissions(guild, getClient().getOurUser(), Collections.singletonList(this), Permissions.MANAGE_ROLES);
 

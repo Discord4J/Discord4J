@@ -4,17 +4,26 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * Represents a banned user from a guild, with a nullable reason.
+ * A ban entry in a guild.
  */
 public class Ban {
 
 	/**
-	 * The maximum reason length. Also applies to kicks.
+	 * The maximum length of a ban or kick reason.
 	 */
 	public static final int MAX_REASON_LENGTH = 512;
 
+	/**
+	 * The guild the ban is in.
+	 */
 	private final IGuild guild;
+	/**
+	 * The user who is banned.
+	 */
 	private final IUser user;
+	/**
+	 * The nullable reason for the ban.
+	 */
 	private final String reason;
 
 	public Ban(IGuild guild, IUser user, String reason) {
@@ -24,27 +33,27 @@ public class Ban {
 	}
 
 	/**
-	 * Returns the reason for this ban. May be null to signify no reason provided.
+	 * Gets the nullable reason for the ban.
 	 *
-	 * @return The reason, or null if there isn't one
+	 * @return The nullable reason for the ban.
 	 */
 	public String getReason() {
 		return reason;
 	}
 
 	/**
-	 * Returns the user banned.
+	 * Gets the user who is banned.
 	 *
-	 * @return The banned user
+	 * @return The user who is banned.
 	 */
 	public IUser getUser() {
 		return user;
 	}
 
 	/**
-	 * Returns the guild the user was banned from.
+	 * Gets the guild the ban is in.
 	 *
-	 * @return The guild the user was banned from
+	 * @return The guild the ban is in.
 	 */
 	public IGuild getGuild() {
 		return guild;

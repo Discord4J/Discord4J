@@ -35,7 +35,7 @@
 package sx.blah.discord.api.internal;
 
 /**
- * This enum represents gateway op codes.
+ * Represents OP codes sent on the main gateway. The {@link #ordinal()} of these objects is the op code sent to Discord.
  */
 public enum GatewayOps {
 	/**
@@ -91,6 +91,12 @@ public enum GatewayOps {
 	 */
 	UNKNOWN;
 
+	/**
+	 * Gets a GatewayOps from an opcode or {@link #UNKNOWN} if an unknown code is passed.
+	 *
+	 * @param opcode The integer opcode.
+	 * @return The appropriate GatewayOps or {@link #UNKNOWN}.
+	 */
 	public static GatewayOps get(int opcode) {
 		if (opcode >= values().length) {
 			return UNKNOWN;

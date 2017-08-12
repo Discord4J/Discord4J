@@ -21,47 +21,51 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This class centralizes all audio handling.
+ * Manages the front-facing portion of audio sending and receiving for a guild.
  */
 public interface IAudioManager {
 
 	/**
-	 * Sets the audio provider.
+	 * Sets the audio provider from which audio will be pulled and sent to Discord.
 	 *
-	 * @param provider The audio provider.
+	 * @param provider The audio provider from which audio will be pulled and sent to Discord.
 	 */
 	void setAudioProvider(IAudioProvider provider);
 
 	/**
 	 * Gets the current audio provider.
 	 *
-	 * @return The audio provider.
+	 * @return The current audio provider.
 	 */
 	IAudioProvider getAudioProvider();
 
 	/**
-	 * Sets the audio processor.
+	 * Sets the audio processor which processes/manipulates audio data before it is sent to Discord.
 	 *
-	 * @param processor The audio processor.
+	 * @param processor The audio processor which processes/manipulates audio data before it is sent to Discord.
 	 */
 	void setAudioProcessor(IAudioProcessor processor);
 
 	/**
 	 * Gets the current audio processor.
 	 *
-	 * @return The audio processor.
+	 * @return The current audio processor.
 	 */
 	IAudioProcessor getAudioProcessor();
 
 	/**
-	 * This subscribes an {@link IAudioReceiver} to receive audio from all sources regardless of user.
+	 * Subscribes an {@link IAudioReceiver} to receive audio from all sources regardless of user.
+	 * The {@link IAudioReceiver#receive(byte[], IUser, char, int)} method of every receiver is called every 20ms that
+	 * a user is speaking.
 	 *
 	 * @param receiver The receiver to subscribe.
 	 */
 	void subscribeReceiver(IAudioReceiver receiver);
 
 	/**
-	 * This subscribes an {@link IAudioReceiver} to receive audio from a specific user specifically.
+	 * Subscribes an {@link IAudioReceiver} to receive audio from a specific user.
+	 * The {@link IAudioReceiver#receive(byte[], IUser, char, int)} method of every receiver is called every 20ms that
+	 * the user is speaking.
 	 *
 	 * @param receiver The receiver to subscribe.
 	 * @param user The user to receive audio from.
@@ -69,16 +73,17 @@ public interface IAudioManager {
 	void subscribeReceiver(IAudioReceiver receiver, IUser user);
 
 	/**
-	 * This unsubscribes all copies of this {@link IAudioReceiver} instance from receiving audio.
+	 * Removes the given receiver instance from the list of subscribed receivers. This affects both general and user
+	 * receivers.
 	 *
 	 * @param receiver The receiver to unsubscribe.
 	 */
 	void unsubscribeReceiver(IAudioReceiver receiver);
 
 	/**
-	 * Gets the guild this AudioManager instance belongs to.
+	 * Gets the parent guild of the audio manager.
 	 *
-	 * @return The guild.
+	 * @return The parent guild of the audio manager.
 	 */
 	IGuild getGuild();
 }

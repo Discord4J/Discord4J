@@ -18,12 +18,12 @@
 package sx.blah.discord.api.internal.json.responses;
 
 /**
- * The response received when obtaining a websocket url
+ * Received when requesting the websocket URL.
  */
 public class GatewayResponse {
 
 	/**
-	 * The url pointing to the websocket
+	 * The URL pointing to the websocket.
 	 */
 	public String url;
 }

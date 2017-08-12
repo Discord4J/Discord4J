@@ -60,10 +60,25 @@ import java.util.stream.Collectors;
 
 import static sx.blah.discord.api.internal.DiscordUtils.MAPPER;
 
+/**
+ * Handles {@link GatewayOps#DISPATCH} payloads on the Gateway.
+ */
 class DispatchHandler {
+	/**
+	 * The associated websocket connection.
+	 */
 	private DiscordWS ws;
+	/**
+	 * The associated shard.
+	 */
 	private ShardImpl shard;
+	/**
+	 * The associated client.
+	 */
 	private DiscordClientImpl client;
+	/**
+	 * The thread on which every payload is handled.
+	 */
 	private final ExecutorService dispatchExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("Dispatch Handler"));
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
@@ -72,6 +87,11 @@ class DispatchHandler {
 		this.client = (DiscordClientImpl) shard.getClient();
 	}
 
+	/**
+	 * Deserializes the given payload and passes it to the appropriate method depending on the event name.
+	 *
+	 * @param event The json payload.
+	 */
 	public void handle(final JsonNode event) {
 		dispatchExecutor.submit(() -> {
 			try {

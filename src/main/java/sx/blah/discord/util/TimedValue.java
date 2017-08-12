@@ -20,12 +20,19 @@ package sx.blah.discord.util;
 import java.util.function.Supplier;
 
 /**
- * This is used to ensure a value is accurately and lazily updated.
+ * A value that can be lazily updated after a set time.
  *
- * @param <T> The value type this represents.
+ * @param <T> The type of the object to be initialized.
  */
 public class TimedValue<T> extends Lazy<T> {
+
+	/**
+	 * The amount of time, in milliseconds, before the value should be updated.
+	 */
 	private final long timeToInvalidate;
+	/**
+	 * The last time the value was updated.
+	 */
 	private long time;
 
 	public TimedValue(long timeToInvalidate, Supplier<T> supplier) {

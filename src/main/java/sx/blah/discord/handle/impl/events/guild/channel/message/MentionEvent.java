@@ -20,10 +20,12 @@ package sx.blah.discord.handle.impl.events.guild.channel.message;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
- * This event is dispatched whenever the bot is @mentioned.
+ * Dispatched when the bot is @mentioned in a message.
+ *
+ * <p>Note: When the bot is mentioned, this event is dispatched <b>as well as</b> {@link MessageReceivedEvent}.
  */
 public class MentionEvent extends MessageEvent {
-	
+
 	public MentionEvent(IMessage message) {
 		super(message);
 	}

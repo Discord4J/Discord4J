@@ -17,17 +17,38 @@
 
 package sx.blah.discord.api.internal.json.requests.voice;
 
+/**
+ * Sent to select the voice protocol on the voice gateway.
+ */
 public class SelectProtocolRequest {
+	/**
+	 * The protocol to use.
+	 */
 	private String protocol = "udp";
+	/**
+	 * Inner data object.
+	 */
 	private Data data;
 
 	public SelectProtocolRequest(String address, int port) {
 		this.data = new Data(address, port);
 	}
 
+	/**
+	 * Inner data object sent with the request
+	 */
 	private static class Data {
+		/**
+		 * The local IP address to send to.
+		 */
 		private String address;
+		/**
+		 * The port to send on.
+		 */
 		private int port;
+		/**
+		 * The encryption mode to use.
+		 */
 		private String mode = "xsalsa20_poly1305";
 
 		private Data(String address, int port) {

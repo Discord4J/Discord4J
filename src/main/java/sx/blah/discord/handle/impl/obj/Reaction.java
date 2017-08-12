@@ -29,10 +29,22 @@ import sx.blah.discord.handle.obj.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The default implementation of {@link IReaction}.
+ */
 public class Reaction implements IReaction {
 
+	/**
+	 * The message the reaction is on.
+	 */
 	private final IMessage message;
+	/**
+	 * The number of people who reacted.
+	 */
 	private final int count;
+	/**
+	 * The emoji of the reaction.
+	 */
 	private final ReactionEmoji emoji;
 
 	public Reaction(IMessage message, int count, ReactionEmoji emoji) {

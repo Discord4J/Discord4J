@@ -18,17 +18,17 @@
 package sx.blah.discord.api.internal.json.requests;
 
 /**
- * Represents a request to create a new channel.
+ * Sent to create a new channel.
  */
 public class ChannelCreateRequest {
 
 	/**
-	 * The name of the channel. Must be 2-100 characters long
+	 * The name of the channel. Must be 2-100 characters long.
 	 */
 	public String name;
 
 	/**
-	 * The type of channel, either "text" or "voice"
+	 * The type of channel, either "text" or "voice".
 	 */
 	public String type;
 

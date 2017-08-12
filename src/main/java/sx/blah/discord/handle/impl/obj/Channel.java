@@ -47,30 +47,33 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * The default implementation of {@link IChannel}.
+ */
 public class Channel implements IChannel {
 
 	/**
-	 * This represents the amount of messages to fetch from discord every time the index goes out of bounds.
+	 * The number of messages to fetch from Discord per message history request.
 	 */
 	public static final int MESSAGE_CHUNK_COUNT = 100; //100 is the max amount discord lets you retrieve at one time
 
 	/**
-	 * User-friendly channel name (e.g. "general")
+	 * The name of the channel.
 	 */
 	protected volatile String name;
 
 	/**
-	 * Channel ID.
+	 * The unique snowflake ID of the channel.
 	 */
 	protected final long id;
 
 	/**
-	 * Messages that have been sent into this channel
+	 * The cached messages that have been sent in the channel.
 	 */
 	public final Cache<IMessage> messages;
 
 	/**
-	 * The guild this channel belongs to.
+	 * The parent guild of the channel.
 	 */
 	protected final IGuild guild;
 
@@ -80,7 +83,7 @@ public class Channel implements IChannel {
 	protected volatile String topic;
 
 	/**
-	 * Whether the bot should send out a typing status
+	 * Whether the bot is "typing" in the channel.
 	 */
 	private AtomicBoolean isTyping = new AtomicBoolean(false);
 
@@ -90,27 +93,27 @@ public class Channel implements IChannel {
 	protected static final Timer typingTimer = new Timer("Typing Status Timer", true);
 
 	/**
-	 * 10 seconds, the time it takes for one typing status to "wear off".
+	 * The period of time, in seconds, before another typing update must be sent to maintain typing status.
 	 */
 	protected static final long TIME_FOR_TYPE_STATUS = 10000;
 
 	/**
-	 * The position of this channel in the channel list.
+	 * The position of the channel in the channel list.
 	 */
 	protected volatile int position;
 
 	/**
-	 * The permission overrides for users (key = user id).
+	 * The permission overrides for users.
 	 */
 	public final Cache<PermissionOverride> userOverrides;
 
 	/**
-	 * The permission overrides for roles (key = role id).
+	 * The permission overrides for roles.
 	 */
 	public final Cache<PermissionOverride> roleOverrides;
 
 	/**
-	 * The webhooks for this channel.
+	 * The webhooks for the channel.
 	 */
 	protected final Cache<IWebhook> webhooks;
 
@@ -120,7 +123,7 @@ public class Channel implements IChannel {
 	protected boolean isNSFW;
 
 	/**
-	 * The client that created this object.
+	 * The client that owns the channel object.
 	 */
 	protected final DiscordClientImpl client;
 
@@ -147,7 +150,7 @@ public class Channel implements IChannel {
 	/**
 	 * Sets the CACHED name of the channel.
 	 *
-	 * @param name The name.
+	 * @param name The name of the channel.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -167,7 +170,7 @@ public class Channel implements IChannel {
 	/**
 	 * Adds a message to the internal message CACHE.
 	 *
-	 * @param message the message.
+	 * @param message The message to add.
 	 */
 	public void addToCache(IMessage message) {
 		if (getMaxInternalCacheCount() < 0) {
@@ -181,6 +184,13 @@ public class Channel implements IChannel {
 		}
 	}
 
+	/**
+	 * Makes a request to Discord for message history.
+	 *
+	 * @param before The ID of the message to get message history before.
+	 * @param limit The maximum number of messages to request.
+	 * @return The received messages.
+	 */
 	private IMessage[] getHistory(long before, int limit) {
 		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES);
 
@@ -408,7 +418,7 @@ public class Channel implements IChannel {
 	/**
 	 * Sets the CACHED topic for the channel.
 	 *
-	 * @param topic The new channel topic
+	 * @param topic The channel topic.
 	 */
 	public void setTopic(String topic) {
 		this.topic = topic;
@@ -606,6 +616,11 @@ public class Channel implements IChannel {
 		return isTyping.get();
 	}
 
+	/**
+	 * Sends a request to edit the channel.
+	 *
+	 * @param request The request object describing the changes to make.
+	 */
 	private void edit(ChannelEditRequest request) {
 		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS);
 
@@ -753,6 +768,14 @@ public class Channel implements IChannel {
 		overridePermissions("member", user.getStringID(), toAdd, toRemove);
 	}
 
+	/**
+	 * Makes a request to Discord to override permissions for a role or member.
+	 *
+	 * @param type The type of override to make. Either "role" or "member".
+	 * @param id The ID of the role or member to make the override for.
+	 * @param toAdd The permissions to explicitly allow.
+	 * @param toRemove The permissions to explicitly deny.
+	 */
 	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
 		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_PERMISSIONS);
 
@@ -882,6 +905,9 @@ public class Channel implements IChannel {
 		return webhook;
 	}
 
+	/**
+	 * Forcibly loads and caches all webhooks for the channel.
+	 */
 	public void loadWebhooks() {
 		try {
 			PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_WEBHOOKS);

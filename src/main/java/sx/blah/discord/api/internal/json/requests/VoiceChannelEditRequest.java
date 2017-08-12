@@ -17,6 +17,9 @@
 
 package sx.blah.discord.api.internal.json.requests;
 
+/**
+ * Sent to edit a voice channel's properties.
+ */
 public class VoiceChannelEditRequest {
 
 	/**

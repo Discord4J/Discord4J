@@ -17,11 +17,15 @@
 
 package sx.blah.discord.handle.impl.events;
 
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.Event;
 
 /**
- * This event is dispatched when all shards are ready to interact with the api.
+ * Dispatched when all shards have received all available guilds. This means that a
+ * {@link sx.blah.discord.handle.impl.events.shard.ShardReadyEvent} has been fired for each shard.
+ *
+ * @see IDiscordClient#isReady()
  */
 public class ReadyEvent extends Event {
-	
+
 }

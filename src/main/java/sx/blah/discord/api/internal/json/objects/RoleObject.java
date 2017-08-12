@@ -22,7 +22,7 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class RoleObject {
 	/**
-	 * The id of the role.
+	 * The ID of the role.
 	 */
 	public String id;
 	/**

@@ -20,7 +20,7 @@ package sx.blah.discord.api.events;
 import java.lang.annotation.*;
 
 /**
- * Represents a method that handles events
+ * Signifies a method that should be registered for invokation with an {@link EventDispatcher}.
  */
 @Documented
 @Target(ElementType.METHOD)

@@ -21,7 +21,16 @@ package sx.blah.discord.api.internal.json.objects;
  * Represents a json presence object.
  */
 public class PresenceObject {
+	/**
+	 * The user the presence belongs to.
+	 */
 	public UserObject user;
+	/**
+	 * The status type of the presence.
+	 */
 	public String status;
+	/**
+	 * The game of the presence.
+	 */
 	public GameObject game;
 }

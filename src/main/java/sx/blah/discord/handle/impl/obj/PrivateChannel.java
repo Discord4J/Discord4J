@@ -29,10 +29,13 @@ import sx.blah.discord.util.cache.LongMap;
 
 import java.util.*;
 
+/**
+ * The default implementation of {@link IPrivateChannel}.
+ */
 public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	/**
-	 * The recipient of this private channel.
+	 * The recipient user of the channel.
 	 */
 	protected final IUser recipient;
 

@@ -18,18 +18,18 @@
 package sx.blah.discord.modules;
 
 /**
- * This is used to configure the module behavior in Discord4J.
+ * Used to configure module behavior in Discord4J.
  */
 public class Configuration {
-	
+
 	/**
-	 * When this is true, modules are automatically enabled when loaded.
-	 * This is recommended because it automatically resolves dependencies.
+	 * Whether modules should be automatically enabled when loaded. This is recommended because it automatically
+	 * resolves dependencies.
 	 */
 	public static boolean AUTOMATICALLY_ENABLE_MODULES = true;
-	
+
 	/**
-	 * When this is true, modules are dynamically loaded from the modules directory.
+	 * Whether external modules located in the modules directory should be automatically loaded.
 	 */
 	public static boolean LOAD_EXTERNAL_MODULES = true;
 }

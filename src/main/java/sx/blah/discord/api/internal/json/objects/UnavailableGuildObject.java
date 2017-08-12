@@ -22,7 +22,7 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class UnavailableGuildObject {
 	/**
-	 * The id of the guild.
+	 * The ID of the guild.
 	 */
 	public String id;
 	/**

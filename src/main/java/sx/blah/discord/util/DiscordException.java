@@ -18,31 +18,24 @@
 package sx.blah.discord.util;
 
 /**
- * This represents an exception thrown when there is a miscellaneous error doing a discord operation.
+ * A miscellaneous exception thrown by Discord4J.
  */
 public class DiscordException extends RuntimeException {
 
 	private String message;
 
-	/**
-	 * @param message The error message
-	 */
 	public DiscordException(String message) {
 		super(message);
 		this.message = message;
 	}
 
-	/**
-	 * @param message The error message
-	 * @param cause The cause
-	 */
 	public DiscordException(String message, Throwable cause) {
 		super(message, cause);
 		this.message = message;
 	}
 
 	/**
-	 * This gets the error message sent by Discord.
+	 * Gets the error message.
 	 *
 	 * @return The error message.
 	 */

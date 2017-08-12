@@ -18,17 +18,17 @@
 package sx.blah.discord.api.internal.json.requests;
 
 /**
- * This represents a single object which composes the reorder roles operation array parameter.
+ * Sent in an array to reorder the roles of a guild.
  */
 public class ReorderRolesRequest {
 
 	/**
-	 * The id of the role.
+	 * The ID of the role.
 	 */
 	public String id;
 
 	/**
-	 * The new position of this role.
+	 * The new position of the role.
 	 */
 	public int position;
 

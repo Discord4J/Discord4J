@@ -23,10 +23,22 @@ import sx.blah.discord.handle.obj.StatusType;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The default implementation of {@link IPresence}.
+ */
 public class Presence implements IPresence {
 
+	/**
+	 * The nullable playing text of the presence.
+	 */
 	private final String playingText;
+	/**
+	 * The nullable streaming url of the presence.
+	 */
 	private final String streamingUrl;
+	/**
+	 * The type of status of the presence.
+	 */
 	private final StatusType status;
 
 	public Presence(String playingText, String streamingUrl, StatusType status) {

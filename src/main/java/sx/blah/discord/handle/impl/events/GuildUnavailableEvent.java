@@ -20,8 +20,7 @@ package sx.blah.discord.handle.impl.events;
 import sx.blah.discord.handle.obj.IGuild;
 
 /**
- * This event is dispatched when a guild becomes unavailable.
- * Note: this guild is removed from the guild list when this happens!
+ * Dispatched when a guild becomes unavailable.
  * @deprecated Use {@link sx.blah.discord.handle.impl.events.guild.GuildUnavailableEvent} instead.
  */
 @Deprecated

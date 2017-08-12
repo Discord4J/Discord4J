@@ -22,19 +22,19 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class VoiceStateObject {
 	/**
-	 * The guild id of the voice state.
+	 * The guild ID of the voice state.
 	 */
 	public String guild_id;
 	/**
-	 * The voice channel id of the voice state.
+	 * The voice channel ID of the voice state.
 	 */
 	public String channel_id;
 	/**
-	 * The user id with the state.
+	 * The user ID of the voice state.
 	 */
 	public String user_id;
 	/**
-	 * The session id of the voice state.
+	 * The session ID of the voice state.
 	 */
 	public String session_id;
 	/**

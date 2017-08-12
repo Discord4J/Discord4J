@@ -34,9 +34,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The default implementation of {@link IVoiceChannel}.
+ */
 public class VoiceChannel extends Channel implements IVoiceChannel {
 
+	/**
+	 * The maximum number of users allowed in the voice channel at once.
+	 */
 	protected volatile int userLimit = 0;
+	/**
+	 * The bitrate of the voice channel.
+	 */
 	protected volatile int bitrate = 0;
 
 	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW,
@@ -60,18 +69,18 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	/**
-	 * Sets the CACHED user limit.
+	 * Sets the CACHED user limit of the voice channel.
 	 *
-	 * @param limit The new user limit.
+	 * @param limit The user limit.
 	 */
 	public void setUserLimit(int limit) {
 		this.userLimit = limit;
 	}
 
 	/**
-	 * Sets the CACHED bitrate.
+	 * Sets the CACHED bitrate of the voice channel.
 	 *
-	 * @param bitrate The new bitrate.
+	 * @param bitrate The bitrate.
 	 */
 	public void setBitrate(int bitrate) { this.bitrate = bitrate; }
 

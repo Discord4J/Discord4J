@@ -18,71 +18,77 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * Represents a {@link sx.blah.discord.handle.impl.obj.User}'s voice state in a guild.
+ * A {@link IUser}'s voice state in a {@link IGuild}.
  */
 public interface IVoiceState extends IIDLinkedObject {
 
 	/**
-	 * Gets the guild for this voice state.
-	 * @return The guild.
+	 * Gets the guild of the voice state.
+	 *
+	 * @return The guild of the voice state.
 	 */
 	IGuild getGuild();
 
 	/**
-	 * Gets the voice channel for this voice state.
-	 * This is null if the user is not in a voice channel.
+	 * Gets the voice channel of the voice state.
 	 *
-	 * @return The voice channel.
+	 * @return The voice channel of the voice state (or null if the user is not in a voice channel).
 	 */
 	IVoiceChannel getChannel();
 
 	/**
-	 * Gets the user for this voice state.
-	 * @return The user.
+	 * Gets the user of the voice state.
+	 *
+	 * @return The user of the voice state.
 	 */
 	IUser getUser();
 
 	/**
-	 * Gets the session id for this voice state.
-	 * Note: Probably not useful to you.
-	 * @return The session id.
+	 * Gets the session ID of the voice state.
+	 *
+	 * @return The session ID of the voice state.
 	 */
 	String getSessionID();
 
 	/**
-	 * Whether the user represented by this voice state is deafened on the guild-level.
-	 * @return Guild-level deaf state.
+	 * Gets whether the user of the voice state is deafened on the guild.
+	 *
+	 * @return Whether the user of the voice state is deafened on the guild.
 	 */
 	boolean isDeafened();
 
 	/**
-	 * Whether the user represented by this voice state is muted on the guild-level.
-	 * @return Guild-level mute state.
+	 * Gets whether the user of the voice state is muted on the guild.
+	 *
+	 * @return Whether the user of the voice state is muted on the guild.
 	 */
 	boolean isMuted();
 
 	/**
-	 * Whether the user represented by this voice state has deafened themselves in their client.
-	 * @return Client-level deaf state.
+	 * Gets whether the user of the voice state is deafened on the client.
+	 *
+	 * @return Whether the user of the voice state is deafened on the client.
 	 */
 	boolean isSelfDeafened();
 
 	/**
-	 * Whether the user represented by this voice state has muted themselves in their client.
-	 * @return Client-level mute state.
+	 * Gets whether the user of the voice state is muted on the client.
+	 *
+	 * @return Whether the user of the voice state is muted on the client.
 	 */
 	boolean isSelfMuted();
 
 	/**
-	 * Whether the user represented by this voice state is muted by the bot user.
-	 * @return User suppressed state.
+	 * Gets whether the user of the voice state is muted by the bot user.
+	 *
+	 * @return Whether the user of the voice state is muted by the bot user.
 	 */
 	boolean isSuppressed();
 
 	/**
-	 * Gets the ID of the guild this relates to.
+	 * Gets the ID of the guild of the voice state.
 	 *
-	 * @return The guild id.
+	 * @return The ID of the guild of the voice state.
 	 */
 	@Override
 	default long getLongID() {

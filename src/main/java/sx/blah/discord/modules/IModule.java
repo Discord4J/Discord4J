@@ -22,54 +22,59 @@ import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.events.IListener;
 
 /**
- * This class represents a Discord4J "module", implement it to create a new Module. When enabled, modules are registered
- * as event listeners, so your module can use {@link EventSubscriber} or
+ * A Discord4J "module".
+ *
+ * <p>When enabled, modules are registered as event listeners, so your module can use {@link EventSubscriber} or
  * {@link IListener} to listen for events.
- * Deployment: The Module Loader will first look for an attribute called "Discord4J-ModuleClass" in a jar's manifest which
- * contains the fully qualified name of all IModule implementations, separated by semicolons ";". If it does not exist then it will default to
- * recursively searching through all the classes of the jar. It is recommended to use the jar attribute in order to reduce Loader overhead.
- * NOTE: This module must respect the enable() and disable() methods. And it <b>MUST</b> have a default constructor.
+ *
+ * <p>Modules <b>MUST</b> have a default constructor.
+ *
+ * @see sx.blah.discord.modules Information about module loading.
  */
 public interface IModule {
 
 	/**
-	 * This is called to enable the module. NOTE: A new instance of this class is created for each enable() call.
+	 * Called to enable the module. A new instance of the module is created for each call to this method.
 	 *
-	 * @param client The client this module instance is being enabled for.
-	 * @return Whether the module was successfully started, true if successful, false if otherwise.
+	 * @param client The client the module instance is being enabled for.
+	 * @return Whether the module was successfully enabled.
 	 */
 	boolean enable(IDiscordClient client);
 
 	/**
-	 * This is called to disable the module.
+	 * Called to disable the module.
+	 *
+	 * <p>It is important that the module implementation attempt to do any and all cleanup in this method in order for
+	 * the module to properly unload. The module loader can make no guarantees about the unloading of modules if they
+	 * do not properly implement this method.
 	 */
 	void disable();
 
 	/**
-	 * This should return the name of the module.
+	 * Gets the name of the module.
 	 *
 	 * @return The name of the module.
 	 */
 	String getName();
 
 	/**
-	 * This should return the author(s) of this module.
+	 * Gets the author(s) of the module.
 	 *
-	 * @return The author(s).
+	 * @return The author(s) of the module.
 	 */
 	String getAuthor();
 
 	/**
-	 * This should return the version of this module.
+	 * Gets the version of the module.
 	 *
-	 * @return The version.
+	 * @return The version of the module.
 	 */
 	String getVersion();
 
 	/**
-	 * This should return the minimum required version of Discord4J for this to run.
+	 * Gets the minimum required version of Discord4J for the module to function.
 	 *
-	 * @return The minimum required version, i.e. "2.2.0".
+	 * @return The minimum required version, i.e. "2.8.4".
 	 */
 	String getMinimumDiscord4JVersion();
 }

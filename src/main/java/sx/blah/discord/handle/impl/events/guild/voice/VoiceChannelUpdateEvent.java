@@ -20,7 +20,7 @@ package sx.blah.discord.handle.impl.events.guild.voice;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This event is dispatched when a voice channel is updated.
+ * Dispatched when a voice channel is updated.
  */
 public class VoiceChannelUpdateEvent extends VoiceChannelEvent {
 
@@ -33,18 +33,18 @@ public class VoiceChannelUpdateEvent extends VoiceChannelEvent {
 	}
 
 	/**
-	 * Gets the original voice channel.
+	 * Gets the voice channel before it was updated.
 	 *
-	 * @return The un-updated instance of the voice channel.
+	 * @return The voice channel before it was updated.
 	 */
 	public IVoiceChannel getOldVoiceChannel() {
 		return oldVoiceChannel;
 	}
 
 	/**
-	 * Gets the new voice channel.
+	 * Gets voice channel after it was updated.
 	 *
-	 * @return The updated instance of the voice channel.
+	 * @return The voice channel after it was updated.
 	 */
 	public IVoiceChannel getNewVoiceChannel() {
 		return newVoiceChannel;

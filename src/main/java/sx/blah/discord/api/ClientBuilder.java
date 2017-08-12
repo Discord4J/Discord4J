@@ -37,12 +37,12 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Use this as a factory to create {@link IDiscordClient} instances
+ * Used to configure and build a {@link IDiscordClient} instance.
  */
 public class ClientBuilder {
 
 	/**
-	 * This represents the default amount of messages which may be cached by channels.
+	 * The default amount of messages which may be cached by channels.
 	 * @see sx.blah.discord.util.MessageHistory
 	 */
 	public static final int DEFAULT_MESSAGE_CACHE_LIMIT = 256;
@@ -63,21 +63,19 @@ public class ClientBuilder {
 	private long eventThreadTimeout = 60L;
 	private TimeUnit eventThreadTimeoutUnit = TimeUnit.SECONDS;
 	private int overflowCapacity = 128;
-
 	private StatusType status;
 	private String playingText;
 	private String streamUrl;
-
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
 	private final List<Object> listeners = new ArrayList<>();
 	private final List<Class<?>> listenerClasses = new ArrayList<>();
 
 	/**
-	 * Provides the login info for the client.
+	 * Configures the bot token used for authentication with Discord.
 	 *
 	 * @param token The bot's token.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withToken(String token) {
 		this.botToken = token;
@@ -85,19 +83,19 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Gets the provided token.
+	 * Gets the bot's authentication token.
 	 *
-	 * @return The provided token.
+	 * @return The bot's authentication token.
 	 */
 	public String getToken() {
 		return botToken;
 	}
 
 	/**
-	 * Makes the client have a ping timeout.
+	 * Configures the max number of heartbeats Discord can not respond to before a reconnect is initiated.
 	 *
-	 * @param maxMissedPings The maximum amount of pings that discord can not respond to before a new session is created.
-	 * @return The instance of the builder.
+	 * @param maxMissedPings The max number of heartbeats Discord can not respond to before a reconnect is initiated.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withPingTimeout(int maxMissedPings) {
 		this.maxMissedPings = maxMissedPings;
@@ -105,11 +103,10 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets whether the client should act as a daemon (it is NOT a daemon by default).
+	 * Configures whether the main client thread should be daemon. (It is non-daemon by default).
 	 *
-	 * @param isDaemon If true, the client will not stop the JVM from closing until the client is logged out from. If false
-	 * the client will stop the JVM from closing until logged out from.
-	 * @return The instance of the builder.
+	 * @param isDaemon Whether the main client thread should be daemon.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder setDaemon(boolean isDaemon) {
 		this.isDaemon = isDaemon;
@@ -117,10 +114,10 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the sharding information for the client.
+	 * Configures the number of shards the client should create and manage.
 	 *
-	 * @param shardCount The total number of shards that will be created.
-	 * @return The instance of the builder.
+	 * @param shardCount The number of shards the client should create and manage.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withShards(int shardCount) {
 		this.shardCount = shardCount;
@@ -128,10 +125,10 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets whether the bot should use Discord's recommended number of shards on login.
+	 * Configures whether the client should request the number of shards to login with from Discord.
 	 *
-	 * @param useRecommended If the bot is to use the recommended number of shards.
-	 * @return The instance of the builder.
+	 * @param useRecommended Whether the bot should request the number of shards to login with from Discord.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withRecommendedShardCount(boolean useRecommended) {
 		this.withRecommendedShardCount = useRecommended;
@@ -139,20 +136,22 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the bot to use Discord's recommended number of shards on login. NOTE: This is incompatible with {@link #setShard(int, int)}.
+	 * Configures the client to request the number of shards to login with from Discord.
 	 *
-	 * @return The instance of the builder.
+	 * <p>Note: This method is incompatible with {@link #setShard(int, int)}.
+	 *
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withRecommendedShardCount() {
 		return withRecommendedShardCount(true);
 	}
 
 	/**
-	 * Sets the max amount of attempts shards managed by this client will make to reconnect in the event of an
-	 * unexpected disconnection.
+	 * Configures the max number of attempts shards managed by the client will make to reconnect to Discord.
 	 *
-	 * @param maxReconnectAttempts The max amount of attempts before the shard is abandoned.
-	 * @return The instance of the builder.
+	 * @param maxReconnectAttempts The max max number of attempts shards managed by the client will make to reconnect to
+	 *                             Discord.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder setMaxReconnectAttempts(int maxReconnectAttempts) {
 		this.maxReconnectAttempts = maxReconnectAttempts;
@@ -160,12 +159,11 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the max amount of messages which are cached from message received events (for better message history
-	 * efficiency).
+	 * Configures the max number of messages which are cached for each channel.
 	 *
-	 * @param maxCacheCount The maximum amount of messages. Setting this to a negative number makes it infinite while
-	 *                      setting it to 0 makes it disable caching.
-	 * @return The instance of the builder.
+	 * @param maxCacheCount The maximum number of messages which are cached for each channel. A negative value indicates
+	 *                      infinite caching while <code>0</code> indicates no caching.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder setMaxMessageCacheCount(int maxCacheCount) {
 		this.maxCacheCount = maxCacheCount;
@@ -173,11 +171,11 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the {@link ICacheDelegateProvider} used to create {@link sx.blah.discord.util.cache.ICacheDelegate}s to store cached
-	 * objects.
+	 * Configures the {@link ICacheDelegateProvider} used by the client to create
+	 * {@link sx.blah.discord.util.cache.ICacheDelegate}s to store cached objects.
 	 *
-	 * @param provider The cache provider for this client to use.
-	 * @return The instance of the builder.
+	 * @param provider The cache delegate provider used by the client to create cache delegates.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder setCacheProvider(ICacheDelegateProvider provider) {
 		this.provider = provider;
@@ -185,10 +183,10 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * This registers event listeners before the client is logged in.
+	 * Configures listeners to immediately register with the client's {@link EventDispatcher} before logging in.
 	 *
 	 * @param listeners The listeners to register.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public final ClientBuilder registerListeners(IListener... listeners) {
 		iListeners.addAll(Arrays.asList(listeners));
@@ -196,10 +194,10 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * This registers event listeners before the client is logged in.
+	 * Configures listeners to immediately register with the client's {@link EventDispatcher} before logging in.
 	 *
 	 * @param listeners The listeners to register.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder registerListeners(Object... listeners) {
 		this.listeners.addAll(Arrays.asList(listeners));
@@ -207,10 +205,10 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * This registers event listeners before the client is logged in.
+	 * Configures listeners to immediately register with the client's {@link EventDispatcher} before logging in.
 	 *
 	 * @param listeners The listeners to register.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder registerListeners(Class<?>... listeners) {
 		listenerClasses.addAll(Arrays.asList(listeners));
@@ -218,40 +216,41 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * This registers an event listeners before the client is logged in.
+	 * Configures a listener to immediately register with the client's {@link EventDispatcher} before logging in.
 	 *
 	 * @param listener The listener to register.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder registerListener(IListener listener) {
 		return registerListeners(listener);
 	}
 
 	/**
-	 * This registers an event listeners before the client is logged in.
+	 * Configures a listener to immediately register with the client's {@link EventDispatcher} before logging in.
 	 *
 	 * @param listener The listener to register.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder registerListener(Object listener) {
 		return registerListeners(listener);
 	}
 
 	/**
-	 * This registers an event listeners before the client is logged in.
+	 * Configures a listener to immediately register with the client's {@link EventDispatcher} before logging in.
 	 *
 	 * @param listener The listener to register.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder registerListener(Class<?> listener) {
 		return registerListeners(listener);
 	}
 
 	/**
-	 * Sets the 5xx retry count. Default: 5
+	 * Configures the number of retries that should be attempted for HTTP requests to Discord in the case of a 5xx
+	 * response code.
 	 *
-	 * @param retryCount The new retry count.
-	 * @return The instance of the builder.
+	 * @param retryCount The number of retries that should be made.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder set5xxRetryCount(int retryCount) {
 		this.retryCount = retryCount;
@@ -259,11 +258,15 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the shard for this client to run on. NOTE: This is incompatible with {@link #withRecommendedShardCount()}.
+	 * Configures a <b>single</b> shard for this client to manage.
 	 *
-	 * @param shardIndex The shard to run on.
-	 * @param totalShards The total of number of shards being run.
-	 * @return The instance of the builder.
+	 * <p>Note: This is incompatible with {@link #withShards(int)}.
+	 *
+	 * @param shardIndex The index of the shard to create.
+	 * @param totalShards The total of number of shards being created.
+	 * @return The builder instance.
+	 *
+	 * @see <a href=https://discordapp.com/developers/docs/topics/gateway#sharding>Sharding</a>
 	 */
 	public ClientBuilder setShard(int shardIndex, int totalShards) {
 		if (totalShards >= shardIndex) throw new IllegalArgumentException("The shard index is out of bounds for the provided total shard count!");
@@ -273,10 +276,11 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the policy to use in the case where the EventDispatcher cannot keep up with the volume of events being sent.
+	 * Configures the handler to use if the client's {@link EventDispatcher} thread pool cannot keep up with the volume
+	 * of events being received.
 	 *
 	 * @param handler The handler to call when this occurs.
-	 * @return The instance of the builder
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withEventBackpressureHandler(RejectedExecutionHandler handler) {
 		this.backpressureHandler = handler;
@@ -284,11 +288,11 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the minimum amount of threads which must be alive at any given time in the EventDispatcher. Higher values
-	 * are more expensive overall but lead to quicker availability of threads.
+	 * Configures the maximum number of threads which must be alive at any given time in the client's
+	 * {@link EventDispatcher}. Higher values are more expensive overall but lead to quicker availability of threads.
 	 *
 	 * @param minimumDispatchThreads The minimum number of threads to keep alive.
-	 * @return The instance of the builder
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withMinimumDispatchThreads(int minimumDispatchThreads) {
 		this.minimumPoolSize = minimumDispatchThreads;
@@ -296,11 +300,11 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the maximum amount of threads which may be alive at any given time in the EventDispatcher. Higher values
-	 * are more expensive overall but lead to quicker availability of threads.
+	 * Configures the maximum amount of threads which may be alive at any given time in the client's
+	 * {@link EventDispatcher}. Higher values are more expensive overall but lead to quicker availability of threads.
 	 *
 	 * @param maximumDispatchThreads The maximum number of threads to keep alive.
-	 * @return The instance of the builder
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withMaximumDispatchThreads(int maximumDispatchThreads) {
 		this.maximumPoolSize = maximumDispatchThreads;
@@ -308,12 +312,12 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the amount of time of idleness before threads are killed in the EventDispatcher while the number of threads
-	 * is higher than the minimum allowed.
+	 * Configures the amount of time extra threads in the client's {@link EventDispatcher} are allowed to be idle before
+	 * they are killed.
 	 *
-	 * @param time The amount of time.
+	 * @param time The amount of allowed idle time.
 	 * @param unit The unit of time to use.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withIdleDispatchThreadTimeout(long time, TimeUnit unit) {
 		this.eventThreadTimeout = time;
@@ -322,11 +326,12 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the amount of events allowed to overflow by without calling the backpressure handler. This allows for easy
-	 * recovery in the event that there is a sudden, unexpected burst of events which the EventDispatcher cannot handle.
+	 * Configures the number of events the client's {@link EventDispatcher} is allowed to overflow by without calling
+	 * the backpressure handler. This allows for easy recovery in the case that there is a sudden, unexpected burst of
+	 * events which the dispatcher cannot handle.
 	 *
 	 * @param overflowCapacity The overflow capacity.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder withEventOverflowCapacity(int overflowCapacity) {
 		this.overflowCapacity = overflowCapacity;
@@ -334,89 +339,90 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to online.
+	 * Sets the online status of the bot to online on all shards when the bot logs in.
 	 *
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder online() {
 		return online(null);
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to online with the given playing text.
+	 * Sets the online status of the bot to online with the given playing text on all shards when the bot logs in.
 	 *
-	 * @param playingText The game playing text.
-	 * @return The instance of the builder.
+	 * @param playingText The nullable playing text.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder online(String playingText) {
 		return setPresence(StatusType.ONLINE, playingText, null);
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to idle.
+	 * Sets the online status of the bot to idle on all shards when the bot logs in.
 	 *
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder idle() {
 		return idle(null);
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to idle with the given playing text.
+	 * Sets the online status of the bot to idle with the given playing text on all shards when the bot logs in.
 	 *
-	 * @param playingText The game playing text.
-	 * @return The instance of the builder.
+	 * @param playingText The nullable playing text.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder idle(String playingText) {
 		return setPresence(StatusType.IDLE, playingText, null);
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to do not disturb.
+	 * Sets the online status of the bot to do not disturb on all shards when the bot logs in.
 	 *
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder dnd() {
 		return dnd(null);
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to do not disturb with the given playing text.
+	 * Sets the online status of the bot to do not disturb with the given playing text on all shards when the bot logs in.
 	 *
-	 * @param playingText The game playing text.
-	 * @return The instance of the builder.
+	 * @param playingText The nullable playing text.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder dnd(String playingText) {
 		return setPresence(StatusType.DND, playingText, null);
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to invisible.
+	 * Sets the online status of the bot to invisible on all shards when the bot logs in.
 	 *
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder invisible() {
 		return setPresence(StatusType.INVISIBLE, null, null);
 	}
 
 	/**
-	 * Sets the status to be sent to Discord on login to streaming with the given playing text and stream url.
+	 * Sets the online status of the bot to streaming with the given playing text and stream url on all shards when the
+	 * bot logs in.
 	 *
-	 * @param playingText The game playing text.
+	 * @param playingText The nullable playing text.
 	 * @param streamUrl The valid twitch.tv streaming url.
-	 * @return The instance of the builder.
+	 * @return The builder instance.
 	 */
 	public ClientBuilder streaming(String playingText, String streamUrl) {
 		return setPresence(StatusType.ONLINE, playingText, streamUrl);
 	}
 
 	/**
-	 * Sets the presence to be sent to Discord on login.
+	 * Sets online status of the bot when it logs in.
 	 *
 	 * @param status The status type.
-	 * @param playingText The optional game playing text.
-	 * @param streamUrl The optional stream url.
-	 * @return The instance of the builder.
+	 * @param playingText The nullable game playing text.
+	 * @param streamUrl The nullable stream url.
+	 * @return The builder instance.
 	 */
 	private ClientBuilder setPresence(StatusType status, String playingText, String streamUrl) {
 		this.status = status;
@@ -426,11 +432,9 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Creates the discord instance with the desired features
+	 * Creates a {@link IDiscordClient} with the configuration specified by this builder.
 	 *
-	 * @return The discord instance
-	 *
-	 * @throws DiscordException Thrown if the instance isn't built correctly
+	 * @return The new client with the configuration specified by this builder.
 	 */
 	public IDiscordClient build() {
 		if (botToken == null)
@@ -459,11 +463,9 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Performs {@link #build()} and logs in automatically
+	 * Builds and logs in the new client instance.
 	 *
-	 * @return The discord instance
-	 *
-	 * @throws DiscordException Thrown if the instance isn't built correctly
+	 * @return The new client which has begun its connection process.
 	 */
 	public IDiscordClient login() {
 		IDiscordClient client = build();

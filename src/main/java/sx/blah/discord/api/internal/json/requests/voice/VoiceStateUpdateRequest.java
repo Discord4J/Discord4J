@@ -17,11 +17,25 @@
 
 package sx.blah.discord.api.internal.json.requests.voice;
 
+/**
+ * Sent when the bot wants to join, move, or disconnect from a voice channel.
+ */
 public class VoiceStateUpdateRequest {
-
+	/**
+	 * The ID of the guild the channel is in.
+	 */
 	public String guild_id;
+	/**
+	 * The ID of the channel.
+	 */
 	public String channel_id;
+	/**
+	 * Whether the bot is self muted.
+	 */
 	public boolean self_mute;
+	/**
+	 * Whether the bot is self deafened.
+	 */
 	public boolean self_deaf;
 
 	public VoiceStateUpdateRequest(String guild_id, String channel_id, boolean self_mute, boolean self_deaf) {

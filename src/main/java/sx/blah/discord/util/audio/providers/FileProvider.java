@@ -24,8 +24,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * This extension of {@link AudioInputStreamProvider} attempts to create an {@link AudioInputStream} from the provided
- * file and then provide based on that.
+ * An audio provider which extracts an {@link AudioInputStream} from a file.
  */
 public class FileProvider extends AudioInputStreamProvider {
 

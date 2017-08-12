@@ -24,18 +24,18 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * Represents a private channel where you could direct message a user.
- * <p>
- * Some methods from {@link IChannel}, when called, will always throw an exception due to the incompatible nature
+ * A private channel with another user.
+ *
+ * <p>Some methods from {@link IChannel}, when called, will always throw an exception due to the incompatible nature
  * between a <i>guild</i> text channel (what IChannel typically represents) and a <i>private</i> text channel.
  * All deprecated methods defined by this interface will throw an exception if invoked and should be avoided.
  */
 public interface IPrivateChannel extends IChannel {
 
 	/**
-	 * Indicates the user with whom you are communicating.
+	 * Gets the the recipient user of the channel.
 	 *
-	 * @return The user.
+	 * @return The recipient user of the channel.
 	 */
 	IUser getRecipient();
 

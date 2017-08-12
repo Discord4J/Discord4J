@@ -25,12 +25,16 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * The ProviderQueue is an {@link IAudioProvider} implementation which allows for audio providers to be queued so that
- * as soon as a provider cannot provided data (i.e. {@link IAudioProvider#isReady()} returns false) the next provider in
+ * An audio provider which allows for audio providers to be queued one after another.
+ *
+ * <p>As soon as a provider cannot provided data ({@link IAudioProvider#isReady()} returns false), the next provider in
  * the queue is used.
  */
 public class ProviderQueue implements IAudioProvider {
 
+	/**
+	 * The queue of audio providers.
+	 */
 	private final CopyOnWriteArrayList<IAudioProvider> providers = new CopyOnWriteArrayList<>();
 
 	public ProviderQueue() {
@@ -54,7 +58,7 @@ public class ProviderQueue implements IAudioProvider {
 	}
 
 	/**
-	 * Removes the provider from the internal provider queue at the provided index.
+	 * Removes the provider from the internal provider queue at the given index.
 	 *
 	 * @param index The index of the provider to remove.
 	 * @return The provider removed.
@@ -64,7 +68,7 @@ public class ProviderQueue implements IAudioProvider {
 	}
 
 	/**
-	 * Removes the provided provider from the internal provider queue.
+	 * Removes the given provider from the internal provider queue.
 	 *
 	 * @param provider The provider to remove.
 	 */
@@ -73,7 +77,7 @@ public class ProviderQueue implements IAudioProvider {
 	}
 
 	/**
-	 * Gets the position of the provided provider in the provider queue.
+	 * Gets the position of the given provider in the provider queue.
 	 *
 	 * @param provider The provider.
 	 * @return The provider's index.
@@ -83,9 +87,9 @@ public class ProviderQueue implements IAudioProvider {
 	}
 
 	/**
-	 * Gets the provider at the specified position.
+	 * Gets the provider at the given index.
 	 *
-	 * @param index The position to get the provider from.
+	 * @param index The index to get the provider from.
 	 * @return The provider.
 	 */
 	public synchronized IAudioProvider get(int index) {
@@ -102,10 +106,10 @@ public class ProviderQueue implements IAudioProvider {
 	}
 
 	/**
-	 * Inserts a provider in the specified position.
+	 * Sets the provider in the given position.
 	 *
-	 * @param index The position to insert the provider into.
-	 * @param provider The provider to insert.
+	 * @param index The index to set the provider at.
+	 * @param provider The provider to set.
 	 */
 	public synchronized void set(int index, IAudioProvider provider) {
 		providers.set(index, provider);
@@ -124,6 +128,11 @@ public class ProviderQueue implements IAudioProvider {
 		return providers.size() > 0 && isReady;
 	}
 
+	/**
+	 * Gets the first provider in the queue that can provide audio.
+	 *
+	 * @return The first provider in the queue that can provide audio (or {@link DefaultProvider} if there is none).
+	 */
 	private IAudioProvider findSuitableProvider() {
 		IAudioProvider usableProvider = null;
 		for (IAudioProvider provider : providers) {

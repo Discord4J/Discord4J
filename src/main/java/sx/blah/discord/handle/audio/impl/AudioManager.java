@@ -31,18 +31,57 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * The default implementation of {@link IAudioManager}.
+ */
 public class AudioManager implements IAudioManager {
 
+	/**
+	 * The parent guild of the audio manager.
+	 */
 	private final IGuild guild;
+	/**
+	 * The parent client of the audio manager.
+	 */
 	private final IDiscordClient client;
+	/**
+	 * The receivers subscribed to individual users.
+	 */
 	private final Map<IUser, List<IAudioReceiver>> userReceivers = new ConcurrentHashMap<>();
+	/**
+	 * The receivers that receive all audio regardless of which user it was from.
+	 */
 	private final List<IAudioReceiver> generalReceivers = new CopyOnWriteArrayList<>();
+	/**
+	 * The provider through which audio to be sent to Discord is pulled.
+	 */
 	private volatile IAudioProvider provider = new DefaultProvider();
+	/**
+	 * The processor through which audio to be sent to Discord is manipulated/processed.
+	 */
 	private volatile IAudioProcessor processor = new DefaultProcessor();
+	/**
+	 * Whether to use the {@link #processor} when pulling audio data.
+	 */
 	private volatile boolean useProcessor = true;
 
+	/**
+	 * The default mono (single channel) audio encoder.
+	 *
+	 * <p>Because constructing the encoder is potentially expensive, it is lazily constructed.
+	 */
 	private final Lazy<PointerByReference> monoEncoder = new Lazy<>(() -> OpusUtil.newEncoder(1));
+	/**
+	 * The default stereo (two channels) audio encoder.
+	 *
+	 * <p>Because constructing the encoder is potentially expensive, it is lazily constructed.
+	 */
 	private final Lazy<PointerByReference> stereoEncoder = new Lazy<>(() -> OpusUtil.newEncoder(2));
+	/**
+	 * The default stereo (two channels) audio decoder.
+	 *
+	 * <p>Because constructing the decoder is potentially expensive, it is lazily constructed.
+	 */
 	private final Lazy<PointerByReference> stereoDecoder = new Lazy<>(() -> OpusUtil.newDecoder(2));
 
 	public AudioManager(IGuild guild) {
@@ -100,6 +139,12 @@ public class AudioManager implements IAudioManager {
 		userReceivers.values().forEach(list -> list.removeIf(r -> r.equals(receiver)));
 	}
 
+	/**
+	 * Called by the {@link sx.blah.discord.api.internal.UDPVoiceSocket} associated with the guild every 20ms to pull
+	 * audio to send to Discord.
+	 *
+	 * @return The next 20ms of audio to send to Discord.
+	 */
 	public synchronized byte[] sendAudio() {
 		IAudioProcessor processor = getAudioProcessor();
 		IAudioProvider provider = useProcessor ? processor : getAudioProvider();
@@ -107,6 +152,17 @@ public class AudioManager implements IAudioManager {
 		return getAudioDataForProvider(provider);
 	}
 
+	/**
+	 * Called by the {@link sx.blah.discord.api.internal.UDPVoiceSocket} associated with the guild every 20ms to push
+	 * audio received from Discord to every audio subscriber.
+	 *
+	 * @param opus The received opus-encoded audio.
+	 * @param user The user the audio was received from.
+	 * @param sequence The sequence of the RTP header for the packet.
+	 *                 See {@link sx.blah.discord.api.internal.OpusPacket.RTPHeader#sequence}.
+	 * @param timestamp The timestamp of the RTP header for the packet.
+	 *                  See {@link sx.blah.discord.api.internal.OpusPacket.RTPHeader#timestamp}.
+	 */
 	public synchronized void receiveAudio(byte[] opus, IUser user, char sequence, int timestamp) {
 		// Initializing decoder is an expensive op. Don't do it if no one is listening
 		if (generalReceivers.size() > 0 || userReceivers.size() > 0) {
@@ -115,6 +171,17 @@ public class AudioManager implements IAudioManager {
 		}
 	}
 
+	/**
+	 * Called by {@link #receiveAudio(byte[], IUser, char, int)} if there are subscribed receivers on the manager.
+	 *
+	 * @param opusAudio The received opus-encoded audio.
+	 * @param pcmAudio The received decoded audio.
+	 * @param user The user the audio was received from.
+	 * @param sequence The sequence of the RTP header for the packet.
+	 *                 See {@link sx.blah.discord.api.internal.OpusPacket.RTPHeader#sequence}.
+	 * @param timestamp The timestamp of the RTP header for the packet.
+	 *                  See {@link sx.blah.discord.api.internal.OpusPacket.RTPHeader#timestamp}.
+	 */
 	private void receiveAudio(byte[] opusAudio, byte[] pcmAudio, IUser user, char sequence, int timestamp) {
 		generalReceivers.parallelStream().forEach(r -> {
 			if (r.getAudioEncodingType() == AudioEncodingType.OPUS) {
@@ -140,6 +207,12 @@ public class AudioManager implements IAudioManager {
 		return guild;
 	}
 
+	/**
+	 * Gets the opus-encoded audio from a provider.
+	 *
+	 * @param provider The provider to pull audio from.
+	 * @return The opus-encoded audio from the provider.
+	 */
 	private byte[] getAudioDataForProvider(IAudioProvider provider) {
 		if (provider.isReady() && !Discord4J.audioDisabled.get()) {
 			AudioEncodingType type = provider.getAudioEncodingType();

@@ -22,239 +22,239 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Represents a discord embed object.
+ * An embed in a message.
  */
 public interface IEmbed {
 
     /**
-     * Gets the title of the embed media.
+     * Gets the title of the embed.
      *
-     * @return The title of the embed media. Can be null.
+     * @return The nullable title of the embed.
      */
     String getTitle();
 
     /**
-     * Gets the type of embed media.
+     * Gets the type of embed.
      *
-     * @return The type of embed media as a string.
+     * @return The type of embed.
      */
     String getType();
 
     /**
-     * Gets a description of the embed media.
+     * Gets the description of the embed.
      *
-     * @return A description of the embed media. Can be null.
+     * @return The nullable description of the embed.
      */
     String getDescription();
 
     /**
-     * Gets the direct link to the media.
+     * Gets the URL of the embed.
      *
-     * @return The download link for the attachment.
+     * @return The nullable URL of the embed.
      */
     String getUrl();
 
     /**
-     * Gets the timestamp for the media.
+     * Gets the timestamp of the embed.
      *
-     * @return The timestamp.
+     * @return The timestamp of the embed.
      */
     LocalDateTime getTimestamp();
 
     /**
      * Gets the color of the embed.
      *
-     * @return The color.
+     * @return The color of the embed.
      */
     Color getColor();
 
     /**
-     * Gets the footer of the embed media.
+     * Gets the footer of the embed.
      *
-     * @return An object containing information about the embed media's footer. Can be null.
+     * @return The nullable footer of the embed.
      */
     IEmbedFooter getFooter();
 
     /**
-     * Gets the image in the embed media.
+     * Gets the image of the embed.
      *
-     * @return An object containing information about the image. Can be null.
+     * @return The nullable image of the embed.
      */
     IEmbedImage getImage();
 
     /**
-     * Gets the thumbnail of the embed media.
+     * Gets the thumbnail of the embed.
      *
-     * @return An object containing information about the embed media's thumbnail. Can be null.
+     * @return The nullable thumbnail of the embed.
      */
     IEmbedImage getThumbnail();
 
     /**
-     * Gets the video url for the embed media.
+     * Gets the video of the embed media.
      *
-     * @return A url pointing to the video. Can be null.
+     * @return The nullable video of the embed.
      */
     IEmbedVideo getVideo();
 
     /**
-     * Gets the provider of the embed media.
+     * Gets the provider of the embed.
      *
-     * @return An object containing information about the embed media's provider. <b>Can Be Null!</b>
+     * @return The nullable provider of the embed.
      */
     IEmbedProvider getEmbedProvider();
 
     /**
-     * Gets the author for this embed media.
+     * Gets the author of the embed.
      *
-     * @return An object containing information about the author for the embed media. Can be null.
+     * @return The nullable author of the embed.
      */
     IEmbedAuthor getAuthor();
 
     /**
-     * Gets the list of embed fields for this embed media.
+     * Gets the list of fields in the embed.
      *
-     * @return A list containing objects with information about fields. Can be null.
+     * @return The list of fields in the embed.
      */
     List<IEmbedField> getEmbedFields();
 
     /**
-     * Represents an embed image object.
+     * An embed image object.
      */
     interface IEmbedImage {
         /**
-         * Gets the image's url
+         * Gets the image's URL.
          *
-         * @return The image's url
+         * @return The image's URL.
          */
         String getUrl();
 
         /**
-         * Gets the image's height
+         * Gets the image's height.
          *
-         * @return The image's height
+         * @return The image's height.
          */
         int getHeight();
 
         /**
-         * Gets the image's width
+         * Gets the image's width.
          *
-         * @return The image's width
+         * @return The image's width.
          */
         int getWidth();
     }
 
     /**
-     * Represents an embed video object.
+     * An embed video object.
      */
     interface IEmbedVideo {
         /**
-         * Gets the video's url
+         * Gets the video's URL.
          *
-         * @return The video's url
+         * @return The video's URL.
          */
         String getUrl();
 
         /**
-         * Gets the video's height
+         * Gets the video's height.
          *
-         * @return The video's height
+         * @return The video's height.
          */
         int getHeight();
 
         /**
-         * Gets the video's width
+         * Gets the video's width.
          *
-         * @return The video's width
+         * @return The video's width.
          */
         int getWidth();
     }
 
     /**
-     * Represents an embed footer object.
+     * An embed footer object.
      */
     interface IEmbedFooter {
         /**
-         * Gets the footer's text
+         * Gets the footer's text.
          *
-         * @return The footer's text
+         * @return The footer's text.
          */
         String getText();
 
         /**
-         * Gets the footer's icon URL
+         * Gets the footer's icon URL.
          *
-         * @return A url link as a string
+         * @return The footer's icon URL.
          */
         String getIconUrl();
     }
 
     /**
-     * Represents the author for an embed object.
+     * An embed author object.
      */
     interface IEmbedAuthor {
         /**
-         * Gets the author's name
+         * Gets the author's name.
          *
-         * @return The author's name
+         * @return The author's name.
          */
         String getName();
 
         /**
-         * Gets the url for this author
+         * Gets author's URL.
          *
-         * @return The author's url
+         * @return The author's URL.
          */
         String getUrl();
 
         /**
-         * Gets the icon url for this author
+         * Gets author's icon URL.
          *
-         * @return The icon url
+         * @return The author's icon URL.
          */
         String getIconUrl();
     }
 
     /**
-     * Represents a field in the embed object.
+     * An embed field object.
      */
     interface IEmbedField {
         /**
-         * Gets the field's name
+         * Gets the field's name.
          *
-         * @return The field's name
+         * @return The field's name.
          */
         String getName();
 
         /**
-         * Gets the field's value
+         * Gets the field's value.
          *
-         * @return The field's value
+         * @return The field's value.
          */
         String getValue();
 
         /**
-         * Gets if the field is inline or not
+         * Gets whether the field is inline.
          *
-         * @return If the field is inline or not
+         * @return Whether the field is inline.
          */
         boolean isInline();
     }
 
     /**
-     * Represents a site that provides media which is embed in chat. Eg. Youtube, Imgur.
+     * A site that provides media which is embedded in chat. Eg. Youtube, Imgur, etc.
      */
     interface IEmbedProvider {
         /**
-         * Gets the Embedded Media Provider's Name
+         * Gets the provider's name.
          *
-         * @return The Embedded Media Provider's Name
+         * @return The provider's name.
          */
         String getName();
 
         /**
-         * Gets the Embedded Media Provider's Url
+         * Gets the provider's URL.
          *
-         * @return A url link to the Embedded Media Provider as a String
+         * @return The provider's URL.
          */
         String getUrl();
     }

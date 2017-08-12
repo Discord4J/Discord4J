@@ -22,7 +22,7 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class EmojiObject {
 	/**
-	 * The id of the emoji.
+	 * The ID of the emoji.
 	 */
 	public String id;
 	/**

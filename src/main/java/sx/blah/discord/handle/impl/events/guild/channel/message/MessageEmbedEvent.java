@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This event is dispatched whenever a message is edited and the embeds Discord generates change.
+ * Dispatched when a message is created with embeds or a message is updated to have embeds.
  */
 public class MessageEmbedEvent extends MessageEvent {
 
@@ -43,9 +43,9 @@ public class MessageEmbedEvent extends MessageEvent {
 	}
 
 	/**
-	 * The new embedded media that has been added to the message.
+	 * Gets the new embeds that have been added to the message.
 	 *
-	 * @return An array of the new embedded media.
+	 * @return The new embeds that have been added to the message.
 	 */
 	@Deprecated
 	public List<IEmbed> getNewEmbed() {
@@ -53,7 +53,7 @@ public class MessageEmbedEvent extends MessageEvent {
 	}
 
 	/**
-	 * The new embeds that have been added to the message.
+	 * Gets the new embeds that have been added to the message.
 	 *
 	 * @return The new embeds that have been added to the message.
 	 */

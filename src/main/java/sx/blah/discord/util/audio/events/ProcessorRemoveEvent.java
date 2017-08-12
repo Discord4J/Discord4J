@@ -21,7 +21,7 @@ import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This event is dispatched whenever {@link AudioPlayer#removeProcessor(IAudioProcessor)} is called.
+ * Dispatched when {@link AudioPlayer#removeProcessor(IAudioProcessor)} is called.
  */
 public class ProcessorRemoveEvent extends AudioPlayerEvent {
 
@@ -33,9 +33,9 @@ public class ProcessorRemoveEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This gets the processor removed to the {@link AudioPlayer} instance.
+	 * Gets the audio processor that was removed.
 	 *
-	 * @return The processor.
+	 * @return The audio processor.
 	 */
 	public IAudioProcessor getProcessor() {
 		return processor;

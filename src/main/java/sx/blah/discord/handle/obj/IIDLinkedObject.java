@@ -18,15 +18,15 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * This represents an object which is associated with an id.
+ * An object which is uniquely identifiable by a snowflake ID.
  */
 public interface IIDLinkedObject {
 
 	/**
-	 * Gets the snowflake unique id for this object.
+	 * Gets the unique snowflake ID of the object.
 	 *
-	 * @return The id.
-	 * @deprecated Use {@link #getStringID()} instead as this will return a long in future versions.
+	 * @return The unique snowflake ID of the object.
+	 * @deprecated Use {@link #getStringID()} instead. This this will return a <code>long</code> in future versions.
 	 */
 	@Deprecated
 	default String getID() {
@@ -34,16 +34,16 @@ public interface IIDLinkedObject {
 	}
 
 	/**
-	 * Gets the <b>unsigned</b> long value of the id for this object.
+	 * Gets the unique snowflake ID of the object. This value is <b>unsigned</b>.
 	 *
-	 * @return The id.
+	 * @return The unique snowflake ID of the object.
 	 */
 	long getLongID();
 
 	/**
-	 * Gets the snowflake unique id for this object.
+	 * Gets the unique snowflake ID of the object.
 	 *
-	 * @return The id.
+	 * @return The unique snowflake ID of the object.
 	 */
 	default String getStringID() {
 		return Long.toUnsignedString(getLongID());

@@ -18,8 +18,7 @@
 package sx.blah.discord.util;
 
 /**
- * Represents an operation that accepts no input arguments and returns no result.
- * It is expected to operate via side-effects.
+ * A function that accepts not input and produces no output.
  */
 @FunctionalInterface
 public interface Procedure {

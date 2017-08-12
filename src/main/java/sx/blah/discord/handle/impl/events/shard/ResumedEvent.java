@@ -20,11 +20,11 @@ package sx.blah.discord.handle.impl.events.shard;
 import sx.blah.discord.api.IShard;
 
 /**
- * Fired when the client receives a RESUMED payload from the gateway.
- * Missed events should replay after this.
+ * Dispatched when a shard receives a resume payload on the gateway. This is after all missed events from a successful
+ * resume have been replayed.
  */
 public class ResumedEvent extends ShardEvent {
-	
+
 	public ResumedEvent(IShard shard) {
 		super(shard);
 	}

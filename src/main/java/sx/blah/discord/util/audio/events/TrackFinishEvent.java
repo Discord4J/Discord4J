@@ -22,7 +22,7 @@ import sx.blah.discord.util.audio.AudioPlayer;
 import java.util.Optional;
 
 /**
- * This is dispatched when a track is finished playing.
+ * Dispatched when a track is finished playing.
  */
 public class TrackFinishEvent extends AudioPlayerEvent {
 
@@ -35,18 +35,18 @@ public class TrackFinishEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This gets the track that finished playing.
+	 * Gets the track that finished playing.
 	 *
-	 * @return The original track.
+	 * @return The track that finished playing.
 	 */
 	public AudioPlayer.Track getOldTrack() {
 		return oldTrack;
 	}
 
 	/**
-	 * This gets the next track on the queue (if it exists).
+	 * Gets the next track in the queue.
 	 *
-	 * @return The (optional) next track.
+	 * @return The next track in the queue.
 	 */
 	public Optional<AudioPlayer.Track> getNewTrack() {
 		return Optional.ofNullable(newTrack);

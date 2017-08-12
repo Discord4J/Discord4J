@@ -17,20 +17,25 @@
 
 package sx.blah.discord.api.internal.json.requests;
 
+/**
+ * Used to replay missed events when the bot successfully resumes on the gateway.
+ */
 public class ResumeRequest {
 
 	/**
-	 * The session token
+	 * The bot's authentication token.
 	 */
 	public String token;
 
 	/**
-	 * The session id to resume.
+	 * The session ID to resume.
+	 * @see sx.blah.discord.api.internal.DiscordWS#sessionId
 	 */
 	public String session_id;
 
 	/**
-	 * This is the last cached value of {@link sx.blah.discord.api.internal.json.GatewayPayload#s}
+	 * The last cached sequence number.
+	 * @see sx.blah.discord.api.internal.DiscordWS#seq
 	 */
 	public long seq;
 

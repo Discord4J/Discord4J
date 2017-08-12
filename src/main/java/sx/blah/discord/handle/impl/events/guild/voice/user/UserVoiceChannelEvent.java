@@ -22,21 +22,21 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This represents a generic voice channel event involving a user.
+ * A generic voice-related event involving a user.
  */
 public abstract class UserVoiceChannelEvent extends VoiceChannelEvent {
-	
+
 	private final IUser user;
-	
+
 	public UserVoiceChannelEvent(IVoiceChannel voiceChannel, IUser user) {
 		super(voiceChannel);
 		this.user = user;
 	}
-	
+
 	/**
-	 * This gets the user involved in this event.
+	 * Gets the user involved in the event.
 	 *
-	 * @return The user.
+	 * @return The user involved.
 	 */
 	public IUser getUser() {
 		return user;

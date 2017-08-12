@@ -16,6 +16,6 @@
  */
 
 /**
- * This contains the interfaces Discord4J users directly interact with.
+ * This package contains the Discord entities users interact with.
  */
 package sx.blah.discord.handle.obj;

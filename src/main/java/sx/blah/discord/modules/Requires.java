@@ -20,8 +20,8 @@ package sx.blah.discord.modules;
 import java.lang.annotation.*;
 
 /**
- * This annotation is used to mark a module as having a dependency on another module. This will prevent it from being
- * loaded if its dependency isn't loaded.
+ * Marks a module as having a dependency on another module. This will prevent it from being loaded if its dependency
+ * isn't loaded.
  */
 @Documented
 @Target(ElementType.TYPE)
@@ -29,7 +29,7 @@ import java.lang.annotation.*;
 public @interface Requires {
 
 	/**
-	 * This is the fully qualified class name of the required module. Ex. "com.foo.Bar"
+	 * Gets the fully qualified class name of the required module. Ex. "com.foo.Bar"
 	 */
 	String value();
 }

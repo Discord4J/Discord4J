@@ -28,28 +28,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class defines the Discord user.
+ * A Discord user.
  */
 public interface IUser extends IDiscordObject<IUser> {
 
 	/**
-	 * Gets the user's username.
+	 * Gets the user's name.
 	 *
-	 * @return The username.
+	 * @return The user's name.
 	 */
 	String getName();
 
 	/**
-	 * Gets the user's avatar id.
+	 * Gets the user's avatar hash.
 	 *
-	 * @return The avatar id.
+	 * @return The user's avatar hash.
 	 */
 	String getAvatar();
 
 	/**
-	 * Gets the user's avatar direct link.
+	 * Gets the user's avatar URL.
 	 *
-	 * @return The avatar url.
+	 * @return The user's avatar URL.
 	 */
 	String getAvatarURL();
 
@@ -61,84 +61,83 @@ public interface IUser extends IDiscordObject<IUser> {
 	IPresence getPresence();
 
 	/**
-	 * Gets the status for this user.
+	 * Gets the user's status.
 	 *
 	 * @return The user's status.
-	 * @deprecated Use {@link #getPresence()}
+	 * @deprecated Use {@link #getPresence()} instead.
 	 */
 	@Deprecated
 	Status getStatus();
 
 	/**
-	 * Gets the name displayed to a guild for this user.
+	 * Gets the user's display name. This is their nickname or their username if they do not have a nickname.
 	 *
-	 * @param guild The guild to check the display name for.
-	 * @return The display name. This is the user's nickname if it exists, otherwise the user's standard name.
+	 * @param guild The guild to get their display name for.
+	 * @return The user's display name.
 	 */
 	String getDisplayName(IGuild guild);
 
 	/**
-	 * Formats a string to @mention the user.
-	 * NOTE: This is equivalent to mention(true).
+	 * Gets a formatted string mentioning the user.
 	 *
-	 * @return The formatted string.
+	 * <p>This is equivalent to <code>mention(true)</code>
+	 *
+	 * @return A formatted string mentioning the user.
 	 */
 	String mention();
 
 	/**
-	 * Formats a string to @mention the user.
+	 * Gets a formatted string mentioning the user.
 	 *
-	 * @param mentionWithNickname If true, the mention will display the user's nickname instead of the user's "real"
-	 * name if it exists.
-	 * @return The formatted string.
+	 * @param mentionWithNickname Whether the mention should display the user's nickname or their username.
+	 * @return A formatted string mentioning the user.
 	 */
 	String mention(boolean mentionWithNickname);
 
 	/**
-	 * Gets the discriminator for the user. This is used by Discord to differentiate between two users with the same name.
+	 * Gets the user's discriminator.
 	 *
-	 * @return The discriminator.
+	 * @return The user's discriminator.
 	 */
 	String getDiscriminator();
 
 	/**
-	 * Gets the roles the user is a part of.
+	 * Gets the roles the user has in the given guild.
 	 *
-	 * @param guild The guild to check the roles for.
-	 * @return The roles.
+	 * @param guild The guild to get roles for.
+	 * @return The roles the user has in the given guild.
 	 */
 	List<IRole> getRolesForGuild(IGuild guild);
 
 	/**
-	 * Gets the permissions the user has on the guild.
+	 * Gets the permissions the user has in the given guild.
 	 *
-	 * @param guild The guild to check the permissions for.
-	 * @return The permissions.
+	 * @param guild The guild to get permissions for.
+	 * @return The permissions the user has in the given guild.
        */
 	EnumSet<Permissions> getPermissionsForGuild(IGuild guild);
 
 	/**
-	 * Gets the nickname for this user in this guild.
+	 * Gets the user's nickname in the given guild.
 	 *
 	 * @param guild The guild to get the nickname for.
-	 * @return The nickname (if it exists in this guild).
+	 * @return The user's nickname in the given guild (or null if they don't have one).
 	 */
 	String getNicknameForGuild(IGuild guild);
 
 	/**
-	 * Get's the user's never-null voice state for the given guild.
+	 * Gets the user's voice state for the given guild.
 	 *
-	 * @param guild The guild to check.
-	 * @return The voice state.
+	 * @param guild The guild to get the voice state for.
+	 * @return The user's voice state for the given guild.
 	 */
 	IVoiceState getVoiceStateForGuild(IGuild guild);
 
 	/**
-	 * Gets all of the user's voice states.
-	 * Key is the guild ID that the voice state is for.
+	 * Gets the user's voice states for every guild. (Key = Guild ID).
 	 *
-	 * @return All of the user's voice states.
-	 * @deprecated Use {@link #getVoiceStatesLong()} instead
+	 * @return The user's voice states for every guild.
+	 * @deprecated Use {@link #getVoiceStatesLong()} instead.
 	 */
 	@Deprecated
 	default Map<String, IVoiceState> getVoiceStates() {
@@ -148,56 +147,44 @@ public interface IUser extends IDiscordObject<IUser> {
 	}
 
 	/**
-	 * Gets all of the user's voice states.
-	 * Key is the guild ID that the voice state is for.
+	 * Gets the user's voice states for every guild. (Key = Guild ID).
 	 *
-	 * @return All of the user's voice states.
+	 * @return The user's voice states for every guild.
 	 */
 	LongMap<IVoiceState> getVoiceStatesLong();
 
 	/**
-	 * Moves the user to the given voice channel.
+	 * Moves the user from one voice channel to another.
 	 *
-	 * @param channel The voice channel to move to.
+	 * @param channel The voice channel to move the user to.
 	 */
 	void moveToVoiceChannel(IVoiceChannel channel);
 
 	/**
-	 * Gets whether or not this user is a bot.
+	 * Gets whether the user is a bot.
 	 *
-	 * @return True if a bot, false if otherwise.
+	 * @return Whether the user is a bot.
 	 */
 	boolean isBot();
 
 	/**
-	 * Gets a {@link IPrivateChannel} for this user.
+	 * Gets the private channel for the user or creates it if one doesn't exist.
 	 *
-	 * @return The {@link IPrivateChannel} object.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @return The private channel for the user.
 	 */
 	IPrivateChannel getOrCreatePMChannel();
 
 	/**
-	 * Adds a Role to this user.
+	 * Adds a role to the user.
 	 *
-	 * @param role The role to add to the User
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
+	 * @param role The role to add.
 	 */
 	void addRole(IRole role);
 
 	/**
-	 * Removes a Role from this user.
+	 * Removes a role from the user.
 	 *
-	 * @param role The role to remove from the User.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
+	 * @param role The role to remove.
 	 */
 	void removeRole(IRole role);
 }

@@ -18,7 +18,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
 /**
- * This is the request sent in order to edit a channel's information.
+ * Sent to edit a channel's properties.
  */
 public class ChannelEditRequest {
 
@@ -32,8 +32,8 @@ public class ChannelEditRequest {
 		/**
 		 * Sets the new name of the channel.
 		 *
-		 * @param name the new name, must be 2-100 characters long.
-		 * @return this builder, for chaining.
+		 * @param name The new name, must be 2-100 characters long.
+		 * @return This builder, for chaining.
 		 */
 		public Builder name(String name) {
 			this.name = name;
@@ -43,8 +43,8 @@ public class ChannelEditRequest {
 		/**
 		 * Sets the new position of the channel.
 		 *
-		 * @param position the new position.
-		 * @return this builder, for chaining.
+		 * @param position The new position.
+		 * @return This builder, for chaining.
 		 */
 		public Builder position(int position) {
 			this.position = position;
@@ -54,8 +54,8 @@ public class ChannelEditRequest {
 		/**
 		 * Sets the new topic of the channel.
 		 *
-		 * @param topic the new topic
-		 * @return this builder, for chaining.
+		 * @param topic The new topic.
+		 * @return This builder, for chaining.
 		 */
 		public Builder topic(String topic) {
 			this.topic = topic;
@@ -76,15 +76,24 @@ public class ChannelEditRequest {
 		/**
 		 * Builds the channel edit request.
 		 *
-		 * @return the channel edit request.
+		 * @return The channel edit request.
 		 */
 		public ChannelEditRequest build() {
 			return new ChannelEditRequest(name, position, topic, nsfw);
 		}
 	}
 
+	/**
+	 * The new name of the channel.
+	 */
 	private final String name;
+	/**
+	 * The new position of the channel.
+	 */
 	private final Integer position;
+	/**
+	 * The new topic of the channel.
+	 */
 	private final String topic;
 	private final Boolean nsfw;
 

@@ -20,51 +20,49 @@ package sx.blah.discord.handle.obj;
 import java.util.List;
 
 /**
- * Represents a guild's <b>custom</b> emoji, not a Unicode one. This can be used for reactions. If you need the
- * Unicode type emojis, use {@link com.vdurmont.emoji.EmojiManager#getForAlias(String)} to get
- * an {@link com.vdurmont.emoji.Emoji}.
+ * A <b>custom</b> emoji in a guild. This is <b>not</b> a Unicode emoji.
  */
 public interface IEmoji extends IDiscordObject<IEmoji> {
 
 	/**
-	 * Gets the guild for this emoji.
+	 * Gets the parent guild of the emoji.
 	 *
-	 * @return The guild.
+	 * @return The parent guild of the emoji.
 	 */
 	IGuild getGuild();
 
 	/**
 	 * Gets the emoji's name.
 	 *
-	 * @return The name.
+	 * @return The emoji's name.
 	 */
 	String getName();
 
 	/**
-	 * Gets the roles for this emoji. Possibly for integration, but unused at the moment.
+	 * Gets the roles which are allowed to use the emoji.
 	 *
-	 * @return The roles list.
+	 * @return The roles which are allowed to use the emoji.
 	 */
 	List<IRole> getRoles();
 
 	/**
-	 * Returns true if the emoji needs colons, false otherwise.
+	 * Gets whether the emoji needs colons in chat.
 	 *
-	 * @return True if the emoji needs colons, false otherwise.
+	 * @return Whether the emoji needs colons in chat.
 	 */
 	boolean requiresColons();
 
 	/**
-	 * Checks whether the role is managed by an external plugin like Twitch.
+	 * Gets whether the emoji is managed by an external service like Twitch.
 	 *
-	 * @return True if managed, false if otherwise.
+	 * @return Whether the emoji is managed by an external service.
 	 */
 	boolean isManaged();
 
 	/**
-	 * Gets the image URL for this emoji.
+	 * Gets the image URL for the emoji.
 	 *
-	 * @return The image URL.
+	 * @return The image URL for the emoji.
 	 */
 	String getImageUrl();
 }

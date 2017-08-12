@@ -20,17 +20,16 @@ package sx.blah.discord.util.cache;
 import sx.blah.discord.handle.obj.IIDLinkedObject;
 
 /**
- * This represents a provider of {@link ICacheDelegate}s for use in {@link Cache}s.
+ * A provider of cache delegates for use by a cache.
  */
 @FunctionalInterface
 public interface ICacheDelegateProvider {
 
 	/**
-	 * This is called to provide a new instance of an {@link ICacheDelegate}.
+	 * Creates a cache delegate.
 	 *
-	 * @param clazz The class being stored in the delegate. (<b>NOTE:</b> be wary of
-	 * {@link sx.blah.discord.util.IDLinkedObjectWrapper}s.
-	 * @return The cache delegate to use.
+	 * @param clazz The class of the type the delegate stores.
+	 * @return The created cache delegate.
 	 */
 	<T extends IIDLinkedObject> ICacheDelegate<T> provide(Class<T> clazz);
 }

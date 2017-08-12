@@ -22,11 +22,11 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class VoiceRegionObject {
 	/**
-	 * The id of the region.
+	 * The ID of the region.
 	 */
 	public String id;
 	/**
-	 * The name of the object.
+	 * The name of the region.
 	 */
 	public String name;
 	/**

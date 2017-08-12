@@ -35,7 +35,7 @@ public class InviteObject {
 	 */
 	public InviteChannelObject channel;
 	/**
-	 * User who created the invite. Not present for vanity url invites or invites created for widgets.
+	 * The user who created the invite. Not present for vanity url invites or invites created for widgets.
 	 */
 	public UserObject inviter;
 
@@ -44,19 +44,19 @@ public class InviteObject {
 	 */
 	public static class InviteGuildObject {
 		/**
-		 * ID of the guild.
+		 * The ID of the guild.
 		 */
 		public String id;
 		/**
-		 * Name of the guild.
+		 * The name of the guild.
 		 */
 		public String name;
 		/**
-		 * Hash of the guild splash (or null).
+		 * The hash of the guild splash (or null).
 		 */
 		public String splash;
 		/**
-		 * Hash of the guild icon (or null).
+		 * The hash of the guild icon (or null).
 		 */
 		public String icon;
 	}
@@ -66,15 +66,15 @@ public class InviteObject {
 	 */
 	public static class InviteChannelObject {
 		/**
-		 * ID of the channel.
+		 * The ID of the channel.
 		 */
 		public String id;
 		/**
-		 * Name of the channel.
+		 * The name of the channel.
 		 */
 		public String name;
 		/**
-		 * Type of the channel. 'text' or 'voice'
+		 * The type of the channel. "text" or "voice"
 		 */
 		public String type;
 	}
