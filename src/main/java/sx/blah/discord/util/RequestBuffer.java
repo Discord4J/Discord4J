@@ -39,7 +39,7 @@ public class RequestBuffer {
 	 * Queues a request.
 	 *
 	 * @param request The request to be carried out.
-	 * @param <T>     The type of the object returned by the request.
+	 * @param <T> The type of the object returned by the request.
 	 * @return The result of the request.
 	 */
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
@@ -136,8 +136,7 @@ public class RequestBuffer {
 		 *
 		 * @param requestFuture The future managing this request.
 		 */
-		default void onRetry(RequestFuture<T> requestFuture) {
-		}
+		default void onRetry(RequestFuture<T> requestFuture) {}
 	}
 
 	/**
@@ -159,7 +158,6 @@ public class RequestBuffer {
 
 	/**
 	 * A future that controls the execution of a request.
-	 *
 	 * @param <T> The type of the object the request returns.
 	 */
 	public static class RequestFuture<T> implements Future<T>, Delayed {
@@ -185,7 +183,7 @@ public class RequestBuffer {
 			if (isDone() || isCancelled())
 				return 0;
 
-			return unit.convert(callable.timeForNextRequest - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+			return unit.convert(callable.timeForNextRequest-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 		}
 
 		/**
@@ -199,7 +197,7 @@ public class RequestBuffer {
 
 		@Override
 		public int compareTo(Delayed o) {
-			return (int) (getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
+			return (int) (getDelay(TimeUnit.MILLISECONDS)-o.getDelay(TimeUnit.MILLISECONDS));
 		}
 
 		@Override
@@ -261,7 +259,7 @@ public class RequestBuffer {
 			backing.run();
 		}
 
-		private static class RequestCallable<T> implements Callable<T> {
+		private static class RequestCallable <T> implements Callable<T> {
 
 			final IRequest<T> request;
 			final RequestFuture<T> future;
@@ -290,7 +288,7 @@ public class RequestBuffer {
 					}
 				} catch (RateLimitException e) {
 					firstAttempt = false;
-					timeForNextRequest = System.currentTimeMillis() + e.getRetryDelay();
+					timeForNextRequest = System.currentTimeMillis()+e.getRetryDelay();
 					bucket = e.getMethod();
 					rateLimited = true;
 				} catch (Exception e) {
