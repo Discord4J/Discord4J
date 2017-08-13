@@ -33,6 +33,7 @@ public class SimpleClientTest {
                 .writerStrategy(new MultipartWriterStrategy())
                 .writerStrategy(new EmptyWriterStrategy())
                 .readerStrategy(new JacksonReaderStrategy(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
                 .build();
         Router router = new SimpleRouter(httpClient);
         GatewayPojo result = router.exchange(Routes.GATEWAY_GET).toFuture().join();
