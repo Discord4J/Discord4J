@@ -23,14 +23,19 @@ public class SimpleHttpClient {
     private final HttpHeaders headers;
     private final List<WriterStrategy<?>> writerStrategies;
     private final List<ReaderStrategy<?>> readerStrategies;
+    private final Consumer<HttpClientRequest> defaultRequestFilter;
+    private final Consumer<HttpClientResponse> defaultResponseFilter;
 
     public SimpleHttpClient(HttpClient httpClient, String baseUrl, HttpHeaders headers,
-                            List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies) {
+                            List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies,
+                            Consumer<HttpClientRequest> defaultRequestFilter, Consumer<HttpClientResponse> defaultResponseFilter) {
         this.httpClient = httpClient;
         this.baseUrl = baseUrl;
         this.headers = headers;
         this.writerStrategies = writerStrategies;
         this.readerStrategies = readerStrategies;
+        this.defaultRequestFilter = defaultRequestFilter;
+        this.defaultResponseFilter = defaultResponseFilter;
     }
 
     public static SimpleHttpClient.Builder builder() {
@@ -47,6 +52,9 @@ public class SimpleHttpClient {
         return httpClient.request(method, baseUrl + uri,
                 request -> {
                     headers.forEach(entry -> request.header(entry.getKey(), entry.getValue()));
+                    if (defaultRequestFilter != null) {
+                        defaultRequestFilter.accept(request);
+                    }
                     if (requestFilter != null) {
                         requestFilter.accept(request);
                     }
@@ -61,6 +69,9 @@ public class SimpleHttpClient {
                 })
                 .log("discord4j.http.client", Level.FINE)
                 .flatMap(response -> {
+                    if (defaultResponseFilter != null) {
+                        defaultResponseFilter.accept(response);
+                    }
                     if (responseFilter != null) {
                         responseFilter.accept(response);
                     }
@@ -102,6 +113,10 @@ public class SimpleHttpClient {
         Builder writerStrategy(WriterStrategy<?> strategy);
 
         Builder readerStrategy(ReaderStrategy<?> strategy);
+
+        Builder requestFilter(Consumer<HttpClientRequest> requestConsumer);
+
+        Builder responseFilter(Consumer<HttpClientResponse> responseConsumer);
 
         SimpleHttpClient build();
     }

@@ -67,14 +67,23 @@ public interface Router {
         @Nullable
         private Consumer<HttpClientResponse> responseFilter;
 
-        @Nullable
-        private Consumer<HttpClientRequest.Form> formConsumer;
-
         private Context() {
         }
 
         public static Context create() {
             return new Context();
+        }
+
+        public static Context ofRequest(Consumer<HttpClientRequest> requestFilter) {
+            return new Context().requestFilter(requestFilter);
+        }
+
+        public static Context ofResponse(Consumer<HttpClientResponse> responseFilter) {
+            return new Context().responseFilter(responseFilter);
+        }
+
+        public static Context ofContentType(String value) {
+            return new Context().requestFilter(req -> req.header("content-type", value));
         }
 
         public Context requestFilter(Consumer<HttpClientRequest> requestFilter) {
@@ -84,11 +93,6 @@ public interface Router {
 
         public Context responseFilter(Consumer<HttpClientResponse> responseFilter) {
             this.responseFilter = responseFilter;
-            return this;
-        }
-
-        public Context form(Consumer<HttpClientRequest.Form> formConsumer) {
-            this.formConsumer = formConsumer;
             return this;
         }
 
@@ -128,14 +132,6 @@ public interface Router {
 
         public void setResponseFilter(Consumer<HttpClientResponse> responseFilter) {
             this.responseFilter = responseFilter;
-        }
-
-        public Consumer<HttpClientRequest.Form> getFormConsumer() {
-            return formConsumer;
-        }
-
-        public void setFormConsumer(Consumer<HttpClientRequest.Form> formConsumer) {
-            this.formConsumer = formConsumer;
         }
 
         public Map<String, Object> getQueryParams() {

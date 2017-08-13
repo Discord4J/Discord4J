@@ -8,11 +8,13 @@ import discord4j.http.function.client.reactive.ClientHttpRequest;
 import discord4j.util.MultiValueMap;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -44,14 +46,23 @@ public class WebFluxRouter implements Router {
 
         BodyInserter<?, ClientHttpRequest> bodyInserter;
         if (requestEntity == null) {
-            if (context != null && context.getFormConsumer() != null) {
-                bodyInserter = BodyInserters.fromMultipartForm(context.getFormConsumer());
-            } else {
-                bodyInserter = BodyInserters.empty();
-            }
+            bodyInserter = BodyInserters.empty();
         } else {
-            bodyInserter = BodyInserters.fromObject(requestEntity);
+            if (requestEntity.getClass() == Consumer.class) {
+                bodyInserter = BodyInserters.fromMultipartForm((Consumer<HttpClientRequest.Form>) requestEntity);
+            } else {
+                bodyInserter = BodyInserters.fromObject(requestEntity);
+            }
         }
+//        if (requestEntity == null) {
+//            if (context != null && context.getFormConsumer() != null) {
+//                bodyInserter = BodyInserters.fromMultipartForm(context.getFormConsumer());
+//            } else {
+//                bodyInserter = BodyInserters.empty();
+//            }
+//        } else {
+//            bodyInserter = BodyInserters.fromObject(requestEntity);
+//        }
         return exchangeInternal(route, bodyInserter, context);
     }
 
