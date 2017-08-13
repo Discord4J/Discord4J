@@ -42,9 +42,9 @@ public class SimpleHttpClient {
         return new SimpleHttpClientBuilder();
     }
 
-    public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body,
+    public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType,
                                    @Nullable Consumer<HttpClientRequest> requestFilter,
-                                   @Nullable Consumer<HttpClientResponse> responseFilter, Class<T> responseType) {
+                                   @Nullable Consumer<HttpClientResponse> responseFilter) {
         Objects.requireNonNull(method);
         Objects.requireNonNull(uri);
         Objects.requireNonNull(responseType);

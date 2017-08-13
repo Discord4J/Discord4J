@@ -42,9 +42,7 @@ public class SimpleRouter implements Router {
                 }
             }
         }
-        return client.exchange(completeRoute.getMethod(), completeRoute.getUri(), requestEntity,
-                context != null ? context.getRequestFilter() : null,
-                context != null ? context.getResponseFilter() : null,
-                completeRoute.getResponseType());
+        return client.exchange(completeRoute.getMethod(), completeRoute.getUri(), requestEntity, completeRoute.getResponseType(),
+                context != null ? context.getRequestFilter() : null, context != null ? context.getResponseFilter() : null);
     }
 }
