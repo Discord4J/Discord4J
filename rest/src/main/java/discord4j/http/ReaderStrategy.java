@@ -8,6 +8,6 @@ import java.lang.reflect.Type;
 
 public interface ReaderStrategy<Res> {
 
-    boolean canRead(@Nullable Type type, @Nullable String contentType);
-    Mono<Res> read(HttpClientResponse response, Class<Res> responseType);
+	boolean canRead(@Nullable Type type, @Nullable String contentType);
+	Mono<Res> read(HttpClientResponse response, Class<Res> responseType);
 }

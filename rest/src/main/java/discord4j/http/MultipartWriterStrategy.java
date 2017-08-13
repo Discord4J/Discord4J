@@ -9,13 +9,13 @@ import java.util.function.Consumer;
 
 public class MultipartWriterStrategy implements WriterStrategy<Consumer<HttpClientRequest.Form>> {
 
-    @Override
-    public boolean canWrite(@Nullable Type type, @Nullable String contentType) {
-        return contentType != null && contentType.equals("multipart/form-data");
-    }
+	@Override
+	public boolean canWrite(@Nullable Type type, @Nullable String contentType) {
+		return contentType != null && contentType.equals("multipart/form-data");
+	}
 
-    @Override
-    public Mono<Void> write(HttpClientRequest request, Consumer<HttpClientRequest.Form> body) {
-        return request.chunkedTransfer(false).sendForm(body).then();
-    }
+	@Override
+	public Mono<Void> write(HttpClientRequest request, Consumer<HttpClientRequest.Form> body) {
+		return request.chunkedTransfer(false).sendForm(body).then();
+	}
 }

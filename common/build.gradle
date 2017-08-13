@@ -3,6 +3,4 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
-
-    compile 'com.github.Discord4J:webflux-netty-client:eb000515fe'
 }

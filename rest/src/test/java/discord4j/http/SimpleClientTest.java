@@ -1,6 +1,7 @@
 package discord4j.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.http.client.ExchangeFilter;
 import discord4j.http.client.SimpleHttpClient;
 import discord4j.pojo.GatewayPojo;
 import discord4j.pojo.MessagePojo;
@@ -16,34 +17,53 @@ import java.util.function.Consumer;
 
 public class SimpleClientTest {
 
-    private static final Logger log = LoggerFactory.getLogger(SimpleClientTest.class);
+	private static final Logger log = LoggerFactory.getLogger(SimpleClientTest.class);
 
-    @Test
-    public void testGetGateway() {
-        String token = System.getProperty("token");
+	@Test
+	public void testGetGateway() {
+		String token = System.getProperty("token");
 
-        ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = new ObjectMapper();
 
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl(Routes.BASE_URL)
-                .defaultHeader("user-agent", "DiscordBot (http://discord4j.com, Discord4J/3.0.0)")
-                .defaultHeader("authorization", "Bot " + token)
-                .defaultHeader("content-type", "application/json")
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .writerStrategy(new MultipartWriterStrategy())
-                .writerStrategy(new EmptyWriterStrategy())
-                .readerStrategy(new JacksonReaderStrategy(mapper))
-                .readerStrategy(new EmptyReaderStrategy())
-                .build();
-        Router router = new SimpleRouter(httpClient);
-        GatewayPojo result = router.exchange(Routes.GATEWAY_GET).toFuture().join();
-        log.info("Result: " + result.url);
+		SimpleHttpClient httpClient = SimpleHttpClient.builder()
+				.baseUrl(Routes.BASE_URL)
+				.defaultHeader("user-agent", "DiscordBot (http://discord4j.com, Discord4J/3.0.0)")
+				.defaultHeader("authorization", "Bot " + token)
+				.defaultHeader("content-type", "application/json")
+				.writerStrategy(new JacksonWriterStrategy(mapper))
+				.writerStrategy(new MultipartWriterStrategy())
+				.writerStrategy(new EmptyWriterStrategy())
+				.readerStrategy(new JacksonReaderStrategy(mapper))
+				.readerStrategy(new EmptyReaderStrategy())
+				.build();
+		Router router = new SimpleRouter(httpClient);
+		GatewayPojo result = router.exchange(Routes.GATEWAY_GET.complete()).toFuture().join();
+		log.info("Result: " + result.url);
+	}
 
-        // Expects 401 error
-        Consumer<HttpClientRequest.Form> consumer = form -> form.attr("test", "value");
-        MessagePojo result2 = router.exchange(Routes.MESSAGE_CREATE.complete(100000), consumer,
-                Router.Context.ofContentType("multipart/form-data"))
-                .toFuture()
-                .join();
-    }
+	@Test
+	public void testSendMultipart() {
+		String token = System.getProperty("token");
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		SimpleHttpClient httpClient = SimpleHttpClient.builder()
+				.baseUrl(Routes.BASE_URL)
+				.defaultHeader("user-agent", "DiscordBot (http://discord4j.com, Discord4J/3.0.0)")
+				.defaultHeader("authorization", "Bot " + token)
+				.defaultHeader("content-type", "application/json")
+				.writerStrategy(new JacksonWriterStrategy(mapper))
+				.writerStrategy(new MultipartWriterStrategy())
+				.writerStrategy(new EmptyWriterStrategy())
+				.readerStrategy(new JacksonReaderStrategy(mapper))
+				.readerStrategy(new EmptyReaderStrategy())
+				.build();
+		Router router = new SimpleRouter(httpClient);
+
+		Consumer<HttpClientRequest.Form> consumer = form -> form.attr("test", "value");
+		MessagePojo result2 = router.exchange(Routes.MESSAGE_CREATE.complete(100000), consumer, ExchangeFilter
+				.requestContentType("multipart/form-data"))
+				.toFuture()
+				.join();
+	}
 }

@@ -12,27 +12,27 @@ import java.util.Objects;
 
 public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
-    private final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 
-    public JacksonReaderStrategy(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+	public JacksonReaderStrategy(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
-    @Override
-    public boolean canRead(@Nullable Type type, @Nullable String contentType) {
-        return contentType != null && contentType.contains("application/json");
-    }
+	@Override
+	public boolean canRead(@Nullable Type type, @Nullable String contentType) {
+		return contentType != null && contentType.contains("application/json");
+	}
 
-    @Override
-    public Mono<Res> read(HttpClientResponse response, Class<Res> responseType) {
-        Objects.requireNonNull(response);
-        Objects.requireNonNull(responseType);
-        return response.receive().aggregate().asByteArray().map(bytes -> {
-            try {
-                return objectMapper.readValue(bytes, responseType);
-            } catch (IOException e) {
-                throw Exceptions.propagate(e);
-            }
-        });
-    }
+	@Override
+	public Mono<Res> read(HttpClientResponse response, Class<Res> responseType) {
+		Objects.requireNonNull(response);
+		Objects.requireNonNull(responseType);
+		return response.receive().aggregate().asByteArray().map(bytes -> {
+			try {
+				return objectMapper.readValue(bytes, responseType);
+			} catch (IOException e) {
+				throw Exceptions.propagate(e);
+			}
+		});
+	}
 }

@@ -8,6 +8,6 @@ import java.lang.reflect.Type;
 
 public interface WriterStrategy<Req> {
 
-    boolean canWrite(@Nullable Type type, @Nullable String contentType);
-    Mono<Void> write(HttpClientRequest request, Req body);
+	boolean canWrite(@Nullable Type type, @Nullable String contentType);
+	Mono<Void> write(HttpClientRequest request, Req body);
 }

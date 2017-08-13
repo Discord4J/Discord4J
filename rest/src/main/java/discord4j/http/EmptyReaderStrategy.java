@@ -9,14 +9,14 @@ import java.lang.reflect.Type;
 
 public class EmptyReaderStrategy implements ReaderStrategy<Void> {
 
-    @Override
-    public boolean canRead(@Nullable Type type, @Nullable String contentType) {
-        Class<?> rawClass = (Class<?>) type;
-        return rawClass != null && (rawClass == Void.class || rawClass == Empty.class);
-    }
+	@Override
+	public boolean canRead(@Nullable Type type, @Nullable String contentType) {
+		Class<?> rawClass = (Class<?>) type;
+		return rawClass != null && (rawClass == Void.class || rawClass == Empty.class);
+	}
 
-    @Override
-    public Mono<Void> read(HttpClientResponse response, Class<Void> responseType) {
-        return Mono.empty();
-    }
+	@Override
+	public Mono<Void> read(HttpClientResponse response, Class<Void> responseType) {
+		return Mono.empty();
+	}
 }
