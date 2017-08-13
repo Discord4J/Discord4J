@@ -21,12 +21,12 @@ public class JacksonWriterStrategy implements WriterStrategy<Object> {
 
 	@Override
 	public boolean canWrite(@Nullable Type type, @Nullable String contentType) {
-		if (type == null) {
+		if (type == null || contentType == null || !contentType.startsWith("application/json")) {
 			return false;
 		}
 		Class<?> rawClass = getJavaType(type).getRawClass();
-		return (Object.class == rawClass) || !String.class.isAssignableFrom(rawClass) && objectMapper.canSerialize
-				(rawClass);
+		return (Object.class == rawClass)
+				|| !String.class.isAssignableFrom(rawClass) && objectMapper.canSerialize(rawClass);
 	}
 
 	@Override

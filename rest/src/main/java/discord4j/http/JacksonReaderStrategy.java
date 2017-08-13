@@ -1,6 +1,8 @@
 package discord4j.http;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClientResponse;
@@ -20,7 +22,12 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
 	@Override
 	public boolean canRead(@Nullable Type type, @Nullable String contentType) {
-		return contentType != null && contentType.contains("application/json");
+		if (contentType == null || !contentType.startsWith("application/json")) {
+			return false;
+		}
+		JavaType javaType = getJavaType(type);
+		Class<?> rawClass = javaType.getRawClass();
+		return !CharSequence.class.isAssignableFrom(rawClass) && objectMapper.canDeserialize(javaType);
 	}
 
 	@Override
@@ -34,5 +41,10 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 				throw Exceptions.propagate(e);
 			}
 		});
+	}
+
+	private JavaType getJavaType(Type type) {
+		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
+		return typeFactory.constructType(type);
 	}
 }

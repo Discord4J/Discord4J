@@ -84,12 +84,12 @@ public class SimpleHttpClient {
 
 					String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
 					return readerStrategies.stream()
-							.filter(s -> s.canRead(responseType.getClass(), contentType))
+							.filter(s -> s.canRead(responseType, contentType))
 							.findFirst()
 							.map(SimpleHttpClient::<T>cast)
 							.map(s -> s.read(response, responseType))
 							.orElseGet(() -> Mono.error(new RuntimeException("No strategies to read this response: " +
-									responseType.getClass() + " - " + contentType)));
+									responseType + " - " + contentType)));
 				});
 	}
 
