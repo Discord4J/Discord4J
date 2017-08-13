@@ -1,12 +1,10 @@
 package discord4j.route;
 
-import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClientRequest;
+import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -49,42 +47,48 @@ public interface Router {
      */
     <T, R> Mono<R> exchange(Route<R> route, @Nullable T requestEntity, @Nullable Context context);
 
-    <T, R> Mono<R> exchangeForm(Route<R> route, Consumer<HttpClientRequest.Form> formConsumer, @Nullable Context context);
-
 
     /**
      * Contains additional information to perform a request
      *
      * @since 3.0
      */
-    public class Context {
+    class Context {
 
-        private Consumer<HttpHeaders> headersConsumer = headers -> {
-        };
-        private Map<String, List<String>> queryParams = new LinkedHashMap<>();
-        private Object[] uriVariables = {};
+        @Nullable
+        private Map<String, Object> queryParams;
 
-        public Context() {
+        @Nullable
+        private Object[] uriVariables;
+
+        @Nullable
+        private Consumer<HttpClientRequest> requestFilter;
+
+        @Nullable
+        private Consumer<HttpClientResponse> responseFilter;
+
+        @Nullable
+        private Consumer<HttpClientRequest.Form> formConsumer;
+
+        private Context() {
         }
 
-        public Context(Consumer<HttpHeaders> headersConsumer, Map<String, List<String>> queryParams, Object[] uriVariables) {
-            this.headersConsumer = headersConsumer;
-            this.queryParams = queryParams;
-            this.uriVariables = uriVariables;
+        public static Context create() {
+            return new Context();
         }
 
-        /**
-         * Manipulate the request's headers with the given consumer. The
-         * headers provided to the consumer are "live", so that the consumer can be used to
-         * {@linkplain HttpHeaders#set(String, Object) overwrite} existing header values,
-         * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
-         * {@link HttpHeaders} methods.
-         *
-         * @param headersConsumer a function that consumes the {@code HttpHeaders}
-         * @return this context
-         */
-        public Context headersConsumer(Consumer<HttpHeaders> headersConsumer) {
-            this.headersConsumer = headersConsumer;
+        public Context requestFilter(Consumer<HttpClientRequest> requestFilter) {
+            this.requestFilter = requestFilter;
+            return this;
+        }
+
+        public Context responseFilter(Consumer<HttpClientResponse> responseFilter) {
+            this.responseFilter = responseFilter;
+            return this;
+        }
+
+        public Context form(Consumer<HttpClientRequest.Form> formConsumer) {
+            this.formConsumer = formConsumer;
             return this;
         }
 
@@ -94,7 +98,7 @@ public interface Router {
          * @param queryParams the params
          * @return this context
          */
-        public Context queryParams(Map<String, List<String>> queryParams) {
+        public Context queryParams(Map<String, Object> queryParams) {
             this.queryParams = queryParams;
             return this;
         }
@@ -110,19 +114,35 @@ public interface Router {
             return this;
         }
 
-        public Consumer<HttpHeaders> getHeadersConsumer() {
-            return headersConsumer;
+        public Consumer<HttpClientRequest> getRequestFilter() {
+            return requestFilter;
         }
 
-        public void setHeadersConsumer(Consumer<HttpHeaders> headersConsumer) {
-            this.headersConsumer = headersConsumer;
+        public void setRequestFilter(Consumer<HttpClientRequest> requestFilter) {
+            this.requestFilter = requestFilter;
         }
 
-        public Map<String, List<String>> getQueryParams() {
+        public Consumer<HttpClientResponse> getResponseFilter() {
+            return responseFilter;
+        }
+
+        public void setResponseFilter(Consumer<HttpClientResponse> responseFilter) {
+            this.responseFilter = responseFilter;
+        }
+
+        public Consumer<HttpClientRequest.Form> getFormConsumer() {
+            return formConsumer;
+        }
+
+        public void setFormConsumer(Consumer<HttpClientRequest.Form> formConsumer) {
+            this.formConsumer = formConsumer;
+        }
+
+        public Map<String, Object> getQueryParams() {
             return queryParams;
         }
 
-        public void setQueryParams(Map<String, List<String>> queryParams) {
+        public void setQueryParams(Map<String, Object> queryParams) {
             this.queryParams = queryParams;
         }
 

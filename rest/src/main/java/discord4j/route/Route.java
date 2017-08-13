@@ -1,6 +1,9 @@
 package discord4j.route;
 
+import discord4j.util.UrlBuilder;
 import io.netty.handler.codec.http.HttpMethod;
+
+import java.util.Map;
 
 /**
  * Provides a mapping between a Discord API endpoint and its response type.
@@ -50,5 +53,19 @@ public class Route<T> {
 
     public Class<T> getResponseType() {
         return responseType;
+    }
+
+    // TODO: to decide between the following - what is the best way to complete/expand a route
+
+    public Route<T> complete(Object... parameters) {
+        return new Route<>(this.method, UrlBuilder.expand(this.uri, parameters), this.responseType);
+    }
+
+    public Route<T> complete(Map<String, ?> parameters) {
+        return new Route<>(this.method, UrlBuilder.expand(this.uri, parameters), this.responseType);
+    }
+
+    public Route<T> complete(Map<String, ?> queryParameters, Object... uriVariables) {
+        return new Route<>(this.method, UrlBuilder.expand(this.uri, queryParameters, uriVariables), this.responseType);
     }
 }

@@ -1,10 +1,14 @@
-package discord4j.http;
+package discord4j.http.client;
 
+import discord4j.http.ReaderStrategy;
+import discord4j.http.WriterStrategy;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
+import reactor.ipc.netty.http.client.HttpClientRequest;
+import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,9 +33,13 @@ public class SimpleHttpClient {
         this.readerStrategies = readerStrategies;
     }
 
+    public static SimpleHttpClient.Builder builder() {
+        return new SimpleHttpClientBuilder();
+    }
+
     public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body,
-                                   @Nullable Consumer<HttpHeaders> requestHeadersConsumer,
-                                   @Nullable Consumer<HttpHeaders> responseHeadersConsumer, Class<T> responseType) {
+                                   @Nullable Consumer<HttpClientRequest> requestFilter,
+                                   @Nullable Consumer<HttpClientResponse> responseFilter, Class<T> responseType) {
         Objects.requireNonNull(method);
         Objects.requireNonNull(uri);
         Objects.requireNonNull(responseType);
@@ -39,8 +47,8 @@ public class SimpleHttpClient {
         return httpClient.request(method, baseUrl + uri,
                 request -> {
                     headers.forEach(entry -> request.header(entry.getKey(), entry.getValue()));
-                    if (requestHeadersConsumer != null) {
-                        requestHeadersConsumer.accept(request.requestHeaders());
+                    if (requestFilter != null) {
+                        requestFilter.accept(request);
                     }
                     String contentType = request.requestHeaders().get(HttpHeaderNames.CONTENT_TYPE);
                     return writerStrategies.stream()
@@ -53,8 +61,8 @@ public class SimpleHttpClient {
                 })
                 .log("discord4j.http.client", Level.FINE)
                 .flatMap(response -> {
-                    if (responseHeadersConsumer != null) {
-                        responseHeadersConsumer.accept(response.responseHeaders());
+                    if (responseFilter != null) {
+                        responseFilter.accept(response);
                     }
                     String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
                     return readerStrategies.stream()
@@ -73,8 +81,8 @@ public class SimpleHttpClient {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> ReaderStrategy<T> cast(ReaderStrategy<?> result) {
-        return (ReaderStrategy<T>) result;
+    private static <T> ReaderStrategy<T> cast(ReaderStrategy<?> strategy) {
+        return (ReaderStrategy<T>) strategy;
     }
 
 //
@@ -86,7 +94,7 @@ public class SimpleHttpClient {
 //        }).flatMap(mapToPOJO(clazz));
 //    }
 
-    interface Builder {
+    public interface Builder {
         Builder baseUrl(String baseUrl);
 
         Builder defaultHeader(String key, String value);

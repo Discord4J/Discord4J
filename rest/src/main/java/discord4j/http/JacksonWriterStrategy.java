@@ -9,7 +9,7 @@ import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.Optional;
+import java.util.Objects;
 
 public class JacksonWriterStrategy implements WriterStrategy<Object> {
 
@@ -30,6 +30,8 @@ public class JacksonWriterStrategy implements WriterStrategy<Object> {
 
     @Override
     public Mono<Void> write(HttpClientRequest request, Object body) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(body);
         try {
             return request.sendString(Mono.just(objectMapper.writeValueAsString(body))).then();
         } catch (Exception e) {

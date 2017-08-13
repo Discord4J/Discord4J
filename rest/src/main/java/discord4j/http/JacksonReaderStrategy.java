@@ -8,6 +8,7 @@ import reactor.ipc.netty.http.client.HttpClientResponse;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
@@ -24,6 +25,8 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
     @Override
     public Mono<Res> read(HttpClientResponse response, Class<Res> responseType) {
+        Objects.requireNonNull(response);
+        Objects.requireNonNull(responseType);
         return response.receive().aggregate().asByteArray().map(bytes -> {
             try {
                 return objectMapper.readValue(bytes, responseType);

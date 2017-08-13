@@ -1,11 +1,10 @@
 package discord4j.route;
 
-import discord4j.http.SimpleHttpClient;
+import discord4j.http.client.SimpleHttpClient;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
+import java.util.Map;
 
 public class SimpleRouter implements Router {
 
@@ -17,22 +16,35 @@ public class SimpleRouter implements Router {
 
     @Override
     public <R> Mono<R> exchange(Route<R> route) {
-        return client.exchange(route.getMethod(), route.getUri(),
-                null, null, null, route.getResponseType());
+        return exchange(route, null, null);
     }
 
     @Override
     public <T, R> Mono<R> exchange(Route<R> route, @Nullable T requestEntity) {
-        return null;
+        return exchange(route, requestEntity, null);
     }
 
     @Override
     public <T, R> Mono<R> exchange(Route<R> route, @Nullable T requestEntity, @Nullable Context context) {
-        return null;
-    }
-
-    @Override
-    public <T, R> Mono<R> exchangeForm(Route<R> route, Consumer<HttpClientRequest.Form> formConsumer, @Nullable Context context) {
-        return null;
+        Route<R> completeRoute = route;
+        if (context != null) {
+            Map<String, Object> mapParameters = context.getQueryParams();
+            Object[] arrayParameters = context.getUriVariables();
+            if (mapParameters != null) {
+                if (arrayParameters != null) {
+                    completeRoute = route.complete(mapParameters, arrayParameters);
+                } else {
+                    completeRoute = route.complete(mapParameters);
+                }
+            } else {
+                if (arrayParameters != null) {
+                    completeRoute = route.complete(arrayParameters);
+                }
+            }
+        }
+        return client.exchange(completeRoute.getMethod(), completeRoute.getUri(), requestEntity,
+                context != null ? context.getRequestFilter() : null,
+                context != null ? context.getResponseFilter() : null,
+                completeRoute.getResponseType());
     }
 }

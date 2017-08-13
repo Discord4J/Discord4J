@@ -6,14 +6,13 @@ import discord4j.http.function.client.ClientResponse;
 import discord4j.http.function.client.WebClient;
 import discord4j.http.function.client.reactive.ClientHttpRequest;
 import discord4j.util.MultiValueMap;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;
+import java.util.LinkedHashMap;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -43,15 +42,17 @@ public class WebFluxRouter implements Router {
     public <T, Res> Mono<Res> exchange(Route<Res> route, @Nullable T requestEntity, @Nullable Router.Context context) {
         Objects.requireNonNull(route);
 
-        BodyInserter<?, ClientHttpRequest> bodyInserter = requestEntity == null ? BodyInserters.empty() : BodyInserters.fromObject(requestEntity);
+        BodyInserter<?, ClientHttpRequest> bodyInserter;
+        if (requestEntity == null) {
+            if (context != null && context.getFormConsumer() != null) {
+                bodyInserter = BodyInserters.fromMultipartForm(context.getFormConsumer());
+            } else {
+                bodyInserter = BodyInserters.empty();
+            }
+        } else {
+            bodyInserter = BodyInserters.fromObject(requestEntity);
+        }
         return exchangeInternal(route, bodyInserter, context);
-    }
-
-    @Override
-    public <T, R> Mono<R> exchangeForm(Route<R> route, Consumer<HttpClientRequest.Form> formConsumer, @Nullable Context context) {
-        Objects.requireNonNull(route);
-        Objects.requireNonNull(formConsumer);
-        return exchangeInternal(route, BodyInserters.fromMultipartForm(formConsumer), context);
     }
 
     private <Res> Mono<Res> exchangeInternal(Route<Res> route, BodyInserter<?, ClientHttpRequest> bodyInserter, Context context) {
@@ -60,16 +61,15 @@ public class WebFluxRouter implements Router {
 
         Function<ClientResponse, Mono<Res>> responseFunction = response -> response.bodyToMono(route.getResponseType());
 
-        Consumer<HttpHeaders> headersConsumer;
         MultiValueMap<String, String> queryParams;
         Object[] uriVariables;
         if (context != null) {
-            headersConsumer = context.getHeadersConsumer();
-            queryParams = new MultiValueMap<>(context.getQueryParams());
-            uriVariables = context.getUriVariables();
+            queryParams = new MultiValueMap<>();
+            Optional.ofNullable(context.getQueryParams())
+                    .orElseGet(LinkedHashMap::new)
+                    .forEach((k, v) -> queryParams.add(k, v.toString()));
+            uriVariables = Optional.ofNullable(context.getUriVariables()).orElseGet(() -> new Object[0]);
         } else {
-            headersConsumer = headers -> {
-            };
             queryParams = new MultiValueMap<>();
             uriVariables = new Object[0];
         }
@@ -78,7 +78,6 @@ public class WebFluxRouter implements Router {
                 .uri(uriBuilder -> uriBuilder.path(uri)
                         .queryParams(queryParams)
                         .build(uriVariables))
-                .headers(headersConsumer)
                 .body(bodyInserter)
                 .exchange()
                 .flatMap(responseFunction);

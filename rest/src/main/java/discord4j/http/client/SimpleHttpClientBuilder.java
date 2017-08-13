@@ -1,5 +1,7 @@
-package discord4j.http;
+package discord4j.http.client;
 
+import discord4j.http.ReaderStrategy;
+import discord4j.http.WriterStrategy;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.ipc.netty.http.client.HttpClient;
@@ -8,7 +10,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleHttpClientBuilder implements SimpleHttpClient.Builder {
+class SimpleHttpClientBuilder implements SimpleHttpClient.Builder {
 
     @Nullable
     private String baseUrl;
