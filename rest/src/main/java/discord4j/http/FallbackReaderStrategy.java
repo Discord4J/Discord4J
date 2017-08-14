@@ -10,7 +10,7 @@ import java.util.Objects;
 public class FallbackReaderStrategy implements ReaderStrategy<String> {
 
 	@Override
-	public boolean canRead(@Nullable Type type, @Nullable String contentType) {
+	public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
 		return true;
 	}
 

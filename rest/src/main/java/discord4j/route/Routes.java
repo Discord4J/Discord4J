@@ -131,8 +131,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-reaction">https://discordapp
 	 * .com/developers/docs/resources/channel#create-reaction</a>
 	 */
-	public static final Route<Empty> REACTION_CREATE = Route.put("/channels/{channel.id}/messages/{message" +
-			".id}/reactions/{emoji}/@me", Empty.class);
+	public static final Route<Void> REACTION_CREATE = Route.put("/channels/{channel.id}/messages/{message" +
+			".id}/reactions/{emoji}/@me", Void.class);
 
 	/**
 	 * Delete a reaction the current user has made for the message. Returns a 204 empty response on success.
@@ -140,8 +140,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-own-reaction">https://discordapp
 	 * .com/developers/docs/resources/channel#delete-own-reaction</a>
 	 */
-	public static final Route<Empty> REACTION_DELETE_OWN = Route.delete("/channels/{channel.id}/messages/{message" +
-			".id}/reactions/{emoji}/@me", Empty.class);
+	public static final Route<Void> REACTION_DELETE_OWN = Route.delete("/channels/{channel.id}/messages/{message" +
+			".id}/reactions/{emoji}/@me", Void.class);
 
 	/**
 	 * Deletes another user's reaction. This endpoint requires the 'MANAGE_MESSAGES' permission to be present on the
@@ -150,8 +150,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-user-reaction">https://discordapp
 	 * .com/developers/docs/resources/channel#delete-user-reaction</a>
 	 */
-	public static final Route<Empty> REACTION_DELETE = Route.delete("/channels/{channel.id}/messages/{message" +
-			".id}/reactions/{emoji}/{user.id}", Empty.class);
+	public static final Route<Void> REACTION_DELETE = Route.delete("/channels/{channel.id}/messages/{message" +
+			".id}/reactions/{emoji}/{user.id}", Void.class);
 
 	/**
 	 * Get a list of users that reacted with this emoji. Returns an array of user objects on success.
@@ -169,8 +169,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-all-reactions">https://discordapp
 	 * .com/developers/docs/resources/channel#delete-all-reactions</a>
 	 */
-	public static final Route<Empty> REACTIONS_DELETE_ALL = Route.delete("/channels/{channel.id}/messages/{message" +
-			".id}/reactions", Empty.class);
+	public static final Route<Void> REACTIONS_DELETE_ALL = Route.delete("/channels/{channel.id}/messages/{message" +
+			".id}/reactions", Void.class);
 
 	/**
 	 * Edit a previously sent message. You can only edit messages that have been sent by the current user. Returns a
@@ -191,8 +191,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-message">https://discordapp
 	 * .com/developers/docs/resources/channel#delete-message</a>
 	 */
-	public static final Route<Empty> MESSAGE_DELETE = Route.delete("/channels/{channel.id}/messages/{message.id}",
-			Empty.class);
+	public static final Route<Void> MESSAGE_DELETE = Route.delete("/channels/{channel.id}/messages/{message.id}",
+			Void.class);
 
 	/**
 	 * Delete multiple messages in a single request. This endpoint can only be used on guild channels and requires the
@@ -209,8 +209,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#bulk-delete-messages">https://discordapp
 	 * .com/developers/docs/resources/channel#bulk-delete-messages</a>
 	 */
-	public static final Route<Empty> MESSAGE_DELETE_BULK = Route.delete("/channels/{channel.id}/messages/bulk-delete",
-			Empty.class);
+	public static final Route<Void> MESSAGE_DELETE_BULK = Route.delete("/channels/{channel.id}/messages/bulk-delete",
+			Void.class);
 
 	/**
 	 * Edit the channel permission overwrites for a user or role in a channel. Only usable for guild channels. Requires
@@ -220,8 +220,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions">https
 	 * ://discordapp.com/developers/docs/resources/channel#edit-channel-permissions</a>
 	 */
-	public static final Route<Empty> CHANNEL_PERMISSIONS_EDIT = Route.put("/channels/{channel" +
-			".id}/permissions/{overwrite.id}", Empty.class);
+	public static final Route<Void> CHANNEL_PERMISSIONS_EDIT = Route.put("/channels/{channel" +
+			".id}/permissions/{overwrite.id}", Void.class);
 
 	/**
 	 * Returns a list of invite objects (with invite metadata) for the channel. Only usable for guild channels.
@@ -253,8 +253,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-channel-permission">https
 	 * ://discordapp.com/developers/docs/resources/channel#delete-channel-permission</a>
 	 */
-	public static final Route<Empty> CHANNEL_PERMISSION_DELETE = Route.delete("/channels/{channel" +
-			".id}/permissions/{overwrite.id}", Empty.class);
+	public static final Route<Void> CHANNEL_PERMISSION_DELETE = Route.delete("/channels/{channel" +
+			".id}/permissions/{overwrite.id}", Void.class);
 
 	/**
 	 * Post a typing indicator for the specified channel. Generally bots should not implement this route. However, if a
@@ -265,7 +265,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#trigger-typing-indicator">https
 	 * ://discordapp.com/developers/docs/resources/channel#trigger-typing-indicator</a>
 	 */
-	public static final Route<Empty> TYPING_INDICATOR_TRIGGER = Route.post("/channels/{channel.id}/typing", Empty
+	public static final Route<Void> TYPING_INDICATOR_TRIGGER = Route.post("/channels/{channel.id}/typing", Void
 			.class);
 
 	/**
@@ -283,7 +283,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#add-pinned-channel-message">https
 	 * ://discordapp.com/developers/docs/resources/channel#add-pinned-channel-message</a>
 	 */
-	public static final Route<Empty> MESSAGES_PINNED_ADD = Route.put("/channels/{channel.id}/pins/{message.id}", Empty
+	public static final Route<Void> MESSAGES_PINNED_ADD = Route.put("/channels/{channel.id}/pins/{message.id}", Void
 			.class);
 
 	/**
@@ -293,8 +293,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-pinned-channel-message">https
 	 * ://discordapp.com/developers/docs/resources/channel#delete-pinned-channel-message</a>
 	 */
-	public static final Route<Empty> MESSAGES_PINNED_DELETE = Route.delete("/channels/{channel.id}/pins/{message.id}",
-			Empty.class);
+	public static final Route<Void> MESSAGES_PINNED_DELETE = Route.delete("/channels/{channel.id}/pins/{message.id}",
+			Void.class);
 
 	/**
 	 * Adds a recipient to a Group DM using their access token.
@@ -302,8 +302,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#group-dm-add-recipient">https
 	 * ://discordapp.com/developers/docs/resources/channel#group-dm-add-recipient</a>
 	 */
-	public static final Route<Empty> GROUP_DM_RECIPIENT_ADD = Route.put("/channels/{channel.id}/recipients/{user.id}",
-			Empty.class);
+	public static final Route<Void> GROUP_DM_RECIPIENT_ADD = Route.put("/channels/{channel.id}/recipients/{user.id}",
+			Void.class);
 
 	/**
 	 * Removes a recipient from a Group DM.
@@ -311,9 +311,9 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#group-dm-remove-recipient">https
 	 * ://discordapp.com/developers/docs/resources/channel#group-dm-remove-recipient</a>
 	 */
-	public static final Route<Empty> GROUP_DM_RECIPIENT_DELETE = Route.delete("/channels/{channel" +
+	public static final Route<Void> GROUP_DM_RECIPIENT_DELETE = Route.delete("/channels/{channel" +
 			".id}/recipients/{user" +
-			".id}", Empty.class);
+			".id}", Void.class);
 
 	////////////////////////////////////////////
 	////////////// Guild Resource //////////////
@@ -353,7 +353,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#delete-guild">https://discordapp
 	 * .com/developers/docs/resources/guild#delete-guild</a>
 	 */
-	public static final Route<Empty> GUILD_DELETE = Route.delete("/guilds/{guild.id}", Empty.class);
+	public static final Route<Void> GUILD_DELETE = Route.delete("/guilds/{guild.id}", Void.class);
 
 	/**
 	 * Returns a list of guild channel objects.
@@ -381,7 +381,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-channel-positions">https
 	 * ://discordapp.com/developers/docs/resources/guild#modify-guild-channel-positions</a>
 	 */
-	public static final Route<Empty> GUILD_CHANNEL_POSITIONS_MODIFY = Route.patch("/guilds/{guild.id}/channels", Empty
+	public static final Route<Void> GUILD_CHANNEL_POSITIONS_MODIFY = Route.patch("/guilds/{guild.id}/channels", Void
 			.class);
 
 	/**
@@ -422,7 +422,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-member">https://discordapp
 	 * .com/developers/docs/resources/guild#modify-guild-member</a>
 	 */
-	public static final Route<Empty> GUILD_MEMBER_MODIFY = Route.patch("/guilds/{guild.id}/members/{user.id}", Empty
+	public static final Route<Void> GUILD_MEMBER_MODIFY = Route.patch("/guilds/{guild.id}/members/{user.id}", Void
 			.class);
 
 	/**
@@ -442,8 +442,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#add-guild-member-role">https://discordapp
 	 * .com/developers/docs/resources/guild#add-guild-member-role</a>
 	 */
-	public static final Route<Empty> GUILD_MEMBER_ROLE_ADD = Route.put("/guilds/{guild.id}/members/{user" +
-			".id}/roles/{role.id}", Empty.class);
+	public static final Route<Void> GUILD_MEMBER_ROLE_ADD = Route.put("/guilds/{guild.id}/members/{user" +
+			".id}/roles/{role.id}", Void.class);
 
 	/**
 	 * Removes a role from a guild member. Requires the 'MANAGE_ROLES' permission. Returns a 204 empty response on
@@ -452,8 +452,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#remove-guild-member-role">https
 	 * ://discordapp.com/developers/docs/resources/guild#remove-guild-member-role</a>
 	 */
-	public static final Route<Empty> GUILD_MEMBER_ROLE_REMOVE = Route.delete("/guilds/{guild.id}/members/{user" +
-			".id}/roles/{role.id}", Empty.class);
+	public static final Route<Void> GUILD_MEMBER_ROLE_REMOVE = Route.delete("/guilds/{guild.id}/members/{user" +
+			".id}/roles/{role.id}", Void.class);
 
 	/**
 	 * Remove a member from a guild. Requires 'KICK_MEMBERS' permission. Returns a 204 empty response on success. Fires
@@ -462,7 +462,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#remove-guild-member">https://discordapp
 	 * .com/developers/docs/resources/guild#remove-guild-member</a>
 	 */
-	public static final Route<Empty> GUILD_MEMBER_REMOVE = Route.delete("/guilds/{guild.id}/members/{user.id}", Empty
+	public static final Route<Void> GUILD_MEMBER_REMOVE = Route.delete("/guilds/{guild.id}/members/{user.id}", Void
 			.class);
 
 	/**
@@ -480,7 +480,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-ban">https://discordapp
 	 * .com/developers/docs/resources/guild#create-guild-ban</a>
 	 */
-	public static final Route<Empty> GUILD_BAN_CREATE = Route.put("/guilds/{guild.id}/bans/{user.id}", Empty.class);
+	public static final Route<Void> GUILD_BAN_CREATE = Route.put("/guilds/{guild.id}/bans/{user.id}", Void.class);
 
 	/**
 	 * Remove the ban for a user. Requires the 'BAN_MEMBERS' permissions. Returns a 204 empty response on success.
@@ -490,7 +490,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#remove-guild-ban">https://discordapp
 	 * .com/developers/docs/resources/guild#remove-guild-ban</a>
 	 */
-	public static final Route<Empty> GUILD_BAN_REMOVE = Route.delete("/guilds/{guild.id}/bans/{user.id}", Empty.class);
+	public static final Route<Void> GUILD_BAN_REMOVE = Route.delete("/guilds/{guild.id}/bans/{user.id}", Void.class);
 
 	/**
 	 * Returns a list of role objects for the guild. Requires the 'MANAGE_ROLES' permission.
@@ -536,7 +536,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#delete-guild-role">https://discordapp
 	 * .com/developers/docs/resources/guild#delete-guild-role</a>
 	 */
-	public static final Route<Empty> GUILD_ROLE_DELETE = Route.delete("/guilds/{guild.id}/roles/{role.id}", Empty
+	public static final Route<Void> GUILD_ROLE_DELETE = Route.delete("/guilds/{guild.id}/roles/{role.id}", Void
 			.class);
 
 	/**
@@ -595,7 +595,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-integration">https
 	 * ://discordapp.com/developers/docs/resources/guild#create-guild-integration</a>
 	 */
-	public static final Route<Empty> GUILD_INTEGRATION_CREATE = Route.post("/guilds/{guild.id}/integrations", Empty
+	public static final Route<Void> GUILD_INTEGRATION_CREATE = Route.post("/guilds/{guild.id}/integrations", Void
 			.class);
 
 	/**
@@ -605,8 +605,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-integration">https
 	 * ://discordapp.com/developers/docs/resources/guild#modify-guild-integration</a>
 	 */
-	public static final Route<Empty> GUILD_INTEGRATION_MODIFY = Route.patch("/guilds/{guild" +
-			".id}/integrations/{integration.id}", Empty.class);
+	public static final Route<Void> GUILD_INTEGRATION_MODIFY = Route.patch("/guilds/{guild" +
+			".id}/integrations/{integration.id}", Void.class);
 
 	/**
 	 * Delete the attached integration object for the guild. Requires the 'MANAGE_GUILD' permission. Returns a 204
@@ -616,8 +616,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#delete-guild-integration">https
 	 * ://discordapp.com/developers/docs/resources/guild#delete-guild-integration</a>
 	 */
-	public static final Route<Empty> GUILD_INTEGRATION_DELETE = Route.delete("/guilds/{guild" +
-			".id}/integrations/{integration.id}", Empty.class);
+	public static final Route<Void> GUILD_INTEGRATION_DELETE = Route.delete("/guilds/{guild" +
+			".id}/integrations/{integration.id}", Void.class);
 
 	/**
 	 * Sync an integration. Requires the 'MANAGE_GUILD' permission. Returns a 204 empty response on success.
@@ -625,9 +625,9 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#sync-guild-integration">https://discordapp
 	 * .com/developers/docs/resources/guild#sync-guild-integration</a>
 	 */
-	public static final Route<Empty> GUILD_INTEGRATION_SYNC = Route.post("/guilds/{guild" +
+	public static final Route<Void> GUILD_INTEGRATION_SYNC = Route.post("/guilds/{guild" +
 			".id}/integrations/{integration" +
-			".id}/sync", Empty.class);
+			".id}/sync", Void.class);
 
 	/**
 	 * Returns the guild embed object. Requires the 'MANAGE_GUILD' permission.
@@ -721,7 +721,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#leave-guild">https://discordapp
 	 * .com/developers/docs/resources/user#leave-guild</a>
 	 */
-	public static final Route<Empty> GUILD_LEAVE = Route.delete("/users/@me/guilds/{guild.id}", Empty.class);
+	public static final Route<Void> GUILD_LEAVE = Route.delete("/users/@me/guilds/{guild.id}", Void.class);
 
 	/**
 	 * Returns a list of DM channel objects.
@@ -846,7 +846,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#delete-webhook">https://discordapp
 	 * .com/developers/docs/resources/webhook#delete-webhook</a>
 	 */
-	public static final Route<Empty> WEBHOOK_DELETE = Route.delete("/webhooks/{webhook.id}", Empty.class);
+	public static final Route<Void> WEBHOOK_DELETE = Route.delete("/webhooks/{webhook.id}", Void.class);
 
 	/**
 	 * Same as above, except this call does not require authentication.
@@ -854,8 +854,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#delete-webhook-with-token">https
 	 * ://discordapp.com/developers/docs/resources/webhook#delete-webhook-with-token</a>
 	 */
-	public static final Route<Empty> WEBHOOK_TOKEN_DELETE = Route.delete("/webhooks/{webhook.id}/{webhook.token}",
-			Empty.class);
+	public static final Route<Void> WEBHOOK_TOKEN_DELETE = Route.delete("/webhooks/{webhook.id}/{webhook.token}",
+			Void.class);
 
 	/**
 	 * This endpoint supports both JSON and form data bodies. It does require multipart/form-data requests instead of
@@ -866,22 +866,22 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#execute-webhook">https://discordapp
 	 * .com/developers/docs/resources/webhook#execute-webhook</a>
 	 */
-	public static final Route<Empty> WEBHOOK_EXECUTE = Route.post("/webhooks/{webhook.id}/{webhook.token}", Empty
+	public static final Route<Void> WEBHOOK_EXECUTE = Route.post("/webhooks/{webhook.id}/{webhook.token}", Void
 			.class);
 
 	/**
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#execute-slackcompatible-webhook">https
 	 * ://discordapp.com/developers/docs/resources/webhook#execute-slackcompatible-webhook</a>
 	 */
-	public static final Route<Empty> WEBHOOK_EXECUTE_SLACK = Route.post("/webhooks/{webhook.id}/{webhook" +
-			".token}/slack", Empty.class);
+	public static final Route<Void> WEBHOOK_EXECUTE_SLACK = Route.post("/webhooks/{webhook.id}/{webhook" +
+			".token}/slack", Void.class);
 
 	/**
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#execute-githubcompatible-webhook">https
 	 * ://discordapp.com/developers/docs/resources/webhook#execute-githubcompatible-webhook</a>
 	 */
-	public static final Route<Empty> WEBHOOK_EXECUTE_GITHUB = Route.post("/webhooks/{webhook.id}/{webhook" +
-			".token}/github", Empty.class);
+	public static final Route<Void> WEBHOOK_EXECUTE_GITHUB = Route.post("/webhooks/{webhook.id}/{webhook" +
+			".token}/github", Void.class);
 
 
 }

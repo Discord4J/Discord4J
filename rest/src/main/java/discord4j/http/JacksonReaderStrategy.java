@@ -21,13 +21,13 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 	}
 
 	@Override
-	public boolean canRead(@Nullable Type type, @Nullable String contentType) {
+	public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
 		if (type == null || contentType == null || !contentType.startsWith("application/json")) {
 			return false;
 		}
-		JavaType javaType = getJavaType(type);
-		Class<?> rawClass = javaType.getRawClass();
-		return !CharSequence.class.isAssignableFrom(rawClass) && objectMapper.canDeserialize(javaType);
+
+		// A Route<String> should be read by the FallbackReader
+		return !CharSequence.class.isAssignableFrom(type) && objectMapper.canDeserialize(getJavaType(type));
 	}
 
 	@Override
@@ -44,7 +44,6 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 	}
 
 	private JavaType getJavaType(Type type) {
-		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		return typeFactory.constructType(type);
+		return objectMapper.getTypeFactory().constructType(type);
 	}
 }
