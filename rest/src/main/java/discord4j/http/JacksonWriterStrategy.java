@@ -11,6 +11,9 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
+/**
+ * Write to a request from an {@code Object} to a JSON {@code String} using Jackson 2.9.
+ */
 public class JacksonWriterStrategy implements WriterStrategy<Object> {
 
 	private final ObjectMapper objectMapper;
@@ -20,7 +23,7 @@ public class JacksonWriterStrategy implements WriterStrategy<Object> {
 	}
 
 	@Override
-	public boolean canWrite(@Nullable Type type, @Nullable String contentType) {
+	public boolean canWrite(@Nullable Class<?> type, @Nullable String contentType) {
 		if (type == null || contentType == null || !contentType.startsWith("application/json")) {
 			return false;
 		}

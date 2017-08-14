@@ -2,7 +2,6 @@ package discord4j.http;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClientResponse;
@@ -12,6 +11,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
+/**
+ * Read a response into JSON and convert to an Object of type {@code <Res>} using Jackson 2.9.
+ *
+ * @param <Res> the type of object in the read response
+ */
 public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
 	private final ObjectMapper objectMapper;

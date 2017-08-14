@@ -4,9 +4,12 @@ import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 import java.util.Objects;
 
+/**
+ * Read a response as a {@code String}, regardless of its type and response Content-Type. It serves as a "catch-all"
+ * reader.
+ */
 public class FallbackReaderStrategy implements ReaderStrategy<String> {
 
 	@Override

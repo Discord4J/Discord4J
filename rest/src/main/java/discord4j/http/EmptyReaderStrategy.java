@@ -5,6 +5,9 @@ import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import javax.annotation.Nullable;
 
+/**
+ * Read a response without a body.
+ */
 public class EmptyReaderStrategy implements ReaderStrategy<Void> {
 
 	@Override

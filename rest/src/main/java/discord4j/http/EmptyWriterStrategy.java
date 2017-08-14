@@ -4,12 +4,11 @@ import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 
 public class EmptyWriterStrategy implements WriterStrategy<Void> {
 
 	@Override
-	public boolean canWrite(@Nullable Type type, @Nullable String contentType) {
+	public boolean canWrite(@Nullable Class<?> type, @Nullable String contentType) {
 		return type == null;
 	}
 
