@@ -22,7 +22,7 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
 	@Override
 	public boolean canRead(@Nullable Type type, @Nullable String contentType) {
-		if (contentType == null || !contentType.startsWith("application/json")) {
+		if (type == null || contentType == null || !contentType.startsWith("application/json")) {
 			return false;
 		}
 		JavaType javaType = getJavaType(type);
