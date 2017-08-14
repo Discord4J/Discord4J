@@ -30,7 +30,7 @@ public class JacksonWriterStrategy implements WriterStrategy<Object> {
 	}
 
 	@Override
-	public Mono<Void> write(HttpClientRequest request, Object body) {
+	public Mono<Void> write(HttpClientRequest request, @Nullable Object body) {
 		Objects.requireNonNull(request);
 		Objects.requireNonNull(body);
 		try {

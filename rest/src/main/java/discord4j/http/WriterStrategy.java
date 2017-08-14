@@ -9,5 +9,5 @@ import java.lang.reflect.Type;
 public interface WriterStrategy<Req> {
 
 	boolean canWrite(@Nullable Type type, @Nullable String contentType);
-	Mono<Void> write(HttpClientRequest request, Req body);
+	Mono<Void> write(HttpClientRequest request, @Nullable Req body);
 }

@@ -15,8 +15,7 @@ class SimpleHttpClientBuilder implements SimpleHttpClient.Builder {
 	private final HttpHeaders headers = new DefaultHttpHeaders();
 	private final List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
 	private final List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
-	@Nullable
-	private String baseUrl;
+	private String baseUrl = "";
 	@Nullable
 	private ExchangeFilter exchangeFilter;
 

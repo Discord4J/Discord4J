@@ -14,7 +14,7 @@ public class EmptyWriterStrategy implements WriterStrategy<Void> {
 	}
 
 	@Override
-	public Mono<Void> write(HttpClientRequest request, Void body) {
+	public Mono<Void> write(HttpClientRequest request, @Nullable Void body) {
 		return request.send();
 	}
 }

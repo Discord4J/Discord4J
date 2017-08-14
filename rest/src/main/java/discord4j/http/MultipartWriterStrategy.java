@@ -15,7 +15,7 @@ public class MultipartWriterStrategy implements WriterStrategy<Consumer<HttpClie
 	}
 
 	@Override
-	public Mono<Void> write(HttpClientRequest request, Consumer<HttpClientRequest.Form> body) {
+	public Mono<Void> write(HttpClientRequest request, @Nullable Consumer<HttpClientRequest.Form> body) {
 		return request.chunkedTransfer(false).sendForm(body).then();
 	}
 }
