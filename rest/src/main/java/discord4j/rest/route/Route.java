@@ -66,6 +66,7 @@ public class Route<T> {
 	}
 
 	public CompleteRoute<T> complete(Object... uriVars) {
-		return new CompleteRoute<>(getMethod(), UrlBuilder.expand(getUri(), uriVars), getResponseType());
+		return new CompleteRoute<>(getMethod(), UrlBuilder.expand(getUri(), uriVars), getResponseType(), getUri()
+				.indexOf("{"));
 	}
 }
