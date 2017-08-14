@@ -1,6 +1,6 @@
 package discord4j.http;
 
-import discord4j.pojo.Empty;
+import pojo.Empty;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClientResponse;
 

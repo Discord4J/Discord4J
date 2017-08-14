@@ -1,4 +1,4 @@
-package discord4j.pojo;
+package pojo;
 
 public class GuildEmbedPojo {
 }

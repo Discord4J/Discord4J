@@ -1,6 +1,6 @@
 package discord4j.route;
 
-import discord4j.pojo.*;
+import pojo.*;
 
 /**
  * A collection of {@link Route} object definitions.

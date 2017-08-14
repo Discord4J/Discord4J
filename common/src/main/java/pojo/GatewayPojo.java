@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package discord4j.pojo;
+package pojo;
 
 /**
  * The response received when obtaining a websocket url
