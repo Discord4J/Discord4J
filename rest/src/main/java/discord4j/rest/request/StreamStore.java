@@ -17,7 +17,7 @@ public class StreamStore {
 	@SuppressWarnings("unchecked")
 	public <T> RequestStream<T> getStream(Route<T> route) {
 		return (RequestStream<T>) streamMap.computeIfAbsent(route, k -> {
-			RequestStream<Route<T>> stream = new RequestStream<>();
+			RequestStream<T> stream = new RequestStream<>(route);
 			streamPuller.subscribeTo(stream);
 			return stream;
 		});
