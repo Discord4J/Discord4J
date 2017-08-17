@@ -65,6 +65,9 @@ public class SimpleHttpClient {
 					}
 
 					String contentType = request.requestHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+
+					System.out.println(writerStrategies.size());
+
 					return writerStrategies.stream()
 							.filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
 							.findFirst()

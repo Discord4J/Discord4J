@@ -14,7 +14,7 @@ public class RouteTest {
 		Route<ChannelPojo> route = Routes.CHANNEL_GET;
 		String majorVar = "123456";
 
-		assertEquals(route.complete(majorVar).getMajorVar(), majorVar);
+		assertEquals(route.newRequest(majorVar).getMajorVar(), majorVar);
 	}
 
 	@Test
@@ -23,7 +23,7 @@ public class RouteTest {
 		String majorVar = "12345";
 		String otherVar = "6789";
 
-		assertEquals(route.complete(majorVar, otherVar).getMajorVar(), majorVar);
+		assertEquals(route.newRequest(majorVar, otherVar).getMajorVar(), majorVar);
 	}
 
 }

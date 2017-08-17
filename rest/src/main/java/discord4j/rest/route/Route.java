@@ -1,7 +1,10 @@
 package discord4j.rest.route;
 
+import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.util.UrlBuilder;
 import io.netty.handler.codec.http.HttpMethod;
+
+import java.util.Objects;
 
 /**
  * Provides a mapping between a Discord API endpoint and its response type.
@@ -65,8 +68,23 @@ public class Route<T> {
 		return responseType;
 	}
 
-	public CompleteRoute<T> complete(Object... uriVars) {
-		return new CompleteRoute<>(getMethod(), UrlBuilder.expand(getUri(), uriVars), getResponseType(), getUri()
-				.indexOf("{"));
+	public DiscordRequest<T> newRequest(Object... uriVars) {
+		return new DiscordRequest<>(this, UrlBuilder.expand(getUri(), uriVars), getUri().indexOf("{"));
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+
+		if (!obj.getClass().isAssignableFrom(Route.class)) return false;
+
+		Route other = (Route) obj;
+
+		return other.method.equals(method) && other.responseType.equals(responseType) && other.uri.equals(uri);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(method, responseType, uri);
 	}
 }
