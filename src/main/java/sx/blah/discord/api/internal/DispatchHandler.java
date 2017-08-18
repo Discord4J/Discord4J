@@ -735,7 +735,7 @@ class DispatchHandler {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
 		if (channel == null) return;
 
-		// Ensures that the cache doesn't flip if it doesn't have perms
+		// Requires read message perms to view the channel (because discord sends this event regardless) and history perms to request the message
 		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(Arrays.asList(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY))) return;
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
@@ -763,7 +763,7 @@ class DispatchHandler {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
 		if (channel == null) return;
 
-		// Ensures that the cache doesn't flip if it doesn't have perms
+		// Requires read message perms to view the channel (because discord sends this event regardless) and history perms to request the message
 		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(Arrays.asList(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY))) return;
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
