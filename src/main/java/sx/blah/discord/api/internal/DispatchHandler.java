@@ -736,10 +736,7 @@ class DispatchHandler {
 		if (channel == null) return;
 
 		// Ensures that the cache doesn't flip if it doesn't have perms
-		Collection<Permissions> requiredPermissions = new ArrayList<>();
-		requiredPermissions.add(Permissions.READ_MESSAGE_HISTORY);
-		requiredPermissions.add(Permissions.READ_MESSAGES);
-		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(requiredPermissions)) return;
+		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(Arrays.asList(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY))) return;
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
@@ -767,10 +764,7 @@ class DispatchHandler {
 		if (channel == null) return;
 
 		// Ensures that the cache doesn't flip if it doesn't have perms
-		Collection<Permissions> requiredPermissions = new ArrayList<>();
-		requiredPermissions.add(Permissions.READ_MESSAGE_HISTORY);
-		requiredPermissions.add(Permissions.READ_MESSAGES);
-		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(requiredPermissions)) return;
+		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(Arrays.asList(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY))) return;
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
