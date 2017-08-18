@@ -269,7 +269,8 @@ public class ClientBuilder {
 	 * @see <a href=https://discordapp.com/developers/docs/topics/gateway#sharding>Sharding</a>
 	 */
 	public ClientBuilder setShard(int shardIndex, int totalShards) {
-		if (totalShards >= shardIndex) throw new IllegalArgumentException("The shard index is out of bounds for the provided total shard count!");
+		if (shardIndex < 0) throw new IllegalArgumentException("The shard index must be greater than or equal to 0!");
+		if (totalShards <= shardIndex) throw new IllegalArgumentException("The shard index is out of bounds for the provided total shard count!");
 
 		this.shard = new int[]{shardIndex, totalShards};
 		return this;
