@@ -47,6 +47,7 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.MessageList;
+import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.RequestBuilder;
 
 import java.time.LocalDateTime;
@@ -743,7 +744,7 @@ class DispatchHandler {
 	private void reactionAdd(ReactionEventResponse event) {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
 		if (channel == null) return;
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
+		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
@@ -769,7 +770,7 @@ class DispatchHandler {
 	private void reactionRemove(ReactionEventResponse event) {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
 		if (channel == null) return;
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
+		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
