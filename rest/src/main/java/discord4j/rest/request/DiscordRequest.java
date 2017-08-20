@@ -3,19 +3,17 @@ package discord4j.rest.request;
 import discord4j.rest.route.Route;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
+import reactor.core.publisher.MonoProcessor;
 
 import javax.annotation.Nullable;
 
 public class DiscordRequest<T> {
 
+	protected final MonoProcessor<T> mono = MonoProcessor.create();
 	private final Route<T> route;
 	private final String completeUri;
 	@Nullable
 	private final String majorVar;
-	@Nullable
-	public MonoSink<T> sink;
-	private final Mono<T> mono = Mono.create(s -> sink = s);
 	@Nullable
 	private Object body;
 
@@ -32,10 +30,6 @@ public class DiscordRequest<T> {
 		} else {
 			this.majorVar = null;
 		}
-	}
-
-	public Mono<T> mono() {
-		return mono;
 	}
 
 	public Route<T> getRoute() {
@@ -67,5 +61,9 @@ public class DiscordRequest<T> {
 	public DiscordRequest<T> body(Object body) {
 		this.body = body;
 		return this;
+	}
+
+	public Mono<T> mono() {
+		return mono;
 	}
 }

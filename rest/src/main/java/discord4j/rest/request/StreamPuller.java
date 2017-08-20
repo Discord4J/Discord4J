@@ -2,8 +2,6 @@ package discord4j.rest.request;
 
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.route.Route;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,16 +24,21 @@ public class StreamPuller {
 		});
 	}
 
-	private static final Logger log = LoggerFactory.getLogger(StreamPuller.class);
-
-	public <T> void subscribeTo(RequestStream<T> stream) {
-		stream.subscribe(req -> {
-			httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType(), null)
-					.doOnError(t -> log.warn("", t))
-					.subscribe(response -> {
-						if (req.sink != null) {
-							req.sink.success(response);
+	<T> void subscribeTo(RequestStream<T> stream) {
+		stream.getStream().subscribe(req -> {
+			stream.pause();
+			httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType()).materialize()
+					.subscribe(signal -> {
+						if (signal.isOnSubscribe()) {
+							req.mono.onSubscribe(signal.getSubscription());
+						} else if (signal.isOnNext()) {
+							req.mono.onNext(signal.get());
+						} else if (signal.isOnError()) {
+							req.mono.onError(signal.getThrowable());
+						} else if (signal.isOnComplete()) {
+							req.mono.onComplete();
 						}
+						stream.resume();
 					});
 		});
 	}

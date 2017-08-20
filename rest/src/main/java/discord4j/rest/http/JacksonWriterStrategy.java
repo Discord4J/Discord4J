@@ -28,7 +28,6 @@ public class JacksonWriterStrategy implements WriterStrategy<Object> {
 			return false;
 		}
 		Class<?> rawClass = getJavaType(type).getRawClass();
-		System.out.println("blahblahblah: " + objectMapper.canSerialize(rawClass));
 
 		return (Object.class == rawClass)
 				|| !String.class.isAssignableFrom(rawClass) && objectMapper.canSerialize(rawClass);

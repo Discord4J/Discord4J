@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class MessagePojo {
 	public String content;
 
+	public MessagePojo() {}
+
 	public MessagePojo(String content) {
 		this.content = content;
 	}

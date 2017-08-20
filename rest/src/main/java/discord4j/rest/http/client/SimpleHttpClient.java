@@ -20,18 +20,14 @@ public class SimpleHttpClient {
 	private final HttpHeaders headers;
 	private final List<WriterStrategy<?>> writerStrategies;
 	private final List<ReaderStrategy<?>> readerStrategies;
-	@Nullable
-	private final ExchangeFilter defaultExchangeFilter;
 
 	public SimpleHttpClient(HttpClient httpClient, String baseUrl, HttpHeaders headers,
-	                        List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies,
-	                        @Nullable ExchangeFilter defaultExchangeFilter) {
+	                        List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies) {
 		this.httpClient = httpClient;
 		this.baseUrl = baseUrl;
 		this.headers = headers;
 		this.writerStrategies = writerStrategies;
 		this.readerStrategies = readerStrategies;
-		this.defaultExchangeFilter = defaultExchangeFilter;
 	}
 
 	public static SimpleHttpClient.Builder builder() {
@@ -48,8 +44,7 @@ public class SimpleHttpClient {
 		return (ReaderStrategy<T>) strategy;
 	}
 
-	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType,
-	                               @Nullable ExchangeFilter exchangeFilter) {
+	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType) {
 		Objects.requireNonNull(method);
 		Objects.requireNonNull(uri);
 		Objects.requireNonNull(responseType);
@@ -57,17 +52,8 @@ public class SimpleHttpClient {
 		return httpClient.request(method, baseUrl + uri,
 				request -> {
 					headers.forEach(entry -> request.header(entry.getKey(), entry.getValue()));
-					if (defaultExchangeFilter != null) {
-						defaultExchangeFilter.getRequestFilter().accept(request);
-					}
-					if (exchangeFilter != null) {
-						exchangeFilter.getRequestFilter().accept(request);
-					}
 
 					String contentType = request.requestHeaders().get(HttpHeaderNames.CONTENT_TYPE);
-
-					System.out.println(writerStrategies.size());
-
 					return writerStrategies.stream()
 							.filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
 							.findFirst()
@@ -78,13 +64,6 @@ public class SimpleHttpClient {
 				})
 				.log("discord4j.rest.http.client", Level.FINE)
 				.flatMap(response -> {
-					if (defaultExchangeFilter != null) {
-						defaultExchangeFilter.getResponseFilter().accept(response);
-					}
-					if (exchangeFilter != null) {
-						exchangeFilter.getResponseFilter().accept(response);
-					}
-
 					String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
 					return readerStrategies.stream()
 							.filter(s -> s.canRead(responseType, contentType))
@@ -105,8 +84,6 @@ public class SimpleHttpClient {
 		Builder writerStrategy(WriterStrategy<?> strategy);
 
 		Builder readerStrategy(ReaderStrategy<?> strategy);
-
-		Builder exchangeFilter(ExchangeFilter exchangeFilter);
 
 		SimpleHttpClient build();
 	}

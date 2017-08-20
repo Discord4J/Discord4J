@@ -16,8 +16,6 @@ class SimpleHttpClientBuilder implements SimpleHttpClient.Builder {
 	private final List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
 	private final List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
 	private String baseUrl = "";
-	@Nullable
-	private ExchangeFilter exchangeFilter;
 
 	@Override
 	public SimpleHttpClient.Builder baseUrl(String baseUrl) {
@@ -44,14 +42,7 @@ class SimpleHttpClientBuilder implements SimpleHttpClient.Builder {
 	}
 
 	@Override
-	public SimpleHttpClient.Builder exchangeFilter(ExchangeFilter exchangeFilter) {
-		this.exchangeFilter = exchangeFilter;
-		return this;
-	}
-
-	@Override
 	public SimpleHttpClient build() {
-		return new SimpleHttpClient(HttpClient.create(), baseUrl, headers, writerStrategies, readerStrategies,
-				exchangeFilter);
+		return new SimpleHttpClient(HttpClient.create(), baseUrl, headers, writerStrategies, readerStrategies);
 	}
 }
