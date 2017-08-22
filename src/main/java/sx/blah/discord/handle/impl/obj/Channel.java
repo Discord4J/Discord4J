@@ -218,6 +218,9 @@ public class Channel implements IChannel {
 
 			while (retrieved.size() < messageCount) { // while we dont have messageCount messages
 				IMessage[] chunk = getHistory(lastMessage.get(), chunkSize);
+
+				if (chunk.length == 0) break;
+
 				lastMessage.set(chunk[chunk.length - 1].getLongID());
 				Collections.addAll(retrieved, chunk);
 			}
