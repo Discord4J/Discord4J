@@ -17,7 +17,6 @@
 
 package sx.blah.discord.api.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
@@ -26,19 +25,11 @@ import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.impl.events.ChannelDeleteEvent;
-import sx.blah.discord.handle.impl.events.ChannelUpdateEvent;
-import sx.blah.discord.handle.impl.events.TypingEvent;
-import sx.blah.discord.handle.impl.events.VoiceChannelDeleteEvent;
-import sx.blah.discord.handle.impl.events.VoiceChannelUpdateEvent;
-import sx.blah.discord.handle.impl.events.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.*;
 import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
-import sx.blah.discord.handle.impl.events.guild.voice.*;
 import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
@@ -743,7 +734,9 @@ class DispatchHandler {
 	private void reactionAdd(ReactionEventResponse event) {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
 		if (channel == null) return;
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
+
+		// Requires read message perms to view the channel (because discord sends this event regardless) and history perms to request the message
+		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(Arrays.asList(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY))) return;
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
@@ -769,7 +762,9 @@ class DispatchHandler {
 	private void reactionRemove(ReactionEventResponse event) {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
 		if (channel == null) return;
-		if (!channel.getModifiedPermissions(client.getOurUser()).contains(Permissions.READ_MESSAGES)) return; // Discord sends this event no matter our permissions for some reason.
+
+		// Requires read message perms to view the channel (because discord sends this event regardless) and history perms to request the message
+		if (!channel.getModifiedPermissions(client.getOurUser()).containsAll(Arrays.asList(Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY))) return;
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
