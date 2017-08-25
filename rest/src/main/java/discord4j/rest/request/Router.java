@@ -6,21 +6,21 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class StreamPuller {
+public class Router {
 
 	private final SimpleHttpClient httpClient;
 	private final Map<Bucket, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
-	public StreamPuller(SimpleHttpClient httpClient) {
+	public Router(SimpleHttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 
-	public <T> Mono<T> push(DiscordRequest<T> request) {
+	public <T> Mono<T> exchange(DiscordRequest<T> request) {
 		return from(request).push(request);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> RequestStream<T> from(DiscordRequest<T> request) {
+	private <T> RequestStream<T> from(DiscordRequest<T> request) {
 		return (RequestStream<T>) streamMap.computeIfAbsent(request.getBucket(), k -> {
 			RequestStream<T> stream = new RequestStream<>();
 			subscribeTo(stream);
@@ -28,7 +28,7 @@ public class StreamPuller {
 		});
 	}
 
-	<T> void subscribeTo(RequestStream<T> stream) {
+	private <T> void subscribeTo(RequestStream<T> stream) {
 		stream.getStream().subscribe(req -> {
 			stream.pause();
 			httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType()).materialize()

@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.pojo.MessagePojo;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.DiscordRequest;
-import discord4j.rest.request.RequestStream;
-import discord4j.rest.request.StreamPuller;
+import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -30,7 +29,7 @@ public class RequestStreamTest {
 				.writerStrategy(new JacksonWriterStrategy(mapper))
 				.build();
 
-		StreamPuller streamPuller = new StreamPuller(httpClient);
+		Router streamPuller = new Router(httpClient);
 
 		DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hello at " + Instant.now()));
 		streamPuller.push(request)
@@ -54,7 +53,7 @@ public class RequestStreamTest {
 				.writerStrategy(new JacksonWriterStrategy(mapper))
 				.build();
 
-		StreamPuller streamPuller = new StreamPuller(httpClient);
+		Router streamPuller = new Router(httpClient);
 
 		for (int i = 0; i < 5; i++) {
 			final int a = i;
@@ -81,7 +80,7 @@ public class RequestStreamTest {
 				.writerStrategy(new JacksonWriterStrategy(mapper))
 				.build();
 
-		StreamPuller streamPuller = new StreamPuller(httpClient);
+		Router streamPuller = new Router(httpClient);
 
 		DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hi"));
 		Mono<MessagePojo> mono = streamPuller.push(request);
