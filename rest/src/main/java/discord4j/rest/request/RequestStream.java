@@ -28,7 +28,7 @@ public class RequestStream<T> {
 			DiscordRequest<T> request = mapper.apply(route);
 			backing.onNext(request);
 			return request.mono();
-		});
+		}).cache();
 	}
 
 	public Flux<DiscordRequest<T>> getStream() {
