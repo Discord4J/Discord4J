@@ -110,6 +110,14 @@ public interface IUser extends IDiscordObject<IUser> {
 	List<IRole> getRolesForGuild(IGuild guild);
 
 	/**
+	 * Gets the color the user's name is shown as in the given guild.
+	 *
+	 * @param guild The guild to get roles for.
+	 * @return The color the user has in the given guild.
+	 */
+	Color getColorForGuild(IGuild guild);
+
+	/**
 	 * Gets the permissions the user has in the given guild.
 	 *
 	 * @param guild The guild to get permissions for.
