@@ -29,10 +29,10 @@ public class RequestStreamTest {
 				.writerStrategy(new JacksonWriterStrategy(mapper))
 				.build();
 
-		Router streamPuller = new Router(httpClient);
+		Router router = new Router(httpClient);
 
 		DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hello at " + Instant.now()));
-		streamPuller.push(request)
+		router.exchange(request)
 				.subscribe(response -> System.out.println("complete response"));
 
 		TimeUnit.SECONDS.sleep(2);
@@ -53,12 +53,12 @@ public class RequestStreamTest {
 				.writerStrategy(new JacksonWriterStrategy(mapper))
 				.build();
 
-		Router streamPuller = new Router(httpClient);
+		Router router = new Router(httpClient);
 
 		for (int i = 0; i < 5; i++) {
 			final int a = i;
 			DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hi " + a));
-			streamPuller.push(request)
+			router.exchange(request)
 					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
 		}
 
@@ -80,10 +80,10 @@ public class RequestStreamTest {
 				.writerStrategy(new JacksonWriterStrategy(mapper))
 				.build();
 
-		Router streamPuller = new Router(httpClient);
+		Router router = new Router(httpClient);
 
 		DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hi"));
-		Mono<MessagePojo> mono = streamPuller.push(request);
+		Mono<MessagePojo> mono = router.exchange(request);
 
 		mono.subscribe();
 		mono.subscribe();
