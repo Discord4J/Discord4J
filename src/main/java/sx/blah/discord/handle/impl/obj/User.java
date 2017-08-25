@@ -33,6 +33,7 @@ import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
+import java.awt.Color;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -220,6 +221,23 @@ public class User implements IUser {
 		}
 
 		return new LinkedList<>();
+	}
+	
+	@Override
+	public Color getColorForGuild(IGuild guild) {
+		Color color = new Color(0);
+		int maxPosition = -1;
+		List<IRole> roleList = getRolesForGuild(guild);
+		if (roleList.isEmpty()) return color;
+		
+		for (IRole role : roleList) {
+			if (role.getPosition() > maxPosition && !role.getColor().equals(color)) {
+				maxPosition = role.getPosition();
+				color = role.getColor();
+			}
+		}
+		
+		return color;
 	}
 
 	@Override
