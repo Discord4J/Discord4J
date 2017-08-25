@@ -3,7 +3,6 @@ package discord4j.rest.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.pojo.MessagePojo;
 import discord4j.rest.http.client.SimpleHttpClient;
-import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
@@ -31,9 +30,11 @@ public class RequestStreamTest {
 
 		Router router = new Router(httpClient);
 
-		DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hello at " + Instant.now()));
-		router.exchange(request)
+		Routes.MESSAGE_CREATE.newRequest(channelId)
+				.body(new MessagePojo("hello at " + Instant.now()))
+				.exchange(router)
 				.subscribe(response -> System.out.println("complete response"));
+
 
 		TimeUnit.SECONDS.sleep(2);
 	}
@@ -57,8 +58,8 @@ public class RequestStreamTest {
 
 		for (int i = 0; i < 5; i++) {
 			final int a = i;
-			DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hi " + a));
-			router.exchange(request)
+			Routes.MESSAGE_CREATE.newRequest(channelId)
+					.body(new MessagePojo("hi " + a)).exchange(router)
 					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
 		}
 
@@ -82,8 +83,9 @@ public class RequestStreamTest {
 
 		Router router = new Router(httpClient);
 
-		DiscordRequest<MessagePojo> request = Routes.MESSAGE_CREATE.newRequest(channelId).body(new MessagePojo("hi"));
-		Mono<MessagePojo> mono = router.exchange(request);
+		Mono<MessagePojo> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
+				.body(new MessagePojo("hi"))
+				.exchange(router);
 
 		mono.subscribe();
 		mono.subscribe();

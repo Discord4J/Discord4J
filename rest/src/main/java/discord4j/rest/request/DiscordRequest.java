@@ -56,4 +56,8 @@ public class DiscordRequest<T> {
 	public Bucket getBucket() {
 		return bucket;
 	}
+
+	public Mono<T> exchange(Router router) {
+		return router.exchange(this);
+	}
 }
