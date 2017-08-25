@@ -12,24 +12,15 @@ public class DiscordRequest<T> {
 	protected final MonoProcessor<T> mono = MonoProcessor.create();
 	private final Route<T> route;
 	private final String completeUri;
-	@Nullable
-	private final String majorVar;
+	private final Bucket bucket;
+
 	@Nullable
 	private Object body;
 
-	public DiscordRequest(Route<T> route, String completeUri, int majorVarIndex) {
+	public DiscordRequest(Route<T> route, String completeUri) {
 		this.route = route;
 		this.completeUri = completeUri;
-
-		if (majorVarIndex != -1) {
-			int end = completeUri.indexOf("/", majorVarIndex);
-			if (end == -1) {
-				end = completeUri.length();
-			}
-			this.majorVar = completeUri.substring(majorVarIndex, end);
-		} else {
-			this.majorVar = null;
-		}
+		this.bucket = Bucket.of(route.getUri(), completeUri);
 	}
 
 	public Route<T> getRoute() {
@@ -49,11 +40,6 @@ public class DiscordRequest<T> {
 	}
 
 	@Nullable
-	public String getMajorVar() {
-		return majorVar;
-	}
-
-	@Nullable
 	public Object getBody() {
 		return body;
 	}
@@ -65,5 +51,9 @@ public class DiscordRequest<T> {
 
 	public Mono<T> mono() {
 		return mono;
+	}
+
+	public Bucket getBucket() {
+		return bucket;
 	}
 }

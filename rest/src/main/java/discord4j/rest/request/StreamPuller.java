@@ -1,7 +1,7 @@
 package discord4j.rest.request;
 
 import discord4j.rest.http.client.SimpleHttpClient;
-import discord4j.rest.route.Route;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,16 +9,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StreamPuller {
 
 	private final SimpleHttpClient httpClient;
-	private final Map<Route<?>, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
+	private final Map<Bucket, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
 	public StreamPuller(SimpleHttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 
+	public <T> Mono<T> push(DiscordRequest<T> request) {
+		return from(request).push(request);
+	}
+
 	@SuppressWarnings("unchecked")
-	public <T> RequestStream<T> from(Route<T> route) {
-		return (RequestStream<T>) streamMap.computeIfAbsent(route, k -> {
-			RequestStream<T> stream = new RequestStream<>(route);
+	public <T> RequestStream<T> from(DiscordRequest<T> request) {
+		return (RequestStream<T>) streamMap.computeIfAbsent(request.getBucket(), k -> {
+			RequestStream<T> stream = new RequestStream<>();
 			subscribeTo(stream);
 			return stream;
 		});
