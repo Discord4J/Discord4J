@@ -231,7 +231,7 @@ public class User implements IUser {
 		if (roleList.isEmpty()) return color;
 		
 		for (IRole role : roleList) {
-			if (role.getPosition() > maxPosition && !role.getColor().equals(color)) {
+			if (role.getPosition() > maxPosition && role.getColor().getRGB() != 0) {
 				maxPosition = role.getPosition();
 				color = role.getColor();
 			}
