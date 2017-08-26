@@ -22,6 +22,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.cache.LongMap;
 
+import java.awt.*;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
