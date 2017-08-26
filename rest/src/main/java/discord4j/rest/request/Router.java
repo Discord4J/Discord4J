@@ -38,20 +38,17 @@ public class Router {
 	class StreamConsumer<T> implements Consumer<DiscordRequest<T>> {
 
 		private final Consumer<HttpHeaders> responseHeadersConsumer = headers -> {
-			/*
 			String remaining = headers.get("X-RateLimit-Remaining");
+			System.out.println(remaining);
 			if (remaining != null) {
 				long value = Long.valueOf(remaining);
 				if (value == 0) {
 					long retryAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
 					System.out.println("retryAt: " + retryAt);
-					sleepTime = Duration.ofMillis(retryAt - System.currentTimeMillis());
+					System.out.println("current: " + System.currentTimeMillis() / 1000);
+					sleepTime = Duration.ofSeconds(retryAt - (System.currentTimeMillis() / 1000));
 				}
 			}
-			*/
-
-			sleepTime = Duration.ofSeconds(2);
-
 		};
 		private final RequestStream<T> stream;
 		private Duration sleepTime = Duration.ZERO;

@@ -63,7 +63,7 @@ public class SimpleHttpClient {
 							.orElseGet(() -> Mono.error(new RuntimeException("No strategies to write this request: " +
 									body + " - " + contentType)));
 				})
-				.log("discord4j.rest.http.client", Level.FINE)
+				//.log("discord4j.rest.http.client", Level.FINE)
 				.flatMap(response -> {
 					responseHeadersConsumer.accept(response.responseHeaders());
 

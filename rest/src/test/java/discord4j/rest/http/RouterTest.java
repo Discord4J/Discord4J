@@ -1,17 +1,29 @@
 package discord4j.rest.http;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.pojo.MessagePojo;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 public class RouterTest {
+
+	@Before
+	public void disableSomeLogs() {
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		context.getLogger("reactor.ipc.netty").setLevel(Level.INFO);
+		context.getLogger("io.netty").setLevel(Level.INFO);
+	}
 
 	@Test
 	public void test() throws Exception {
@@ -56,10 +68,11 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 6; i++) {
 			final int a = i;
 			Routes.MESSAGE_CREATE.newRequest(channelId)
-					.body(new MessagePojo("hi " + a)).exchange(router)
+					.body(new MessagePojo("hi " + a))
+					.exchange(router)
 					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
 		}
 
