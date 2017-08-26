@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
-public class RequestStreamTest {
+public class RouterTest {
 
 	@Test
 	public void test() throws Exception {

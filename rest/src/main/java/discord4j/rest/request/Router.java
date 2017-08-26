@@ -5,6 +5,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class Router {
 
@@ -16,34 +17,39 @@ public class Router {
 	}
 
 	public <T> Mono<T> exchange(DiscordRequest<T> request) {
-		return from(request).push(request);
+		return Mono.defer(() -> {
+			RequestStream<T> stream = getStream(request);
+			stream.push(request);
+			return request.mono();
+		}).cache();
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> RequestStream<T> from(DiscordRequest<T> request) {
+	private <T> RequestStream<T> getStream(DiscordRequest<T> request) {
 		return (RequestStream<T>) streamMap.computeIfAbsent(request.getBucket(), k -> {
 			RequestStream<T> stream = new RequestStream<>();
-			subscribeTo(stream);
-			return stream;
-		});
-	}
 
-	private <T> void subscribeTo(RequestStream<T> stream) {
-		stream.getStream().subscribe(req -> {
-			stream.pause();
-			httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType()).materialize()
-					.subscribe(signal -> {
-						if (signal.isOnSubscribe()) {
-							req.mono.onSubscribe(signal.getSubscription());
-						} else if (signal.isOnNext()) {
-							req.mono.onNext(signal.get());
-						} else if (signal.isOnError()) {
-							req.mono.onError(signal.getThrowable());
-						} else if (signal.isOnComplete()) {
-							req.mono.onComplete();
-						}
-						stream.resume();
-					});
+			stream.read().subscribe(new Consumer<DiscordRequest<T>>() {
+				@SuppressWarnings("ConstantConditions")
+				@Override
+				public void accept(DiscordRequest<T> req) {
+					httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType())
+							.materialize()
+							.subscribe(signal -> {
+								if (signal.isOnSubscribe()) {
+									req.mono.onSubscribe(signal.getSubscription());
+								} else if (signal.isOnNext()) {
+									req.mono.onNext(signal.get());
+								} else if (signal.isOnError()) {
+									req.mono.onError(signal.getThrowable());
+								} else if (signal.isOnComplete()) {
+									req.mono.onComplete();
+								}
+								stream.read().subscribe(this);
+							});
+				}
+			});
+			return stream;
 		});
 	}
 }
