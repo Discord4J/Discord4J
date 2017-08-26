@@ -54,7 +54,7 @@ public class Router {
 
 		};
 		private final RequestStream<T> stream;
-		private Duration sleepTime = Duration.ofSeconds(1);
+		private Duration sleepTime = Duration.ZERO;
 
 		StreamConsumer(RequestStream<T> stream) {
 			this.stream = stream;
