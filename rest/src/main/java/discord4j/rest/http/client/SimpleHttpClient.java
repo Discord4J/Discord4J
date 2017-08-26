@@ -11,6 +11,7 @@ import reactor.ipc.netty.http.client.HttpClient;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class SimpleHttpClient {
@@ -44,7 +45,7 @@ public class SimpleHttpClient {
 		return (ReaderStrategy<T>) strategy;
 	}
 
-	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType) {
+	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType, Consumer<HttpHeaders> responseHeadersConsumer) {
 		Objects.requireNonNull(method);
 		Objects.requireNonNull(uri);
 		Objects.requireNonNull(responseType);
@@ -64,6 +65,8 @@ public class SimpleHttpClient {
 				})
 				.log("discord4j.rest.http.client", Level.FINE)
 				.flatMap(response -> {
+					responseHeadersConsumer.accept(response.responseHeaders());
+
 					String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
 					return readerStrategies.stream()
 							.filter(s -> s.canRead(responseType, contentType))

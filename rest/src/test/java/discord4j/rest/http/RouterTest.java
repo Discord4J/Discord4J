@@ -63,7 +63,7 @@ public class RouterTest {
 					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
 		}
 
-		TimeUnit.SECONDS.sleep(2);
+		TimeUnit.SECONDS.sleep(60);
 	}
 
 	@Test
