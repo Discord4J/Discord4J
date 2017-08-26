@@ -54,6 +54,12 @@ public class Discord4J {
 	 * The version of the project.
 	 */
 	public static final String VERSION;
+
+	/**
+	 * The commit hash of the version of the project.
+	 */
+	public static final String COMMIT;
+
 	/**
 	 * The description of the project.
 	 */
@@ -155,19 +161,17 @@ public class Discord4J {
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.MAIN, "Discord4J Internal Exception", e);
 		}
+
 		NAME = properties.getProperty("application.name");
-		String branch = properties.getProperty("application.git.branch");
-		if (branch.equals("master"))
-			VERSION = properties.getProperty("application.version");
-		else
-			VERSION = String.format("%s (%s-%s)", properties.getProperty("application.version"), branch, properties.getProperty("application.git.commit"));
+		VERSION = properties.getProperty("application.version");
+		COMMIT = properties.getProperty("application.git.commit");
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
 
 		jettyLogger = Log.getLog();
 		Log.setLog(ignoredJettyLogger);
 
-		LOGGER.info(LogMarkers.MAIN, "{} v{} ({})", NAME, VERSION, URL);
+		LOGGER.info(LogMarkers.MAIN, "{} v{} {} ({})", NAME, VERSION, COMMIT, URL);
 		LOGGER.info(LogMarkers.MAIN, "{}", DESCRIPTION);
 	}
 

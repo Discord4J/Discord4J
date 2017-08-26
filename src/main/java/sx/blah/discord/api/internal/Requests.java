@@ -47,6 +47,11 @@ import static sx.blah.discord.Discord4J.*;
 public class Requests {
 
 	/**
+	 * The user agent used for requests.
+	 */
+	public static final String USER_AGENT = String.format("DiscordBot (%s, %s)", URL, VERSION);
+
+	/**
 	 * A Requests instance that has no client associated with it.
 	 */
 	public static final Requests GENERAL_REQUESTS = new Requests(null);
@@ -91,10 +96,6 @@ public class Requests {
 	 * A specific HTTP method request type.
 	 */
 	public final class Request {
-		/**
-		 * The user agent used for requests.
-		 */
-		private final String userAgent = String.format("DiscordBot (%s v%s) - %s %s", URL, VERSION, NAME, DESCRIPTION);
 
 		/**
 		 * The client used for these requests.
@@ -105,7 +106,7 @@ public class Requests {
 		 * The HTTP client requests are made on.
 		 */
 		//Same as HttpClients.createDefault() but with the proper user-agent
-		private final CloseableHttpClient CLIENT = HttpClients.custom().setUserAgent(userAgent).build();
+		private final CloseableHttpClient CLIENT = HttpClients.custom().setUserAgent(USER_AGENT).build();
 
 		/**
 		 * The class of the method type used for the request
