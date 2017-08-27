@@ -11,22 +11,20 @@ import reactor.ipc.netty.http.client.HttpClient;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.logging.Level;
 
 public class SimpleHttpClient {
 
 	private final HttpClient httpClient;
 	private final String baseUrl;
-	private final HttpHeaders headers;
+	private final HttpHeaders defaultHeaders;
 	private final List<WriterStrategy<?>> writerStrategies;
 	private final List<ReaderStrategy<?>> readerStrategies;
 
-	public SimpleHttpClient(HttpClient httpClient, String baseUrl, HttpHeaders headers,
+	public SimpleHttpClient(HttpClient httpClient, String baseUrl, HttpHeaders defaultHeaders,
 	                        List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies) {
 		this.httpClient = httpClient;
 		this.baseUrl = baseUrl;
-		this.headers = headers;
+		this.defaultHeaders = defaultHeaders;
 		this.writerStrategies = writerStrategies;
 		this.readerStrategies = readerStrategies;
 	}
@@ -45,14 +43,16 @@ public class SimpleHttpClient {
 		return (ReaderStrategy<T>) strategy;
 	}
 
-	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType, Consumer<HttpHeaders> responseHeadersConsumer) {
+	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType,
+	                               ExchangeFilter exchangeFilter) {
 		Objects.requireNonNull(method);
 		Objects.requireNonNull(uri);
 		Objects.requireNonNull(responseType);
 
 		return httpClient.request(method, baseUrl + uri,
 				request -> {
-					headers.forEach(entry -> request.header(entry.getKey(), entry.getValue()));
+					defaultHeaders.forEach(entry -> request.header(entry.getKey(), entry.getValue()));
+					exchangeFilter.getRequestFilter().accept(request);
 
 					String contentType = request.requestHeaders().get(HttpHeaderNames.CONTENT_TYPE);
 					return writerStrategies.stream()
@@ -63,9 +63,8 @@ public class SimpleHttpClient {
 							.orElseGet(() -> Mono.error(new RuntimeException("No strategies to write this request: " +
 									body + " - " + contentType)));
 				})
-				//.log("discord4j.rest.http.client", Level.FINE)
 				.flatMap(response -> {
-					responseHeadersConsumer.accept(response.responseHeaders());
+					exchangeFilter.getResponseFilter().accept(response);
 
 					String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
 					return readerStrategies.stream()

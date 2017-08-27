@@ -1,10 +1,13 @@
 package discord4j.rest.request;
 
+import discord4j.rest.http.client.ExchangeFilter;
 import discord4j.rest.http.client.SimpleHttpClient;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -37,21 +40,21 @@ public class Router {
 
 	class StreamConsumer<T> implements Consumer<DiscordRequest<T>> {
 
-		private final Consumer<HttpHeaders> responseHeadersConsumer = headers -> {
-			String remaining = headers.get("X-RateLimit-Remaining");
-			System.out.println(remaining);
-			if (remaining != null) {
-				long value = Long.valueOf(remaining);
-				if (value == 0) {
-					long retryAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
-					System.out.println("retryAt: " + retryAt);
-					System.out.println("current: " + System.currentTimeMillis() / 1000);
-					sleepTime = Duration.ofSeconds(retryAt - (System.currentTimeMillis() / 1000));
-				}
-			}
-		};
 		private final RequestStream<T> stream;
-		private Duration sleepTime = Duration.ZERO;
+		private volatile Duration sleepTime = Duration.ZERO;
+		private final ExchangeFilter exchangeFilter = ExchangeFilter.builder()
+				.responseFilter(response -> {
+					HttpHeaders headers = response.responseHeaders();
+
+					int remaining = headers.getInt("X-RateLimit-Remaining");
+					if (remaining == 0) {
+						long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
+						long discordTime = OffsetDateTime.parse(headers.get("date"), DateTimeFormatter
+								.RFC_1123_DATE_TIME).toEpochSecond();
+						sleepTime = Duration.ofSeconds(resetAt - discordTime);
+					}
+				})
+				.build();
 
 		StreamConsumer(RequestStream<T> stream) {
 			this.stream = stream;
@@ -60,7 +63,7 @@ public class Router {
 		@SuppressWarnings("ConstantConditions")
 		@Override
 		public void accept(DiscordRequest<T> req) {
-			httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType(), responseHeadersConsumer)
+			httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType(), exchangeFilter)
 					.materialize()
 					.subscribe(signal -> {
 						if (signal.isOnSubscribe()) {
@@ -73,7 +76,10 @@ public class Router {
 							req.mono.onComplete();
 						}
 
-						Mono.delay(sleepTime).subscribe(l -> stream.read().subscribe(this));
+						Mono.delay(sleepTime).subscribe(l -> {
+							stream.read().subscribe(this);
+							sleepTime = Duration.ZERO;
+						});
 					});
 		}
 	}

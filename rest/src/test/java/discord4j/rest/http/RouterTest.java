@@ -9,7 +9,6 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
@@ -48,7 +47,7 @@ public class RouterTest {
 				.subscribe(response -> System.out.println("complete response"));
 
 
-		TimeUnit.SECONDS.sleep(2);
+		TimeUnit.SECONDS.sleep(1);
 	}
 
 	@Test
@@ -68,7 +67,7 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 10; i++) {
 			final int a = i;
 			Routes.MESSAGE_CREATE.newRequest(channelId)
 					.body(new MessagePojo("hi " + a))
@@ -76,7 +75,7 @@ public class RouterTest {
 					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
 		}
 
-		TimeUnit.SECONDS.sleep(60);
+		TimeUnit.SECONDS.sleep(10);
 	}
 
 	@Test
