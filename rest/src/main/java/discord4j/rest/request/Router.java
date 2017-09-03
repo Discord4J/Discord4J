@@ -8,7 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Router {
 
-	private final SimpleHttpClient httpClient;
+	final SimpleHttpClient httpClient;
+	final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter();
 	private final Map<Bucket, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
 	public Router(SimpleHttpClient httpClient) {
@@ -26,7 +27,7 @@ public class Router {
 	@SuppressWarnings("unchecked")
 	private <T> RequestStream<T> getStream(DiscordRequest<T> request) {
 		return (RequestStream<T>) streamMap.computeIfAbsent(request.getBucket(), k -> {
-			RequestStream<T> stream = new RequestStream<>(httpClient);
+			RequestStream<T> stream = new RequestStream<>(this);
 			stream.start();
 			return stream;
 		});

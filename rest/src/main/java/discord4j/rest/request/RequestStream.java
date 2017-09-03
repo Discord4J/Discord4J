@@ -3,21 +3,52 @@ package discord4j.rest.request;
 import discord4j.rest.http.client.ExchangeFilter;
 import discord4j.rest.http.client.SimpleHttpClient;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.client.HttpClientException;
+import reactor.retry.BackoffDelay;
+import reactor.retry.Retry;
+import reactor.retry.RetryContext;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class RequestStream<T> {
 
+	private final Retry<AtomicLong> RETRY = Retry.onlyIf(new Predicate<RetryContext<AtomicLong>>() {
+		@Override
+		public boolean test(RetryContext<AtomicLong> ctx) {
+			Throwable exception = ctx.exception();
+			if (exception instanceof HttpClientException) {
+				HttpClientException httpException = (HttpClientException) exception;
+				if (httpException.status().code() == 429) {
+					boolean global = Boolean.valueOf(httpException.headers().get("X-RateLimit-Global"));
+					long retryAfter = Long.valueOf(httpException.headers().get("Retry-After"));
+
+					if (global) {
+						globalRateLimiter.rateLimitFor(Duration.ofMillis(retryAfter));
+					} else {
+						ctx.applicationContext().set(retryAfter);
+					}
+				}
+			}
+			return false;
+		}
+	}).backoff(context -> new BackoffDelay(Duration.ofMillis(((AtomicLong) context.applicationContext()).get())));
+
 	private final EmitterProcessor<DiscordRequest<T>> backing = EmitterProcessor.create(false);
 	private final SimpleHttpClient httpClient;
+	private final GlobalRateLimiter globalRateLimiter;
 
-	RequestStream(SimpleHttpClient httpClient) {
-		this.httpClient = httpClient;
+	RequestStream(Router router) {
+		this.httpClient = router.httpClient;
+		this.globalRateLimiter = router.globalRateLimiter;
 	}
 
 	void push(DiscordRequest<T> request) {
@@ -53,7 +84,9 @@ public class RequestStream<T> {
 		@SuppressWarnings("ConstantConditions")
 		@Override
 		public void accept(DiscordRequest<T> req) {
-			httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType(), exchangeFilter)
+			Mono.when(globalRateLimiter).compose(mono -> Mono.just(new Object()))
+					.flatMap(e -> httpClient.exchange(req.getMethod(), req.getUri(), req.getBody(), req.getResponseType(), exchangeFilter))
+					.retryWhen(RETRY)
 					.materialize()
 					.subscribe(signal -> {
 						if (signal.isOnSubscribe()) {

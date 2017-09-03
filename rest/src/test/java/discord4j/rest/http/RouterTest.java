@@ -5,6 +5,7 @@ import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.pojo.MessagePojo;
 import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.request.GlobalRateLimiter;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Before;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
@@ -67,7 +69,7 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 6; i++) {
 			final int a = i;
 			Routes.MESSAGE_CREATE.newRequest(channelId)
 					.body(new MessagePojo("hi " + a))
