@@ -483,7 +483,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	void changeVerificationLevel(VerificationLevel verification);
 
 	/**
-	 * Changes the name of the guild.
+	 * Changes the icon of the guild.
 	 *
 	 * @param icon The icon of the guild (or null to remove it).
 	 */
