@@ -40,7 +40,11 @@ public class RequestStream<T> {
 			}
 			return false;
 		}
-	}).backoff(context -> new BackoffDelay(Duration.ofMillis(((AtomicLong) context.applicationContext()).get())));
+	}).backoff(context -> {
+		long delay = ((AtomicLong) context.applicationContext()).get();
+		((AtomicLong) context.applicationContext()).set(0L);
+		return new BackoffDelay(Duration.ofMillis(delay));
+	});
 
 	private final EmitterProcessor<DiscordRequest<T>> backing = EmitterProcessor.create(false);
 	private final SimpleHttpClient httpClient;
