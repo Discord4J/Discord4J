@@ -15,12 +15,12 @@ import java.util.Objects;
 public class Route<T> {
 
 	private final HttpMethod method;
-	private final String uri;
+	private final String uriTemplate;
 	private final Class<T> responseType;
 
-	Route(HttpMethod method, String uri, Class<T> responseType) {
+	private Route(HttpMethod method, String uriTemplate, Class<T> responseType) {
 		this.method = method;
-		this.uri = uri;
+		this.uriTemplate = uriTemplate;
 		this.responseType = responseType;
 	}
 
@@ -44,24 +44,8 @@ public class Route<T> {
 		return new Route<>(HttpMethod.DELETE, uri, responseType);
 	}
 
-	public Route<T> query(String key, Object value) {
-		char c;
-		if (getUri().contains("?")) {
-			c = '&';
-		} else {
-			c = '?';
-		}
-		String newUri = getUri() + c + key + "=" + value;
-
-		return new Route<>(getMethod(), newUri, getResponseType());
-	}
-
 	public HttpMethod getMethod() {
 		return method;
-	}
-
-	public String getUri() {
-		return uri;
 	}
 
 	public Class<T> getResponseType() {
@@ -69,22 +53,31 @@ public class Route<T> {
 	}
 
 	public DiscordRequest<T> newRequest(Object... uriVars) {
-		return new DiscordRequest<>(this, RouteUtils.expand(getUri(), uriVars));
+		return new DiscordRequest<>(this, RouteUtils.expand(getUriTemplate(), uriVars));
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-
-		if (!obj.getClass().isAssignableFrom(Route.class)) return false;
-
-		Route other = (Route) obj;
-
-		return other.method.equals(method) && other.responseType.equals(responseType) && other.uri.equals(uri);
+	public String getUriTemplate() {
+		return uriTemplate;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(method, responseType, uri);
+		return Objects.hash(method, responseType, uriTemplate);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+
+		if (!obj.getClass().isAssignableFrom(Route.class)) {
+			return false;
+		}
+
+		Route other = (Route) obj;
+
+		return other.method.equals(method) && other.responseType.equals(responseType)
+				&& other.uriTemplate.equals(uriTemplate);
 	}
 }

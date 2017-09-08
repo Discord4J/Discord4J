@@ -12,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -105,5 +107,65 @@ public class RouterTest {
 		mono.subscribe();
 
 		TimeUnit.SECONDS.sleep(2);
+	}
+
+	@Test
+	public void testCustomThreadingModel() throws Exception {
+		String token = System.getenv("token");
+		String channelId = System.getenv("channel");
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		SimpleHttpClient httpClient = SimpleHttpClient.builder()
+				.baseUrl("https://discordapp.com/api/v6")
+				.defaultHeader("Authorization", "Bot " + token)
+				.defaultHeader("Content-Type", "application/json")
+				.readerStrategy(new JacksonReaderStrategy<>(mapper))
+				.writerStrategy(new JacksonWriterStrategy(mapper))
+				.build();
+
+		Router router = new Router(httpClient);
+		Scheduler thread = Schedulers.single();
+
+		for (int i = 0; i < 6; i++) {
+			final int a = i;
+			Routes.MESSAGE_CREATE.newRequest(channelId)
+					.body(new MessagePojo("hi " + a))
+					.exchange(router)
+					.publishOn(thread)
+					.cancelOn(thread)
+					.subscribeOn(thread)
+					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
+		}
+
+		TimeUnit.SECONDS.sleep(10);
+	}
+
+	@Test
+	public void testBlocking() throws Exception {
+		String token = System.getenv("token");
+		String channelId = System.getenv("channel");
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		SimpleHttpClient httpClient = SimpleHttpClient.builder()
+				.baseUrl("https://discordapp.com/api/v6")
+				.defaultHeader("Authorization", "Bot " + token)
+				.defaultHeader("Content-Type", "application/json")
+				.readerStrategy(new JacksonReaderStrategy<>(mapper))
+				.writerStrategy(new JacksonWriterStrategy(mapper))
+				.build();
+
+		Router router = new Router(httpClient);
+
+		Routes.MESSAGE_CREATE.newRequest(channelId)
+				.body(new MessagePojo("hi 0 at " + Instant.now()))
+				.exchange(router)
+				.block();
+
+		Routes.MESSAGE_CREATE.newRequest(channelId)
+				.body(new MessagePojo("hi 1 at " + Instant.now()))
+				.exchange(router)
+				.block();
 	}
 }

@@ -7,36 +7,38 @@ import reactor.core.publisher.MonoProcessor;
 
 import javax.annotation.Nullable;
 
+/**
+ * Encodes all of the needed information to make an HTTP request to Discord.
+ * <p>
+ * When exchanged on a {@link discord4j.rest.request.Router Router}, the request's {@link #mono mono} receives signals
+ * based on the response of the request.
+ * <p>
+ * More than one call to {@link Router#exchange(DiscordRequest)} for the same request is illegal.
+ *
+ * @param <T> The response type.
+ * @since 3.0
+ */
 public class DiscordRequest<T> {
 
 	protected final MonoProcessor<T> mono = MonoProcessor.create();
 	private final Route<T> route;
 	private final String completeUri;
-	private final Bucket bucket;
 
 	@Nullable
 	private Object body;
+	private boolean exchanged = false;
 
 	public DiscordRequest(Route<T> route, String completeUri) {
 		this.route = route;
 		this.completeUri = completeUri;
-		this.bucket = Bucket.of(route.getUri(), completeUri);
 	}
 
-	public Route<T> getRoute() {
+	Route<T> getRoute() {
 		return route;
 	}
 
-	public HttpMethod getMethod() {
-		return route.getMethod();
-	}
-
-	public String getUri() {
+	String getCompleteUri() {
 		return completeUri;
-	}
-
-	public Class<T> getResponseType() {
-		return route.getResponseType();
 	}
 
 	@Nullable
@@ -53,11 +55,16 @@ public class DiscordRequest<T> {
 		return mono;
 	}
 
-	public Bucket getBucket() {
-		return bucket;
-	}
-
 	public Mono<T> exchange(Router router) {
 		return router.exchange(this);
+	}
+
+	boolean isExchanged() {
+		return exchanged;
+	}
+
+	void setExchanged(boolean exchanged) {
+		if (this.exchanged) throw new IllegalStateException("Attempt to set exchanged value twice.");
+		this.exchanged = exchanged;
 	}
 }
