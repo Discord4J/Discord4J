@@ -35,6 +35,11 @@ class RequestStream<T> {
 	private final EmitterProcessor<DiscordRequest<T>> backing = EmitterProcessor.create(false);
 	private final SimpleHttpClient httpClient;
 	private final GlobalRateLimiter globalRateLimiter;
+	/**
+	 * The retry function used for reading and completing HTTP requests. The back off is determined by the ratelimit
+	 * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the back off is
+	 * applied to the global rate limiter. Otherwise, it is applied only to this stream.
+	 */
 	private final Retry<AtomicLong> RETRY = Retry.onlyIf(new Predicate<RetryContext<AtomicLong>>() {
 		@Override
 		public boolean test(RetryContext<AtomicLong> ctx) {
@@ -77,6 +82,14 @@ class RequestStream<T> {
 		return backing.next();
 	}
 
+	/**
+	 * Reads and completes one request from the stream at a time. If a request fails, it is retried according to the
+	 * {@link #RETRY retry function}. The reader may wait in between each request if preemptive ratelimiting is
+	 * necessary according to the response headers.
+	 *
+	 * @see #sleepTime
+	 * @see #exchangeFilter
+	 */
 	private class Reader implements Consumer<DiscordRequest<T>> {
 
 		private volatile Duration sleepTime = Duration.ZERO;

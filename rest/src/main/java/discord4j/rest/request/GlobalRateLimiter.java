@@ -30,6 +30,11 @@ public class GlobalRateLimiter implements Publisher<Void> {
 		}
 	}));
 
+	/**
+	 * Prevents the rate limiter from completing subscriptions for the given duration.
+	 *
+	 * @param duration The duration to prevent completions for.
+	 */
 	void rateLimitFor(Duration duration) {
 		isRateLimited = true;
 		Mono.delay(duration).subscribe(l -> {

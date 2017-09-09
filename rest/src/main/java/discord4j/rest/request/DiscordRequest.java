@@ -1,7 +1,6 @@
 package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
-import io.netty.handler.codec.http.HttpMethod;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
