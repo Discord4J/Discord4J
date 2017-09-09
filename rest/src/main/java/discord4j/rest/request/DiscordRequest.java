@@ -2,7 +2,6 @@ package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 
 import javax.annotation.Nullable;
 
@@ -19,13 +18,11 @@ import javax.annotation.Nullable;
  */
 public class DiscordRequest<T> {
 
-	protected final MonoProcessor<T> mono = MonoProcessor.create();
 	private final Route<T> route;
 	private final String completeUri;
 
 	@Nullable
 	private Object body;
-	private boolean exchanged = false;
 
 	public DiscordRequest(Route<T> route, String completeUri) {
 		this.route = route;
@@ -50,22 +47,7 @@ public class DiscordRequest<T> {
 		return this;
 	}
 
-	public Mono<T> mono() {
-		return mono;
-	}
-
 	public Mono<T> exchange(Router router) {
 		return router.exchange(this);
-	}
-
-	boolean isExchanged() {
-		return exchanged;
-	}
-
-	void setExchanged(boolean exchanged) {
-		if (this.exchanged) {
-			throw new IllegalStateException("Attempt to set exchanged value twice.");
-		}
-		this.exchanged = exchanged;
 	}
 }

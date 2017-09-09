@@ -2,6 +2,8 @@ package discord4j.rest.request;
 
 import discord4j.rest.http.client.SimpleHttpClient;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+import reactor.util.function.Tuples;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,16 +23,13 @@ public class Router {
 	}
 
 	public <T> Mono<T> exchange(DiscordRequest<T> request) {
-		if (request.isExchanged()) {
-			throw new IllegalStateException("Attempt to exchange request twice.");
-		}
-
 		return Mono.defer(() -> {
 			RequestStream<T> stream = getStream(request);
-			stream.push(request);
-			request.setExchanged(true);
-			return request.mono();
-		}).cache();
+			MonoProcessor<T> callback = MonoProcessor.create();
+
+			stream.push(Tuples.of(callback, request));
+			return callback;
+		});
 	}
 
 	@SuppressWarnings("unchecked")

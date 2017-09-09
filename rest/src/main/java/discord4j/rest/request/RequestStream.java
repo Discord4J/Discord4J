@@ -5,14 +5,14 @@ import discord4j.rest.http.client.SimpleHttpClient;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 import reactor.ipc.netty.http.client.HttpClientException;
 import reactor.retry.BackoffDelay;
 import reactor.retry.Retry;
 import reactor.retry.RetryContext;
+import reactor.util.function.Tuple2;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -31,7 +31,7 @@ import java.util.function.Predicate;
  */
 class RequestStream<T> {
 
-	private final EmitterProcessor<DiscordRequest<T>> backing = EmitterProcessor.create(false);
+	private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing = EmitterProcessor.create(false);
 	private final SimpleHttpClient httpClient;
 	private final GlobalRateLimiter globalRateLimiter;
 	/**
@@ -69,7 +69,7 @@ class RequestStream<T> {
 		this.globalRateLimiter = globalRateLimiter;
 	}
 
-	void push(DiscordRequest<T> request) {
+	void push(Tuple2<MonoProcessor<T>, DiscordRequest<T>> request) {
 		backing.onNext(request);
 	}
 
@@ -77,7 +77,7 @@ class RequestStream<T> {
 		read().subscribe(new Reader());
 	}
 
-	private Mono<DiscordRequest<T>> read() {
+	private Mono<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> read() {
 		return backing.next();
 	}
 
@@ -89,7 +89,7 @@ class RequestStream<T> {
 	 * @see #sleepTime
 	 * @see #exchangeFilter
 	 */
-	private class Reader implements Consumer<DiscordRequest<T>> {
+	private class Reader implements Consumer<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> {
 
 		private volatile Duration sleepTime = Duration.ZERO;
 		private final ExchangeFilter exchangeFilter = ExchangeFilter.builder()
@@ -99,8 +99,7 @@ class RequestStream<T> {
 					int remaining = headers.getInt("X-RateLimit-Remaining");
 					if (remaining == 0) {
 						long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
-						long discordTime = OffsetDateTime.parse(headers.get("Date"),
-								DateTimeFormatter.RFC_1123_DATE_TIME).toEpochSecond();
+						long discordTime = headers.getTimeMillis("Date") / 1000;
 
 						sleepTime = Duration.ofSeconds(resetAt - discordTime);
 					}
@@ -109,7 +108,10 @@ class RequestStream<T> {
 
 		@SuppressWarnings("ConstantConditions")
 		@Override
-		public void accept(DiscordRequest<T> req) {
+		public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
+			MonoProcessor<T> callback = tuple.getT1();
+			DiscordRequest<T> req = tuple.getT2();
+
 			Mono.when(globalRateLimiter)
 					.materialize()
 					.flatMap(e -> httpClient.exchange(req.getRoute().getMethod(), req.getCompleteUri(), req.getBody(),
@@ -118,18 +120,18 @@ class RequestStream<T> {
 					.materialize()
 					.subscribe(signal -> {
 						if (signal.isOnSubscribe()) {
-							req.mono.onSubscribe(signal.getSubscription());
+							callback.onSubscribe(signal.getSubscription());
 						} else if (signal.isOnNext()) {
-							req.mono.onNext(signal.get());
+							callback.onNext(signal.get());
 						} else if (signal.isOnError()) {
-							req.mono.onError(signal.getThrowable());
+							callback.onError(signal.getThrowable());
 						} else if (signal.isOnComplete()) {
-							req.mono.onComplete();
+							callback.onComplete();
 						}
 
 						Mono.delay(sleepTime).subscribe(l -> {
-							read().subscribe(this);
 							sleepTime = Duration.ZERO;
+							read().subscribe(this);
 						});
 					});
 		}

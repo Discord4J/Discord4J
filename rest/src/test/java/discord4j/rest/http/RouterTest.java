@@ -11,6 +11,7 @@ import discord4j.rest.route.Routes;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -71,7 +72,7 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 10; i++) {
 			final int a = i;
 			Routes.MESSAGE_CREATE.newRequest(channelId)
 					.body(new MessagePojo("hi " + a))
