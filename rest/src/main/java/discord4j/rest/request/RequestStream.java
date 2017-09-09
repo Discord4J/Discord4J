@@ -22,7 +22,6 @@ import java.util.function.Predicate;
  * be {@link #push(DiscordRequest) written} to the stream. However, the
  * {@link discord4j.rest.request.RequestStream.Reader reader} ensures that only one is read at a time. This
  * linearization ensures proper ratelimit handling.
- *
  * <p>
  * The flow of a request through the stream is as follows:
  * <p>

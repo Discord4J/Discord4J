@@ -63,7 +63,9 @@ public class DiscordRequest<T> {
 	}
 
 	void setExchanged(boolean exchanged) {
-		if (this.exchanged) throw new IllegalStateException("Attempt to set exchanged value twice.");
+		if (this.exchanged) {
+			throw new IllegalStateException("Attempt to set exchanged value twice.");
+		}
 		this.exchanged = exchanged;
 	}
 }

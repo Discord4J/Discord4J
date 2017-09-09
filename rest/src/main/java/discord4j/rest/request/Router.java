@@ -38,9 +38,9 @@ public class Router {
 		return (RequestStream<T>)
 				streamMap.computeIfAbsent(BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri()),
 						k -> {
-					RequestStream<T> stream = new RequestStream<>(httpClient, globalRateLimiter);
-					stream.start();
-					return stream;
-				});
+							RequestStream<T> stream = new RequestStream<>(httpClient, globalRateLimiter);
+							stream.start();
+							return stream;
+						});
 	}
 }
