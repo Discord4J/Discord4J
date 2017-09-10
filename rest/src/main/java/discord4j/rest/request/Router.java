@@ -22,6 +22,14 @@ public class Router {
 		this.httpClient = httpClient;
 	}
 
+	/**
+	 * Queues a request for execution in the appropriate {@link discord4j.rest.request.RequestStream request stream}
+	 * according to the request's {@link discord4j.rest.request.BucketKey bucket}.
+	 *
+	 * @param request The request to queue.
+	 * @param <T> The request's response type.
+	 * @return A mono that receives signals based on the request's response.
+	 */
 	public <T> Mono<T> exchange(DiscordRequest<T> request) {
 		return Mono.defer(() -> {
 			RequestStream<T> stream = getStream(request);

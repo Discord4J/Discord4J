@@ -7,11 +7,6 @@ import javax.annotation.Nullable;
 
 /**
  * Encodes all of the needed information to make an HTTP request to Discord.
- * <p>
- * When exchanged on a {@link discord4j.rest.request.Router Router}, the request's {@link #mono mono} receives signals
- * based on the response of the request.
- * <p>
- * More than one call to {@link Router#exchange(DiscordRequest)} for the same request is illegal.
  *
  * @param <T> The response type.
  * @since 3.0

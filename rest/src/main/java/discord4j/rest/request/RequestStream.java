@@ -18,8 +18,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * A stream of items wrapped in {@link discord4j.rest.request.DiscordRequest DiscordRequests}. Any number of items may
- * be {@link #push(DiscordRequest) written} to the stream. However, the
+ * A stream of {@link discord4j.rest.request.DiscordRequest DiscordRequests}. Any number of items may be
+ * {@link #push(reactor.util.function.Tuple2)} written} to the stream. However, the
  * {@link discord4j.rest.request.RequestStream.Reader reader} ensures that only one is read at a time. This
  * linearization ensures proper ratelimit handling.
  * <p>
@@ -31,7 +31,8 @@ import java.util.function.Predicate;
  */
 class RequestStream<T> {
 
-	private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing = EmitterProcessor.create(false);
+	private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing =
+			EmitterProcessor.create(false);
 	private final SimpleHttpClient httpClient;
 	private final GlobalRateLimiter globalRateLimiter;
 	/**
