@@ -1,10 +1,10 @@
 dependencies {
-    compile group: 'io.projectreactor.ipc', name: 'reactor-netty', version: '0.7.0.M1'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+    compile "io.projectreactor.ipc:reactor-netty:$reactor_netty_version"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+    compile "org.slf4j:slf4j-api:$slf4j_version"
+    compile "com.google.code.findbugs:jsr305:$jsr305_version"
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "junit:junit:$junit_version"
 
-    testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    testRuntime "ch.qos.logback:logback-classic:$logback_version"
 }

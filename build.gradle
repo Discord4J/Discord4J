@@ -11,6 +11,15 @@ ext {
     project_description = 'Java interface for the Discord API'
     project_jdk = '1.8'
 
+    // Dependencies
+    reactor_version = '3.1.0.M3'
+    reactor_netty_version = '0.7.0.M1'
+    jackson_version = '2.9.0.pr4'
+    slf4j_version = '1.7.25'
+    jsr305_version = '3.0.2'
+    junit_version = '4.12'
+    logback_version = '1.2.3'
+
     project_pom = {
         name project_name
         description project_description
@@ -76,7 +85,6 @@ allprojects {
     license {
         header rootProject.file('src/license/HEADER')
         include "**/*.java"
-        dryRun true
         license.mapping('java', 'SLASHSTAR_STYLE')
     }
     assemble.dependsOn(licenseFormat)
