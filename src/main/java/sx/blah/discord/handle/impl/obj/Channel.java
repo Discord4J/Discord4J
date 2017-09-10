@@ -42,8 +42,8 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -83,9 +83,9 @@ public class Channel implements IChannel {
 	protected volatile String topic;
 
 	/**
-	 * Whether the bot is "typing" in the channel.
+	 * Holds a reference to the task responsible for maintaining typing status.
 	 */
-	private AtomicBoolean isTyping = new AtomicBoolean(false);
+	private AtomicReference<TimerTask> typingTask = new AtomicReference<>(null);
 
 	/**
 	 * Manages all TimerTasks which send typing statuses.
@@ -590,33 +590,42 @@ public class Channel implements IChannel {
 
 	@Override
 	public synchronized void toggleTypingStatus() {
-		setTypingStatus(!this.isTyping.get());
+		setTypingStatus(!getTypingStatus());
 	}
 
 	@Override
 	public void setTypingStatus(boolean typing) {
-		isTyping.set(typing);
-
-		if (isTyping.get())
-			typingTimer.scheduleAtFixedRate(new TimerTask() {
+		if (typing) {
+			TimerTask task = new TimerTask() {
 				@Override
 				public void run() {
-					if (!isTyping.get() || Channel.this.isDeleted()) {
+					if (Channel.this.isDeleted()) {
 						this.cancel();
 						return;
 					}
 					try {
+						Discord4J.LOGGER.trace(LogMarkers.HANDLE, "Sending TypingStatus Keep Alive");
 						((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + getLongID() + "/typing");
 					} catch (RateLimitException | DiscordException e) {
 						Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 					}
 				}
-			}, 0, TIME_FOR_TYPE_STATUS);
+			};
+
+			if (typingTask.compareAndSet(null, task)) {
+				typingTimer.scheduleAtFixedRate(task, 0, TIME_FOR_TYPE_STATUS);
+			}
+		} else {
+			TimerTask oldTask = typingTask.getAndSet(null);
+			if (oldTask != null) {
+				oldTask.cancel();
+			}
+		}
 	}
 
 	@Override
 	public synchronized boolean getTypingStatus() {
-		return isTyping.get();
+		return typingTask.get() != null;
 	}
 
 	/**
@@ -966,7 +975,7 @@ public class Channel implements IChannel {
 	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
-		channel.isTyping.set(isTyping.get());
+		channel.typingTask.set(typingTask.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
 		return channel;
