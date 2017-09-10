@@ -2,6 +2,7 @@ package discord4j.rest.request;
 
 import discord4j.rest.http.client.ExchangeFilter;
 import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.util.RouteUtils;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
@@ -115,7 +116,8 @@ class RequestStream<T> {
 
 			Mono.when(globalRateLimiter)
 					.materialize()
-					.flatMap(e -> httpClient.exchange(req.getRoute().getMethod(), req.getCompleteUri(), req.getBody(),
+					.flatMap(e -> httpClient.exchange(req.getRoute().getMethod(),
+							RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()), req.getBody(),
 							req.getRoute().getResponseType(), exchangeFilter))
 					.retryWhen(RETRY)
 					.materialize()

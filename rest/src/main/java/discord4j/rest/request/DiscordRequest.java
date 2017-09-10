@@ -4,6 +4,8 @@ import discord4j.rest.route.Route;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Encodes all of the needed information to make an HTTP request to Discord.
@@ -18,6 +20,9 @@ public class DiscordRequest<T> {
 
 	@Nullable
 	private Object body;
+
+	@Nullable
+	private Map<String, Object> queryParams;
 
 	public DiscordRequest(Route<T> route, String completeUri) {
 		this.route = route;
@@ -37,8 +42,21 @@ public class DiscordRequest<T> {
 		return body;
 	}
 
+	@Nullable
+	public Map<String, Object> getQueryParams() {
+		return queryParams;
+	}
+
 	public DiscordRequest<T> body(Object body) {
 		this.body = body;
+		return this;
+	}
+
+	public DiscordRequest<T> query(String key, Object value) {
+		if (queryParams == null) {
+			queryParams = new LinkedHashMap<>();
+		}
+		queryParams.put(key, value);
 		return this;
 	}
 

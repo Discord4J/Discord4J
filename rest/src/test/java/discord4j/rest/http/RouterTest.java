@@ -5,18 +5,15 @@ import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.pojo.MessagePojo;
 import discord4j.rest.http.client.SimpleHttpClient;
-import discord4j.rest.request.GlobalRateLimiter;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
