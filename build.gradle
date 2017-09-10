@@ -73,7 +73,12 @@ allprojects {
     apply plugin: 'signing'
     apply plugin: 'license'
 
-    license { header rootProject.file('src/license/HEADER') }
+    license {
+        header rootProject.file('src/license/HEADER')
+        include "**/*.java"
+        dryRun true
+        license.mapping('java', 'SLASHSTAR_STYLE')
+    }
     assemble.dependsOn(licenseFormat)
 
     repositories {
