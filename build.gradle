@@ -12,8 +12,8 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_version = '3.1.0.M3'
-    reactor_netty_version = '0.7.0.M1'
+    reactor_version = '3.1.0.RC1'
+    reactor_netty_version = '0.7.0.M2'
     jackson_version = '2.9.0.pr4'
     slf4j_version = '1.7.25'
     jsr305_version = '3.0.2'
