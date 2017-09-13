@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.StampedLock;
 
 /**
  * A utility class intended to deal with {@link RateLimitException}s by queueing rate-limited operations until they can
@@ -165,6 +166,7 @@ public class RequestBuffer {
 		private final IRequest<T> request;
 		private final RequestCallable<T> callable;
 		private volatile FutureTask<T> backing;
+		final StampedLock lock = new StampedLock();
 
 		RequestFuture(IRequest<T> request) {
 			this.request = request;
@@ -217,32 +219,36 @@ public class RequestBuffer {
 
 		@Override
 		public T get() {
+			long stamp = lock.readLock();
 			try {
-				while (!isDone() && !isCancelled()) {}
-
 				return backing.get();
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
+			} finally {
+				lock.unlockRead(stamp);
 			}
 
 			return null;
 		}
 
 		@Override
-		public T get(long timeout, TimeUnit unit) {
+		public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
 			long timeoutTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
-			try {
-				while (!isDone() && !isCancelled() && System.currentTimeMillis() <= timeoutTime) {}
-
+			long stamp = lock.tryReadLock(timeout, unit);
+			
+			if (!lock.validate(stamp)) {
 				if (System.currentTimeMillis() > timeoutTime)
 					throw new TimeoutException();
-
+		
 				if (isCancelled())
 					throw new InterruptedException();
-
+			}
+			try {
 				return backing.get();
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
+			} finally {
+				lock.unlockRead(stamp);
 			}
 
 			return null;
@@ -259,6 +265,7 @@ public class RequestBuffer {
 
 			final IRequest<T> request;
 			final RequestFuture<T> future;
+			final long stamp;
 
 			volatile boolean firstAttempt = true;
 			volatile long timeForNextRequest = -1;
@@ -268,6 +275,7 @@ public class RequestBuffer {
 			RequestCallable(IRequest<T> request, RequestFuture<T> future) {
 				this.request = request;
 				this.future = future;
+				stamp = future.lock.writeLock();
 			}
 
 			@Override
@@ -280,6 +288,7 @@ public class RequestBuffer {
 						T value = request.request();
 						timeForNextRequest = -1;
 						rateLimited = false;
+						future.lock.unlockWrite(stamp);
 						return value;
 					}
 				} catch (RateLimitException e) {
@@ -290,7 +299,10 @@ public class RequestBuffer {
 				} catch (Exception e) {
 					Discord4J.LOGGER.warn(LogMarkers.UTIL, "RequestBuffer handled an uncaught exception!", e);
 				}
-
+				
+				if (!rateLimited && future.lock.validate(stamp))
+					future.lock.unlockWrite(stamp);
+				
 				return null;
 			}
 		}

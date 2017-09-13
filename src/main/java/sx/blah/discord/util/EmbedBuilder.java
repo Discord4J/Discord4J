@@ -55,6 +55,10 @@ public class EmbedBuilder {
 	 */
 	public static final int FOOTER_CONTENT_LIMIT = DESCRIPTION_CONTENT_LIMIT;
 	/**
+	 * The maximum length of author name.
+	 */
+	public static final int AUTHOR_NAME_LIMIT = 256;
+	/**
 	 * The maximum character limit across all visible fields.
 	 */
 	public static final int MAX_CHAR_LIMIT = 6000;
@@ -311,6 +315,14 @@ public class EmbedBuilder {
 	public EmbedBuilder withAuthorName(String name) {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
+		
+		if (name.trim().length() > AUTHOR_NAME_LIMIT) {
+			if (lenient)
+				name = name.substring(0, AUTHOR_NAME_LIMIT);
+			else
+				throw new IllegalArgumentException(
+						"Author name cannot have more than " + AUTHOR_NAME_LIMIT + " characters");
+		}
 
 		throwExceptionForCharacterLimit(name.trim().length());
 

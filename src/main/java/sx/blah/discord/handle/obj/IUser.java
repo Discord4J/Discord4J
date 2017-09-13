@@ -19,6 +19,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.cache.LongMap;
 
+import java.awt.*;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -94,6 +95,14 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return The roles the user has in the given guild.
 	 */
 	List<IRole> getRolesForGuild(IGuild guild);
+
+	/**
+	 * Gets the color the user's name is shown as in the given guild.
+	 *
+	 * @param guild The guild to get roles for.
+	 * @return The color the user has in the given guild.
+	 */
+	Color getColorForGuild(IGuild guild);
 
 	/**
 	 * Gets the permissions the user has in the given guild.
