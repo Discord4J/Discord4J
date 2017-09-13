@@ -77,11 +77,6 @@ public class Discord4J {
 	 */
 	protected static final LocalDateTime launchTime = LocalDateTime.now();
 	/**
-	 * Whether to log when the user doesn't have the permissions to view a channel.
-	 */
-	@Deprecated
-	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
-	/**
 	 * Whether to allow for audio to be used.
 	 */
 	public static final AtomicBoolean audioDisabled = new AtomicBoolean(false);
@@ -212,15 +207,6 @@ public class Discord4J {
 	 */
 	public static void enableJettyLogging() {
 		Log.setLog(jettyLogger);
-	}
-
-	/**
-	 * Disables logging for when the bot user doesn't have the required permissions to view a channel.
-	 * @deprecated This functionality isn't available in MessageHistories.
-	 */
-	@Deprecated
-	public static void disableChannelWarnings() {
-		ignoreChannelWarnings.set(true);
 	}
 
 	/**

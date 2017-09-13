@@ -24,13 +24,13 @@ import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MessageHistory;
-import sx.blah.discord.util.MessageList;
 import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.cache.Cache;
 
 import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -160,11 +160,6 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	@Override
 	public boolean isConnected() {
 		return client.getConnectedVoiceChannels().contains(this);
-	}
-
-	@Override
-	public MessageList getMessages() {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

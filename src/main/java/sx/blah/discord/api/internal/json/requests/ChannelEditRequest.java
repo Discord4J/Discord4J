@@ -103,20 +103,4 @@ public class ChannelEditRequest {
 		this.topic = topic;
 		this.nsfw = nsfw;
 	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Integer getPosition() {
-		return position;
-	}
-
-	public String getTopic() {
-		return topic;
-	}
-
-	public Boolean isNSFW() {
-		return nsfw;
-	}
 }

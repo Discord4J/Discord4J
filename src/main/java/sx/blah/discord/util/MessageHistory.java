@@ -96,38 +96,12 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 *
 	 * @param id The ID of the desired role.
 	 * @return The message with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #get(long)} instead.
-	 */
-	@Deprecated
-	public IMessage get(String id) {
-		if (id == null) return null;
-		return get(Long.parseUnsignedLong(id));
-	}
-
-	/**
-	 * Gets a message by its unique snowflake ID.
-	 *
-	 * @param id The ID of the desired role.
-	 * @return The message with the provided ID (or null if one was not found).
 	 */
 	public IMessage get(long id) {
 		return Arrays.stream(backing)
 				.filter(msg -> msg.getLongID() == id)
 				.findFirst()
 				.orElse(null);
-	}
-
-	/**
-	 * Gets whether the collection contains a message with the given ID.
-	 *
-	 * @param id The ID to search for.
-	 * @return Whether the collection contains a message with the given ID.
-	 * @deprecated Use {@link #contains(long)} instead.
-	 */
-	@Deprecated
-	public boolean contains(String id) {
-		if (id == null) return false;
-		return contains(Long.parseUnsignedLong(id));
 	}
 
 	/**
@@ -208,19 +182,6 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 		IMessage message = get(index);
 		message.delete();
 		return message;
-	}
-
-	/**
-	 * Deletes the message with the given ID. The deleted message is NOT removed from the collection.
-	 *
-	 * @param id The ID of the message to delete.
-	 * @return The deleted message (or null if no message was found).
-	 * @deprecated Use {@link #delete(long)} instead.
-	 */
-	@Deprecated
-	public IMessage delete(String id) {
-		if (id == null) return null;
-		return delete(Long.parseUnsignedLong(id));
 	}
 
 	/**

@@ -18,14 +18,11 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.RateLimitException;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -98,24 +95,6 @@ public interface IDiscordClient {
 	 * @param avatar The new avatar.
 	 */
 	void changeAvatar(Image avatar);
-
-	/**
-	 * Changes the presence of the bot on all shards.
-	 *
-	 * @param isIdle If true, the bot becomes idle, or online if false.
-	 * @deprecated Use {@link #online()} or {@link #idle()}.
-	 */
-	@Deprecated
-	void changePresence(boolean isIdle);
-
-	/**
-	 * Changes the status of the bot user on all shards.
-	 *
-	 * @param status The new status.
-	 * @deprecated Use {@link #streaming(String, String)}, {@link #online(String)}, or {@link #idle(String)}.
-	 */
-	@Deprecated
-	void changeStatus(Status status);
 
 	/**
 	 * Changes the playing text of the bot on all shards. The previously-set online status will be maintained.
@@ -259,19 +238,6 @@ public interface IDiscordClient {
 	 *
 	 * @param channelID The ID of the desired channel.
 	 * @return The text channel with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getChannelByID(long)} instead.
-	 */
-	@Deprecated
-	default IChannel getChannelByID(String channelID) {
-		if (channelID == null) return null;
-		return getChannelByID(Long.parseUnsignedLong(channelID));
-	}
-
-	/**
-	 * Gets a text channel by its unique snowflake ID from the client's text channel cache.
-	 *
-	 * @param channelID The ID of the desired channel.
-	 * @return The text channel with the provided ID (or null if one was not found).
 	 */
 	IChannel getChannelByID(long channelID);
 
@@ -287,19 +253,6 @@ public interface IDiscordClient {
 	 *
 	 * @param id The ID of the desired channel.
 	 * @return The voice channel with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getVoiceChannelByID(long)} instead.
-	 */
-	@Deprecated
-	default IVoiceChannel getVoiceChannelByID(String id) {
-		if (id == null) return null;
-		return getVoiceChannelByID(Long.parseUnsignedLong(id));
-	}
-
-	/**
-	 * Gets a voice channel by its unique snowflake ID from the client's voice channel cache.
-	 *
-	 * @param id The ID of the desired channel.
-	 * @return The voice channel with the provided ID (or null if one was not found).
 	 */
 	IVoiceChannel getVoiceChannelByID(long id);
 
@@ -309,19 +262,6 @@ public interface IDiscordClient {
 	 * @return A list of all guilds on every shard the bot user is a member of.
 	 */
 	List<IGuild> getGuilds();
-
-	/**
-	 * Gets a guild by its unique snowflake ID from the client's guild cache.
-	 *
-	 * @param guildID The ID of the desired guild.
-	 * @return The guild with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getGuildByID(long)} instead.
-	 */
-	@Deprecated
-	default IGuild getGuildByID(String guildID) {
-		if (guildID == null) return null;
-		return getGuildByID(Long.parseUnsignedLong(guildID));
-	}
 
 	/**
 	 * Gets a guild by its unique snowflake ID from the client's guild cache.
@@ -345,48 +285,12 @@ public interface IDiscordClient {
 	 *
 	 * <p>Note: This method only searches the client's list of <b>cached</b> users. Discord allows the fetching of users
 	 * which the bot cannot directly see (they share no mutual guilds, so they are not cached). This functionality is
-	 * exposed through {@link #fetchUser(String)}.
-	 *
-	 * @param userID The ID of the desired user.
-	 * @return The user with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getUserByID(long)}
-	 */
-	@Deprecated
-	default IUser getUserByID(String userID) {
-		if (userID == null) return null;
-		return getUserByID(Long.parseUnsignedLong(userID));
-	}
-
-	/**
-	 * Gets a user by its unique snowflake ID from the client's user cache.
-	 *
-	 * <p>Note: This method only searches the client's list of <b>cached</b> users. Discord allows the fetching of users
-	 * which the bot cannot directly see (they share no mutual guilds, so they are not cached). This functionality is
 	 * exposed through {@link #fetchUser(long)}.
 	 *
 	 * @param userID The ID of the desired user.
 	 * @return The user with the provided ID (or null if one was not found).
 	 */
 	IUser getUserByID(long userID);
-
-	/**
-	 * Gets a user by its unique snowflake ID from the client's user cache <b>or</b> by fetching it from Discord.
-	 *
-	 * <p>Discord allows the fetching of users the bot cannot directly see (they share no mutual guilds, so they are not
-	 * cached). This method first checks the client's user cache and if there is no such user with the provided ID, it
-	 * is requested from Discord.
-	 *
-	 * <p>Use {@link #getUserByID(String)} to only search the client's user cache.
-	 *
-	 * @param id The ID of the desired user.
-	 * @return The user with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #fetchUser(long)} instead
-	 */
-	@Deprecated
-	default IUser fetchUser(String id) {
-		if (id == null) return null;
-		return fetchUser(Long.parseUnsignedLong(id));
-	}
 
 	/**
 	 * Gets a user by its unique snowflake ID from the client's user cache <b>or</b> by fetching it from Discord.
@@ -433,19 +337,6 @@ public interface IDiscordClient {
 	 *
 	 * @param roleID The ID of the desired role.
 	 * @return The role with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getRoleByID(long)} instead.
-	 */
-	@Deprecated
-	default IRole getRoleByID(String roleID) {
-		if (roleID == null) return null;
-		return getRoleByID(Long.parseUnsignedLong(roleID));
-	}
-
-	/**
-	 * Gets a role by its unique snowflake ID from the client's role cache.
-	 *
-	 * @param roleID The ID of the desired role.
-	 * @return The role with the provided ID (or null if one was not found).
 	 */
 	IRole getRoleByID(long roleID);
 
@@ -465,19 +356,6 @@ public interface IDiscordClient {
 	 * @return A list of all cached messages.
 	 */
 	List<IMessage> getMessages();
-
-	/**
-	 * Gets a message by its unique snowflake ID from the client's message cache.
-	 *
-	 * @param messageID The ID of the desired message.
-	 * @return The message with the provided ID (or null if one was not found).
-	 * @deprecated Use {@link #getMessageByID(long)} instead.
-	 */
-	@Deprecated
-	default IMessage getMessageByID(String messageID) {
-		if (messageID == null) return null;
-		return getMessageByID(Long.parseUnsignedLong(messageID));
-	}
 
 	/**
 	 * Gets a message by its unique snowflake ID from the client's message cache.

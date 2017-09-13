@@ -112,11 +112,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public List<IInvite> getInvites() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void delete() {
 		throw new UnsupportedOperationException();
 	}

@@ -23,7 +23,7 @@ package sx.blah.discord.api.internal.json.objects;
 public class InviteObject {
 
 	/**
-	 * The invite code (unique ID)
+	 * The invite code (unique ID).
 	 */
 	public String code;
 	/**

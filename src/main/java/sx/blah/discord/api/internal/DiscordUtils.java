@@ -56,7 +56,8 @@ import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -522,7 +523,7 @@ public class DiscordUtils {
 	 * and returns that object with updated information if it exists. Otherwise, it constructs a new channel.
 	 *
 	 * @param shard The shard the channel belongs to.
-	 * @param json  The json object representing the channel.
+	 * @param json The json object representing the channel.
 	 * @return The converted channel object.
 	 */
 	public static IChannel getChannelFromJSON(IShard shard, IGuild guild, ChannelObject json) {
@@ -828,22 +829,6 @@ public class DiscordUtils {
 	public static LocalDateTime getSnowflakeTimeFromID(long id) {
 		long milliseconds = DISCORD_EPOCH + (id >>> 22);
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
-	}
-
-	/**
-	 * Gets all of the invite codes from invite URLs in a message.
-	 *
-	 * @param message The message content to parse.
-	 * @return A list of the invite codes in the message.
-	 */
-	public static List<String> getInviteCodesFromMessage(String message) {
-		Matcher matcher = MessageTokenizer.INVITE_PATTERN.matcher(message);
-		List<String> strings = new ArrayList<>();
-		while (matcher.find()) {
-			strings.add(matcher.group(1));
-			matcher = MessageTokenizer.INVITE_PATTERN.matcher(matcher.replaceFirst(""));
-		}
-		return strings;
 	}
 
 	/**

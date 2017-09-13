@@ -21,7 +21,8 @@ import com.vdurmont.emoji.Emoji;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.obj.ReactionEmoji;
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.MessageTokenizer;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -94,15 +95,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @return The attachments in the message.
 	 */
 	List<Attachment> getAttachments();
-
-	/**
-	 * Gets the embeds in the message.
-	 *
-	 * @return The embeds in the message.
-	 * @deprecated Use {@link #getEmbeds()} instead.
-	 */
-	@Deprecated
-	List<IEmbed> getEmbedded();
 
 	/**
 	 * Gets the embeds in the message.
@@ -264,16 +256,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	IReaction getReactionByUnicode(String unicode);
 
 	/**
-	 * Gets a reaction by its unicode character emoji.
-	 *
-	 * @param name The unicode character of the desired reaction.
-	 * @return The reaction with the provided emoji (or null if one was not found).
-	 * @deprecated Use {@link #getReactionByUnicode(String)} instead.
-	 */
-	@Deprecated
-	IReaction getReactionByName(String name);
-
-	/**
 	 * Gets a reaction by its emoji.
 	 *
 	 * @param emoji The emoji of the desired reaction.
@@ -403,17 +385,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Gets the ID of the webhook that sent the message.
 	 *
-	 * @return The nullable ID of the webhook that sent the message.
-	 * @deprecated Use {@link #getWebhookLongID()} instead.
-	 */
-	@Deprecated
-	default String getWebhookID() {
-		return Long.toUnsignedString(getWebhookLongID());
-	}
-
-	/**
-	 * Gets the ID of the webhook that sent the message.
-	 *
 	 * @return The ID of the webhook that sent the message. This is <code>0</code> if the message was not sent by
 	 * a webhook.
 	 */
@@ -467,17 +438,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		 */
 		public int getFilesize() {
 			return filesize;
-		}
-
-		/**
-		 * Gets the unique snowflake ID for the attachment.
-		 *
-		 * @return The unique snowflake ID for the attachment.
-		 * @deprecated Use {@link #getLongID()} or {@link #getStringID()} instead.
-		 */
-		@Deprecated
-		public String getId() {
-			return getStringID();
 		}
 
 		@Override

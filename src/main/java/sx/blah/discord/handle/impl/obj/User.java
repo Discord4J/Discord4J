@@ -139,12 +139,6 @@ public class User implements IUser {
 	}
 
 	@Override
-	@Deprecated
-	public Status getStatus() {
-		return null;
-	}
-
-	@Override
 	public String getAvatar() {
 		return avatar;
 	}

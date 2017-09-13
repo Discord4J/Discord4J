@@ -20,8 +20,8 @@ package sx.blah.discord.modules;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.ModuleDisabledEvent;
-import sx.blah.discord.handle.impl.events.ModuleEnabledEvent;
+import sx.blah.discord.handle.impl.events.module.ModuleDisabledEvent;
+import sx.blah.discord.handle.impl.events.module.ModuleEnabledEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.File;

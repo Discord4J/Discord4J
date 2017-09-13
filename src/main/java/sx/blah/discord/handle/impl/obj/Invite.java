@@ -35,39 +35,50 @@ public class Invite implements IInvite {
 	 * The client the invite belongs to.
 	 */
 	private final IDiscordClient client;
+
 	/**
-	 * The backing JSON object which holds all of the information about the invite.
+	 * The invite code (unique ID).
 	 */
-	private final InviteObject backing;
+	private final String code;
+	/**
+	 * The ID of the guild the invite is for.
+	 */
+	private final long guildID;
+	/**
+	 * The ID of the channel the invite is for.
+	 */
+	private final long channelID;
+	/**
+	 * The ID of the user who created the invite.
+	 */
+	private final long inviterID;
 
 	public Invite(IDiscordClient client, InviteObject backing) {
 		this.client = client;
-		this.backing = backing;
+		this.code = backing.code;
+		this.guildID = Long.parseUnsignedLong(backing.guild.id);
+		this.channelID = Long.parseUnsignedLong(backing.channel.id);
+		this.inviterID = backing.inviter == null ? 0 : Long.parseUnsignedLong(backing.inviter.id);
 	}
 
 	@Override
 	public String getCode() {
-		return backing.code;
-	}
-
-	@Override
-	public String getInviteCode() {
-		return getCode();
+		return code;
 	}
 
 	@Override
 	public IGuild getGuild() {
-		return client.getGuildByID(backing.guild.id);
+		return client.getGuildByID(guildID);
 	}
 
 	@Override
 	public IChannel getChannel() {
-		return getGuild().getChannelByID(backing.channel.id);
+		return getGuild().getChannelByID(channelID);
 	}
 
 	@Override
 	public IUser getInviter() {
-		return getGuild().getUserByID(backing.inviter.id);
+		return inviterID == 0 ? null : getGuild().getUserByID(inviterID);
 	}
 
 	@Override
@@ -78,11 +89,6 @@ public class Invite implements IInvite {
 	@Override
 	public void delete() {
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.INVITE + getCode());
-	}
-
-	@Override
-	public InviteResponse details() {
-		return null;
 	}
 
 	@Override

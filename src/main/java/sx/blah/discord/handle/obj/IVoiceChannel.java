@@ -17,7 +17,8 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.*;
+import sx.blah.discord.util.Image;
+import sx.blah.discord.util.MessageHistory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -98,14 +99,6 @@ public interface IVoiceChannel extends IChannel {
 	 * @return The users who are connected to the voice channel.
 	 */
 	List<IUser> getConnectedUsers();
-
-	/**
-	 * @deprecated See {@link IVoiceChannel} for details.
-	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
-	 */
-	@Override
-	@Deprecated
-	MessageList getMessages();
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.

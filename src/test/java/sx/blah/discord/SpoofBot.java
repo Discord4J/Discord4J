@@ -101,11 +101,10 @@ public class SpoofBot {
 												break;
 
 											case GAME:
-												client.changeStatus(Status.game(rng.nextBoolean() ? getRandString() : null));
+												client.online(rng.nextBoolean() ? getRandString() : null);
 												break;
 
 											case PRESENCE:
-												client.changePresence(rng.nextBoolean());
 												break;
 
 											case MESSAGE_DELETE:
@@ -125,9 +124,9 @@ public class SpoofBot {
 												} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 													e.printStackTrace();
 												}
-												if (invite.getInviteCode() != null) {
+												if (invite.getCode() != null) {
 													try {
-														channel.sendMessage("https://discord.gg/"+invite.getInviteCode());
+														channel.sendMessage("https://discord.gg/"+invite.getCode());
 													} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 														e.printStackTrace();
 													}
