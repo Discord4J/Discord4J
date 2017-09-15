@@ -18,5 +18,13 @@ package discord4j.common.pojo;
 
 public class PruneResponse {
 
-	public long pruned;
+	private int pruned;
+
+	public int getPruned() {
+		return pruned;
+	}
+
+	public void setPruned(int pruned) {
+		this.pruned = pruned;
+	}
 }

@@ -16,33 +16,24 @@
  */
 package discord4j.common.pojo;
 
-public class InvitePojo {
+public class AccountPojo {
 
-	private String code;
-	private GuildPojo guild;
-	private ChannelPojo channel;
+	private String id;
+	private String name;
 
-	public String getCode() {
-		return code;
+	public String getId() {
+		return id;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public GuildPojo getGuild() {
-		return guild;
+	public String getName() {
+		return name;
 	}
 
-	public void setGuild(GuildPojo guild) {
-		this.guild = guild;
-	}
-
-	public ChannelPojo getChannel() {
-		return channel;
-	}
-
-	public void setChannel(ChannelPojo channel) {
-		this.channel = channel;
+	public void setName(String name) {
+		this.name = name;
 	}
 }

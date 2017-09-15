@@ -17,19 +17,16 @@
 package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.OptionalField;
 
-public class VoiceRegionPojo {
+public class EmojiPojo {
 
 	private String id;
 	private String name;
-	@JsonProperty("sample_hostname")
-	private String sampleHostname;
-	@JsonProperty("sample_port")
-	private String samplePort;
-	private boolean vip;
-	private boolean optimal;
-	private boolean deprecated;
-	private boolean custom;
+	private OptionalField<String[]> roles;
+	@JsonProperty("require_colons")
+	private OptionalField<Boolean> requireColons;
+	private OptionalField<Boolean> managed;
 
 	public String getId() {
 		return id;
@@ -47,51 +44,27 @@ public class VoiceRegionPojo {
 		this.name = name;
 	}
 
-	public String getSampleHostname() {
-		return sampleHostname;
+	public OptionalField<String[]> getRoles() {
+		return roles;
 	}
 
-	public void setSampleHostname(String sampleHostname) {
-		this.sampleHostname = sampleHostname;
+	public void setRoles(OptionalField<String[]> roles) {
+		this.roles = roles;
 	}
 
-	public String getSamplePort() {
-		return samplePort;
+	public OptionalField<Boolean> getRequireColons() {
+		return requireColons;
 	}
 
-	public void setSamplePort(String samplePort) {
-		this.samplePort = samplePort;
+	public void setRequireColons(OptionalField<Boolean> requireColons) {
+		this.requireColons = requireColons;
 	}
 
-	public boolean isVip() {
-		return vip;
+	public OptionalField<Boolean> getManaged() {
+		return managed;
 	}
 
-	public void setVip(boolean vip) {
-		this.vip = vip;
-	}
-
-	public boolean isOptimal() {
-		return optimal;
-	}
-
-	public void setOptimal(boolean optimal) {
-		this.optimal = optimal;
-	}
-
-	public boolean isDeprecated() {
-		return deprecated;
-	}
-
-	public void setDeprecated(boolean deprecated) {
-		this.deprecated = deprecated;
-	}
-
-	public boolean isCustom() {
-		return custom;
-	}
-
-	public void setCustom(boolean custom) {
-		this.custom = custom;
+	public void setManaged(OptionalField<Boolean> managed) {
+		this.managed = managed;
 	}
 }

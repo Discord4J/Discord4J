@@ -16,33 +16,51 @@
  */
 package discord4j.common.pojo;
 
-public class InvitePojo {
+public class UserGuildPojo {
 
-	private String code;
-	private GuildPojo guild;
-	private ChannelPojo channel;
+	private String id;
+	private String name;
+	private String icon;
+	private boolean owner;
+	private int permissions;
 
-	public String getCode() {
-		return code;
+	public String getId() {
+		return id;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public GuildPojo getGuild() {
-		return guild;
+	public String getName() {
+		return name;
 	}
 
-	public void setGuild(GuildPojo guild) {
-		this.guild = guild;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public ChannelPojo getChannel() {
-		return channel;
+	public String getIcon() {
+		return icon;
 	}
 
-	public void setChannel(ChannelPojo channel) {
-		this.channel = channel;
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	public boolean isOwner() {
+		return owner;
+	}
+
+	public void setOwner(boolean owner) {
+		this.owner = owner;
+	}
+
+	public int getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(int permissions) {
+		this.permissions = permissions;
 	}
 }

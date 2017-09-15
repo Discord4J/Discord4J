@@ -14,35 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.jackson;
 
-public class InvitePojo {
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
-	private String code;
-	private GuildPojo guild;
-	private ChannelPojo channel;
+import java.io.IOException;
 
-	public String getCode() {
-		return code;
+public class OptionalFieldSerializer extends JsonSerializer<OptionalField> {
+
+	@Override
+	public void serialize(OptionalField value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		if (value.isAbsent()) return;
+
+		if (value.isNull()) {
+			gen.writeNull();
+		} else {
+			gen.writeObject(value.get());
+		}
 	}
 
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	public GuildPojo getGuild() {
-		return guild;
-	}
-
-	public void setGuild(GuildPojo guild) {
-		this.guild = guild;
-	}
-
-	public ChannelPojo getChannel() {
-		return channel;
-	}
-
-	public void setChannel(ChannelPojo channel) {
-		this.channel = channel;
+	@Override
+	public boolean isEmpty(SerializerProvider provider, OptionalField value) {
+		return value.isAbsent();
 	}
 }
+

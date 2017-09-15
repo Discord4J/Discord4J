@@ -17,17 +17,17 @@
 package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
 
-public class GuildMemberPojo {
+import java.util.Optional;
+
+public class PresencePojo {
 
 	private UserPojo user;
-	private OptionalField<String> nick;
 	private String[] roles;
-	@JsonProperty("joined_at")
-	private String joinedAt;
-	private boolean deaf;
-	private boolean mute;
+	private Optional<GamePojo> game;
+	@JsonProperty("guild_id")
+	private String guildId;
+	private String status;
 
 	public UserPojo getUser() {
 		return user;
@@ -35,14 +35,6 @@ public class GuildMemberPojo {
 
 	public void setUser(UserPojo user) {
 		this.user = user;
-	}
-
-	public OptionalField<String> getNick() {
-		return nick;
-	}
-
-	public void setNick(OptionalField<String> nick) {
-		this.nick = nick;
 	}
 
 	public String[] getRoles() {
@@ -53,27 +45,27 @@ public class GuildMemberPojo {
 		this.roles = roles;
 	}
 
-	public String getJoinedAt() {
-		return joinedAt;
+	public Optional<GamePojo> getGame() {
+		return game;
 	}
 
-	public void setJoinedAt(String joinedAt) {
-		this.joinedAt = joinedAt;
+	public void setGame(Optional<GamePojo> game) {
+		this.game = game;
 	}
 
-	public boolean isDeaf() {
-		return deaf;
+	public String getGuildId() {
+		return guildId;
 	}
 
-	public void setDeaf(boolean deaf) {
-		this.deaf = deaf;
+	public void setGuildId(String guildId) {
+		this.guildId = guildId;
 	}
 
-	public boolean isMute() {
-		return mute;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setMute(boolean mute) {
-		this.mute = mute;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

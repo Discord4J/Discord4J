@@ -16,33 +16,42 @@
  */
 package discord4j.common.pojo;
 
-public class InvitePojo {
+public class OverwritePojo {
 
-	private String code;
-	private GuildPojo guild;
-	private ChannelPojo channel;
+	private String id;
+	private String type;
+	private int allow;
+	private int deny;
 
-	public String getCode() {
-		return code;
+	public String getId() {
+		return id;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public GuildPojo getGuild() {
-		return guild;
+	public String getType() {
+		return type;
 	}
 
-	public void setGuild(GuildPojo guild) {
-		this.guild = guild;
+	public void setType(String type) {
+		this.type = type;
 	}
 
-	public ChannelPojo getChannel() {
-		return channel;
+	public int getAllow() {
+		return allow;
 	}
 
-	public void setChannel(ChannelPojo channel) {
-		this.channel = channel;
+	public void setAllow(int allow) {
+		this.allow = allow;
+	}
+
+	public int getDeny() {
+		return deny;
+	}
+
+	public void setDeny(int deny) {
+		this.deny = deny;
 	}
 }

@@ -14,35 +14,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.pojo.embed;
 
-public class InvitePojo {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-	private String code;
-	private GuildPojo guild;
-	private ChannelPojo channel;
+public class EmbedFooterPojo {
 
-	public String getCode() {
-		return code;
+	private String text;
+	@JsonProperty("icon_url")
+	private String iconUrl;
+	@JsonProperty("proxy_icon_url")
+	private String proxyIconUrl;
+
+	public String getText() {
+		return text;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setText(String text) {
+		this.text = text;
 	}
 
-	public GuildPojo getGuild() {
-		return guild;
+	public String getIconUrl() {
+		return iconUrl;
 	}
 
-	public void setGuild(GuildPojo guild) {
-		this.guild = guild;
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
-	public ChannelPojo getChannel() {
-		return channel;
+	public String getProxyIconUrl() {
+		return proxyIconUrl;
 	}
 
-	public void setChannel(ChannelPojo channel) {
-		this.channel = channel;
+	public void setProxyIconUrl(String proxyIconUrl) {
+		this.proxyIconUrl = proxyIconUrl;
 	}
 }

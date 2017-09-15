@@ -14,23 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.pojo.embed;
 
-public class ConnectionPojo {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-	private String id;
+public class EmbedAuthorPojo {
+
 	private String name;
-	private String type;
-	private boolean revoked;
-	private IntegrationPojo[] integrations;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
+	private String url;
+	@JsonProperty("icon_url")
+	private String iconUrl;
+	@JsonProperty("proxy_icon_url")
+	private String proxyIconUrl;
 
 	public String getName() {
 		return name;
@@ -40,27 +35,27 @@ public class ConnectionPojo {
 		this.name = name;
 	}
 
-	public String getType() {
-		return type;
+	public String getUrl() {
+		return url;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
-	public boolean isRevoked() {
-		return revoked;
+	public String getIconUrl() {
+		return iconUrl;
 	}
 
-	public void setRevoked(boolean revoked) {
-		this.revoked = revoked;
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
-	public IntegrationPojo[] getIntegrations() {
-		return integrations;
+	public String getProxyIconUrl() {
+		return proxyIconUrl;
 	}
 
-	public void setIntegrations(IntegrationPojo[] integrations) {
-		this.integrations = integrations;
+	public void setProxyIconUrl(String proxyIconUrl) {
+		this.proxyIconUrl = proxyIconUrl;
 	}
 }

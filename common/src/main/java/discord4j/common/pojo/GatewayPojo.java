@@ -16,15 +16,26 @@
  */
 package discord4j.common.pojo;
 
-/**
- * The response received when obtaining a websocket url
- */
+import discord4j.common.jackson.OptionalField;
+
 public class GatewayPojo {
 
-	/**
-	 * The url pointing to the websocket
-	 */
-	public String url;
+	private String url;
+	private OptionalField<Integer> shards;
 
-	public Long shards;
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public OptionalField<Integer> getShards() {
+		return shards;
+	}
+
+	public void setShards(OptionalField<Integer> shards) {
+		this.shards = shards;
+	}
 }

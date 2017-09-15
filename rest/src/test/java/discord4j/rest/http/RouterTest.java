@@ -59,8 +59,11 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
+		MessagePojo body = new MessagePojo();
+		body.setContent("hello at " + Instant.now());
+
 		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hello at " + Instant.now()))
+				.body(body)
 				.exchange(router)
 				.subscribe(response -> System.out.println("complete response"));
 
@@ -87,10 +90,14 @@ public class RouterTest {
 
 		for (int i = 0; i < 10; i++) {
 			final int a = i;
+
+			MessagePojo body = new MessagePojo();
+			body.setContent("hi " + a);
+
 			Routes.MESSAGE_CREATE.newRequest(channelId)
-					.body(new MessagePojo("hi " + a))
+					.body(body)
 					.exchange(router)
-					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
+					.subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
 		}
 
 		TimeUnit.SECONDS.sleep(10);
@@ -113,8 +120,11 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
+		MessagePojo body = new MessagePojo();
+		body.setContent("hi");
+
 		Mono<MessagePojo> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hi"))
+				.body(body)
 				.exchange(router);
 
 		mono.subscribe();
@@ -143,13 +153,17 @@ public class RouterTest {
 
 		for (int i = 0; i < 6; i++) {
 			final int a = i;
+
+			MessagePojo body = new MessagePojo();
+			body.setContent("hi " + a);
+
 			Routes.MESSAGE_CREATE.newRequest(channelId)
-					.body(new MessagePojo("hi " + a))
+					.body(body)
 					.exchange(router)
 					.publishOn(thread)
 					.cancelOn(thread)
 					.subscribeOn(thread)
-					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
+					.subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
 		}
 
 		TimeUnit.SECONDS.sleep(10);
@@ -172,13 +186,19 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
+		MessagePojo body0 = new MessagePojo();
+		body0.setContent("hi 0 at " + Instant.now());
+
 		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hi 0 at " + Instant.now()))
+				.body(body0)
 				.exchange(router)
 				.block();
 
+		MessagePojo body1 = new MessagePojo();
+		body1.setContent("hi 1 at " + Instant.now());
+
 		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hi 1 at " + Instant.now()))
+				.body(body1)
 				.exchange(router)
 				.block();
 	}

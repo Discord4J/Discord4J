@@ -19,27 +19,23 @@ package discord4j.common.pojo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.OptionalField;
 
-import java.util.Optional;
+public class VoiceStatePojo {
 
-public class WebhookPojo {
-
-	private String id;
 	@JsonProperty("guild_id")
 	private OptionalField<String> guildId;
 	@JsonProperty("channel_id")
 	private String channelId;
-	private OptionalField<UserPojo> user;
-	private Optional<String> name;
-	private Optional<String> avatar;
-	private String token;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
+	@JsonProperty("user_id")
+	private String userId;
+	@JsonProperty("session_id")
+	private String sessionId;
+	private boolean deaf;
+	private boolean mute;
+	@JsonProperty("self_deaf")
+	private boolean selfDeaf;
+	@JsonProperty("self_mute")
+	private boolean selfMute;
+	private boolean suppress;
 
 	public OptionalField<String> getGuildId() {
 		return guildId;
@@ -57,35 +53,59 @@ public class WebhookPojo {
 		this.channelId = channelId;
 	}
 
-	public OptionalField<UserPojo> getUser() {
-		return user;
+	public String getUserId() {
+		return userId;
 	}
 
-	public void setUser(OptionalField<UserPojo> user) {
-		this.user = user;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
-	public Optional<String> getName() {
-		return name;
+	public String getSessionId() {
+		return sessionId;
 	}
 
-	public void setName(Optional<String> name) {
-		this.name = name;
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
-	public Optional<String> getAvatar() {
-		return avatar;
+	public boolean isDeaf() {
+		return deaf;
 	}
 
-	public void setAvatar(Optional<String> avatar) {
-		this.avatar = avatar;
+	public void setDeaf(boolean deaf) {
+		this.deaf = deaf;
 	}
 
-	public String getToken() {
-		return token;
+	public boolean isMute() {
+		return mute;
 	}
 
-	public void setToken(String token) {
-		this.token = token;
+	public void setMute(boolean mute) {
+		this.mute = mute;
+	}
+
+	public boolean isSelfDeaf() {
+		return selfDeaf;
+	}
+
+	public void setSelfDeaf(boolean selfDeaf) {
+		this.selfDeaf = selfDeaf;
+	}
+
+	public boolean isSelfMute() {
+		return selfMute;
+	}
+
+	public void setSelfMute(boolean selfMute) {
+		this.selfMute = selfMute;
+	}
+
+	public boolean isSuppress() {
+		return suppress;
+	}
+
+	public void setSuppress(boolean suppress) {
+		this.suppress = suppress;
 	}
 }

@@ -14,7 +14,47 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.pojo.embed;
 
-public class PartialGuildPojo {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class EmbedImagePojo {
+
+	private String url;
+	@JsonProperty("proxy_url")
+	private String proxyUrl;
+	private int height;
+	private int width;
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getProxyUrl() {
+		return proxyUrl;
+	}
+
+	public void setProxyUrl(String proxyUrl) {
+		this.proxyUrl = proxyUrl;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
 }

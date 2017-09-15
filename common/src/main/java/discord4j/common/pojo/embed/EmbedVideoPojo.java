@@ -14,35 +14,35 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.pojo.embed;
 
-public class InvitePojo {
+public class EmbedVideoPojo {
 
-	private String code;
-	private GuildPojo guild;
-	private ChannelPojo channel;
+	private String url;
+	private int height;
+	private int width;
 
-	public String getCode() {
-		return code;
+	public String getUrl() {
+		return url;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
-	public GuildPojo getGuild() {
-		return guild;
+	public int getHeight() {
+		return height;
 	}
 
-	public void setGuild(GuildPojo guild) {
-		this.guild = guild;
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
-	public ChannelPojo getChannel() {
-		return channel;
+	public int getWidth() {
+		return width;
 	}
 
-	public void setChannel(ChannelPojo channel) {
-		this.channel = channel;
+	public void setWidth(int width) {
+		this.width = width;
 	}
 }

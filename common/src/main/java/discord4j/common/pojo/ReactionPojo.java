@@ -16,33 +16,33 @@
  */
 package discord4j.common.pojo;
 
-public class InvitePojo {
+public class ReactionPojo {
 
-	private String code;
-	private GuildPojo guild;
-	private ChannelPojo channel;
+	private int count;
+	private boolean me;
+	private EmojiPojo emoji;
 
-	public String getCode() {
-		return code;
+	public int getCount() {
+		return count;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setCount(int count) {
+		this.count = count;
 	}
 
-	public GuildPojo getGuild() {
-		return guild;
+	public boolean isMe() {
+		return me;
 	}
 
-	public void setGuild(GuildPojo guild) {
-		this.guild = guild;
+	public void setMe(boolean me) {
+		this.me = me;
 	}
 
-	public ChannelPojo getChannel() {
-		return channel;
+	public EmojiPojo getEmoji() {
+		return emoji;
 	}
 
-	public void setChannel(ChannelPojo channel) {
-		this.channel = channel;
+	public void setEmoji(EmojiPojo emoji) {
+		this.emoji = emoji;
 	}
 }

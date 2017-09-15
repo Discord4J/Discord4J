@@ -16,5 +16,27 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class GuildEmbedPojo {
+
+	private boolean enabled;
+	@JsonProperty("channel_id")
+	private String channelId;
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public String getChannelId() {
+		return channelId;
+	}
+
+	public void setChannelId(String channelId) {
+		this.channelId = channelId;
+	}
 }

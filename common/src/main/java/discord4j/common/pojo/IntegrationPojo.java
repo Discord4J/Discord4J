@@ -16,5 +16,111 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class IntegrationPojo {
+
+	private String id;
+	private String name;
+	private String type;
+	private boolean enabled;
+	private boolean syncing;
+	@JsonProperty("role_id")
+	private String roleId;
+	@JsonProperty("expire_behavior")
+	private int expireBehavior;
+	@JsonProperty("expire_grace_period")
+	private int expireGracePeriod;
+	private UserPojo user;
+	private AccountPojo account;
+	@JsonProperty("synced_at")
+	private String syncedAt;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public boolean isSyncing() {
+		return syncing;
+	}
+
+	public void setSyncing(boolean syncing) {
+		this.syncing = syncing;
+	}
+
+	public String getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(String roleId) {
+		this.roleId = roleId;
+	}
+
+	public int getExpireBehavior() {
+		return expireBehavior;
+	}
+
+	public void setExpireBehavior(int expireBehavior) {
+		this.expireBehavior = expireBehavior;
+	}
+
+	public int getExpireGracePeriod() {
+		return expireGracePeriod;
+	}
+
+	public void setExpireGracePeriod(int expireGracePeriod) {
+		this.expireGracePeriod = expireGracePeriod;
+	}
+
+	public UserPojo getUser() {
+		return user;
+	}
+
+	public void setUser(UserPojo user) {
+		this.user = user;
+	}
+
+	public AccountPojo getAccount() {
+		return account;
+	}
+
+	public void setAccount(AccountPojo account) {
+		this.account = account;
+	}
+
+	public String getSyncedAt() {
+		return syncedAt;
+	}
+
+	public void setSyncedAt(String syncedAt) {
+		this.syncedAt = syncedAt;
+	}
 }

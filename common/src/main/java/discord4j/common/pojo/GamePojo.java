@@ -16,5 +16,35 @@
  */
 package discord4j.common.pojo;
 
-public class PrivateChannelPojo {
+import java.util.Optional;
+
+public class GamePojo {
+
+	private String name;
+	private int type;
+	private Optional<String> url;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+	public Optional<String> getUrl() {
+		return url;
+	}
+
+	public void setUrl(Optional<String> url) {
+		this.url = url;
+	}
 }

@@ -728,8 +728,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-current-user-guilds">https://discordapp
 	 * .com/developers/docs/resources/user#get-current-user-guilds</a>
 	 */
-	public static final Route<PartialGuildPojo> CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds",
-			PartialGuildPojo.class);
+	public static final Route<UserGuildPojo> CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds",
+			UserGuildPojo.class);
 
 	/**
 	 * Leave a guild. Returns a 204 empty response on success.
@@ -745,8 +745,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-user-dms">https://discordapp
 	 * .com/developers/docs/resources/user#get-user-dms</a>
 	 */
-	public static final Route<PrivateChannelPojo[]> USER_DMS_GET = Route.get("/users/@me/channels",
-			PrivateChannelPojo[].class);
+	public static final Route<ChannelPojo[]> USER_DMS_GET = Route.get("/users/@me/channels",
+			ChannelPojo[].class);
 
 	/**
 	 * Create a new DM channel with a user. Returns a DM channel object.
@@ -754,8 +754,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#create-dm">https://discordapp
 	 * .com/developers/docs/resources/user#create-dm</a>
 	 */
-	public static final Route<PrivateChannelPojo> USER_DM_CREATE = Route.post("/users/@me/channels",
-			PrivateChannelPojo.class);
+	public static final Route<ChannelPojo> USER_DM_CREATE = Route.post("/users/@me/channels",
+			ChannelPojo.class);
 
 	/**
 	 * Create a new group DM channel with multiple users. Returns a DM channel object.
@@ -763,8 +763,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#create-group-dm">https://discordapp
 	 * .com/developers/docs/resources/user#create-group-dm</a>
 	 */
-	public static final Route<PrivateChannelPojo> GROUP_DM_CREATE = Route.post("/users/@me/channels",
-			PrivateChannelPojo.class);
+	public static final Route<ChannelPojo> GROUP_DM_CREATE = Route.post("/users/@me/channels",
+			ChannelPojo.class);
 
 	/**
 	 * Returns a list of connection objects. Requires the connections OAuth2 scope.
