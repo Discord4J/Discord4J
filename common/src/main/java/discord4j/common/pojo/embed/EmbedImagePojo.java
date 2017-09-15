@@ -18,6 +18,11 @@ package discord4j.common.pojo.embed;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents an Embed Image Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-image-structure">Embed Image Object</a>
+ */
 public class EmbedImagePojo {
 
 	private String url;

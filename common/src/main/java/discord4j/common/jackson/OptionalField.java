@@ -18,6 +18,14 @@ package discord4j.common.jackson;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+/**
+ * Represents a JSON property that is Optional <i>or</i> Optional <b>and</b> Nullable.
+ * <p>
+ * If the property is <i>only</i> Nullable, then a standard {@link java.util.Optional Optional} should be utilized.
+ * Regular JSON properties (neither Nullable or Optional) do not require usage of either types.
+ *
+ * @param <T> JSON Property Type
+ */
 @JsonSerialize(using = OptionalFieldSerializer.class)
 public class OptionalField<T> {
 
@@ -32,35 +40,82 @@ public class OptionalField<T> {
 		this.isExplicitlyNull = isExplicitlyNull;
 	}
 
+	/**
+	 * Returns an instance of {@code OptionalField} with the included {@code value}.
+	 *
+	 * @param value The value of this JSON Property, may be null.
+	 * @param <T> JSON Property Type
+	 * @return An instance of {@code OptionalField} representing the included {@code value}.
+	 * @see #isPresent()
+	 */
 	public static <T> OptionalField<T> of(T value) {
 		return new OptionalField<>(value, false);
 	}
 
+	/**
+	 * Returns an instance of {@code OptionalField} that represents an empty value of {@code <T>}.
+	 *
+	 * @param <T> JSON Property Type
+	 * @return An instance of {@code OptionalField} representing an empty value.
+	 * @see #isAbsent()
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> OptionalField<T> absent() {
 		return (OptionalField<T>) ABSENT;
 	}
 
+	/**
+	 * Returns an instance of {@code OptionalField} that represents a null value of {@code <T>}.
+	 *
+	 * @param <T> JSON Property Type
+	 * @return An instance of {@code OptionalField} representing a null value.
+	 * @see #isNull()
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> OptionalField<T> ofNull() {
 		return (OptionalField<T>) NULL;
 	}
 
+	/**
+	 * Returns an instance of {@code <T>}, if possible.
+	 *
+	 * @return An instance of {@code <T>}, guaranteed to never be null.
+	 * @throws IllegalStateException If {@link #isPresent()} returns false.
+	 */
 	public T get() {
 		if (!isPresent()) throw new IllegalStateException();
 		return value;
 	}
 
+	/**
+	 * Checks if the value is <i>present</i>.
+	 * <p>
+	 * A value is present if it was included (not Optional) and not null.
+	 * @return True if the value is present, false otherwise.
+	 */
 	public boolean isPresent() {
 		return value != null;
 	}
 
+	/**
+	 * Checks if the value is <i>absent</i>.
+	 * <p>
+	 * A value is absent if it was not included. It is important to note that this does <b>not</b> necessarily imply
+	 * nullability by the source.
+	 * @return True if the value is absent, false otherwise.
+	 */
 	public boolean isAbsent() {
 		return value == null && !isExplicitlyNull;
 	}
 
+	/**
+	 * Checks if the value is <i>null</i>.
+	 * <p>
+	 * A value is null if it was included and had a null value. Unlike {@link #isAbsent()}, null is explicitly defined
+	 * by the JSON source and intended to be processed as such.
+	 * @return True if the value is null, false otherwise.
+	 */
 	public boolean isNull() {
 		return value == null && isExplicitlyNull;
 	}
 }
-

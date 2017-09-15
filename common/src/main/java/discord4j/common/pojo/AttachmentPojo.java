@@ -20,6 +20,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Optional;
 
+/**
+ * Represents an Attachment Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#attachment-object">Attachment Object</a>
+ */
 public class AttachmentPojo {
 
 	private String id;

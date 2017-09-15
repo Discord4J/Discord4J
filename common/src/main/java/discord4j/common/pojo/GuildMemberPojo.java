@@ -19,6 +19,11 @@ package discord4j.common.pojo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.OptionalField;
 
+/**
+ * Represents a Guild Member Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-member-object">Guild Member Object</a>
+ */
 public class GuildMemberPojo {
 
 	private UserPojo user;

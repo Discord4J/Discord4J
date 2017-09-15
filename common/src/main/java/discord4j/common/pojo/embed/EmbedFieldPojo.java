@@ -16,6 +16,11 @@
  */
 package discord4j.common.pojo.embed;
 
+/**
+ * Represents an Embed Field Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-field-structure">Embed Field Object</a>
+ */
 public class EmbedFieldPojo {
 
 	private String name;

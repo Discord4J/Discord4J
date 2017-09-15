@@ -16,6 +16,11 @@
  */
 package discord4j.common.pojo;
 
+/**
+ * Represents a Prune Response Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#begin-guild-prune">Prune Response Object</a>
+ */
 public class PruneResponse {
 
 	private int pruned;

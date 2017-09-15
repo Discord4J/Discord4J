@@ -18,6 +18,11 @@ package discord4j.common.pojo;
 
 import discord4j.common.jackson.OptionalField;
 
+/**
+ * Represents a Gateway Response Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#get-gateway-bot-example-response">Gateway Response Object</a>
+ */
 public class GatewayPojo {
 
 	private String url;

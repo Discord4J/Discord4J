@@ -18,6 +18,11 @@ package discord4j.common.pojo;
 
 import java.util.Optional;
 
+/**
+ * Represents a Game Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#game-object">Game Object</a>
+ */
 public class GamePojo {
 
 	private String name;

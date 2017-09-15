@@ -21,6 +21,11 @@ import discord4j.common.jackson.OptionalField;
 
 import java.util.Optional;
 
+/**
+ * Represents a Webhook Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/webhook#webhook-object">Webhook Object</a>
+ */
 public class WebhookPojo {
 
 	private String id;

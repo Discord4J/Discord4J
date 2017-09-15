@@ -16,6 +16,11 @@
  */
 package discord4j.common.pojo.embed;
 
+/**
+ * Represents an Embed Provider Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-provider-structure">Embed Provider Object</a>
+ */
 public class EmbedProviderPojo {
 
 	private String name;

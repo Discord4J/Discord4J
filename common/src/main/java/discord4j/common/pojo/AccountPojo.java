@@ -16,6 +16,11 @@
  */
 package discord4j.common.pojo;
 
+/**
+ * Represents an Integration Account Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-account-object">Integration Account Object</a>
+ */
 public class AccountPojo {
 
 	private String id;

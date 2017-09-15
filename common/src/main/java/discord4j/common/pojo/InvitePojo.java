@@ -16,6 +16,11 @@
  */
 package discord4j.common.pojo;
 
+/**
+ * Represents an Invite Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/invite#invite-object">Invite Object</a>
+ */
 public class InvitePojo {
 
 	private String code;

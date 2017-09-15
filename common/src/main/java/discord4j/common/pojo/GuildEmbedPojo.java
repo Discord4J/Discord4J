@@ -18,6 +18,11 @@ package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents a Guild Embed Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-embed-object">Guild Embed Object</a>
+ */
 public class GuildEmbedPojo {
 
 	private boolean enabled;

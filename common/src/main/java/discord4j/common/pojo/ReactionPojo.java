@@ -16,6 +16,11 @@
  */
 package discord4j.common.pojo;
 
+/**
+ * Represents a Reaction Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#reaction-object">Reaction Object</a>
+ */
 public class ReactionPojo {
 
 	private int count;

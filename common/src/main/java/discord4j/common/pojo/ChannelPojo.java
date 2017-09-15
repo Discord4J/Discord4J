@@ -19,6 +19,11 @@ package discord4j.common.pojo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.OptionalField;
 
+/**
+ * Represents a Channel Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#channel-object">Channel Object</a>
+ */
 public class ChannelPojo {
 
 	// common

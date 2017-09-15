@@ -20,6 +20,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Optional;
 
+/**
+ * Represents a Presence Update Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update-presence-update-event-fields">Presence Update Object</a>
+ */
 public class PresencePojo {
 
 	private UserPojo user;

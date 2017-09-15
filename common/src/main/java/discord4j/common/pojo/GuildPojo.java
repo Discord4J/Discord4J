@@ -21,6 +21,11 @@ import discord4j.common.jackson.OptionalField;
 
 import java.util.Optional;
 
+/**
+ * Represents a Guild Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-object">Guild Object</a>
+ */
 public class GuildPojo {
 
 	private String id;

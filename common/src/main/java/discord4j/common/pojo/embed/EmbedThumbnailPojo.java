@@ -18,6 +18,11 @@ package discord4j.common.pojo.embed;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents an Embed Thumbnail Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-thumbnail-structure">Embed Thumbnail Object</a>
+ */
 public class EmbedThumbnailPojo {
 
 	private String url;

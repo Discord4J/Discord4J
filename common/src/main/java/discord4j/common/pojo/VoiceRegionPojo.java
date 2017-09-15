@@ -18,6 +18,11 @@ package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents a Voice Region Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-region">Voice Region Object</a>
+ */
 public class VoiceRegionPojo {
 
 	private String id;

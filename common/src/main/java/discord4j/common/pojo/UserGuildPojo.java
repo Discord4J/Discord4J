@@ -16,6 +16,11 @@
  */
 package discord4j.common.pojo;
 
+/**
+ * Represents an User Guild Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/user#get-current-user-guilds-example-partial-guild">User Guild Object</a>
+ */
 public class UserGuildPojo {
 
 	private String id;

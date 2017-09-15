@@ -18,6 +18,11 @@ package discord4j.common.pojo.embed;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents an Embed Author Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-author-structure">Embed Author Object</a>
+ */
 public class EmbedAuthorPojo {
 
 	private String name;

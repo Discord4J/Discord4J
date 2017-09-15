@@ -22,6 +22,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.io.IOException;
 
+/**
+ * Custom Jackson serializer for {@link OptionalField} property types.
+ */
 public class OptionalFieldSerializer extends JsonSerializer<OptionalField> {
 
 	@Override
@@ -40,4 +43,3 @@ public class OptionalFieldSerializer extends JsonSerializer<OptionalField> {
 		return value.isAbsent();
 	}
 }
-

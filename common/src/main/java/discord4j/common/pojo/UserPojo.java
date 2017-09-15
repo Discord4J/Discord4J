@@ -19,6 +19,11 @@ package discord4j.common.pojo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.OptionalField;
 
+/**
+ * Represents an User Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/user#user-object">User Object</a>
+ */
 public class UserPojo {
 
 	private String id;

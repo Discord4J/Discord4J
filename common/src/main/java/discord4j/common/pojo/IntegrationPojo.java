@@ -18,6 +18,11 @@ package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents an Integration Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-object">Integration Object</a>
+ */
 public class IntegrationPojo {
 
 	private String id;

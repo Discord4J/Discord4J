@@ -20,6 +20,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.OptionalField;
 import discord4j.common.pojo.embed.EmbedPojo;
 
+/**
+ * Represents a Message Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-object">Message Object</a>
+ */
 public class MessagePojo {
 
 	private String id;

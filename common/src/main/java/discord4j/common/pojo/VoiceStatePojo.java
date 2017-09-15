@@ -19,6 +19,11 @@ package discord4j.common.pojo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.OptionalField;
 
+/**
+ * Represents a Voice State Object as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-state-object">Voice State Object</a>
+ */
 public class VoiceStatePojo {
 
 	@JsonProperty("guild_id")
