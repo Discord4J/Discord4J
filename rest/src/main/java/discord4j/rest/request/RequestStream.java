@@ -114,7 +114,7 @@ class RequestStream<T> {
 				.responseFilter(response -> {
 					HttpHeaders headers = response.responseHeaders();
 
-					int remaining = headers.getInt("X-RateLimit-Remaining");
+					int remaining = headers.getInt("X-RateLimit-Remaining", -1);
 					if (remaining == 0) {
 						long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
 						long discordTime = headers.getTimeMillis("Date") / 1000;

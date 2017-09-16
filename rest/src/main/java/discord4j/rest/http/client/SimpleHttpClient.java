@@ -27,6 +27,7 @@ import reactor.ipc.netty.http.client.HttpClient;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 
 public class SimpleHttpClient {
 
@@ -79,6 +80,7 @@ public class SimpleHttpClient {
 							.orElseGet(() -> Mono.error(new RuntimeException("No strategies to write this request: " +
 									body + " - " + contentType)));
 				})
+				.log("discord4j.rest.http.client", Level.FINEST)
 				.flatMap(response -> {
 					exchangeFilter.getResponseFilter().accept(response);
 
