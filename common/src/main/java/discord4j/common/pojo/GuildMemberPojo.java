@@ -30,7 +30,7 @@ import discord4j.common.jackson.Possible;
 public class GuildMemberPojo {
 
 	private UserPojo user;
-	private Possible<String> nick;
+	private Possible<String> nick = Possible.absent();
 	private String[] roles;
 	@JsonProperty("joined_at")
 	private String joinedAt;

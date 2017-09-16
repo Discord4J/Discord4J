@@ -17,33 +17,44 @@
 package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordPojoFilter;
-import discord4j.common.jackson.Possible;
 
 /**
- * Represents a Gateway Response Object as defined by Discord.
+ * Represents an Embed Footer Object as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#get-gateway-bot-example-response">Gateway Response Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-footer-structure">Embed Footer Object</a>
  */
 @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class GatewayPojo {
+public class EmbedFooterPojo {
 
-	private String url;
-	private Possible<Integer> shards = Possible.absent();
+	private String text;
+	@JsonProperty("icon_url")
+	private String iconUrl;
+	@JsonProperty("proxy_icon_url")
+	private String proxyIconUrl;
 
-	public String getUrl() {
-		return url;
+	public String getText() {
+		return text;
 	}
 
-	public void setUrl(String url) {
-		this.url = url;
+	public void setText(String text) {
+		this.text = text;
 	}
 
-	public Possible<Integer> getShards() {
-		return shards;
+	public String getIconUrl() {
+		return iconUrl;
 	}
 
-	public void setShards(Possible<Integer> shards) {
-		this.shards = shards;
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
+
+	public String getProxyIconUrl() {
+		return proxyIconUrl;
+	}
+
+	public void setProxyIconUrl(String proxyIconUrl) {
+		this.proxyIconUrl = proxyIconUrl;
 	}
 }

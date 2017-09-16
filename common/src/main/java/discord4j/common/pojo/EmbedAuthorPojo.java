@@ -14,22 +14,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo.embed;
+package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordPojoFilter;
 
 /**
- * Represents an Embed Field Object as defined by Discord.
+ * Represents an Embed Author Object as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-field-structure">Embed Field Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-author-structure">Embed Author Object</a>
  */
 @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class EmbedFieldPojo {
+public class EmbedAuthorPojo {
 
 	private String name;
-	private String value;
-	private boolean inline;
+	private String url;
+	@JsonProperty("icon_url")
+	private String iconUrl;
+	@JsonProperty("proxy_icon_url")
+	private String proxyIconUrl;
 
 	public String getName() {
 		return name;
@@ -39,19 +43,27 @@ public class EmbedFieldPojo {
 		this.name = name;
 	}
 
-	public String getValue() {
-		return value;
+	public String getUrl() {
+		return url;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
-	public boolean isInline() {
-		return inline;
+	public String getIconUrl() {
+		return iconUrl;
 	}
 
-	public void setInline(boolean inline) {
-		this.inline = inline;
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
+
+	public String getProxyIconUrl() {
+		return proxyIconUrl;
+	}
+
+	public void setProxyIconUrl(String proxyIconUrl) {
+		this.proxyIconUrl = proxyIconUrl;
 	}
 }

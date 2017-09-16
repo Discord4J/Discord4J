@@ -31,10 +31,10 @@ public class EmojiPojo {
 
 	private String id;
 	private String name;
-	private Possible<String[]> roles;
+	private Possible<String[]> roles = Possible.absent();
 	@JsonProperty("require_colons")
-	private Possible<Boolean> requireColons;
-	private Possible<Boolean> managed;
+	private Possible<Boolean> requireColons = Possible.absent();
+	private Possible<Boolean> managed = Possible.absent();
 
 	public String getId() {
 		return id;

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordPojoFilter;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleOptional;
-import discord4j.common.pojo.embed.EmbedPojo;
 
 import java.util.Optional;
 
@@ -49,11 +48,11 @@ public class MessagePojo {
 	private String[] mentionRoles;
 	private AttachmentPojo[] attachments;
 	private EmbedPojo[] embeds;
-	private Possible<ReactionPojo[]> reactions;
-	private PossibleOptional<String> nonce;
+	private Possible<ReactionPojo[]> reactions = Possible.absent();
+	private PossibleOptional<String> nonce = PossibleOptional.absent();
 	private boolean pinned;
 	@JsonProperty("webhook_id")
-	private Possible<String> webhookId;
+	private Possible<String> webhookId = Possible.absent();
 	private int type;
 
 	public String getId() {

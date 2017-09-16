@@ -14,34 +14,25 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo.embed;
+package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordPojoFilter;
 
 /**
- * Represents an Embed Author Object as defined by Discord.
+ * Represents an Embed Thumbnail Object as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-author-structure">Embed Author Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-thumbnail-structure">Embed Thumbnail Object</a>
  */
 @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class EmbedAuthorPojo {
+public class EmbedThumbnailPojo {
 
-	private String name;
 	private String url;
-	@JsonProperty("icon_url")
-	private String iconUrl;
-	@JsonProperty("proxy_icon_url")
-	private String proxyIconUrl;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
+	@JsonProperty("proxy_url")
+	private String proxyUrl;
+	private int height;
+	private int width;
 
 	public String getUrl() {
 		return url;
@@ -51,19 +42,27 @@ public class EmbedAuthorPojo {
 		this.url = url;
 	}
 
-	public String getIconUrl() {
-		return iconUrl;
+	public String getProxyUrl() {
+		return proxyUrl;
 	}
 
-	public void setIconUrl(String iconUrl) {
-		this.iconUrl = iconUrl;
+	public void setProxyUrl(String proxyUrl) {
+		this.proxyUrl = proxyUrl;
 	}
 
-	public String getProxyIconUrl() {
-		return proxyIconUrl;
+	public int getHeight() {
+		return height;
 	}
 
-	public void setProxyIconUrl(String proxyIconUrl) {
-		this.proxyIconUrl = proxyIconUrl;
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
 	}
 }

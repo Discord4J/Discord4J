@@ -16,21 +16,28 @@
  */
 package discord4j.common.jackson;
 
-public class DiscordPojoFilter {
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.ReferenceType;
+import com.fasterxml.jackson.databind.type.TypeBindings;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.type.TypeModifier;
+
+import java.lang.reflect.Type;
+
+public class PossibleTypeModifier extends TypeModifier {
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
+	public JavaType modifyType(JavaType type, Type jdkType, TypeBindings context, TypeFactory typeFactory) {
+		if (type.isReferenceType() || type.isContainerType()) {
+			return type;
 		}
 
-		if (Possible.class.isAssignableFrom(obj.getClass())) {
-			return ((Possible) obj).isAbsent();
-		}
-		if (PossibleOptional.class.isAssignableFrom(obj.getClass())) {
-			return ((PossibleOptional) obj).isAbsent();
+		Class<?> raw = type.getRawClass();
+
+		if (raw == Possible.class || raw == PossibleOptional.class) {
+			return ReferenceType.upgradeFrom(type, type.containedTypeOrUnknown(0));
 		}
 
-		return false;
+		return type;
 	}
 }

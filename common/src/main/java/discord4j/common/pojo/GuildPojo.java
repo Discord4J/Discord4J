@@ -58,16 +58,16 @@ public class GuildPojo {
 
 	// GUILD_CREATE only
 	@JsonProperty("joined_at")
-	private Possible<String> joinedAt;
-	private Possible<Boolean> large;
-	private Possible<Boolean> unavailable;
+	private Possible<String> joinedAt = Possible.absent();
+	private Possible<Boolean> large = Possible.absent();
+	private Possible<Boolean> unavailable = Possible.absent();
 	@JsonProperty("member_count")
-	private Possible<Integer> memberCount;
+	private Possible<Integer> memberCount = Possible.absent();
 	@JsonProperty("voice_states")
-	private Possible<VoiceStatePojo[]> voiceStates;
-	private Possible<GuildMemberPojo[]> members;
-	private Possible<ChannelPojo[]> channels;
-	private Possible<PresencePojo[]> presences;
+	private Possible<VoiceStatePojo[]> voiceStates = Possible.absent();
+	private Possible<GuildMemberPojo[]> members = Possible.absent();
+	private Possible<ChannelPojo[]> channels = Possible.absent();
+	private Possible<PresencePojo[]> presences = Possible.absent();
 
 	public String getId() {
 		return id;

@@ -30,7 +30,7 @@ import discord4j.common.jackson.Possible;
 public class VoiceStatePojo {
 
 	@JsonProperty("guild_id")
-	private Possible<String> guildId;
+	private Possible<String> guildId = Possible.absent();
 	@JsonProperty("channel_id")
 	private String channelId;
 	@JsonProperty("user_id")

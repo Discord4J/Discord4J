@@ -14,47 +14,44 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo.embed;
+package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordPojoFilter;
 
 /**
- * Represents an Embed Footer Object as defined by Discord.
+ * Represents an Embed Video Object as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-footer-structure">Embed Footer Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-video-structure">Embed Video Object</a>
  */
 @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class EmbedFooterPojo {
+public class EmbedVideoPojo {
 
-	private String text;
-	@JsonProperty("icon_url")
-	private String iconUrl;
-	@JsonProperty("proxy_icon_url")
-	private String proxyIconUrl;
+	private String url;
+	private int height;
+	private int width;
 
-	public String getText() {
-		return text;
+	public String getUrl() {
+		return url;
 	}
 
-	public void setText(String text) {
-		this.text = text;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
-	public String getIconUrl() {
-		return iconUrl;
+	public int getHeight() {
+		return height;
 	}
 
-	public void setIconUrl(String iconUrl) {
-		this.iconUrl = iconUrl;
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
-	public String getProxyIconUrl() {
-		return proxyIconUrl;
+	public int getWidth() {
+		return width;
 	}
 
-	public void setProxyIconUrl(String proxyIconUrl) {
-		this.proxyIconUrl = proxyIconUrl;
+	public void setWidth(int width) {
+		this.width = width;
 	}
 }

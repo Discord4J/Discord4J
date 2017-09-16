@@ -14,25 +14,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo.embed;
+package discord4j.common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordPojoFilter;
 
 /**
- * Represents an Embed Thumbnail Object as defined by Discord.
+ * Represents an Embed Provider Object as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-thumbnail-structure">Embed Thumbnail Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-provider-structure">Embed Provider Object</a>
  */
 @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class EmbedThumbnailPojo {
+public class EmbedProviderPojo {
 
+	private String name;
 	private String url;
-	@JsonProperty("proxy_url")
-	private String proxyUrl;
-	private int height;
-	private int width;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getUrl() {
 		return url;
@@ -40,29 +44,5 @@ public class EmbedThumbnailPojo {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public String getProxyUrl() {
-		return proxyUrl;
-	}
-
-	public void setProxyUrl(String proxyUrl) {
-		this.proxyUrl = proxyUrl;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
 	}
 }

@@ -36,8 +36,8 @@ public class UserPojo {
 	private boolean bot;
 	@JsonProperty("mfa_enabled")
 	private boolean mfaEnabled;
-	private Possible<Boolean> verified;
-	private Possible<String> email;
+	private Possible<Boolean> verified = Possible.absent();
+	private Possible<String> email = Possible.absent();
 
 	public String getId() {
 		return id;

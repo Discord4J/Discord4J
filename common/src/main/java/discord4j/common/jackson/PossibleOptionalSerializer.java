@@ -16,25 +16,53 @@
  */
 package discord4j.common.jackson;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
+import com.fasterxml.jackson.databind.type.ReferenceType;
+import com.fasterxml.jackson.databind.util.NameTransformer;
 
-import java.io.IOException;
+public class PossibleOptionalSerializer extends ReferenceTypeSerializer<PossibleOptional<?>> {
 
-/**
- * Custom Jackson serializer for {@link discord4j.common.jackson.Possible} property types.
- */
-public class PossibleOptionalSerializer extends JsonSerializer<PossibleOptional> {
+	PossibleOptionalSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts,
+	                           JsonSerializer<Object> ser) {
+		super(fullType, staticTyping, vts, ser);
+	}
 
-	@Override
-	public void serialize(PossibleOptional value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-		if (value.isAbsent()) return;
-		gen.writeObject(value.get());
+	PossibleOptionalSerializer(PossibleOptionalSerializer base, BeanProperty property, TypeSerializer vts,
+	                           JsonSerializer<?> valueSer, NameTransformer unwrapper, Object suppressableValue,
+	                           boolean suppressNulls) {
+		super(base, property, vts, valueSer, unwrapper, suppressableValue, suppressNulls);
 	}
 
 	@Override
-	public boolean isEmpty(SerializerProvider provider, PossibleOptional value) {
-		return value.isAbsent();
+	protected ReferenceTypeSerializer<PossibleOptional<?>> withResolved(BeanProperty prop, TypeSerializer vts,
+	                                                                    JsonSerializer<?> valueSer,
+	                                                                    NameTransformer unwrapper) {
+		return new PossibleOptionalSerializer(this, prop, vts, valueSer, unwrapper, _suppressableValue,
+				_suppressNulls);
+	}
+
+	@Override
+	public ReferenceTypeSerializer<PossibleOptional<?>> withContentInclusion(Object suppressableValue,
+	                                                                         boolean suppressNulls) {
+		return new PossibleOptionalSerializer(this, _property, _valueTypeSerializer, _valueSerializer, _unwrapper,
+				suppressableValue, suppressNulls);
+	}
+
+	@Override
+	protected boolean _isValuePresent(PossibleOptional<?> value) {
+		return value.isPresent();
+	}
+
+	@Override
+	protected Object _getReferenced(PossibleOptional<?> value) {
+		return value.get();
+	}
+
+	@Override
+	protected Object _getReferencedIfPresent(PossibleOptional<?> value) {
+		return !value.isPresent() ? null : value.get();
 	}
 }

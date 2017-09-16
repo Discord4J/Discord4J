@@ -16,24 +16,21 @@
  */
 package discord4j.common.jackson;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import java.util.Objects;
 import java.util.Optional;
 
-@JsonSerialize(using = PossibleOptionalSerializer.class)
 public class PossibleOptional<T> {
 
 	private static final PossibleOptional<?> ABSENT = new PossibleOptional<>(null);
+	private static final PossibleOptional<?> EMPTY = new PossibleOptional<>(Optional.empty());
 
 	private final Optional<T> value;
 
-	private PossibleOptional(T value) {
-		this.value = Optional.ofNullable(value);
+	private PossibleOptional(Optional<T> value) {
+		this.value = value;
 	}
 
 	public static <T> PossibleOptional<T> of(T value) {
-		return new PossibleOptional<>(value);
+		return new PossibleOptional<>(Optional.ofNullable(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -41,12 +38,53 @@ public class PossibleOptional<T> {
 		return (PossibleOptional<T>) ABSENT;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> PossibleOptional<T> empty() {
+		return (PossibleOptional<T>) EMPTY;
+	}
+
 	public T get() {
-		if (isAbsent()) throw new IllegalStateException();
+		if (!isPresent()) {
+			throw new IllegalStateException();
+		}
 		return value.get();
 	}
 
 	public boolean isAbsent() {
-		return !value.isPresent();
+		return value == null;
+	}
+
+	public boolean isPresent() {
+		return !isAbsent() && value.isPresent();
+	}
+
+	@Override
+	public int hashCode() {
+		return value != null ? value.hashCode() : 0;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		PossibleOptional<?> that = (PossibleOptional<?>) o;
+
+		return value != null ? value.equals(that.value) : that.value == null;
+	}
+
+	@Override
+	public String toString() {
+		if (isAbsent()) {
+			return "PossibleOptional.absent";
+		}
+		if (!isPresent()) {
+			return "PossibleOptional.empty";
+		}
+		return "PossibleOptional[" + value.get() + "]";
 	}
 }

@@ -16,11 +16,10 @@
  */
 package discord4j.common.jackson;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
-@JsonSerialize(using = PossibleSerializer.class)
+@Nonnull
 public class Possible<T> {
 
 	private static final Possible<?> ABSENT = new Possible<>(null);
@@ -42,12 +41,41 @@ public class Possible<T> {
 	}
 
 	public T get() {
-		if (isAbsent()) throw new IllegalStateException();
+		if (isAbsent()) {
+			throw new IllegalStateException();
+		}
 		return value;
 	}
 
 	public boolean isAbsent() {
 		return value == null;
+	}
+
+	@Override
+	public int hashCode() {
+		return value != null ? value.hashCode() : 0;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		Possible<?> possible = (Possible<?>) o;
+
+		return value != null ? value.equals(possible.value) : possible.value == null;
+	}
+
+	@Override
+	public String toString() {
+		if (isAbsent()) {
+			return "Possible.absent";
+		}
+		return "Possible[" + value + "]";
 	}
 }
 

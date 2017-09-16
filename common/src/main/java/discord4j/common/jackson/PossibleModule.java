@@ -14,35 +14,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo.embed;
+package discord4j.common.jackson;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import discord4j.common.jackson.DiscordPojoFilter;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.Module;
 
-/**
- * Represents an Embed Provider Object as defined by Discord.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-provider-structure">Embed Provider Object</a>
- */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class EmbedProviderPojo {
+public class PossibleModule extends Module {
 
-	private String name;
-	private String url;
-
-	public String getName() {
-		return name;
+	@Override
+	public String getModuleName() {
+		return "PossibleModule";
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	@Override
+	public Version version() {
+		return Version.unknownVersion();
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
+	@Override
+	public void setupModule(SetupContext context) {
+		context.addSerializers(new PossibleSerializers());
+		context.addDeserializers(new PossibleDeserializers());
+		context.addTypeModifier(new PossibleTypeModifier());
 	}
 }

@@ -33,32 +33,32 @@ public class ChannelPojo {
 	// common
 	private String id;
 	private int type;
-	private Possible<String> name;
+	private Possible<String> name = Possible.absent();
 
 	// guild only
 	@JsonProperty("guild_id")
-	private Possible<String> guildId;
-	private Possible<Integer> position;
+	private Possible<String> guildId = Possible.absent();
+	private Possible<Integer> position = Possible.absent();
 
 	// guild text only
 	@JsonProperty("permission_overwrites")
-	private Possible<OverwritePojo[]> permissionOverwrites;
-	private Possible<String> topic;
+	private Possible<OverwritePojo[]> permissionOverwrites = Possible.absent();
+	private Possible<String> topic = Possible.absent();
 	@JsonProperty("last_message_id")
-	private Possible<String> lastMessageId;
+	private Possible<String> lastMessageId = Possible.absent();
 
 	// guild voice only
-	private Possible<Integer> bitrate;
+	private Possible<Integer> bitrate = Possible.absent();
 	@JsonProperty("user_limit")
-	private Possible<Integer> userLimit;
+	private Possible<Integer> userLimit = Possible.absent();
 
 	// private/group only
-	private Possible<UserPojo[]> recipients;
-	private PossibleOptional<String> icon;
+	private Possible<UserPojo[]> recipients = Possible.absent();
+	private PossibleOptional<String> icon = PossibleOptional.absent();
 	@JsonProperty("owner_id")
-	private Possible<String> ownerId;
+	private Possible<String> ownerId = Possible.absent();
 	@JsonProperty("application_id")
-	private Possible<String> applicationId;
+	private Possible<String> applicationId = Possible.absent();
 
 	public String getId() {
 		return id;

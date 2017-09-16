@@ -33,10 +33,10 @@ public class WebhookPojo {
 
 	private String id;
 	@JsonProperty("guild_id")
-	private Possible<String> guildId;
+	private Possible<String> guildId = Possible.absent();
 	@JsonProperty("channel_id")
 	private String channelId;
-	private Possible<UserPojo> user;
+	private Possible<UserPojo> user = Possible.absent();
 	private Optional<String> name;
 	private Optional<String> avatar;
 	private String token;

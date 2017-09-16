@@ -14,23 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+@NonNullApi
+package discord4j.common.pojo;
 
-public class DiscordPojoFilter {
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-
-		if (Possible.class.isAssignableFrom(obj.getClass())) {
-			return ((Possible) obj).isAbsent();
-		}
-		if (PossibleOptional.class.isAssignableFrom(obj.getClass())) {
-			return ((PossibleOptional) obj).isAbsent();
-		}
-
-		return false;
-	}
-}
+import reactor.util.lang.NonNullApi;

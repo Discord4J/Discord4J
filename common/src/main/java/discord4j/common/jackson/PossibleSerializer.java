@@ -16,22 +16,49 @@
  */
 package discord4j.common.jackson;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
+import com.fasterxml.jackson.databind.type.ReferenceType;
+import com.fasterxml.jackson.databind.util.NameTransformer;
 
-import java.io.IOException;
+public class PossibleSerializer extends ReferenceTypeSerializer<Possible<?>> {
 
-public class PossibleSerializer extends JsonSerializer<Possible> {
+	PossibleSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts, JsonSerializer<Object> ser) {
+		super(fullType, staticTyping, vts, ser);
+	}
 
-	@Override
-	public void serialize(Possible value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-		if (value.isAbsent()) return;
-		gen.writeObject(value.get());
+	PossibleSerializer(PossibleSerializer base, BeanProperty property, TypeSerializer vts, JsonSerializer<?> valueSer,
+	                   NameTransformer unwrapper, Object suppressableValue, boolean suppressNulls) {
+		super(base, property, vts, valueSer, unwrapper, suppressableValue, suppressNulls);
 	}
 
 	@Override
-	public boolean isEmpty(SerializerProvider provider, Possible value) {
-		return value.isAbsent();
+	protected ReferenceTypeSerializer<Possible<?>> withResolved(BeanProperty prop, TypeSerializer vts,
+	                                                            JsonSerializer<?> valueSer, NameTransformer
+			                                                            unwrapper) {
+		return new PossibleSerializer(this, prop, vts, valueSer, unwrapper, _suppressableValue, _suppressNulls);
+	}
+
+	@Override
+	public ReferenceTypeSerializer<Possible<?>> withContentInclusion(Object suppressableValue, boolean suppressNulls) {
+		return new PossibleSerializer(this, _property, _valueTypeSerializer, _valueSerializer, _unwrapper,
+				suppressableValue, suppressNulls);
+	}
+
+	@Override
+	protected boolean _isValuePresent(Possible<?> value) {
+		return !value.isAbsent();
+	}
+
+	@Override
+	protected Object _getReferenced(Possible<?> value) {
+		return value.get();
+	}
+
+	@Override
+	protected Object _getReferencedIfPresent(Possible<?> value) {
+		return value.isAbsent() ? null : value.get();
 	}
 }
