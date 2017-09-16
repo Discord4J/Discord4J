@@ -46,7 +46,7 @@ public class WebSocketTest {
 							.subscribeWith(output)
 							.doOnNext(s -> log.debug("inbound " + s))
 							.then()
-							.doOnTerminate((aVoid, ex) ->
+							.doOnSuccessOrError((aVoid, ex) ->
 									log.debug("Done with " + (ex != null ? ex.getMessage() : "success")));
 				})
 				.block(Duration.ofMillis(5000));
