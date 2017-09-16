@@ -23,23 +23,18 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 
 /**
- * Custom Jackson serializer for {@link OptionalField} property types.
+ * Custom Jackson serializer for {@link discord4j.common.jackson.Possible} property types.
  */
-public class OptionalFieldSerializer extends JsonSerializer<OptionalField> {
+public class PossibleOptionalSerializer extends JsonSerializer<PossibleOptional> {
 
 	@Override
-	public void serialize(OptionalField value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+	public void serialize(PossibleOptional value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 		if (value.isAbsent()) return;
-
-		if (value.isNull()) {
-			gen.writeNull();
-		} else {
-			gen.writeObject(value.get());
-		}
+		gen.writeObject(value.get());
 	}
 
 	@Override
-	public boolean isEmpty(SerializerProvider provider, OptionalField value) {
+	public boolean isEmpty(SerializerProvider provider, PossibleOptional value) {
 		return value.isAbsent();
 	}
 }

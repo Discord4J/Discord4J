@@ -16,14 +16,17 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
 
 /**
  * Represents an User Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/user#user-object">User Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class UserPojo {
 
 	private String id;
@@ -33,8 +36,8 @@ public class UserPojo {
 	private boolean bot;
 	@JsonProperty("mfa_enabled")
 	private boolean mfaEnabled;
-	private OptionalField<Boolean> verified;
-	private OptionalField<String> email;
+	private Possible<Boolean> verified;
+	private Possible<String> email;
 
 	public String getId() {
 		return id;
@@ -84,19 +87,19 @@ public class UserPojo {
 		this.mfaEnabled = mfaEnabled;
 	}
 
-	public OptionalField<Boolean> getVerified() {
+	public Possible<Boolean> getVerified() {
 		return verified;
 	}
 
-	public void setVerified(OptionalField<Boolean> verified) {
+	public void setVerified(Possible<Boolean> verified) {
 		this.verified = verified;
 	}
 
-	public OptionalField<String> getEmail() {
+	public Possible<String> getEmail() {
 		return email;
 	}
 
-	public void setEmail(OptionalField<String> email) {
+	public void setEmail(Possible<String> email) {
 		this.email = email;
 	}
 }

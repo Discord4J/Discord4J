@@ -14,35 +14,40 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo.embed;
+package discord4j.common.jackson;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import discord4j.common.jackson.DiscordPojoFilter;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-/**
- * Represents an Embed Provider Object as defined by Discord.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-provider-structure">Embed Provider Object</a>
- */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class EmbedProviderPojo {
+import java.util.Objects;
 
-	private String name;
-	private String url;
+@JsonSerialize(using = PossibleSerializer.class)
+public class Possible<T> {
 
-	public String getName() {
-		return name;
+	private static final Possible<?> ABSENT = new Possible<>(null);
+
+	private final T value;
+
+	private Possible(T value) {
+		this.value = value;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public static <T> Possible<T> of(T value) {
+		Objects.requireNonNull(value);
+		return new Possible<>(value);
 	}
 
-	public String getUrl() {
-		return url;
+	@SuppressWarnings("unchecked")
+	public static <T> Possible<T> absent() {
+		return (Possible<T>) ABSENT;
 	}
 
-	public void setUrl(String url) {
-		this.url = url;
+	public T get() {
+		if (isAbsent()) throw new IllegalStateException();
+		return value;
+	}
+
+	public boolean isAbsent() {
+		return value == null;
 	}
 }
+

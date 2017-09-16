@@ -16,8 +16,10 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
 
 import java.util.Optional;
 
@@ -26,6 +28,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-object">Guild Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class GuildPojo {
 
 	private String id;
@@ -55,16 +58,16 @@ public class GuildPojo {
 
 	// GUILD_CREATE only
 	@JsonProperty("joined_at")
-	private OptionalField<String> joinedAt;
-	private OptionalField<Boolean> large;
-	private OptionalField<Boolean> unavailable;
+	private Possible<String> joinedAt;
+	private Possible<Boolean> large;
+	private Possible<Boolean> unavailable;
 	@JsonProperty("member_count")
-	private OptionalField<Integer> memberCount;
+	private Possible<Integer> memberCount;
 	@JsonProperty("voice_states")
-	private OptionalField<VoiceStatePojo[]> voiceStates;
-	private OptionalField<GuildMemberPojo[]> members;
-	private OptionalField<ChannelPojo[]> channels;
-	private OptionalField<PresencePojo[]> presences;
+	private Possible<VoiceStatePojo[]> voiceStates;
+	private Possible<GuildMemberPojo[]> members;
+	private Possible<ChannelPojo[]> channels;
+	private Possible<PresencePojo[]> presences;
 
 	public String getId() {
 		return id;
@@ -202,67 +205,67 @@ public class GuildPojo {
 		this.widgetChannelId = widgetChannelId;
 	}
 
-	public OptionalField<String> getJoinedAt() {
+	public Possible<String> getJoinedAt() {
 		return joinedAt;
 	}
 
-	public void setJoinedAt(OptionalField<String> joinedAt) {
+	public void setJoinedAt(Possible<String> joinedAt) {
 		this.joinedAt = joinedAt;
 	}
 
-	public OptionalField<Boolean> getLarge() {
+	public Possible<Boolean> getLarge() {
 		return large;
 	}
 
-	public void setLarge(OptionalField<Boolean> large) {
+	public void setLarge(Possible<Boolean> large) {
 		this.large = large;
 	}
 
-	public OptionalField<Boolean> getUnavailable() {
+	public Possible<Boolean> getUnavailable() {
 		return unavailable;
 	}
 
-	public void setUnavailable(OptionalField<Boolean> unavailable) {
+	public void setUnavailable(Possible<Boolean> unavailable) {
 		this.unavailable = unavailable;
 	}
 
-	public OptionalField<Integer> getMemberCount() {
+	public Possible<Integer> getMemberCount() {
 		return memberCount;
 	}
 
-	public void setMemberCount(OptionalField<Integer> memberCount) {
+	public void setMemberCount(Possible<Integer> memberCount) {
 		this.memberCount = memberCount;
 	}
 
-	public OptionalField<VoiceStatePojo[]> getVoiceStates() {
+	public Possible<VoiceStatePojo[]> getVoiceStates() {
 		return voiceStates;
 	}
 
-	public void setVoiceStates(OptionalField<VoiceStatePojo[]> voiceStates) {
+	public void setVoiceStates(Possible<VoiceStatePojo[]> voiceStates) {
 		this.voiceStates = voiceStates;
 	}
 
-	public OptionalField<GuildMemberPojo[]> getMembers() {
+	public Possible<GuildMemberPojo[]> getMembers() {
 		return members;
 	}
 
-	public void setMembers(OptionalField<GuildMemberPojo[]> members) {
+	public void setMembers(Possible<GuildMemberPojo[]> members) {
 		this.members = members;
 	}
 
-	public OptionalField<ChannelPojo[]> getChannels() {
+	public Possible<ChannelPojo[]> getChannels() {
 		return channels;
 	}
 
-	public void setChannels(OptionalField<ChannelPojo[]> channels) {
+	public void setChannels(Possible<ChannelPojo[]> channels) {
 		this.channels = channels;
 	}
 
-	public OptionalField<PresencePojo[]> getPresences() {
+	public Possible<PresencePojo[]> getPresences() {
 		return presences;
 	}
 
-	public void setPresences(OptionalField<PresencePojo[]> presences) {
+	public void setPresences(Possible<PresencePojo[]> presences) {
 		this.presences = presences;
 	}
 }

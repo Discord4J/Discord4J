@@ -16,18 +16,21 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
 
 /**
  * Represents a Guild Member Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-member-object">Guild Member Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class GuildMemberPojo {
 
 	private UserPojo user;
-	private OptionalField<String> nick;
+	private Possible<String> nick;
 	private String[] roles;
 	@JsonProperty("joined_at")
 	private String joinedAt;
@@ -42,11 +45,11 @@ public class GuildMemberPojo {
 		this.user = user;
 	}
 
-	public OptionalField<String> getNick() {
+	public Possible<String> getNick() {
 		return nick;
 	}
 
-	public void setNick(OptionalField<String> nick) {
+	public void setNick(Possible<String> nick) {
 		this.nick = nick;
 	}
 

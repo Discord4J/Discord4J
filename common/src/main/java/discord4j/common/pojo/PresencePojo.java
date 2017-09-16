@@ -16,7 +16,9 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.DiscordPojoFilter;
 
 import java.util.Optional;
 
@@ -25,6 +27,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update-presence-update-event-fields">Presence Update Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class PresencePojo {
 
 	private UserPojo user;

@@ -16,22 +16,25 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
 
 /**
  * Represents an Emoji Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-object">Emoji Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class EmojiPojo {
 
 	private String id;
 	private String name;
-	private OptionalField<String[]> roles;
+	private Possible<String[]> roles;
 	@JsonProperty("require_colons")
-	private OptionalField<Boolean> requireColons;
-	private OptionalField<Boolean> managed;
+	private Possible<Boolean> requireColons;
+	private Possible<Boolean> managed;
 
 	public String getId() {
 		return id;
@@ -49,27 +52,27 @@ public class EmojiPojo {
 		this.name = name;
 	}
 
-	public OptionalField<String[]> getRoles() {
+	public Possible<String[]> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(OptionalField<String[]> roles) {
+	public void setRoles(Possible<String[]> roles) {
 		this.roles = roles;
 	}
 
-	public OptionalField<Boolean> getRequireColons() {
+	public Possible<Boolean> getRequireColons() {
 		return requireColons;
 	}
 
-	public void setRequireColons(OptionalField<Boolean> requireColons) {
+	public void setRequireColons(Possible<Boolean> requireColons) {
 		this.requireColons = requireColons;
 	}
 
-	public OptionalField<Boolean> getManaged() {
+	public Possible<Boolean> getManaged() {
 		return managed;
 	}
 
-	public void setManaged(OptionalField<Boolean> managed) {
+	public void setManaged(Possible<Boolean> managed) {
 		this.managed = managed;
 	}
 }

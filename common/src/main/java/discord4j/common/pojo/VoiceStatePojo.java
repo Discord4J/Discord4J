@@ -16,18 +16,21 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
 
 /**
  * Represents a Voice State Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-state-object">Voice State Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class VoiceStatePojo {
 
 	@JsonProperty("guild_id")
-	private OptionalField<String> guildId;
+	private Possible<String> guildId;
 	@JsonProperty("channel_id")
 	private String channelId;
 	@JsonProperty("user_id")
@@ -42,11 +45,11 @@ public class VoiceStatePojo {
 	private boolean selfMute;
 	private boolean suppress;
 
-	public OptionalField<String> getGuildId() {
+	public Possible<String> getGuildId() {
 		return guildId;
 	}
 
-	public void setGuildId(OptionalField<String> guildId) {
+	public void setGuildId(Possible<String> guildId) {
 		this.guildId = guildId;
 	}
 

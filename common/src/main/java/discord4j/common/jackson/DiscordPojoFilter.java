@@ -14,35 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.jackson;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import discord4j.common.jackson.DiscordPojoFilter;
+public class DiscordPojoFilter {
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
 
-/**
- * Represents an Integration Account Object as defined by Discord.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-account-object">Integration Account Object</a>
- */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class AccountPojo {
+		if (Possible.class.isAssignableFrom(obj.getClass())) {
+			return ((Possible) obj).isAbsent();
+		}
+		if (PossibleOptional.class.isAssignableFrom(obj.getClass())) {
+			return ((PossibleOptional) obj).isAbsent();
+		}
 
-	private String id;
-	private String name;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+		return false;
 	}
 }

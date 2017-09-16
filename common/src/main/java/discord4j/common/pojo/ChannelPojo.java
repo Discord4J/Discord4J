@@ -16,45 +16,49 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleOptional;
 
 /**
  * Represents a Channel Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#channel-object">Channel Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class ChannelPojo {
 
 	// common
 	private String id;
 	private int type;
-	private OptionalField<String> name;
+	private Possible<String> name;
 
 	// guild only
 	@JsonProperty("guild_id")
-	private OptionalField<String> guildId;
-	private OptionalField<Integer> position;
+	private Possible<String> guildId;
+	private Possible<Integer> position;
 
 	// guild text only
 	@JsonProperty("permission_overwrites")
-	private OptionalField<OverwritePojo[]> permissionOverwrites;
-	private OptionalField<String> topic;
+	private Possible<OverwritePojo[]> permissionOverwrites;
+	private Possible<String> topic;
 	@JsonProperty("last_message_id")
-	private OptionalField<String> lastMessageId;
+	private Possible<String> lastMessageId;
 
 	// guild voice only
-	private OptionalField<Integer> bitrate;
+	private Possible<Integer> bitrate;
 	@JsonProperty("user_limit")
-	private OptionalField<Integer> userLimit;
+	private Possible<Integer> userLimit;
 
 	// private/group only
-	private OptionalField<UserPojo[]> recipients;
-	private OptionalField<String> icon;
+	private Possible<UserPojo[]> recipients;
+	private PossibleOptional<String> icon;
 	@JsonProperty("owner_id")
-	private OptionalField<String> ownerId;
+	private Possible<String> ownerId;
 	@JsonProperty("application_id")
-	private OptionalField<String> applicationId;
+	private Possible<String> applicationId;
 
 	public String getId() {
 		return id;
@@ -72,99 +76,99 @@ public class ChannelPojo {
 		this.type = type;
 	}
 
-	public OptionalField<String> getName() {
+	public Possible<String> getName() {
 		return name;
 	}
 
-	public void setName(OptionalField<String> name) {
+	public void setName(Possible<String> name) {
 		this.name = name;
 	}
 
-	public OptionalField<String> getGuildId() {
+	public Possible<String> getGuildId() {
 		return guildId;
 	}
 
-	public void setGuildId(OptionalField<String> guildId) {
+	public void setGuildId(Possible<String> guildId) {
 		this.guildId = guildId;
 	}
 
-	public OptionalField<Integer> getPosition() {
+	public Possible<Integer> getPosition() {
 		return position;
 	}
 
-	public void setPosition(OptionalField<Integer> position) {
+	public void setPosition(Possible<Integer> position) {
 		this.position = position;
 	}
 
-	public OptionalField<OverwritePojo[]> getPermissionOverwrites() {
+	public Possible<OverwritePojo[]> getPermissionOverwrites() {
 		return permissionOverwrites;
 	}
 
-	public void setPermissionOverwrites(OptionalField<OverwritePojo[]> permissionOverwrites) {
+	public void setPermissionOverwrites(Possible<OverwritePojo[]> permissionOverwrites) {
 		this.permissionOverwrites = permissionOverwrites;
 	}
 
-	public OptionalField<String> getTopic() {
+	public Possible<String> getTopic() {
 		return topic;
 	}
 
-	public void setTopic(OptionalField<String> topic) {
+	public void setTopic(Possible<String> topic) {
 		this.topic = topic;
 	}
 
-	public OptionalField<String> getLastMessageId() {
+	public Possible<String> getLastMessageId() {
 		return lastMessageId;
 	}
 
-	public void setLastMessageId(OptionalField<String> lastMessageId) {
+	public void setLastMessageId(Possible<String> lastMessageId) {
 		this.lastMessageId = lastMessageId;
 	}
 
-	public OptionalField<Integer> getBitrate() {
+	public Possible<Integer> getBitrate() {
 		return bitrate;
 	}
 
-	public void setBitrate(OptionalField<Integer> bitrate) {
+	public void setBitrate(Possible<Integer> bitrate) {
 		this.bitrate = bitrate;
 	}
 
-	public OptionalField<Integer> getUserLimit() {
+	public Possible<Integer> getUserLimit() {
 		return userLimit;
 	}
 
-	public void setUserLimit(OptionalField<Integer> userLimit) {
+	public void setUserLimit(Possible<Integer> userLimit) {
 		this.userLimit = userLimit;
 	}
 
-	public OptionalField<UserPojo[]> getRecipients() {
+	public Possible<UserPojo[]> getRecipients() {
 		return recipients;
 	}
 
-	public void setRecipients(OptionalField<UserPojo[]> recipients) {
+	public void setRecipients(Possible<UserPojo[]> recipients) {
 		this.recipients = recipients;
 	}
 
-	public OptionalField<String> getIcon() {
+	public PossibleOptional<String> getIcon() {
 		return icon;
 	}
 
-	public void setIcon(OptionalField<String> icon) {
+	public void setIcon(PossibleOptional<String> icon) {
 		this.icon = icon;
 	}
 
-	public OptionalField<String> getOwnerId() {
+	public Possible<String> getOwnerId() {
 		return ownerId;
 	}
 
-	public void setOwnerId(OptionalField<String> ownerId) {
+	public void setOwnerId(Possible<String> ownerId) {
 		this.ownerId = ownerId;
 	}
 
-	public OptionalField<String> getApplicationId() {
+	public Possible<String> getApplicationId() {
 		return applicationId;
 	}
 
-	public void setApplicationId(OptionalField<String> applicationId) {
+	public void setApplicationId(Possible<String> applicationId) {
 		this.applicationId = applicationId;
 	}
 }

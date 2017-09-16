@@ -16,8 +16,10 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
 
 import java.util.Optional;
 
@@ -26,14 +28,15 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/webhook#webhook-object">Webhook Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class WebhookPojo {
 
 	private String id;
 	@JsonProperty("guild_id")
-	private OptionalField<String> guildId;
+	private Possible<String> guildId;
 	@JsonProperty("channel_id")
 	private String channelId;
-	private OptionalField<UserPojo> user;
+	private Possible<UserPojo> user;
 	private Optional<String> name;
 	private Optional<String> avatar;
 	private String token;
@@ -46,11 +49,11 @@ public class WebhookPojo {
 		this.id = id;
 	}
 
-	public OptionalField<String> getGuildId() {
+	public Possible<String> getGuildId() {
 		return guildId;
 	}
 
-	public void setGuildId(OptionalField<String> guildId) {
+	public void setGuildId(Possible<String> guildId) {
 		this.guildId = guildId;
 	}
 
@@ -62,11 +65,11 @@ public class WebhookPojo {
 		this.channelId = channelId;
 	}
 
-	public OptionalField<UserPojo> getUser() {
+	public Possible<UserPojo> getUser() {
 		return user;
 	}
 
-	public void setUser(OptionalField<UserPojo> user) {
+	public void setUser(Possible<UserPojo> user) {
 		this.user = user;
 	}
 

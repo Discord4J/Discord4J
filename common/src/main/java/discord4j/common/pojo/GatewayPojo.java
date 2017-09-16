@@ -16,17 +16,20 @@
  */
 package discord4j.common.pojo;
 
-import discord4j.common.jackson.OptionalField;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
 
 /**
  * Represents a Gateway Response Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#get-gateway-bot-example-response">Gateway Response Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class GatewayPojo {
 
 	private String url;
-	private OptionalField<Integer> shards;
+	private Possible<Integer> shards;
 
 	public String getUrl() {
 		return url;
@@ -36,11 +39,11 @@ public class GatewayPojo {
 		this.url = url;
 	}
 
-	public OptionalField<Integer> getShards() {
+	public Possible<Integer> getShards() {
 		return shards;
 	}
 
-	public void setShards(OptionalField<Integer> shards) {
+	public void setShards(Possible<Integer> shards) {
 		this.shards = shards;
 	}
 }

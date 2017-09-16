@@ -16,15 +16,21 @@
  */
 package discord4j.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.OptionalField;
+import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleOptional;
 import discord4j.common.pojo.embed.EmbedPojo;
+
+import java.util.Optional;
 
 /**
  * Represents a Message Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-object">Message Object</a>
  */
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
 public class MessagePojo {
 
 	private String id;
@@ -34,7 +40,7 @@ public class MessagePojo {
 	private String content;
 	private String timestamp;
 	@JsonProperty("edited_timestamp")
-	private String editedTimestamp;
+	private Optional<String> editedTimestamp;
 	private boolean tts;
 	@JsonProperty("mention_everyone")
 	private boolean mentionEveryone;
@@ -43,11 +49,11 @@ public class MessagePojo {
 	private String[] mentionRoles;
 	private AttachmentPojo[] attachments;
 	private EmbedPojo[] embeds;
-	private OptionalField<ReactionPojo[]> reactions;
-	private OptionalField<String> nonce;
+	private Possible<ReactionPojo[]> reactions;
+	private PossibleOptional<String> nonce;
 	private boolean pinned;
 	@JsonProperty("webhook_id")
-	private OptionalField<String> webhookId;
+	private Possible<String> webhookId;
 	private int type;
 
 	public String getId() {
@@ -90,11 +96,11 @@ public class MessagePojo {
 		this.timestamp = timestamp;
 	}
 
-	public String getEditedTimestamp() {
+	public Optional<String> getEditedTimestamp() {
 		return editedTimestamp;
 	}
 
-	public void setEditedTimestamp(String editedTimestamp) {
+	public void setEditedTimestamp(Optional<String> editedTimestamp) {
 		this.editedTimestamp = editedTimestamp;
 	}
 
@@ -146,19 +152,19 @@ public class MessagePojo {
 		this.embeds = embeds;
 	}
 
-	public OptionalField<ReactionPojo[]> getReactions() {
+	public Possible<ReactionPojo[]> getReactions() {
 		return reactions;
 	}
 
-	public void setReactions(OptionalField<ReactionPojo[]> reactions) {
+	public void setReactions(Possible<ReactionPojo[]> reactions) {
 		this.reactions = reactions;
 	}
 
-	public OptionalField<String> getNonce() {
+	public PossibleOptional<String> getNonce() {
 		return nonce;
 	}
 
-	public void setNonce(OptionalField<String> nonce) {
+	public void setNonce(PossibleOptional<String> nonce) {
 		this.nonce = nonce;
 	}
 
@@ -170,11 +176,11 @@ public class MessagePojo {
 		this.pinned = pinned;
 	}
 
-	public OptionalField<String> getWebhookId() {
+	public Possible<String> getWebhookId() {
 		return webhookId;
 	}
 
-	public void setWebhookId(OptionalField<String> webhookId) {
+	public void setWebhookId(Possible<String> webhookId) {
 		this.webhookId = webhookId;
 	}
 

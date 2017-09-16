@@ -14,35 +14,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.jackson;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import discord4j.common.jackson.DiscordPojoFilter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
-/**
- * Represents an Integration Account Object as defined by Discord.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-account-object">Integration Account Object</a>
- */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
-public class AccountPojo {
+import java.io.IOException;
 
-	private String id;
-	private String name;
+public class PossibleSerializer extends JsonSerializer<Possible> {
 
-	public String getId() {
-		return id;
+	@Override
+	public void serialize(Possible value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		if (value.isAbsent()) return;
+		gen.writeObject(value.get());
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+	@Override
+	public boolean isEmpty(SerializerProvider provider, Possible value) {
+		return value.isAbsent();
 	}
 }
