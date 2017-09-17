@@ -216,22 +216,14 @@ public class User implements IUser {
 
 		return new LinkedList<>();
 	}
-	
+
 	@Override
 	public Color getColorForGuild(IGuild guild) {
-		Color color = new Color(0);
-		int maxPosition = -1;
-		List<IRole> roleList = getRolesForGuild(guild);
-		if (roleList.isEmpty()) return color;
-		
-		for (IRole role : roleList) {
-			if (role.getPosition() > maxPosition && role.getColor().getRGB() != 0) {
-				maxPosition = role.getPosition();
-				color = role.getColor();
-			}
-		}
-		
-		return color;
+		return getRolesForGuild(guild).stream()
+				.filter(r -> r.getColor().getRGB() != 0)
+				.max(Comparator.comparing(IRole::getPosition))
+				.map(IRole::getColor)
+				.orElse(new Color(0, true));
 	}
 
 	@Override

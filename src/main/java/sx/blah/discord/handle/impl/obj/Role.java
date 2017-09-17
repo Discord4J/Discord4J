@@ -94,7 +94,7 @@ public class Role implements IRole {
 		this.managed = managed;
 		this.id = id;
 		this.hoist = hoist;
-		this.color = new Color(color);
+		this.color = new Color(color, true);
 		this.mentionable = mentionable;
 		this.guild = guild;
 	}
@@ -176,7 +176,7 @@ public class Role implements IRole {
 	 * @param color The role color.
 	 */
 	public void setColor(int color) {
-		this.color = new Color(color);
+		this.color = new Color(color, true);
 	}
 
 	@Override
