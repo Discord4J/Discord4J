@@ -61,6 +61,19 @@ public abstract class Routes {
 	public static final Route<GatewayPojo> GATEWAY_BOT_GET = Route.get("/gateway/bot", GatewayPojo.class);
 
 	//////////////////////////////////////////////
+	////////////// Audit Log Resource ////////////
+	//////////////////////////////////////////////
+
+	/**
+	 * Returns an audit log object for the guild. Requires the 'VIEW_AUDIT_LOG' permission.
+	 *
+	 * @see <a href="https://discordapp.com/developers/docs/resources/audit-log#get-guild-audit-log">https://discordapp
+	 * .com/developers/docs/resources/audit-log#get-guild-audit-log</a>
+	 */
+	public static final Route<AuditLogPojo> AUDIT_LOG_GET = Route.get("/guilds/{guild.id}/audit-logs",
+			AuditLogPojo.class);
+
+	//////////////////////////////////////////////
 	////////////// Channel Resource //////////////
 	//////////////////////////////////////////////
 
@@ -325,6 +338,55 @@ public abstract class Routes {
 	 */
 	public static final Route<Void> GROUP_DM_RECIPIENT_DELETE = Route.delete("/channels/{channel.id}/recipients/" +
 			"{user.id}", Void.class);
+
+	////////////////////////////////////////////
+	////////////// Emoji Resource //////////////
+	////////////////////////////////////////////
+
+	/**
+	 * Returns a list of emoji objects for the given guild.
+	 *
+	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#list-guild-emojis">https://discordapp
+	 * .com/developers/docs/resources/emoji#list-guild-emojis</a>
+	 */
+	public static final Route<EmojiPojo[]> GUILD_EMOJIS_GET = Route.get("/guilds/{guild.id}/emojis",
+			EmojiPojo[].class);
+
+	/**
+	 * Returns an emoji object for the given guild and emoji IDs.
+	 *
+	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#get-guild-emoji">https://discordapp
+	 * .com/developers/docs/resources/emoji#get-guild-emoji</a>
+	 */
+	public static final Route<EmojiPojo> GUILD_EMOJI_GET = Route.get("/guilds/{guild.id}/emojis/{emoji.id}",
+			EmojiPojo.class);
+
+	/**
+	 * Create a new emoji for the guild. Returns the new emoji object on success. Fires a Guild Emojis Update Gateway
+	 * event.
+	 *
+	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#create-guild-emoji">https://discordapp
+	 * .com/developers/docs/resources/emoji#create-guild-emoji</a>
+	 */
+	public static final Route<EmojiPojo> GUILD_EMOJI_CREATE = Route.post("/guilds/{guild.id}/emojis", EmojiPojo.class);
+
+	/**
+	 * Modify the given emoji. Returns the updated emoji object on success. Fires a Guild Emojis Update Gateway event.
+	 *
+	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#modify-guild-emoji">https://discordapp
+	 * .com/developers/docs/resources/emoji#modify-guild-emoji</a>
+	 */
+	public static final Route<EmojiPojo> GUILD_EMOJI_MODIFY = Route.patch("/guilds/{guild.id}/emojis/{emoji.id}",
+			EmojiPojo.class);
+
+	/**
+	 * Delete the given emoji. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.
+	 *
+	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#delete-guild-emoji">https://discordapp
+	 * .com/developers/docs/resources/emoji#delete-guild-emoji</a>
+	 */
+	public static final Route<Void> GUILD_EMOJI_DELETE = Route.delete("/guilds/{guild.id}/emojis/{emoji.id}",
+			Void.class);
 
 	////////////////////////////////////////////
 	////////////// Guild Resource //////////////
