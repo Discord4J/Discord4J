@@ -377,6 +377,7 @@ class DispatchHandler {
 			if (user != null) {
 				guild.users.remove(user);
 				guild.joinTimes.remove(user);
+				user.roles.remove(guild);
 				guild.setTotalMemberCount(guild.getTotalMemberCount() - 1);
 				Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" has been removed from or left guild \"{}\".", user.getName(), guild.getName());
 				client.dispatcher.dispatch(new UserLeaveEvent(guild, user));
