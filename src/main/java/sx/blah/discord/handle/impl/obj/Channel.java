@@ -37,6 +37,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
+import zzz_koloboke_compile.shaded.$kotlin$.internal.OnlyInputTypes;
 
 import java.io.*;
 import java.time.LocalDateTime;
@@ -122,12 +123,15 @@ public class Channel implements IChannel {
 	 */
 	protected boolean isNSFW;
 
+	protected volatile Long categoryId;
+
 	/**
 	 * The client that owns the channel object.
 	 */
 	protected final DiscordClientImpl client;
 
-	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
+	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
+				   boolean isNSFW, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides, Long categoryId) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -139,6 +143,7 @@ public class Channel implements IChannel {
 		this.isNSFW = isNSFW;
 		this.messages = new Cache<>(client, IMessage.class);
 		this.webhooks = new Cache<>(client, IWebhook.class);
+		this.categoryId = categoryId;
 	}
 
 
@@ -945,8 +950,18 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public ICategory getCategory() {
+		if(categoryId == null) {
+			return null;
+		}
+
+		return getGuild().getCategoryById(categoryId);
+	}
+
+	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW, new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class));
+		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW,
+				new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class), categoryId);
 		channel.typingTask.set(typingTask.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);

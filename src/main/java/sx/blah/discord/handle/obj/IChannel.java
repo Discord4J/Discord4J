@@ -763,6 +763,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 */
 	boolean isDeleted();
 
+	ICategory getCategory();
+
 	/**
 	 * A permission override for a role or user.
 	 */

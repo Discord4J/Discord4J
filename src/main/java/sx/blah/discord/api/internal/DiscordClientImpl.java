@@ -298,6 +298,35 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return null;
 	}
 
+	@Override
+	public List<ICategory> getCategories() {
+		return shards.stream()
+				.map(IShard::getCategories)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public ICategory getCategoryById(long id) {
+		for(IShard shard : shards) {
+			ICategory category = shard.getCategoryById(id);
+			if(category != null) {
+				return category;
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public List<ICategory> getCategoriesByName(String name) {
+		return shards.stream()
+				.map(IShard::getCategories)
+				.flatMap(List::stream)
+				.filter(category -> category.getName().equals(name))
+				.collect(Collectors.toList());
+	}
+
 	private String obtainGateway() {
 		String gateway = null;
 		try {

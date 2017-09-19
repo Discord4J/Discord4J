@@ -606,4 +606,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The audit log with entries with the given responsible user and the given action type.
 	 */
 	AuditLog getAuditLog(IUser user, ActionType actionType);
+
+	List<ICategory> getCategories();
+	ICategory getCategoryById(long id);
+	List<ICategory> getCategoriesByName(String name);
 }

@@ -49,8 +49,8 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	protected volatile int bitrate = 0;
 
 	public VoiceChannel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW,
-						int userLimit, int bitrate, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides) {
-		super(client, name, id, guild, topic, position, isNSFW, roleOverrides, userOverrides);
+						int userLimit, int bitrate, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides, Long categoryId) {
+		super(client, name, id, guild, topic, position, isNSFW, roleOverrides, userOverrides, categoryId);
 		this.userLimit = userLimit;
 		this.bitrate = bitrate;
 	}
@@ -359,7 +359,7 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 
 	@Override
 	public IVoiceChannel copy() {
-		return new VoiceChannel(client, name, id, guild, topic, position, isNSFW, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy());
+		return new VoiceChannel(client, name, id, guild, topic, position, isNSFW, userLimit, bitrate, roleOverrides.copy(), userOverrides.copy(), categoryId);
 	}
 
 	@Override

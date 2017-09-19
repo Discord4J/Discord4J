@@ -75,6 +75,8 @@ public class Guild implements IGuild {
 	 */
 	public final Cache<TimeStampHolder> joinTimes;
 
+	public final Cache<ICategory> categories;
+
 	/**
 	 * The name of the guild.
 	 */
@@ -159,12 +161,12 @@ public class Guild implements IGuild {
 		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification,
 				new Cache<>((DiscordClientImpl) shard.getClient(), IRole.class), new Cache<>((DiscordClientImpl) shard.getClient(), IChannel.class),
 				new Cache<>((DiscordClientImpl) shard.getClient(), IVoiceChannel.class), new Cache<>((DiscordClientImpl) shard.getClient(), IUser.class),
-				new Cache<>((DiscordClientImpl) shard.getClient(), TimeStampHolder.class));
+				new Cache<>((DiscordClientImpl) shard.getClient(), TimeStampHolder.class), new Cache<>((DiscordClientImpl) shard.getClient(), ICategory.class));
 	}
 
 	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout,
 				 String region, int verification, Cache<IRole> roles, Cache<IChannel> channels,
-				 Cache<IVoiceChannel> voiceChannels, Cache<IUser> users, Cache<TimeStampHolder> joinTimes) {
+				 Cache<IVoiceChannel> voiceChannels, Cache<IUser> users, Cache<TimeStampHolder> joinTimes, Cache<ICategory> categories) {
 		this.shard = shard;
 		this.client = shard.getClient();
 		this.name = name;
@@ -183,6 +185,7 @@ public class Guild implements IGuild {
 		this.verification = VerificationLevel.get(verification);
 		this.audioManager = new AudioManager(this);
 		this.emojis = new Cache<>((DiscordClientImpl) client, IEmoji.class);
+		this.categories = categories;
 	}
 
 	@Override
@@ -813,7 +816,7 @@ public class Guild implements IGuild {
 	@Override
 	public IGuild copy() {
 		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, verification.ordinal(),
-				roles.copy(), channels.copy(), voiceChannels.copy(), users.copy(), joinTimes.copy());
+				roles.copy(), channels.copy(), voiceChannels.copy(), users.copy(), joinTimes.copy(), categories.copy());
 	}
 
 	@Override
@@ -942,6 +945,25 @@ public class Guild implements IGuild {
 	@Override
 	public AuditLog getAuditLog(IUser user, ActionType actionType) {
 		return getAuditLog(user, actionType, (System.currentTimeMillis() - DiscordUtils.DISCORD_EPOCH) << 22);
+	}
+
+	@Override
+	public List<ICategory> getCategories() {
+		return categories.stream()
+				.sorted(Comparator.comparingInt(ICategory::getPosition))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public ICategory getCategoryById(long id) {
+		return categories.get(id);
+	}
+
+	@Override
+	public List<ICategory> getCategoriesByName(String name) {
+		return getCategories().stream()
+				.filter(category -> category.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	private AuditLog getAuditLog(IUser user, ActionType actionType, long before) {

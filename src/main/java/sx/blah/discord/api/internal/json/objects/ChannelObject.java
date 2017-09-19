@@ -37,6 +37,7 @@ public class ChannelObject {
 	public String owner_id;
 	public String application_id;
 	public boolean nsfw;
+	public String parent_id;
 
 	public static class Type {
 		public static final int GUILD_TEXT = 0;

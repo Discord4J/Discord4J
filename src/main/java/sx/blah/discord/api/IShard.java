@@ -304,4 +304,7 @@ public interface IShard {
 	 * @return The private channel for the given user.
 	 */
 	IPrivateChannel getOrCreatePMChannel(IUser user);
+
+	List<ICategory> getCategories();
+	ICategory getCategoryById(long id);
 }

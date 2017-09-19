@@ -540,6 +540,7 @@ public class DiscordUtils {
 		} else if (json.type == ChannelObject.Type.GUILD_TEXT || json.type == ChannelObject.Type.GUILD_VOICE) {
 			Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
 					getPermissionOverwritesFromJSONs(client, json.permission_overwrites);
+			Long categoryId = json.parent_id == null ? null : Long.parseUnsignedLong(json.parent_id);
 
 			if (channel != null) {
 				channel.setName(json.name);
@@ -559,10 +560,10 @@ public class DiscordUtils {
 				}
 			} else if (json.type == ChannelObject.Type.GUILD_TEXT) {
 				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
-						overrides.getRight(), overrides.getLeft());
+						overrides.getRight(), overrides.getLeft(), categoryId);
 			} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
-						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft());
+						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft(), categoryId);
 			}
 		}
 
@@ -818,6 +819,10 @@ public class DiscordUtils {
 		}
 
 		return null;
+	}
+
+	public static ICategory getCategoryFromJSON(IShard shard, IGuild guild, ChannelObject json) {
+		return new Category(shard, json.name, Long.parseUnsignedLong(json.id), guild, json.position, json.nsfw);
 	}
 
 	/**

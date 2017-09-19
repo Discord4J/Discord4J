@@ -444,4 +444,8 @@ public interface IDiscordClient {
 	 * @see <a href=https://discordapp.com/developers/applications/me>Applications</a>
 	 */
 	IUser getApplicationOwner();
+
+	List<ICategory> getCategories();
+	ICategory getCategoryById(long id);
+	List<ICategory> getCategoriesByName(String name);
 }
