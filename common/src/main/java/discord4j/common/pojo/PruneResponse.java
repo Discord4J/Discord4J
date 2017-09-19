@@ -16,15 +16,14 @@
  */
 package discord4j.common.pojo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.DiscordPojo;
 
 /**
  * Represents a Prune Response Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild#begin-guild-prune">Prune Response Object</a>
  */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
+@DiscordPojo
 public class PruneResponse {
 
 	private int pruned;

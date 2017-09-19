@@ -16,15 +16,14 @@
  */
 package discord4j.common.pojo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.DiscordPojo;
 
 /**
  * Represents a Connection Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/user#connection-object">Connection Object</a>
  */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
+@DiscordPojo
 public class ConnectionPojo {
 
 	private String id;

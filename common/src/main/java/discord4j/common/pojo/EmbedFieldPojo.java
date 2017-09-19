@@ -16,15 +16,15 @@
  */
 package discord4j.common.pojo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.DiscordPojo;
 
 /**
  * Represents an Embed Field Object as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-field-structure">Embed Field Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-field-structure">Embed
+ * Field Object</a>
  */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
+@DiscordPojo
 public class EmbedFieldPojo {
 
 	private String name;

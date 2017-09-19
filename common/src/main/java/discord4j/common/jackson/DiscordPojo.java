@@ -14,43 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.pojo;
+package discord4j.common.jackson;
 
-import discord4j.common.jackson.DiscordPojo;
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-/**
- * Represents a Reaction Object as defined by Discord.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#reaction-object">Reaction Object</a>
- */
-@DiscordPojo
-public class ReactionPojo {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-	private int count;
-	private boolean me;
-	private EmojiPojo emoji;
-
-	public int getCount() {
-		return count;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
-	}
-
-	public boolean isMe() {
-		return me;
-	}
-
-	public void setMe(boolean me) {
-		this.me = me;
-	}
-
-	public EmojiPojo getEmoji() {
-		return emoji;
-	}
-
-	public void setEmoji(EmojiPojo emoji) {
-		this.emoji = emoji;
-	}
+@Retention(RetentionPolicy.RUNTIME)
+@JacksonAnnotationsInside
+@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
+public @interface DiscordPojo {
 }

@@ -16,16 +16,15 @@
  */
 package discord4j.common.pojo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.DiscordPojo;
 
 /**
  * Represents a Voice Region Object as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-region">Voice Region Object</a>
  */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
+@DiscordPojo
 public class VoiceRegionPojo {
 
 	private String id;

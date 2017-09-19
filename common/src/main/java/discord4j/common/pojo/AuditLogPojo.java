@@ -16,11 +16,10 @@
  */
 package discord4j.common.pojo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.DiscordPojo;
 
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
+@DiscordPojo
 public class AuditLogPojo {
 
 	private WebhookPojo[] webhooks;

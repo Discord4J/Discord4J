@@ -16,16 +16,16 @@
  */
 package discord4j.common.pojo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.DiscordPojoFilter;
+import discord4j.common.jackson.DiscordPojo;
 
 /**
  * Represents an Embed Footer Object as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-footer-structure">Embed Footer Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-footer-structure">Embed
+ * Footer Object</a>
  */
-@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordPojoFilter.class)
+@DiscordPojo
 public class EmbedFooterPojo {
 
 	private String text;
