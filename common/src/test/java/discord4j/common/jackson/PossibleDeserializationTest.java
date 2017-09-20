@@ -18,7 +18,7 @@ package discord4j.common.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.pojo.Pojo;
+import discord4j.common.entity.Pojo;
 import org.junit.Test;
 
 import java.io.IOException;

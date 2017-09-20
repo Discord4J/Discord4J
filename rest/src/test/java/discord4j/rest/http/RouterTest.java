@@ -19,7 +19,7 @@ package discord4j.rest.http;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.pojo.MessagePojo;
+import discord4j.common.entity.MessageEntity;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -59,7 +59,7 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		MessagePojo body = new MessagePojo();
+		MessageEntity body = new MessageEntity();
 		body.setContent("hello at " + Instant.now());
 
 		Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -91,7 +91,7 @@ public class RouterTest {
 		for (int i = 0; i < 10; i++) {
 			final int a = i;
 
-			MessagePojo body = new MessagePojo();
+			MessageEntity body = new MessageEntity();
 			body.setContent("hi " + a);
 
 			Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -120,10 +120,10 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		MessagePojo body = new MessagePojo();
+		MessageEntity body = new MessageEntity();
 		body.setContent("hi");
 
-		Mono<MessagePojo> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
+		Mono<MessageEntity> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
 				.body(body)
 				.exchange(router);
 
@@ -154,7 +154,7 @@ public class RouterTest {
 		for (int i = 0; i < 6; i++) {
 			final int a = i;
 
-			MessagePojo body = new MessagePojo();
+			MessageEntity body = new MessageEntity();
 			body.setContent("hi " + a);
 
 			Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -186,7 +186,7 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		MessagePojo body0 = new MessagePojo();
+		MessageEntity body0 = new MessageEntity();
 		body0.setContent("hi 0 at " + Instant.now());
 
 		Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -194,7 +194,7 @@ public class RouterTest {
 				.exchange(router)
 				.block();
 
-		MessagePojo body1 = new MessagePojo();
+		MessageEntity body1 = new MessageEntity();
 		body1.setContent("hi 1 at " + Instant.now());
 
 		Routes.MESSAGE_CREATE.newRequest(channelId)

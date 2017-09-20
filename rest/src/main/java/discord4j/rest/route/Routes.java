@@ -16,7 +16,7 @@
  */
 package discord4j.rest.route;
 
-import discord4j.common.pojo.*;
+import discord4j.common.entity.*;
 
 /**
  * A collection of {@link Route} object definitions.
@@ -45,7 +45,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/topics/gateway#get-gateway">https://discordapp
 	 * .com/developers/docs/topics/gateway#get-gateway</a>
 	 */
-	public static final Route<GatewayPojo> GATEWAY_GET = Route.get("/gateway", GatewayPojo.class);
+	public static final Route<GatewayEntity> GATEWAY_GET = Route.get("/gateway", GatewayEntity.class);
 
 	/**
 	 * Returns an object with the same information as Get Gateway, plus a shards key, containing the recommended number
@@ -58,7 +58,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/topics/gateway#get-gateway-bot">https://discordapp
 	 * .com/developers/docs/topics/gateway#get-gateway-bot</a>
 	 */
-	public static final Route<GatewayPojo> GATEWAY_BOT_GET = Route.get("/gateway/bot", GatewayPojo.class);
+	public static final Route<GatewayEntity> GATEWAY_BOT_GET = Route.get("/gateway/bot", GatewayEntity.class);
 
 	//////////////////////////////////////////////
 	////////////// Audit Log Resource ////////////
@@ -70,8 +70,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/audit-log#get-guild-audit-log">https://discordapp
 	 * .com/developers/docs/resources/audit-log#get-guild-audit-log</a>
 	 */
-	public static final Route<AuditLogPojo> AUDIT_LOG_GET = Route.get("/guilds/{guild.id}/audit-logs",
-			AuditLogPojo.class);
+	public static final Route<AuditLogEntity> AUDIT_LOG_GET = Route.get("/guilds/{guild.id}/audit-logs",
+			AuditLogEntity.class);
 
 	//////////////////////////////////////////////
 	////////////// Channel Resource //////////////
@@ -83,7 +83,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#get-channel">https://discordapp
 	 * .com/developers/docs/resources/channel#get-channel</a>
 	 */
-	public static final Route<ChannelPojo> CHANNEL_GET = Route.get("/channels/{channel.id}", ChannelPojo.class);
+	public static final Route<ChannelEntity> CHANNEL_GET = Route.get("/channels/{channel.id}", ChannelEntity.class);
 
 	/**
 	 * Update a channels settings. Requires the 'MANAGE_CHANNELS' permission for the guild. Returns a guild channel on
@@ -92,7 +92,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">https://discordapp
 	 * .com/developers/docs/resources/channel#modify-channel</a>
 	 */
-	public static final Route<ChannelPojo> CHANNEL_MODIFY = Route.put("/channels/{channel.id}", ChannelPojo.class);
+	public static final Route<ChannelEntity> CHANNEL_MODIFY = Route.put("/channels/{channel.id}", ChannelEntity.class);
 
 	/**
 	 * Update a channels settings. Requires the 'MANAGE_CHANNELS' permission for the guild. Returns a guild channel on
@@ -102,8 +102,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">https://discordapp
 	 * .com/developers/docs/resources/channel#modify-channel</a>
 	 */
-	public static final Route<ChannelPojo> CHANNEL_MODIFY_PARTIAL = Route.patch("/channels/{channel.id}",
-			ChannelPojo.class);
+	public static final Route<ChannelEntity> CHANNEL_MODIFY_PARTIAL = Route.patch("/channels/{channel.id}",
+			ChannelEntity.class);
 
 	/**
 	 * Delete a guild channel, or close a private message. Requires the 'MANAGE_CHANNELS' permission for the guild.
@@ -112,7 +112,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#deleteclose-channel">https://discordapp
 	 * .com/developers/docs/resources/channel#deleteclose-channel</a>
 	 */
-	public static final Route<ChannelPojo> CHANNEL_DELETE = Route.delete("/channels/{channel.id}", ChannelPojo.class);
+	public static final Route<ChannelEntity> CHANNEL_DELETE = Route.delete("/channels/{channel.id}", ChannelEntity.class);
 
 	/**
 	 * Returns the messages for a channel. If operating on a guild channel, this endpoint requires the 'READ_MESSAGES'
@@ -121,8 +121,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#get-channel-messages">https://discordapp
 	 * .com/developers/docs/resources/channel#get-channel-messages</a>
 	 */
-	public static final Route<MessagePojo[]> MESSAGES_GET = Route.get("/channels/{channel.id}/messages",
-			MessagePojo[].class);
+	public static final Route<MessageEntity[]> MESSAGES_GET = Route.get("/channels/{channel.id}/messages",
+			MessageEntity[].class);
 
 	/**
 	 * Returns a specific message in the channel. If operating on a guild channel, this endpoints requires the
@@ -131,8 +131,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#get-channel-message">https://discordapp
 	 * .com/developers/docs/resources/channel#get-channel-message</a>
 	 */
-	public static final Route<MessagePojo> MESSAGE_GET = Route.get("/channels/{channel.id}/messages/{message.id}",
-			MessagePojo.class);
+	public static final Route<MessageEntity> MESSAGE_GET = Route.get("/channels/{channel.id}/messages/{message.id}",
+			MessageEntity.class);
 
 	/**
 	 * Post a message to a guild text or DM channel. If operating on a guild channel, this endpoint requires the
@@ -147,8 +147,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">https://discordapp
 	 * .com/developers/docs/resources/channel#create-message</a>
 	 */
-	public static final Route<MessagePojo> MESSAGE_CREATE = Route.post("/channels/{channel.id}/messages",
-			MessagePojo.class);
+	public static final Route<MessageEntity> MESSAGE_CREATE = Route.post("/channels/{channel.id}/messages",
+			MessageEntity.class);
 
 	/**
 	 * Create a reaction for the message. This endpoint requires the 'READ_MESSAGE_HISTORY' permission to be present on
@@ -187,8 +187,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#get-reactions">https://discordapp
 	 * .com/developers/docs/resources/channel#get-reactions</a>
 	 */
-	public static final Route<UserPojo[]> REACTIONS_GET = Route.get("/channels/{channel.id}/messages/{message.id}" +
-			"/reactions/{emoji}", UserPojo[].class);
+	public static final Route<UserEntity[]> REACTIONS_GET = Route.get("/channels/{channel.id}/messages/{message.id}" +
+			"/reactions/{emoji}", UserEntity[].class);
 
 	/**
 	 * Deletes all reactions on a message. This endpoint requires the 'MANAGE_MESSAGES' permission to be present on the
@@ -207,8 +207,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#edit-message">https://discordapp
 	 * .com/developers/docs/resources/channel#edit-message</a>
 	 */
-	public static final Route<MessagePojo> MESSAGE_EDIT = Route.patch("/channels/{channel.id}/messages/{message.id}",
-			MessagePojo.class);
+	public static final Route<MessageEntity> MESSAGE_EDIT = Route.patch("/channels/{channel.id}/messages/{message.id}",
+			MessageEntity.class);
 
 	/**
 	 * Delete a message. If operating on a guild channel and trying to delete a message that was not sent by the
@@ -257,8 +257,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#get-channel-invites">https://discordapp
 	 * .com/developers/docs/resources/channel#get-channel-invites</a>
 	 */
-	public static final Route<InvitePojo[]> CHANNEL_INVITES_GET = Route.get("/channels/{channel.id}/invites",
-			InvitePojo[].class);
+	public static final Route<InviteEntity[]> CHANNEL_INVITES_GET = Route.get("/channels/{channel.id}/invites",
+			InviteEntity[].class);
 
 	/**
 	 * Create a new invite object for the channel. Only usable for guild channels. Requires the CREATE_INSTANT_INVITE
@@ -268,8 +268,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-channel-invite">https
 	 * ://discordapp.com/developers/docs/resources/channel#create-channel-invite</a>
 	 */
-	public static final Route<InvitePojo> CHANNEL_INVITE_CREATE = Route.post("/channels/{channel.id}/invites",
-			InvitePojo.class);
+	public static final Route<InviteEntity> CHANNEL_INVITE_CREATE = Route.post("/channels/{channel.id}/invites",
+			InviteEntity.class);
 
 	/**
 	 * Delete a channel permission overwrite for a user or role in a channel. Only usable for guild channels. Requires
@@ -299,8 +299,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/channel#get-pinned-messages">https://discordapp
 	 * .com/developers/docs/resources/channel#get-pinned-messages</a>
 	 */
-	public static final Route<MessagePojo[]> MESSAGES_PINNED_GET = Route.get("/channels/{channel.id}/pins",
-			MessagePojo[].class);
+	public static final Route<MessageEntity[]> MESSAGES_PINNED_GET = Route.get("/channels/{channel.id}/pins",
+			MessageEntity[].class);
 
 	/**
 	 * Pin a message in a channel. Requires the 'MANAGE_MESSAGES' permission. Returns a 204 empty response on success.
@@ -349,8 +349,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#list-guild-emojis">https://discordapp
 	 * .com/developers/docs/resources/emoji#list-guild-emojis</a>
 	 */
-	public static final Route<EmojiPojo[]> GUILD_EMOJIS_GET = Route.get("/guilds/{guild.id}/emojis",
-			EmojiPojo[].class);
+	public static final Route<EmojiEntity[]> GUILD_EMOJIS_GET = Route.get("/guilds/{guild.id}/emojis",
+			EmojiEntity[].class);
 
 	/**
 	 * Returns an emoji object for the given guild and emoji IDs.
@@ -358,8 +358,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#get-guild-emoji">https://discordapp
 	 * .com/developers/docs/resources/emoji#get-guild-emoji</a>
 	 */
-	public static final Route<EmojiPojo> GUILD_EMOJI_GET = Route.get("/guilds/{guild.id}/emojis/{emoji.id}",
-			EmojiPojo.class);
+	public static final Route<EmojiEntity> GUILD_EMOJI_GET = Route.get("/guilds/{guild.id}/emojis/{emoji.id}",
+			EmojiEntity.class);
 
 	/**
 	 * Create a new emoji for the guild. Returns the new emoji object on success. Fires a Guild Emojis Update Gateway
@@ -368,7 +368,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#create-guild-emoji">https://discordapp
 	 * .com/developers/docs/resources/emoji#create-guild-emoji</a>
 	 */
-	public static final Route<EmojiPojo> GUILD_EMOJI_CREATE = Route.post("/guilds/{guild.id}/emojis", EmojiPojo.class);
+	public static final Route<EmojiEntity> GUILD_EMOJI_CREATE = Route.post("/guilds/{guild.id}/emojis", EmojiEntity.class);
 
 	/**
 	 * Modify the given emoji. Returns the updated emoji object on success. Fires a Guild Emojis Update Gateway event.
@@ -376,8 +376,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/emoji#modify-guild-emoji">https://discordapp
 	 * .com/developers/docs/resources/emoji#modify-guild-emoji</a>
 	 */
-	public static final Route<EmojiPojo> GUILD_EMOJI_MODIFY = Route.patch("/guilds/{guild.id}/emojis/{emoji.id}",
-			EmojiPojo.class);
+	public static final Route<EmojiEntity> GUILD_EMOJI_MODIFY = Route.patch("/guilds/{guild.id}/emojis/{emoji.id}",
+			EmojiEntity.class);
 
 	/**
 	 * Delete the given emoji. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.
@@ -401,7 +401,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild">https://discordapp
 	 * .com/developers/docs/resources/guild#create-guild</a>
 	 */
-	public static final Route<GuildPojo> GUILD_CREATE = Route.post("/guilds", GuildPojo.class);
+	public static final Route<GuildEntity> GUILD_CREATE = Route.post("/guilds", GuildEntity.class);
 
 	/**
 	 * Returns the guild object for the given id.
@@ -409,7 +409,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild</a>
 	 */
-	public static final Route<GuildPojo> GUILD_GET = Route.get("/guilds/{guild.id}", GuildPojo.class);
+	public static final Route<GuildEntity> GUILD_GET = Route.get("/guilds/{guild.id}", GuildEntity.class);
 
 	/**
 	 * Modify a guild's settings. Returns the updated guild object on success. Fires a Guild Update Gateway event.
@@ -417,7 +417,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild">https://discordapp
 	 * .com/developers/docs/resources/guild#modify-guild</a>
 	 */
-	public static final Route<GuildPojo> GUILD_MODIFY = Route.patch("/guilds/{guild.id}", GuildPojo.class);
+	public static final Route<GuildEntity> GUILD_MODIFY = Route.patch("/guilds/{guild.id}", GuildEntity.class);
 
 	/**
 	 * Delete a guild permanently. User must be owner. Returns 204 No Content on success. Fires a Guild Delete Gateway
@@ -434,8 +434,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-channels">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-channels</a>
 	 */
-	public static final Route<ChannelPojo[]> GUILD_CHANNELS_GET = Route.get("/guilds/{guild.id}/channels",
-			ChannelPojo[].class);
+	public static final Route<ChannelEntity[]> GUILD_CHANNELS_GET = Route.get("/guilds/{guild.id}/channels",
+			ChannelEntity[].class);
 
 	/**
 	 * Create a new channel object for the guild. Requires the 'MANAGE_CHANNELS' permission. Returns the new channel
@@ -444,8 +444,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-channel">https://discordapp
 	 * .com/developers/docs/resources/guild#create-guild-channel</a>
 	 */
-	public static final Route<ChannelPojo> GUILD_CHANNEL_CREATE = Route.post("/guilds/{guild.id}/channels",
-			ChannelPojo.class);
+	public static final Route<ChannelEntity> GUILD_CHANNEL_CREATE = Route.post("/guilds/{guild.id}/channels",
+			ChannelEntity.class);
 
 	/**
 	 * Modify the positions of a set of channel objects for the guild. Requires 'MANAGE_CHANNELS' permission. Returns a
@@ -463,8 +463,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-member">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-member</a>
 	 */
-	public static final Route<GuildMemberPojo> GUILD_MEMBER_GET = Route.get("/guilds/{guild.id}/members/{user.id}",
-			GuildMemberPojo.class);
+	public static final Route<GuildMemberEntity> GUILD_MEMBER_GET = Route.get("/guilds/{guild.id}/members/{user.id}",
+			GuildMemberEntity.class);
 
 	/**
 	 * Returns a list of guild member objects that are members of the guild.
@@ -472,8 +472,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#list-guild-members">https://discordapp
 	 * .com/developers/docs/resources/guild#list-guild-members</a>
 	 */
-	public static final Route<GuildMemberPojo[]> GUILD_MEMBERS_LIST = Route.get("/guilds/{guild.id}/members",
-			GuildMemberPojo[].class);
+	public static final Route<GuildMemberEntity[]> GUILD_MEMBERS_LIST = Route.get("/guilds/{guild.id}/members",
+			GuildMemberEntity[].class);
 
 	/**
 	 * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope.
@@ -483,8 +483,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#add-guild-member">https://discordapp
 	 * .com/developers/docs/resources/guild#add-guild-member</a>
 	 */
-	public static final Route<GuildMemberPojo> GUILD_MEMBER_ADD = Route.put("/guilds/{guild.id}/members/{user.id}",
-			GuildMemberPojo.class);
+	public static final Route<GuildMemberEntity> GUILD_MEMBER_ADD = Route.put("/guilds/{guild.id}/members/{user.id}",
+			GuildMemberEntity.class);
 
 	/**
 	 * Modify attributes of a guild member. Returns a 204 empty response on success. Fires a Guild Member Update
@@ -542,7 +542,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-bans">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-bans</a>
 	 */
-	public static final Route<UserPojo[]> GUILD_BANS_GET = Route.get("/guilds/{guild.id}/bans", UserPojo[].class);
+	public static final Route<UserEntity[]> GUILD_BANS_GET = Route.get("/guilds/{guild.id}/bans", UserEntity[].class);
 
 	/**
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user. Requires the 'BAN_MEMBERS'
@@ -568,7 +568,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-roles">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-roles</a>
 	 */
-	public static final Route<RolePojo[]> GUILD_ROLES_GET = Route.get("/guilds/{guild.id}/roles", RolePojo[].class);
+	public static final Route<RoleEntity[]> GUILD_ROLES_GET = Route.get("/guilds/{guild.id}/roles", RoleEntity[].class);
 
 	/**
 	 * Create a new role for the guild. Requires the 'MANAGE_ROLES' permission. Returns the new role object on success.
@@ -577,7 +577,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-role">https://discordapp
 	 * .com/developers/docs/resources/guild#create-guild-role</a>
 	 */
-	public static final Route<RolePojo> GUILD_ROLE_CREATE = Route.post("/guilds/{guild.id}/roles", RolePojo.class);
+	public static final Route<RoleEntity> GUILD_ROLE_CREATE = Route.post("/guilds/{guild.id}/roles", RoleEntity.class);
 
 	/**
 	 * Modify the positions of a set of role objects for the guild. Requires the 'MANAGE_ROLES' permission. Returns a
@@ -586,8 +586,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions">https
 	 * ://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions</a>
 	 */
-	public static final Route<RolePojo[]> GUILD_ROLE_POSITIONS_MODIFY = Route.patch("/guilds/{guild.id}/roles",
-			RolePojo[].class);
+	public static final Route<RoleEntity[]> GUILD_ROLE_POSITIONS_MODIFY = Route.patch("/guilds/{guild.id}/roles",
+			RoleEntity[].class);
 
 	/**
 	 * Modify a guild role. Requires the 'MANAGE_ROLES' permission. Returns the updated role on success. Fires a Guild
@@ -596,8 +596,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-role">https://discordapp
 	 * .com/developers/docs/resources/guild#modify-guild-role</a>
 	 */
-	public static final Route<RolePojo> GUILD_ROLE_MODIFY = Route.patch("/guilds/{guild.id}/roles/{role.id}",
-			RolePojo.class);
+	public static final Route<RoleEntity> GUILD_ROLE_MODIFY = Route.patch("/guilds/{guild.id}/roles/{role.id}",
+			RoleEntity.class);
 
 	/**
 	 * Delete a guild role. Requires the 'MANAGE_ROLES' permission. Returns a 204 empty response on success. Fires a
@@ -615,8 +615,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-prune-count">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-prune-count</a>
 	 */
-	public static final Route<PruneResponse> GUILD_PRUNE_COUNT_GET = Route.get("/guilds/{guild.id}/prune",
-			PruneResponse.class);
+	public static final Route<PruneResponseEntity> GUILD_PRUNE_COUNT_GET = Route.get("/guilds/{guild.id}/prune",
+			PruneResponseEntity.class);
 
 	/**
 	 * Begin a prune operation. Requires the 'KICK_MEMBERS' permission. Returns an object with one 'pruned' key
@@ -626,8 +626,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#begin-guild-prune">https://discordapp
 	 * .com/developers/docs/resources/guild#begin-guild-prune</a>
 	 */
-	public static final Route<PruneResponse> GUILD_PRUNE_BEGIN = Route.post("/guilds/{guild.id}/prune",
-			PruneResponse.class);
+	public static final Route<PruneResponseEntity> GUILD_PRUNE_BEGIN = Route.post("/guilds/{guild.id}/prune",
+			PruneResponseEntity.class);
 
 	/**
 	 * Returns a list of voice region objects for the guild. Unlike the similar /voice route, this returns VIP servers
@@ -636,8 +636,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-voice-regions">https
 	 * ://discordapp.com/developers/docs/resources/guild#get-guild-voice-regions</a>
 	 */
-	public static final Route<VoiceRegionPojo[]> GUILD_VOICE_REGION_GET = Route.get("/guilds/{guild.id}/regions",
-			VoiceRegionPojo[].class);
+	public static final Route<VoiceRegionEntity[]> GUILD_VOICE_REGION_GET = Route.get("/guilds/{guild.id}/regions",
+			VoiceRegionEntity[].class);
 
 	/**
 	 * Returns a list of invite objects (with invite metadata) for the guild. Requires the 'MANAGE_GUILD' permission.
@@ -645,8 +645,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-invites">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-invites</a>
 	 */
-	public static final Route<InvitePojo[]> GUILD_INVITES_GET = Route.get("/guilds/{guild.id}/invites",
-			InvitePojo[].class);
+	public static final Route<InviteEntity[]> GUILD_INVITES_GET = Route.get("/guilds/{guild.id}/invites",
+			InviteEntity[].class);
 
 	/**
 	 * Returns a list of integration objects for the guild. Requires the 'MANAGE_GUILD' permission.
@@ -654,8 +654,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-integrations">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-integrations</a>
 	 */
-	public static final Route<IntegrationPojo[]> GUILD_INTEGRATIONS_GET = Route.get("/guilds/{guild.id}/integrations",
-			IntegrationPojo[].class);
+	public static final Route<IntegrationEntity[]> GUILD_INTEGRATIONS_GET = Route.get("/guilds/{guild.id}/integrations",
+			IntegrationEntity[].class);
 
 	/**
 	 * Attach an integration object from the current user to the guild. Requires the 'MANAGE_GUILD' permission. Returns
@@ -702,8 +702,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-embed">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-embed</a>
 	 */
-	public static final Route<GuildEmbedPojo> GUILD_EMBED_GET = Route.get("/guilds/{guild.id}/embed",
-			GuildEmbedPojo.class);
+	public static final Route<GuildEmbedEntity> GUILD_EMBED_GET = Route.get("/guilds/{guild.id}/embed",
+			GuildEmbedEntity.class);
 
 	/**
 	 * Modify a guild embed object for the guild. All attributes may be passed in with JSON and modified. Requires the
@@ -712,8 +712,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-embed">https://discordapp
 	 * .com/developers/docs/resources/guild#modify-guild-embed</a>
 	 */
-	public static final Route<GuildEmbedPojo> GUILD_EMBED_MODIFY = Route.patch("/guilds/{guild.id}/embed",
-			GuildEmbedPojo.class);
+	public static final Route<GuildEmbedEntity> GUILD_EMBED_MODIFY = Route.patch("/guilds/{guild.id}/embed",
+			GuildEmbedEntity.class);
 
 	/////////////////////////////////////////////
 	////////////// Invite Resource //////////////
@@ -725,7 +725,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/invite#get-invite">https://discordapp
 	 * .com/developers/docs/resources/invite#get-invite</a>
 	 */
-	public static final Route<InvitePojo> INVITE_GET = Route.get("/invites/{invite.code}", InvitePojo.class);
+	public static final Route<InviteEntity> INVITE_GET = Route.get("/invites/{invite.code}", InviteEntity.class);
 
 	/**
 	 * Delete an invite. Requires the MANAGE_CHANNELS permission. Returns an invite object on success.
@@ -733,7 +733,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/invite#delete-invite">https://discordapp
 	 * .com/developers/docs/resources/invite#delete-invite</a>
 	 */
-	public static final Route<InvitePojo> INVITE_DELETE = Route.delete("/invites/{invite.code}", InvitePojo.class);
+	public static final Route<InviteEntity> INVITE_DELETE = Route.delete("/invites/{invite.code}", InviteEntity.class);
 
 	/**
 	 * Accept an invite. This requires the guilds.join OAuth2 scope to be able to accept invites on behalf of normal
@@ -742,7 +742,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/invite#accept-invite">https://discordapp
 	 * .com/developers/docs/resources/invite#accept-invite</a>
 	 */
-	public static final Route<InvitePojo> INVITE_ACCEPT = Route.post("/invites/{invite.code}", InvitePojo.class);
+	public static final Route<InviteEntity> INVITE_ACCEPT = Route.post("/invites/{invite.code}", InviteEntity.class);
 
 	///////////////////////////////////////////
 	////////////// User Resource //////////////
@@ -755,7 +755,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-current-user">https://discordapp
 	 * .com/developers/docs/resources/user#get-current-user</a>
 	 */
-	public static final Route<UserPojo> CURRENT_USER_GET = Route.get("/users/@me", UserPojo.class);
+	public static final Route<UserEntity> CURRENT_USER_GET = Route.get("/users/@me", UserEntity.class);
 
 	/**
 	 * Returns a user object for a given user ID.
@@ -763,7 +763,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-user">https://discordapp
 	 * .com/developers/docs/resources/user#get-user</a>
 	 */
-	public static final Route<UserPojo> USER_GET = Route.get("/users/{user.id}", UserPojo.class);
+	public static final Route<UserEntity> USER_GET = Route.get("/users/{user.id}", UserEntity.class);
 
 	/**
 	 * Modify the requester's user account settings. Returns a user object on success.
@@ -771,7 +771,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#modify-current-user">https://discordapp
 	 * .com/developers/docs/resources/user#modify-current-user</a>
 	 */
-	public static final Route<UserPojo> CURRENT_USER_MODIFY = Route.patch("/users/@me", UserPojo.class);
+	public static final Route<UserEntity> CURRENT_USER_MODIFY = Route.patch("/users/@me", UserEntity.class);
 
 	/**
 	 * Returns a list of partial guild objects the current user is a member of. Requires the guilds OAuth2 scope.
@@ -779,8 +779,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-current-user-guilds">https://discordapp
 	 * .com/developers/docs/resources/user#get-current-user-guilds</a>
 	 */
-	public static final Route<UserGuildPojo> CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds",
-			UserGuildPojo.class);
+	public static final Route<UserGuildEntity> CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds",
+			UserGuildEntity.class);
 
 	/**
 	 * Leave a guild. Returns a 204 empty response on success.
@@ -796,7 +796,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-user-dms">https://discordapp
 	 * .com/developers/docs/resources/user#get-user-dms</a>
 	 */
-	public static final Route<ChannelPojo[]> USER_DMS_GET = Route.get("/users/@me/channels", ChannelPojo[].class);
+	public static final Route<ChannelEntity[]> USER_DMS_GET = Route.get("/users/@me/channels", ChannelEntity[].class);
 
 	/**
 	 * Create a new DM channel with a user. Returns a DM channel object.
@@ -804,7 +804,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#create-dm">https://discordapp
 	 * .com/developers/docs/resources/user#create-dm</a>
 	 */
-	public static final Route<ChannelPojo> USER_DM_CREATE = Route.post("/users/@me/channels", ChannelPojo.class);
+	public static final Route<ChannelEntity> USER_DM_CREATE = Route.post("/users/@me/channels", ChannelEntity.class);
 
 	/**
 	 * Create a new group DM channel with multiple users. Returns a DM channel object.
@@ -812,7 +812,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#create-group-dm">https://discordapp
 	 * .com/developers/docs/resources/user#create-group-dm</a>
 	 */
-	public static final Route<ChannelPojo> GROUP_DM_CREATE = Route.post("/users/@me/channels", ChannelPojo.class);
+	public static final Route<ChannelEntity> GROUP_DM_CREATE = Route.post("/users/@me/channels", ChannelEntity.class);
 
 	/**
 	 * Returns a list of connection objects. Requires the connections OAuth2 scope.
@@ -820,8 +820,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-user-connections">https://discordapp
 	 * .com/developers/docs/resources/user#get-user-connections</a>
 	 */
-	public static final Route<ConnectionPojo[]> USER_CONNECTIONS_GET = Route.get("/users/@me/connections",
-			ConnectionPojo[].class);
+	public static final Route<ConnectionEntity[]> USER_CONNECTIONS_GET = Route.get("/users/@me/connections",
+			ConnectionEntity[].class);
 
 	////////////////////////////////////////////
 	////////////// Voice Resource //////////////
@@ -833,8 +833,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/voice#list-voice-regions">https://discordapp
 	 * .com/developers/docs/resources/voice#list-voice-regions</a>
 	 */
-	public static final Route<VoiceRegionPojo[]> VOICE_REGION_LIST = Route.get("/voice/regions",
-			VoiceRegionPojo[].class);
+	public static final Route<VoiceRegionEntity[]> VOICE_REGION_LIST = Route.get("/voice/regions",
+			VoiceRegionEntity[].class);
 
 	//////////////////////////////////////////////
 	////////////// Webhook Resource //////////////
@@ -846,8 +846,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#create-webhook">https://discordapp
 	 * .com/developers/docs/resources/webhook#create-webhook</a>
 	 */
-	public static final Route<WebhookPojo> CHANNEL_WEBHOOK_CREATE = Route.post("/channels/{channel.id}/webhooks",
-			WebhookPojo.class);
+	public static final Route<WebhookEntity> CHANNEL_WEBHOOK_CREATE = Route.post("/channels/{channel.id}/webhooks",
+			WebhookEntity.class);
 
 	/**
 	 * Returns a list of channel webhook objects.
@@ -855,8 +855,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#get-channel-webhooks">https://discordapp
 	 * .com/developers/docs/resources/webhook#get-channel-webhooks</a>
 	 */
-	public static final Route<WebhookPojo[]> CHANNEL_WEBHOOKS_GET = Route.get("/channels/{channel.id}/webhooks",
-			WebhookPojo[].class);
+	public static final Route<WebhookEntity[]> CHANNEL_WEBHOOKS_GET = Route.get("/channels/{channel.id}/webhooks",
+			WebhookEntity[].class);
 
 	/**
 	 * Returns a list of guild webhook objects.
@@ -864,8 +864,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#get-guild-webhooks">https://discordapp
 	 * .com/developers/docs/resources/webhook#get-guild-webhooks</a>
 	 */
-	public static final Route<WebhookPojo[]> GUILD_WEBHOOKS_GET = Route.get("/guilds/{guild.id}/webhooks",
-			WebhookPojo[].class);
+	public static final Route<WebhookEntity[]> GUILD_WEBHOOKS_GET = Route.get("/guilds/{guild.id}/webhooks",
+			WebhookEntity[].class);
 
 	/**
 	 * Returns the new webhook object for the given id.
@@ -873,7 +873,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#get-webhook">https://discordapp
 	 * .com/developers/docs/resources/webhook#get-webhook</a>
 	 */
-	public static final Route<WebhookPojo> WEBHOOK_GET = Route.get("/webhooks/{webhook.id}", WebhookPojo.class);
+	public static final Route<WebhookEntity> WEBHOOK_GET = Route.get("/webhooks/{webhook.id}", WebhookEntity.class);
 
 	/**
 	 * Same as {@link #WEBHOOK_GET}, except this call does not require authentication and returns no user in the
@@ -882,8 +882,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#get-webhook-with-token">https
 	 * ://discordapp.com/developers/docs/resources/webhook#get-webhook-with-token</a>
 	 */
-	public static final Route<WebhookPojo> WEBHOOK_TOKEN_GET = Route.get("/webhooks/{webhook.id}/{webhook.token}",
-			WebhookPojo.class);
+	public static final Route<WebhookEntity> WEBHOOK_TOKEN_GET = Route.get("/webhooks/{webhook.id}/{webhook.token}",
+			WebhookEntity.class);
 
 	/**
 	 * Modify a webhook. Returns the updated webhook object on success. All parameters to this endpoint are optional.
@@ -891,7 +891,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#modify-webhook">https://discordapp
 	 * .com/developers/docs/resources/webhook#modify-webhook</a>
 	 */
-	public static final Route<WebhookPojo> WEBHOOK_MODIFY = Route.patch("/webhooks/{webhook.id}", WebhookPojo.class);
+	public static final Route<WebhookEntity> WEBHOOK_MODIFY = Route.patch("/webhooks/{webhook.id}", WebhookEntity.class);
 
 	/**
 	 * Same as {@link #WEBHOOK_MODIFY}, except this call does not require authentication and returns no user in the
@@ -900,8 +900,8 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#modify-webhook-with-token">https
 	 * ://discordapp.com/developers/docs/resources/webhook#modify-webhook-with-token</a>
 	 */
-	public static final Route<WebhookPojo> WEBHOOK_TOKEN_MODIFY = Route.patch("/webhooks/{webhook.id}/{webhook.token}",
-			WebhookPojo.class);
+	public static final Route<WebhookEntity> WEBHOOK_TOKEN_MODIFY = Route.patch("/webhooks/{webhook.id}/{webhook.token}",
+			WebhookEntity.class);
 
 	/**
 	 * Delete a webhook permanently. User must be owner. Returns a 204 NO CONTENT response on success.
