@@ -53,6 +53,6 @@ public class PossibleDeserializer extends ReferenceTypeDeserializer<Possible<?>>
 
 	@Override
 	public Object getReferenced(Possible<?> reference) {
-		return reference.get();
+		return reference.isAbsent() ? null : reference.get();
 	}
 }

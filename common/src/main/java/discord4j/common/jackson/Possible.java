@@ -16,10 +16,9 @@
  */
 package discord4j.common.jackson;
 
-import javax.annotation.Nonnull;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
-@Nonnull
 public class Possible<T> {
 
 	private static final Possible<?> ABSENT = new Possible<>(null);
@@ -42,7 +41,7 @@ public class Possible<T> {
 
 	public T get() {
 		if (isAbsent()) {
-			throw new IllegalStateException();
+			throw new NoSuchElementException();
 		}
 		return value;
 	}

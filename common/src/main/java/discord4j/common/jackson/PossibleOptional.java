@@ -16,21 +16,24 @@
  */
 package discord4j.common.jackson;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class PossibleOptional<T> {
 
-	private static final PossibleOptional<?> ABSENT = new PossibleOptional<>(null);
-	private static final PossibleOptional<?> EMPTY = new PossibleOptional<>(Optional.empty());
+	private static final PossibleOptional<?> ABSENT = new PossibleOptional<>(null, false);
+	private static final PossibleOptional<?> EMPTY = new PossibleOptional<>(null, true);
 
-	private final Optional<T> value;
+	private final T value;
+	private final boolean empty;
 
-	private PossibleOptional(Optional<T> value) {
+	private PossibleOptional(T value, boolean empty) {
 		this.value = value;
+		this.empty = empty;
 	}
 
 	public static <T> PossibleOptional<T> of(T value) {
-		return new PossibleOptional<>(Optional.ofNullable(value));
+		return new PossibleOptional<>(value, false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -45,17 +48,17 @@ public class PossibleOptional<T> {
 
 	public T get() {
 		if (!isPresent()) {
-			throw new IllegalStateException();
+			throw new NoSuchElementException();
 		}
-		return value.get();
+		return value;
 	}
 
 	public boolean isAbsent() {
-		return value == null;
+		return value == null && !empty;
 	}
 
 	public boolean isPresent() {
-		return !isAbsent() && value.isPresent();
+		return value != null;
 	}
 
 	@Override
@@ -85,6 +88,6 @@ public class PossibleOptional<T> {
 		if (!isPresent()) {
 			return "PossibleOptional.empty";
 		}
-		return "PossibleOptional[" + value.get() + "]";
+		return "PossibleOptional[" + value + "]";
 	}
 }

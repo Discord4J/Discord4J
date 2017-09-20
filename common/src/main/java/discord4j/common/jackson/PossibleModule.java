@@ -28,7 +28,7 @@ public class PossibleModule extends Module {
 
 	@Override
 	public Version version() {
-		return Version.unknownVersion();
+		return new Version(1, 0, 0, null, null, null);
 	}
 
 	@Override
