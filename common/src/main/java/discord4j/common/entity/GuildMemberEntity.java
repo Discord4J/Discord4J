@@ -21,9 +21,9 @@ import discord4j.common.jackson.DiscordEntity;
 import discord4j.common.jackson.Possible;
 
 /**
- * Represents a Guild Member Object as defined by Discord.
+ * Represents a Guild Member Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-member-object">Guild Member Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-member-object">Guild Member Entity</a>
  */
 @DiscordEntity
 public class GuildMemberEntity {

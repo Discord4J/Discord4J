@@ -19,9 +19,9 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Embed Object as defined by Discord.
+ * Represents an Embed Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object">Embed Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object">Embed Entity</a>
  */
 @DiscordEntity
 public class EmbedEntity {

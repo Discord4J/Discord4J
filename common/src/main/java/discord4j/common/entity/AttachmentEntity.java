@@ -22,9 +22,9 @@ import discord4j.common.jackson.DiscordEntity;
 import java.util.Optional;
 
 /**
- * Represents an Attachment Object as defined by Discord.
+ * Represents an Attachment Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#attachment-object">Attachment Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#attachment-object">Attachment Entity</a>
  */
 @DiscordEntity
 public class AttachmentEntity {

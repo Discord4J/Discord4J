@@ -19,9 +19,9 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents a Reaction Object as defined by Discord.
+ * Represents a Reaction Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#reaction-object">Reaction Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#reaction-object">Reaction Entity</a>
  */
 @DiscordEntity
 public class ReactionEntity {

@@ -20,9 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents a Guild Embed Object as defined by Discord.
+ * Represents a Guild Embed Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-embed-object">Guild Embed Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-embed-object">Guild Embed Entity</a>
  */
 @DiscordEntity
 public class GuildEmbedEntity {

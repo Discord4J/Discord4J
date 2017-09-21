@@ -22,9 +22,9 @@ import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleOptional;
 
 /**
- * Represents a Channel Object as defined by Discord.
+ * Represents a Channel Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#channel-object">Channel Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#channel-object">Channel Entity</a>
  */
 @DiscordEntity
 public class ChannelEntity {

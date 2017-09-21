@@ -20,10 +20,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Embed Author Object as defined by Discord.
+ * Represents an Embed Author Entity as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-author-structure">Embed
- * Author Object</a>
+ * Author Entity</a>
  */
 @DiscordEntity
 public class EmbedAuthorEntity {

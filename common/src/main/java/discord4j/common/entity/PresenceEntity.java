@@ -22,11 +22,11 @@ import discord4j.common.jackson.DiscordEntity;
 import java.util.Optional;
 
 /**
- * Represents a Presence Update Object as defined by Discord.
+ * Represents a Presence Update Entity as defined by Discord.
  *
  * @see
  * <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update-presence-update-event-fields">Presence
- * Update Object</a>
+ * Update Entity</a>
  */
 @DiscordEntity
 public class PresenceEntity {

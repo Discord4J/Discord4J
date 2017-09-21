@@ -19,6 +19,9 @@ package discord4j.common.jackson;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 
+/**
+ * Jackson Module for the Possible mechanism.
+ */
 public class PossibleModule extends Module {
 
 	@Override

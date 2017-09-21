@@ -19,9 +19,16 @@ package discord4j.common.jackson;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.*;
 
+/**
+ * Indicates that the object type is an entity utilized by Discord.
+ * <p>
+ * All possible entities are typically located under the {@code Resources} section in the
+ * <a href="https://discordapp.com/developers/docs/intro">Discord API</a> barring a few exceptions.
+ */
+@Documented
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @JacksonAnnotationsInside
 @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = DiscordEntityFilter.class)

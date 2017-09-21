@@ -21,9 +21,9 @@ import discord4j.common.jackson.DiscordEntity;
 import discord4j.common.jackson.Possible;
 
 /**
- * Represents an Emoji Object as defined by Discord.
+ * Represents an Emoji Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-object">Emoji Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-object">Emoji Entity</a>
  */
 @DiscordEntity
 public class EmojiEntity {

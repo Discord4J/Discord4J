@@ -21,9 +21,9 @@ import discord4j.common.jackson.DiscordEntity;
 import java.util.Optional;
 
 /**
- * Represents a Game Object as defined by Discord.
+ * Represents a Game Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#game-object">Game Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#game-object">Game Entity</a>
  */
 @DiscordEntity
 public class GameEntity {

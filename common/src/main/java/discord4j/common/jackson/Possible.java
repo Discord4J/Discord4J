@@ -19,6 +19,11 @@ package discord4j.common.jackson;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * Represents a JSON property that may be absent, but never null if it's present.
+ *
+ * @param <T> JSON Property Type
+ */
 public class Possible<T> {
 
 	private static final Possible<?> ABSENT = new Possible<>(null);
@@ -29,16 +34,36 @@ public class Possible<T> {
 		this.value = value;
 	}
 
+	/**
+	 * Returns a {@code Possible} with a non-null, present value.
+	 *
+	 * @param value A non-null value for a new {@code Possible} to represent.
+	 * @param <T> JSON Property Type
+	 * @return An instance of {@code Possible} whose value is always present and never null.
+	 * @throws NullPointerException If {@code value} is null.
+	 */
 	public static <T> Possible<T> of(T value) {
 		Objects.requireNonNull(value);
 		return new Possible<>(value);
 	}
 
+	/**
+	 * Returns a {@code Possible} with an absent value.
+	 *
+	 * @param <T> JSON Property Type
+	 * @return An instance of {@code Possible} whose value is absent, but not necessarily null.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Possible<T> absent() {
 		return (Possible<T>) ABSENT;
 	}
 
+	/**
+	 * Returns an instance of {@code T} if this instance of {@code Possible} represents a non-absent value.
+	 *
+	 * @return An instance of {@code T}, if it is present. Guaranteed to never be null.
+	 * @throws NoSuchElementException If the value is {@link #isAbsent() absent}.
+	 */
 	public T get() {
 		if (isAbsent()) {
 			throw new NoSuchElementException();
@@ -46,6 +71,11 @@ public class Possible<T> {
 		return value;
 	}
 
+	/**
+	 * Checks whether the instance of this {@code Possible} represents an absent value.
+	 *
+	 * @return True is the value is absent, false otherwise.
+	 */
 	public boolean isAbsent() {
 		return value == null;
 	}
@@ -77,4 +107,3 @@ public class Possible<T> {
 		return "Possible[" + value + "]";
 	}
 }
-

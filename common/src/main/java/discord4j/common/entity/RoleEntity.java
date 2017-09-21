@@ -19,9 +19,9 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents a Role Object as defined by Discord.
+ * Represents a Role Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Entity</a>
  */
 @DiscordEntity
 public class RoleEntity {

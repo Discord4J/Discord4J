@@ -23,6 +23,9 @@ import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 
+/**
+ * Jackson Serializer for {@link Possible}.
+ */
 public class PossibleSerializer extends ReferenceTypeSerializer<Possible<?>> {
 
 	PossibleSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts, JsonSerializer<Object> ser) {

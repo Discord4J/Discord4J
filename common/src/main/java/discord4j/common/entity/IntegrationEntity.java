@@ -20,9 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Integration Object as defined by Discord.
+ * Represents an Integration Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-object">Integration Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-object">Integration Entity</a>
  */
 @DiscordEntity
 public class IntegrationEntity {
@@ -39,7 +39,7 @@ public class IntegrationEntity {
 	@JsonProperty("expire_grace_period")
 	private int expireGracePeriod;
 	private UserEntity user;
-	private AccountEntity account;
+	private IntegrationAccountEntity integrationAccount;
 	@JsonProperty("synced_at")
 	private String syncedAt;
 
@@ -115,12 +115,12 @@ public class IntegrationEntity {
 		this.user = user;
 	}
 
-	public AccountEntity getAccount() {
-		return account;
+	public IntegrationAccountEntity getIntegrationAccount() {
+		return integrationAccount;
 	}
 
-	public void setAccount(AccountEntity account) {
-		this.account = account;
+	public void setIntegrationAccount(IntegrationAccountEntity integrationAccount) {
+		this.integrationAccount = integrationAccount;
 	}
 
 	public String getSyncedAt() {

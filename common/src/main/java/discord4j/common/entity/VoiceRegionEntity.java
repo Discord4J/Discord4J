@@ -20,9 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents a Voice Region Object as defined by Discord.
+ * Represents a Voice Region Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-region">Voice Region Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-region">Voice Region Entity</a>
  */
 @DiscordEntity
 public class VoiceRegionEntity {

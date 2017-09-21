@@ -21,9 +21,9 @@ import discord4j.common.jackson.DiscordEntity;
 import discord4j.common.jackson.Possible;
 
 /**
- * Represents a Voice State Object as defined by Discord.
+ * Represents a Voice State Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-state-object">Voice State Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-state-object">Voice State Entity</a>
  */
 @DiscordEntity
 public class VoiceStateEntity {

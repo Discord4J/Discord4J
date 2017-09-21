@@ -19,10 +19,10 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Embed Field Object as defined by Discord.
+ * Represents an Embed Field Entity as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-field-structure">Embed
- * Field Object</a>
+ * Field Entity</a>
  */
 @DiscordEntity
 public class EmbedFieldEntity {

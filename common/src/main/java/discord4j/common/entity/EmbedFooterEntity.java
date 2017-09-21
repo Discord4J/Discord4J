@@ -20,10 +20,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Embed Footer Object as defined by Discord.
+ * Represents an Embed Footer Entity as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-footer-structure">Embed
- * Footer Object</a>
+ * Footer Entity</a>
  */
 @DiscordEntity
 public class EmbedFooterEntity {

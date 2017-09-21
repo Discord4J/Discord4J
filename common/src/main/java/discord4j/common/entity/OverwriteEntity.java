@@ -19,9 +19,9 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Overwrite Object as defined by Discord.
+ * Represents an Overwrite Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Entity</a>
  */
 @DiscordEntity
 public class OverwriteEntity {

@@ -19,9 +19,9 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Invite Object as defined by Discord.
+ * Represents an Invite Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/invite#invite-object">Invite Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/invite#invite-object">Invite Entity</a>
  */
 @DiscordEntity
 public class InviteEntity {

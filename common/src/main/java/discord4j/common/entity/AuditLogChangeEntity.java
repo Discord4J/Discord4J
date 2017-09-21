@@ -19,6 +19,12 @@ package discord4j.common.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordEntity;
 
+/**
+ * Represents an Audit Log Change Entity as defined by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/audit-log#audit-log-change-object">Audit Log Change
+ * Entity</a>
+ */
 @DiscordEntity
 public class AuditLogChangeEntity {
 

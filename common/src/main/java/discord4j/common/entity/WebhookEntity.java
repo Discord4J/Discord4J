@@ -23,9 +23,9 @@ import discord4j.common.jackson.Possible;
 import java.util.Optional;
 
 /**
- * Represents a Webhook Object as defined by Discord.
+ * Represents a Webhook Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/webhook#webhook-object">Webhook Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/webhook#webhook-object">Webhook Entity</a>
  */
 @DiscordEntity
 public class WebhookEntity {

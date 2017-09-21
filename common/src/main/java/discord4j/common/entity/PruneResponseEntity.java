@@ -19,9 +19,9 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents a Prune Response Object as defined by Discord.
+ * Represents a Prune Response Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#begin-guild-prune">Prune Response Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#begin-guild-prune">Prune Response Entity</a>
  */
 @DiscordEntity
 public class PruneResponseEntity {

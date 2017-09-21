@@ -21,9 +21,9 @@ import discord4j.common.jackson.DiscordEntity;
 import discord4j.common.jackson.Possible;
 
 /**
- * Represents an User Object as defined by Discord.
+ * Represents an User Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/user#user-object">User Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/user#user-object">User Entity</a>
  */
 @DiscordEntity
 public class UserEntity {

@@ -23,6 +23,9 @@ import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.deser.std.ReferenceTypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 
+/**
+ * Jackson Deserializer for {@link PossibleOptional}.
+ */
 public class PossibleOptionalDeserializer extends ReferenceTypeDeserializer<PossibleOptional<?>> {
 
 	public PossibleOptionalDeserializer(JavaType fullType, ValueInstantiator inst, TypeDeserializer typeDeser,

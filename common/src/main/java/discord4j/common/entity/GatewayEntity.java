@@ -20,10 +20,10 @@ import discord4j.common.jackson.DiscordEntity;
 import discord4j.common.jackson.Possible;
 
 /**
- * Represents a Gateway Response Object as defined by Discord.
+ * Represents a Gateway Response Entity as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#get-gateway-bot-example-response">Gateway
- * Response Object</a>
+ * Response Entity</a>
  */
 @DiscordEntity
 public class GatewayEntity {

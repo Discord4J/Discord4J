@@ -20,10 +20,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Embed Thumbnail Object as defined by Discord.
+ * Represents an Embed Thumbnail Entity as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-thumbnail-structure">Embed
- * Thumbnail Object</a>
+ * Thumbnail Entity</a>
  */
 @DiscordEntity
 public class EmbedThumbnailEntity {

@@ -19,10 +19,10 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Embed Video Object as defined by Discord.
+ * Represents an Embed Video Entity as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-video-structure">Embed
- * Video Object</a>
+ * Video Entity</a>
  */
 @DiscordEntity
 public class EmbedVideoEntity {

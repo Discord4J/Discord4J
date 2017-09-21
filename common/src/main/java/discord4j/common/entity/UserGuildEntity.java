@@ -19,11 +19,11 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an User Guild Object as defined by Discord.
+ * Represents an User Guild Entity as defined by Discord.
  *
  * @see
  * <a href="https://discordapp.com/developers/docs/resources/user#get-current-user-guilds-example-partial-guild">User
- * Guild Object</a>
+ * Guild Entity</a>
  */
 @DiscordEntity
 public class UserGuildEntity {

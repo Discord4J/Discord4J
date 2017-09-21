@@ -19,12 +19,13 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Integration Account Object as defined by Discord.
+ * Represents an Integration Account Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-account-object">Integration Account Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#integration-account-object">Integration Account
+ * Entity</a>
  */
 @DiscordEntity
-public class AccountEntity {
+public class IntegrationAccountEntity {
 
 	private String id;
 	private String name;

@@ -19,10 +19,10 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents an Embed Provider Object as defined by Discord.
+ * Represents an Embed Provider Entity as defined by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object-embed-provider-structure">Embed
- * Provider Object</a>
+ * Provider Entity</a>
  */
 @DiscordEntity
 public class EmbedProviderEntity {

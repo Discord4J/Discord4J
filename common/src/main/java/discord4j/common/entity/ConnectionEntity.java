@@ -19,9 +19,9 @@ package discord4j.common.entity;
 import discord4j.common.jackson.DiscordEntity;
 
 /**
- * Represents a Connection Object as defined by Discord.
+ * Represents a Connection Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/user#connection-object">Connection Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/user#connection-object">Connection Entity</a>
  */
 @DiscordEntity
 public class ConnectionEntity {

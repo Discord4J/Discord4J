@@ -24,9 +24,9 @@ import discord4j.common.jackson.PossibleOptional;
 import java.util.Optional;
 
 /**
- * Represents a Message Object as defined by Discord.
+ * Represents a Message Entity as defined by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-object">Message Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-object">Message Entity</a>
  */
 @DiscordEntity
 public class MessageEntity {
