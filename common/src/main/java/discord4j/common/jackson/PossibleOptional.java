@@ -58,7 +58,7 @@ public class PossibleOptional<T> {
 	}
 
 	public boolean isPresent() {
-		return value != null;
+		return !empty;
 	}
 
 	@Override
