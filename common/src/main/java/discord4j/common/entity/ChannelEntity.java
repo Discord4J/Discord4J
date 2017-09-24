@@ -38,6 +38,8 @@ public class ChannelEntity {
 	@JsonProperty("guild_id")
 	private Possible<String> guildId = Possible.absent();
 	private Possible<Integer> position = Possible.absent();
+	@JsonProperty("parent_id")
+	private PossibleOptional<String> parentId = PossibleOptional.absent();
 
 	// guild text only
 	@JsonProperty("permission_overwrites")
@@ -169,5 +171,13 @@ public class ChannelEntity {
 
 	public void setApplicationId(Possible<String> applicationId) {
 		this.applicationId = applicationId;
+	}
+
+	public PossibleOptional<String> getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(PossibleOptional<String> parentId) {
+		this.parentId = parentId;
 	}
 }
