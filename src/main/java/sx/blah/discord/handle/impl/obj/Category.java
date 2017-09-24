@@ -16,15 +16,22 @@
  */
 package sx.blah.discord.handle.impl.obj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.OverwriteObject;
+import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -32,7 +39,7 @@ import java.util.stream.Collectors;
 
 public class Category implements ICategory {
 
-	private final IDiscordClient client;
+	private final DiscordClientImpl client;
 	private final IShard shard;
 	private volatile String name;
 	private final long id;
@@ -45,7 +52,7 @@ public class Category implements ICategory {
 
 	public Category(IShard shard, String name, long id, IGuild guild, int position, boolean nsfw, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
 		this.shard = shard;
-		this.client = shard.getClient();
+		this.client = (DiscordClientImpl) shard.getClient();
 		this.name = name;
 		this.guild = guild;
 		this.position = position;
@@ -78,8 +85,33 @@ public class Category implements ICategory {
 	}
 
 	@Override
+	public void changePosition(int position) {
+		edit(new ChannelEditRequest.Builder().position(position).build());
+	}
+
+	private void edit(ChannelEditRequest request) {
+		PermissionUtils.requirePermissions(getModifiedPermissions(client.getOurUser()), EnumSet.of(Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS));
+
+		try {
+			client.REQUESTS.PATCH.makeRequest(
+					DiscordEndpoints.CHANNELS + id,
+					DiscordUtils.MAPPER.writeValueAsString(request));
+		} catch (JsonProcessingException e) {
+			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
+		}
+	}
+
+	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public void changeName(String name) {
+		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+
+		edit(new ChannelEditRequest.Builder().name(name).build());
 	}
 
 	@Override
@@ -141,6 +173,68 @@ public class Category implements ICategory {
 		}
 
 		return permissions;
+	}
+
+	@Override
+	public LongMap<PermissionOverride> getUserOverridesLong() {
+		return userOverrides.mapCopy();
+	}
+
+	@Override
+	public LongMap<PermissionOverride> getRoleOverridesLong() {
+		return roleOverrides.mapCopy();
+	}
+
+	@Override
+	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
+		EnumSet<Permissions> base = role.getPermissions();
+		PermissionOverride override = roleOverrides.get(role.getLongID());
+
+		if (override == null) {
+			if ((override = roleOverrides.get(guild.getEveryoneRole().getLongID())) == null)
+				return base;
+		}
+
+		base.addAll(new ArrayList<>(override.allow()));
+		override.deny().forEach(base::remove);
+
+		return base;
+	}
+
+	@Override
+	public void removePermissionsOverride(IUser user) {
+		PermissionUtils.requirePermissions(getModifiedPermissions(getClient().getOurUser()), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+user.getStringID());
+
+		userOverrides.remove(user.getLongID());
+	}
+
+	@Override
+	public void removePermissionsOverride(IRole role) {
+		// TODO Require hierarchical permissions
+
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+role.getStringID());
+
+		roleOverrides.remove(role.getLongID());
+	}
+
+	@Override
+	public void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
+		overridePermissions("role", role.getStringID(), toAdd, toRemove);
+	}
+
+	@Override
+	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
+		overridePermissions("member", user.getStringID(), toAdd, toRemove);
+	}
+
+	private void overridePermissions(String type, String id, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
+		PermissionUtils.requirePermissions(getModifiedPermissions(getClient().getOurUser()), EnumSet.of(Permissions.MANAGE_PERMISSIONS));
+
+		((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
+				DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+id,
+				new OverwriteObject(type, null, Permissions.generatePermissionsNumber(toAdd), Permissions.generatePermissionsNumber(toRemove)));
 	}
 
 	@Override

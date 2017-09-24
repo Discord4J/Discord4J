@@ -550,6 +550,7 @@ public class DiscordUtils {
 				channel.roleOverrides.clear();
 				channel.userOverrides.putAll(overrides.getLeft());
 				channel.roleOverrides.putAll(overrides.getRight());
+				channel.setCategoryId(categoryId);
 
 				if (json.type == ChannelObject.Type.GUILD_TEXT) {
 					channel.setTopic(json.topic);

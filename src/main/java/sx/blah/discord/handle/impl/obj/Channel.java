@@ -966,6 +966,10 @@ public class Channel implements IChannel {
 		return getGuild().getCategoryById(categoryId);
 	}
 
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW,

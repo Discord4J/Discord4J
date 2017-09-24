@@ -16,6 +16,8 @@
  */
 package sx.blah.discord.handle.obj;
 
+import sx.blah.discord.util.cache.LongMap;
+
 import java.util.EnumSet;
 import java.util.List;
 
@@ -29,7 +31,16 @@ public interface ICategory extends IDiscordObject<ICategory> {
 	List<IChannel> getChannels();
 	IGuild getGuild();
 	int getPosition();
+	void changePosition(int position);
 	String getName();
+	void changeName(String name);
 	boolean isNSFW();
 	EnumSet<Permissions> getModifiedPermissions(IUser user);
+	EnumSet<Permissions> getModifiedPermissions(IRole role);
+	LongMap<PermissionOverride> getUserOverridesLong();
+	LongMap<PermissionOverride> getRoleOverridesLong();
+	void removePermissionsOverride(IUser user);
+	void removePermissionsOverride(IRole role);
+	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
+	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
 }
