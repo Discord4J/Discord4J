@@ -80,6 +80,23 @@ class OpusPacket {
 
 		audio = TweetNaCl.secretbox_open(audio, getNonce(), secret);
 		isEncrypted = false;
+
+		if (header.type == (byte) 0x90 && audio[0] == (byte) 0xBE && audio[1] == (byte) 0xDE) {
+			int hlen = audio[2] << 8 | audio[3];
+			int i = 4;
+			for (; i < hlen + 4; i++)
+			{
+				int b = audio[i];
+				int len = (b & 0x0F) + 1;
+				i += len;
+			}
+			while (audio[i] == 0)
+				i++;
+
+			byte[] buf = new byte[audio.length - i];
+			System.arraycopy(audio, i, buf, 0, buf.length);
+			audio = buf;
+		}
 	}
 
 	/**
@@ -121,13 +138,13 @@ class OpusPacket {
 		static final int LENGTH = 12;
 
 		/**
-		 * The type of the packet. Always 0x80
+		 * The type of the packet.
 		 */
-		final byte type = (byte) 0x80;
+		final byte type;
 		/**
-		 * The version of the packet. Always 0x78.
+		 * The version of the packet.
 		 */
-		final byte version = (byte) 0x78;
+		final byte version;
 		/**
 		 * Incremented for each packet received on the socket.
 		 */
@@ -143,12 +160,16 @@ class OpusPacket {
 
 		RTPHeader(byte[] header) {
 			ByteBuffer buf = ByteBuffer.wrap(header);
+			this.type = buf.get(0);
+			this.version = buf.get(1);
 			this.sequence = buf.getChar(2);
 			this.timestamp = buf.getInt(4);
 			this.ssrc = buf.getInt(8);
 		}
 
 		RTPHeader(char sequence, int timestamp, int ssrc) {
+			this.type = (byte) 0x80;
+			this.version = 0x78;
 			this.sequence = sequence;
 			this.timestamp = timestamp;
 			this.ssrc = ssrc;
