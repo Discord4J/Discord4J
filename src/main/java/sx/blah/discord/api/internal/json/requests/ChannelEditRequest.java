@@ -17,9 +17,12 @@
 
 package sx.blah.discord.api.internal.json.requests;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Sent to edit a channel's properties.
  */
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class ChannelEditRequest {
 
 	public static class Builder {
@@ -92,17 +95,17 @@ public class ChannelEditRequest {
 	/**
 	 * The new name of the channel.
 	 */
-	private final String name;
+	private String name;
 	/**
 	 * The new position of the channel.
 	 */
-	private final Integer position;
+	private Integer position;
 	/**
 	 * The new topic of the channel.
 	 */
-	private final String topic;
-	private final Boolean nsfw;
-	private final Long parent_id;
+	private String topic;
+	private Boolean nsfw;
+	public Long parent_id = 0L; // default must not be null because null is a valid value
 
 	ChannelEditRequest(String name, Integer position, String topic, Boolean nsfw, Long parentId) {
 		this.name = name;
@@ -111,4 +114,8 @@ public class ChannelEditRequest {
 		this.nsfw = nsfw;
 		this.parent_id = parentId;
 	}
+
+	ChannelEditRequest() {
+	}
+
 }

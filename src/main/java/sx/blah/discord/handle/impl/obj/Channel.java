@@ -630,7 +630,7 @@ public class Channel implements IChannel {
 		try {
 			client.REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.CHANNELS + id,
-					DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(request));
+					DiscordUtils.MAPPER.writeValueAsString(request));
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
