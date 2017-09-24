@@ -592,14 +592,24 @@ class DispatchHandler {
 				IChannel oldChannel = toUpdate.copy();
 				toUpdate = (Channel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
 				toUpdate.loadWebhooks();
-				client.dispatcher.dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+
+				if (!Objects.equals(oldChannel.getCategory(), toUpdate.getCategory())) {
+					client.dispatcher.dispatch(new ChannelCategoryUpdateEvent(oldChannel, toUpdate, oldChannel.getCategory(), toUpdate.getCategory()));
+				} else {
+					client.dispatcher.dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+				}
 			}
 		} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 			IVoiceChannel toUpdate = shard.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
 			if (toUpdate != null) {
 				IVoiceChannel oldChannel = toUpdate.copy();
 				toUpdate = (IVoiceChannel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
-				client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
+
+				if (!Objects.equals(oldChannel.getCategory(), toUpdate.getCategory())) {
+					client.dispatcher.dispatch(new ChannelCategoryUpdateEvent(oldChannel, toUpdate, oldChannel.getCategory(), toUpdate.getCategory()));
+				} else {
+					client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
+				}
 			}
 		} else if (json.type == ChannelObject.Type.GUILD_CATEGORY) {
 			ICategory toUpdate = shard.getCategoryById(Long.parseUnsignedLong(json.id));
