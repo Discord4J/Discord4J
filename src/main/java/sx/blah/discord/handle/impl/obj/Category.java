@@ -21,10 +21,12 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.handle.obj.ICategory;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.PermissionUtils;
+import sx.blah.discord.util.cache.Cache;
 
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,10 @@ public class Category implements ICategory {
 	private volatile int position;
 	private volatile boolean nsfw;
 
-	public Category(IShard shard, String name, long id, IGuild guild, int position, boolean nsfw) {
+	private final Cache<PermissionOverride> userOverrides;
+	private final Cache<PermissionOverride> roleOverrides;
+
+	public Category(IShard shard, String name, long id, IGuild guild, int position, boolean nsfw, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
 		this.shard = shard;
 		this.client = shard.getClient();
 		this.name = name;
@@ -46,11 +51,13 @@ public class Category implements ICategory {
 		this.position = position;
 		this.id = id;
 		this.nsfw = nsfw;
+		this.userOverrides = userOverrides;
+		this.roleOverrides = roleOverrides;
 	}
 
 	@Override
 	public void delete() {
-		// TODO Add permissions check
+		PermissionUtils.requirePermissions(getModifiedPermissions(getClient().getOurUser()), EnumSet.of(Permissions.MANAGE_CHANNEL));
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id);
 	}
@@ -92,7 +99,7 @@ public class Category implements ICategory {
 
 	@Override
 	public ICategory copy() {
-		return new Category(shard, name, id, guild, position, nsfw);
+		return new Category(shard, name, id, guild, position, nsfw, userOverrides, roleOverrides);
 	}
 
 	@Override
@@ -105,6 +112,35 @@ public class Category implements ICategory {
 		return getGuild().getChannels().stream()
 				.filter(channel -> channel.getCategory().equals(this))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
+		if (getGuild().getOwnerLongID() == user.getLongID())
+			return EnumSet.allOf(Permissions.class);
+
+		List<IRole> roles = user.getRolesForGuild(guild);
+		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
+
+		if (!permissions.contains(Permissions.ADMINISTRATOR)) {
+			PermissionOverride override = userOverrides.get(user.getLongID());
+			List<PermissionOverride> overrideRoles = roles.stream()
+					.filter(r -> roleOverrides.containsKey(r.getLongID()))
+					.map(role -> roleOverrides.get(role.getLongID()))
+					.collect(Collectors.toList());
+			Collections.reverse(overrideRoles);
+			for (PermissionOverride roleOverride : overrideRoles) {
+				permissions.addAll(roleOverride.allow());
+				permissions.removeAll(roleOverride.deny());
+			}
+
+			if (override != null) {
+				permissions.addAll(override.allow());
+				permissions.removeAll(override.deny());
+			}
+		}
+
+		return permissions;
 	}
 
 	@Override

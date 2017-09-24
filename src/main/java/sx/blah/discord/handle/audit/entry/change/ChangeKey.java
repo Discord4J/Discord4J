@@ -20,6 +20,7 @@ package sx.blah.discord.handle.audit.entry.change;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.PermissionOverride;
 import sx.blah.discord.util.LogMarkers;
 
 /**
@@ -70,7 +71,7 @@ public final class ChangeKey<T> {
 	public static final ChangeKey<String> AVATAR_HASH = newKey();
 	public static final ChangeKey<Long> ID = newKey();
 	public static final ChangeKey<Object> TYPE = newKey();
-	public static final ChangeKey<IChannel.PermissionOverride[]> PERMISSION_OVERWRITES = newKey();
+	public static final ChangeKey<PermissionOverride[]> PERMISSION_OVERWRITES = newKey();
 
 	public static ChangeKey<?> fromRaw(String rawKey) {
 		ChangeKey<?> key = null;

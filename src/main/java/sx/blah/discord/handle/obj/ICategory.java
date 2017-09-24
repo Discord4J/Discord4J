@@ -16,6 +16,7 @@
  */
 package sx.blah.discord.handle.obj;
 
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -30,4 +31,5 @@ public interface ICategory extends IDiscordObject<ICategory> {
 	int getPosition();
 	String getName();
 	boolean isNSFW();
+	EnumSet<Permissions> getModifiedPermissions(IUser user);
 }

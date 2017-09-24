@@ -132,8 +132,18 @@ public class PermissionUtils {
 	 * @param required The permissions the user must have.
 	 */
 	public static void requirePermissions(IChannel channel, IUser user, EnumSet<Permissions> required) {
+		requirePermissions(channel.getModifiedPermissions(user), required);
+	}
+
+	/**
+	 * Throws a {@link MissingPermissionsException} if the set of permissions does not contain all of the required permissions.
+	 *
+	 * @param permissions The permissions to check.
+	 * @param required The permissions the given set must have.
+	 */
+	public static void requirePermissions(EnumSet<Permissions> permissions, EnumSet<Permissions> required) {
 		EnumSet<Permissions> copy = required.clone();
-		copy.removeAll(channel.getModifiedPermissions(user));
+		copy.removeAll(permissions);
 		if (!copy.isEmpty()) throw new MissingPermissionsException(copy);
 	}
 
@@ -186,7 +196,18 @@ public class PermissionUtils {
 	 * @return True if the user has all of the required permissions.
 	 */
 	public static boolean hasPermissions(IChannel channel, IUser user, EnumSet<Permissions> required) {
-		return channel.getModifiedPermissions(user).containsAll(required);
+		return hasPermissions(channel.getModifiedPermissions(user), required);
+	}
+
+	/**
+	 * Determines if the given set of permissions has all of the required permissions.
+	 *
+	 * @param permissions The permissions to check.
+	 * @param required The permissions the given set must have.
+	 * @return True if the given set of permissions has all of the required permissions.
+	 */
+	public static boolean hasPermissions(EnumSet<Permissions> permissions, EnumSet<Permissions> required) {
+		return permissions.containsAll(required);
 	}
 
 	/**

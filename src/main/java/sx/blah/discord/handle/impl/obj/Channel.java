@@ -951,7 +951,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void setCategory(ICategory category) {
-		// TODO Permissions check
+		PermissionUtils.requirePermissions(this, getClient().getOurUser(), Permissions.MANAGE_CHANNELS);
 
 		Long id = category == null ? null : category.getLongID();
 		edit(new ChannelEditRequest.Builder().parentId(id).build());

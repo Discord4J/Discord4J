@@ -44,7 +44,6 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.LongMapCollector;
-import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.RequestBuilder;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
@@ -62,7 +61,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -540,7 +538,7 @@ public class DiscordUtils {
 				channel = new PrivateChannel(client, recipient, id);
 			}
 		} else if (json.type == ChannelObject.Type.GUILD_TEXT || json.type == ChannelObject.Type.GUILD_VOICE) {
-			Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
+			Pair<Cache<PermissionOverride>, Cache<PermissionOverride>> overrides =
 					getPermissionOverwritesFromJSONs(client, json.permission_overwrites);
 			Long categoryId = json.parent_id == null ? null : Long.parseUnsignedLong(json.parent_id);
 
@@ -578,17 +576,17 @@ public class DiscordUtils {
 	 * @param overwrites The array of json overwrite objects.
 	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
 	 */
-	public static Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>>
+	public static Pair<Cache<PermissionOverride>, Cache<PermissionOverride>>
 	getPermissionOverwritesFromJSONs(DiscordClientImpl client, OverwriteObject[] overwrites) {
-		Cache<IChannel.PermissionOverride> userOverrides = new Cache<>(client, IChannel.PermissionOverride.class);
-		Cache<IChannel.PermissionOverride> roleOverrides = new Cache<>(client, IChannel.PermissionOverride.class);
+		Cache<PermissionOverride> userOverrides = new Cache<>(client, PermissionOverride.class);
+		Cache<PermissionOverride> roleOverrides = new Cache<>(client, PermissionOverride.class);
 
 		for (OverwriteObject overrides : overwrites) {
 			if (overrides.type.equalsIgnoreCase("role")) {
-				roleOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+				roleOverrides.put(new PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
 								Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
 			} else if (overrides.type.equalsIgnoreCase("member")) {
-				userOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+				userOverrides.put(new PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
 								Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
 			} else {
 				Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
@@ -824,7 +822,11 @@ public class DiscordUtils {
 	}
 
 	public static ICategory getCategoryFromJSON(IShard shard, IGuild guild, ChannelObject json) {
-		return new Category(shard, json.name, Long.parseUnsignedLong(json.id), guild, json.position, json.nsfw);
+		Pair<Cache<PermissionOverride>, Cache<PermissionOverride>> permissionOverwrites =
+				getPermissionOverwritesFromJSONs((DiscordClientImpl) shard.getClient(), json.permission_overwrites);
+
+		return new Category(shard, json.name, Long.parseUnsignedLong(json.id), guild, json.position, json.nsfw,
+				permissionOverwrites.getLeft(), permissionOverwrites.getRight());
 	}
 
 	/**
