@@ -628,7 +628,7 @@ public class Guild implements IGuild {
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS+getStringID()+"/channels",
-				new ChannelCreateRequest(name, "text"),
+				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_TEXT),
 				ChannelObject.class);
 
 		IChannel channel = DiscordUtils.getChannelFromJSON(getShard(), this, response);
@@ -647,7 +647,7 @@ public class Guild implements IGuild {
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS+getStringID()+"/channels",
-				new ChannelCreateRequest(name, "voice"),
+				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_VOICE),
 				ChannelObject.class);
 
 		IVoiceChannel channel = (IVoiceChannel) DiscordUtils.getChannelFromJSON(getShard(), this, response);
@@ -945,6 +945,25 @@ public class Guild implements IGuild {
 	@Override
 	public AuditLog getAuditLog(IUser user, ActionType actionType) {
 		return getAuditLog(user, actionType, (System.currentTimeMillis() - DiscordUtils.DISCORD_EPOCH) << 22);
+	}
+
+	@Override
+	public ICategory createCategory(String name) {
+		shard.checkReady("create channel");
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNELS);
+
+		if (name == null || name.length() < 2 || name.length() > 100)
+			throw new DiscordException("Category name can only be between 2 and 100 characters!");
+
+		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS+getStringID()+"/channels",
+				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_CATEGORY),
+				ChannelObject.class);
+
+		ICategory category = DiscordUtils.getCategoryFromJSON(getShard(), this, response);
+		categories.put(category);
+
+		return category;
 	}
 
 	@Override

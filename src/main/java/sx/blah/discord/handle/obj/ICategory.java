@@ -23,6 +23,8 @@ import java.util.List;
  * coding gods, but seriously please god do not use this as it's still a work in progress and we need docs and aaahhhh!
  */
 public interface ICategory extends IDiscordObject<ICategory> {
+	void delete();
+	boolean isDeleted();
 	List<IChannel> getChannels();
 	IGuild getGuild();
 	int getPosition();

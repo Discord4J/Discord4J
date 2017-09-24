@@ -607,6 +607,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 */
 	AuditLog getAuditLog(IUser user, ActionType actionType);
 
+	ICategory createCategory(String name);
 	List<ICategory> getCategories();
 	ICategory getCategoryById(long id);
 	List<ICategory> getCategoriesByName(String name);

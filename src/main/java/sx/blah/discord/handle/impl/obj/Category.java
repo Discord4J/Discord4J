@@ -18,6 +18,8 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.handle.obj.ICategory;
 import sx.blah.discord.handle.obj.IChannel;
@@ -44,6 +46,18 @@ public class Category implements ICategory {
 		this.position = position;
 		this.id = id;
 		this.nsfw = nsfw;
+	}
+
+	@Override
+	public void delete() {
+		// TODO Add permissions check
+
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+id);
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return getClient().getCategoryById(id) != this;
 	}
 
 	@Override

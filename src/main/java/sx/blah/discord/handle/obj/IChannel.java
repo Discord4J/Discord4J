@@ -763,6 +763,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 */
 	boolean isDeleted();
 
+	void setCategory(ICategory category);
 	ICategory getCategory();
 
 	/**

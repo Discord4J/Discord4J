@@ -24,10 +24,16 @@ public class ChannelEditRequest {
 
 	public static class Builder {
 
+		private Long parentId;
 		private String name;
 		private Integer position;
 		private String topic;
 		private Boolean nsfw;
+
+		public Builder parentId(Long parentId) {
+			this.parentId = parentId;
+			return this;
+		}
 
 		/**
 		 * Sets the new name of the channel.
@@ -79,7 +85,7 @@ public class ChannelEditRequest {
 		 * @return The channel edit request.
 		 */
 		public ChannelEditRequest build() {
-			return new ChannelEditRequest(name, position, topic, nsfw);
+			return new ChannelEditRequest(name, position, topic, nsfw, parentId);
 		}
 	}
 
@@ -96,11 +102,13 @@ public class ChannelEditRequest {
 	 */
 	private final String topic;
 	private final Boolean nsfw;
+	private final Long parent_id;
 
-	ChannelEditRequest(String name, Integer position, String topic, Boolean nsfw) {
+	ChannelEditRequest(String name, Integer position, String topic, Boolean nsfw, Long parentId) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;
 		this.nsfw = nsfw;
+		this.parent_id = parentId;
 	}
 }

@@ -950,6 +950,14 @@ public class Channel implements IChannel {
 	}
 
 	@Override
+	public void setCategory(ICategory category) {
+		// TODO Permissions check
+
+		Long id = category == null ? null : category.getLongID();
+		edit(new ChannelEditRequest.Builder().parentId(id).build());
+	}
+
+	@Override
 	public ICategory getCategory() {
 		if (categoryId == null) {
 			return null;
