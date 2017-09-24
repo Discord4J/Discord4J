@@ -16,7 +16,7 @@ public class MainRunner {
 
     public static void main(String[] args){
 
-        if(args.length != 1){
+        if (args.length != 1){
             System.out.println("Please enter the bots token as the first argument e.g java -jar thisjar.jar tokenhere");
             return;
         }
@@ -29,7 +29,7 @@ public class MainRunner {
         // Register a listener via the IListener interface
         cli.getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
             public void handle(MessageReceivedEvent event) {
-                if(event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
+                if (event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
                     BotUtils.sendMessage(event.getChannel(), "I am sending a message from an IListener listener");
             }
         });
@@ -110,7 +110,7 @@ public class MyEvents {
 
     @EventSubscriber
     public void onMessageReceived(MessageReceivedEvent event){
-        if(event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
+        if (event.getMessage().getContent().startsWith(BotUtils.BOT_PREFIX + "test"))
             BotUtils.sendMessage(event.getChannel(), "I am sending a message from an EventSubscriber listener");
     }
 

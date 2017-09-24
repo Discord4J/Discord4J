@@ -310,7 +310,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	public ICategory getCategoryById(long id) {
 		for(IShard shard : shards) {
 			ICategory category = shard.getCategoryById(id);
-			if(category != null) {
+			if (category != null) {
 				return category;
 			}
 		}

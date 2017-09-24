@@ -355,6 +355,8 @@ public class DiscordUtils {
 						guild.channels.put(channel);
 					} else if (channelJSON.type == ChannelObject.Type.GUILD_VOICE) {
 						guild.voiceChannels.put((IVoiceChannel) channel);
+					} else if (channelJSON.type == ChannelObject.Type.GUILD_CATEGORY) {
+						guild.categories.put(DiscordUtils.getCategoryFromJSON(shard, guild, channelJSON));
 					}
 				}
 

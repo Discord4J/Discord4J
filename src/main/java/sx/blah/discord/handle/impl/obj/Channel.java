@@ -951,7 +951,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public ICategory getCategory() {
-		if(categoryId == null) {
+		if (categoryId == null) {
 			return null;
 		}
 

@@ -567,9 +567,9 @@ class DispatchHandler {
 				((Guild) channel.getGuild()).voiceChannels.remove(channel);
 				client.dispatcher.dispatch(new VoiceChannelDeleteEvent(channel));
 			}
-		} else if(json.type == ChannelObject.Type.GUILD_CATEGORY) {
+		} else if (json.type == ChannelObject.Type.GUILD_CATEGORY) {
 			ICategory category = client.getCategoryById(Long.parseUnsignedLong(json.id));
-			if(category != null) {
+			if (category != null) {
 				((Guild) category.getGuild()).categories.remove(category);
 				client.dispatcher.dispatch(new CategoryDeleteEvent(category));
 			}
@@ -601,9 +601,9 @@ class DispatchHandler {
 				toUpdate = (IVoiceChannel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
 				client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
 			}
-		} else if(json.type == ChannelObject.Type.GUILD_CATEGORY) {
+		} else if (json.type == ChannelObject.Type.GUILD_CATEGORY) {
 			ICategory toUpdate = shard.getCategoryById(Long.parseUnsignedLong(json.id));
-			if(toUpdate != null) {
+			if (toUpdate != null) {
 				ICategory oldCategory = toUpdate.copy();
 				toUpdate = DiscordUtils.getCategoryFromJSON(shard, toUpdate.getGuild(), json);
 				client.dispatcher.dispatch(new CategoryUpdateEvent(oldCategory, toUpdate));

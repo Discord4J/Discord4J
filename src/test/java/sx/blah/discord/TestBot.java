@@ -32,9 +32,7 @@ import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
 import java.net.URL;
-import java.util.StringJoiner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -304,6 +302,11 @@ public class TestBot {
 									client.logout();
 								} else if (m.getContent().startsWith(".test")) {
 									test(m);
+								} else if (m.getContent().startsWith(".category")) {
+									client.getCategories().stream()
+											.map(ICategory::getName)
+											.reduce((l, r) -> l + "\n" + r)
+											.ifPresent(names -> m.getChannel().sendMessage(names));
 								}
 							}
 						} catch (Exception e) {
