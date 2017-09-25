@@ -8,8 +8,8 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_version = '3.1.0.RC1'
-    reactor_netty_version = '0.7.0.M2'
+    reactor_version = '3.1.0.RELEASE'
+    reactor_netty_version = '0.7.0.RELEASE'
     jackson_version = '2.9.0.pr4'
     slf4j_version = '1.7.25'
     jsr305_version = '3.0.2'
@@ -126,6 +126,6 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.0'
-    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.0-all.zip'
+    gradleVersion = '4.2'
+    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.2-all.zip'
 }

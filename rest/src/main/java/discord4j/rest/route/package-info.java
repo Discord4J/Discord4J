@@ -17,4 +17,4 @@
 @NonNullApi
 package discord4j.rest.route;
 
-import reactor.util.lang.NonNullApi;
+import reactor.util.annotation.NonNullApi;
