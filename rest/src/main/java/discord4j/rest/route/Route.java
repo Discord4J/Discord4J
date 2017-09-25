@@ -68,6 +68,13 @@ public class Route<T> {
 		return responseType;
 	}
 
+	/**
+	 * Prepare a request, expanding this route template URI with the given parameters.
+	 *
+	 * @param uriVars the values to expand each template parameter
+	 * @return a request that is ready to be routed
+	 * @see discord4j.rest.request.DiscordRequest#exchange
+	 */
 	public DiscordRequest<T> newRequest(Object... uriVars) {
 		return new DiscordRequest<>(this, RouteUtils.expand(getUriTemplate(), uriVars));
 	}

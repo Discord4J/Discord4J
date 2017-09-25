@@ -63,11 +63,24 @@ public class DiscordRequest<T> {
 		return queryParams;
 	}
 
+	/**
+	 * Set the given synchronous {@link java.lang.Object} as the body for the request.
+	 *
+	 * @param body the object to set as request body
+	 * @return this request
+	 */
 	public DiscordRequest<T> body(Object body) {
 		this.body = body;
 		return this;
 	}
 
+	/**
+	 * Add the given name and value as a request query parameter.
+	 *
+	 * @param key the query parameter name
+	 * @param value the query parameter value
+	 * @return this request
+	 */
 	public DiscordRequest<T> query(String key, Object value) {
 		if (queryParams == null) {
 			queryParams = new LinkedHashMap<>();
@@ -76,6 +89,12 @@ public class DiscordRequest<T> {
 		return this;
 	}
 
+	/**
+	 * Exchange this request through the given {@link discord4j.rest.request.Router}.
+	 *
+	 * @param router a router that performs this request
+	 * @return the result of this request
+	 */
 	public Mono<T> exchange(Router router) {
 		return router.exchange(this);
 	}

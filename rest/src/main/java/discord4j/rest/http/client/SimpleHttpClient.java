@@ -29,6 +29,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
+/**
+ * A simple wrapper over <a href="https://github.com/reactor/reactor-netty">Reactor Netty</a> to perform web requests on
+ * the client side.
+ *
+ * @since 3.0
+ */
 public class SimpleHttpClient {
 
 	private final HttpClient httpClient;
@@ -37,8 +43,8 @@ public class SimpleHttpClient {
 	private final List<WriterStrategy<?>> writerStrategies;
 	private final List<ReaderStrategy<?>> readerStrategies;
 
-	public SimpleHttpClient(HttpClient httpClient, String baseUrl, HttpHeaders defaultHeaders,
-	                        List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies) {
+	SimpleHttpClient(HttpClient httpClient, String baseUrl, HttpHeaders defaultHeaders,
+	                 List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies) {
 		this.httpClient = httpClient;
 		this.baseUrl = baseUrl;
 		this.defaultHeaders = defaultHeaders;
@@ -46,6 +52,11 @@ public class SimpleHttpClient {
 		this.readerStrategies = readerStrategies;
 	}
 
+	/**
+	 * Obtain a {@link discord4j.rest.http.client.SimpleHttpClient} builder.
+	 *
+	 * @return a builder
+	 */
 	public static SimpleHttpClient.Builder builder() {
 		return new SimpleHttpClientBuilder();
 	}
@@ -60,6 +71,25 @@ public class SimpleHttpClient {
 		return (ReaderStrategy<T>) strategy;
 	}
 
+	/**
+	 * Exchange a request for a {@link reactor.core.publisher.Mono} response of the specified type.
+	 * <p>
+	 * The request will be processed according to the writer strategies and its response according to the reader
+	 * strategies available.
+	 * <p>
+	 * The raw request and response objects can be manipulated with a given
+	 * {@link discord4j.rest.http.client.ExchangeFilter},
+	 * for example, to read and/or write to headers.
+	 *
+	 * @param method the HTTP method
+	 * @param uri the URI used in this request. Will be appended to the base URI, if exists
+	 * @param body an object representing the body of the request
+	 * @param responseType the desired response type
+	 * @param exchangeFilter the filter to use while executing this request
+	 * @param <R> the type of the request body, can be <code>null</code>
+	 * @param <T> the type of the response body, can be {@link java.lang.Void}
+	 * @return a {@link reactor.core.publisher.Mono} of {@link T} with the response
+	 */
 	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType,
 	                               ExchangeFilter exchangeFilter) {
 		Objects.requireNonNull(method);
@@ -95,16 +125,50 @@ public class SimpleHttpClient {
 				});
 	}
 
+	/**
+	 * A mutable builder for a {@link discord4j.rest.http.client.SimpleHttpClient}.
+	 */
 	public interface Builder {
 
+		/**
+		 * Configure a base URI for requests performed through the client to avoid repeating the same host, port and
+		 * base path.
+		 *
+		 * @param baseUrl the base URI for all requests
+		 * @return this builder
+		 */
 		Builder baseUrl(String baseUrl);
 
+		/**
+		 * Add the given header to all requests that have not added it.
+		 *
+		 * @param key the header name
+		 * @param value the header value
+		 * @return this builder
+		 */
 		Builder defaultHeader(String key, String value);
 
+		/**
+		 * Configure the {@link discord4j.rest.http.WriterStrategy} to use. It will be added to the list of strategies.
+		 *
+		 * @param strategy the writing strategy to add
+		 * @return this builder
+		 */
 		Builder writerStrategy(WriterStrategy<?> strategy);
 
+		/**
+		 * Configure the {@link discord4j.rest.http.ReaderStrategy} to use. It will be added to the list of strategies.
+		 *
+		 * @param strategy the reading strategy to add
+		 * @return this builder
+		 */
 		Builder readerStrategy(ReaderStrategy<?> strategy);
 
+		/**
+		 * Build the {@link discord4j.rest.http.client.SimpleHttpClient} instance.
+		 *
+		 * @return a client
+		 */
 		SimpleHttpClient build();
 	}
 }
