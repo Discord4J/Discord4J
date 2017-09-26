@@ -347,7 +347,7 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public ICategory getCategoryById(long id) {
-		return guildCache.findResult((guildId, guild) -> guild.getCategoryById(id));
+	public ICategory getCategoryByID(long categoryID) {
+		return guildCache.findResult((guildId, guild) -> guild.getCategoryByID(categoryID));
 	}
 }

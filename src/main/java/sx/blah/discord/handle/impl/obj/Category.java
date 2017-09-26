@@ -41,23 +41,23 @@ public class Category implements ICategory {
 
 	private final DiscordClientImpl client;
 	private final IShard shard;
-	private volatile String name;
+	private final String name;
 	private final long id;
-	private volatile IGuild guild;
-	private volatile int position;
-	private volatile boolean nsfw;
+	private final IGuild guild;
+	private final int position;
+	private final boolean isNSFW;
 
 	private final Cache<PermissionOverride> userOverrides;
 	private final Cache<PermissionOverride> roleOverrides;
 
-	public Category(IShard shard, String name, long id, IGuild guild, int position, boolean nsfw, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
+	public Category(IShard shard, String name, long id, IGuild guild, int position, boolean isNSFW, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
 		this.shard = shard;
 		this.client = (DiscordClientImpl) shard.getClient();
 		this.name = name;
 		this.guild = guild;
 		this.position = position;
 		this.id = id;
-		this.nsfw = nsfw;
+		this.isNSFW = isNSFW;
 		this.userOverrides = userOverrides;
 		this.roleOverrides = roleOverrides;
 	}
@@ -71,7 +71,7 @@ public class Category implements ICategory {
 
 	@Override
 	public boolean isDeleted() {
-		return getClient().getCategoryById(id) != this;
+		return getClient().getCategoryByID(id) != this;
 	}
 
 	@Override
@@ -126,12 +126,17 @@ public class Category implements ICategory {
 
 	@Override
 	public boolean isNSFW() {
-		return nsfw;
+		return isNSFW;
+	}
+
+	@Override
+	public void changeNSFW(boolean nsfw) {
+		edit(new ChannelEditRequest.Builder().nsfw(isNSFW).build());
 	}
 
 	@Override
 	public ICategory copy() {
-		return new Category(shard, name, id, guild, position, nsfw, userOverrides, roleOverrides);
+		return new Category(shard, name, id, guild, position, isNSFW, userOverrides, roleOverrides);
 	}
 
 	@Override
@@ -212,7 +217,7 @@ public class Category implements ICategory {
 
 	@Override
 	public void removePermissionsOverride(IRole role) {
-		// TODO Require hierarchical permissions
+		// TODO Require hierarchical permissions (NEEDS TO BE DONE COUGH COUGH PANDA)
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+role.getStringID());
 

@@ -18,6 +18,9 @@ package sx.blah.discord.handle.impl.events.guild.category;
 
 import sx.blah.discord.handle.obj.ICategory;
 
+/**
+ * Dispatched when a category is created.
+ */
 public class CategoryCreateEvent extends CategoryEvent {
 	public CategoryCreateEvent(ICategory category) {
 		super(category);

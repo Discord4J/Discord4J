@@ -305,6 +305,18 @@ public interface IShard {
 	 */
 	IPrivateChannel getOrCreatePMChannel(IUser user);
 
+	/**
+	 * Gets a list of all categories visible to the bot user on the shard.
+	 *
+	 * @return A list of all visible categories.
+	 */
 	List<ICategory> getCategories();
-	ICategory getCategoryById(long id);
+
+	/**
+	 * Gets a category by its unique snowflake ID from the shard's category cache.
+	 *
+	 * @param categoryID The ID of the desired category.
+	 * @return The category with the provided ID (or null if one was not found).
+	 */
+	ICategory getCategoryByID(long categoryID);
 }

@@ -974,7 +974,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public ICategory getCategoryById(long id) {
+	public ICategory getCategoryByID(long id) {
 		return categories.get(id);
 	}
 

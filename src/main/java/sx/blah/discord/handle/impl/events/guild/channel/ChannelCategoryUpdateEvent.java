@@ -19,6 +19,9 @@ package sx.blah.discord.handle.impl.events.guild.channel;
 import sx.blah.discord.handle.obj.ICategory;
 import sx.blah.discord.handle.obj.IChannel;
 
+/**
+ * Dispatched when a channel is moved in or out of a category.
+ */
 public class ChannelCategoryUpdateEvent extends ChannelUpdateEvent {
 	private final ICategory oldCategory;
 	private final ICategory newCategory;
@@ -30,10 +33,20 @@ public class ChannelCategoryUpdateEvent extends ChannelUpdateEvent {
 		this.newCategory = newCategory;
 	}
 
+	/**
+	 * Returns the category that the channel now resides in.
+	 *
+	 * @return The category that the channel now resides in, may be null.
+	 */
 	public ICategory getNewCategory() {
 		return this.newCategory;
 	}
 
+	/**
+	 * Returns the category that the channel used to reside in.
+	 *
+	 * @return The category that the channel used  to reside in, may be null.
+	 */
 	public ICategory getOldCategory() {
 		return this.oldCategory;
 	}

@@ -950,7 +950,7 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public void setCategory(ICategory category) {
+	public void changeCategory(ICategory category) {
 		PermissionUtils.requirePermissions(this, getClient().getOurUser(), Permissions.MANAGE_CHANNELS);
 
 		Long id = category == null ? null : category.getLongID();
@@ -963,7 +963,7 @@ public class Channel implements IChannel {
 			return null;
 		}
 
-		return getGuild().getCategoryById(categoryId);
+		return getGuild().getCategoryByID(categoryId);
 	}
 
 	public void setCategoryId(Long categoryId) {

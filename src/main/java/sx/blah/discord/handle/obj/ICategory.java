@@ -22,25 +22,136 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * Do not use this yet because if you do all you will experience is pain and suffering from the deepest depths of the
- * coding gods, but seriously please god do not use this as it's still a work in progress and we need docs and aaahhhh!
+ * A category in Discord.
  */
 public interface ICategory extends IDiscordObject<ICategory> {
+	/**
+	 * Deletes the category.
+	 */
 	void delete();
+
+	/**
+	 * Gets whether the category is deleted.
+	 *
+	 * @return Whether the category is deleted.
+	 */
 	boolean isDeleted();
+
+	/**
+	 * Gets the category's channels.
+	 *
+	 * @return The category's channels.
+	 */
 	List<IChannel> getChannels();
+
+	/**
+	 * Gets the parent guild of the category.
+	 *
+	 * @return The parent guild of the category.
+	 */
 	IGuild getGuild();
+
+	/**
+	 * Gets the position of the category in the channel list.
+	 *
+	 * @return The position of the category in the channel list.
+	 */
 	int getPosition();
+
+	/**
+	 * Changes the position of the category.
+	 *
+	 * @param position The position of the category.
+	 */
 	void changePosition(int position);
+
+	/**
+	 * Gets the name of the category.
+	 *
+	 * @return The name of the category.
+	 */
 	String getName();
+
+	/**
+	 * Changes the name of the category.
+	 *
+	 * @param name The name of the category.
+	 */
 	void changeName(String name);
+
+	/**
+	 * Gets whether the category is marked as NSFW (Not Safe For Work).
+	 *
+	 * @return Whether the category is marked as NSFW.
+	 */
 	boolean isNSFW();
+
+	/**
+	 * Changes the nsfw state of the category.
+	 *
+	 * @param isNSFW The new nsfw state of the category.
+	 */
+	void changeNSFW(boolean isNSFW);
+
+	/**
+	 * Gets the permissions a user has in the category, taking into account user and role overrides.
+	 *
+	 * @param user The user to get permissions for.
+	 * @return The permissions the user has in the category.
+	 */
 	EnumSet<Permissions> getModifiedPermissions(IUser user);
+
+	/**
+	 * Gets the permissions a role has in the category, taking into account role overrides.
+	 *
+	 * @param role The role to get permissions for.
+	 * @return The permissions the role has in the category.
+	 */
 	EnumSet<Permissions> getModifiedPermissions(IRole role);
+
+	/**
+	 * Gets the permissions overrides for users. (Key = User ID)
+	 *
+	 * @return The user permissions overrides for the category.
+	 */
 	LongMap<PermissionOverride> getUserOverridesLong();
+
+	/**
+	 * Gets the permissions overrides for roles. (Key = Role ID)
+	 *
+	 * @return The role permissions overrides for this category.
+	 */
 	LongMap<PermissionOverride> getRoleOverridesLong();
+
+	/**
+	 * Removes a user's permissions override.
+	 *
+	 * @param user The user whose override should be removed.
+	 */
 	void removePermissionsOverride(IUser user);
+
+	/**
+	 * Removes a role's permissions override.
+	 *
+	 * @param role The role whose override should be removed.
+	 */
 	void removePermissionsOverride(IRole role);
+
+	/**
+	 * Creates or edits a role's permissions override.
+	 *
+	 * @param role The role to create/edit the permissions override for.
+	 * @param toAdd The permissions to explicitly grant.
+	 * @param toRemove The permissions to explicitly deny.
+	 */
 	void overrideRolePermissions(IRole role, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
+
+	/**
+	 * Creates or edits a user's permissions override.
+	 *
+	 * @param user The user to create/edit the permissions override for.
+	 * @param toAdd The permissions to explicitly grant.
+	 * @param toRemove The permissions to explicitly deny.
+	 */
 	void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove);
 }

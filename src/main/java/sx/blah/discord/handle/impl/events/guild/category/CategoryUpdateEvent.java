@@ -18,6 +18,11 @@ package sx.blah.discord.handle.impl.events.guild.category;
 
 import sx.blah.discord.handle.obj.ICategory;
 
+/**
+ * Dispatched when a category is updated.
+ *
+ * @see sx.blah.discord.handle.impl.events.guild.channel.ChannelCategoryUpdateEvent
+ */
 public class CategoryUpdateEvent extends CategoryEvent {
 	private final ICategory oldCategory, newCategory;
 
@@ -27,10 +32,20 @@ public class CategoryUpdateEvent extends CategoryEvent {
 		this.newCategory = newCategory;
 	}
 
+	/**
+	 * Gets the category before it was updated.
+	 *
+	 * @return The category before it was updated.
+	 */
 	public ICategory getOldCategory() {
 		return this.oldCategory;
 	}
 
+	/**
+	 * Gets the category after it was updated.
+	 *
+	 * @return The category after it was updated.
+	 */
 	public ICategory getNewCategory() {
 		return this.newCategory;
 	}

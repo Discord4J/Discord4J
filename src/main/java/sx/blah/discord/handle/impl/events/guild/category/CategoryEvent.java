@@ -19,6 +19,9 @@ package sx.blah.discord.handle.impl.events.guild.category;
 import sx.blah.discord.handle.impl.events.guild.GuildEvent;
 import sx.blah.discord.handle.obj.ICategory;
 
+/**
+ * A generic category-related event.
+ */
 public abstract class CategoryEvent extends GuildEvent {
 	private ICategory category;
 
@@ -27,6 +30,11 @@ public abstract class CategoryEvent extends GuildEvent {
 		this.category = category;
 	}
 
+	/**
+	 * Gets the category involved in the event.
+	 *
+	 * @return The category involved.
+	 */
 	public ICategory getCategory() {
 		return this.category;
 	}

@@ -763,6 +763,17 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 */
 	boolean isDeleted();
 
-	void setCategory(ICategory category);
+	/**
+	 * Changes the category of the channel.
+	 *
+	 * @param category The category of the channel.
+	 */
+	void changeCategory(ICategory category);
+
+	/**
+	 * Gets the category of the channel.
+	 *
+	 * @return The category of the channel, may be null.
+	 */
 	ICategory getCategory();
 }

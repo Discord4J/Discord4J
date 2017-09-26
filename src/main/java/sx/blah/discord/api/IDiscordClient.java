@@ -445,7 +445,26 @@ public interface IDiscordClient {
 	 */
 	IUser getApplicationOwner();
 
+	/**
+	 * Gets a list of all categories visible to the bot user on every shard.
+	 *
+	 * @return A list of all visible categories.
+	 */
 	List<ICategory> getCategories();
-	ICategory getCategoryById(long id);
+
+	/**
+	 * Gets a category by its unique snowflake ID from the client's category cache.
+	 *
+	 * @param categoryID The ID of the desired category.
+	 * @return The category with the provided ID (or null if one was not found).
+	 */
+	ICategory getCategoryByID(long categoryID);
+
+	/**
+	 * Gets a list of categories by their name.
+	 *
+	 * @param name The name of the desired categories.
+	 * @return A list of categories with the provided name.
+	 */
 	List<ICategory> getCategoriesByName(String name);
 }

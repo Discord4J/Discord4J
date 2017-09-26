@@ -307,9 +307,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public ICategory getCategoryById(long id) {
+	public ICategory getCategoryByID(long categoryID) {
 		for(IShard shard : shards) {
-			ICategory category = shard.getCategoryById(id);
+			ICategory category = shard.getCategoryByID(categoryID);
 			if (category != null) {
 				return category;
 			}
