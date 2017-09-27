@@ -41,14 +41,14 @@ public class Category implements ICategory {
 
 	private final DiscordClientImpl client;
 	private final IShard shard;
-	private final String name;
+	private String name;
 	private final long id;
 	private final IGuild guild;
-	private final int position;
-	private final boolean isNSFW;
+	private int position;
+	private boolean isNSFW;
 
-	private final Cache<PermissionOverride> userOverrides;
-	private final Cache<PermissionOverride> roleOverrides;
+	public final Cache<PermissionOverride> userOverrides;
+	public final Cache<PermissionOverride> roleOverrides;
 
 	public Category(IShard shard, String name, long id, IGuild guild, int position, boolean isNSFW, Cache<PermissionOverride> userOverrides, Cache<PermissionOverride> roleOverrides) {
 		this.shard = shard;
@@ -60,6 +60,18 @@ public class Category implements ICategory {
 		this.isNSFW = isNSFW;
 		this.userOverrides = userOverrides;
 		this.roleOverrides = roleOverrides;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+	public void setNSFW(boolean isNSFW) {
+		this.isNSFW = isNSFW;
 	}
 
 	@Override

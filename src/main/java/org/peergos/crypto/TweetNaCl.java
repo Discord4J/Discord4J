@@ -476,7 +476,7 @@ public class TweetNaCl {
         for (a=0;a < 16;++a)c[a]=i[iOff + a];
         for(a=253;a>=0;a--) {
             S(c,c);
-            if (a!=2&&a!=4) M(c, 0, c, 0, i, iOff);
+            if(a!=2&&a!=4) M(c, 0, c, 0, i, iOff);
         }
         for (a=0;a < 16;++a)o[oOff + a]=c[a];
     }
@@ -488,7 +488,7 @@ public class TweetNaCl {
         for (a=0;a < 16;++a)c[a]=i[a];
         for(a=250;a>=0;a--) {
             S(c,c);
-            if (a!=1) M(c, 0, c, 0, i, 0);
+            if(a!=1) M(c, 0, c, 0, i, 0);
         }
         for (a=0;a < 16;++a)o[a]=c[a];
     }

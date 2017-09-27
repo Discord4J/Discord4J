@@ -616,7 +616,6 @@ class DispatchHandler {
 			if (toUpdate != null) {
 				ICategory oldCategory = toUpdate.copy();
 				toUpdate = DiscordUtils.getCategoryFromJSON(shard, toUpdate.getGuild(), json);
-				((Guild) toUpdate.getGuild()).categories.put(toUpdate); // Update the cache
 				client.dispatcher.dispatch(new CategoryUpdateEvent(oldCategory, toUpdate));
 			}
 		}

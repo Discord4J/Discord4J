@@ -826,8 +826,22 @@ public class DiscordUtils {
 		Pair<Cache<PermissionOverride>, Cache<PermissionOverride>> permissionOverwrites =
 				getPermissionOverwritesFromJSONs((DiscordClientImpl) shard.getClient(), json.permission_overwrites);
 
-		return new Category(shard, json.name, Long.parseUnsignedLong(json.id), guild, json.position, json.nsfw,
-				permissionOverwrites.getLeft(), permissionOverwrites.getRight());
+		Category category = (Category) shard.getCategoryByID(Long.parseUnsignedLong(json.id));
+		if (category != null) {
+			category.setName(json.name);
+			category.setPosition(json.position);
+			category.setNSFW(json.nsfw);
+			category.userOverrides.clear();
+			category.roleOverrides.clear();
+			category.userOverrides.putAll(permissionOverwrites.getLeft());
+			category.roleOverrides.putAll(permissionOverwrites.getRight());
+
+		} else {
+			category = new Category(shard, json.name, Long.parseUnsignedLong(json.id), guild, json.position, json.nsfw,
+					permissionOverwrites.getLeft(), permissionOverwrites.getRight());
+		}
+
+		return category;
 	}
 
 	/**
