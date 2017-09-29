@@ -229,7 +229,7 @@ public class Category implements ICategory {
 
 	@Override
 	public void removePermissionsOverride(IRole role) {
-		// TODO Require hierarchical permissions (NEEDS TO BE DONE COUGH COUGH PANDA)
+		PermissionUtils.requireHierarchicalPermissions(getGuild(), client.getOurUser(), Collections.singletonList(role), Permissions.MANAGE_PERMISSIONS);
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.CHANNELS+getStringID()+"/permissions/"+role.getStringID());
 

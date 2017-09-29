@@ -37,7 +37,6 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
-import zzz_koloboke_compile.shaded.$kotlin$.internal.OnlyInputTypes;
 
 import java.io.*;
 import java.time.LocalDateTime;
