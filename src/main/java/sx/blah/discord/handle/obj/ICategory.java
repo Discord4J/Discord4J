@@ -25,6 +25,7 @@ import java.util.List;
  * A category in Discord.
  */
 public interface ICategory extends IDiscordObject<ICategory> {
+
 	/**
 	 * Deletes the category.
 	 */

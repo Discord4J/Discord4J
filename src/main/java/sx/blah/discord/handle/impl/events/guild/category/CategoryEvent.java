@@ -23,7 +23,8 @@ import sx.blah.discord.handle.obj.ICategory;
  * A generic category-related event.
  */
 public abstract class CategoryEvent extends GuildEvent {
-	private ICategory category;
+
+	private final ICategory category;
 
 	public CategoryEvent(ICategory category) {
 		super(category.getGuild());

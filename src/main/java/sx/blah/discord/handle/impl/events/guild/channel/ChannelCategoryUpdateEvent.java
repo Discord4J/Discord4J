@@ -23,6 +23,7 @@ import sx.blah.discord.handle.obj.IChannel;
  * Dispatched when a channel is moved in or out of a category.
  */
 public class ChannelCategoryUpdateEvent extends ChannelUpdateEvent {
+
 	private final ICategory oldCategory;
 	private final ICategory newCategory;
 

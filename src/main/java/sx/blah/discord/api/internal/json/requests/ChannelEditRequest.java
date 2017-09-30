@@ -27,14 +27,14 @@ public class ChannelEditRequest {
 
 	public static class Builder {
 
-		private Long parentId;
+		private Long parentID;
 		private String name;
 		private Integer position;
 		private String topic;
 		private Boolean nsfw;
 
-		public Builder parentId(Long parentId) {
-			this.parentId = parentId;
+		public Builder parentID(Long parentID) {
+			this.parentID = parentID;
 			return this;
 		}
 
@@ -88,7 +88,7 @@ public class ChannelEditRequest {
 		 * @return The channel edit request.
 		 */
 		public ChannelEditRequest build() {
-			return new ChannelEditRequest(name, position, topic, nsfw, parentId);
+			return new ChannelEditRequest(name, position, topic, nsfw, parentID);
 		}
 	}
 
@@ -107,12 +107,12 @@ public class ChannelEditRequest {
 	private Boolean nsfw;
 	public Long parent_id = 0L; // default must not be null because null is a valid value
 
-	ChannelEditRequest(String name, Integer position, String topic, Boolean nsfw, Long parentId) {
+	ChannelEditRequest(String name, Integer position, String topic, Boolean nsfw, Long parentID) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;
 		this.nsfw = nsfw;
-		this.parent_id = parentId;
+		this.parent_id = parentID;
 	}
 
 	ChannelEditRequest() {

@@ -24,6 +24,7 @@ import sx.blah.discord.handle.obj.ICategory;
  * @see sx.blah.discord.handle.impl.events.guild.channel.ChannelCategoryUpdateEvent
  */
 public class CategoryUpdateEvent extends CategoryEvent {
+
 	private final ICategory oldCategory, newCategory;
 
 	public CategoryUpdateEvent(ICategory oldCategory, ICategory newCategory) {

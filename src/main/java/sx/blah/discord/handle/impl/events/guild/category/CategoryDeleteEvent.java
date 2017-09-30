@@ -22,6 +22,7 @@ import sx.blah.discord.handle.obj.ICategory;
  * Dispatched when a category is deleted.
  */
 public class CategoryDeleteEvent extends CategoryEvent {
+
 	public CategoryDeleteEvent(ICategory category) {
 		super(category);
 	}
