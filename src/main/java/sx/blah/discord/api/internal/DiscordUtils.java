@@ -565,11 +565,11 @@ public class DiscordUtils {
 					vc.setBitrate(json.bitrate);
 				}
 			} else if (json.type == ChannelObject.Type.GUILD_TEXT) {
-				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
-						overrides.getRight(), overrides.getLeft(), categoryID);
+				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw, categoryID,
+						overrides.getRight(), overrides.getLeft());
 			} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
-						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft(), categoryID);
+						json.user_limit, json.bitrate, categoryID, overrides.getRight(), overrides.getLeft());
 			}
 		}
 

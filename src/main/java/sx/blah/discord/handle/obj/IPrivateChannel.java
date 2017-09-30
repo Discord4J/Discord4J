@@ -50,7 +50,7 @@ public interface IPrivateChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	LongMap<PermissionOverride> getUserOverridesLong();
+	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong();
 
 	/**
 	 * @deprecated See {@link IPrivateChannel} for details.
@@ -58,7 +58,7 @@ public interface IPrivateChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	LongMap<PermissionOverride> getRoleOverridesLong();
+	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
 
 	/**
 	 * @deprecated See {@link IPrivateChannel} for details.

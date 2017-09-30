@@ -105,12 +105,12 @@ public class Channel implements IChannel {
 	/**
 	 * The permission overrides for users.
 	 */
-	public final Cache<PermissionOverride> userOverrides;
+	public final Cache<sx.blah.discord.handle.obj.PermissionOverride> userOverrides;
 
 	/**
 	 * The permission overrides for roles.
 	 */
-	public final Cache<PermissionOverride> roleOverrides;
+	public final Cache<sx.blah.discord.handle.obj.PermissionOverride> roleOverrides;
 
 	/**
 	 * The webhooks for the channel.
@@ -129,8 +129,9 @@ public class Channel implements IChannel {
 	 */
 	protected final DiscordClientImpl client;
 
-	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
-				   boolean isNSFW, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides, long categoryID) {
+	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position, boolean isNSFW, long categoryID,
+				   Cache<sx.blah.discord.handle.obj.PermissionOverride> roleOverrides,
+				   Cache<sx.blah.discord.handle.obj.PermissionOverride> userOverrides) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -688,12 +689,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public LongMap<PermissionOverride> getUserOverridesLong() {
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong() {
 		return userOverrides.mapCopy();
 	}
 
 	@Override
-	public LongMap<PermissionOverride> getRoleOverridesLong() {
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong() {
 		return roleOverrides.mapCopy();
 	}
 
@@ -936,8 +937,9 @@ public class Channel implements IChannel {
 
 	@Override
 	public IChannel copy() {
-		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW,
-				new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class), categoryID);
+		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW, categoryID,
+				new Cache<>(client, sx.blah.discord.handle.obj.PermissionOverride.class),
+				new Cache<>(client, sx.blah.discord.handle.obj.PermissionOverride.class));
 		channel.typingTask.set(typingTask.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);
