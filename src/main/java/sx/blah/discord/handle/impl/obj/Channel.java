@@ -919,7 +919,7 @@ public class Channel implements IChannel {
 		PermissionUtils.requirePermissions(this, getClient().getOurUser(), Permissions.MANAGE_CHANNELS);
 
 		Long id = category == null ? null : category.getLongID();
-		edit(new ChannelEditRequest.Builder().parentId(id).build());
+		edit(new ChannelEditRequest.Builder().parentID(id).build());
 	}
 
 	@Override
