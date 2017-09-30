@@ -122,7 +122,7 @@ public class Channel implements IChannel {
 	 */
 	protected boolean isNSFW;
 
-	protected volatile Long categoryId;
+	protected volatile long categoryID;
 
 	/**
 	 * The client that owns the channel object.
@@ -130,7 +130,7 @@ public class Channel implements IChannel {
 	protected final DiscordClientImpl client;
 
 	public Channel(DiscordClientImpl client, String name, long id, IGuild guild, String topic, int position,
-				   boolean isNSFW, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides, Long categoryId) {
+				   boolean isNSFW, Cache<PermissionOverride> roleOverrides, Cache<PermissionOverride> userOverrides, long categoryID) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -142,7 +142,7 @@ public class Channel implements IChannel {
 		this.isNSFW = isNSFW;
 		this.messages = new Cache<>(client, IMessage.class);
 		this.webhooks = new Cache<>(client, IWebhook.class);
-		this.categoryId = categoryId;
+		this.categoryID = categoryID;
 	}
 
 
@@ -637,7 +637,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void edit(String name, int position, String topic) {
-		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
+		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
 			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).position(position).topic(topic).build());
@@ -645,7 +645,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public void changeName(String name) {
-		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
+		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
 			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).build());
@@ -699,47 +699,12 @@ public class Channel implements IChannel {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
-		if (isPrivate() || getGuild().getOwnerLongID() == user.getLongID())
-			return EnumSet.allOf(Permissions.class);
-
-		List<IRole> roles = user.getRolesForGuild(guild);
-		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
-
-		if (!permissions.contains(Permissions.ADMINISTRATOR)) {
-			PermissionOverride override = userOverrides.get(user.getLongID());
-			List<PermissionOverride> overrideRoles = roles.stream()
-					.filter(r -> roleOverrides.containsKey(r.getLongID()))
-					.map(role -> roleOverrides.get(role.getLongID()))
-					.collect(Collectors.toList());
-			Collections.reverse(overrideRoles);
-			for (PermissionOverride roleOverride : overrideRoles) {
-				permissions.addAll(roleOverride.allow());
-				permissions.removeAll(roleOverride.deny());
-			}
-
-			if (override != null) {
-				permissions.addAll(override.allow());
-				permissions.removeAll(override.deny());
-			}
-		}
-
-		return permissions;
+		return PermissionUtils.getModifiedPermissions(user, guild, userOverrides, roleOverrides);
 	}
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
-		EnumSet<Permissions> base = role.getPermissions();
-		PermissionOverride override = roleOverrides.get(role.getLongID());
-
-		if (override == null) {
-			if ((override = roleOverrides.get(guild.getEveryoneRole().getLongID())) == null)
-				return base;
-		}
-
-		base.addAll(new ArrayList<>(override.allow()));
-		override.deny().forEach(base::remove);
-
-		return base;
+		return PermissionUtils.getModifiedPermissions(role, roleOverrides);
 	}
 
 	@Override
@@ -958,21 +923,21 @@ public class Channel implements IChannel {
 
 	@Override
 	public ICategory getCategory() {
-		if (categoryId == null) {
+		if (categoryID == 0L) {
 			return null;
 		}
 
-		return getGuild().getCategoryByID(categoryId);
+		return getGuild().getCategoryByID(categoryID);
 	}
 
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setCategoryID(long categoryId) {
+		this.categoryID = categoryId;
 	}
 
 	@Override
 	public IChannel copy() {
 		Channel channel = new Channel(client, name, id, guild, topic, position, isNSFW,
-				new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class), categoryId);
+				new Cache<>(client, PermissionOverride.class), new Cache<>(client, PermissionOverride.class), categoryID);
 		channel.typingTask.set(typingTask.get());
 		channel.roleOverrides.putAll(roleOverrides);
 		channel.userOverrides.putAll(userOverrides);

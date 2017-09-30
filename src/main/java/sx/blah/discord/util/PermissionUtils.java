@@ -18,11 +18,10 @@
 package sx.blah.discord.util;
 
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.cache.Cache;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.OptionalInt;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility for permission checking.
@@ -478,5 +477,68 @@ public class PermissionUtils {
 		EnumSet<Permissions> set = EnumSet.noneOf(Permissions.class);
 		set.addAll(Arrays.asList(array));
 		return set;
+	}
+
+	/**
+	 * Gets the permissions a user has in some permissions object, taking into account user and role overrides.
+	 *
+	 * @param user The user to get permissions for.
+	 * @param guild The guild the user is in.
+	 * @param userOverrides The internal user overrides cache.
+	 * @param roleOverrides The internal role overrides cache.
+	 * @return The permissions the user has in the permissions object.
+	 */
+	public static EnumSet<Permissions> getModifiedPermissions(IUser user, IGuild guild,
+															  Cache<PermissionOverride> userOverrides,
+															  Cache<PermissionOverride> roleOverrides) {
+
+		if(guild.getOwnerLongID() == user.getLongID()) {
+			return EnumSet.allOf(Permissions.class);
+		}
+
+		List<IRole> roles = user.getRolesForGuild(guild);
+		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
+
+		if (!permissions.contains(Permissions.ADMINISTRATOR)) {
+			PermissionOverride override = userOverrides.get(user.getLongID());
+			List<PermissionOverride> overrideRoles = roles.stream()
+					.filter(r -> roleOverrides.containsKey(r.getLongID()))
+					.map(role -> roleOverrides.get(role.getLongID()))
+					.collect(Collectors.toList());
+			Collections.reverse(overrideRoles);
+			for (PermissionOverride roleOverride : overrideRoles) {
+				permissions.addAll(roleOverride.allow());
+				permissions.removeAll(roleOverride.deny());
+			}
+
+			if (override != null) {
+				permissions.addAll(override.allow());
+				permissions.removeAll(override.deny());
+			}
+		}
+
+		return permissions;
+	}
+
+	/**
+	 * Gets the permissions a role has in some permissions object, taking into account role overrides.
+	 *
+	 * @param role The role to get permissions for.
+	 * @param roleOverrides The internal role overrides cache.
+	 * @return The permissions the role has in the permissions object.
+	 */
+	public static EnumSet<Permissions> getModifiedPermissions(IRole role, Cache<PermissionOverride> roleOverrides) {
+		EnumSet<Permissions> base = role.getPermissions();
+		PermissionOverride override = roleOverrides.get(role.getLongID());
+
+		if (override == null) {
+			if ((override = roleOverrides.get(role.getGuild().getEveryoneRole().getLongID())) == null)
+				return base;
+		}
+
+		base.addAll(new ArrayList<>(override.allow()));
+		override.deny().forEach(base::remove);
+
+		return base;
 	}
 }

@@ -41,11 +41,11 @@ public class Category implements ICategory {
 
 	private final DiscordClientImpl client;
 	private final IShard shard;
-	private String name;
+	private volatile String name;
 	private final long id;
 	private final IGuild guild;
-	private int position;
-	private boolean isNSFW;
+	private volatile int position;
+	private volatile boolean isNSFW;
 
 	public final Cache<PermissionOverride> userOverrides;
 	public final Cache<PermissionOverride> roleOverrides;
@@ -120,7 +120,7 @@ public class Category implements ICategory {
 
 	@Override
 	public void changeName(String name) {
-		if (name == null || !name.matches("^[a-z0-9-_]{2,100}$"))
+		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
 			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).build());
@@ -148,7 +148,7 @@ public class Category implements ICategory {
 
 	@Override
 	public ICategory copy() {
-		return new Category(shard, name, id, guild, position, isNSFW, userOverrides, roleOverrides);
+		return new Category(shard, name, id, guild, position, isNSFW, userOverrides.copy(), roleOverrides.copy());
 	}
 
 	@Override
@@ -159,37 +159,13 @@ public class Category implements ICategory {
 	@Override
 	public List<IChannel> getChannels() {
 		return getGuild().getChannels().stream()
-				.filter(channel -> channel.getCategory().equals(this))
+				.filter(channel -> equals(channel.getCategory()))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
-		if (getGuild().getOwnerLongID() == user.getLongID())
-			return EnumSet.allOf(Permissions.class);
-
-		List<IRole> roles = user.getRolesForGuild(guild);
-		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
-
-		if (!permissions.contains(Permissions.ADMINISTRATOR)) {
-			PermissionOverride override = userOverrides.get(user.getLongID());
-			List<PermissionOverride> overrideRoles = roles.stream()
-					.filter(r -> roleOverrides.containsKey(r.getLongID()))
-					.map(role -> roleOverrides.get(role.getLongID()))
-					.collect(Collectors.toList());
-			Collections.reverse(overrideRoles);
-			for (PermissionOverride roleOverride : overrideRoles) {
-				permissions.addAll(roleOverride.allow());
-				permissions.removeAll(roleOverride.deny());
-			}
-
-			if (override != null) {
-				permissions.addAll(override.allow());
-				permissions.removeAll(override.deny());
-			}
-		}
-
-		return permissions;
+		return PermissionUtils.getModifiedPermissions(user, guild, userOverrides, roleOverrides);
 	}
 
 	@Override
@@ -204,18 +180,7 @@ public class Category implements ICategory {
 
 	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
-		EnumSet<Permissions> base = role.getPermissions();
-		PermissionOverride override = roleOverrides.get(role.getLongID());
-
-		if (override == null) {
-			if ((override = roleOverrides.get(guild.getEveryoneRole().getLongID())) == null)
-				return base;
-		}
-
-		base.addAll(new ArrayList<>(override.allow()));
-		override.deny().forEach(base::remove);
-
-		return base;
+		return PermissionUtils.getModifiedPermissions(role, roleOverrides);
 	}
 
 	@Override

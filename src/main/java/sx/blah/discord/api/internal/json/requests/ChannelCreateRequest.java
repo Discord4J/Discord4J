@@ -28,7 +28,7 @@ public class ChannelCreateRequest {
 	public String name;
 
 	/**
-	 * The type of channel, either "text" or "voice".
+	 * The type of channel.
 	 */
 	public int type;
 

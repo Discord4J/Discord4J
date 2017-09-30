@@ -135,6 +135,11 @@ public class DiscordUtils {
 	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://(www\\.)?twitch\\.tv/.+");
 
 	/**
+	 * Pattern for Discord's valid channel names.
+	 */
+	public static final Pattern CHANNEL_NAME_PATTERN = Pattern.compile("^[a-z0-9-_]{2,100}$");
+
+	/**
 	 * Gets a snowflake from a unix timestamp.
 	 *
 	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
@@ -540,7 +545,7 @@ public class DiscordUtils {
 		} else if (json.type == ChannelObject.Type.GUILD_TEXT || json.type == ChannelObject.Type.GUILD_VOICE) {
 			Pair<Cache<PermissionOverride>, Cache<PermissionOverride>> overrides =
 					getPermissionOverwritesFromJSONs(client, json.permission_overwrites);
-			Long categoryId = json.parent_id == null ? null : Long.parseUnsignedLong(json.parent_id);
+			long categoryID = json.parent_id == null ? 0L : Long.parseUnsignedLong(json.parent_id);
 
 			if (channel != null) {
 				channel.setName(json.name);
@@ -550,7 +555,7 @@ public class DiscordUtils {
 				channel.roleOverrides.clear();
 				channel.userOverrides.putAll(overrides.getLeft());
 				channel.roleOverrides.putAll(overrides.getRight());
-				channel.setCategoryId(categoryId);
+				channel.setCategoryID(categoryID);
 
 				if (json.type == ChannelObject.Type.GUILD_TEXT) {
 					channel.setTopic(json.topic);
@@ -561,10 +566,10 @@ public class DiscordUtils {
 				}
 			} else if (json.type == ChannelObject.Type.GUILD_TEXT) {
 				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
-						overrides.getRight(), overrides.getLeft(), categoryId);
+						overrides.getRight(), overrides.getLeft(), categoryID);
 			} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
-						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft(), categoryId);
+						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft(), categoryID);
 			}
 		}
 
