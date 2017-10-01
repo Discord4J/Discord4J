@@ -945,6 +945,8 @@ public class Guild implements IGuild {
 	}
 
 	private AuditLog getAuditLog(IUser user, ActionType actionType, long before) {
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.VIEW_AUDIT_LOG);
+
 		List<AuditLog> retrieved = new ArrayList<>();
 
 		AuditLogEntryObject[] chunk;
