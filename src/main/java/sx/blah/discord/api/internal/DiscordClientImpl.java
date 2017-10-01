@@ -23,7 +23,6 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
-import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
@@ -40,6 +39,7 @@ import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +87,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * The cache of the available voice regions.
 	 */
-	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
+	public final Map<String, IRegion> REGIONS = new ConcurrentHashMap<>();
 
 	/**
 	 * The maximum number of heartbeats that Discord can miss before a reconnect begins.
@@ -213,28 +213,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public List<IRegion> getRegions() {
-		if (REGIONS.isEmpty()) {
-			VoiceRegionObject[] regions = REQUESTS.GET.makeRequest(
-					DiscordEndpoints.VOICE+"regions", VoiceRegionObject[].class);
-
-			Arrays.stream(regions)
-					.map(DiscordUtils::getRegionFromJSON)
-					.forEach(REGIONS::add);
-		}
-
-		return REGIONS;
+		return new ArrayList<>(REGIONS.values());
 	}
 
 	@Override
 	public IRegion getRegionByID(String regionID) {
-		try {
-			return getRegions().stream()
-					.filter(r -> r.getID().equals(regionID))
-					.findAny().orElse(null);
-		} catch (RateLimitException | DiscordException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-		}
-		return null;
+		return REGIONS.get(regionID);
 	}
 
 	private ApplicationInfoResponse getApplicationInfo() {

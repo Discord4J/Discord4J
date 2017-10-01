@@ -859,6 +859,37 @@ public class DiscordUtils {
 	}
 
 	/**
+	 * Retrieves all standard regions (non-VIP regions).
+	 *
+	 * @param requests Used to send a request to Discord to get standard regions.
+	 * @return A list of standard, non-VIP regions.
+	 */
+	public static List<IRegion> getStandardRegions(Requests requests) {
+		VoiceRegionObject[] regions = requests.GET.makeRequest(
+				DiscordEndpoints.VOICE + "regions", VoiceRegionObject[].class);
+
+		return Arrays.stream(regions)
+				.map(DiscordUtils::getRegionFromJSON)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Retrieves all regions available to the guild, including VIP regions.
+	 *
+	 * @param requests Used to send a request to get available regions.
+	 * @param guild The guild to get the regions available to.
+	 * @return All regions available to the guild, including VIP regions.
+	 */
+	public static List<IRegion> getRegionsFromGuild(Requests requests, IGuild guild) {
+		VoiceRegionObject[] regions = requests.GET.makeRequest(
+				DiscordEndpoints.GUILDS + guild.getStringID() + "/regions", VoiceRegionObject[].class);
+
+		return Arrays.stream(regions)
+				.map(DiscordUtils::getRegionFromJSON)
+				.collect(Collectors.toList());
+	}
+
+	/**
 	 * Creates a {@link ThreadFactory} which produces threads which run as daemons.
 	 *
 	 * @return The new daemon thread factory.
