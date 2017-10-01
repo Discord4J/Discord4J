@@ -949,7 +949,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public ICategory createCategory(String name) {
-		shard.checkReady("create channel");
+		shard.checkReady("create category");
 		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNELS);
 
 		if (name == null || name.length() < 2 || name.length() > 100)
