@@ -968,9 +968,17 @@ public class Guild implements IGuild {
 
 	@Override
 	public List<ICategory> getCategories() {
-		return categories.stream()
-				.sorted(Comparator.comparingInt(ICategory::getPosition))
-				.collect(Collectors.toList());
+		LinkedList<ICategory> list = new LinkedList<>(categories.values());
+		list.sort((c1, c2) -> {
+			int originalPos1 = ((Category) c1).position;
+			int originalPos2 = ((Category) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
 	}
 
 	@Override

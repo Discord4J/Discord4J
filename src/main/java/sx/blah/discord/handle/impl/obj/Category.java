@@ -39,13 +39,13 @@ import java.util.stream.Collectors;
 
 public class Category implements ICategory {
 
-	private final DiscordClientImpl client;
-	private final IShard shard;
-	private volatile String name;
-	private final long id;
-	private final IGuild guild;
-	private volatile int position;
-	private volatile boolean isNSFW;
+	protected final DiscordClientImpl client;
+	protected final IShard shard;
+	protected volatile String name;
+	protected final long id;
+	protected final IGuild guild;
+	protected volatile int position;
+	protected volatile boolean isNSFW;
 
 	public final Cache<PermissionOverride> userOverrides;
 	public final Cache<PermissionOverride> roleOverrides;
@@ -93,7 +93,7 @@ public class Category implements ICategory {
 
 	@Override
 	public int getPosition() {
-		return position;
+		return getGuild().getCategories().indexOf(this);
 	}
 
 	@Override
