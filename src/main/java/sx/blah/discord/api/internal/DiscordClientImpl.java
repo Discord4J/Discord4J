@@ -212,35 +212,39 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return ourUser;
 	}
 
-	private synchronized void loadStandardRegions() {
-		if (regions.isEmpty()) { // Guarantee so standard regions are first
-			VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
-					(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
-							DiscordEndpoints.VOICE + "regions", VoiceRegionObject[].class)).get();
+	private void loadStandardRegions() {
+		synchronized (regions) {
+			if (regions.isEmpty()) { // Guarantee so standard regions are first
+				VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
+						(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
+								DiscordEndpoints.VOICE + "regions", VoiceRegionObject[].class)).get();
 
-			Arrays.stream(regionObjects)
-					.map(DiscordUtils::getRegionFromJSON)
-					.forEach(r -> regions.putIfAbsent(r.getID(), r));
+				Arrays.stream(regionObjects)
+						.map(DiscordUtils::getRegionFromJSON)
+						.forEach(r -> regions.putIfAbsent(r.getID(), r));
+			}
 		}
 	}
 
-	public synchronized IRegion getGuildRegion(Guild guild) {
-		loadStandardRegions();
-		IRegion region = regions.get(guild.getRegionID());
+	public IRegion getGuildRegion(Guild guild) {
+		synchronized (regions) {
+			loadStandardRegions();
+			IRegion region = regions.get(guild.getRegionID());
 
-		if (region == null) { // New region types means Discord has updated
-			VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
-					(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
-							DiscordEndpoints.GUILDS + guild.getStringID() + "/regions", VoiceRegionObject[].class)).get();
+			if (region == null) { // New region types means Discord has updated
+				VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
+						(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
+								DiscordEndpoints.GUILDS + guild.getStringID() + "/regions", VoiceRegionObject[].class)).get();
 
-			Arrays.stream(regionObjects)
-					.map(DiscordUtils::getRegionFromJSON)
-					.forEach(r -> regions.putIfAbsent(r.getID(), r));
+				Arrays.stream(regionObjects)
+						.map(DiscordUtils::getRegionFromJSON)
+						.forEach(r -> regions.putIfAbsent(r.getID(), r));
 
-			region = regions.get(guild.getRegionID());
+				region = regions.get(guild.getRegionID());
+			}
+
+			return region;
 		}
-
-		return region;
 	}
 
 	private void loadAllRegions() {
@@ -261,7 +265,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IRegion getRegionByID(String regionID) {
-		loadStandardRegions();
 		IRegion region = regions.get(regionID);
 
 		if (region == null) {
