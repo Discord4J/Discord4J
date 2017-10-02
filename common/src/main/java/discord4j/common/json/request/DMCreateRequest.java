@@ -14,29 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json.request;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+public class DMCreateRequest {
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
-	}
+	@JsonProperty("recipient_id")
+	private final String recipientId;
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
-	}
-
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public DMCreateRequest(String recipientId) {
+		this.recipientId = recipientId;
 	}
 }

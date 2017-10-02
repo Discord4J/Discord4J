@@ -14,29 +14,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+public class EmbedFieldEntity {
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+	private String name;
+	private String value;
+	private boolean inline;
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
+	public EmbedFieldEntity(String name, String value, boolean inline) {
+		this.name = name;
+		this.value = value;
+		this.inline = inline;
 	}
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
+	public String getName() {
+		return name;
 	}
 
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	public boolean isInline() {
+		return inline;
+	}
+
+	public void setInline(boolean inline) {
+		this.inline = inline;
 	}
 }

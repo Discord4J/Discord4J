@@ -14,29 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json.response;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+public class EmbedImageResponse {
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
+	private String url;
+	@JsonProperty("proxy_url")
+	private String proxyUrl;
+	private int height;
+	private int width;
+
+	public String getUrl() {
+		return url;
 	}
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
+	public String getProxyUrl() {
+		return proxyUrl;
 	}
 
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public int getHeight() {
+		return height;
+	}
+
+	public int getWidth() {
+		return width;
 	}
 }

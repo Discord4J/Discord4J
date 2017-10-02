@@ -14,29 +14,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+public class GameEntity {
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+	private String name;
+	private int type;
+	private String url;
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
+	public GameEntity(String name, int type, String url) {
+		this.name = name;
+		this.type = type;
+		this.url = url;
 	}
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
+	public String getName() {
+		return name;
 	}
 
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 }

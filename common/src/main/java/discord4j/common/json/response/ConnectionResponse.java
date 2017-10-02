@@ -14,29 +14,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json.response;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+public class ConnectionResponse {
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+	private String id;
+	private String name;
+	private String type;
+	private boolean revoked;
+	private IntegrationResponse[] integrations;
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
+	public String getId() {
+		return id;
 	}
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
+	public String getName() {
+		return name;
 	}
 
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public String getType() {
+		return type;
+	}
+
+	public boolean isRevoked() {
+		return revoked;
+	}
+
+	public IntegrationResponse[] getIntegrations() {
+		return integrations;
 	}
 }

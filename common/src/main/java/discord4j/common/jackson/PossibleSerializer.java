@@ -32,8 +32,9 @@ public class PossibleSerializer extends ReferenceTypeSerializer<Possible<?>> {
 		super(fullType, staticTyping, vts, ser);
 	}
 
-	PossibleSerializer(PossibleSerializer base, BeanProperty property, TypeSerializer vts, JsonSerializer<?> valueSer,
-	                   NameTransformer unwrapper, Object suppressableValue, boolean suppressNulls) {
+	private PossibleSerializer(PossibleSerializer base, BeanProperty property, TypeSerializer vts,
+	                           JsonSerializer<?> valueSer,
+	                           NameTransformer unwrapper, Object suppressableValue, boolean suppressNulls) {
 		super(base, property, vts, valueSer, unwrapper, suppressableValue, suppressNulls);
 	}
 

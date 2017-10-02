@@ -40,23 +40,23 @@ public class Route<T> {
 		this.responseType = responseType;
 	}
 
-	public static <R> Route<R> get(String uri, Class<R> responseType) {
+	public static <T> Route<T> get(String uri, Class<T> responseType) {
 		return new Route<>(HttpMethod.GET, uri, responseType);
 	}
 
-	public static <R> Route<R> post(String uri, Class<R> responseType) {
+	public static <T> Route<T> post(String uri, Class<T> responseType) {
 		return new Route<>(HttpMethod.POST, uri, responseType);
 	}
 
-	public static <R> Route<R> put(String uri, Class<R> responseType) {
+	public static <T> Route<T> put(String uri, Class<T> responseType) {
 		return new Route<>(HttpMethod.PUT, uri, responseType);
 	}
 
-	public static <R> Route<R> patch(String uri, Class<R> responseType) {
+	public static <T> Route<T> patch(String uri, Class<T> responseType) {
 		return new Route<>(HttpMethod.PATCH, uri, responseType);
 	}
 
-	public static <R> Route<R> delete(String uri, Class<R> responseType) {
+	public static <T> Route<T> delete(String uri, Class<T> responseType) {
 		return new Route<>(HttpMethod.DELETE, uri, responseType);
 	}
 

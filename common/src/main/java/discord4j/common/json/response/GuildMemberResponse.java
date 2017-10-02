@@ -14,29 +14,45 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json.response;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+import javax.annotation.Nullable;
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
+public class GuildMemberResponse {
+
+	private UserResponse user;
+	@Nullable
+	private String nick;
+	private String[] roles;
+	@JsonProperty("joined_at")
+	private String joinedAt;
+	private boolean deaf;
+	private boolean mute;
+
+	public UserResponse getUser() {
+		return user;
 	}
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
+	@Nullable
+	public String getNick() {
+		return nick;
 	}
 
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public String[] getRoles() {
+		return roles;
+	}
+
+	public String getJoinedAt() {
+		return joinedAt;
+	}
+
+	public boolean isDeaf() {
+		return deaf;
+	}
+
+	public boolean isMute() {
+		return mute;
 	}
 }

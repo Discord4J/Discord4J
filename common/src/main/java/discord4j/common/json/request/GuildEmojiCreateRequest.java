@@ -14,29 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json.request;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+public class GuildEmojiCreateRequest {
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+	private final String name;
+	private final String image;
+	private final String[] roles;
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
-	}
-
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
-	}
-
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public GuildEmojiCreateRequest(String name, String image, String[] roles) {
+		this.name = name;
+		this.image = image;
+		this.roles = roles;
 	}
 }

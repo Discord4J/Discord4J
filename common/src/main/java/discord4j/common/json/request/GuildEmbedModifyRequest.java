@@ -14,29 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json.request;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.Possible;
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+public class GuildEmbedModifyRequest {
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
-	}
+	private final Possible<Boolean> enabled;
+	@JsonProperty("channel_id")
+	private final Possible<String> channelId;
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
-	}
-
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public GuildEmbedModifyRequest(Possible<Boolean> enabled, Possible<String> channelId) {
+		this.enabled = enabled;
+		this.channelId = channelId;
 	}
 }

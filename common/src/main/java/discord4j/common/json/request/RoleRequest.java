@@ -14,29 +14,25 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json.request;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+import discord4j.common.jackson.Possible;
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+public class RoleRequest {
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
-	}
+	private final Possible<String> name;
+	private final Possible<Integer> permissions;
+	private final Possible<Integer> color;
+	private final Possible<Boolean> hoist;
+	private final Possible<Boolean> mentionable;
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
-	}
-
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public RoleRequest(Possible<String> name, Possible<Integer> permissions,
+	                   Possible<Integer> color, Possible<Boolean> hoist,
+	                   Possible<Boolean> mentionable) {
+		this.name = name;
+		this.permissions = permissions;
+		this.color = color;
+		this.hoist = hoist;
+		this.mentionable = mentionable;
 	}
 }

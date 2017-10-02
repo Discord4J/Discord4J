@@ -35,9 +35,6 @@ public class PossibleSerializers extends Serializers.Base {
 		if (Possible.class.isAssignableFrom(raw)) {
 			return new PossibleSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
 		}
-		if (PossibleOptional.class.isAssignableFrom(raw)) {
-			return new PossibleOptionalSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
-		}
 
 		return null;
 

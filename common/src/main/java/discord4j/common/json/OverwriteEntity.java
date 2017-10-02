@@ -14,29 +14,51 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.jackson;
+package discord4j.common.json;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+public class OverwriteEntity {
 
-/**
- * Jackson Module for the Possible mechanism.
- */
-public class PossibleModule extends Module {
+	private String id;
+	private String type;
+	private int allow;
+	private int deny;
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
+	public OverwriteEntity(String id, String type, int allow, int deny) {
+		this.id = id;
+		this.type = type;
+		this.allow = allow;
+		this.deny = deny;
 	}
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
+	public String getId() {
+		return id;
 	}
 
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public int getAllow() {
+		return allow;
+	}
+
+	public void setAllow(int allow) {
+		this.allow = allow;
+	}
+
+	public int getDeny() {
+		return deny;
+	}
+
+	public void setDeny(int deny) {
+		this.deny = deny;
 	}
 }
