@@ -40,9 +40,9 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	protected final IUser recipient;
 
 	public PrivateChannel(DiscordClientImpl client, IUser recipient, long id) {
-		super(client, recipient.getName(), id, null, null, 0, false,
-				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)),
-				new Cache<>(Cache.IGNORING_PROVIDER.provide(PermissionOverride.class)));
+		super(client, recipient.getName(), id, null, null, 0, false, 0L,
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(sx.blah.discord.handle.obj.PermissionOverride.class)),
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(sx.blah.discord.handle.obj.PermissionOverride.class)));
 		this.recipient = recipient;
 	}
 
@@ -59,12 +59,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public LongMap<PermissionOverride> getUserOverridesLong() {
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public LongMap<PermissionOverride> getRoleOverridesLong() {
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong() {
 		throw new UnsupportedOperationException();
 	}
 

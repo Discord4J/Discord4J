@@ -28,11 +28,11 @@ public class ChannelCreateRequest {
 	public String name;
 
 	/**
-	 * The type of channel, either "text" or "voice".
+	 * The type of channel.
 	 */
-	public String type;
+	public int type;
 
-	public ChannelCreateRequest(String name, String type) {
+	public ChannelCreateRequest(String name, int type) {
 		this.name = name;
 		this.type = type;
 	}

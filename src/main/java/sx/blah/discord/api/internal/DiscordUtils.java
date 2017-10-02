@@ -44,7 +44,6 @@ import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.LongMapCollector;
-import sx.blah.discord.util.MessageTokenizer;
 import sx.blah.discord.util.RequestBuilder;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
@@ -62,7 +61,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -135,6 +133,11 @@ public class DiscordUtils {
 	 * Pattern for Discord's valid streaming URL strings passed to {@link IShard#streaming(String, String)}.
 	 */
 	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://(www\\.)?twitch\\.tv/.+");
+
+	/**
+	 * Pattern for Discord's valid channel names.
+	 */
+	public static final Pattern CHANNEL_NAME_PATTERN = Pattern.compile("^[a-z0-9-_]{2,100}$");
 
 	/**
 	 * Gets a snowflake from a unix timestamp.
@@ -355,6 +358,8 @@ public class DiscordUtils {
 						guild.channels.put(channel);
 					} else if (channelJSON.type == ChannelObject.Type.GUILD_VOICE) {
 						guild.voiceChannels.put((IVoiceChannel) channel);
+					} else if (channelJSON.type == ChannelObject.Type.GUILD_CATEGORY) {
+						guild.categories.put(DiscordUtils.getCategoryFromJSON(shard, guild, channelJSON));
 					}
 				}
 
@@ -538,8 +543,9 @@ public class DiscordUtils {
 				channel = new PrivateChannel(client, recipient, id);
 			}
 		} else if (json.type == ChannelObject.Type.GUILD_TEXT || json.type == ChannelObject.Type.GUILD_VOICE) {
-			Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>> overrides =
+			Pair<Cache<PermissionOverride>, Cache<PermissionOverride>> overrides =
 					getPermissionOverwritesFromJSONs(client, json.permission_overwrites);
+			long categoryID = json.parent_id == null ? 0L : Long.parseUnsignedLong(json.parent_id);
 
 			if (channel != null) {
 				channel.setName(json.name);
@@ -549,6 +555,7 @@ public class DiscordUtils {
 				channel.roleOverrides.clear();
 				channel.userOverrides.putAll(overrides.getLeft());
 				channel.roleOverrides.putAll(overrides.getRight());
+				channel.setCategoryID(categoryID);
 
 				if (json.type == ChannelObject.Type.GUILD_TEXT) {
 					channel.setTopic(json.topic);
@@ -558,11 +565,11 @@ public class DiscordUtils {
 					vc.setBitrate(json.bitrate);
 				}
 			} else if (json.type == ChannelObject.Type.GUILD_TEXT) {
-				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
+				channel = new Channel(client, json.name, id, guild, json.topic, json.position, json.nsfw, categoryID,
 						overrides.getRight(), overrides.getLeft());
 			} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 				channel = new VoiceChannel(client, json.name, id, guild, json.topic, json.position, json.nsfw,
-						json.user_limit, json.bitrate, overrides.getRight(), overrides.getLeft());
+						json.user_limit, json.bitrate, categoryID, overrides.getRight(), overrides.getLeft());
 			}
 		}
 
@@ -575,17 +582,17 @@ public class DiscordUtils {
 	 * @param overwrites The array of json overwrite objects.
 	 * @return A pair representing the overwrites per id; left value = user overrides and right value = role overrides.
 	 */
-	public static Pair<Cache<IChannel.PermissionOverride>, Cache<IChannel.PermissionOverride>>
+	public static Pair<Cache<PermissionOverride>, Cache<PermissionOverride>>
 	getPermissionOverwritesFromJSONs(DiscordClientImpl client, OverwriteObject[] overwrites) {
-		Cache<IChannel.PermissionOverride> userOverrides = new Cache<>(client, IChannel.PermissionOverride.class);
-		Cache<IChannel.PermissionOverride> roleOverrides = new Cache<>(client, IChannel.PermissionOverride.class);
+		Cache<PermissionOverride> userOverrides = new Cache<>(client, PermissionOverride.class);
+		Cache<PermissionOverride> roleOverrides = new Cache<>(client, PermissionOverride.class);
 
 		for (OverwriteObject overrides : overwrites) {
 			if (overrides.type.equalsIgnoreCase("role")) {
-				roleOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+				roleOverrides.put(new PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
 								Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
 			} else if (overrides.type.equalsIgnoreCase("member")) {
-				userOverrides.put(new IChannel.PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
+				userOverrides.put(new PermissionOverride(Permissions.getAllowedPermissionsForNumber(overrides.allow),
 								Permissions.getDeniedPermissionsForNumber(overrides.deny), Long.parseUnsignedLong(overrides.id)));
 			} else {
 				Discord4J.LOGGER.warn(LogMarkers.API, "Unknown permissions overwrite type \"{}\"!", overrides.type);
@@ -818,6 +825,28 @@ public class DiscordUtils {
 		}
 
 		return null;
+	}
+
+	public static ICategory getCategoryFromJSON(IShard shard, IGuild guild, ChannelObject json) {
+		Pair<Cache<PermissionOverride>, Cache<PermissionOverride>> permissionOverwrites =
+				getPermissionOverwritesFromJSONs((DiscordClientImpl) shard.getClient(), json.permission_overwrites);
+
+		Category category = (Category) shard.getCategoryByID(Long.parseUnsignedLong(json.id));
+		if (category != null) {
+			category.setName(json.name);
+			category.setPosition(json.position);
+			category.setNSFW(json.nsfw);
+			category.userOverrides.clear();
+			category.roleOverrides.clear();
+			category.userOverrides.putAll(permissionOverwrites.getLeft());
+			category.roleOverrides.putAll(permissionOverwrites.getRight());
+
+		} else {
+			category = new Category(shard, json.name, Long.parseUnsignedLong(json.id), guild, json.position, json.nsfw,
+					permissionOverwrites.getLeft(), permissionOverwrites.getRight());
+		}
+
+		return category;
 	}
 
 	/**

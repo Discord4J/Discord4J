@@ -615,14 +615,14 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @return The user permissions overrides for the channel.
 	 */
-	LongMap<PermissionOverride> getUserOverridesLong();
+	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong();
 
 	/**
 	 * Gets the permissions overrides for roles. (Key = Role ID)
 	 *
 	 * @return The role permissions overrides for this channel.
 	 */
-	LongMap<PermissionOverride> getRoleOverridesLong();
+	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
 
 	/**
 	 * Gets the permissions a user has in the channel, taking into account user and role overrides.
@@ -764,8 +764,25 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	boolean isDeleted();
 
 	/**
-	 * A permission override for a role or user.
+	 * Changes the category of the channel.
+	 *
+	 * @param category The category of the channel.
 	 */
+	void changeCategory(ICategory category);
+
+	/**
+	 * Gets the category of the channel.
+	 *
+	 * @return The category of the channel, may be null.
+	 */
+	ICategory getCategory();
+
+	/**
+	 * A permission override for a role or user.
+	 *
+	 * @deprecated Use {@link sx.blah.discord.handle.obj.PermissionOverride} instead.
+	 */
+	@Deprecated
 	class PermissionOverride implements IIDLinkedObject {
 
 		/**

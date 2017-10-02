@@ -337,4 +337,17 @@ public class ShardImpl implements IShard {
 		privateChannels.put(channel);
 		return channel;
 	}
+
+	@Override
+	public List<ICategory> getCategories() {
+		return getGuilds().stream()
+				.map(IGuild::getCategories)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public ICategory getCategoryByID(long categoryID) {
+		return guildCache.findResult((guildId, guild) -> guild.getCategoryByID(categoryID));
+	}
 }

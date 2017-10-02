@@ -26,6 +26,9 @@ import sx.blah.discord.api.internal.json.requests.GuildMembersRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.api.internal.json.responses.voice.VoiceUpdateResponse;
 import sx.blah.discord.handle.impl.events.guild.*;
+import sx.blah.discord.handle.impl.events.guild.category.CategoryCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.category.CategoryDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.category.CategoryUpdateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.ChannelUpdateEvent;
@@ -540,6 +543,10 @@ class DispatchHandler {
 				} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 					guild.voiceChannels.put((IVoiceChannel) channel);
 					client.dispatcher.dispatch(new VoiceChannelCreateEvent((IVoiceChannel) channel));
+				} else if (json.type == ChannelObject.Type.GUILD_CATEGORY) {
+					ICategory category = DiscordUtils.getCategoryFromJSON(shard, guild, json);
+					guild.categories.put(category);
+					client.dispatcher.dispatch(new CategoryCreateEvent(category));
 				}
 			}
 		}
@@ -561,6 +568,12 @@ class DispatchHandler {
 				((Guild) channel.getGuild()).voiceChannels.remove(channel);
 				client.dispatcher.dispatch(new VoiceChannelDeleteEvent(channel));
 			}
+		} else if (json.type == ChannelObject.Type.GUILD_CATEGORY) {
+			ICategory category = client.getCategoryByID(Long.parseUnsignedLong(json.id));
+			if (category != null) {
+				((Guild) category.getGuild()).categories.remove(category);
+				client.dispatcher.dispatch(new CategoryDeleteEvent(category));
+			}
 		}
 	}
 
@@ -580,14 +593,31 @@ class DispatchHandler {
 				IChannel oldChannel = toUpdate.copy();
 				toUpdate = (Channel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
 				toUpdate.loadWebhooks();
-				client.dispatcher.dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+
+				if (!Objects.equals(oldChannel.getCategory(), toUpdate.getCategory())) {
+					client.dispatcher.dispatch(new ChannelCategoryUpdateEvent(oldChannel, toUpdate, oldChannel.getCategory(), toUpdate.getCategory()));
+				} else {
+					client.dispatcher.dispatch(new ChannelUpdateEvent(oldChannel, toUpdate));
+				}
 			}
 		} else if (json.type == ChannelObject.Type.GUILD_VOICE) {
 			IVoiceChannel toUpdate = shard.getVoiceChannelByID(Long.parseUnsignedLong(json.id));
 			if (toUpdate != null) {
 				IVoiceChannel oldChannel = toUpdate.copy();
 				toUpdate = (IVoiceChannel) DiscordUtils.getChannelFromJSON(shard, toUpdate.getGuild(), json);
-				client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
+
+				if (!Objects.equals(oldChannel.getCategory(), toUpdate.getCategory())) {
+					client.dispatcher.dispatch(new ChannelCategoryUpdateEvent(oldChannel, toUpdate, oldChannel.getCategory(), toUpdate.getCategory()));
+				} else {
+					client.dispatcher.dispatch(new VoiceChannelUpdateEvent(oldChannel, toUpdate));
+				}
+			}
+		} else if (json.type == ChannelObject.Type.GUILD_CATEGORY) {
+			ICategory toUpdate = shard.getCategoryByID(Long.parseUnsignedLong(json.id));
+			if (toUpdate != null) {
+				ICategory oldCategory = toUpdate.copy();
+				toUpdate = DiscordUtils.getCategoryFromJSON(shard, toUpdate.getGuild(), json);
+				client.dispatcher.dispatch(new CategoryUpdateEvent(oldCategory, toUpdate));
 			}
 		}
 	}

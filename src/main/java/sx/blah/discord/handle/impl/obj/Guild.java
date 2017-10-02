@@ -75,6 +75,8 @@ public class Guild implements IGuild {
 	 */
 	public final Cache<TimeStampHolder> joinTimes;
 
+	public final Cache<ICategory> categories;
+
 	/**
 	 * The name of the guild.
 	 */
@@ -159,12 +161,12 @@ public class Guild implements IGuild {
 		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification,
 				new Cache<>((DiscordClientImpl) shard.getClient(), IRole.class), new Cache<>((DiscordClientImpl) shard.getClient(), IChannel.class),
 				new Cache<>((DiscordClientImpl) shard.getClient(), IVoiceChannel.class), new Cache<>((DiscordClientImpl) shard.getClient(), IUser.class),
-				new Cache<>((DiscordClientImpl) shard.getClient(), TimeStampHolder.class));
+				new Cache<>((DiscordClientImpl) shard.getClient(), TimeStampHolder.class), new Cache<>((DiscordClientImpl) shard.getClient(), ICategory.class));
 	}
 
 	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout,
 				 String region, int verification, Cache<IRole> roles, Cache<IChannel> channels,
-				 Cache<IVoiceChannel> voiceChannels, Cache<IUser> users, Cache<TimeStampHolder> joinTimes) {
+				 Cache<IVoiceChannel> voiceChannels, Cache<IUser> users, Cache<TimeStampHolder> joinTimes, Cache<ICategory> categories) {
 		this.shard = shard;
 		this.client = shard.getClient();
 		this.name = name;
@@ -183,6 +185,7 @@ public class Guild implements IGuild {
 		this.verification = VerificationLevel.get(verification);
 		this.audioManager = new AudioManager(this);
 		this.emojis = new Cache<>((DiscordClientImpl) client, IEmoji.class);
+		this.categories = categories;
 	}
 
 	@Override
@@ -625,7 +628,7 @@ public class Guild implements IGuild {
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS+getStringID()+"/channels",
-				new ChannelCreateRequest(name, "text"),
+				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_TEXT),
 				ChannelObject.class);
 
 		IChannel channel = DiscordUtils.getChannelFromJSON(getShard(), this, response);
@@ -644,7 +647,7 @@ public class Guild implements IGuild {
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS+getStringID()+"/channels",
-				new ChannelCreateRequest(name, "voice"),
+				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_VOICE),
 				ChannelObject.class);
 
 		IVoiceChannel channel = (IVoiceChannel) DiscordUtils.getChannelFromJSON(getShard(), this, response);
@@ -813,7 +816,7 @@ public class Guild implements IGuild {
 	@Override
 	public IGuild copy() {
 		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, verification.ordinal(),
-				roles.copy(), channels.copy(), voiceChannels.copy(), users.copy(), joinTimes.copy());
+				roles.copy(), channels.copy(), voiceChannels.copy(), users.copy(), joinTimes.copy(), categories.copy());
 	}
 
 	@Override
@@ -942,6 +945,52 @@ public class Guild implements IGuild {
 	@Override
 	public AuditLog getAuditLog(IUser user, ActionType actionType) {
 		return getAuditLog(user, actionType, (System.currentTimeMillis() - DiscordUtils.DISCORD_EPOCH) << 22);
+	}
+
+	@Override
+	public ICategory createCategory(String name) {
+		shard.checkReady("create category");
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNELS);
+
+		if (name == null || name.length() < 2 || name.length() > 100)
+			throw new DiscordException("Category name can only be between 2 and 100 characters!");
+
+		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS+getStringID()+"/channels",
+				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_CATEGORY),
+				ChannelObject.class);
+
+		ICategory category = DiscordUtils.getCategoryFromJSON(getShard(), this, response);
+		categories.put(category);
+
+		return category;
+	}
+
+	@Override
+	public List<ICategory> getCategories() {
+		LinkedList<ICategory> list = new LinkedList<>(categories.values());
+		list.sort((c1, c2) -> {
+			int originalPos1 = ((Category) c1).position;
+			int originalPos2 = ((Category) c2).position;
+			if (originalPos1 == originalPos2) {
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
+			} else {
+				return originalPos1 - originalPos2;
+			}
+		});
+		return list;
+	}
+
+	@Override
+	public ICategory getCategoryByID(long id) {
+		return categories.get(id);
+	}
+
+	@Override
+	public List<ICategory> getCategoriesByName(String name) {
+		return getCategories().stream()
+				.filter(category -> category.getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	private AuditLog getAuditLog(IUser user, ActionType actionType, long before) {

@@ -606,4 +606,35 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The audit log with entries with the given responsible user and the given action type.
 	 */
 	AuditLog getAuditLog(IUser user, ActionType actionType);
+
+	/**
+	 * Creates a new category.
+	 *
+	 * @param name The name of the new category. MUST be between 2-100 characters long.
+	 * @return The new category.
+	 */
+	ICategory createCategory(String name);
+
+	/**
+	 * Gets the guild's categories sorted by their effective positions.
+	 *
+	 * @return The guild's categories sorted by their effective positions.
+	 */
+	List<ICategory> getCategories();
+
+	/**
+	 * Gets a category by its unique snowflake ID from the guild's category cache.
+	 *
+	 * @param id The ID of the desired category.
+	 * @return The category with the provided ID (or null if one was not found).
+	 */
+	ICategory getCategoryByID(long id);
+
+	/**
+	 * Gets a list of categories by their name.
+	 *
+	 * @param name The case-sensitive name of the desired categories.
+	 * @return A list of categories with the provided name.
+	 */
+	List<ICategory> getCategoriesByName(String name);
 }
