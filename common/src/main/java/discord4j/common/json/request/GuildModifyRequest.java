@@ -18,7 +18,9 @@ package discord4j.common.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleJson;
 
+@PossibleJson
 public class GuildModifyRequest {
 
 	private final Possible<String> name;

@@ -18,9 +18,11 @@ package discord4j.common.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleJson;
 
 import javax.annotation.Nullable;
 
+@PossibleJson
 public class GuildMemberModifyRequest {
 
 	@Nullable

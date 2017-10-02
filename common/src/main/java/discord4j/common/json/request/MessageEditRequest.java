@@ -17,9 +17,11 @@
 package discord4j.common.json.request;
 
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleJson;
 
 import javax.annotation.Nullable;
 
+@PossibleJson
 public class MessageEditRequest {
 
 	@Nullable
