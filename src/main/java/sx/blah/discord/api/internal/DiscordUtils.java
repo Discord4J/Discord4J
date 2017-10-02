@@ -305,7 +305,7 @@ public class DiscordUtils {
 			guild.setOwnerID(Long.parseUnsignedLong(json.owner_id));
 			guild.setAFKChannel(json.afk_channel_id == null ? 0 : Long.parseUnsignedLong(json.afk_channel_id));
 			guild.setAfkTimeout(json.afk_timeout);
-			guild.setRegion(json.region);
+			guild.setRegionID(json.region);
 			guild.setVerificationLevel(json.verification_level);
 			guild.setTotalMemberCount(json.member_count);
 
@@ -856,37 +856,6 @@ public class DiscordUtils {
 				toPCM.getSampleSizeInBits(), toPCM.getChannels(), toPCM.getFrameSize(), toPCM.getFrameRate(), true);
 
 		return AudioSystem.getAudioInputStream(audioFormat, pcmStream);
-	}
-
-	/**
-	 * Retrieves all standard regions (non-VIP regions).
-	 *
-	 * @param requests Used to send a request to Discord to get standard regions.
-	 * @return A list of standard, non-VIP regions.
-	 */
-	public static List<IRegion> getStandardRegions(Requests requests) {
-		VoiceRegionObject[] regions = requests.GET.makeRequest(
-				DiscordEndpoints.VOICE + "regions", VoiceRegionObject[].class);
-
-		return Arrays.stream(regions)
-				.map(DiscordUtils::getRegionFromJSON)
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Retrieves all regions available to the guild, including VIP regions.
-	 *
-	 * @param requests Used to send a request to get available regions.
-	 * @param guild The guild to get the regions available to.
-	 * @return All regions available to the guild, including VIP regions.
-	 */
-	public static List<IRegion> getRegionsFromGuild(Requests requests, IGuild guild) {
-		VoiceRegionObject[] regions = requests.GET.makeRequest(
-				DiscordEndpoints.GUILDS + guild.getStringID() + "/regions", VoiceRegionObject[].class);
-
-		return Arrays.stream(regions)
-				.map(DiscordUtils::getRegionFromJSON)
-				.collect(Collectors.toList());
 	}
 
 	/**

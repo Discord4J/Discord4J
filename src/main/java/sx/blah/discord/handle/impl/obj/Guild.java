@@ -48,8 +48,6 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -57,11 +55,6 @@ import java.util.stream.Collectors;
  * The default implementation of {@link IGuild}.
  */
 public class Guild implements IGuild {
-
-	/**
-	 * This lock is utilized to prevent spam calls to {@link #setRegion(String)}.
-	 */
-	private final static Lock REGION_LOCK = new ReentrantLock();
 
 	/**
 	 * The guild's text channels.
@@ -187,11 +180,10 @@ public class Guild implements IGuild {
 		this.roles = roles;
 		this.afkChannel = afkChannel;
 		this.afkTimeout = afkTimeout;
+		this.regionID = region;
 		this.verification = VerificationLevel.get(verification);
 		this.audioManager = new AudioManager(this);
 		this.emojis = new Cache<>((DiscordClientImpl) client, IEmoji.class);
-
-		setRegion(region); // this.regionID = region
 	}
 
 	@Override
@@ -664,37 +656,25 @@ public class Guild implements IGuild {
 
 	@Override
 	public IRegion getRegion() {
-		return client.getRegionByID(regionID);
+		return ((DiscordClientImpl) client).getGuildRegion(this);
 	}
 
 	/**
-	 * Sets thee CACHED voice region of the guild.
+	 * Gets the CACHED voice region of the guild.
+	 *
+	 * @return The voice region.
+	 */
+	public String getRegionID() {
+		return regionID;
+	}
+
+	/**
+	 * Sets the CACHED voice region of the guild.
 	 *
 	 * @param regionID The voice region.
 	 */
-	public void setRegion(String regionID) {
-		DiscordClientImpl clientImpl = (DiscordClientImpl) client;
-		REGION_LOCK.lock();
-		try {
-			if (clientImpl.REGIONS.isEmpty()) {
-				RequestBuffer.request(() ->
-						(List<IRegion>) DiscordUtils.getStandardRegions(clientImpl.REQUESTS))
-						.get().stream() // get() is called to so a request can populate the cache
-						.forEach(r -> clientImpl.REGIONS.put(r.getID(), r));
-			}
-
-			// The above method ensures this calls only for VIP
-			if (!clientImpl.REGIONS.containsKey(regionID)) {
-				RequestBuffer.request(() ->
-						(List<IRegion>) DiscordUtils.getRegionsFromGuild(clientImpl.REQUESTS, this))
-						.get().stream()
-						.forEach(r -> clientImpl.REGIONS.putIfAbsent(r.getID(), r));
-			}
-
-		} finally {
-			REGION_LOCK.unlock();
-			this.regionID = regionID;
-		}
+	public void setRegionID(String regionID) {
+		this.regionID = regionID;
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
+import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
 import sx.blah.discord.api.internal.json.requests.AccountInfoChangeRequest;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.voice.VoiceStateUpdateRequest;
@@ -87,7 +88,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * The cache of the available voice regions.
 	 */
-	public final Map<String, IRegion> REGIONS = new ConcurrentHashMap<>();
+	private final Map<String, IRegion> regions = new ConcurrentHashMap<>();
 
 	/**
 	 * The maximum number of heartbeats that Discord can miss before a reconnect begins.
@@ -211,14 +212,64 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return ourUser;
 	}
 
+	private synchronized void loadStandardRegions() {
+		if (regions.isEmpty()) { // Guarantee so standard regions are first
+			VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
+					(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
+							DiscordEndpoints.VOICE + "regions", VoiceRegionObject[].class)).get();
+
+			Arrays.stream(regionObjects)
+					.map(DiscordUtils::getRegionFromJSON)
+					.forEach(r -> regions.putIfAbsent(r.getID(), r));
+		}
+	}
+
+	public synchronized IRegion getGuildRegion(Guild guild) {
+		loadStandardRegions();
+		IRegion region = regions.get(guild.getRegionID());
+
+		if (region == null) { // New region types means Discord has updated
+			VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
+					(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
+							DiscordEndpoints.GUILDS + guild.getStringID() + "/regions", VoiceRegionObject[].class)).get();
+
+			Arrays.stream(regionObjects)
+					.map(DiscordUtils::getRegionFromJSON)
+					.forEach(r -> regions.putIfAbsent(r.getID(), r));
+
+			region = regions.get(guild.getRegionID());
+		}
+
+		return region;
+	}
+
+	private void loadAllRegions() {
+		loadStandardRegions();
+
+		shards.stream()
+				.map(IShard::getGuilds)
+				.flatMap(List::stream)
+				.map(g -> (Guild) g)
+				.forEach(this::getGuildRegion);
+	}
+
 	@Override
 	public List<IRegion> getRegions() {
-		return new ArrayList<>(REGIONS.values());
+		loadAllRegions();
+		return new ArrayList<>(regions.values());
 	}
 
 	@Override
 	public IRegion getRegionByID(String regionID) {
-		return REGIONS.get(regionID);
+		loadStandardRegions();
+		IRegion region = regions.get(regionID);
+
+		if (region == null) {
+			loadAllRegions();
+			region = regions.get(regionID);
+		}
+
+		return region;
 	}
 
 	private ApplicationInfoResponse getApplicationInfo() {
