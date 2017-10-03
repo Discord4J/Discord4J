@@ -18,8 +18,13 @@ package discord4j.rest.http;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.pojo.MessagePojo;
+import discord4j.common.jackson.PossibleModule;
+import discord4j.common.json.request.MessageCreateRequest;
+import discord4j.common.json.response.MessageResponse;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -35,6 +40,13 @@ import java.util.concurrent.TimeUnit;
 
 public class RouterTest {
 
+	private ObjectMapper getMapper() {
+		return new ObjectMapper()
+				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+				.registerModule(new PossibleModule());
+	}
+
 	@Before
 	public void disableSomeLogs() {
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -47,7 +59,7 @@ public class RouterTest {
 		String token = System.getenv("token");
 		String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = getMapper();
 
 		SimpleHttpClient httpClient = SimpleHttpClient.builder()
 				.baseUrl("https://discordapp.com/api/v6")
@@ -59,8 +71,10 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
+		MessageCreateRequest body = new MessageCreateRequest("hello at" + Instant.now(), null, false, null);
+
 		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hello at " + Instant.now()))
+				.body(body)
 				.exchange(router)
 				.subscribe(response -> System.out.println("complete response"));
 
@@ -73,7 +87,7 @@ public class RouterTest {
 		String token = System.getenv("token");
 		String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = getMapper();
 
 		SimpleHttpClient httpClient = SimpleHttpClient.builder()
 				.baseUrl("https://discordapp.com/api/v6")
@@ -87,10 +101,13 @@ public class RouterTest {
 
 		for (int i = 0; i < 10; i++) {
 			final int a = i;
+
+			MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
+
 			Routes.MESSAGE_CREATE.newRequest(channelId)
-					.body(new MessagePojo("hi " + a))
+					.body(body)
 					.exchange(router)
-					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
+					.subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
 		}
 
 		TimeUnit.SECONDS.sleep(10);
@@ -101,7 +118,7 @@ public class RouterTest {
 		String token = System.getenv("token");
 		String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = getMapper();
 
 		SimpleHttpClient httpClient = SimpleHttpClient.builder()
 				.baseUrl("https://discordapp.com/api/v6")
@@ -113,8 +130,10 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
-		Mono<MessagePojo> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hi"))
+		MessageCreateRequest body = new MessageCreateRequest("hi", null, false, null);
+
+		Mono<MessageResponse> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
+				.body(body)
 				.exchange(router);
 
 		mono.subscribe();
@@ -128,7 +147,7 @@ public class RouterTest {
 		String token = System.getenv("token");
 		String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = getMapper();
 
 		SimpleHttpClient httpClient = SimpleHttpClient.builder()
 				.baseUrl("https://discordapp.com/api/v6")
@@ -143,13 +162,16 @@ public class RouterTest {
 
 		for (int i = 0; i < 6; i++) {
 			final int a = i;
+
+			MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
+
 			Routes.MESSAGE_CREATE.newRequest(channelId)
-					.body(new MessagePojo("hi " + a))
+					.body(body)
 					.exchange(router)
 					.publishOn(thread)
 					.cancelOn(thread)
 					.subscribeOn(thread)
-					.subscribe(response -> System.out.println("response " + a + ": " + response.content));
+					.subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
 		}
 
 		TimeUnit.SECONDS.sleep(10);
@@ -160,7 +182,7 @@ public class RouterTest {
 		String token = System.getenv("token");
 		String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = getMapper();
 
 		SimpleHttpClient httpClient = SimpleHttpClient.builder()
 				.baseUrl("https://discordapp.com/api/v6")
@@ -172,13 +194,17 @@ public class RouterTest {
 
 		Router router = new Router(httpClient);
 
+		MessageCreateRequest body0 = new MessageCreateRequest("hi 0 at" + Instant.now(), null, false, null);
+
 		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hi 0 at " + Instant.now()))
+				.body(body0)
 				.exchange(router)
 				.block();
 
+		MessageCreateRequest body1 = new MessageCreateRequest("hi 1 at" + Instant.now(), null, false, null);
+
 		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(new MessagePojo("hi 1 at " + Instant.now()))
+				.body(body1)
 				.exchange(router)
 				.block();
 	}
