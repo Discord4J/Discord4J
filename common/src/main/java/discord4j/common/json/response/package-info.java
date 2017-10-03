@@ -17,4 +17,4 @@
 @NonNullApi
 package discord4j.common.json.response;
 
-import reactor.util.lang.NonNullApi;
+import reactor.util.annotation.NonNullApi;
