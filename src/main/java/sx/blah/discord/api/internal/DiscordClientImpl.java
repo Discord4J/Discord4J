@@ -227,8 +227,8 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	public IRegion getGuildRegion(Guild guild) {
+		loadStandardRegions();
 		synchronized (regions) {
-			loadStandardRegions();
 			IRegion region = regions.get(guild.getRegionID());
 
 			if (region == null) { // New region types means Discord has updated
@@ -265,6 +265,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IRegion getRegionByID(String regionID) {
+		loadStandardRegions();
 		IRegion region = regions.get(regionID);
 
 		if (region == null) {
