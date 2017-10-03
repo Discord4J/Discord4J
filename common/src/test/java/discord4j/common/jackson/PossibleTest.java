@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.json.Pojo;
 import org.junit.Test;
 
@@ -49,6 +48,6 @@ public class PossibleTest {
 		return new ObjectMapper()
 				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModules(new Jdk8Module(), new PossibleModule());
+				.registerModule(new PossibleModule());
 	}
 }

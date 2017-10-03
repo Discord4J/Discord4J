@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.request.MessageCreateRequest;
 import discord4j.common.json.response.MessageResponse;
@@ -38,7 +37,6 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RouterTest {
 
@@ -46,7 +44,7 @@ public class RouterTest {
 		return new ObjectMapper()
 				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModules(new Jdk8Module(), new PossibleModule());
+				.registerModule(new PossibleModule());
 	}
 
 	@Before

@@ -1,7 +1,6 @@
 dependencies {
     compile "io.projectreactor.ipc:reactor-netty:$reactor_netty_version"
     compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
     compile "org.slf4j:slf4j-api:$slf4j_version"
     compile "com.google.code.findbugs:jsr305:$jsr305_version"
 
