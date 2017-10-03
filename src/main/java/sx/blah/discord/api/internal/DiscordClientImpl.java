@@ -40,6 +40,7 @@ import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.ICacheDelegateProvider;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +88,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	/**
 	 * The cache of the available voice regions.
 	 */
-	private final List<IRegion> REGIONS = new CopyOnWriteArrayList<>();
+	private final Map<String, IRegion> regions = new ConcurrentHashMap<>();
 
 	/**
 	 * The maximum number of heartbeats that Discord can miss before a reconnect begins.
@@ -211,30 +212,68 @@ public final class DiscordClientImpl implements IDiscordClient {
 		return ourUser;
 	}
 
+	private void loadStandardRegions() {
+		synchronized (regions) {
+			if (regions.isEmpty()) { // Guarantee so standard regions are first
+				VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
+						(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
+								DiscordEndpoints.VOICE + "regions", VoiceRegionObject[].class)).get();
+
+				Arrays.stream(regionObjects)
+						.map(DiscordUtils::getRegionFromJSON)
+						.forEach(r -> regions.putIfAbsent(r.getID(), r));
+			}
+		}
+	}
+
+	public IRegion getGuildRegion(Guild guild) {
+		loadStandardRegions();
+		synchronized (regions) {
+			IRegion region = regions.get(guild.getRegionID());
+
+			if (region == null) { // New region types means Discord has updated
+				VoiceRegionObject[] regionObjects = RequestBuffer.request(() ->
+						(VoiceRegionObject[]) REQUESTS.GET.makeRequest(
+								DiscordEndpoints.GUILDS + guild.getStringID() + "/regions", VoiceRegionObject[].class)).get();
+
+				Arrays.stream(regionObjects)
+						.map(DiscordUtils::getRegionFromJSON)
+						.forEach(r -> regions.putIfAbsent(r.getID(), r));
+
+				region = regions.get(guild.getRegionID());
+			}
+
+			return region;
+		}
+	}
+
+	private void loadAllRegions() {
+		loadStandardRegions();
+
+		shards.stream()
+				.map(IShard::getGuilds)
+				.flatMap(List::stream)
+				.map(g -> (Guild) g)
+				.forEach(this::getGuildRegion);
+	}
+
 	@Override
 	public List<IRegion> getRegions() {
-		if (REGIONS.isEmpty()) {
-			VoiceRegionObject[] regions = REQUESTS.GET.makeRequest(
-					DiscordEndpoints.VOICE+"regions", VoiceRegionObject[].class);
-
-			Arrays.stream(regions)
-					.map(DiscordUtils::getRegionFromJSON)
-					.forEach(REGIONS::add);
-		}
-
-		return REGIONS;
+		loadAllRegions();
+		return new ArrayList<>(regions.values());
 	}
 
 	@Override
 	public IRegion getRegionByID(String regionID) {
-		try {
-			return getRegions().stream()
-					.filter(r -> r.getID().equals(regionID))
-					.findAny().orElse(null);
-		} catch (RateLimitException | DiscordException e) {
-			Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
+		loadStandardRegions();
+		IRegion region = regions.get(regionID);
+
+		if (region == null) {
+			loadAllRegions();
+			region = regions.get(regionID);
 		}
-		return null;
+
+		return region;
 	}
 
 	private ApplicationInfoResponse getApplicationInfo() {

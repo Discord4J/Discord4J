@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
  * The default implementation of {@link IGuild}.
  */
 public class Guild implements IGuild {
+
 	/**
 	 * The guild's text channels.
 	 */
@@ -658,15 +659,24 @@ public class Guild implements IGuild {
 
 	@Override
 	public IRegion getRegion() {
-		return client.getRegionByID(regionID);
+		return ((DiscordClientImpl) client).getGuildRegion(this);
 	}
 
 	/**
-	 * Sets thee CACHED voice region of the guild.
+	 * Gets the CACHED voice region of the guild.
+	 *
+	 * @return The voice region.
+	 */
+	public String getRegionID() {
+		return regionID;
+	}
+
+	/**
+	 * Sets the CACHED voice region of the guild.
 	 *
 	 * @param regionID The voice region.
 	 */
-	public void setRegion(String regionID) {
+	public void setRegionID(String regionID) {
 		this.regionID = regionID;
 	}
 

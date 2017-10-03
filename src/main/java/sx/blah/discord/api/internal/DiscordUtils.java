@@ -308,7 +308,7 @@ public class DiscordUtils {
 			guild.setOwnerID(Long.parseUnsignedLong(json.owner_id));
 			guild.setAFKChannel(json.afk_channel_id == null ? 0 : Long.parseUnsignedLong(json.afk_channel_id));
 			guild.setAfkTimeout(json.afk_timeout);
-			guild.setRegion(json.region);
+			guild.setRegionID(json.region);
 			guild.setVerificationLevel(json.verification_level);
 			guild.setTotalMemberCount(json.member_count);
 
