@@ -115,14 +115,14 @@ public interface ICategory extends IDiscordObject<ICategory> {
 	 *
 	 * @return The user permissions overrides for the category.
 	 */
-	LongMap<PermissionOverride> getUserOverridesLong();
+	LongMap<PermissionOverride> getUserOverrides();
 
 	/**
 	 * Gets the permissions overrides for roles. (Key = Role ID)
 	 *
 	 * @return The role permissions overrides for this category.
 	 */
-	LongMap<PermissionOverride> getRoleOverridesLong();
+	LongMap<PermissionOverride> getRoleOverrides();
 
 	/**
 	 * Removes a user's permissions override.

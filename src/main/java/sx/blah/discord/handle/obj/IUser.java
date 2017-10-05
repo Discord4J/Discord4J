@@ -132,8 +132,17 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * Gets the user's voice states for every guild. (Key = Guild ID).
 	 *
 	 * @return The user's voice states for every guild.
+	 * @deprecated Use {{@link #getVoiceStates()}} instead.
 	 */
+	@Deprecated
 	LongMap<IVoiceState> getVoiceStatesLong();
+
+	/**
+	 * Gets the user's voice states for every guild. (Key = Guild ID).
+	 *
+	 * @return The user's voice states for every guild.
+	 */
+	LongMap<IVoiceState> getVoiceStates();
 
 	/**
 	 * Moves the user from one voice channel to another.

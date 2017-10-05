@@ -614,15 +614,33 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Gets the permissions overrides for users. (Key = User ID)
 	 *
 	 * @return The user permissions overrides for the channel.
+	 * @deprecated Use {@link #getUserOverrides()} instead.
 	 */
+	@Deprecated
 	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong();
+
+	/**
+	 * Gets the permissions overrides for users. (Key = User ID)
+	 *
+	 * @return The user permissions overrides for the channel.
+	 */
+	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverrides();
+
+	/**
+	 * Gets the permissions overrides for roles. (Key = Role ID)
+	 *
+	 * @return The role permissions overrides for this channel.
+	 * @deprecated Use {{@link #getRoleOverrides()}} instead.
+	 */
+	@Deprecated
+	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
 
 	/**
 	 * Gets the permissions overrides for roles. (Key = Role ID)
 	 *
 	 * @return The role permissions overrides for this channel.
 	 */
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
+	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverrides();
 
 	/**
 	 * Gets the permissions a user has in the channel, taking into account user and role overrides.

@@ -169,12 +169,12 @@ public class Category implements ICategory {
 	}
 
 	@Override
-	public LongMap<PermissionOverride> getUserOverridesLong() {
+	public LongMap<PermissionOverride> getUserOverrides() {
 		return userOverrides.mapCopy();
 	}
 
 	@Override
-	public LongMap<PermissionOverride> getRoleOverridesLong() {
+	public LongMap<PermissionOverride> getRoleOverrides() {
 		return roleOverrides.mapCopy();
 	}
 

@@ -690,11 +690,21 @@ public class Channel implements IChannel {
 
 	@Override
 	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong() {
+		return getUserOverrides();
+	}
+
+	@Override
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverrides() {
 		return userOverrides.mapCopy();
 	}
 
 	@Override
 	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong() {
+		return getRoleOverrides();
+	}
+
+	@Override
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverrides() {
 		return roleOverrides.mapCopy();
 	}
 
