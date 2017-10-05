@@ -178,4 +178,12 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @param role The role to remove.
 	 */
 	void removeRole(IRole role);
+
+	/**
+	 * Gets whether the user has a role.
+	 *
+	 * @param role The role to validate.
+	 * @return True if the user has the role, false otherwise.
+	 */
+	boolean hasRole(IRole role);
 }

@@ -311,6 +311,11 @@ public class User implements IUser {
 	}
 
 	@Override
+	public boolean hasRole(IRole role) {
+		return getRolesForGuild(role.getGuild()).contains(role);
+	}
+
+	@Override
 	public IUser copy() {
 		User newUser = new User(shard, name, id, discriminator, avatar, presence, isBot);
 		newUser.voiceStates.putAll(voiceStates);
