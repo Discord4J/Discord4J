@@ -39,11 +39,18 @@ public interface ICategory extends IDiscordObject<ICategory> {
 	boolean isDeleted();
 
 	/**
-	 * Gets the category's channels.
+	 * Gets the category's text channels.
 	 *
-	 * @return The category's channels.
+	 * @return The category's text channels.
 	 */
 	List<IChannel> getChannels();
+
+	/**
+	 * Gets the category's voice channels.
+	 *
+	 * @return The category's voice channels.
+	 */
+	List<IVoiceChannel> getVoiceChannels();
 
 	/**
 	 * Gets the parent guild of the category.

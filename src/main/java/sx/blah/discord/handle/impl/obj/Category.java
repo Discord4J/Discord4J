@@ -164,6 +164,13 @@ public class Category implements ICategory {
 	}
 
 	@Override
+	public List<IVoiceChannel> getVoiceChannels() {
+		return getGuild().getVoiceChannels().stream()
+				.filter(channel -> equals(channel.getCategory()))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IUser user) {
 		return PermissionUtils.getModifiedPermissions(user, guild, userOverrides, roleOverrides);
 	}
