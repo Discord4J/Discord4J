@@ -18,10 +18,10 @@ package discord4j.gateway;
 
 import discord4j.gateway.client.WebSocketClient;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ReplayProcessor;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,7 +31,7 @@ import static org.junit.Assert.assertEquals;
 
 public class WebSocketTest {
 
-	private static final Logger log = LoggerFactory.getLogger(WebSocketTest.class);
+	private static final Logger log = Loggers.getLogger(WebSocketTest.class);
 
 	@Test
 	public void connectTest() throws URISyntaxException, InterruptedException {

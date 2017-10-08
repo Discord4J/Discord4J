@@ -23,11 +23,11 @@ import discord4j.gateway.buffer.NettyDataBufferFactory;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  */
 public class WebSocketClient {
 
-	private static final Logger log = LoggerFactory.getLogger(WebSocketClient.class);
+	private static final Logger log = Loggers.getLogger(WebSocketClient.class);
 
 	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
