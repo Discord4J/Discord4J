@@ -1,3 +1,8 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '2.0.1'
+    id 'java'
+}
+
 ext {
     // Project constants
     github_org = 'Discord4J'
@@ -15,34 +20,6 @@ ext {
     jsr305_version = '3.0.2'
     junit_version = '4.12'
     logback_version = '1.2.3'
-
-    project_pom = {
-        name project_name
-        description project_description
-        url "https://github.com/${github_org}/${project_name}"
-        developers {
-            developer {
-                id 'austinv11'
-                name 'austinv11'
-            }
-        }
-        licenses {
-            license {
-                name 'LGPLv3'
-                url 'https://opensource.org/licenses/LGPL-3.0'
-                distribution 'repo'
-            }
-        }
-        scm {
-            url "https://github.com/${github_org}/${project_name}.git"
-            connection "scm:git:https://github.com/${github_org}/${project_name}.git"
-            developerConnection "scm:git:git@github.com:${github_org}/${project_name}.git"
-        }
-        organization {
-            name github_org
-            url "https://github.com/${github_org}"
-        }
-    }
 
     /** Function returns a new manifest that can be customized per module */
     defaultManifest = {
@@ -74,9 +51,6 @@ allprojects {
     sourceCompatibility = project_jdk
     targetCompatibility = project_jdk
 
-    apply plugin: 'maven'
-    apply plugin: 'signing'
-
     repositories {
         jcenter()
         mavenCentral()
@@ -104,28 +78,10 @@ allprojects {
         archives sourcesJar
     }
 
-    signing {
-        required { !version.endsWith('SNAPSHOT') && gradle.taskGraph.hasTask("uploadArchives") }
-        sign configurations.archives
-    }
-
-    uploadArchives {
-        enabled false
-
-        repositories.mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: defaultBlank({ deployUrl })) {
-                // If these are not defined assemble needlessly fails for unrelated tasks, hence, defaultBlank.
-                authentication(userName: defaultBlank({ deployUser }), password: defaultBlank({ deployPass }))
-            }
-
-            pom.project project_pom
-        }
-    }
+    shadowJar.dependsOn(assemble)
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.2'
-    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.2-all.zip'
+    gradleVersion = '4.2.1'
+    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.2.1-all.zip'
 }
