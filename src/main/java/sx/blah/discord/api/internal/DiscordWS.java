@@ -43,7 +43,6 @@ import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
-import java.util.zip.Inflater;
 
 public class DiscordWS extends WebSocketAdapter {
 
@@ -59,7 +58,6 @@ public class DiscordWS extends WebSocketAdapter {
 
 	private DispatchHandler dispatchHandler;
 	HeartbeatHandler heartbeatHandler;
-	private Inflater inflater;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -193,7 +191,6 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
 			wsClient.start();
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
-			inflater = new Inflater();
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: ", e);
 		} finally {
