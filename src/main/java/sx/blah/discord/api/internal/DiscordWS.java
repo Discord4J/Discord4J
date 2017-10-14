@@ -49,6 +49,7 @@ import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.Inflater;
 
 /**
  * Facilitates a websocket connection between the client and Discord's Gateway.
@@ -114,6 +115,10 @@ public class DiscordWS extends WebSocketAdapter {
 	 * Indicates whether the bot has received the initial Ready payload from Discord.
 	 */
 	public boolean hasReceivedReady = false;
+	/**
+	 * zlib context
+	 */
+	private Inflater context;
 
 	DiscordWS(IShard shard, String gateway, int maxMissedPings, PresenceUpdateRequest identifyPresence) {
 		this.client = (DiscordClientImpl) shard.getClient();
@@ -229,7 +234,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		try (InputStream decoded = new InflaterInputStream(new ByteArrayInputStream(payload, offset, len))) {
+		try (InputStream decoded = new InflaterInputStream(new ByteArrayInputStream(payload, offset, len), context)) {
 			onWebSocketText(IOUtils.toString(decoded));
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", e);
@@ -249,6 +254,7 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
 			wsClient.start();
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
+			context = new Inflater();
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: ", e);
 		} finally {
