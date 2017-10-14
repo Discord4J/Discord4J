@@ -24,6 +24,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.apache.commons.io.IOUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
@@ -34,6 +35,7 @@ import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -41,6 +43,7 @@ import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.Inflater;
 
 public class DiscordWS extends WebSocketAdapter {
 
@@ -56,6 +59,7 @@ public class DiscordWS extends WebSocketAdapter {
 
 	private DispatchHandler dispatchHandler;
 	HeartbeatHandler heartbeatHandler;
+	private Inflater inflater;
 
 	/**
 	 * When the bot has received all available guilds.
@@ -173,10 +177,8 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new InflaterInputStream(new ByteArrayInputStream(payload, offset, len))));
-		onWebSocketText(reader.lines().collect(Collectors.joining()));
-		try {
-			reader.close();
+		try (InputStream decoded = new InflaterInputStream(new ByteArrayInputStream(payload, offset, len))) {
+			onWebSocketText(IOUtils.toString(decoded));
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", e);
 		}
@@ -191,6 +193,7 @@ public class DiscordWS extends WebSocketAdapter {
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
 			wsClient.start();
 			wsClient.connect(this, new URI(gateway), new ClientUpgradeRequest());
+			inflater = new Inflater();
 		} catch (Exception e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered error while connecting websocket: ", e);
 		} finally {
