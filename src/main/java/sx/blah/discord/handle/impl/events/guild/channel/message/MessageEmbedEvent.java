@@ -24,29 +24,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This event is dispatched whenever a message is edited and the embeds Discord generates change.
+ * Dispatched when a message is created with embeds or a message is updated to have embeds.
  */
 public class MessageEmbedEvent extends MessageEvent {
 
-	private final List<IEmbed> newEmbed;
+	private final List<IEmbed> newEmbeds;
 
-	public MessageEmbedEvent(IMessage message, List<IEmbed> oldEmbed) {
+	public MessageEmbedEvent(IMessage message, List<IEmbed> oldEmbeds) {
 		super(message);
+
 		List<IEmbed> tempArray = new ArrayList<>();
-		for (IEmbed attachment : message.getEmbedded()) {
-			if (!oldEmbed.contains(attachment)) {
+		for (IEmbed attachment : message.getEmbeds()) {
+			if (!oldEmbeds.contains(attachment)) {
 				tempArray.add(attachment);
 			}
 		}
-		newEmbed = tempArray;
+		newEmbeds = tempArray;
 	}
 
 	/**
-	 * The new embedded media that has been added to the message.
+	 * Gets the new embeds that have been added to the message.
 	 *
-	 * @return An array of the new embedded media.
+	 * @return The new embeds that have been added to the message.
 	 */
-	public List<IEmbed> getNewEmbed() {
-		return newEmbed;
+	public List<IEmbed> getNewEmbeds() {
+		return newEmbeds;
 	}
 }

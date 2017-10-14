@@ -20,15 +20,18 @@ package sx.blah.discord.handle.impl.obj;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IEmbed;
 
-import java.awt.Color;
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * The default implementation of {@link IEmbed}.
+ */
 public class Embed implements IEmbed {
 	/**
-	 * The title of the embed.
+	 * The nullable title of the embed.
 	 */
 	protected final String title;
 
@@ -38,57 +41,57 @@ public class Embed implements IEmbed {
 	protected final String type;
 
 	/**
-	 * The description of the embed.
+	 * The nullable description of the embed.
 	 */
 	protected final String description;
 
 	/**
-	 * The download link for the embed.
+	 * The nullable URL of the embed.
 	 */
 	protected final String url;
 
 	/**
-	 * The object containing the image for the thumbnail for the embed.
+	 * The nullable thumbnail of the embed.
 	 */
 	protected final IEmbedImage thumbnail;
 
 	/**
-	 * The object containing information about the provider of the embed.
+	 * The nullable provider of the embed.
 	 */
 	protected final IEmbedProvider provider;
 
 	/**
-	 * The timestamp for the embed.
+	 * The timestamp of the embed.
 	 */
 	protected final LocalDateTime timestamp;
 
 	/**
-	 * The colored strip for the embed.
+	 * The color of the embed.
 	 */
 	protected final Color color;
 
 	/**
-	 * The object containing information about the footer of the embed.
+	 * The nullable footer of the embed.
 	 */
 	protected final IEmbedFooter footer;
 
 	/**
-	 * The object containing information about the image of the embed.
+	 * The nullable image of the embed.
 	 */
 	protected final IEmbedImage image;
 
 	/**
-	 * The object containing information about the video of the embed.
+	 * The nullable video of the embed.
 	 */
 	protected final IEmbedVideo video;
 
 	/**
-	 * The object containing information about the author for the embed.
+	 * The nullable author of the embed.
 	 */
 	protected final IEmbedAuthor author;
 
 	/**
-	 * A list of objects containing information about fields in the embed
+	 * The list of fields in the embed.
 	 */
 	protected final List<IEmbedField> embedFields;
 
@@ -224,10 +227,22 @@ public class Embed implements IEmbed {
 		return embedFields;
 	}
 
+	/**
+	 * The default implementation of {@link sx.blah.discord.handle.obj.IEmbed.IEmbedImage}.
+	 */
 	public static class EmbedImage implements IEmbedImage {
 
+		/**
+		 * The image's URL.
+		 */
 		protected String url;
+		/**
+		 * The image's height.
+		 */
 		protected int height;
+		/**
+		 * The image's width
+		 */
 		protected int width;
 
 		public EmbedImage(String url, int height, int width) {
@@ -252,10 +267,22 @@ public class Embed implements IEmbed {
 		}
 	}
 
+	/**
+	 * The default implementation of {@link sx.blah.discord.handle.obj.IEmbed.IEmbedVideo}.
+	 */
 	public static class EmbedVideo implements IEmbedVideo {
 
+		/**
+		 * The video's URL.
+		 */
 		protected String url;
+		/**
+		 * The video's height.
+		 */
 		protected int height;
+		/**
+		 * The video's width.
+		 */
 		protected int width;
 
 		public EmbedVideo(String url, int height, int width) {
@@ -280,15 +307,18 @@ public class Embed implements IEmbed {
 		}
 	}
 
+	/**
+	 * The default implementation of {@link sx.blah.discord.handle.obj.IEmbed.IEmbedFooter}.
+	 */
 	public static class EmbedFooter implements IEmbedFooter {
 
 		/**
-		 * The text for the footer
+		 * The footer's text.
 		 */
 		protected String text;
 
 		/**
-		 * The url link for the footer
+		 * The footer's icon URL.
 		 */
 		protected String iconUrl;
 
@@ -309,12 +339,21 @@ public class Embed implements IEmbed {
 	}
 
 	/**
-	 * Represents the author for an embedded object
+	 * The default implementation of {@link sx.blah.discord.handle.obj.IEmbed.IEmbedAuthor}.
 	 */
 	public static class EmbedAuthor implements IEmbedAuthor {
 
+		/**
+		 * The author's name.
+		 */
 		protected String name;
+		/**
+		 * The author's URL.
+		 */
 		protected String url;
+		/**
+		 * The author's icon URL.
+		 */
 		protected String icon_url;
 
 		public EmbedAuthor(String name, String url, String icon_url) {
@@ -339,10 +378,22 @@ public class Embed implements IEmbed {
 		}
 	}
 
+	/**
+	 * The default implementation of {@link sx.blah.discord.handle.obj.IEmbed.IEmbedField}.
+	 */
 	public static class EmbedField implements IEmbedField {
 
+		/**
+		 * The field's name.
+		 */
 		protected String name;
+		/**
+		 * The field's value.
+		 */
 		protected String value;
+		/**
+		 * Whether the field is inline.
+		 */
 		protected boolean inline;
 
 		public EmbedField(String name, String value, boolean inline) {
@@ -368,17 +419,17 @@ public class Embed implements IEmbed {
 	}
 
 	/**
-	 * Represents a site that provides media which is embedded in chat. Eg. Youtube, Imgur.
+	 * The default implementation of {@link sx.blah.discord.handle.obj.IEmbed.IEmbedProvider}.
 	 */
 	public static class EmbedProvider implements IEmbedProvider {
 
 		/**
-		 * The name of the Embedded Media Provider
+		 * The provider's name.
 		 */
 		protected String name;
 
 		/**
-		 * The url link to the Embedded Media Provider
+		 * The provider's URL.
 		 */
 		protected String url;
 

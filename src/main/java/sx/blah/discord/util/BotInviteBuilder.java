@@ -26,13 +26,25 @@ import sx.blah.discord.handle.obj.Permissions;
 import java.util.EnumSet;
 
 /**
- * This is a utility class to build invite links for server owners to invite your bot.
+ * Builds OAuth2 bot invite URLs.
  */
 public class BotInviteBuilder {
 
+	/**
+	 * The client the builder is making an invite for.
+	 */
 	private final IDiscordClient client;
+	/**
+	 * The guild that the invite is for.
+	 */
 	private IGuild guild;
+	/**
+	 * The permissions requested in the invite.
+	 */
 	private EnumSet<Permissions> permissions;
+	/**
+	 * The client ID for the invite. (Or null to use the client's)
+	 */
 	private String clientIDOverride;
 
 	public BotInviteBuilder(IDiscordClient client) {
@@ -40,9 +52,9 @@ public class BotInviteBuilder {
 	}
 
 	/**
-	 * This makes the invite link specific to the given guild.
+	 * Sets the guild that the invite is for.
 	 *
-	 * @param guild The guild for this invite link.
+	 * @param guild The guild that the invite is for.
 	 * @return The builder instance.
 	 */
 	public BotInviteBuilder withGuild(IGuild guild) {
@@ -51,9 +63,9 @@ public class BotInviteBuilder {
 	}
 
 	/**
-	 * This replaces the client id provided by your {@link IDiscordClient} instance.
+	 * Sets the client ID for the invite. This overrides the client ID from the given client.
 	 *
-	 * @param id The client id to override with.
+	 * @param id The client ID for the invite.
 	 * @return The builder instance.
 	 */
 	public BotInviteBuilder withClientID(String id) {
@@ -62,9 +74,9 @@ public class BotInviteBuilder {
 	}
 
 	/**
-	 * This makes the invite link request specific permissions for the bot when it joins.
+	 * Sets the permissions requested in the invite.
 	 *
-	 * @param permissions The permissions to request.
+	 * @param permissions The permissions requested in the invite.
 	 * @return The builder instance.
 	 */
 	public BotInviteBuilder withPermissions(EnumSet<Permissions> permissions) {
@@ -73,9 +85,9 @@ public class BotInviteBuilder {
 	}
 
 	/**
-	 * Builds the actual invite link.
+	 * Builds the invite URL with the configuration specified by the builder.
 	 *
-	 * @return The invite link.
+	 * @return The invite URL with the configuration specified by the builder.
 	 */
 	public String build() {
 		String url = DiscordEndpoints.AUTHORIZE+"?client_id=%s&scope=bot";
@@ -84,7 +96,7 @@ public class BotInviteBuilder {
 			url += "&permissions="+Permissions.generatePermissionsNumber(permissions);
 
 		if (guild != null)
-			url += "&guild_id="+guild.getID();
+			url += "&guild_id="+guild.getStringID();
 
 		try {
 			return String.format(url, clientIDOverride == null ? client.getApplicationClientID() : clientIDOverride);
@@ -97,7 +109,7 @@ public class BotInviteBuilder {
 	/**
 	 * Wrapper for {@link #build()}.
 	 *
-	 * @return The completed invite link.
+	 * @return The invite URL with the configuration specified by the builder.
 	 */
 	@Override
 	public String toString() {

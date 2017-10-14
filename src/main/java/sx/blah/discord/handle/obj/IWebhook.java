@@ -17,108 +17,85 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 /**
- * Defines a Discord webhook for a channel.
+ * A webhook in a guild text {@link IChannel channel}.
  */
 public interface IWebhook extends IDiscordObject<IWebhook> {
 
 	/**
-	 * Gets the guild/server this webhook belongs to.
+	 * Gets the parent guild of the webhook.
 	 *
-	 * @return The guild.
+	 * @return The parent guild of the webhook.
 	 */
 	IGuild getGuild();
 
 	/**
-	 * Gets the channel this webhook belongs to.
+	 * Gets the parent channel of the webhook.
 	 *
-	 * @return The channel.
+	 * @return The parent channel lof the webhook.
 	 */
-
 	IChannel getChannel();
 
 	/**
-	 * Gets the author of this webhook.
+	 * Gets the user who created the webhook.
 	 *
-	 * @return The author.
+	 * @return The user who created the webhook.
 	 */
-
 	IUser getAuthor();
 
 	/**
-	 * Gets the default name of this webhook.
+	 * Gets the webhook's default name.
 	 *
-	 * @return The default name.
+	 * @return The webhook's default name.
 	 */
-
 	String getDefaultName();
 
 	/**
-	 * Gets the default avatar of this webhook.
+	 * Gets the webhook's default avatar.
 	 *
-	 * @return The default avatar.
+	 * @return The webhook's default avatar.
 	 */
-
 	String getDefaultAvatar();
 
 	/**
-	 * Gets the secure token of the webhook.
+	 * Gets the webhook's secure token.
 	 *
-	 * @return The secure token.
+	 * @return The webhook's secure token.
 	 */
-
 	String getToken();
 
 	/**
-	 * Changes the default name of the user this webhook posts as.
+	 * Changes the default name of the webhook.
 	 *
-	 * @param name The default name for the user.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param name The default name of the webhook.
 	 */
-
 	void changeDefaultName(String name);
 
 	/**
-	 * Changes the default avatar of the user this webhook posts as.
+	 * Changes the default avatar of the webhook.
 	 *
-	 * @param avatar The default avatar, as encoded in base64. For URLs, use {@link Image#forUrl(String, String)} and {@link #changeDefaultAvatar(Image)}
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param avatar The base64-encoded default avatar of the webhook.
 	 */
 	void changeDefaultAvatar(String avatar);
 
 	/**
-	 * Changes the default avatar of the user this webhook posts as.
+	 * Changes the default avatar of the webhook.
 	 *
-	 * @param avatar The Image object to use as the avatar.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param avatar The default avatar of the webhook.
 	 */
-
 	void changeDefaultAvatar(Image avatar);
 
 	/**
 	 * Deletes this webhook.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
 	void delete();
 
 	/**
-	 * Checks to see if this webhook is deleted.
+	 * Gets whether the webhook is deleted.
 	 *
-	 * @return True if this webhook is deleted.
+	 * @return Whether the webhook is deleted.
 	 */
 	boolean isDeleted();
 }

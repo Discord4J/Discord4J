@@ -21,16 +21,61 @@ package sx.blah.discord.api.internal.json.objects;
  * Represents a json invite object.
  */
 public class InviteObject {
+
 	/**
-	 * The invite code.
+	 * The invite code (unique ID).
 	 */
 	public String code;
 	/**
-	 * The guild the invite is for.
+	 * The guild this invite is for.
 	 */
-	public GuildObject guild;
+	public InviteGuildObject guild;
 	/**
-	 * The channel the invite is for.
+	 * The channel this invite is for.
 	 */
-	public ChannelObject channel;
+	public InviteChannelObject channel;
+	/**
+	 * The user who created the invite. Not present for vanity url invites or invites created for widgets.
+	 */
+	public UserObject inviter;
+
+	/**
+	 * Represents the parent guild of an invite.
+	 */
+	public static class InviteGuildObject {
+		/**
+		 * The ID of the guild.
+		 */
+		public String id;
+		/**
+		 * The name of the guild.
+		 */
+		public String name;
+		/**
+		 * The hash of the guild splash (or null).
+		 */
+		public String splash;
+		/**
+		 * The hash of the guild icon (or null).
+		 */
+		public String icon;
+	}
+
+	/**
+	 * Represents the channel an invite is for.
+	 */
+	public static class InviteChannelObject {
+		/**
+		 * The ID of the channel.
+		 */
+		public String id;
+		/**
+		 * The name of the channel.
+		 */
+		public String name;
+		/**
+		 * The type of the channel. "text" or "voice"
+		 */
+		public String type;
+	}
 }

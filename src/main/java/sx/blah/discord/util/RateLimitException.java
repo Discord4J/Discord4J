@@ -18,8 +18,10 @@
 package sx.blah.discord.util;
 
 /**
- * Represents a 429 TOO MANY REQUESTS return code from a url connection.
- * This happens if your bot exceeds a Discord api rate limit.
+ * Thrown when performing an operation with Discord would result in being ratelimited.
+ *
+ * <p>This should always be preemptively thrown by Discord4J's request system. However, if the user somehow hits an
+ * actual HTTP 429 from Discord, it will also be reported through this exception.
  */
 public class RateLimitException extends RuntimeException {
 
@@ -35,29 +37,18 @@ public class RateLimitException extends RuntimeException {
 	}
 
 	/**
-	 * This gets the amount of time (in milliseconds) to wait until sending another request.
+	 * Gets the amount of time (in milliseconds) to wait until sending another request.
 	 *
-	 * @return The amount of milliseconds to wait before retrying the operation.
+	 * @return The amount of time (in milliseconds) to wait until sending another request.
 	 */
 	public long getRetryDelay() {
 		return retryAfter;
 	}
 
 	/**
-	 * Gets the bucket (set of requests) this exception covers.
+	 * Gets the HTTP method the rate limit was in response to.
 	 *
-	 * @return The bucket.
-	 * @deprecated See {@link #getMethod()}
-	 */
-	@Deprecated
-	public String getBucket() {
-		return method;
-	}
-
-	/**
-	 * Gets the method this rate limit was in response to.
-	 *
-	 * @return The method.
+	 * @return The HTTP method the rate limit was in response to.
 	 */
 	public String getMethod() {
 		return method;
@@ -66,7 +57,7 @@ public class RateLimitException extends RuntimeException {
 	/**
 	 * Gets whether this is a global rate limit or limited to a particular method.
 	 *
-	 * @return True if global or false if otherwise.
+	 * @return Whether this is a global rate limit.
 	 */
 	public boolean isGlobal() {
 		return global;

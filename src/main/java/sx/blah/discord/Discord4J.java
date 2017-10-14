@@ -41,28 +41,35 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Main class. :D
+ * The main class of Discord4J. Static information about D4J is stored here as well as the entry point for module-only
+ * execution.
  */
 public class Discord4J {
 
 	/**
-	 * The name of the project
+	 * The name of the project.
 	 */
 	public static final String NAME;
 	/**
-	 * The version of the api
+	 * The version of the project.
 	 */
 	public static final String VERSION;
+
 	/**
-	 * The api's description
+	 * The commit hash of the version of the project.
+	 */
+	public static final String COMMIT;
+
+	/**
+	 * The description of the project.
 	 */
 	public static final String DESCRIPTION;
 	/**
-	 * The github repo for the api
+	 * The github repo of the project.
 	 */
 	public static final String URL;
 	/**
-	 * SLF4J Instance
+	 * SLF4J Instance.
 	 */
 	public static final Logger LOGGER = initLogger();
 	/**
@@ -70,16 +77,13 @@ public class Discord4J {
 	 */
 	protected static final LocalDateTime launchTime = LocalDateTime.now();
 	/**
-	 * Whether to log when the user doesn't have the permissions to view a channel.
-         */
-	@Deprecated
-	public static final AtomicBoolean ignoreChannelWarnings = new AtomicBoolean(false);
-	/**
 	 * Whether to allow for audio to be used.
 	 */
 	public static final AtomicBoolean audioDisabled = new AtomicBoolean(false);
 	/**
-	 * The alternate discord url.
+	 * The alternate Discord base URL.
+	 *
+	 * @see sx.blah.discord.api.internal.DiscordEndpoints#BASE
 	 */
 	public static volatile String alternateUrl = null;
 	/**
@@ -152,24 +156,22 @@ public class Discord4J {
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.MAIN, "Discord4J Internal Exception", e);
 		}
+
 		NAME = properties.getProperty("application.name");
-		String branch = properties.getProperty("application.git.branch");
-		if (branch.equals("master"))
-			VERSION = properties.getProperty("application.version");
-		else
-			VERSION = String.format("%s (%s-%s)", properties.getProperty("application.version"), branch, properties.getProperty("application.git.commit"));
+		VERSION = properties.getProperty("application.version");
+		COMMIT = properties.getProperty("application.git.commit");
 		DESCRIPTION = properties.getProperty("application.description");
 		URL = properties.getProperty("application.url");
 
 		jettyLogger = Log.getLog();
 		Log.setLog(ignoredJettyLogger);
 
-		LOGGER.info(LogMarkers.MAIN, "{} v{} ({})", NAME, VERSION, URL);
+		LOGGER.info(LogMarkers.MAIN, "{} v{} {} ({})", NAME, VERSION, COMMIT, URL);
 		LOGGER.info(LogMarkers.MAIN, "{}", DESCRIPTION);
 	}
 
 	/**
-	 * This is used to run Discord4J independent of any bot, making it module dependent.
+	 * Runs Discord4J using modules only.
 	 *
 	 * @param args The args should only include the bot token.
 	 */
@@ -192,38 +194,27 @@ public class Discord4J {
 	}
 
 	/**
-	 * Gets the time when this class was loaded. Useful for keeping track of application uptime.
-	 * Note: See {@link IDiscordClient#getLaunchTime()} for uptime of a specific client instance.
+	 * Gets the time when this class was loaded.
 	 *
-	 * @return The launch time.
+	 * @return The time when this class was loaded.
 	 */
 	public static LocalDateTime getLaunchTime() {
 		return launchTime;
 	}
 
 	/**
-	 * This enables Jetty Websocket logging. WARNING: This spams the console a ton.
+	 * Enables Jetty Websocket logging. WARNING: This spams the console a ton.
 	 */
 	public static void enableJettyLogging() {
 		Log.setLog(jettyLogger);
 	}
 
 	/**
-	 * This disables logging for when the user doesn't have the required permissions to view a channel.
-	 * @deprecated This functionality isn't available in MessageHistories.
-         */
-	@Deprecated
-	public static void disableChannelWarnings() {
-		ignoreChannelWarnings.set(true);
-	}
-
-	/**
-	 * This sets the base discord api so the provided url. This defaults to https://discordapp.com/.
-	 * NOTE: This will only have any sort of effect if called before the
-	 * {@link sx.blah.discord.api.internal.DiscordEndpoints} class is initialized, meaning that you MUST call this
-	 * before any Discord4J calls.
+	 * Sets the base Discord URL. This defaults to <code>https://discordapp.com/</code>
 	 *
-	 * @param url The url.
+	 * <p>NOTE: This must be called before the initialization of {@link sx.blah.discord.api.internal.DiscordEndpoints}.
+	 *
+	 * @param url The base URL.
 	 */
 	public static void setBaseDiscordUrl(String url) {
 		LOGGER.info("Base url changed to {}", url);
@@ -231,13 +222,18 @@ public class Discord4J {
 	}
 
 	/**
-	 * This disables audio, use this if you receive {@link UnsatisfiedLinkError}s.
+	 * Disables audio loading.
 	 */
 	public static void disableAudio() {
 		LOGGER.info("Disabled audio.");
 		audioDisabled.set(true);
 	}
 
+	/**
+	 * Initializes the logger as either the {@link Discord4JLogger default implementation} or a found SLF4J implementation.
+	 *
+	 * @return The initialized logger.
+	 */
 	private static Logger initLogger() {
 		if (!isSLF4JImplementationPresent()) {
 			System.err.println("Discord4J: ERROR INITIALIZING LOGGER!");
@@ -249,6 +245,11 @@ public class Discord4J {
 		}
 	}
 
+	/**
+	 * Gets whether an SLF4J implementation is present on the classpath.
+	 *
+	 * @return Whether an SLF4J implementation is present on the classpath.
+	 */
 	private static boolean isSLF4JImplementationPresent() {
 		try {
 			Class.forName("org.slf4j.impl.StaticLoggerBinder"); //First try to find the implementation
@@ -259,7 +260,7 @@ public class Discord4J {
 	}
 
 	/**
-	 * This is a logger implementation used by Discord4J if no valid SLF4J implementation is found.
+	 * A logger implementation used by Discord4J if no valid SLF4J implementation is found.
 	 */
 	public static class Discord4JLogger extends MarkerIgnoringBase {
 
@@ -274,7 +275,7 @@ public class Discord4J {
 		}
 
 		/**
-		 * Sets the level for this logger. Messages will only be logged if the message level >= the current level.
+		 * Sets the level for the logger.
 		 *
 		 * @param level The level for the logger.
 		 */
@@ -300,6 +301,13 @@ public class Discord4J {
 			this.error = stream;
 		}
 
+		/**
+		 * Logs a message on the given level.
+		 *
+		 * @param level The level to log the message on.
+		 * @param message The message to log.
+		 * @param error The error to log.
+		 */
 		private void log(Level level, String message, Throwable error) {
 			if (level.ordinal() >= this.level) {
 				PrintStream stream = level.ordinal() >= Level.WARN.ordinal() ? this.error : standard;
@@ -477,7 +485,7 @@ public class Discord4J {
 		}
 
 		/**
-		 * This represents the minimum level required for a message to be logged.
+		 * Log levels.
 		 */
 		public enum Level {
 			TRACE, DEBUG, INFO, WARN, ERROR, NONE

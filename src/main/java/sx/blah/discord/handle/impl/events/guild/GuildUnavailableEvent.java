@@ -22,38 +22,37 @@ import sx.blah.discord.handle.obj.IGuild;
 import java.util.Optional;
 
 /**
- * This event is dispatched when a guild becomes unavailable.
- * Note: this guild is removed from the guild list when this happens!
+ * Dispatched when a guild becomes unavailable.
  */
 public class GuildUnavailableEvent extends GuildEvent {
 
-	private final String id;
+	private final long id;
 
 	public GuildUnavailableEvent(IGuild guild) {
 		super(guild);
-		this.id = guild.getID();
+		this.id = guild.getLongID();
 	}
 
-	public GuildUnavailableEvent(String id) {
+	public GuildUnavailableEvent(long id) {
 		super(null);
 		this.id = id;
 	}
 
 	/**
-	 * Gets the guild that became unavailable.
+	 * Gets the guild that became unavailable. This is not present if the guild was not previously cached.
 	 *
-	 * @return The guild. This will not be present if a guild was never initialized before the ready event.
+	 * @return The guild that became unavailable.
 	 */
 	public Optional<IGuild> getOptionalGuild() {
 		return Optional.ofNullable(getGuild());
 	}
 
 	/**
-	 * Gets the id of the guild that became unavailable. This is always available.
+	 * Gets the ID of the guild that became unavailable.
 	 *
-	 * @return The unavailable guild.
+	 * @return The ID of the guild that became unavailable.
 	 */
-	public String getGuildID() {
+	public long getGuildLongID() {
 		return id;
 	}
 }

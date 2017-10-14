@@ -22,10 +22,10 @@ import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * Fired when a reaction gets added to a message.
+ * Dispatched when a reaction gets added to a message.
  */
 public class ReactionAddEvent extends ReactionEvent {
-	
+
 	public ReactionAddEvent(IMessage message, IReaction reaction, IUser user) {
 		super(message, reaction, user);
 	}

@@ -20,43 +20,71 @@ package sx.blah.discord.api.internal;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
-import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
-import sx.blah.discord.handle.impl.events.DisconnectedEvent;
-import sx.blah.discord.handle.impl.events.PresenceUpdateEvent;
-import sx.blah.discord.handle.impl.obj.PresenceImpl;
+import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
+import sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent;
+import sx.blah.discord.handle.impl.obj.Presence;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
+import sx.blah.discord.util.cache.Cache;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * Default implementation of {@link IShard}.
+ */
 public class ShardImpl implements IShard {
 
+	/**
+	 * The gateway connection for this shard.
+	 */
 	public volatile DiscordWS ws;
 
+	/**
+	 * The gateway endpoint obtained for this shard.
+	 */
 	private final String gateway;
+	/**
+	 * The shard info.
+	 * @see <a href=https://discordapp.com/developers/docs/topics/gateway#sharding>Sharding</a>
+	 */
 	private final int[] info;
 
+	/**
+	 * The client that manages this shard.
+	 */
 	private final DiscordClientImpl client;
-	final List<IGuild> guildList = new CopyOnWriteArrayList<>();
-	final List<IPrivateChannel> privateChannels = new CopyOnWriteArrayList<>();
-	public final Map<String, DiscordVoiceWS> voiceWebSockets = new ConcurrentHashMap<>();
+	/**
+	 * All of the guilds this shard manages.
+	 */
+	final Cache<IGuild> guildCache;
+	/**
+	 * The private channels on this shard. Only populated if this is shard 0.
+	 */
+	final Cache<IPrivateChannel> privateChannels;
+	/**
+	 * The voice gateways for guilds on this shard.
+	 */
+	public final Cache<DiscordVoiceWS> voiceWebSockets;
 
-	ShardImpl(IDiscordClient client, String gateway, int[] info) {
+	private final PresenceUpdateRequest identifyPresence;
+
+	ShardImpl(IDiscordClient client, String gateway, int[] info, PresenceUpdateRequest identifyPresence) {
 		this.client = (DiscordClientImpl) client;
 		this.gateway = gateway;
 		this.info = info;
+		this.identifyPresence = identifyPresence;
+		this.guildCache = new Cache<>((DiscordClientImpl) client, IGuild.class);
+		this.privateChannels = new Cache<>((DiscordClientImpl) client, IPrivateChannel.class);
+		this.voiceWebSockets = new Cache<>((DiscordClientImpl) client, DiscordVoiceWS.class);
 	}
 
 	@Override
@@ -72,7 +100,7 @@ public class ShardImpl implements IShard {
 	@Override
 	public void login() {
 		Discord4J.LOGGER.trace(LogMarkers.API, "Shard logging in.");
-		this.ws = new DiscordWS(this, gateway, client.maxMissedPings);
+		this.ws = new DiscordWS(this, gateway, client.maxMissedPings, identifyPresence);
 		this.ws.connect();
 	}
 
@@ -81,13 +109,12 @@ public class ShardImpl implements IShard {
 		checkLoggedIn("logout");
 
 		Discord4J.LOGGER.info(LogMarkers.API, "Shard {} logging out.", getInfo()[0]);
-		getConnectedVoiceChannels().forEach(channel -> {
-			RequestBuffer.RequestFuture<IVoiceChannel> request = RequestBuffer.request(() -> {
+		getConnectedVoiceChannels().forEach(channel ->
+			RequestBuffer.request(() -> {
 				channel.leave();
 				return channel;
-			});
-			request.get();
-		});
+			}).get()
+		);
 		getClient().getDispatcher().dispatch(new DisconnectedEvent(DisconnectedEvent.Reason.LOGGED_OUT, this));
 		ws.shutdown();
 	}
@@ -135,28 +162,22 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void streaming(String playingText, String streamingUrl) {
-		updatePresence(StatusType.STREAMING, playingText, streamingUrl);
+		updatePresence(StatusType.ONLINE, playingText, streamingUrl);
 	}
 
 	@Override
-	@Deprecated
-	public void changeStatus(Status status) {
-		// old functionality just in case
-		if (status.getType() == Status.StatusType.STREAM) {
-			streaming(status.getStatusMessage(), status.getUrl().orElse(null));
-		} else {
-			changePlayingText(status.getStatusMessage());
-		}
+	public void dnd(String playingText) {
+		updatePresence(StatusType.DND, playingText);
 	}
 
 	@Override
-	@Deprecated
-	public void changePresence(boolean isIdle) {
-		// old functionality just in case
-		if (isIdle)
-			idle();
-		else
-			online();
+	public void dnd() {
+		dnd(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+	}
+
+	@Override
+	public void invisible() {
+		updatePresence(StatusType.INVISIBLE, null);
 	}
 
 	private void updatePresence(StatusType status, String playing) {
@@ -164,29 +185,35 @@ public class ShardImpl implements IShard {
 	}
 
 	private void updatePresence(StatusType status, String playing, String streamUrl) {
-		final boolean isIdle = status == StatusType.IDLE; // temporary until v6
-		IUser ourUser = getClient().getOurUser();
+		checkLoggedIn("update presence");
 
+		if (streamUrl != null) {
+			if (!DiscordUtils.STREAM_URL_PATTERN.matcher(streamUrl).matches()) {
+				throw new IllegalArgumentException("Stream URL must be a twitch.tv url.");
+			}
+		}
+
+		IUser ourUser = getClient().getOurUser();
 		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new PresenceImpl(Optional.ofNullable(playing), Optional.ofNullable(streamUrl), status);
+		IPresence newPresence = new Presence(playing, streamUrl, status);
 
 		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
-		ws.send(GatewayOps.STATUS_UPDATE,
-				new PresenceUpdateRequest(isIdle ? System.currentTimeMillis() : null, ourUser.getPresence()));
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, playing, streamUrl));
 	}
 
 	@Override
-	public List<IChannel> getChannels(boolean priv) {
-		List<IChannel> channels = guildList.stream()
-				.map(IGuild::getChannels)
-				.flatMap(List::stream)
+	public List<IChannel> getChannels(boolean includePrivate) {
+		List<IChannel> channels = guildCache.stream()
+				.flatMap(g -> g.getChannels().stream())
 				.collect(Collectors.toList());
-		if (priv)
-			channels.addAll(privateChannels);
+
+		if (includePrivate)
+			channels.addAll(privateChannels.values());
+
 		return channels;
 	}
 
@@ -196,15 +223,15 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IChannel getChannelByID(String id) {
-		return getChannels(true).stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
+	public IChannel getChannelByID(long id) {
+		IChannel channel = guildCache.findResult((guildID, guild) -> guild.getChannelByID(id));
+
+		return channel == null ? privateChannels.get(id) : channel;
 	}
 
 	@Override
 	public List<IVoiceChannel> getVoiceChannels() {
-		return guildList.stream()
+		return guildCache.stream()
 				.map(IGuild::getVoiceChannels)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
@@ -216,31 +243,26 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IVoiceChannel getVoiceChannelByID(String id) {
-		return getVoiceChannels().stream()
-				.filter(c -> c.getID().equalsIgnoreCase(id))
-				.findAny().orElse(null);
+	public IVoiceChannel getVoiceChannelByID(long id) {
+		return guildCache.findResult((guildID, guild) -> guild.getVoiceChannelByID(id));
 	}
 
 	@Override
 	public List<IGuild> getGuilds() {
-		return guildList;
+		return new LinkedList<>(guildCache.values());
 	}
 
 	@Override
-	public IGuild getGuildByID(String guildID) {
-		return guildList.stream()
-				.filter(g -> g.getID().equalsIgnoreCase(guildID))
-				.findAny().orElse(null);
+	public IGuild getGuildByID(long guildID) {
+		return guildCache.get(guildID);
 	}
 
 	@Override
 	public List<IUser> getUsers() {
-		List<IUser> guildUserList = guildList
-				.stream()
+		List<IUser> guildUserList = guildCache.stream()
 				.map(IGuild::getUsers)
-				.distinct()
 				.flatMap(List::stream)
+				.distinct()
 				.collect(Collectors.toList());
 
 		if (client.getOurUser() != null && !guildUserList.contains(client.getOurUser()))
@@ -250,38 +272,29 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IUser getUserByID(String userID) {
-		IGuild guild = guildList.stream()
-				.filter(g -> g.getUserByID(userID) != null)
-				.findFirst()
-				.orElse(null);
-
-		IUser user = guild != null ? guild.getUserByID(userID) : null;
+	public IUser getUserByID(long userID) {
 		IUser ourUser = getClient().getOurUser();
-
-		user = ourUser != null && ourUser.getID().equals(userID) ? ourUser : user; // List of users doesn't include the bot user. Check if the id is that of the bot.
-		return user;
+		if (ourUser != null && userID == ourUser.getLongID()) return ourUser;
+		return guildCache.findResult((guildID, guild) -> guild.getUserByID(userID));
 	}
 
 	@Override
-	public IUser fetchUser(String id) {
+	public IUser fetchUser(long id) {
 		IUser cached = getUserByID(id);
-		return cached == null ? DiscordUtils.getUserFromJSON(null, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + id, UserObject.class)) : cached;
+		return cached == null ? DiscordUtils.getUserFromJSON(this, client.REQUESTS.GET.makeRequest(DiscordEndpoints.USERS + Long.toUnsignedString(id), UserObject.class)) : cached;
 	}
 
 	@Override
 	public List<IRole> getRoles() {
-		return guildList.stream()
+		return guildCache.stream()
 				.map(IGuild::getRoles)
 				.flatMap(List::stream)
 				.collect(Collectors.toList());
 	}
 
 	@Override
-	public IRole getRoleByID(String roleID) {
-		return getRoles().stream()
-				.filter(r -> r.getID().equalsIgnoreCase(roleID))
-				.findAny().orElse(null);
+	public IRole getRoleByID(long roleID) {
+		return guildCache.findResult((guildID, guild) -> guild.getRoleByID(roleID));
 	}
 
 	@Override
@@ -298,20 +311,11 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public IMessage getMessageByID(String messageID) {
-		for (IGuild guild : guildList) {
-			IMessage message = guild.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		for (IPrivateChannel privateChannel : privateChannels) {
-			IMessage message = privateChannel.getMessageByID(messageID);
-			if (message != null)
-				return message;
-		}
-
-		return null;
+	public IMessage getMessageByID(long messageID) {
+		IMessage message = guildCache.findResult((guildID, guild) -> guild.getMessageByID(messageID));
+		if (message == null)
+			message = privateChannels.findResult((channelID, channel) -> channel.getMessageByID(messageID));
+		return message;
 	}
 
 	@Override
@@ -321,18 +325,29 @@ public class ShardImpl implements IShard {
 		if (user.equals(getClient().getOurUser()))
 			throw new DiscordException("Cannot PM yourself!");
 
-		Optional<IPrivateChannel> opt = privateChannels.stream()
-				.filter(c -> c.getRecipient().getID().equalsIgnoreCase(user.getID()))
-				.findAny();
-		if (opt.isPresent())
-			return opt.get();
+		IPrivateChannel channel = privateChannels.get(user.getLongID());
+		if (channel != null)
+			return channel;
 
-		PrivateChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
-				DiscordEndpoints.USERS+getClient().getOurUser().getID()+"/channels",
-				new PrivateChannelCreateRequest(user.getID()),
-				PrivateChannelObject.class);
-		IPrivateChannel channel = DiscordUtils.getPrivateChannelFromJSON(this, pmChannel);
-		privateChannels.add(channel);
+		ChannelObject pmChannel = client.REQUESTS.POST.makeRequest(
+				DiscordEndpoints.USERS+getClient().getOurUser().getStringID()+"/channels",
+				new PrivateChannelCreateRequest(user.getStringID()),
+				ChannelObject.class);
+		channel = (IPrivateChannel) DiscordUtils.getChannelFromJSON(this, null, pmChannel);
+		privateChannels.put(channel);
 		return channel;
+	}
+
+	@Override
+	public List<ICategory> getCategories() {
+		return getGuilds().stream()
+				.map(IGuild::getCategories)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public ICategory getCategoryByID(long categoryID) {
+		return guildCache.findResult((guildId, guild) -> guild.getCategoryByID(categoryID));
 	}
 }

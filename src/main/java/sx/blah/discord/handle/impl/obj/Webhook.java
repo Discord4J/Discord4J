@@ -24,27 +24,48 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.WebhookObject;
 import sx.blah.discord.api.internal.json.requests.WebhookEditRequest;
-import sx.blah.discord.handle.impl.events.WebhookUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.webhook.WebhookUpdateEvent;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.PermissionUtils;
 
-import java.util.EnumSet;
 import java.util.Objects;
 
+/**
+ * The default implementation of {@link IWebhook}.
+ */
 public class Webhook implements IWebhook {
 
-	protected final String id;
+	/**
+	 * The unique snowflake ID of the webhook.
+	 */
+	protected final long id;
+	/**
+	 * The client the object belongs to.
+	 */
 	protected final IDiscordClient client;
+	/**
+	 * The parent channel lof the webhook.
+	 */
 	protected final IChannel channel;
+	/**
+	 * The user who created the webhook.
+	 */
 	protected final IUser author;
+	/**
+	 * The webhook's default name.
+	 */
 	protected volatile String name;
+	/**
+	 * The webhook's default avatar.
+	 */
 	protected volatile String avatar;
+	/**
+	 * The webhook's secure token.
+	 */
 	protected final String token;
 
-	public Webhook(IDiscordClient client, String name, String id, IChannel channel, IUser author, String avatar, String token) {
+	public Webhook(IDiscordClient client, String name, long id, IChannel channel, IUser author, String avatar, String token) {
 		this.client = client;
 		this.name = name;
 		this.id = id;
@@ -55,7 +76,7 @@ public class Webhook implements IWebhook {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -104,8 +125,14 @@ public class Webhook implements IWebhook {
 		return token;
 	}
 
+	/**
+	 * Sends a request to edit the webhook.
+	 *
+	 * @param name The default name of the webhook.
+	 * @param avatar The base64-encoded default avatar of the webhook.
+	 */
 	private void edit(String name, String avatar) {
-		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
+		PermissionUtils.requirePermissions(channel, client.getOurUser(), Permissions.MANAGE_WEBHOOKS);
 
 		WebhookObject response = ((DiscordClientImpl) client).REQUESTS.PATCH.makeRequest(
 				DiscordEndpoints.WEBHOOKS + id,
@@ -136,7 +163,7 @@ public class Webhook implements IWebhook {
 	/**
 	 * Sets the CACHED name of the webhook.
 	 *
-	 * @param name The new cached name
+	 * @param name The name.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -145,7 +172,7 @@ public class Webhook implements IWebhook {
 	/**
 	 * Sets the CACHED avatar of the webhook.
 	 *
-	 * @param avatar The new cached avatar
+	 * @param avatar The avatar.
 	 */
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
@@ -153,7 +180,7 @@ public class Webhook implements IWebhook {
 
 	@Override
 	public void delete() {
-		DiscordUtils.checkPermissions(client, channel, EnumSet.of(Permissions.MANAGE_WEBHOOKS));
+		PermissionUtils.requirePermissions(channel, client.getOurUser(), Permissions.MANAGE_WEBHOOKS);
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.WEBHOOKS + id);
 	}

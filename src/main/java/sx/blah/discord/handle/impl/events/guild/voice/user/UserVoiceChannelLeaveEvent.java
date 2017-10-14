@@ -21,10 +21,10 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This event is dispatched when a user disconnects from a voice channel.
+ * Dispatched when a user leaves a voice channel.
  */
 public class UserVoiceChannelLeaveEvent extends UserVoiceChannelEvent {
-	
+
 	public UserVoiceChannelLeaveEvent(IVoiceChannel voiceChannel, IUser user) {
 		super(voiceChannel, user);
 	}

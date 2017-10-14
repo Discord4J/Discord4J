@@ -28,10 +28,8 @@ import sx.blah.discord.api.internal.json.requests.RoleEditRequest;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.PermissionUtils;
 
 import java.awt.*;
 import java.io.IOException;
@@ -39,76 +37,70 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
 
+/**
+ * The default implementation of {@link IRole}.
+ */
 public class Role implements IRole {
 
 	/**
-	 * Where the role should be displayed. -1 is @everyone, it is always last
+	 * The position of the role.
 	 */
 	protected volatile int position;
 
 	/**
-	 * The permissions the role has.
+	 * The permissions granted to the role.
 	 */
 	protected volatile EnumSet<Permissions> permissions;
 
 	/**
-	 * The role name
+	 * The name of the role.
 	 */
 	protected volatile String name;
 
 	/**
-	 * Whether this role is managed via plugins like twitch
+	 * Whether the role is managed by an external service.
 	 */
 	protected volatile boolean managed;
 
 	/**
-	 * The role id
+	 * The unique snowflake ID of the role.
 	 */
-	protected volatile String id;
+	protected volatile long id;
 
 	/**
-	 * Whether to display this role separately from others
+	 * Whether the role is hoisted.
 	 */
 	protected volatile boolean hoist;
 
 	/**
-	 * The DECIMAL format for the color
+	 * The color of the role.
 	 */
 	protected volatile Color color;
 
 	/**
-	 * Whether you can @mention this role.
+	 * Whether the role is mentionable.
 	 */
 	protected volatile boolean mentionable;
 
 	/**
-	 * The guild this role belongs to
+	 * The parent guild of the role.
 	 */
 	protected volatile IGuild guild;
 
-	public Role(int position, int permissions, String name, boolean managed, String id, boolean hoist, int color, boolean mentionable, IGuild guild) {
+	public Role(int position, int permissions, String name, boolean managed, long id, boolean hoist, int color, boolean mentionable, IGuild guild) {
 		this.position = position;
 		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
 		this.name = name;
 		this.managed = managed;
 		this.id = id;
 		this.hoist = hoist;
-		this.color = new Color(color);
+		this.color = new Color(color, true);
 		this.mentionable = mentionable;
 		this.guild = guild;
 	}
 
 	@Override
 	public int getPosition() {
-		getGuild().getRoles().sort((r1, r2) -> {
-			int originalPos1 = ((Role) r1).position;
-			int originalPos2 = ((Role) r2).position;
-			if (originalPos1 == originalPos2) {
-				return r2.getCreationDate().compareTo(r1.getCreationDate());
-			} else {
-				return originalPos1 - originalPos2;
-			}
-		});
 		return getGuild().getRoles().indexOf(this);
 	}
 
@@ -127,9 +119,9 @@ public class Role implements IRole {
 	}
 
 	/**
-	 * Sets the CACHED enabled permissions.
+	 * Sets the CACHED permissions by the raw permissions number.
 	 *
-	 * @param permissions The permissions number.
+	 * @param permissions The raw permissions number.
 	 */
 	public void setPermissions(int permissions) {
 		this.permissions = Permissions.getAllowedPermissionsForNumber(permissions);
@@ -143,7 +135,7 @@ public class Role implements IRole {
 	/**
 	 * Sets the CACHED role name.
 	 *
-	 * @param name The name.
+	 * @param name The role name.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -155,7 +147,7 @@ public class Role implements IRole {
 	}
 
 	@Override
-	public String getID() {
+	public long getLongID() {
 		return id;
 	}
 
@@ -165,9 +157,9 @@ public class Role implements IRole {
 	}
 
 	/**
-	 * Sets whether this role is hoisted in the CACHE.
+	 * Sets the CACHED hoist value.
 	 *
-	 * @param hoist True if hoisted, false if otherwise.
+	 * @param hoist The hoist value.
 	 */
 	public void setHoist(boolean hoist) {
 		this.hoist = hoist;
@@ -181,10 +173,10 @@ public class Role implements IRole {
 	/**
 	 * Sets the CACHED role color.
 	 *
-	 * @param color The color decimal number.
+	 * @param color The role color.
 	 */
 	public void setColor(int color) {
-		this.color = new Color(color);
+		this.color = new Color(color, true);
 	}
 
 	@Override
@@ -193,9 +185,9 @@ public class Role implements IRole {
 	}
 
 	/**
-	 * Sets whether this role is mentionable in the CACHE.
+	 * Sets the CACHED mentionable value.
 	 *
-	 * @param mentionable True if mentionable, false if otherwise.
+	 * @param mentionable The mentionable value.
 	 */
 	public void setMentionable(boolean mentionable) {
 		this.mentionable = mentionable;
@@ -206,14 +198,19 @@ public class Role implements IRole {
 		return guild;
 	}
 
+	/**
+	 * Sends a request to edit the role.
+	 *
+	 * @param request The request object describing the changes to make.
+	 */
 	private void edit(RoleEditRequest request) {
-		DiscordUtils.checkPermissions(getClient(), guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
+		PermissionUtils.requireHierarchicalPermissions(guild, getClient().getOurUser(), Collections.singletonList(this), Permissions.MANAGE_ROLES);
 
 		try {
 			DiscordUtils.getRoleFromJSON(guild,
 					DiscordUtils.MAPPER.readValue(
 							((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
-									DiscordEndpoints.GUILDS + guild.getID() + "/roles/" + id,
+									DiscordEndpoints.GUILDS + guild.getStringID() + "/roles/" + id,
 									DiscordUtils.MAPPER_NO_NULLS.writeValueAsString(request)), RoleObject.class));
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
@@ -268,9 +265,9 @@ public class Role implements IRole {
 
 	@Override
 	public void delete() {
-		DiscordUtils.checkPermissions(((Guild) guild).client, guild, Collections.singletonList(this), EnumSet.of(Permissions.MANAGE_ROLES));
+		PermissionUtils.requireHierarchicalPermissions(guild, getClient().getOurUser(), Collections.singletonList(this), Permissions.MANAGE_ROLES);
 
-		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getID()+"/roles/"+id);
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS+guild.getStringID()+"/roles/"+id);
 	}
 
 	@Override
@@ -301,7 +298,7 @@ public class Role implements IRole {
 
 	@Override
 	public String mention() {
-		return isMentionable() ? (isEveryoneRole() ? "@everyone" : "<@&"+id+">") : name;
+		return isEveryoneRole() ? "@everyone" : "<@&"+id+">";
 	}
 
 	@Override

@@ -21,18 +21,11 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This event is dispatched when a user moves from one voice channel to another.
+ * Dispatched when a user moves from one voice channel to another.
  */
 public class UserVoiceChannelMoveEvent extends UserVoiceChannelEvent {
 
-	/**
-	 * The channel the user left.
-	 */
 	private final IVoiceChannel oldChannel;
-
-	/**
-	 * The channel the user joined.
-	 */
 	private final IVoiceChannel newChannel;
 
 	public UserVoiceChannelMoveEvent(IUser user, IVoiceChannel oldChannel, IVoiceChannel newChannel) {
@@ -42,18 +35,18 @@ public class UserVoiceChannelMoveEvent extends UserVoiceChannelEvent {
 	}
 
 	/**
-	 * Gets the voice channel this user left.
+	 * Gets the voice channel the user left.
 	 *
-	 * @return The voice channel.
+	 * @return The voice channel the user left.
 	 */
 	public IVoiceChannel getOldChannel() {
 		return oldChannel;
 	}
 
 	/**
-	 * Gets the voice channel this user joined.
+	 * Gets the voice channel the user joined.
 	 *
-	 * @return The voice channel.
+	 * @return The voice channel the user joined.
 	 */
 	public IVoiceChannel getNewChannel() {
 		return newChannel;

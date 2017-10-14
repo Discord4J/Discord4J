@@ -22,7 +22,7 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class MessageObject {
 	/**
-	 * The id of the message.
+	 * The ID of the message.
 	 */
 	public String id;
 	/**
@@ -30,7 +30,7 @@ public class MessageObject {
 	 */
 	public int type;
 	/**
-	 * The channel id for the channel this message was sent in.
+	 * The channel ID for the channel this message was sent in.
 	 */
 	public String channel_id;
 	/**
@@ -42,11 +42,11 @@ public class MessageObject {
 	 */
 	public String content;
 	/**
-	 * The timestamp of when the message was sent.
+	 * The ISO-8601 timestamp of when the message was sent.
 	 */
 	public String timestamp;
 	/**
-	 * The timestamp of when the message was last edited.
+	 * The ISO-8601 timestamp of when the message was last edited.
 	 */
 	public String edited_timestamp;
 	/**
@@ -86,7 +86,7 @@ public class MessageObject {
 	 */
 	public ReactionObject[] reactions;
 	/**
-	 * The id of the webhook that sent the message.
+	 * The ID of the webhook that sent the message. (If it was sent from a webhook)
 	 */
 	public String webhook_id;
 
@@ -95,7 +95,7 @@ public class MessageObject {
 	 */
 	public static class AttachmentObject {
 		/**
-		 * The id of the attachment.
+		 * The ID of the attachment.
 		 */
 		public String id;
 		/**
@@ -107,19 +107,19 @@ public class MessageObject {
 		 */
 		public int size;
 		/**
-		 * The url of the attached file.
+		 * The URL of the attached file.
 		 */
 		public String url;
 		/**
-		 * The proxy url of the attached file.
+		 * The proxied URL of the attached file.
 		 */
 		public String proxy_url;
 		/**
-		 * The height of the attached file if it's an image.
+		 * The height of the attached file. (If it's an image)
 		 */
 		public int height;
 		/**
-		 * The width of the attached file if it's an image.
+		 * The width of the attached file. (If it's an image)
 		 */
 		public int width;
 	}
@@ -133,7 +133,7 @@ public class MessageObject {
 		 */
 		public int count;
 		/**
-		 * Whether the self user has reacted with this reaction.
+		 * Whether our user has reacted with this reaction.
 		 */
 		public boolean me;
 		/**

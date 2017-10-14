@@ -21,7 +21,7 @@ import sx.blah.discord.handle.audio.AudioEncodingType;
 import sx.blah.discord.handle.audio.IAudioProvider;
 
 /**
- * This is a NO-OP audio provider.
+ * The default implementation of {@link IAudioProvider} which is NO-OP. It provides no audio data.
  */
 public class DefaultProvider implements IAudioProvider {
 

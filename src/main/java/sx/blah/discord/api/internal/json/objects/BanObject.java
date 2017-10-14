@@ -23,7 +23,6 @@ package sx.blah.discord.api.internal.json.objects;
 public class BanObject {
 	/**
 	 * The reason for the ban.
-	 * Note: Currently unused by Discord API.
 	 */
 	public String reason;
 	/**

@@ -22,8 +22,8 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.DiscordStatus;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
@@ -88,8 +88,8 @@ public class TestBot {
 					public void handle(ReadyEvent readyEvent) {
 						try {
 							//Initialize required data
-							final IChannel testChannel = client.getChannelByID(System.getenv("CHANNEL"));
-							final IChannel spoofChannel = client.getChannelByID(System.getenv("SPOOF_CHANNEL"));
+							final IChannel testChannel = client.getChannelByID(Long.parseUnsignedLong(System.getenv("CHANNEL")));
+							final IChannel spoofChannel = client.getChannelByID(Long.parseUnsignedLong(System.getenv("SPOOF_CHANNEL")));
 							String buildNumber = System.getenv("BUILD_ID");
 
 							IVoiceChannel channel = client.getVoiceChannels().stream().filter(voiceChannel-> voiceChannel.getName().equalsIgnoreCase("Annoying Shit")).findFirst().orElse(null);
@@ -117,7 +117,7 @@ public class TestBot {
 							}
 
 							//Time to unleash the ai
-							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), System.getenv("SPOOF_CHANNEL"));
+							SpoofBot spoofBot = new SpoofBot(client, System.getenv("SPOOF"), Long.parseUnsignedLong(System.getenv("SPOOF_CHANNEL")));
 
 							final long now = System.currentTimeMillis();
 							new Thread(() -> {
@@ -170,12 +170,12 @@ public class TestBot {
 										e.printStackTrace();
 									}
 								} else if (m.getContent().startsWith(".clear")) {
-									IChannel c = client.getChannelByID(m.getChannel().getID());
+									IChannel c = client.getChannelByID(m.getChannel().getLongID());
 									if (null != c) {
-										c.getMessageHistory().stream().filter(message -> message.getAuthor().getID()
-												.equalsIgnoreCase(client.getOurUser().getID())).forEach(message -> {
+										c.getMessageHistory().stream().filter(message -> message.getAuthor().getLongID()
+												== client.getOurUser().getLongID()).forEach(message -> {
 											try {
-												Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getID(), message.getAuthor().getName(), message.getContent());
+												Discord4J.LOGGER.debug("Attempting deletion of message {} by \"{}\" ({})", message.getStringID(), message.getAuthor().getName(), message.getContent());
 												message.delete();
 											} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 												e.printStackTrace();
@@ -198,15 +198,15 @@ public class TestBot {
 										e.printStackTrace();
 									}
 								} else if (m.getContent().startsWith(".presence")) {
-									client.changePresence(!client.getOurUser().getPresence().equals(Presences.IDLE));
+									client.idle();
 								} else if (m.getContent().startsWith(".game")) {
 									String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
-									client.changeStatus(Status.game(game));
+									client.changePlayingText(game);
 								} else if (m.getContent().startsWith(".type")) {
 									m.getChannel().toggleTypingStatus();
 								} else if (m.getContent().startsWith(".invite")) {
 									try {
-										m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getInviteCode());
+										m.reply("http://discord.gg/"+m.getChannel().createInvite(1800, 0, false, false).getCode());
 									} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 										e.printStackTrace();
 									}
@@ -227,7 +227,7 @@ public class TestBot {
 									StringJoiner roleJoiner = new StringJoiner(", ");
 									StringJoiner permissionsJoiner = new StringJoiner(", ");
 									for (IRole role : m.getMentions().get(0).getRolesForGuild(m.getChannel().getGuild())) {
-										Discord4J.LOGGER.info("{}", role.getID());
+										Discord4J.LOGGER.info("{}", role.getStringID());
 										for (Permissions permissions : role.getPermissions()) {
 											permissionsJoiner.add(permissions.toString());
 										}
@@ -235,7 +235,7 @@ public class TestBot {
 										permissionsJoiner = new StringJoiner(", ");
 									}
 									try {
-										Discord4J.LOGGER.info("{}", m.getAuthor().getID());
+										Discord4J.LOGGER.info("{}", m.getAuthor().getStringID());
 										m.reply("This user has the following roles and permissions: "+roleJoiner.toString());
 									} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 										e.printStackTrace();
@@ -313,7 +313,7 @@ public class TestBot {
 
 					//Used for convenience in testing
 					private void test(IMessage message) throws Exception {
-						message.reply(String.valueOf(message.getClient().getUserByID(message.getContent().split(" ")[1]).getRolesForGuild(message.getGuild()).size()));
+						message.reply(message.getClient().fetchUser(Long.parseUnsignedLong(message.getContent().split(" ")[1])).mention());
 					}
 				});
 			}

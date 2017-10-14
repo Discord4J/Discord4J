@@ -18,17 +18,17 @@
 package sx.blah.discord.api.internal.json.event;
 
 /**
- * This is received when a role was deleted.
+ * The object received on the gateway when a role is deleted.
  */
 public class GuildRoleDeleteEventResponse {
 
 	/**
-	 * The role's id.
+	 * The role's ID.
 	 */
 	public String role_id;
 
 	/**
-	 * The guild's id.
+	 * The guild's ID.
 	 */
 	public String guild_id;
 }

@@ -23,7 +23,7 @@ import sx.blah.discord.handle.obj.IUser;
 import java.time.LocalDateTime;
 
 /**
- * This is dispatched when a user is added/joins a guild.
+ * Dispatched when a member joins a guild.
  */
 public class UserJoinEvent extends GuildMemberEvent {
 
@@ -35,9 +35,9 @@ public class UserJoinEvent extends GuildMemberEvent {
 	}
 
 	/**
-	 * Gets the timestamp for when the user joined the guild.
+	 * Gets the timestamp of when the user joined the guild.
 	 *
-	 * @return The timestamp.
+	 * @return The timestamp of when the user joined the guild.
 	 */
 	public LocalDateTime getJoinTime() {
 		return joinTime;

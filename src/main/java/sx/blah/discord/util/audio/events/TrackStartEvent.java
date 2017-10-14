@@ -20,7 +20,7 @@ package sx.blah.discord.util.audio.events;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This is dispatched when a track starts playing.
+ * Dispatched when a track starts playing.
  */
 public class TrackStartEvent extends AudioPlayerEvent {
 
@@ -32,9 +32,9 @@ public class TrackStartEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This gets the track that started playing.
+	 * Gets the track that started playing.
 	 *
-	 * @return The track.
+	 * @return The track that started playing.
 	 */
 	public AudioPlayer.Track getTrack() {
 		return track;

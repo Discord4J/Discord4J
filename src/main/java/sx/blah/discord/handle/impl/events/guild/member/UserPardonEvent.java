@@ -21,10 +21,10 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This event is dispatched when a user is pardoned from a ban.
+ * Dispatched when a user's ban is pardoned.
  */
 public class UserPardonEvent extends GuildMemberEvent {
-	
+
 	public UserPardonEvent(IGuild guild, IUser user) {
 		super(guild, user);
 	}

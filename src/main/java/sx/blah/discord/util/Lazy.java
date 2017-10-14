@@ -20,7 +20,7 @@ package sx.blah.discord.util;
 import java.util.function.Supplier;
 
 /**
- * Simple implementation of lazy initialization.
+ * A wrapper which lazily-initializes an object using the given supplier.
  *
  * @param <T> The type of the object to be initialized.
  */
@@ -32,6 +32,11 @@ public class Lazy<T> {
 		this.supplier = supplier;
 	}
 
+	/**
+	 * Gets the inner object. If {@link #obj} is null, {@link #supplier} is invoked.
+	 *
+	 * @return The inner object.
+	 */
 	public T get() {
 		if (obj == null) obj = supplier.get();
 		return obj;

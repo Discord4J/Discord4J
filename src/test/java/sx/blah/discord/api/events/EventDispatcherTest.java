@@ -16,17 +16,23 @@
  */
 package sx.blah.discord.api.events;
 
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageEvent;
+
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.concurrent.Executor;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class EventDispatcherTest {
 
@@ -38,7 +44,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testRegisterIListener() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);
 		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 		int originalSize = internalRegistry.get().size();
 		eventDispatcher.registerListener((IListener<Event>) (Event event) -> {
@@ -48,8 +56,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testRegisterInstanceEventSubscribers() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 		int originalSize = internalRegistry.get().size();
 
 		StaticAndInstanceEventHandler eventHandler = new StaticAndInstanceEventHandler();
@@ -60,8 +69,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testRegisterStaticEventSubscribers() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 		int originalSize = internalRegistry.get().size();
 
 		eventDispatcher.registerListener(StaticAndInstanceEventHandler.class);
@@ -70,8 +80,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testRegisterStaticAndInstanceEventSubscribers() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 		int originalSize = internalRegistry.get().size();
 
 		StaticAndInstanceEventHandler eventHandler = new StaticAndInstanceEventHandler();
@@ -84,8 +95,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testUnregisterIListener() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 		IListener<Event> listener = (Event event) -> {
 		};
 		eventDispatcher.registerListener(listener);
@@ -96,8 +108,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testUnregisterInstanceEventSubscribers() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 
 		StaticAndInstanceEventHandler eventHandler = new StaticAndInstanceEventHandler();
 
@@ -109,8 +122,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testUnregisterStaticEventSubscribers() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 
 		eventDispatcher.registerListener(StaticAndInstanceEventHandler.class);
 		assertEquals(2, internalRegistry.get().size());
@@ -120,8 +134,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testUnregisterStaticAndInstanceEventSubscribers() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 
 		StaticAndInstanceEventHandler eventHandler = new StaticAndInstanceEventHandler();
 
@@ -136,8 +151,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testDispatch() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 		SynchronousQueue<MyEvent> interThreadExchange = new SynchronousQueue<>();
 		IListener<MyEvent> l = e -> {
 			try {
@@ -155,8 +171,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testRegisterTemporaryListener() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicReference<HashSet<Object>> internalRegistry = getInternalRegistry(eventDispatcher);
 		SynchronousQueue<MyEvent> interThreadExchange = new SynchronousQueue<>();
 		IListener<MyEvent> l = e -> {
 			try {
@@ -175,8 +192,9 @@ public class EventDispatcherTest {
 
 	@Test
 	public void testWaitFor() throws Exception {
-		EventDispatcher eventDispatcher = new EventDispatcher(null);
-		SynchronousQueue<MyEvent> interThreadExchange = new SynchronousQueue<>();
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		SynchronousQueue<MyEvent> interThreadExchange = new SynchronousQueue<>();
 		Thread thread = new Thread(() -> {
 			try {
 				MyEvent e = eventDispatcher.waitFor(MyEvent.class);
@@ -194,6 +212,44 @@ public class EventDispatcherTest {
 		eventDispatcher.dispatch(new MyEvent());
 		MyEvent result = interThreadExchange.poll(1, TimeUnit.MINUTES);
 		assertNotNull(result);
+	}
+
+	@Test
+	public void testDispatchWithCustomExecutor() throws Exception {
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicBoolean handled = new AtomicBoolean(false); //doesn't need to be atomic at all, but it's the easiest mutable boolean I can use within a subclas
+		Executor localThreadExecutor = (Runnable command) -> {
+			command.run();
+			handled.set(true);
+		};
+		eventDispatcher.registerListener(localThreadExecutor, (IListener<MyEvent>) (MyEvent event) -> {
+		});
+		eventDispatcher.dispatch(new MyEvent());
+		assertTrue(handled.get());
+	}
+
+	@Test
+	public void testDispatcherBackpressure() throws Exception {
+		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
+				1, Runtime.getRuntime().availableProcessors() * 4, 128,
+				60L, TimeUnit.SECONDS);		AtomicBoolean backpressured = new AtomicBoolean(false);
+		Thread thisThread = Thread.currentThread();
+
+		eventDispatcher.registerListener((IListener<MyEvent>) evt -> {
+			if (Thread.currentThread() == thisThread) {
+				backpressured.set(true);
+			} else {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+		});
+		while (!backpressured.get()) {
+			eventDispatcher.dispatch(new MyEvent());
+		}
 	}
 
 	private AtomicReference<HashSet<Object>> getInternalRegistry(EventDispatcher dispatcher) throws Exception {

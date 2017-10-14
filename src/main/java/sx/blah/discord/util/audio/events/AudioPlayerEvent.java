@@ -21,7 +21,7 @@ import sx.blah.discord.api.events.Event;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This represents an event which is dispatched by an {@link sx.blah.discord.util.audio.AudioPlayer}.
+ * A generic audio player-related event.
  */
 public class AudioPlayerEvent extends Event {
 
@@ -32,9 +32,9 @@ public class AudioPlayerEvent extends Event {
 	}
 
 	/**
-	 * This gets the {@link AudioPlayer} instance which dispatched this event.
+	 * Gets the audio player involved in the event.
 	 *
-	 * @return The player.
+	 * @return The audio player involved.
 	 */
 	public AudioPlayer getPlayer() {
 		return player;

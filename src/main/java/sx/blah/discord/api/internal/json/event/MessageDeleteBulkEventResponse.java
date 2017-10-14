@@ -18,17 +18,17 @@
 package sx.blah.discord.api.internal.json.event;
 
 /**
- * This is received when a bot bulk deletes
+ * The object received on the gateway when a bot bulk deletes messages.
  */
 public class MessageDeleteBulkEventResponse {
 
 	/**
-	 * The ids of the messages deleted.
+	 * The IDs of the deleted messages.
 	 */
 	public String[] ids;
 
 	/**
-	 * The id of the channel the messages belong to.
+	 * The ID of the channel the messages belonged to.
 	 */
 	public String channel_id;
 }

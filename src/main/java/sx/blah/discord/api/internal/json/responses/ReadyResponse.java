@@ -17,16 +17,40 @@
 
 package sx.blah.discord.api.internal.json.responses;
 
-import sx.blah.discord.api.internal.json.objects.PrivateChannelObject;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.objects.UnavailableGuildObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 
+/**
+ * Received on the gateway when the handshake has been completed.
+ */
 public class ReadyResponse {
+	/**
+	 * The gateway protocol version.
+	 */
 	public String v;
+	/**
+	 * The self user object.
+	 */
 	public UserObject user;
+	/**
+	 * The shard information.
+	 */
 	public int[] shard;
+	/**
+	 * The ID of the gateway session. Used for resuming.
+	 */
 	public String session_id;
-	public PrivateChannelObject[] private_channels;
+	/**
+	 * Array of DM channels the bot has.
+	 */
+	public ChannelObject[] private_channels;
+	/**
+	 * Array of unavailable guilds.
+	 */
 	public UnavailableGuildObject[] guilds;
+	/**
+	 * Array of servers connected to. Used for debugging.
+	 */
 	public String[] _trace;
 }

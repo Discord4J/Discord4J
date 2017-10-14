@@ -24,23 +24,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.StampedLock;
 
 /**
- * This is a utility class intended to help with dealing with {@link RateLimitException}s by queueing rate-limited
- * operations until they can be sent.
+ * A utility class intended to deal with {@link RateLimitException}s by queueing rate-limited operations until they can
+ * be completed.
  */
 public class RequestBuffer {
 
-	private static final ExecutorService initialExecutor = Executors.newCachedThreadPool(DiscordUtils.createDaemonThreadFactory("RequestBuffer Initial Executor"));
+	private static final ExecutorService initialExecutor = Executors.newFixedThreadPool(2, DiscordUtils.createDaemonThreadFactory("RequestBuffer Initial Executor"));
 	private static final Map<String, ScheduledExecutorService> requestServices = new ConcurrentHashMap<>();
 	private static final Map<String, List<RequestFuture>> requests = new ConcurrentHashMap<>();
 
 	/**
-	 * Here it is, the magical method that does it all.
+	 * Queues a request.
 	 *
 	 * @param request The request to be carried out.
-	 * @param <T> The expected object to be returned.
-	 * @return The future value, the future will have a value after the request has been successfully executed.
+	 * @param <T> The type of the object returned by the request.
+	 * @return The result of the request.
 	 */
 	public static <T> RequestFuture<T> request(IRequest<T> request) {
 		final RequestFuture<T> future = new RequestFuture<>(request);
@@ -73,18 +74,17 @@ public class RequestBuffer {
 	}
 
 	/**
-	 * This is a version of {@link #request(IRequest)} without a return value. No functional difference, only more
-	 * continence.
+	 * Queues a request.
 	 *
 	 * @param request The request to be carried out.
-	 * @return The request future.
+	 * @return The result of the request.
 	 */
 	public static RequestFuture<Void> request(IVoidRequest request) {
 		return request((IRequest<Void>) request); //Casted to use the correct request() method
 	}
 
 	/**
-	 * This returns the number of incomplete requests.
+	 * Gets the number of incomplete requests in the queue.
 	 *
 	 * @return The number of incomplete requests.
 	 */
@@ -97,7 +97,7 @@ public class RequestBuffer {
 	}
 
 	/**
-	 * This kills all currently queued requests.
+	 * Kills all currently queued requests.
 	 *
 	 * @return The number of requests killed.
 	 */
@@ -118,24 +118,22 @@ public class RequestBuffer {
 	}
 
 	/**
-	 * This is used to model the request, NOTE: it IS a functional interface so you are encouraged to use lambdas!
+	 * A request to be carried out by the buffer.
 	 *
-	 * @param <T> The type of object this request is expected to return.
+	 * @param <T> The type of the object returned by the request.
 	 */
 	@FunctionalInterface
 	public interface IRequest<T> {
 
 		/**
-		 * This is called when the request is attempted.
+		 * Attempts the request.
 		 *
-		 * @return The result of this request, if any.
-		 *
-		 * @throws RateLimitException
+		 * @return The result of this request.
 		 */
 		T request();
 
 		/**
-		 * This is called when this request is retried. This should NOT block.
+		 * Retries the request. This should NOT block the thread.
 		 *
 		 * @param requestFuture The future managing this request.
 		 */
@@ -143,8 +141,7 @@ public class RequestBuffer {
 	}
 
 	/**
-	 * This is used to model a request which returns nothing, NOTE: it IS a functional interface so you are encouraged
-	 * to use lambdas!
+	 * A request to be carried out by the buffer that has no result.
 	 */
 	@FunctionalInterface
 	public interface IVoidRequest extends IRequest<Void> {
@@ -155,18 +152,21 @@ public class RequestBuffer {
 		}
 
 		/**
-		 * This is called when the request is attempted.
-		 *
-		 * @throws RateLimitException
+		 * Attempts the request.
 		 */
 		void doRequest();
 	}
 
+	/**
+	 * A future that controls the execution of a request.
+	 * @param <T> The type of the object the request returns.
+	 */
 	public static class RequestFuture<T> implements Future<T>, Delayed {
 
 		private final IRequest<T> request;
 		private final RequestCallable<T> callable;
 		private volatile FutureTask<T> backing;
+		final StampedLock lock = new StampedLock();
 
 		RequestFuture(IRequest<T> request) {
 			this.request = request;
@@ -178,7 +178,7 @@ public class RequestBuffer {
 		 * Gets the delay until the next request is attempted.
 		 *
 		 * @param unit The time unit for the delay.
-		 * @return The delay.
+		 * @return The delay until the next request is attempted.
 		 */
 		@Override
 		public long getDelay(TimeUnit unit) {
@@ -189,21 +189,14 @@ public class RequestBuffer {
 		}
 
 		/**
-		 * Gets the bucket this request was ratelimited for.
+		 * Gets the bucket the request was ratelimited for.
 		 *
-		 * @return The bucket.
+		 * @return The bucket the request was ratelimited for.
 		 */
 		public String getBucket() {
 			return callable.bucket;
 		}
 
-		/**
-		 * Compares this to another delayed object.
-		 *
-		 * @param o The other object.
-		 * @return Negative if the delay on this object is less than the other object, positive if the opposite or 0
-		 * if otherwise.
-		 */
 		@Override
 		public int compareTo(Delayed o) {
 			return (int) (getDelay(TimeUnit.MILLISECONDS)-o.getDelay(TimeUnit.MILLISECONDS));
@@ -226,32 +219,36 @@ public class RequestBuffer {
 
 		@Override
 		public T get() {
+			long stamp = lock.readLock();
 			try {
-				while (!isDone() && !isCancelled()) {}
-
 				return backing.get();
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
+			} finally {
+				lock.unlockRead(stamp);
 			}
 
 			return null;
 		}
 
 		@Override
-		public T get(long timeout, TimeUnit unit) {
+		public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
 			long timeoutTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
-			try {
-				while (!isDone() && !isCancelled() && System.currentTimeMillis() <= timeoutTime) {}
-
+			long stamp = lock.tryReadLock(timeout, unit);
+			
+			if (!lock.validate(stamp)) {
 				if (System.currentTimeMillis() > timeoutTime)
 					throw new TimeoutException();
-
+		
 				if (isCancelled())
 					throw new InterruptedException();
-
+			}
+			try {
 				return backing.get();
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.UTIL, "Exception caught attempting to handle a ratelimited request", e);
+			} finally {
+				lock.unlockRead(stamp);
 			}
 
 			return null;
@@ -268,6 +265,7 @@ public class RequestBuffer {
 
 			final IRequest<T> request;
 			final RequestFuture<T> future;
+			final long stamp;
 
 			volatile boolean firstAttempt = true;
 			volatile long timeForNextRequest = -1;
@@ -277,6 +275,7 @@ public class RequestBuffer {
 			RequestCallable(IRequest<T> request, RequestFuture<T> future) {
 				this.request = request;
 				this.future = future;
+				stamp = future.lock.writeLock();
 			}
 
 			@Override
@@ -289,6 +288,7 @@ public class RequestBuffer {
 						T value = request.request();
 						timeForNextRequest = -1;
 						rateLimited = false;
+						future.lock.unlockWrite(stamp);
 						return value;
 					}
 				} catch (RateLimitException e) {
@@ -299,7 +299,10 @@ public class RequestBuffer {
 				} catch (Exception e) {
 					Discord4J.LOGGER.warn(LogMarkers.UTIL, "RequestBuffer handled an uncaught exception!", e);
 				}
-
+				
+				if (!rateLimited && future.lock.validate(stamp))
+					future.lock.unlockWrite(stamp);
+				
 				return null;
 			}
 		}

@@ -24,20 +24,51 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
+/**
+ * Used to interact with the {@link Opus} wrapper.
+ */
 public class OpusUtil {
 
+	/**
+	 * The sample rate in Hz of the opus audio sent and received from Discord.
+	 */
 	public static final int OPUS_SAMPLE_RATE = 48000;
+	/**
+	 * The frame size of the opus audio sent and received from Discord.
+	 */
 	public static final int OPUS_FRAME_SIZE = 960;
+	/**
+	 * The time in milliseconds of each frame of opus audio sent and received from Discord.
+	 */
 	public static final int OPUS_FRAME_TIME = 20;
 
+	/**
+	 * Creates a new opus encoder.
+	 *
+	 * @param channels The number of channels the encoder should expect to encode. (mono or stereo)
+	 * @return The created opus encoder.
+	 */
 	public static PointerByReference newEncoder(int channels) {
 		return Opus.INSTANCE.opus_encoder_create(OPUS_SAMPLE_RATE, channels, Opus.OPUS_APPLICATION_AUDIO, IntBuffer.allocate(4));
 	}
 
+	/**
+	 * Creates a new opus decoder.
+	 *
+	 * @param channels The number of channels the decoder should excpet to decode. (mono or stereo)
+	 * @return The created opus decoder.
+	 */
 	public static PointerByReference newDecoder(int channels) {
 		return Opus.INSTANCE.opus_decoder_create(OPUS_SAMPLE_RATE, channels, IntBuffer.allocate(4));
 	}
 
+	/**
+	 * Encodes raw pcm data using the given encoder.
+	 *
+	 * @param encoder The encoder to encode the audio with.
+	 * @param pcm The audio to encode.
+	 * @return The opus-encoded audio.
+	 */
 	public static byte[] encode(PointerByReference encoder, byte[] pcm) {
 		ShortBuffer nonEncodedBuffer = ShortBuffer.allocate(pcm.length / 2);
 		ByteBuffer encodedBuffer = ByteBuffer.allocate(4096);
@@ -57,6 +88,13 @@ public class OpusUtil {
 		return encoded;
 	}
 
+	/**
+	 * Decodes opus audio using the given decoder.
+	 *
+	 * @param decoder The decoder to decode the audio with.
+	 * @param opus The audio to decode.
+	 * @return The decoded pcm data.
+	 */
 	public static byte[] decode(PointerByReference decoder, byte[] opus) {
 		ShortBuffer decodedBuffer = ShortBuffer.allocate(4096);
 

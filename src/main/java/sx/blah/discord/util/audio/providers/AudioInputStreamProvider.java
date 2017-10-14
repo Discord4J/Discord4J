@@ -28,11 +28,17 @@ import javax.sound.sampled.AudioInputStream;
 import java.io.IOException;
 
 /**
- * This represents an {@link IAudioProvider} implementation which wraps an {@link AudioInputStream}.
+ * An audio provider which wraps an {@link AudioInputStream}.
  */
 public class AudioInputStreamProvider implements IAudioProvider {
 
+	/**
+	 * The underlying audio stream.
+	 */
 	private final AudioInputStream stream;
+	/**
+	 * Whether the stream is closed.
+	 */
 	private volatile boolean isClosed = false;
 
 	public AudioInputStreamProvider(AudioInputStream stream) {
@@ -40,9 +46,9 @@ public class AudioInputStreamProvider implements IAudioProvider {
 	}
 
 	/**
-	 * Gets the stream associated with this provider.
+	 * Gets the underlying audio stream.
 	 *
-	 * @return The stream.
+	 * @return The underlying audio stream.
 	 */
 	public AudioInputStream getStream() {
 		return stream;

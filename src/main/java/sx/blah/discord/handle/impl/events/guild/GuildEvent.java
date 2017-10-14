@@ -21,20 +21,20 @@ import sx.blah.discord.api.events.Event;
 import sx.blah.discord.handle.obj.IGuild;
 
 /**
- * This represents a generic guild event.
+ * A generic guild-related event.
  */
 public abstract class GuildEvent extends Event {
-	
+
 	private final IGuild guild;
-	
+
 	public GuildEvent(IGuild guild) {
 		this.guild = guild;
 	}
-	
+
 	/**
-	 * This gets the guild object involved in this event.
+	 * Gets the guild involved in the event.
 	 *
-	 * @return The guild.
+	 * @return The guild involved.
 	 */
 	public IGuild getGuild() {
 		return guild;

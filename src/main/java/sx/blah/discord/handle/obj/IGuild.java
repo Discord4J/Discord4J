@@ -18,437 +18,390 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.audio.IAudioManager;
-import sx.blah.discord.handle.audio.impl.AudioManager;
-import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.Ban;
+import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * This class defines a guild/server/clan/whatever it's called.
+ * A Discord guild.
  */
 public interface IGuild extends IDiscordObject<IGuild> {
 
 	/**
-	 * Gets the user id for the owner of this guild.
+	 * Gets the unique snowflake ID of the owner of the guild.
 	 *
-	 * @return The owner id.
+	 * @return The unique snowflake ID of the owner of the guild.
 	 */
-	String getOwnerID();
+	long getOwnerLongID();
 
 	/**
-	 * Gets the user object for the owner of this guild.
+	 * Gets the owner of the guild.
 	 *
-	 * @return The owner.
+	 * @return The owner of the guild.
 	 */
 	IUser getOwner();
 
 	/**
-	 * Gets the icon id for this guild.
+	 * Gets the guild's icon hash.
 	 *
-	 * @return The icon id.
+	 * @return The guild's icon hash.
 	 */
 	String getIcon();
 
 	/**
-	 * Gets the direct link to the guild's icon.
+	 * Gets the guild's icon URL.
 	 *
-	 * @return The icon url.
+	 * @return The guild's icon URL.
 	 */
 	String getIconURL();
 
 	/**
-	 * Gets all the channels on the server.
+	 * Gets the guild's text channels sorted by their effective positions.
 	 *
-	 * @return All channels on the server.
+	 * @return The guild's text channels sorted by their effective positions.
 	 */
 	List<IChannel> getChannels();
 
 	/**
-	 * Gets a channel on the guild by a specific channel id.
+	 * Gets a text channel by its unique snowflake ID from the guild's text channel cache.
 	 *
-	 * @param id The ID of the channel you want to find.
-	 * @return The channel with given ID.
+	 * @param id The ID of the desired channel.
+	 * @return The text channel with the provided ID (or null if one was not found).
 	 */
-	IChannel getChannelByID(String id);
+	IChannel getChannelByID(long id);
 
 	/**
-	 * Gets all the users connected to the guild.
+	 * Gets the guild's members.
 	 *
-	 * @return All users connected to the guild.
+	 * @return The guild's members.
 	 */
 	List<IUser> getUsers();
 
 	/**
-	 * Gets a user by its id in the guild.
+	 * Gets a user by its unique snowflake ID from the guild's user cache.
 	 *
-	 * @param id ID of the user you want to find.
-	 * @return The user with given ID.
+	 * @param id The ID of the desired user.
+	 * @return The user with the provided ID (or null if one was not found).
 	 */
-	IUser getUserByID(String id);
+	IUser getUserByID(long id);
 
 	/**
-	 * Gets all the channels which has a name matching the provided one.
+	 * Gets a list of text channels by their name.
 	 *
-	 * @param name The name to search for.
-	 * @return The list of matching channels.
+	 * @param name The case-sensitive name of the desired text channels.
+	 * @return A list of text channels with the provided name.
 	 */
 	List<IChannel> getChannelsByName(String name);
 
 	/**
-	 * Gets all the voice channels which has a name matching the provided one.
+	 * Gets a list of voice channels by their name.
 	 *
-	 * @param name The name to search for.
-	 * @return The list of matching channels.
+	 * @param name The case-sensitive name of the desired voice channels.
+	 * @return A list of voice channels with the provided name.
 	 */
 	List<IVoiceChannel> getVoiceChannelsByName(String name);
 
 	/**
-	 * Gets all the users which have a display name (i.e. nickname if present else discord name) which matches the
-	 * provided name. This is effectively the same as #getUsersByName(name, true).
+	 * Gets a list of users by their name.
 	 *
-	 * @param name The name to search for.
-	 * @return The list of matching users.
+	 * <p>This is equivalent to <code>getUsersByName(name, true)</code>
+	 *
+	 * @param name The case-sensitive name of the desired users.
+	 * @return A list of users with the provided name.
 	 */
 	List<IUser> getUsersByName(String name);
 
 	/**
-	 * Gets all the users which have a name which matches the.
-	 * provided name.
+	 * Gets a list of users by their name.
 	 *
-	 * @param name The name to search for.
-	 * @param includeNicknames Whether to check nicknames in addition to normal names.
-	 * @return The list of matching users.
+	 * @param name The name of the desired users.
+	 * @param includeNicknames Whether to match nicknames as well as usernames.
+	 * @return A list of users with the provided name.
 	 */
 	List<IUser> getUsersByName(String name, boolean includeNicknames);
 
 	/**
-	 * Gets all the users who have the provided role.
+	 * Gets a list of users with the given role.
 	 *
-	 * @param role The role to search with.
-	 * @return The list of matching users.
+	 * @param role The role of the desired users.
+	 * @return A list of users with the given role.
 	 */
 	List<IUser> getUsersByRole(IRole role);
 
 	/**
 	 * Gets the name of the guild.
 	 *
-	 * @return The name of the guild
+	 * @return The name of the guild.
 	 */
 	String getName();
 
 	/**
-	 * Gets the roles contained in this guild.
+	 * Gets the guild's roles sorted by their effective positions.
 	 *
-	 * @return The list of roles in the guild.
+	 * @return The guild's roles sorted by their effective positions.
 	 */
 	List<IRole> getRoles();
 
 	/**
-	 * Gets the roles a user is a part of.
+	 * Gets the roles for the given user.
 	 *
-	 * @param user The user to check the roles for.
-	 * @return The roles.
+	 * @param user The user to get the roles for.
+	 * @return The roles for the given user.
 	 */
 	List<IRole> getRolesForUser(IUser user);
 
 	/**
-	 * Gets a role object for its unique id.
+	 * Gets a role by its unique snowflake ID from the guild's role cache.
 	 *
-	 * @param id The role id of the desired role.
-	 * @return The role, or null if not found.
+	 * @param id The ID of the desired role.
+	 * @return The role with the provided ID (or null if one was not found).
 	 */
-	IRole getRoleByID(String id);
+	IRole getRoleByID(long id);
 
 	/**
-	 * This finds all the roles which has the same name as the provided one.
+	 * Gets a list of roles by their name.
 	 *
-	 * @param name The name to search for.
-	 * @return The roles with a matching name.
+	 * @param name The case-sensitive name of the desired roles.
+	 * @return A list of roles with the provided name.
 	 */
 	List<IRole> getRolesByName(String name);
 
 	/**
-	 * Gets the voice channels in this guild.
+	 * Gets the guild's voice channels sorted by their effective positions.
 	 *
-	 * @return The voice channels.
+	 * @return The guild's vocie channels sorted by their effective positions.
 	 */
 	List<IVoiceChannel> getVoiceChannels();
 
 	/**
-	 * Gets a voice channel for a give id.
+	 * Gets a voice channel by its unique snowflake ID from the guild's voice channel cache.
 	 *
-	 * @param id The channel id.
-	 * @return The voice channel (or null if not found).
+	 * @param id The ID of the desired channel.
+	 * @return The voice channel with the provided ID (or null if one was not found).
 	 */
-	IVoiceChannel getVoiceChannelByID(String id);
+	IVoiceChannel getVoiceChannelByID(long id);
 
 	/**
-	 * Gets the voice channel that the bot is currently connected to.
+	 * Gets the voice channel in the guild that the bot is connected to.
 	 *
-	 * @return the voice channel (or null if the bot is not connected to a voice channel in this guild)
+	 * @return The voice channel in the guild that the bot is connected to (or null if the bot is not connected to a
+	 * voice channel in the guild).
 	 */
 	IVoiceChannel getConnectedVoiceChannel();
 
 	/**
-	 * Gets the channel where afk users are placed.
+	 * Gets the voice channel where AFK users are moved to.
 	 *
-	 * @return The voice channel (or null if nonexistant).
+	 * @return The voice channel where AFK users are moved to (or null if one is not set).
 	 */
 	IVoiceChannel getAFKChannel();
 
 	/**
-	 * Gets the timeout (in seconds) before a user is placed in the AFK channel.
+	 * Gets the timeout (in seconds) before a user is moved to the AFK voice channel.
 	 *
-	 * @return The timeout.
+	 * @return The timeout (in seconds) before a user is moved to the AFK voice channel.
 	 */
 	int getAFKTimeout();
 
 	/**
-	 * Creates a new role in this guild.
+	 * Creates a role in the guild.
 	 *
-	 * @return The new role.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @return The created role.
 	 */
 	IRole createRole();
 
 	/**
-	 * Retrieves the list of banned users from this guild.
+	 * Gets the list of users who are banned from the guild.
 	 *
-	 * @return The list of banned users.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @return The list of users who are banned from the guild.
 	 */
 	List<IUser> getBannedUsers();
 
 	/**
-	 * Bans a user from this guild.
+	 * Gets the list of bans for the guild.
+	 *
+	 * @return The list of bans for the guild.
+	 */
+	List<Ban> getBans();
+
+	/**
+	 * Bans a user from the guild.
 	 *
 	 * @param user The user to ban.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
 	void banUser(IUser user);
 
 	/**
-	 * Bans a user from this guild.
+	 * Bans a user from the guild.
 	 *
 	 * @param user The user to ban.
 	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
 	void banUser(IUser user, int deleteMessagesForDays);
 
 	/**
-	 * Bans a user from this guild.
+	 * Bans a user from the guild.
 	 *
-	 * @param userID The snowflake ID of the user.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param user The user to ban.
+	 * @param reason The reason for banning. This may be at most {@value Ban#MAX_REASON_LENGTH} characters long.
 	 */
-	void banUser(String userID);
+	void banUser(IUser user, String reason);
 
 	/**
-	 * Bans a user from this guild.
+	 * Bans a user from the guild.
 	 *
-	 * @param userID The snowflake ID of the user.
+	 * @param user The user to ban.
+	 * @param reason The reason for banning. This may be at most {@value Ban#MAX_REASON_LENGTH} characters long.
 	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
-	void banUser(String userID, int deleteMessagesForDays);
+	void banUser(IUser user, String reason, int deleteMessagesForDays);
 
 	/**
-	 * This removes a ban on a user.
+	 * Bans a user from the guild.
+	 *
+	 * @param userID The snowflake ID of the user to ban.
+	 */
+	void banUser(long userID);
+
+	/**
+	 * Bans a user from the guild.
+	 *
+	 * @param userID The snowflake ID of the user to ban.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 */
+	void banUser(long userID, int deleteMessagesForDays);
+
+	/**
+	 * Bans a user from the guild.
+	 *
+	 * @param userID The snowflake ID of the user to ban.
+	 * @param reason The reason for banning. This may be at most {@value Ban#MAX_REASON_LENGTH} characters long.
+	 */
+	void banUser(long userID, String reason);
+
+	/**
+	 * Bans a user from the guild.
+	 *
+	 * @param userID The snowflake ID of the user to ban.
+	 * @param reason The reason for banning. This may be at most {@value Ban#MAX_REASON_LENGTH} characters long.
+	 * @param deleteMessagesForDays The number of days to delete messages from this user for.
+	 */
+	void banUser(long userID, String reason, int deleteMessagesForDays);
+
+	/**
+	 * Unbans a user.
 	 *
 	 * @param userID The user to unban.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
-	void pardonUser(String userID);
+	void pardonUser(long userID);
 
 	/**
 	 * Kicks a user from the guild.
 	 *
 	 * @param user The user to kick.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
 	void kickUser(IUser user);
 
 	/**
-	 * Edits the roles a user is a part of.
+	 * Kicks a user from the guild.
+	 *
+	 * @param user The user to kick.
+	 * @param reason The reason for kicking. This may be at most {@value Ban#MAX_REASON_LENGTH} characters long.
+	 */
+	void kickUser(IUser user, String reason);
+
+	/**
+	 * Edits the roles a user has.
 	 *
 	 * @param user The user to edit the roles for.
 	 * @param roles The roles for the user to have.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
 	 */
 	void editUserRoles(IUser user, IRole[] roles);
 
 	/**
-	 * Sets whether a user should be deafened.
+	 * Sets whether a user is deafened.
 	 *
-	 * @param user The user affected.
-	 * @param deafen True to deafen the user, false to undeafen the user.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @param user The user to deafen or undeafen.
+	 * @param deafen Whether the user is deafened.
 	 */
 	void setDeafenUser(IUser user, boolean deafen);
 
 	/**
-	 * Sets whether a user should be muted.
+	 * Sets whether a user is muted.
 	 *
-	 * @param user The user affected.
-	 * @param mute True to mute the user, false to unmute the user.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @param user The user to mute or unmute.
+	 * @param mute Whether the user is muted.
 	 */
 	void setMuteUser(IUser user, boolean mute);
 
 	/**
-	 * Sets a user's nickname in this guild.
+	 * Sets a user's nickname in the guild.
 	 *
-	 * @param user The user affected.
+	 * @param user The user to set the nickname for.
 	 * @param nick The user's new nickname or null to remove the nickname.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws DiscordException
-	 * @throws RateLimitException
 	 */
 	void setUserNickname(IUser user, String nick);
 
 	/**
-	 * Edits all properties of this guild.
+	 * Edits all properties of the guild.
 	 *
-	 * @param name The new name of the guild.
-	 * @param region The new region of the guild.
-	 * @param level The new verification level of the guild.
-	 * @param icon The new icon of the guild.
-	 * @param afkChannel The new afk channel of the guild.
-	 * @param afkTimeout The new afk timeout of the guild.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param name The name of the guild.
+	 * @param region The region of the guild.
+	 * @param level The verification level of the guild.
+	 * @param icon The icon of the guild.
+	 * @param afkChannel The afk channel of the guild.
+	 * @param afkTimeout The afk timeout of the guild.
 	 */
 	void edit(String name, IRegion region, VerificationLevel level, Image icon, IVoiceChannel afkChannel, int afkTimeout);
 
 	/**
 	 * Changes the name of the guild.
 	 *
-	 * @param name The new name of the guild.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param name The name of the guild.
 	 */
 	void changeName(String name);
 
 	/**
 	 * Changes the region of the guild.
 	 *
-	 * @param region The new region of the guild.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param region The region of the guild.
 	 */
 	void changeRegion(IRegion region);
 
 	/**
 	 * Changes the verification level of the guild.
 	 *
-	 * @param verification The new verification level of the guild.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param verification The verification level of the guild.
 	 */
 	void changeVerificationLevel(VerificationLevel verification);
 
 	/**
-	 * Changes the name of the guild.
+	 * Changes the icon of the guild.
 	 *
-	 * @param icon The new icon of the guild (or null to remove it).
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param icon The icon of the guild (or null to remove it).
 	 */
 	void changeIcon(Image icon);
 
 	/**
 	 * Changes the AFK voice channel of the guild.
 	 *
-	 * @param channel The new AFK voice channel of the guild (or null to remove it).
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param channel The AFK voice channel of the guild (or null to remove it).
 	 */
 	void changeAFKChannel(IVoiceChannel channel);
 
 	/**
 	 * Changes the AFK timeout for the guild.
 	 *
-	 * @param timeout The new AFK timeout for the guild.
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param timeout The AFK timeout for the guild.
 	 */
 	void changeAFKTimeout(int timeout);
 
 	/**
-	 * This deletes this guild if and only if you are its owner, otherwise it throws a {@link MissingPermissionsException}.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
-	 *
-	 * @deprecated Marked for removal. Can never succeed as a bot cannot own a guild.
-	 */
-	@Deprecated
-	void deleteGuild();
-
-	/**
-	 * This leaves the guild, NOTE: it throws a {@link DiscordException} if you are the guilds owner, use
-	 * {@link #deleteGuild()} instead!
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 *
-	 * @deprecated Use {@link #leave()} instead.
-	 */
-	@Deprecated
-	void leaveGuild();
-
-	/**
 	 * Leaves the guild.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
 	 */
 	void leave();
 
@@ -457,180 +410,231 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param name The name of the new channel. MUST be between 2-100 characters long.
 	 * @return The new channel.
-	 *
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
 	 */
 	IChannel createChannel(String name);
 
 	/**
 	 * Creates a new voice channel.
 	 *
-	 * @param name The name of the new channel. MUST be between 2-100 characters long.
-	 * @return The new channel.
-	 *
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
+	 * @param name The name of the new voice channel. MUST be between 2-100 characters long.
+	 * @return The new voice channel.
 	 */
 	IVoiceChannel createVoiceChannel(String name);
 
 	/**
-	 * Gets the region this guild is located in.
+	 * Gets the guild's voice region.
 	 *
-	 * @return The region.
+	 * @return The guild's voice region.
 	 */
 	IRegion getRegion();
 
 	/**
-	 * Gets the verification level of this guild.
+	 * Gets the guild's verification level.
 	 *
-	 * @return The verification level.
+	 * @return The guild's verification level.
 	 */
 	VerificationLevel getVerificationLevel();
 
 	/**
-	 * This retrieves the @everyone role which exists on all guilds.
+	 * Gets the @everyone role for the guild.
 	 *
-	 * @return The object representing the @everyone role.
+	 * @return The @everyone role for the guild.
 	 */
 	IRole getEveryoneRole();
 
 	/**
-	 * This gets the general channel for this guild. NOTE: This gets the default (general) channel created by discord,
-	 * so it may not actually be named 'general'.
+	 * Gets the default channel for the guild.
 	 *
 	 * @return The default/general channel.
+	 *
+	 * @deprecated Use {@link #getDefaultChannel()} instead.
 	 */
+	@Deprecated
 	IChannel getGeneralChannel();
 
 	/**
-	 * This gets all the currently available invites for this guild.
+	 * Gets the channel in the guild with the highest position that the bot user can read.
 	 *
-	 * @return The list of all available invites.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
+	 * @return The channel in the guild with the highest position that the bot user can read.
 	 */
-	List<IInvite> getInvites();
+	IChannel getDefaultChannel();
 
 	/**
-	 * This reorders the position of the roles in this guild.
+	 * Gets all of the invites to the guild.
 	 *
-	 * @param rolesInOrder ALL the roles in the server, in the order of desired position. The first role gets position 1, second position 2, etc.
+	 * @return All of the invites to the guild.
+	 */
+	List<IExtendedInvite> getExtendedInvites();
+
+	/**
+	 * Reorders the position of the roles in the guild.
 	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
-	 * @throws MissingPermissionsException
+	 * @param rolesInOrder All the roles in the guild, in order. The lowest role is at position <code>0</code>.
 	 */
 	void reorderRoles(IRole... rolesInOrder);
 
 	/**
-	 * Gets the amount of users that would be pruned for the given amount of days.
+	 * Gets the number of users that would be pruned for the given number of days of inactivity.
 	 *
-	 * @param days The amount of days of inactivity to lead to a prune.
-	 * @return The amount of users.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @param days The number of days of inactivity.
+	 * @return The number of users that would be pruned for the given number of days of inactivity.
 	 */
 	int getUsersToBePruned(int days);
 
 	/**
-	 * Prunes guild users for the given amount of days.
+	 * Prunes guild users for the given number of days of inactivity.
 	 *
-	 * @param days The amount of days of inactivity to lead to a prune.
-	 * @return The amount of users.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @param days The number of days of inactivity.
+	 * @return The number of users pruned.
 	 */
 	int pruneUsers(int days);
 
 	/**
-	 * Checks to see if the this guild is deleted.
+	 * Gets whether the guild is deleted.
 	 *
-	 * @return True if this guild is deleted.
+	 * @return Whether the guild is deleted.
 	 */
 	boolean isDeleted();
 
 	/**
-	 * Gets the {@link AudioManager} instance for this guild.
+	 * Gets the guild's audio manager.
 	 *
-	 * @return The audio manager for this guild.
+	 * @return The guild's audio manager.
 	 */
 	IAudioManager getAudioManager();
 
 	/**
-	 * This gets the timestamp for when the provided user joined the guild.
+	 * This gets the timestamp of when the given user joined the guild.
 	 *
 	 * @param user The user to get the timestamp for.
-	 * @return The timestamp.
-	 *
-	 * @throws DiscordException
+	 * @return The timestamp of when the given user joined the guild.
 	 */
 	LocalDateTime getJoinTimeForUser(IUser user);
 
 	/**
-	 * This gets a message by its id.
+	 * Gets a message by its unique snowflake ID from the guild's message cache.
 	 *
-	 * @param id The message id.
-	 * @return The message or null if not found.
+	 * @param id The ID of the desired message.
+	 * @return The message with the provided ID (or null if one was not found).
 	 */
-	IMessage getMessageByID(String id);
+	IMessage getMessageByID(long id);
 
 	/**
-	 * This gets all the emojis in the guild.
+	 * Gets the guild's emojis.
 	 *
-	 * @return A list of emojis.
+	 * @return The guild's emojis.
 	 */
 	List<IEmoji> getEmojis();
 
 	/**
-	 * This gets an emoji by its ID.
+	 * Gets an emoji by its unique snowflake ID from the guild's emoji cache.
 	 *
-	 * @param id The ID.
-	 * @return The emoji.
+	 * @param id The ID of the desired emoji.
+	 * @return The emoji with the provided ID (or null if one was not found).
 	 */
-	IEmoji getEmojiByID(String id);
+	IEmoji getEmojiByID(long id);
 
 	/**
-	 * This gets an emoji by its name.
+	 * Gets a custom emoji by its name.
 	 *
-	 * @param name The name, <b>without colons</b>.
-	 * @return The emoji.
+	 * @param name The name of the desired emoji.
+	 * @return The emoji with the given name (or null if one was not found).
 	 */
 	IEmoji getEmojiByName(String name);
 
 	/**
-	 * This gets a webhook by its id.
+	 * Gets a webhook by its unique snowflake ID from the channels's webhook cache.
 	 *
-	 * @param id The webhook id.
-	 * @return The webhook or null if not found.
+	 * @param id The ID of the desired webhook.
+	 * @return The webhook with the provided ID (or null if one was not found).
 	 */
-	IWebhook getWebhookByID(String id);
+	IWebhook getWebhookByID(long id);
 
 	/**
-	 * This finds all the webhooks which have the same name as the provided one.
+	 * Gets a list of webhooks by their name.
 	 *
-	 * @param name The name to search for.
-	 * @return The webhooks with a matching name.
+	 * @param name The name of the desired webhooks.
+	 * @return A list of webhooks with the provided name.
 	 */
 	List<IWebhook> getWebhooksByName(String name);
 
 	/**
-	 * This returns all the webhooks for this guild.
+	 * Gets all of the guild's webhooks.
 	 *
-	 * @return All webhooks for this guild.
+	 * @return All of the guild's webhooks.
 	 */
 	List<IWebhook> getWebhooks();
 
 	/**
-	 * Get the total amount of members on the guild
+	 * Gets the total number of members the guild has.
 	 *
-	 * @return The count of members on the guild
+	 * <p>Note: This is not necessarily the same as <code>getUsers().getSize()</code> because users are asynchronously
+	 * retrieved from Discord.
+	 *
+	 * @return The total number of members the guild has.
 	 */
 	int getTotalMemberCount();
+
+	/**
+	 * Gets the full audit log for the guild.
+	 *
+	 * @return The full audit log for the guild.
+	 */
+	AuditLog getAuditLog();
+
+	/**
+	 * Gets the audit log with entries for the given action type.
+	 *
+	 * @param actionType The action type of the desired entries.
+	 * @return The audit log with entries for the given action type.
+	 */
+	AuditLog getAuditLog(ActionType actionType);
+
+	/**
+	 * Gets the audit log with entries with the given responsible user.
+	 *
+	 * @param user The responsible user of the desired entries.
+	 * @return The audit log with entries with the given responsible user.
+	 */
+	AuditLog getAuditLog(IUser user);
+
+	/**
+	 * Gets the audit log with entries with the given responsible user and the given action type.
+	 *
+	 * @param user The responsible user of the desired entries.
+	 * @param actionType The action type of the desired entries.
+	 * @return The audit log with entries with the given responsible user and the given action type.
+	 */
+	AuditLog getAuditLog(IUser user, ActionType actionType);
+
+	/**
+	 * Creates a new category.
+	 *
+	 * @param name The name of the new category. MUST be between 2-100 characters long.
+	 * @return The new category.
+	 */
+	ICategory createCategory(String name);
+
+	/**
+	 * Gets the guild's categories sorted by their effective positions.
+	 *
+	 * @return The guild's categories sorted by their effective positions.
+	 */
+	List<ICategory> getCategories();
+
+	/**
+	 * Gets a category by its unique snowflake ID from the guild's category cache.
+	 *
+	 * @param id The ID of the desired category.
+	 * @return The category with the provided ID (or null if one was not found).
+	 */
+	ICategory getCategoryByID(long id);
+
+	/**
+	 * Gets a list of categories by their name.
+	 *
+	 * @param name The case-sensitive name of the desired categories.
+	 * @return A list of categories with the provided name.
+	 */
+	List<ICategory> getCategoriesByName(String name);
 }

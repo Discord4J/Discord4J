@@ -21,7 +21,7 @@ import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
- * This event is dispatched whenever {@link AudioPlayer#addProcessor(IAudioProcessor)} is called.
+ * Dispatched when {@link AudioPlayer#addProcessor(IAudioProcessor)} is called.
  */
 public class ProcessorAddEvent extends AudioPlayerEvent {
 
@@ -33,9 +33,9 @@ public class ProcessorAddEvent extends AudioPlayerEvent {
 	}
 
 	/**
-	 * This gets the processor added to the {@link AudioPlayer} instance.
+	 * Gets the audio processor that was added.
 	 *
-	 * @return The processor.
+	 * @return The audio processor.
 	 */
 	public IAudioProcessor getProcessor() {
 		return processor;

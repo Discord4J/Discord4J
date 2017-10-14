@@ -22,23 +22,53 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.handle.obj.IVoiceState;
 
+/**
+ * The default implementation of {@link IVoiceState}.
+ */
 public class VoiceState implements IVoiceState {
 
+	/**
+	 * The guild of the voice state.
+	 */
 	private final IGuild guild;
-	private final IVoiceChannel channel;
+	/**
+	 * The user of the voice state.
+	 */
 	private final IUser user;
+	/**
+	 * The session ID of the voice state.
+	 */
 	private final String sessionID;
+	/**
+	 * The voice channel of the voice state.
+	 */
+	private IVoiceChannel channel;
+	/**
+	 * Whether the user of the voice state is deafened on the guild.
+	 */
 	private boolean isDeafened;
+	/**
+	 * Whether the user of the voice state is muted on the guild.
+	 */
 	private boolean isMuted;
-	private final boolean isSelfDeafened;
-	private final boolean isSelfMuted;
+	/**
+	 * Whether the user of the voice state is deafened on the client.
+	 */
+	private boolean isSelfDeafened;
+	/**
+	 * Whether the user of the voice state is muted on the client.
+	 */
+	private boolean isSelfMuted;
+	/**
+	 * Whether the user of the voice state is muted by the bot user.
+	 */
 	private final boolean isSuppressed;
 
 	public VoiceState(IGuild guild, IVoiceChannel channel, IUser user, String sessionID, boolean isDeafened, boolean isMuted, boolean isSelfDeafened, boolean isSelfMuted, boolean isSuppressed) {
 		this.guild = guild;
-		this.channel = channel;
 		this.user = user;
 		this.sessionID = sessionID;
+		this.channel = channel;
 		this.isDeafened = isDeafened;
 		this.isMuted = isMuted;
 		this.isSelfDeafened = isSelfDeafened;
@@ -60,6 +90,15 @@ public class VoiceState implements IVoiceState {
 		return channel;
 	}
 
+	/**
+	 * Sets the voice channel of the voice state.
+	 *
+	 * @param channel The voice channel.
+	 */
+	public void setChannel(IVoiceChannel channel) {
+		this.channel = channel;
+	}
+
 	@Override
 	public IUser getUser() {
 		return user;
@@ -75,6 +114,11 @@ public class VoiceState implements IVoiceState {
 		return isDeafened;
 	}
 
+	/**
+	 * Sets the deafened state of the voice state.
+	 *
+	 * @param isDeafened The deafened state.
+	 */
 	public void setDeafened(boolean isDeafened) {
 		this.isDeafened = isDeafened;
 	}
@@ -84,6 +128,11 @@ public class VoiceState implements IVoiceState {
 		return isMuted;
 	}
 
+	/**
+	 * Sets the muted state of the voice state.
+	 *
+	 * @param isMuted The muted state.
+	 */
 	public void setMuted(boolean isMuted) {
 		this.isMuted = isMuted;
 	}
@@ -93,9 +142,27 @@ public class VoiceState implements IVoiceState {
 		return isSelfDeafened;
 	}
 
+	/**
+	 * Sets the self deafened state of the voice state.
+	 *
+	 * @param isSelfDeafened The self deafened state.
+	 */
+	public void setSelfDeafened(boolean isSelfDeafened) {
+		this.isSelfDeafened = isSelfDeafened;
+	}
+
 	@Override
 	public boolean isSelfMuted() {
 		return isSelfMuted;
+	}
+
+	/**
+	 * Sets the self muted state of the voice state.
+	 *
+	 * @param isSelfMuted The self muted state.
+	 */
+	public void setSelfMuted(boolean isSelfMuted) {
+		this.isSelfMuted = isSelfMuted;
 	}
 
 	@Override

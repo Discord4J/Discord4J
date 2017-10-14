@@ -20,7 +20,7 @@ package sx.blah.discord.api.internal.json.event;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 
 /**
- * This is a generic object representing all guild ban events.
+ * The object received on the gateway when a guild member is banned.
  */
 public class GuildBanEventResponse {
 

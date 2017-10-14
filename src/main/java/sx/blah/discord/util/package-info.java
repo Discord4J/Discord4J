@@ -16,6 +16,6 @@
  */
 
 /**
- * This package contains utilities for dealing with the Discord api.
+ * This package contains utility classes for Discord4J.
  */
 package sx.blah.discord.util;

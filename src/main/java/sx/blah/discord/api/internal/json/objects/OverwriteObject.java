@@ -22,7 +22,7 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class OverwriteObject {
 	/**
-	 * The id of the overwrite.
+	 * The ID of the overwrite.
 	 */
 	public String id;
 	/**
@@ -30,11 +30,11 @@ public class OverwriteObject {
 	 */
 	public String type;
 	/**
-	 * The permissions allowed by this overwrite.
+	 * The permissions explicitly allowed by this overwrite.
 	 */
 	public int allow;
 	/**
-	 * The permissions denied by this overwrite.
+	 * The permissions explicitly denied by this overwrite.
 	 */
 	public int deny;
 

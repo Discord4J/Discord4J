@@ -20,7 +20,7 @@ package sx.blah.discord.api.internal.json.event;
 import sx.blah.discord.api.internal.json.objects.EmojiObject;
 
 /**
- * The response when the emoji list for a guild updates.
+ * The object received on the gateway when the emoji list for a guild is updated.
  */
 public class GuildEmojiUpdateResponse {
 
@@ -30,7 +30,7 @@ public class GuildEmojiUpdateResponse {
 	public String guild_id;
 
 	/**
-	 * The emoji objects.
+	 * The new array of emojis.
 	 */
 	public EmojiObject[] emojis;
 

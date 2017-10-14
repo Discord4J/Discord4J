@@ -27,16 +27,17 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * This is a utility class to help create asynchronous and synchronous interactions with the discord api.<br>
- * This builder works on the following model:<br>
+ * A utility class to help create asynchronous and synchronous interactions with the Discord API.
+ *
+ * <p>This builder works on the following model:
  * <ul>
  *     <li>The builder has one "active" action, which is the action currently being modified by these builder methods.</li>
- *     <li>When either {@link #andThen(IRequestAction)} or {@link #elseDo(IRequestAction)} are called, the "active"
- *     action is then placed on a queue and is replaced by a new action to be modified.</li>
+ *     <li>When either {@link #andThen(IRequestAction)} or {@link #elseDo(IRequestAction)} is called, the "active"
+ *     action is then placed in a queue and is replaced by a new action to be modified.</li>
  *     <li>After {@link #execute()} is called, the builder then goes down the queue of actions. For each action, it will
  *     wait for an event before and/or after its main {@link IRequestAction} is executed. Once the main
- *     {@link IRequestAction} is executed, it will handle then call the action created by {@link #elseDo(IRequestAction)}
- *     if an exception was encountered and call the correct exception handler, otherwise it'll then repeat this process
+ *     action is executed, it will handle then call the action created by {@link #elseDo(IRequestAction)}
+ *     if an exception was encountered and call the correct exception handler, otherwise it will repeat this process
  *     on the next action as provided by the {@link #andThen(IRequestAction)} method.</li>
  * </ul>
  */
@@ -57,11 +58,9 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * Determines whether this request should be buffered for rate limits.
-	 * This is false by default.
+	 * Sets whether the request should be buffered for rate limits. False by default.
 	 *
-	 * @param shouldBuffer If true, rate limits will be handled automatically, if false, {@link RateLimitException}s have
-	 * to be handled manually.
+	 * @param shouldBuffer Whether the request should be buffered for rate limits.
 	 * @return The builder instance.
 	 *
 	 * @see RequestBuffer RequestBuffer
@@ -72,12 +71,10 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * Determines whether this request should fail when an exception is encountered. It is essentially the same as
-	 * {@link IRequestAction#execute()} returning false.
-	 * This is true by default.
+	 * Sets whether the request should fail when an exception is encountered. It is essentially the same as
+	 * {@link IRequestAction#execute()} returning false. This is true by default.
 	 *
-	 * @param shouldFail If true, the request will be cancelled on an exception, if false the request will continue on
-	 * an exception.
+	 * @param shouldFail Whether the request should fail when an exception is encountered.
 	 * @return The builder instance.
 	 */
 	public RequestBuilder shouldFailOnException(boolean shouldFail) {
@@ -86,11 +83,9 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * Determines whether or not this request should be asynchronous.
-	 * This is false by default.
+	 * Sets whether the request should be executed asynchronously. This is false by default.
 	 *
-	 * @param isAsync If true, the request will be executed on a separate thread, if false the request will be executed
-	 * on the current thread.
+	 * @param isAsync Whether the request should be executed asynchronously.
 	 * @return The builder instance.
 	 */
 	public RequestBuilder setAsync(boolean isAsync) {
@@ -99,7 +94,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This sets the currently "active" action's actual action.
+	 * Sets the currently "active" action's actual action.
 	 *
 	 * @param action The action to run.
 	 * @return The builder instance.
@@ -110,9 +105,9 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This makes the currently active action execute AFTER the specified event filter is passed.
+	 * Sets the currently active action to execute AFTER the specified event filter is passed.
 	 *
-	 * @param eventFilter The event filter, it should return true when the action should proceed.
+	 * @param eventFilter A function that returns true when the the action should execute.
 	 * @param <T> The type of event to wait for.
 	 * @return The builder instance.
 	 */
@@ -121,11 +116,10 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This makes the currently active action execute AFTER the specified event filter is passed.
+	 * Sets the currently active action to execute AFTER the specified event filter is passed.
 	 *
-	 * @param eventFilter The event filter, it should return true when the action should proceed.
-	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
-	 * of whether the event fired.
+	 * @param eventFilter A function that returns true when the the action should execute.
+	 * @param time The timeout, in milliseconds, after which the action should execute regardless of the event filter.
 	 * @param <T> The type of event to wait for.
 	 * @return The builder instance.
 	 */
@@ -134,12 +128,11 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This makes the currently active action execute AFTER the specified event filter is passed.
+	 * Sets the currently active action to execute AFTER the specified event filter is passed.
 	 *
-	 * @param eventFilter The event filter, it should return true when the action should proceed.
-	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
-	 * event fired.
-	 * @param unit The unit for the time parameter.
+	 * @param eventFilter A function that returns true when the the action should execute.
+	 * @param time The timeout, in milliseconds, after which the action should execute regardless of the event filter.
+	 * @param unit The time unit of the timeout.
 	 * @param <T> The type of event to wait for.
 	 * @return The builder instance.
 	 */
@@ -150,9 +143,9 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This makes the currently active action execute BEFORE the specified event filter is passed.
+	 * Sets the currently active action to execute BEFORE the specified event filer is passed.
 	 *
-	 * @param eventFilter The event filter, it should return true when the action should proceed.
+	 * @param eventFilter A function that returns true when the the action should execute.
 	 * @param <T> The type of event to wait for.
 	 * @return The builder instance.
 	 */
@@ -161,11 +154,10 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This makes the currently active action execute BEFORE the specified event filter is passed.
+	 * Sets the currently active action to execute BEFORE the specified event filer is passed.
 	 *
-	 * @param eventFilter The event filter, it should return true when the action should proceed.
-	 * @param time The timeout, in milliseconds. After this amount of time is reached, the thread is notified regardless
-	 * of whether the event fired.
+	 * @param eventFilter A function that returns true when the the action should execute.
+	 * @param time The timeout, in milliseconds, after which the action should execute regardless of the event filter.
 	 * @param <T> The type of event to wait for.
 	 * @return The builder instance.
 	 */
@@ -174,12 +166,11 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This makes the currently active action execute BEFORE the specified event filter is passed.
+	 * Sets the currently active action to execute BEFORE the specified event filer is passed.
 	 *
-	 * @param eventFilter The event filter, it should return true when the action should proceed.
-	 * @param time The timeout. After this amount of time is reached, the thread is notified regardless of whether the
-	 * event fired.
-	 * @param unit The unit for the time parameter.
+	 * @param eventFilter A function that returns true when the the action should execute.
+	 * @param time The timeout, in milliseconds, after which the action should execute regardless of the event filter.
+	 * @param unit The time unit of the timeout.
 	 * @param <T> The type of event to wait for.
 	 * @return The builder instance.
 	 */
@@ -190,7 +181,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a handler for when {@link DiscordException}s occur. By default the handler just logs the exception.
+	 * Sets the handler for when {@link DiscordException}s occur. By default the handler just logs the exception.
 	 *
 	 * @param exceptionConsumer The exception handler.
 	 * @return The builder instance.
@@ -201,7 +192,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a handler for when {@link RateLimitException}s occur. By default the handler just logs the exception.
+	 * Sets the handler for when {@link RateLimitException}s occur. By default the handler just logs the exception.
 	 *
 	 * @param exceptionConsumer The exception handler.
 	 * @return The builder instance.
@@ -212,7 +203,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a handler for when {@link MissingPermissionsException}s occur. By default the handler just logs the exception.
+	 * Sets the handler for when {@link MissingPermissionsException}s occur. By default the handler just logs the exception.
 	 *
 	 * @param exceptionConsumer The exception handler.
 	 * @return The builder instance.
@@ -223,7 +214,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a handler for when external {@link Exception}s occur. By default the handler just logs the exception.
+	 * Sets the handler for when external {@link Exception}s occur. By default the handler just logs the exception.
 	 *
 	 * @param exceptionConsumer The exception handler.
 	 * @return The builder instance.
@@ -234,7 +225,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a handler for when the current action times out on doActionBefore or doActionAfter
+	 * Sets the handler for when the current action times out on doActionBefore or doActionAfter.
 	 *
 	 * @param timeoutProcedure The timeout handler.
 	 * @return The builder instance.
@@ -245,7 +236,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a new active action which will be executed after the current one succeeds.
+	 * Sets the new active action which will be executed after the current one succeeds.
 	 *
 	 * @param action The action to run.
 	 * @return The builder instance.
@@ -258,8 +249,9 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * This creates a new active action which will be executed after the current one succeeds.
-	 * Note: this new action CANNOT have a following action, the following action would occur after the current one
+	 * Sets the new active action which will be executed after the current one succeeds.
+	 *
+	 * <p>This new action CANNOT have a following action, the following action would occur after the current one
 	 * succeeds.
 	 *
 	 * @param action The action to run.
@@ -273,7 +265,7 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * Same as {@link #execute()} since apparently there's supposed to be a build method in every builder class.
+	 * An alias for {@link #execute()}.
 	 */
 	public void build() {
 		execute();
@@ -323,18 +315,18 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * Gets whether or not this request has been cancelled.
+	 * Gets whether the request is cancelled
 	 *
-	 * @return True if cancelled, false if otherwise.
+	 * @return Whether the request is cancelled.
 	 */
 	public boolean isCancelled() {
 		return isCancelled;
 	}
 
 	/**
-	 * Gets whether or not this request is still in the process of executing.
+	 * Gets whether the request is finished executing or cancelled.
 	 *
-	 * @return True if cancelled or finished, false if otherwise.
+	 * @return Whether the request is finished executing or cancelled.
 	 */
 	public boolean isDone() {
 		return isDone || isCancelled();
@@ -358,9 +350,9 @@ public class RequestBuilder {
 		private volatile ActionMode mode = ActionMode.ALWAYS;
 
 		/**
-		 * This is called to actually execute this action.
+		 * Executes the action.
 		 *
-		 * @return True if successful, false if otherwise.
+		 * @return Whether the execution was successful.
 		 */
 		public boolean execute() {
 			if (action == null)
@@ -369,8 +361,11 @@ public class RequestBuilder {
 			boolean result = false;
 
 			try {
-				if (waitBefore != null)
-					client.getDispatcher().waitFor(waitBefore, waitBeforeTimeout, TimeUnit.MILLISECONDS, timeoutHandler);
+				if (waitBefore != null) {
+					if (client.getDispatcher().waitFor(waitBefore, waitBeforeTimeout, TimeUnit.MILLISECONDS) == null) {
+						timeoutHandler.invoke();
+					}
+				}
 
 				if (bufferRequests) {
 					Future<Boolean> futureResult = RequestBuffer.request(() -> {
@@ -393,8 +388,11 @@ public class RequestBuilder {
 					result = action.execute();
 				}
 
-				if (waitAfter != null)
-					client.getDispatcher().waitFor(waitAfter, waitAfterTimeout, TimeUnit.MILLISECONDS, timeoutHandler);
+				if (waitAfter != null) {
+					if (client.getDispatcher().waitFor(waitAfter, waitAfterTimeout, TimeUnit.MILLISECONDS) == null) {
+						timeoutHandler.invoke();
+					}
+				}
 
 			} catch (RateLimitException e) {
 				rateLimitHandler.accept(e);
@@ -414,37 +412,33 @@ public class RequestBuilder {
 	}
 
 	/**
-	 * Represents the type of action an {@link Action} represents.
+	 * The type of action an {@link Action} represents.
 	 */
 	private enum ActionMode {
 		/**
-		 * This action always occurs.
+		 * The action always occurs.
 		 */
 		ALWAYS,
 		/**
-		 * This action only occurs if the previous one didn't fail.
+		 * The action only occurs if the previous one didn't fail.
 		 */
 		NEXT,
 		/**
-		 * This action only occurs if the previous action failed.
+		 * The action only occurs if the previous action failed.
 		 */
 		ELSE
 	}
 
 	/**
-	 * This represents an action done for a request.
+	 * A function that is executed by the request builder.
 	 */
 	@FunctionalInterface
 	public interface IRequestAction {
 
 		/**
-		 * This is called to execute the action.
+		 * Executes the action.
 		 *
-		 * @return True if the request was a success, false if otherwise.
-		 *
-		 * @throws RateLimitException
-		 * @throws MissingPermissionsException
-		 * @throws DiscordException
+		 * @return Whether the execution succeeded.
 		 */
 		boolean execute() throws Exception;
 	}

@@ -20,10 +20,13 @@ package sx.blah.discord.handle.impl.events.guild.channel.message;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
- * This event is dispatched whenever a message is sent by the bot.
+ * Dispatched when a message is sent by the bot.
+ *
+ * <p>Note: This event is effectively dispatched by checking the author of a {@link MessageReceivedEvent}. If the
+ * author is the bot user, this event is fired <b>instead</b> of {@link MessageReceivedEvent}.
  */
 public class MessageSendEvent extends MessageEvent {
-	
+
 	public MessageSendEvent(IMessage message) {
 		super(message);
 	}

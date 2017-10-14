@@ -20,7 +20,7 @@ package sx.blah.discord.handle.impl.events.guild.role;
 import sx.blah.discord.handle.obj.IRole;
 
 /**
- * This event is dispatched whenever a guild role is modified.
+ * Dispatched when a role is updated.
  */
 public class RoleUpdateEvent extends RoleEvent {
 
@@ -33,18 +33,18 @@ public class RoleUpdateEvent extends RoleEvent {
 	}
 
 	/**
-	 * Gets the original version of the role.
+	 * Gets the role before it was updated.
 	 *
-	 * @return The old role.
+	 * @return The role before it was updated.
 	 */
 	public IRole getOldRole() {
 		return oldRole;
 	}
 
 	/**
-	 * Gets the new version of the role.
+	 * Gets role after it was updated.
 	 *
-	 * @return The new role.
+	 * @return The role after it was updated.
 	 */
 	public IRole getNewRole() {
 		return newRole;

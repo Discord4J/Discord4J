@@ -20,7 +20,7 @@ package sx.blah.discord.api.internal.json.responses;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 
 /**
- * This is received in response to a request to discord regarding the bot's application information.
+ * Represents a bot's application information.
  */
 public class ApplicationInfoResponse {
 
@@ -35,7 +35,7 @@ public class ApplicationInfoResponse {
 	public String icon;
 
 	/**
-	 * The application's client id.
+	 * The application's client ID.
 	 */
 	public String id;
 

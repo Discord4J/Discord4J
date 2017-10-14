@@ -20,27 +20,27 @@ package sx.blah.discord.api.internal.json.event;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 
 /**
- * This event is received when a member is updated in a guild.
+ * The object received on the gateway when a member is updated in a guild.
  */
 public class GuildMemberUpdateEventResponse {
 
 	/**
-	 * The guild affected.
+	 * The ID of the guild.
 	 */
 	public String guild_id;
 
 	/**
-	 * The user's roles.
+	 * The IDs of the member's roles.
 	 */
 	public String[] roles;
 
 	/**
-	 * The user.
+	 * The user involved.
 	 */
 	public UserObject user;
 
 	/**
-	 * The user's new nick.
+	 * The user's new nickname.
 	 */
 	public String nick;
 }

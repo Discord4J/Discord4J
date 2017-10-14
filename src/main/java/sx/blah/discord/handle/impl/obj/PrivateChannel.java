@@ -17,35 +17,55 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.AttachmentPartEntry;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.cache.Cache;
+import sx.blah.discord.util.cache.LongMap;
 
 import java.util.*;
 
+/**
+ * The default implementation of {@link IPrivateChannel}.
+ */
 public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	/**
-	 * The recipient of this private channel.
+	 * The recipient user of the channel.
 	 */
 	protected final IUser recipient;
 
-	public PrivateChannel(DiscordClientImpl client, IUser recipient, String id) {
-		super(client, recipient.getName(), id, null, null, 0, new HashMap<>(), new HashMap<>());
+	public PrivateChannel(DiscordClientImpl client, IUser recipient, long id) {
+		super(client, recipient.getName(), id, null, null, 0, false, 0L,
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(sx.blah.discord.handle.obj.PermissionOverride.class)),
+				new Cache<>(Cache.IGNORING_PROVIDER.provide(sx.blah.discord.handle.obj.PermissionOverride.class)));
 		this.recipient = recipient;
 	}
 
 	@Override
-	public Map<String, PermissionOverride> getUserOverrides() {
-		return new HashMap<>();
+	public IMessage sendMessage(String content, EmbedObject embed, boolean tts) {
+		if (recipient.isBot()) throw new DiscordException("Bots may not DM other bots.");
+		return super.sendMessage(content, embed, tts);
 	}
 
 	@Override
-	public Map<String, PermissionOverride> getRoleOverrides() {
-		return new HashMap<>();
+	public IMessage sendFiles(String content, boolean tts, EmbedObject embed, AttachmentPartEntry... entries) {
+		if (recipient.isBot()) throw new DiscordException("Bots may not DM other bots.");
+		return super.sendFiles(content, tts, embed, entries);
+	}
+
+	@Override
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -57,17 +77,17 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
+	public void edit(String name, int position, String topic) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IExtendedInvite> getExtendedInvites() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public EnumSet<Permissions> getModifiedPermissions(IRole role) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addUserOverride(String userId, PermissionOverride override) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addRoleOverride(String roleId, PermissionOverride override) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -88,11 +108,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public void overrideUserPermissions(IUser user, EnumSet<Permissions> toAdd, EnumSet<Permissions> toRemove) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<IInvite> getInvites() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -132,7 +147,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public IInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) {
+	public IExtendedInvite createInvite(int maxAge, int maxUses, boolean temporary, boolean unique) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -143,12 +158,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public String getTopic() {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public IGuild getGuild() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -162,17 +177,12 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	}
 
 	@Override
-	public List<IMessage> getPinnedMessages() {
-		return new ArrayList<>();
-	}
-
-	@Override
 	public List<IWebhook> getWebhooks() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IWebhook getWebhookByID(String id) {
+	public IWebhook getWebhookByID(long id) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -203,7 +213,7 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public List<IUser> getUsersHere() {
-		return Collections.singletonList(recipient);
+		return Arrays.asList(recipient, getClient().getOurUser());
 	}
 
 	@Override
@@ -223,6 +233,16 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 
 	@Override
 	public boolean isDeleted() {
-		return false;
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isNSFW() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IShard getShard() {
+		return getClient().getShards().get(0);
 	}
 }

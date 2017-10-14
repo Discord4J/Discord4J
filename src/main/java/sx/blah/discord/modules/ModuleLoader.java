@@ -20,8 +20,8 @@ package sx.blah.discord.modules;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.ModuleDisabledEvent;
-import sx.blah.discord.handle.impl.events.ModuleEnabledEvent;
+import sx.blah.discord.handle.impl.events.module.ModuleDisabledEvent;
+import sx.blah.discord.handle.impl.events.module.ModuleEnabledEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.File;
@@ -43,17 +43,26 @@ import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 /**
- * This class is used to manage loading and unloading modules for a discord client.
+ * Manages loading and unloading modules for a discord client.
  */
 public class ModuleLoader {
 
 	/**
-	 * This is the directory external modules are located in
+	 * The directory external modules are located in.
 	 */
 	public static final String MODULE_DIR = "modules";
+	/**
+	 * The classes of the modules loaded by the loader.
+	 */
 	protected static final List<Class<? extends IModule>> modules = new CopyOnWriteArrayList<>();
 
+	/**
+	 * The client which owns the module loader.
+	 */
 	private IDiscordClient client;
+	/**
+	 * The modules loaded by the loader.
+	 */
 	private List<IModule> loadedModules = new CopyOnWriteArrayList<>();
 
 	static {
@@ -113,19 +122,19 @@ public class ModuleLoader {
 	}
 
 	/**
-	 * Gets the modules loaded in this ModuleLoader instance.
+	 * Gets the modules loaded by the module loader.
 	 *
-	 * @return The list of loaded modules.
+	 * @return The modules loaded.
 	 */
 	public List<IModule> getLoadedModules() {
 		return loadedModules;
 	}
 
 	/**
-	 * Gets the module classes which will/has been loaded and may or may not be enabled in a given module instance.
+	 * Gets the module classes which will be or have been loaded. These may or may not be enabled in a given module
+	 * instance.
 	 *
 	 * @return The module classes.
-	 * @see #getLoadedModules()
 	 */
 	public static List<Class<? extends IModule>> getModules() {
 		return modules;
@@ -135,7 +144,7 @@ public class ModuleLoader {
 	 * Manually loads a module.
 	 *
 	 * @param module The module to load.
-	 * @return true if the module was successfully loaded, false if otherwise. Note: successful load != successfully enabled
+	 * @return Whether the module was successfully loaded.
 	 */
 	public boolean loadModule(IModule module) {
                 if (!loadedModules.contains(module) && !canModuleLoad(module)) {
@@ -185,6 +194,13 @@ public class ModuleLoader {
 		client.getDispatcher().dispatch(new ModuleDisabledEvent(module));
 	}
 
+	/**
+	 * Gets whether the given list of modules has a module with the given class name.
+	 *
+	 * @param modules The modules to check.
+	 * @param className The class name to search for.
+	 * @return Whether the given list of modules has a module with the given class name.
+	 */
 	private boolean hasDependency(List<IModule> modules, String className) {
 		for (IModule module : modules)
 			if (module.getClass().getName().equals(className))
@@ -192,6 +208,12 @@ public class ModuleLoader {
 		return false;
 	}
 
+	/**
+	 * Gets whether the given module can be loaded.
+	 *
+	 * @param module The module to check.
+	 * @return Whether the given module can be loaded.
+	 */
 	private boolean canModuleLoad(IModule module) {
 		String[] versions;
 		String[] discord4jVersion;
@@ -212,8 +234,8 @@ public class ModuleLoader {
 
 	/**
 	 * Loads a jar file and automatically adds any modules.
-	 * To avoid high overhead recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest
-	 * Multiple classes should be separated by a semicolon ";"
+	 * To avoid high overhead recursion, specify the attribute "Discord4J-ModuleClass" in your jar manifest.
+	 * Multiple classes should be separated by a semicolon ";".
 	 *
 	 * @param file The jar file to load.
 	 */
@@ -264,7 +286,7 @@ public class ModuleLoader {
 	}
 
 	/**
-	 * This method is used to recursively load the parents of subclasses in order to avoid errors
+	 * Recursively loads the parents of subclasses in order to avoid class loader errors.
 	 */
 	private static Class loadClass(String clazz) throws ClassNotFoundException {
 		if (clazz.contains("$") && clazz.substring(0, clazz.lastIndexOf("$")).length() > 0) {
@@ -277,7 +299,7 @@ public class ModuleLoader {
 	}
 
 	/**
-	 * This loads a list of jar files and automatically resolves any dependency issues.
+	 * Loads a list of jar files and automatically resolves any dependency issues.
 	 *
 	 * @param files The jar files to load.
 	 */
@@ -348,6 +370,13 @@ public class ModuleLoader {
 			Discord4J.LOGGER.warn(LogMarkers.MODULES, "Unable to load {} modules!", dependents.size());
 	}
 
+	/**
+	 * Gets the <code>Module-Requires</code> attribute list from the given jar file manifest.
+	 *
+	 * @param file The jar file to extract the manifest attribute from.
+	 * @return The value of the attribute.
+	 * @throws IOException If the jar file read operation fails.
+	 */
 	private static String[] getModuleRequires(File file) throws IOException {
 		JarFile jarFile = new JarFile(file);
 		Manifest manifest = jarFile.getManifest();
@@ -367,6 +396,13 @@ public class ModuleLoader {
 		}
 	}
 
+	/**
+	 * Gets the jar file which contains a class with the given class name.
+	 *
+	 * @param files The jar files to search.
+	 * @param clazz The class name to search for.
+	 * @return The jar file which contains a class with the given class name (or null if one was not found).
+	 */
 	private static File findFileForClass(List<File> files, String clazz) {
 		return files.stream().filter((file) -> {
 			try {

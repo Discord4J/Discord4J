@@ -22,25 +22,25 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 /**
- * This represents a generic voice channel event.
+ * A generic voice channel-related event.
  */
 public abstract class VoiceChannelEvent extends GuildEvent {
-	
+
 	private final IVoiceChannel voiceChannel;
-	
+
 	public VoiceChannelEvent(IVoiceChannel voiceChannel) {
 		this(voiceChannel.getGuild(), voiceChannel);
 	}
-	
+
 	public VoiceChannelEvent(IGuild guild, IVoiceChannel voiceChannel) {
 		super(guild);
 		this.voiceChannel = voiceChannel;
 	}
-	
+
 	/**
-	 * This gets the voice channel involved in this event.
+	 * Gets the voice channel involved in the event.
 	 *
-	 * @return The voice channel.
+	 * @return The voice channel involved.
 	 */
 	public IVoiceChannel getVoiceChannel() {
 		return voiceChannel;

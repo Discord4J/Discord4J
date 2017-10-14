@@ -20,7 +20,7 @@ package sx.blah.discord.api.internal.json.event;
 import sx.blah.discord.api.internal.json.objects.RoleObject;
 
 /**
- * This is received when a role is created or updated in a guild.
+ * The object received on the gateway when a role is created or updated in a guild.
  */
 public class GuildRoleEventResponse {
 
@@ -30,7 +30,7 @@ public class GuildRoleEventResponse {
 	public RoleObject role;
 
 	/**
-	 * The guild id of the guild involved.
+	 * The ID of the guild.
 	 */
 	public String guild_id;
 }

@@ -17,70 +17,77 @@
 
 package sx.blah.discord.api;
 
-import sx.blah.discord.handle.impl.obj.*;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.RateLimitException;
 
-import java.util.Collection;
 import java.util.List;
 
+/**
+ * A single shard connection to Discord. Each shard has its own gateway connection
+ * ({@link sx.blah.discord.api.internal.DiscordWS} instance) and is only associated with other shards by their parent
+ * {@link IDiscordClient}.
+ *
+ * @see <a href=https://discordapp.com/developers/docs/topics/gateway#sharding>Sharding</a>
+ */
 public interface IShard {
 
 	/**
-	 * Gets the client this shard is managed by.
-	 * @return The client.
+	 * Gets the client that manages this shard.
+	 *
+	 * @return The client that manages this shard.
 	 */
 	IDiscordClient getClient();
 
 	/**
 	 * Gets the sharding information for this shard. Index 0 is the current shard number and index 1 is the total number of shards.
+	 *
 	 * @return The sharding information.
 	 */
 	int[] getInfo();
 
 	/**
-	 * Connects this shard to the Discord gateway.
-	 * @throws DiscordException
+	 * Begins the connection process to the Discord gateway.
 	 */
 	void login();
 
 	/**
 	 * Disconnects this shard from the Discord gateway.
-	 * @throws DiscordException
 	 */
 	void logout();
 
 	/**
-	 * Checks if the api is ready to be interacted with. This means all available guilds on this shard have been received.
+	 * Gets whether the the shard is fully logged in. This means all available guilds have been received on this shard.
+	 * All functionality of the shard is not available until this is true.
 	 *
-	 * @return True if ready, false if otherwise.
+	 * @return Whether the shard is fully logged in.
 	 */
 	boolean isReady();
 
 	/**
-	 * Ensures the shard is ready to interact with the api.
+	 * Throws an exception if the shard is not ready.
 	 *
 	 * @param action The action that is being attempted. (i.e. "send message")
-	 * @throws DiscordException
+	 * @see #isReady()
 	 */
 	default void checkReady(String action) {
 		if (!isReady()) throw new DiscordException("Attempt to " + action + " before shard is ready!");
 	}
 
 	/**
-	 * Checks if the shard has established a connection with the Discord gateway. This means the Ready payload has been received.
-	 * Note: This is most likely only useful to advanced users.
+	 * Gets whether the shard has received the READY payload on the gateway.
 	 *
-	 * @return True if logged in, false if otherwise.
+	 * <p>This is <b>not the same</b> as {@link #isReady()}. A small subset of the functionality of the shard is
+	 * available if this is true, but not all.
+	 *
+	 * @return Whether every shard has begun its connection process with Discord.
 	 */
 	boolean isLoggedIn();
 
 	/**
-	 * Ensures that the shard has established a connection with the Discord gateway.
+	 * Throws an exception if the shard is not logged in.
 	 *
 	 * @param action The action that is being attempted. (i.e. "send message")
-	 * @throws DiscordException
+	 * @see #isLoggedIn()
 	 */
 	default void checkLoggedIn(String action) {
 		if (!isLoggedIn()) throw new DiscordException("Attempt to " + action + " before shard has logged in!");
@@ -89,225 +96,227 @@ public interface IShard {
 	/**
 	 * Gets the last time it took for Discord to acknowledge a heartbeat.
 	 *
-	 * @return The time it took.
+	 * @return The last time it took for Discord to acknowledge a heartbeat.
 	 */
 	long getResponseTime();
 
 	/**
-	 * Set this shard's presence to have this playing text while retaining the status. Can be null.
+	 * Changes the playing text of the bot on the shard. The previously-set online status will be maintained.
 	 *
-	 * @param playingText The (nullable) playing text
+	 * <p>Note: Due to the fact that Discord doesn't send updates for the bot user's presence, it is possible that using
+	 * this method will overwrite an online status set by a different gateway connection.
+	 *
+	 * @param playingText The nullable playing text.
 	 */
 	void changePlayingText(String playingText);
 
 	/**
-	 * Set this shard's presence to be online, with the playing text.
+	 * Changes the online status of the bot to online with the given playing text on the shard.
 	 *
-	 * @param playingText The game playing text
+	 * @param playingText The nullable playing text.
 	 */
 	void online(String playingText);
 
 	/**
-	 * Set this shard's presence to be online, retaining the original playing text (if any).
+	 * Changes the online status of the bot to online on the shard.
 	 */
 	void online();
 
 	/**
-	 * Set this shard's presence to be idle, with the playing text.
+	 * Changes the online status of the bot to idle with the given playing text on the shard.
 	 *
-	 * @param playingText The game playing text
+	 * @param playingText The nullable playing text.
 	 */
 	void idle(String playingText);
 
 	/**
-	 * Set this shard's presence to be idle, retaining the original playing text (if any).
+	 * Changes the online status of the bot to idle on the shard.
 	 */
 	void idle();
 
 	/**
-	 * Set this shard's presence to be streaming, using the provided game playing text and streaming URL.
+	 * Changes the online status of the bot to streaming with the given playing text and stream url on the shard.
 	 *
-	 * @param playingText The game playing text
-	 * @param streamingUrl The streaming URL (Twitch, YouTube Gaming, etc.)
+	 * @param playingText The nullable playing text.
+	 * @param streamingUrl The valid twitch.tv streaming url.
 	 */
 	void streaming(String playingText, String streamingUrl);
 
-	// Future presences
-
-//	/**
-//	 * Set this shard's presence to be in do not disturb mode, using the provided playing text.
-//	 * Note that this doesn't stop events from occurring.
-//	 *
-//	 * @param playingText The game playing text
-//	 */
-//	void dnd(String playingText);
-//
-//	/**
-//	 * Set this shard's presence to be in do not disturb mode, using the original playing text (if any).
-//	 * Note that this doesn't stop events from occurring.
-//	 */
-//	void dnd();
-//
-//	/**
-//	 * Set this shard's presence to be invisible (appear offline to others).
-//	 */
-//	void invisible();
-
 	/**
-	 * Changes this user's presence.
+	 * Changes the online status of the bot to do not disturb with the given playing text on the shard.
 	 *
-	 * @param isIdle If true, this user becomes idle, or online if false.
-	 * @deprecated Use {@link #online()} or {@link #idle()}
+	 * @param playingText The nullable playing text.
 	 */
-	@Deprecated
-	void changePresence(boolean isIdle);
+	void dnd(String playingText);
 
 	/**
-	 * Changes the status of the bot user.
-	 *
-	 * @param status The new status to use.
-	 * @deprecated Use {@link #streaming(String, String)} or the online/idle methods with the playing text
+	 * Changes the online status of the bot to do not disturb on the shard.
 	 */
-	@Deprecated
-	void changeStatus(Status status);
+	void dnd();
 
 	/**
-	 * Gets a set of all channels visible to this shard.
+	 * Changes the online status of the bot to invisible on the shard.
+	 */
+	void invisible();
+
+	/**
+	 * Gets a list of all text channels visible to the bot user on the shard.
 	 *
-	 * @param includePrivate Whether to include private channels in the set.
-	 * @return A {@link Collection} of all {@link Channel} objects.
+	 * @param includePrivate Whether to include private channels.
+	 * @return A list of all visible text channels.
 	 */
 	List<IChannel> getChannels(boolean includePrivate);
 
 	/**
-	 * Gets a set of all channels visible to this shard.
+	 * Gets a list of all non-private text channels visible to the bot user on the shard.
 	 *
-	 * @return A {@link Collection} of all non-private {@link Channel} objects.
+	 * <p>This is equivalent to <code>getChannels(false)</code>.
+	 *
+	 * @return A list of all visible, non-private text channels.
 	 */
 	List<IChannel> getChannels();
 
 	/**
-	 * Gets a channel by its unique id.
+	 * Gets a text channel by its unique snowflake ID from the shard's text channel cache.
 	 *
-	 * @param channelID The id of the desired channel.
-	 * @return The {@link Channel} object with the provided id.
+	 * @param channelID The ID of the desired channel.
+	 * @return The text channel with the provided ID (or null if one was not found).
 	 */
-	IChannel getChannelByID(String channelID);
+	IChannel getChannelByID(long channelID);
 
 	/**
-	 * Gets a set of all voice channels visible to this shard.
+	 * Gets a list of all voice channels visible to the bot user on the shard.
 	 *
-	 * @return A {@link Collection} of all {@link VoiceChannel} objects.
+	 * @return A list of all visible voice channels.
 	 */
 	List<IVoiceChannel> getVoiceChannels();
 
 	/**
-	 * Gets the connected voice channels on this shard.
+	 * Gets a list of voice channels the client is connected to on the shard.
 	 *
-	 * @return The voice channels.
+	 * <p>A bot may be connected to one voice channel per guild.
+	 *
+	 * @return A list of connected voice channels.
 	 */
 	List<IVoiceChannel> getConnectedVoiceChannels();
 
 	/**
-	 * Gets a voice channel from a given id.
+	 * Gets a voice channel by its unique snowflake ID from the shard's voice channel cache.
 	 *
-	 * @param id The voice channel id.
-	 * @return The voice channel (or null if not found).
+	 * @param id The ID of the desired channel.
+	 * @return The voice channel with the provided ID (or null if one was not found).
 	 */
-	IVoiceChannel getVoiceChannelByID(String id);
+	IVoiceChannel getVoiceChannelByID(long id);
 
 	/**
-	 * Gets a set of all guilds visible to this shard.
+	 * Gets a list of the guilds the bot user is a member of that the shard received.
 	 *
-	 * @return The list of {@link Guild}s the api is connected to.
+	 * @return A list of guilds the bot user is a member of that the shard received.
 	 */
 	List<IGuild> getGuilds();
 
 	/**
-	 * Gets a guild by its unique id.
+	 * Gets a guild by its unique snowflake ID from the shard's guild cache.
 	 *
-	 * @param guildID The id of the desired guild.
-	 * @return The {@link Guild} object with the provided id.
+	 * @param guildID The ID of the desired guild.
+	 * @return The guild with the provided ID (or null if one was not found).
 	 */
-	IGuild getGuildByID(String guildID);
+	IGuild getGuildByID(long guildID);
 
 	/**
-	 * Gets a set of all users visible to this shard.
+	 * Gets a list of all users visible to the bot user on the shard.
 	 *
-	 * @return A {@link Collection} of all {@link User} objects.
+	 * <p>Note: This list <b>does</b> contain the bot user.
+	 *
+	 * @return A list of all visible users.
 	 */
 	List<IUser> getUsers();
 
 	/**
-	 * Gets a cached user by its unique id.
+	 * Gets a user by its unique snowflake ID from the shard's user cache.
 	 *
-	 * @param userID The id of the desired user.
-	 * @return The {@link User} object with the provided id.
+	 * <p>Note: This method only searches the client's list of <b>cached</b> users. Discord allows the fetching of users
+	 * which the bot cannot directly see (they share no mutual guilds, so they are not cached). This functionality is
+	 * exposed through {@link #fetchUser(long)}.
 	 *
-	 * @see #fetchUser(String)
+	 * @param userID The ID of the desired user.
+	 * @return The user with the provided ID (or null if one was not found).
 	 */
-	IUser getUserByID(String userID);
+	IUser getUserByID(long userID);
 
 	/**
-	 * This attempts to retrieve a user by its id by first checking the api's internal cache, if the user is not found,
-	 * a REST request is performed.
+	 * Gets a user by its unique snowflake ID from the shard's user cache <b>or</b> by fetching it from Discord.
 	 *
-	 * @param id The id of the user to find.
-	 * @return Ths user fetched, if found.
+	 * <p>Discord allows the fetching of users the bot cannot directly see (they share no mutual guilds, so they are not
+	 * cached). This method first checks the client's user cache and if there is no such user with the provided ID, it
+	 * is requested from Discord.
 	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * <p>Use {@link #getUserByID(long)} to only search the shard's user cache.
 	 *
-	 * @see #getUserByID(String)
+	 * @return The user with the provided ID (nor null if one was not found).
 	 */
-	IUser fetchUser(String id);
+	IUser fetchUser(long id);
 
 	/**
-	 * Gets a set of all roles visible to this shard.
+	 * Gets a list of all roles visible to the bot user on the shard.
 	 *
-	 * @return A {@link Collection} of all {@link Role} objects.
+	 * @return A list of all visible roles.
 	 */
 	List<IRole> getRoles();
 
 	/**
-	 * Gets a role by its unique id.
+	 * Gets a role by its unique snowflake ID from the shard's role cache.
 	 *
-	 * @param roleID The id of the desired role.
-	 * @return The {@link Role} object
+	 * @param roleID The ID of the desired role.
+	 * @return The role with the provided ID (or null if one was not found).
 	 */
-	IRole getRoleByID(String roleID);
+	IRole getRoleByID(long roleID);
 
 	/**
-	 * This gets all messages stored in this shard's cache.
+	 * Gets a list of all messages in the shard's message cache.
 	 *
-	 * @param includePrivate Whether to include private messages or not.
-	 * @return A collection of all messages.
+	 * @param includePrivate Whether to include private messages.
+	 * @return A list of all cached messages.
 	 */
 	List<IMessage> getMessages(boolean includePrivate);
 
 	/**
-	 * This gets all messages stored in this shard's cache. (including from private channels).
+	 * Gets a list of all messages in the client's message cache.
 	 *
-	 * @return A collection of all messages.
+	 * <p>This is equivalent to <code>getMessages(true)</code>
+	 *
+	 * @return A list of all cached messages.
 	 */
 	List<IMessage> getMessages();
 
 	/**
-	 * This attempts to search all guilds/private channels visible to this shard for a message.
+	 * Gets a message by its unique snowflake ID from the shard's message cache.
 	 *
-	 * @param messageID The message id of the message to find.
-	 * @return The message or null if not found.
+	 * @param messageID The ID of the desired role.
+	 * @return The message with the provided ID (or null if one was not found).
 	 */
-	IMessage getMessageByID(String messageID);
+	IMessage getMessageByID(long messageID);
 
 	/**
-	 * Gets a {@link IPrivateChannel} for the provided recipient.
+	 * Gets the private channel for a user or creates it if one doesn't exist.
 	 *
-	 * @param user The user who will be the recipient of the private channel.
-	 * @return The {@link IPrivateChannel} object.
-	 *
-	 * @throws DiscordException
-	 * @throws RateLimitException
+	 * @param user The user to get the private channel for.
+	 * @return The private channel for the given user.
 	 */
 	IPrivateChannel getOrCreatePMChannel(IUser user);
+
+	/**
+	 * Gets a list of all categories visible to the bot user on the shard.
+	 *
+	 * @return A list of all visible categories.
+	 */
+	List<ICategory> getCategories();
+
+	/**
+	 * Gets a category by its unique snowflake ID from the shard's category cache.
+	 *
+	 * @param categoryID The ID of the desired category.
+	 * @return The category with the provided ID (or null if one was not found).
+	 */
+	ICategory getCategoryByID(long categoryID);
 }

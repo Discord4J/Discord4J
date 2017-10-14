@@ -17,97 +17,85 @@
 
 package sx.blah.discord.handle.obj;
 
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
-
 import java.awt.*;
 import java.util.EnumSet;
 
 /**
- * Represents a role.
+ * A role in a {@link IGuild}.
  */
 public interface IRole extends IDiscordObject<IRole> {
 
 	/**
-	 * Gets the position of the role, the higher the number the higher priority it has on sorting. @everyone is always -1
+	 * Gets the position of the role. Lowest is @everyone at -1.
 	 *
-	 * @return The position.
+	 * @return The position of the role.
 	 */
 	int getPosition();
 
 	/**
-	 * Gets the position the role allows.
+	 * Gets permissions granted to the role.
 	 *
-	 * @return The set of enabled permissions.
+	 * @return The permissions granted to the role.
 	 */
 	EnumSet<Permissions> getPermissions();
 
 	/**
 	 * Gets the name of the role.
 	 *
-	 * @return The name.
+	 * @return The name of the role.
 	 */
 	String getName();
 
 	/**
-	 * Checks whether the role is managed by an external plugin like twitch.
+	 * Gets whether the role is managed by an external service like Twitch.
 	 *
-	 * @return True if managed, false if otherwise.
+	 * @return Whether the role is managed by an external service.
 	 */
 	boolean isManaged();
 
 	/**
-	 * Gets whether the role is hoisted–meaning that it is displayed separately from the @everyone role.
+	 * Gets whether the role is hoisted. (Displayed separately in the online user list)
 	 *
-	 * @return True if hoisted, false if otherwise.
+	 * @return Whether the role is hoisted.
 	 */
 	boolean isHoisted();
 
 	/**
-	 * Gets the color for this role.
+	 * Gets the color of the role.
 	 *
-	 * @return The color.
+	 * @return The color of the role.
 	 */
 	Color getColor();
 
 	/**
-	 * Gets whether this role is mentionable or not.
+	 * Gets whether the role is mentionable.
 	 *
-	 * @return True if mentionable, false if otherwise.
+	 * @return Whether the role is mentionable.
 	 */
 	boolean isMentionable();
 
 	/**
-	 * Gets the guild this role belongs to.
+	 * Gets the parent guild of the role.
 	 *
-	 * @return The guild.
+	 * @return The parent guild of the role.
 	 */
 	IGuild getGuild();
 
 	/**
-	 * Edits all properties of this role.
+	 * Edits all properties of the role.
 	 *
-	 * @param color The new color of the role.
-	 * @param hoist Whether the role should be displayed separately from others.
-	 * @param name The new name of the role.
-	 * @param permissions The new permissions set of the role.
-	 * @param isMentionable Whether the role can be mentioned.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @param color The color of the role.
+	 * @param hoist Whether to hoist the role.
+	 * @param name The name of the role.
+	 * @param permissions The permissions the role grants.
+	 * @param isMentionable Whether the role is mentionable.
 	 */
 	void edit(Color color, boolean hoist, String name, EnumSet<Permissions> permissions, boolean isMentionable);
 
 	/**
 	 * Changes the color of the role.
 	 *
-	 * @param color The new color for the role.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param color The color of the role.
 	 */
 	void changeColor(Color color);
 
@@ -115,73 +103,53 @@ public interface IRole extends IDiscordObject<IRole> {
 	 * Changes whether to hoist the role.
 	 *
 	 * @param hoist Whether to hoist the role.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
 	 */
 	void changeHoist(boolean hoist);
 
 	/**
 	 * Changes the name of the role.
 	 *
-	 * @param name The new name for the role.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param name The name of the role.
 	 */
 	void changeName(String name);
 
 	/**
-	 * Changes the permissions of the role.
+	 * Changes the permissions the role grants.
 	 *
-	 * @param permissions The new permissions for the role.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param permissions The permissions the role grants.
 	 */
 	void changePermissions(EnumSet<Permissions> permissions);
 
 	/**
-	 * Changes whether this role is mentionable.
+	 * Changes whether the role is mentionable.
 	 *
-	 * @param isMentionable Whether this role should be mentionable or not.
-	 *
-	 * @throws RateLimitException
-	 * @throws DiscordException
-	 * @throws MissingPermissionsException
+	 * @param isMentionable Whether the role is mentionable.
 	 */
 	void changeMentionable(boolean isMentionable);
 
 	/**
-	 * Attempts to delete this role.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * Deletes the role.
 	 */
 	void delete();
 
 	/**
-	 * This checks if the role is the @everyone role.
+	 * Gets whether the role is the @everyone role of the guild.
 	 *
-	 * @return True if the @everyone role, false if otherwise.
+	 * @return Whether the role is the @everyone role of the guild.
 	 */
 	boolean isEveryoneRole();
 
 	/**
-	 * Checks to see if the this role is deleted.
+	 * Gets whether the role is deleted.
 	 *
-	 * @return True if this role is deleted.
+	 * @return Whether the role is deleted.
 	 */
 	boolean isDeleted();
+
 	/**
-	 * Formats a string to @mention the role.
+	 * Gets a formatted string mentioning the role.
 	 *
-	 * @return The formatted string. Note: if {@link #isMentionable()} returns false, this just returns the result of
-	 * {@link #getName()}.
+	 * @return A formatted string mentioning the role.
 	 */
 	String mention();
 }

@@ -28,22 +28,22 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Represents an avatar image.
+ * A function which supplies base64-encoded image data for use as images in Discord.
  */
 @FunctionalInterface
 public interface Image {
 
 	/**
-	 * Gets the data to send to discord.
+	 * Gets the base64-encoded encoded image.
 	 *
-	 * @return The data to send to discord, can be null.
+	 * @return The nullable base64-encoded image.
 	 */
 	String getData();
 
 	/**
-	 * Gets the image data (avatar id) for for a user's avatar.
+	 * Gets the image data for a user's avatar.
 	 *
-	 * @param user The user to get the avatar id for.
+	 * @param user The user to get the image data from.
 	 * @return The user's avatar image.
 	 */
 	static Image forUser(IUser user) {
@@ -51,7 +51,7 @@ public interface Image {
 	}
 
 	/**
-	 * Gets the data (null) for the default discord avatar.
+	 * Gets the data (null) for the default Discord avatar.
 	 *
 	 * @return The default avatar image.
 	 */

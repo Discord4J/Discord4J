@@ -20,10 +20,25 @@ package sx.blah.discord.api.internal.json;
 import sx.blah.discord.api.internal.GatewayOps;
 import sx.blah.discord.api.internal.VoiceOps;
 
+/**
+ * Generic payload sent on the main or voice gateway.
+ */
 public class GatewayPayload {
+	/**
+	 * The event name. (Only used for OP 0)
+	 */
 	public String t;
+	/**
+	 * The sequence number.
+	 */
 	public Integer s;
+	/**
+	 * The opcode for the payload.
+	 */
 	public Integer op;
+	/**
+	 * The data of the payload.
+	 */
 	public Object d;
 
 	public GatewayPayload() {}

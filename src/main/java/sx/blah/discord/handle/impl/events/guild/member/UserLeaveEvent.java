@@ -21,10 +21,10 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- * This event is dispatched when a guild member is removed/leaves from a guild
+ * Dispatched when a member leaves a guild.
  */
 public class UserLeaveEvent extends GuildMemberEvent {
-	
+
 	public UserLeaveEvent(IGuild guild, IUser user) {
 		super(guild, user);
 	}

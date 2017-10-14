@@ -18,42 +18,31 @@
 package sx.blah.discord.api.internal.json.objects;
 
 /**
- * The extended invite response received from creating an invite.
+ * Represents a json invite object with metadata.
  */
 public class ExtendedInviteObject extends InviteObject {
-
 	/**
-	 * The time (in seconds) the invite lasts for
-	 */
-	public long max_age;
-
-	/**
-	 * Whether the invite has been revoked
-	 */
-	public boolean revoked;
-
-	/**
-	 * The time and date the invite was created
-	 */
-	public String created_at;
-
-	/**
-	 * Whether the invite only temporarily accepts a user
-	 */
-	public boolean temporary;
-
-	/**
-	 * The current number of uses of the invite
+	 * The number of times this invite has been used.
 	 */
 	public int uses;
-
 	/**
-	 * The maximum amount of times this invite can accept a user
+	 * The max number of times this invite can be used.
 	 */
 	public int max_uses;
-
 	/**
-	 * The user who created this invite
+	 * The duration (in seconds) after which the invite expires.
 	 */
-	public UserObject inviter;
+	public int max_age;
+	/**
+	 * Whether this invite only grants temporary membership.
+	 */
+	public boolean temporary;
+	/**
+	 * The ISO-8601 timestamp of when this invite was created.
+	 */
+	public String created_at;
+	/**
+	 * Whether this invite is revoked.
+	 */
+	public boolean revoked;
 }

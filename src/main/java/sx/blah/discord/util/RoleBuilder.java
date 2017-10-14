@@ -26,15 +26,33 @@ import java.awt.*;
 import java.util.EnumSet;
 
 /**
- * Utility class designed to make the creation of roles easier.
+ * Used to configure and build a {@link IRole}.
  */
 public class RoleBuilder {
 
+	/**
+	 * The parent guild of the role.
+	 */
 	private IGuild guild;
+	/**
+	 * The color of the role.
+	 */
 	private Color color;
+	/**
+	 * Whether the role is hoisted.
+	 */
 	private boolean hoist = false;
+	/**
+	 * Whether the role is mentionable.
+	 */
 	private boolean mentionable = false;
+	/**
+	 * The name of the role.
+	 */
 	private String name;
+	/**
+	 * The permissions granted to the role.
+	 */
 	private EnumSet<Permissions> permissions;
 
 	public RoleBuilder(IGuild guild) {
@@ -45,7 +63,7 @@ public class RoleBuilder {
 	 * Sets the color of the role.
 	 *
 	 * @param color The color of the role.
-	 * @return The role builder instance
+	 * @return The builder instance.
 	 */
 	public RoleBuilder withColor(Color color) {
 		this.color = color;
@@ -53,10 +71,10 @@ public class RoleBuilder {
 	}
 
 	/**
-	 * Determines whether or not this role is hoisted.
+	 * Sets whether to hoist the role.
 	 *
-	 * @param hoist If true, users with this role will be displayed separately from the "everyone" role.
-	 * @return The role builder instance.
+	 * @param hoist Whether to hoist the role.
+	 * @return The builder instance.
 	 */
 	public RoleBuilder setHoist(boolean hoist) {
 		this.hoist = hoist;
@@ -64,10 +82,10 @@ public class RoleBuilder {
 	}
 
 	/**
-	 * Determines whether or not this role is mentionable.
+	 * Sets whether the role is mentionable.
 	 *
-	 * @param mentionable If true, users can use a role mention for this role.
-	 * @return The role builder instance.
+	 * @param mentionable Whether the role is mentionable.
+	 * @return The builder instance.
 	 */
 	public RoleBuilder setMentionable(boolean mentionable) {
 		this.mentionable = mentionable;
@@ -78,7 +96,7 @@ public class RoleBuilder {
 	 * Sets the name of the role.
 	 *
 	 * @param name The name of the role.
-	 * @return The role builder instance.
+	 * @return The builder instance.
 	 */
 	public RoleBuilder withName(String name) {
 		this.name = name;
@@ -86,10 +104,10 @@ public class RoleBuilder {
 	}
 
 	/**
-	 * Sets the permissions of the role.
+	 * Sets the permissions granted to the role.
 	 *
-	 * @param permissions A set of the permissions of the role.
-	 * @return The role builder instance.
+	 * @param permissions The permissions granted to the role.
+	 * @return The builder instance.
 	 */
 	public RoleBuilder withPermissions(EnumSet<Permissions> permissions) {
 		this.permissions = permissions;
@@ -97,13 +115,9 @@ public class RoleBuilder {
 	}
 
 	/**
-	 * Creates the role in the specified guild.
+	 * Builds a role with the configuration specified by the builder.
 	 *
-	 * @return The {@link IRole} object representing the new role.
-	 *
-	 * @throws MissingPermissionsException
-	 * @throws RateLimitException
-	 * @throws DiscordException
+	 * @return A role with the configuration specified by the builder.
 	 */
 	public IRole build() {
 		if (guild == null)

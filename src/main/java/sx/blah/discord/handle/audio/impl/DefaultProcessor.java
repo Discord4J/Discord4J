@@ -22,10 +22,13 @@ import sx.blah.discord.handle.audio.IAudioProcessor;
 import sx.blah.discord.handle.audio.IAudioProvider;
 
 /**
- * This is a processor which just relays provider data.
+ * The default implementation of {@link IAudioProcessor} which just relays audio data as is.
  */
 public class DefaultProcessor implements IAudioProcessor {
 
+	/**
+	 * The underlying provider from which audio is pulled.
+	 */
 	private volatile IAudioProvider provider = new DefaultProvider();
 
 	@Override

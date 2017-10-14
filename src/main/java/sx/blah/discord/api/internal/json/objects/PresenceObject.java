@@ -22,25 +22,13 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class PresenceObject {
 	/**
-	 * The user associated with this presence.
+	 * The user the presence belongs to.
 	 */
 	public UserObject user;
 	/**
-	 * The status of the presence.
+	 * The status type of the presence.
 	 */
 	public String status;
-	/**
-	 * The roles the user has.
-	 */
-	public RoleObject[] roles;
-	/**
-	 * The nickname of the user.
-	 */
-	public String nick;
-	/**
-	 * The guild id of the presence.
-	 */
-	public String guild_id;
 	/**
 	 * The game of the presence.
 	 */

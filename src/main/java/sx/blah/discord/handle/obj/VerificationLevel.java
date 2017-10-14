@@ -18,30 +18,41 @@
 package sx.blah.discord.handle.obj;
 
 /**
- * Represents a verification level for a guild
+ * A verification level for a {@link IGuild}.
  */
 public enum VerificationLevel {
 	/**
-	 * Represents a verification level of None
+	 * A verification level of None.
 	 */
 	NONE,
 	/**
-	 * Represents a verification level of Low
+	 * A verification level of Low.
 	 */
 	LOW,
 	/**
-	 * Represents a verification level of Medium
+	 * A verification level of Medium.
 	 */
 	MEDIUM,
 	/**
-	 * Represents a verification level of (╯°□°）╯︵ ┻━┻
+	 * A verification level of (╯°□°）╯︵ ┻━┻.
 	 */
 	HIGH,
 	/**
-	 * Unknown verification level
+	 * A verification level of ┻━┻ ﾐヽ(ಠ益ಠ)ノ彡┻━┻.
+	 */
+	EXTREME,
+	/**
+	 * An unknown verification level.
 	 */
 	UNKNOWN;
 
+	/**
+	 * Gets a verification level by its int ID.
+	 *
+	 * @param id The ID of the verification level to get.
+	 * @return The corresponding verification level or {@link #UNKNOWN} if the ID did not match any known verification
+	 * level.
+	 */
 	public static VerificationLevel get(int id) {
 		if (id >= values().length) {
 			return UNKNOWN;

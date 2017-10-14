@@ -17,22 +17,32 @@
 
 package sx.blah.discord.api.internal.json.requests;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
- * This is the request sent in order to edit a channel's information.
+ * Sent to edit a channel's properties.
  */
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class ChannelEditRequest {
 
 	public static class Builder {
 
+		private Long parentID;
 		private String name;
 		private Integer position;
 		private String topic;
+		private Boolean nsfw;
+
+		public Builder parentID(Long parentID) {
+			this.parentID = parentID;
+			return this;
+		}
 
 		/**
 		 * Sets the new name of the channel.
 		 *
-		 * @param name the new name, must be 2-100 characters long.
-		 * @return this builder, for chaining.
+		 * @param name The new name, must be 2-100 characters long.
+		 * @return This builder, for chaining.
 		 */
 		public Builder name(String name) {
 			this.name = name;
@@ -42,8 +52,8 @@ public class ChannelEditRequest {
 		/**
 		 * Sets the new position of the channel.
 		 *
-		 * @param position the new position.
-		 * @return this builder, for chaining.
+		 * @param position The new position.
+		 * @return This builder, for chaining.
 		 */
 		public Builder position(int position) {
 			this.position = position;
@@ -53,8 +63,8 @@ public class ChannelEditRequest {
 		/**
 		 * Sets the new topic of the channel.
 		 *
-		 * @param topic the new topic
-		 * @return this builder, for chaining.
+		 * @param topic The new topic.
+		 * @return This builder, for chaining.
 		 */
 		public Builder topic(String topic) {
 			this.topic = topic;
@@ -62,34 +72,50 @@ public class ChannelEditRequest {
 		}
 
 		/**
+		 * Sets the new nsfw state of the channel.
+		 *
+		 * @param nsfw the nsfw state.
+		 * @return this builder, for chaining.
+		 */
+		public Builder nsfw(boolean nsfw) {
+			this.nsfw = nsfw;
+			return this;
+		}
+
+		/**
 		 * Builds the channel edit request.
 		 *
-		 * @return the channel edit request.
+		 * @return The channel edit request.
 		 */
 		public ChannelEditRequest build() {
-			return new ChannelEditRequest(name, position, topic);
+			return new ChannelEditRequest(name, position, topic, nsfw, parentID);
 		}
 	}
 
-	private final String name;
-	private final Integer position;
-	private final String topic;
+	/**
+	 * The new name of the channel.
+	 */
+	private String name;
+	/**
+	 * The new position of the channel.
+	 */
+	private Integer position;
+	/**
+	 * The new topic of the channel.
+	 */
+	private String topic;
+	private Boolean nsfw;
+	public Long parent_id = 0L; // default must not be null because null is a valid value
 
-	ChannelEditRequest(String name, Integer position, String topic) {
+	ChannelEditRequest(String name, Integer position, String topic, Boolean nsfw, Long parentID) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;
+		this.nsfw = nsfw;
+		this.parent_id = parentID;
 	}
 
-	public String getName() {
-		return name;
+	ChannelEditRequest() {
 	}
 
-	public Integer getPosition() {
-		return position;
-	}
-
-	public String getTopic() {
-		return topic;
-	}
 }
