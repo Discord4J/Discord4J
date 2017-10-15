@@ -391,6 +391,20 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	long getWebhookLongID();
 
 	/**
+	 * Gets the message type.
+	 *
+	 * @return The message type.
+	 */
+	Type getType();
+
+	/**
+	 * Gets whether the message is a system message.
+	 *
+	 * @return Whether the message is a system message.
+	 */
+	boolean isSystemMessage();
+
+	/**
 	 * An attachment included in a message.
 	 */
 	class Attachment implements IIDLinkedObject {
@@ -455,4 +469,25 @@ public interface IMessage extends IDiscordObject<IMessage> {
 		}
 	}
 
+	enum Type {
+		DEFAULT(0),
+		RECIPIENT_ADD(1),
+		RECIPIENT_REMOVE(2),
+		CALL(3),
+		CHANNEL_NAME_CHANGE(4),
+		CHANNEL_ICON_CHANGE(5),
+		CHANEL_PINNED_MESSAGE(6),
+		GUILD_MEMBER_JOIN(7),
+		UNKNOWN(Integer.MIN_VALUE);
+
+		private final int value;
+
+		Type(final int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+	}
 }

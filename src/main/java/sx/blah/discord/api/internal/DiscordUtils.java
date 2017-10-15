@@ -449,12 +449,17 @@ public class DiscordUtils {
 					.findAny()
 					.orElseGet(() -> getUserFromJSON(channel.getShard(), json.author));
 
+			IMessage.Type type = Arrays.stream(IMessage.Type.values())
+					.filter(t -> t.getValue() == json.type)
+					.findFirst()
+					.orElse(IMessage.Type.UNKNOWN);
+
 			Message message = new Message(channel.getClient(), Long.parseUnsignedLong(json.id), json.content,
 					author, channel, convertFromTimestamp(json.timestamp),
 					json.edited_timestamp == null ? null : convertFromTimestamp(json.edited_timestamp),
 					json.mention_everyone, getMentionsFromJSON(json), getRoleMentionsFromJSON(json),
 					getAttachmentsFromJSON(json), Boolean.TRUE.equals(json.pinned), getEmbedsFromJSON(json),
-					json.webhook_id != null ? Long.parseUnsignedLong(json.webhook_id) : 0);
+					json.webhook_id != null ? Long.parseUnsignedLong(json.webhook_id) : 0, type);
 			message.setReactions(getReactionsFromJSON(message, json.reactions));
 
 			return message;

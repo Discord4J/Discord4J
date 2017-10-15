@@ -137,6 +137,11 @@ public class Message implements IMessage {
 	protected final long webhookID;
 
 	/**
+	 * The type of the message.
+	 */
+	protected final Type type;
+
+	/**
 	 * Pattern for Discord's channel mentions.
 	 */
 	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
@@ -149,7 +154,7 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
-				   List<Embed> embeds, List<IReaction> reactions, long webhookID) {
+				   List<Embed> embeds, List<IReaction> reactions, long webhookID, Type type) {
 		this.client = client;
 		this.id = id;
 		setContent(content);
@@ -166,6 +171,7 @@ public class Message implements IMessage {
 		this.everyoneMentionIsValid = mentionsEveryone;
 		this.reactions = reactions;
 		this.webhookID = webhookID;
+		this.type = type;
 
 		setChannelMentions();
 	}
@@ -173,9 +179,9 @@ public class Message implements IMessage {
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
 				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
-				   List<Embed> embeds, long webhookID) {
+				   List<Embed> embeds, long webhookID, Type type) {
 		this(client, id, content, user, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, roleMentions,
-				attachments, pinned, embeds, new ArrayList<>(), webhookID);
+				attachments, pinned, embeds, new ArrayList<>(), webhookID, type);
 	}
 
 	@Override
@@ -430,7 +436,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embeds, reactions, webhookID);
+				mentions, roleMentions, attachments, isPinned, embeds, reactions, webhookID, type);
 	}
 
 	@Override
@@ -634,6 +640,16 @@ public class Message implements IMessage {
 	@Override
 	public boolean isDeleted() {
 		return deleted;
+	}
+
+	@Override
+	public Type getType() {
+		return type;
+	}
+
+	@Override
+	public boolean isSystemMessage() {
+		return !getType().equals(Type.DEFAULT);
 	}
 
 	/**
