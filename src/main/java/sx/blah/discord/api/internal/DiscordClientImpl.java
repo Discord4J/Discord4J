@@ -51,10 +51,6 @@ import java.util.stream.Collectors;
  */
 public final class DiscordClientImpl implements IDiscordClient {
 
-	static {
-		if (!Discord4J.audioDisabled.get()) Services.load();
-	}
-
 	/**
 	 * The shards this client controls.
 	 */

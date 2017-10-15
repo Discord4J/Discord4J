@@ -17,7 +17,6 @@
 
 package sx.blah.discord.api.internal;
 
-import sun.net.spi.nameservice.dns.DNSNameService;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.util.LogMarkers;
 
@@ -27,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.jar.JarOutputStream;
@@ -34,7 +34,11 @@ import java.util.zip.ZipEntry;
 
 /**
  * Used to load audio SPIs used by Discord4J's audio system.
+ *
+ * @deprecated The audio libraries are loaded regardless of whether or not {@link #load()} is ever called. The usage
+ * of this class is thus no longer necessary and will be removed entirely with no replacement in the future.
  */
+@Deprecated
 public class Services {
 
 	/**
@@ -65,10 +69,10 @@ public class Services {
 				}
 			}
 
-			ClassLoader extLoader = DNSNameService.class.getClassLoader();
-			Method addExtUrl = extLoader.getClass().getDeclaredMethod("addExtURL", URL.class);
-			addExtUrl.setAccessible(true);
-			addExtUrl.invoke(extLoader, servicesJar.toURI().toURL());
+			URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+			Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+			method.setAccessible(true);
+			method.invoke(classLoader, servicesJar.toURI().toURL());
 
 			for (Class service : services.keySet()) {
 				ServiceLoader loader = ServiceLoader.load(service);

@@ -56,9 +56,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <p>NOTE: The goal of this class is to provide a wide variety of tools which work for a wide variety of use-cases. As
  * such, the feature set has a wide breadth but not necessarily depth.
  *
- * <p>The player supports all audio formats supported by {@link javax.sound.sampled.AudioSystem}. By default, Discord4J
- * includes <a href=https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html>Service Provider Interfaces</a> for
- * Mpeg and Flac formats. See {@link sx.blah.discord.api.internal.Services}.
+ * <p>The player supports all audio formats supported by {@link javax.sound.sampled.AudioSystem} in addition to MPEG and
+ * FLAC formats.
  */
 public class AudioPlayer implements IAudioProvider {
 

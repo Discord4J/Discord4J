@@ -96,7 +96,9 @@ public class TestBot {
 							if (channel != null) {
 								channel.join();
 								AudioPlayer.getAudioPlayerForGuild(channel.getGuild()).queue(new File("./test.mp3")); //Mono test
+								AudioPlayer.getAudioPlayerForGuild(channel.getGuild()).queue(new File("./test.flac")); //Mono test
 								AudioPlayer.getAudioPlayerForGuild(channel.getGuild()).queue(new File("./test2.mp3")); //Stereo test
+								AudioPlayer.getAudioPlayerForGuild(channel.getGuild()).queue(new File("./test2.flac")); //Stereo test
 							}
 
 							//Start testing
@@ -248,10 +250,12 @@ public class TestBot {
 									channel.leave();
 								} else if (m.getContent().startsWith(".play")) {
 									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
-//								player.queue(new File("./test.mp3"));
-//								player.queue(new File("./test2.mp3"));
-									player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test.mp3"));
-									player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test2.mp3"));
+									player.queue(new File("./test.mp3"));
+									player.queue(new File("./test.flac"));
+									player.queue(new File("./test2.mp3"));
+									player.queue(new File("./test2.flac"));
+									// player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test.mp3"));
+									// player.queue(new URL("https://github.com/austinv11/Discord4J/raw/master/test2.mp3"));
 								} else if (m.getContent().startsWith(".pause")) {
 									AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(m.getGuild());
 									player.setPaused(true);
