@@ -137,9 +137,9 @@ public final class DiscordClientImpl implements IDiscordClient {
 	private final PresenceUpdateRequest identifyPresence;
 
 	/**
-	 * The owner of this application.
+	 * The ID of the owner of this application.
 	 */
-	private volatile IUser applicationOwner;
+	private volatile long applicationOwnerID;
 
 	public DiscordClientImpl(String token, int shardCount, boolean isDaemon, int maxMissedPings, int maxReconnectAttempts,
 							 int retryCount, int maxCacheCount, ICacheDelegateProvider provider, int[] shard,
@@ -324,25 +324,16 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 	@Override
 	public IUser getApplicationOwner() {
-		if (applicationOwner == null) {
-			UserObject owner;
-
+		if (applicationOwnerID == 0L) {
 			try {
-				owner = getApplicationInfo().owner;
+				applicationOwnerID = Long.parseUnsignedLong(getApplicationInfo().owner.id);
 			} catch (RateLimitException e) {
 				Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-				return applicationOwner;
+				return null;
 			}
-
-			IUser user = getUserByID(Long.parseUnsignedLong(owner.id));
-			if (user == null) {
-				DiscordUtils.getUserFromJSON(getShards().get(0), owner);
-			}
-
-			applicationOwner = user;
 		}
 
-		return applicationOwner;
+		return fetchUser(applicationOwnerID);
 	}
 
 	@Override
