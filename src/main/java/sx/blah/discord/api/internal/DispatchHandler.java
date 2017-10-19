@@ -444,7 +444,7 @@ class DispatchHandler {
 		IMessage oldMessage = toUpdate == null ? null : toUpdate.copy();
 		toUpdate = (Message) DiscordUtils.getUpdatedMessageFromJSON(client, toUpdate, json);
 
-		if (oldMessage == null && json.content != null) { // Cannot resolve edit type
+		if (oldMessage == null) { // Cannot resolve edit type
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		} else {
 			if (json.pinned != null && oldMessage.isPinned() && !json.pinned) {
