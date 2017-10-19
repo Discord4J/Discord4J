@@ -435,27 +435,27 @@ class DispatchHandler {
 	}
 
 	private void messageUpdate(MessageObject json) {
-		String id = json.id;
-		String channelID = json.channel_id;
-
-		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(channelID));
+		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.channel_id));
 		if (channel == null)
 			return;
 
-		Message toUpdate = (Message) channel.getMessageByID(Long.parseUnsignedLong(id));
-		if (toUpdate == null) return;
+		Message toUpdate = (Message) channel.messages.get(json.id);
 
-		IMessage oldMessage = toUpdate.copy();
-		toUpdate = (Message) DiscordUtils.getUpdatedMessageFromJSON(toUpdate, json);
+		IMessage oldMessage = toUpdate == null ? null : toUpdate.copy();
+		toUpdate = (Message) DiscordUtils.getUpdatedMessageFromJSON(client, toUpdate, json);
 
-		if (json.pinned != null && oldMessage.isPinned() && !json.pinned) {
-			client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
-		} else if (json.pinned != null && !oldMessage.isPinned() && json.pinned) {
-			client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
-		} else if (oldMessage.getEmbeds().size() < toUpdate.getEmbeds().size()) {
-			client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbeds()));
-		} else if (json.content != null && !oldMessage.getContent().equals(json.content)) {
+		if (oldMessage == null && json.content != null) { // Cannot resolve edit type
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
+		} else {
+			if (json.pinned != null && oldMessage.isPinned() && !json.pinned) {
+				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
+			} else if (json.pinned != null && !oldMessage.isPinned() && json.pinned) {
+				client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
+			} else if (oldMessage.getEmbeds().size() < toUpdate.getEmbeds().size()) {
+				client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbeds()));
+			} else if (json.content != null && !oldMessage.getContent().equals(json.content)) {
+				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
+			}
 		}
 	}
 

@@ -33,9 +33,9 @@ public class MessageUpdateEvent extends MessageEvent {
 	}
 
 	/**
-	 * Gets the message before it was updated.
+	 * Gets the message before it was updated. Can be null if there was no previous message to compare to.
 	 *
-	 * @return The message before it was updated.
+	 * @return The message before it was updated, or null if the message was not cached before the update.
 	 */
 	public IMessage getOldMessage() {
 		return oldMessage;

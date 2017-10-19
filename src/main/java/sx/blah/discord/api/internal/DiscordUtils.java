@@ -469,13 +469,16 @@ public class DiscordUtils {
 	/**
 	 * Updates a {@link IMessage} object with the non-null or non-empty contents of a json {@link MessageObject}.
 	 *
+	 * @param client The client this message belongs to.
 	 * @param toUpdate The message to update.
 	 * @param json The json object representing the message.
 	 * @return The updated message object.
 	 */
-	public static IMessage getUpdatedMessageFromJSON(IMessage toUpdate, MessageObject json) {
-		if (toUpdate == null)
-			return null;
+	public static IMessage getUpdatedMessageFromJSON(IDiscordClient client, IMessage toUpdate, MessageObject json) {
+		if (toUpdate == null) {
+			Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.channel_id));
+			return channel == null ? null : getMessageFromJSON(channel, json);
+		}
 
 		Message message = (Message) toUpdate;
 		List<IMessage.Attachment> attachments = getAttachmentsFromJSON(json);
