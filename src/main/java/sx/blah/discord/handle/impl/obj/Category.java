@@ -120,7 +120,7 @@ public class Category implements ICategory {
 
 	@Override
 	public void changeName(String name) {
-		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
+		if (name == null || name.length() < 2 || name.length() > 100)
 			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).build());
