@@ -25,16 +25,19 @@ import java.util.List;
 
 /**
  * Dispatched when a message is created with embeds or a message is updated to have embeds.
+ * <p>
+ * NOTE: {@link #getOldMessage()} will not return null if and only if this event is related to editing a message
+ * <b>and</b> the previous message was in the cache.
  */
-public class MessageEmbedEvent extends MessageEvent {
+public class MessageEmbedEvent extends MessageUpdateEvent {
 
 	private final List<IEmbed> newEmbeds;
 
-	public MessageEmbedEvent(IMessage message, List<IEmbed> oldEmbeds) {
-		super(message);
+	public MessageEmbedEvent(IMessage oldMessage, IMessage newMessage, List<IEmbed> oldEmbeds) {
+		super(oldMessage, newMessage);
 
 		List<IEmbed> tempArray = new ArrayList<>();
-		for (IEmbed attachment : message.getEmbeds()) {
+		for (IEmbed attachment : newMessage.getEmbeds()) {
 			if (!oldEmbeds.contains(attachment)) {
 				tempArray.add(attachment);
 			}

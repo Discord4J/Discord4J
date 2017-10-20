@@ -21,10 +21,12 @@ import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Dispatched when a message is pinned in a channel.
+ * <p>
+ * NOTE: This event can only be fired if the message was previously cached. {@link #getOldMessage()} is never null.
  */
-public class MessagePinEvent extends MessageEvent {
+public class MessagePinEvent extends MessageUpdateEvent {
 
-	public MessagePinEvent(IMessage message) {
-		super(message);
+	public MessagePinEvent(IMessage oldMessage, IMessage newMessage) {
+		super(oldMessage, newMessage);
 	}
 }

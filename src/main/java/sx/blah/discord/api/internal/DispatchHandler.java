@@ -307,7 +307,7 @@ class DispatchHandler {
 				} else {
 					client.dispatcher.dispatch(new MessageReceivedEvent(message));
 					if (!message.getEmbeds().isEmpty()) {
-						client.dispatcher.dispatch(new MessageEmbedEvent(message, new ArrayList<>()));
+						client.dispatcher.dispatch(new MessageEmbedEvent(null, message, new ArrayList<>()));
 					}
 				}
 			}
@@ -448,12 +448,14 @@ class DispatchHandler {
 			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 		} else {
 			if (json.pinned != null && oldMessage.isPinned() && !json.pinned) {
-				client.dispatcher.dispatch(new MessageUnpinEvent(toUpdate));
+				client.dispatcher.dispatch(new MessageUnpinEvent(oldMessage, toUpdate));
 			} else if (json.pinned != null && !oldMessage.isPinned() && json.pinned) {
-				client.dispatcher.dispatch(new MessagePinEvent(toUpdate));
+				client.dispatcher.dispatch(new MessagePinEvent(oldMessage, toUpdate));
 			} else if (oldMessage.getEmbeds().size() < toUpdate.getEmbeds().size()) {
-				client.dispatcher.dispatch(new MessageEmbedEvent(toUpdate, oldMessage.getEmbeds()));
+				client.dispatcher.dispatch(new MessageEmbedEvent(oldMessage, toUpdate, oldMessage.getEmbeds()));
 			} else if (json.content != null && !oldMessage.getContent().equals(json.content)) {
+				client.dispatcher.dispatch(new MessageEditEvent(oldMessage, toUpdate));
+			} else {
 				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
 			}
 		}

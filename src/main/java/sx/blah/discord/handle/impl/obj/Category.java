@@ -121,7 +121,7 @@ public class Category implements ICategory {
 	@Override
 	public void changeName(String name) {
 		if (name == null || name.length() < 2 || name.length() > 100)
-			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+			throw new IllegalArgumentException("Category name must be between 2 and 100 characters!");
 
 		edit(new ChannelEditRequest.Builder().name(name).build());
 	}

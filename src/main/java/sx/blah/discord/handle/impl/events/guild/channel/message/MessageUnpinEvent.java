@@ -21,10 +21,12 @@ import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Dispatched when a message is unpinned in a channel.
+ * <p>
+ * NOTE: This event can only be fired if the message was previously cached. {@link #getOldMessage()} is never null.
  */
-public class MessageUnpinEvent extends MessageEvent {
+public class MessageUnpinEvent extends MessageUpdateEvent {
 
-	public MessageUnpinEvent(IMessage message) {
-		super(message);
+	public MessageUnpinEvent(IMessage oldMessage, IMessage newMessage) {
+		super(oldMessage, newMessage);
 	}
 }

@@ -20,7 +20,9 @@ package sx.blah.discord.handle.impl.events.guild.channel.message;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
- * Dispatched when a message's content is edited.
+ * Dispatched when a message is updated.
+ * <p>
+ * NOTE: This event will always fire, regardless if the message was previously cached.
  */
 public class MessageUpdateEvent extends MessageEvent {
 
