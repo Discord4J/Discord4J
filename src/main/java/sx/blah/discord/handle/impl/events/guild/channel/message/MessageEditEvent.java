@@ -20,6 +20,8 @@ import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Dispatched when a message's content is edited.
+ * <p>
+ * NOTE: This event can only be fired if the message was previously cached. {@link #getOldMessage()} is never null.
  */
 public class MessageEditEvent extends MessageUpdateEvent {
 

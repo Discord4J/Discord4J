@@ -477,7 +477,7 @@ public class DiscordUtils {
 	public static IMessage getUpdatedMessageFromJSON(IDiscordClient client, IMessage toUpdate, MessageObject json) {
 		if (toUpdate == null) {
 			Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(json.channel_id));
-			return channel == null ? null : getMessageFromJSON(channel, json);
+			return channel == null ? null : channel.getMessageByID(Long.parseUnsignedLong(json.id));
 		}
 
 		Message message = (Message) toUpdate;
