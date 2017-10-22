@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.json;
+package discord4j.common.json.response;
 
-public class RoleEntity {
+public class RoleResponse {
 
 	private String id;
 	private String name;
@@ -27,7 +27,7 @@ public class RoleEntity {
 	private boolean managed;
 	private boolean mentionable;
 
-	public RoleEntity(String id, String name, int color, boolean hoist, int position, int permissions, boolean managed,
+	public RoleResponse(String id, String name, int color, boolean hoist, int position, int permissions, boolean managed,
 	                  boolean mentionable) {
 		this.id = id;
 		this.name = name;

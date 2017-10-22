@@ -90,6 +90,17 @@ public class DiscordRequest<T> {
 	}
 
 	/**
+	 * Adds the given names and values as request query parameters.
+	 *
+	 * @param params a map of query parameter names to values
+	 * @return this request
+	 */
+	public DiscordRequest<T> query(Map<String, Object> params) {
+		params.forEach(this::query);
+		return this;
+	}
+
+	/**
 	 * Exchange this request through the given {@link discord4j.rest.request.Router}.
 	 *
 	 * @param router a router that performs this request

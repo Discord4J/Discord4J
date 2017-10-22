@@ -16,7 +16,6 @@
  */
 package discord4j.rest.route;
 
-import discord4j.common.json.RoleEntity;
 import discord4j.common.json.response.*;
 
 /**
@@ -532,7 +531,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-roles">https://discordapp
 	 * .com/developers/docs/resources/guild#get-guild-roles</a>
 	 */
-	public static final Route<RoleEntity[]> GUILD_ROLES_GET = Route.get("/guilds/{guild.id}/roles", RoleEntity[].class);
+	public static final Route<RoleResponse[]> GUILD_ROLES_GET = Route.get("/guilds/{guild.id}/roles", RoleResponse[].class);
 
 	/**
 	 * Create a new role for the guild. Requires the 'MANAGE_ROLES' permission. Returns the new role object on success.
@@ -541,7 +540,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-role">https://discordapp
 	 * .com/developers/docs/resources/guild#create-guild-role</a>
 	 */
-	public static final Route<RoleEntity> GUILD_ROLE_CREATE = Route.post("/guilds/{guild.id}/roles", RoleEntity.class);
+	public static final Route<RoleResponse> GUILD_ROLE_CREATE = Route.post("/guilds/{guild.id}/roles", RoleResponse.class);
 
 	/**
 	 * Modify the positions of a set of role objects for the guild. Requires the 'MANAGE_ROLES' permission. Returns a
@@ -550,7 +549,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions">https
 	 * ://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions</a>
 	 */
-	public static final Route<RoleEntity[]> GUILD_ROLE_POSITIONS_MODIFY = Route.patch("/guilds/{guild.id}/roles", RoleEntity[].class);
+	public static final Route<RoleResponse[]> GUILD_ROLE_POSITIONS_MODIFY = Route.patch("/guilds/{guild.id}/roles", RoleResponse[].class);
 
 	/**
 	 * Modify a guild role. Requires the 'MANAGE_ROLES' permission. Returns the updated role on success. Fires a Guild
@@ -559,7 +558,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-role">https://discordapp
 	 * .com/developers/docs/resources/guild#modify-guild-role</a>
 	 */
-	public static final Route<RoleEntity> GUILD_ROLE_MODIFY = Route.patch("/guilds/{guild.id}/roles/{role.id}", RoleEntity.class);
+	public static final Route<RoleResponse> GUILD_ROLE_MODIFY = Route.patch("/guilds/{guild.id}/roles/{role.id}", RoleResponse.class);
 
 	/**
 	 * Delete a guild role. Requires the 'MANAGE_ROLES' permission. Returns a 204 empty response on success. Fires a
@@ -596,7 +595,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-voice-regions">https
 	 * ://discordapp.com/developers/docs/resources/guild#get-guild-voice-regions</a>
 	 */
-	public static final Route<VoiceRegionResponse[]> GUILD_VOICE_REGION_GET = Route.get("/guilds/{guild.id}/regions", VoiceRegionResponse[].class);
+	public static final Route<VoiceRegionResponse[]> GUILD_VOICE_REGIONS_GET = Route.get("/guilds/{guild.id}/regions", VoiceRegionResponse[].class);
 
 	/**
 	 * Returns a list of invite objects (with invite metadata) for the guild. Requires the 'MANAGE_GUILD' permission.
@@ -844,7 +843,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/webhook#modify-webhook-with-token">https
 	 * ://discordapp.com/developers/docs/resources/webhook#modify-webhook-with-token</a>
 	 */
-	public static final Route<WebhookResponse> WEBHOOK_TOKEN_MODIFY = Route.patch("/webhooks/{webhook.id}/{webhook.token}", WebhookResponse.class);
+	public static final Route<WebhookResponse> WEBHOOK_TOKEN_MODIFY = Route.patch("/webhooks/{webhook.id}/{webhook.token}", WebhookResponse.class); // TODO: return type wrong
 
 	/**
 	 * Delete a webhook permanently. User must be owner. Returns a 204 NO CONTENT response on success.
