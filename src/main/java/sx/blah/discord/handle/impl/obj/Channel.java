@@ -628,9 +628,13 @@ public class Channel implements IChannel {
 		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNEL, Permissions.MANAGE_CHANNELS);
 
 		try {
+
+			String json = DiscordUtils.MAPPER.writeValueAsString(request);
+			System.out.println(json);
+
 			client.REQUESTS.PATCH.makeRequest(
 					DiscordEndpoints.CHANNELS + id,
-					DiscordUtils.MAPPER.writeValueAsString(request));
+					json);
 		} catch (JsonProcessingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}

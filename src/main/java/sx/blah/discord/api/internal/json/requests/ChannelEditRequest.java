@@ -27,7 +27,7 @@ public class ChannelEditRequest {
 
 	public static class Builder {
 
-		private Long parentID;
+		private Long parentID = 0L;
 		private String name;
 		private Integer position;
 		private String topic;
