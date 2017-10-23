@@ -130,6 +130,11 @@ public class EmojiImpl implements IEmoji {
 	}
 
 	@Override
+	public boolean isDeleted() {
+		return this.equals(getGuild().getEmojiByID(getLongID()));
+	}
+
+	@Override
 	public IDiscordClient getClient() {
 		return getGuild().getClient();
 	}

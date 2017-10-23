@@ -60,6 +60,13 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	boolean isManaged();
 
 	/**
+	 * Gets whether the emoji is deleted.
+	 *
+	 * @return Whether the emoji is deleted.
+	 */
+	boolean isDeleted();
+
+	/**
 	 * Gets the image URL for the emoji.
 	 *
 	 * @return The image URL for the emoji.
