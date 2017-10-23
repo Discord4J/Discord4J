@@ -25,6 +25,7 @@ import java.util.Arrays;
  * Represents a json custom emoji create object.
  */
 public class EmojiCreateRequest {
+
 	/**
 	 * The name of the emoji.
 	 */
