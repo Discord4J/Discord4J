@@ -118,11 +118,11 @@ public class DiscordUtils {
 	 * Pattern for Discord's custom emoji.
 	 */
 	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
-	
+
 	/**
  	 * Check the input of name in IGuild.addEmoji().
  	 */
- 	public static final Pattern EMOJI_CREATE_NAME = Pattern.compile("([^A-Za-z0-9_])");
+ 	public static final Pattern EMOJI_NAME_PATTERN = Pattern.compile("([^A-Za-z0-9_])");
 
 	/**
 	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:).
