@@ -19,12 +19,18 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.EmojiObject;
+import sx.blah.discord.api.internal.json.requests.EmojiChangeRequest;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.util.PermissionUtils;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -100,6 +106,27 @@ public class EmojiImpl implements IEmoji {
 	@Override
 	public String getImageUrl() {
 		return String.format(DiscordEndpoints.EMOJI_IMAGE, getStringID());
+	}
+
+	@Override
+	public IEmoji changeRoles(IRole... roles) {
+		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+
+		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(String.format(DiscordEndpoints.EMOJIS, getGuild().getStringID()) + getStringID(), new EmojiChangeRequest(getName(), roles), EmojiObject.class);
+		IEmoji newEmoji = DiscordUtils.getEmojiFromJSON(getGuild(), response);
+
+		//TODO save newEmoji in cache?
+
+		return newEmoji;
+	}
+
+	@Override
+	public void deleteEmoji() {
+		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(String.format(DiscordEndpoints.EMOJIS, getGuild().getStringID()) + getStringID());
+
+		//TODO remove emoji from cache
 	}
 
 	@Override
