@@ -17,7 +17,6 @@
 package discord4j.common.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.json.RoleEntity;
 
 public class GuildCreateRequest {
 
@@ -28,11 +27,11 @@ public class GuildCreateRequest {
 	private final int verificationLevel;
 	@JsonProperty("default_message_notifications")
 	private final int defaultMessageNotifications;
-	private final RoleEntity[] roles;
+	private final RoleCreateRequest[] roles;
 	private final PartialChannelRequest[] channels;
 
 	public GuildCreateRequest(String name, String region, String icon, int verificationLevel,
-	                          int defaultMessageNotifications, RoleEntity[] roles,
+	                          int defaultMessageNotifications, RoleCreateRequest[] roles,
 	                          PartialChannelRequest[] channels) {
 		this.name = name;
 		this.region = region;

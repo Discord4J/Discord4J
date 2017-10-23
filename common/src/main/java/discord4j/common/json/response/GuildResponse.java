@@ -17,7 +17,6 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.json.RoleEntity;
 
 import javax.annotation.Nullable;
 
@@ -47,7 +46,7 @@ public class GuildResponse {
 	private int defaultMessageNotifications;
 	@JsonProperty("explicit_content_filter")
 	private int explciitContentFilter;
-	private RoleEntity[] roles;
+	private RoleResponse[] roles;
 	private EmojiResponse[] emojis;
 	private String[] features;
 	@JsonProperty("mfa_level")
@@ -134,7 +133,7 @@ public class GuildResponse {
 		return explciitContentFilter;
 	}
 
-	public RoleEntity[] getRoles() {
+	public RoleResponse[] getRoles() {
 		return roles;
 	}
 
