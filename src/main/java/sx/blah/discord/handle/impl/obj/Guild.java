@@ -860,7 +860,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IEmoji changeEmoji(String name, IRole... roles){
+	public IEmoji changeEmoji(String name, IRole... roles) {
 		if (name.length() < 2 || name.length() > 32 || DiscordUtils.EMOJI_NAME_PATTERN.matcher(name).find())
 			throw new DiscordException("Emoji name must be 2-32 alphanumeric characters and underscores.");
 
@@ -872,6 +872,16 @@ public class Guild implements IGuild {
 			throw new DiscordException("Emoji was unable to be changed (Discord didn't return a response).");
 
 		return DiscordUtils.getEmojiFromJSON(this, response);
+	}
+
+	@Override
+	public void deleteEmoji(String name) {
+		if (name.length() < 2 || name.length() > 32 || DiscordUtils.EMOJI_NAME_PATTERN.matcher(name).find())
+			throw new DiscordException("Emoji name must be 2-32 alphanumeric characters and underscores.");
+
+		PermissionUtils.hasPermissions(this, client.getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+
+		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(String.format(DiscordEndpoints.EMOJIS, getStringID()) + name);
 	}
 
 	@Override

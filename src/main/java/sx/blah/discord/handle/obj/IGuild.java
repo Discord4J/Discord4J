@@ -562,6 +562,13 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IEmoji changeEmoji(String name, IRole... roles);
 
 	/**
+	 * Delete an emoji
+	 *
+	 * @param name The name, <b>without colons</b> of length 2-32 characters.
+	 */
+	void deleteEmoji(String name);
+
+	/**
 	 * Gets a webhook by its unique snowflake ID from the channels's webhook cache.
 	 *
 	 * @param id The ID of the desired webhook.
