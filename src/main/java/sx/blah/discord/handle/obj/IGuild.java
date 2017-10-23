@@ -553,6 +553,15 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IEmoji createEmoji(String name, Image image, IRole... roles);
 
 	/**
+	 * Changes an emoji
+	 *
+	 * @param name The name, <b>without colons</b> of length 2-32 characters.
+	 * @param roles The roles for which this emoji will be whitelisted, if empty all roles will be allowed. Your bot must be whitelisted by Discord to use this feature.
+	 * @return The changed emoji.
+	 */
+	IEmoji changeEmoji(String name, IRole... roles);
+
+	/**
 	 * Gets a webhook by its unique snowflake ID from the channels's webhook cache.
 	 *
 	 * @param id The ID of the desired webhook.
