@@ -67,7 +67,7 @@ public final class DiscordEndpoints {
 	/**
 	 * Formatted string for the emoji endpoint.
 	 */
-	public static final String EMOJIS = GUILDS+"%s/emojis";
+	public static final String EMOJIS = GUILDS+"%s/emojis/";
 
 	/**
 	 * The webhooks endpoint.
