@@ -860,11 +860,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
- 	public IEmoji createEmoji(String name, Image image) {
- 		return createEmoji(name, image, getEveryoneRole());
- 	}
-
-	@Override
 	public IWebhook getWebhookByID(long id) {
 		return channels.stream()
 				.map(channel -> channel.getWebhookByID(id))
