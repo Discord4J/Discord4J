@@ -17,6 +17,10 @@
 
 package sx.blah.discord.api.internal.json.requests;
 
+import sx.blah.discord.handle.obj.IRole;
+
+import java.util.Arrays;
+
 /**
  * Represents a json custom emoji create object.
  */
@@ -31,8 +35,14 @@ public class EmojiCreateRequest {
 	 */
 	public String image;
 
-	public EmojiCreateRequest(String name, String image) {
+	/**
+	 * The roles for which this emoji will be whitelisted
+	 */
+	public String[] roles;
+
+	public EmojiCreateRequest(String name, String image, IRole[] roles) {
 		this.name = name;
 		this.image = image;
+		this.roles = Arrays.stream(roles).map(IRole::getStringID).toArray(String[]::new);
 	}
 }

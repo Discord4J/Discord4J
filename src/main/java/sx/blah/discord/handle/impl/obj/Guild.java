@@ -843,20 +843,25 @@ public class Guild implements IGuild {
 				.filter(emoji -> emoji.getName().equals(name))
 				.findFirst().orElse(null);
 	}
-	
+
 	@Override
- 	public IEmoji addEmoji(String name, Image image){
- 		if (name.length() < 2 || name.length() > 32 || DiscordUtils.EMOJI_CREATE_NAME.matcher(name).find())
- 			throw new DiscordException("Emoji names must be at least 2 characters long and can only contain alphanumeric characters and underscores.");
- 
- 		DiscordUtils.checkPermissions(client, this, EnumSet.of(Permissions.MANAGE_EMOJIS));
- 
- 		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + getID() + "/emojis", new EmojiCreateRequest(name, image.getData()), EmojiObject.class);
- 
- 		if (response == null)
- 			throw new DiscordException("Bots normally cannot create emojis. If you are building a service that needs to create emojis please contact support@discordapp.com to be whitelisted.");
- 
- 		return DiscordUtils.getEmojiFromJSON(this, response);
+	public IEmoji createEmoji(String name, Image image, IRole... roles) {
+		if (name.length() < 2 || name.length() > 32 || DiscordUtils.EMOJI_CREATE_NAME.matcher(name).find())
+			throw new DiscordException("Emoji names must be at least 2 characters long and can only contain alphanumeric characters and underscores.");
+
+		PermissionUtils.hasPermissions(this, client.getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+
+		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(String.format(DiscordEndpoints.EMOJIS, getStringID()), new EmojiCreateRequest(name, image.getData(), roles), EmojiObject.class);
+
+		if (response == null)
+			throw new DiscordException("Emoji was unable to be created (Discord didn't return a response).");
+
+		return DiscordUtils.getEmojiFromJSON(this, response);
+	}
+
+	@Override
+ 	public IEmoji createEmoji(String name, Image image) {
+ 		return createEmoji(name, image, getEveryoneRole());
  	}
 
 	@Override

@@ -541,19 +541,26 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return The emoji with the given name (or null if one was not found).
 	 */
 	IEmoji getEmojiByName(String name);
-	
+
 	/**
- 	 * This adds a custom emoji to the guild.
+	 * Creates a new emoji.
+	 *
+	 * @param name The name, <b>without colons</b> of length 2-32 characters.
+	 * @param image The image of the emoji.
+	 * @param roles The roles for which this emoji will be whitelisted
+	 * @return The new emoji.
+	 */
+	IEmoji createEmoji(String name, Image image, IRole... roles);
+
+	/**
+ 	 * Creates a new emoji.
  	 *
  	 * @param name The name, <b>without colons</b> of length 2-32 characters.
- 	 * @param image The Image of the Emoji.
- 	 * @return The emoji.
+ 	 * @param image The image of the emoji.
+ 	 * @return The new emoji.
  	 *
- 	 * @throws DiscordException
- 	 * @throws RateLimitException
- 	 * @throws MissingPermissionsException
  	 */
- 	IEmoji addEmoji(String name, Image image);
+ 	IEmoji createEmoji(String name, Image image);
 
 	/**
 	 * Gets a webhook by its unique snowflake ID from the channels's webhook cache.
