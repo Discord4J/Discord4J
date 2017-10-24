@@ -33,16 +33,10 @@ import java.util.*;
  * @see IChannel#getMessageHistory(int)
  * @see IChannel#getMessageHistoryFrom(java.time.LocalDateTime)
  * @see IChannel#getMessageHistoryFrom(java.time.LocalDateTime, int)
- * @see IChannel#getMessageHistoryFrom(String)
- * @see IChannel#getMessageHistoryFrom(String, int)
  * @see IChannel#getMessageHistoryIn(java.time.LocalDateTime, java.time.LocalDateTime)
  * @see IChannel#getMessageHistoryIn(java.time.LocalDateTime, java.time.LocalDateTime, int)
- * @see IChannel#getMessageHistoryIn(String, String)
- * @see IChannel#getMessageHistoryIn(String, String, int)
  * @see IChannel#getMessageHistoryTo(java.time.LocalDateTime)
  * @see IChannel#getMessageHistoryTo(java.time.LocalDateTime, int)
- * @see IChannel#getMessageHistoryTo(String)
- * @see IChannel#getMessageHistoryTo(String, int)
  */
 public class MessageHistory extends AbstractList<IMessage> implements List<IMessage>, RandomAccess {
 

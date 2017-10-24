@@ -170,8 +170,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
 	 *
-	 * @param beginID The ID to start at. (Inclusive)
-	 * @param endID The ID to stop at. (Inclusive)
+	 * @param beginID The ID to start at (newest). (Inclusive)
+	 * @param endID The ID to stop at (oldest). (Inclusive)
 	 * @return The messages in the specified range of message IDs.
 	 */
 	MessageHistory getMessageHistoryIn(long beginID, long endID);
@@ -181,8 +181,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * <p>If the internal message cache does not have enough messages, they will be fetched from Discord.
 	 *
-	 * @param beginID The ID to start at. (Inclusive)
-	 * @param endID The ID to stop at. (Inclusive)
+	 * @param beginID The ID to start at (newest). (Inclusive)
+	 * @param endID The ID to stop at (oldest). (Inclusive)
 	 * @param maxMessageCount The maximum number of messages to retrieve.
 	 * @return The messages in the given range of message IDs.
 	 */
