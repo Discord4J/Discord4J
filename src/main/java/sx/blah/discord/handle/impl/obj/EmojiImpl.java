@@ -113,7 +113,7 @@ public class EmojiImpl implements IEmoji {
 	public void changeRoles(IRole... roles) {
 		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
 
-		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(String.format(DiscordEndpoints.EMOJIS, getGuild().getStringID()) + getStringID(), new EmojiEditRequest(getName(), roles), EmojiObject.class);
+		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(), new EmojiEditRequest(getName(), roles), EmojiObject.class);
 		IEmoji emoji = DiscordUtils.getEmojiFromJSON(getGuild(), response);
 	}
 
@@ -121,7 +121,7 @@ public class EmojiImpl implements IEmoji {
 	public void changeName(String name) {
 		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
 
-		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(String.format(DiscordEndpoints.EMOJIS, getGuild().getStringID()) + getStringID(), new EmojiEditRequest(name, getRoles().toArray(new IRole[getRoles().size()])), EmojiObject.class);
+		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(), new EmojiEditRequest(name, getRoles().toArray(new IRole[getRoles().size()])), EmojiObject.class);
 		IEmoji emoji = DiscordUtils.getEmojiFromJSON(getGuild(), response);
 	}
 
@@ -129,7 +129,7 @@ public class EmojiImpl implements IEmoji {
 	public void deleteEmoji() {
 		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
 
-		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(String.format(DiscordEndpoints.EMOJIS, getGuild().getStringID()) + getStringID());
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID());
 
 		((Guild) guild).emojis.remove(this);
 	}

@@ -709,8 +709,10 @@ public class DiscordUtils {
 				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role))).toArray(IRole[]::new);
 
 		EmojiImpl emoji = (EmojiImpl) guild.getEmojiByName(json.name);
-		emoji.changeName(json.name);
-		emoji.changeRoles(roles);
+		if (emoji != null) {
+			emoji.setName(json.name);
+			emoji.setRoles(roles);
+		}
 
 		return new EmojiImpl(id, guild, json.name, Arrays.asList(roles), json.require_colons, json.managed);
 	}

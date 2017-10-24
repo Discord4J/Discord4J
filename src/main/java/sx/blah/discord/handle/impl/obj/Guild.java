@@ -851,7 +851,7 @@ public class Guild implements IGuild {
 
 		PermissionUtils.hasPermissions(this, client.getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
 
-		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(String.format(DiscordEndpoints.EMOJIS, getStringID()), new EmojiCreateRequest(name, image.getData(), roles), EmojiObject.class);
+		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/emojis", new EmojiCreateRequest(name, image.getData(), roles), EmojiObject.class);
 
 		if (response == null)
 			throw new DiscordException("Emoji was unable to be created (Discord didn't return a response).");

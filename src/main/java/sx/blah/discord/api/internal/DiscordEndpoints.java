@@ -65,11 +65,6 @@ public final class DiscordEndpoints {
 	public static final String CHANNELS = APIBASE+"/channels/";
 
 	/**
-	 * Formatted string for the emoji endpoint.
-	 */
-	public static final String EMOJIS = GUILDS+"%s/emojis/";
-
-	/**
 	 * The webhooks endpoint.
 	 */
 	public static final String WEBHOOKS = APIBASE+"/webhooks/";
