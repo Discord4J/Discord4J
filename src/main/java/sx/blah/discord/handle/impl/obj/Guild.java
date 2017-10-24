@@ -856,9 +856,9 @@ public class Guild implements IGuild {
 		if (response == null)
 			throw new DiscordException("Emoji was unable to be created (Discord didn't return a response).");
 
-		//TODO save new emoji in cache
-
-		return DiscordUtils.getEmojiFromJSON(this, response);
+		IEmoji emoji = DiscordUtils.getEmojiFromJSON(this, response);
+		this.emojis.put(emoji);
+		return emoji;
 	}
 
 	@Override
