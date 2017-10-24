@@ -77,6 +77,8 @@ class RequestStream<T> {
 			return false;
 		}
 	}).backoff(context -> {
+		if (context.applicationContext() == null) return new BackoffDelay(Duration.ZERO);
+
 		long delay = ((AtomicLong) context.applicationContext()).get();
 		((AtomicLong) context.applicationContext()).set(0L);
 		return new BackoffDelay(Duration.ofMillis(delay));
