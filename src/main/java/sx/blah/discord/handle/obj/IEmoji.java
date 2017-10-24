@@ -89,7 +89,6 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 
 	/**
 	 * Delete an emoji.
-	 *
 	 */
 	void deleteEmoji();
 }
