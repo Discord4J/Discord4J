@@ -545,7 +545,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	/**
 	 * Creates a new emoji.
 	 *
-	 * @param name The name, <b>without colons</b> of length 2-32 characters.
+	 * @param name The name, <b>without colons</b> of length 2-32 characters only consisting of alphanumeric characters and underscores.
 	 * @param image The image of the emoji.
 	 * @param roles The roles for which this emoji will be whitelisted, if empty all roles will be allowed. Your bot must be whitelisted by Discord to use this feature.
 	 * @return The new emoji.

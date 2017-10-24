@@ -32,7 +32,7 @@ public class EmojiEditRequest {
 	public String name;
 
 	/**
-	 * The roles for which this emoji will be whitelisted
+	 * The roles for which this emoji will be whitelisted.
 	 */
 	public String[] roles;
 

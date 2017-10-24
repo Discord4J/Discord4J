@@ -32,12 +32,12 @@ public class EmojiCreateRequest {
 	public String name;
 
 	/**
-	 * The string of bytes of the emoji
+	 * The string of bytes of the emoji.
 	 */
 	public String image;
 
 	/**
-	 * The roles for which this emoji will be whitelisted
+	 * The roles for which this emoji will be whitelisted.
 	 */
 	public String[] roles;
 

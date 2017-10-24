@@ -49,7 +49,7 @@ public class EmojiImpl implements IEmoji {
 	 */
 	private final IGuild guild;
 	/**
-	 * the name of the emoji.
+	 * The name of the emoji.
 	 */
 	private volatile String name;
 	/**
