@@ -39,7 +39,7 @@ public class ChannelService extends RestService {
 	}
 
 	public Mono<ChannelResponse> modifyChannel(long channelId, ChannelModifyRequest request) {
-		return Routes.CHANNEL_MODIFY.newRequest(channelId)
+		return Routes.CHANNEL_MODIFY_PARTIAL.newRequest(channelId)
 				.body(request)
 				.exchange(getRouter());
 	}
