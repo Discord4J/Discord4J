@@ -83,7 +83,7 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	/**
 	 * Changes an emoji's name.
 	 *
-	 * @param name The name, <b>without colons</b> of length 2-32 characters.
+	 * @param name The name, <b>without colons</b> of length 2-32 characters only consisting of alphanumeric characters and underscores.
 	 */
 	void changeName(String name);
 
