@@ -28,6 +28,9 @@ public class EmbedFieldEntity {
 		this.inline = inline;
 	}
 
+	public EmbedFieldEntity() {
+	}
+
 	public String getName() {
 		return name;
 	}

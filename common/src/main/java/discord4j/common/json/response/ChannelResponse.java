@@ -36,6 +36,8 @@ public class ChannelResponse {
 	private String name;
 	@Nullable
 	private String topic;
+	@Nullable
+	private Boolean nsfw;
 	@JsonProperty("last_message_id")
 	@Nullable
 	private String lastMessageId;
@@ -88,6 +90,11 @@ public class ChannelResponse {
 	@Nullable
 	public String getTopic() {
 		return topic;
+	}
+
+	@Nullable
+	public Boolean getNsfw() {
+		return nsfw;
 	}
 
 	@Nullable

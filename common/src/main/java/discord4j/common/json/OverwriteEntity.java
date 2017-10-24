@@ -30,6 +30,9 @@ public class OverwriteEntity {
 		this.deny = deny;
 	}
 
+	public OverwriteEntity() {
+	}
+
 	public String getId() {
 		return id;
 	}

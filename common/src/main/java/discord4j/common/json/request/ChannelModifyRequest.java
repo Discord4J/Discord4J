@@ -30,6 +30,8 @@ public class ChannelModifyRequest {
 	private final Possible<Integer> position;
 	@Nullable
 	private final Possible<String> topic;
+	@Nullable
+	private final Possible<Boolean> nsfw;
 	private final Possible<Integer> bitrate;
 	@JsonProperty("user_limit")
 	private final Possible<Integer> userLimit;
@@ -40,13 +42,15 @@ public class ChannelModifyRequest {
 	private final Possible<String> parentId;
 
 	public ChannelModifyRequest(Possible<String> name, Possible<Integer> position,
-	                            @Nullable Possible<String> topic, Possible<Integer> bitrate,
+	                            @Nullable Possible<String> topic,
+	                            @Nullable Possible<Boolean> nsfw, Possible<Integer> bitrate,
 	                            Possible<Integer> userLimit,
 	                            Possible<OverwriteEntity> permissionOverwrites,
 	                            @Nullable Possible<String> parentId) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;
+		this.nsfw = nsfw;
 		this.bitrate = bitrate;
 		this.userLimit = userLimit;
 		this.permissionOverwrites = permissionOverwrites;

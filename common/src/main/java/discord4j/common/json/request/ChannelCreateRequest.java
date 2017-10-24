@@ -36,16 +36,19 @@ public class ChannelCreateRequest {
 	@JsonProperty("parent_id")
 	@Nullable
 	private final Possible<String> parentId;
+	private final Possible<Boolean> nsfw;
 
 	public ChannelCreateRequest(String name, Possible<Integer> type,
 	                            Possible<Integer> bitrate, Possible<Integer> userLimit,
 	                            Possible<OverwriteEntity[]> permissionOverwrites,
-	                            @Nullable Possible<String> parentId) {
+	                            @Nullable Possible<String> parentId,
+	                            Possible<Boolean> nsfw) {
 		this.name = name;
 		this.type = type;
 		this.bitrate = bitrate;
 		this.userLimit = userLimit;
 		this.permissionOverwrites = permissionOverwrites;
 		this.parentId = parentId;
+		this.nsfw = nsfw;
 	}
 }

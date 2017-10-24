@@ -28,6 +28,9 @@ public class GameEntity {
 		this.url = url;
 	}
 
+	public GameEntity() {
+	}
+
 	public String getName() {
 		return name;
 	}

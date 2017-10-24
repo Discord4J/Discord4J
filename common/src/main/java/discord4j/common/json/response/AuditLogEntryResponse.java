@@ -25,6 +25,7 @@ public class AuditLogEntryResponse {
 	@JsonProperty("target_id")
 	@Nullable
 	private String targetId;
+	@Nullable
 	private AuditLogChangeResponse[] changes;
 	@JsonProperty("user_id")
 	private String userId;
@@ -32,7 +33,7 @@ public class AuditLogEntryResponse {
 	@JsonProperty("action_type")
 	private int actionType;
 	@Nullable
-	private AuditLogEntryOptionsResponse[] options;
+	private AuditLogEntryOptionsResponse options;
 	@Nullable
 	private String reason;
 
@@ -41,6 +42,7 @@ public class AuditLogEntryResponse {
 		return targetId;
 	}
 
+	@Nullable
 	public AuditLogChangeResponse[] getChanges() {
 		return changes;
 	}
@@ -58,7 +60,7 @@ public class AuditLogEntryResponse {
 	}
 
 	@Nullable
-	public AuditLogEntryOptionsResponse[] getOptions() {
+	public AuditLogEntryOptionsResponse getOptions() {
 		return options;
 	}
 
