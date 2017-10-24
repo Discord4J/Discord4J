@@ -846,7 +846,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IEmoji createEmoji(String name, Image image, IRole... roles) {
-		if (name.length() < 2 || name.length() > 32 || DiscordUtils.EMOJI_NAME_PATTERN.matcher(name).find())
+		if (!DiscordUtils.EMOJI_NAME_PATTERN.matcher(name).find())
 			throw new DiscordException("Emoji name must be between 2-32 characters and consist only of alphanumeric characters and underscores.");
 
 		PermissionUtils.hasPermissions(this, client.getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));

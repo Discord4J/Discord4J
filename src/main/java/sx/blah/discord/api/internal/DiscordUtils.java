@@ -62,6 +62,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Collection of internal Discord4J utilities.
@@ -121,7 +122,7 @@ public class DiscordUtils {
 	/**
  	 * Pattern for naming Discord's custom emoji.
  	 */
- 	public static final Pattern EMOJI_NAME_PATTERN = Pattern.compile("([^A-Za-z0-9_])");
+ 	public static final Pattern EMOJI_NAME_PATTERN = Pattern.compile("([A-Za-z0-9_]{2,32})");
 
 	/**
 	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:).
@@ -705,17 +706,20 @@ public class DiscordUtils {
 	 */
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
 		long id = Long.parseUnsignedLong(json.id);
-		IRole[] roles = Arrays.stream(json.roles)
+		List<IRole> roles = Arrays.stream(json.roles)
 				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role)))
-				.toArray(IRole[]::new);
+				.collect(Collectors.toList());
 
 		EmojiImpl emoji = (EmojiImpl) guild.getEmojiByID(id);
 		if (emoji != null) {
 			emoji.setName(json.name);
-			emoji.setRoles(roles);
+			emoji.setRoles(roles.toArray(new IRole[roles.size()]));
+			return emoji;
 		}
 
-		return new EmojiImpl(id, guild, json.name, Arrays.asList(roles), json.require_colons, json.managed);
+		Cache<IRole> roleCache = new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class);
+		roleCache.putAll(roles);
+		return new EmojiImpl(id, guild, json.name, roleCache, json.require_colons, json.managed);
 	}
 
 	/**

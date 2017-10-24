@@ -29,11 +29,9 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.PermissionUtils;
+import sx.blah.discord.util.cache.Cache;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * The default implementation of {@link IEmoji}.
@@ -55,7 +53,7 @@ public class EmojiImpl implements IEmoji {
 	/**
 	 * The roles which are allowed to use the emoji.
 	 */
-	private volatile List<IRole> roles;
+	public final Cache<IRole> roles;
 	/**
 	 * Whether the emoji needs colons in chat.
 	 */
@@ -65,7 +63,16 @@ public class EmojiImpl implements IEmoji {
 	 */
 	private final boolean isManaged;
 
-	public EmojiImpl(long id, IGuild guild, String name, List<IRole> roles, boolean requiresColons, boolean isManaged) {
+	public EmojiImpl(long id, IGuild guild, String name, boolean requiresColons, boolean isManaged) {
+		this.id = id;
+		this.guild = guild;
+		this.name = name;
+		this.roles = new Cache<>((DiscordClientImpl) getClient(), IRole.class);
+		this.requiresColons = requiresColons;
+		this.isManaged = isManaged;
+	}
+
+	public EmojiImpl(long id, IGuild guild, String name, Cache<IRole> roles, boolean requiresColons, boolean isManaged) {
 		this.id = id;
 		this.guild = guild;
 		this.name = name;
@@ -91,7 +98,7 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public List<IRole> getRoles() {
-		return roles;
+		return new ArrayList<>(roles.values());
 	}
 
 	@Override
@@ -149,7 +156,8 @@ public class EmojiImpl implements IEmoji {
 	 * @param roles The roles of the emoji.
 	 */
 	public void setRoles(IRole... roles) {
-		this.roles = Arrays.asList(roles);
+		this.roles.clear();
+		this.roles.putAll(Arrays.asList(roles));
 	}
 
 	@Override
