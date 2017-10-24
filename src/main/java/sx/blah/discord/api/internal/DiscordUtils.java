@@ -33,8 +33,8 @@ import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
-import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.handle.audit.entry.AuditLogEntry;
 import sx.blah.discord.handle.audit.entry.DiscordObjectEntry;
 import sx.blah.discord.handle.audit.entry.TargetedEntry;
@@ -62,7 +62,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Collection of internal Discord4J utilities.
@@ -120,7 +119,7 @@ public class DiscordUtils {
 	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
 
 	/**
- 	 * Check the input of name in IGuild.addEmoji().
+ 	 * Pattern for naming Discord's custom emoji.
  	 */
  	public static final Pattern EMOJI_NAME_PATTERN = Pattern.compile("([^A-Za-z0-9_])");
 
@@ -706,11 +705,14 @@ public class DiscordUtils {
 	 */
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
 		long id = Long.parseUnsignedLong(json.id);
-		List<IRole> roles = Arrays.stream(json.roles)
-				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role)))
-				.collect(Collectors.toList());
+		IRole[] roles = Arrays.stream(json.roles)
+				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role))).toArray(IRole[]::new);
 
-		return new EmojiImpl(id, guild, json.name, roles, json.require_colons, json.managed);
+		EmojiImpl emoji = (EmojiImpl) guild.getEmojiByName(json.name);
+		emoji.changeName(json.name);
+		emoji.changeRoles(roles);
+
+		return new EmojiImpl(id, guild, json.name, Arrays.asList(roles), json.require_colons, json.managed);
 	}
 
 	/**

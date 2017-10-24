@@ -24,7 +24,7 @@ import java.util.Arrays;
 /**
  * Represents a json custom emoji create object.
  */
-public class EmojiChangeRequest {
+public class EmojiEditRequest {
 
 	/**
 	 * The name of the emoji.
@@ -36,7 +36,7 @@ public class EmojiChangeRequest {
 	 */
 	public String[] roles;
 
-	public EmojiChangeRequest(String name, IRole[] roles) {
+	public EmojiEditRequest(String name, IRole... roles) {
 		this.name = name;
 		this.roles = Arrays.stream(roles).map(IRole::getStringID).toArray(String[]::new);
 	}

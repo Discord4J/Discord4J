@@ -74,12 +74,18 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	String getImageUrl();
 
 	/**
-	 * Changes an emoji
+	 * Changes an emoji's roles
 	 *
 	 * @param roles The roles for which this emoji will be whitelisted, if empty all roles will be allowed. Your bot must be whitelisted by Discord to use this feature.
-	 * @return The changed emoji.
 	 */
-	IEmoji changeRoles(IRole... roles);
+	void changeRoles(IRole... roles);
+
+	/**
+	 * Changes an emoji's name
+	 *
+	 * @param name The name, <b>without colons</b> of length 2-32 characters.
+	 */
+	void changeName(String name);
 
 	/**
 	 * Delete an emoji
