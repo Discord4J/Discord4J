@@ -706,9 +706,10 @@ public class DiscordUtils {
 	public static IEmoji getEmojiFromJSON(IGuild guild, EmojiObject json) {
 		long id = Long.parseUnsignedLong(json.id);
 		IRole[] roles = Arrays.stream(json.roles)
-				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role))).toArray(IRole[]::new);
+				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role)))
+				.toArray(IRole[]::new);
 
-		EmojiImpl emoji = (EmojiImpl) guild.getEmojiByName(json.name);
+		EmojiImpl emoji = (EmojiImpl) guild.getEmojiByID(id);
 		if (emoji != null) {
 			emoji.setName(json.name);
 			emoji.setRoles(roles);
