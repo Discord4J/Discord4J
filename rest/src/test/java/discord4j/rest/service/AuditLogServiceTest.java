@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.response.AuditLogResponse;
 import discord4j.rest.http.EmptyReaderStrategy;
 import discord4j.rest.http.EmptyWriterStrategy;
 import discord4j.rest.http.JacksonReaderStrategy;
@@ -29,26 +28,20 @@ import discord4j.rest.http.JacksonWriterStrategy;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
-import org.junit.Assert;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class AuditLogServiceTest {
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+	private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
+
+	private AuditLogService auditLogService = null;
 
 	private AuditLogService getAuditLogService() {
+
+		if (auditLogService != null) return auditLogService;
+
 		String token = System.getenv("token");
 		ObjectMapper mapper = getMapper();
 
@@ -64,14 +57,18 @@ public class AuditLogServiceTest {
 
 		Router router = new Router(httpClient);
 
-		return new AuditLogService(router);
+		return auditLogService = new AuditLogService(router);
+	}
+
+	private ObjectMapper getMapper() {
+		return new ObjectMapper()
+				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+				.registerModule(new PossibleModule());
 	}
 
 	@Test
 	public void testGetAuditLog() {
-		long guildId = Long.parseUnsignedLong(System.getenv("guildId"));
-
-		AuditLogResponse response = getAuditLogService().getAuditLog(guildId, Collections.emptyMap()).block();
-		assertNotNull(response);
+		getAuditLogService().getAuditLog(guild, Collections.emptyMap()).block();
 	}
 }

@@ -45,7 +45,12 @@ public class ChannelServiceTest {
 	private static final long editMessage = Long.parseUnsignedLong(System.getenv("editMessage"));
 	private static final long permanentOverwrite = Long.parseUnsignedLong(System.getenv("permanentOverwrite"));
 
+	private ChannelService channelService = null;
+
 	private ChannelService getChannelService() {
+
+		if (channelService != null) return channelService;
+
 		String token = System.getenv("token");
 		ObjectMapper mapper = getMapper();
 
@@ -61,7 +66,7 @@ public class ChannelServiceTest {
 
 		Router router = new Router(httpClient);
 
-		return new ChannelService(router);
+		return channelService = new ChannelService(router);
 	}
 
 	private ObjectMapper getMapper() {

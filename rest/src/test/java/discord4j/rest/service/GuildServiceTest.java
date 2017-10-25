@@ -36,10 +36,10 @@ import java.util.Collections;
 
 public class GuildServiceTest {
 
-	private final long guild = Long.parseUnsignedLong(System.getenv("guild"));
-	private final long member = Long.parseUnsignedLong(System.getenv("member"));
-	private final long permanentRole = Long.parseUnsignedLong(System.getenv("permanentRole"));
-	private final String trashCategory = System.getenv("trashCategory");
+	private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
+	private static final long member = Long.parseUnsignedLong(System.getenv("member"));
+	private static final long permanentRole = Long.parseUnsignedLong(System.getenv("permanentRole"));
+	private static final String trashCategory = System.getenv("trashCategory");
 
 	private GuildService guildService = null;
 

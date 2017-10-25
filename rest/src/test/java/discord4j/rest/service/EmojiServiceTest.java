@@ -32,10 +32,15 @@ import org.junit.Test;
 
 public class EmojiServiceTest {
 
-	private final long guild = Long.parseUnsignedLong(System.getenv("guild"));
-	private final long permanentEmoji = Long.parseUnsignedLong(System.getenv("permanentEmoji"));
+	private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
+	private static final long permanentEmoji = Long.parseUnsignedLong(System.getenv("permanentEmoji"));
+
+	private EmojiService emojiService = null;
 
 	private EmojiService getEmojiService() {
+
+		if (emojiService != null) return emojiService;
+
 		String token = System.getenv("token");
 		ObjectMapper mapper = getMapper();
 
@@ -51,7 +56,7 @@ public class EmojiServiceTest {
 
 		Router router = new Router(httpClient);
 
-		return new EmojiService(router);
+		return emojiService = new EmojiService(router);
 	}
 
 	private ObjectMapper getMapper() {
