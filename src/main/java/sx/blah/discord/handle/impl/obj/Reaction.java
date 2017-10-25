@@ -83,7 +83,7 @@ public class Reaction implements IReaction {
 		IEmoji emoji = getMessage().getGuild().getEmojiByID(getEmoji().getLongID());
 		if (emoji == null) {
 			// Make up information that we don't have. Temporary until this method is removed.
-			emoji = new EmojiImpl(getEmoji().getLongID(), null, getEmoji().getName(), new ArrayList<>(), false, false);
+			emoji = new EmojiImpl(getEmoji().getLongID(), null, getEmoji().getName(), false, false);
 		}
 		return emoji;
 	}

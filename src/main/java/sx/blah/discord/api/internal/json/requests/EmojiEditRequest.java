@@ -36,7 +36,7 @@ public class EmojiEditRequest {
 	 */
 	public String[] roles;
 
-	public EmojiEditRequest(String name, IRole... roles) {
+	public EmojiEditRequest(String name, IRole[] roles) {
 		this.name = name;
 		this.roles = Arrays.stream(roles).map(IRole::getStringID).toArray(String[]::new);
 	}

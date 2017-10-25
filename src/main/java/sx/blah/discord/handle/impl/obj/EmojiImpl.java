@@ -114,7 +114,7 @@ public class EmojiImpl implements IEmoji {
 	}
 
 	@Override
-	public void changeRoles(IRole... roles) {
+	public void changeRoles(IRole[] roles) {
 		PermissionUtils.requirePermissions(getGuild(), getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
 
 

@@ -79,7 +79,7 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	 *
 	 * @param roles The roles for which this emoji will be whitelisted, if empty all roles will be allowed.
 	 */
-	void changeRoles(IRole... roles);
+	void changeRoles(IRole[] roles);
 
 	/**
 	 * Changes the name of the emoji.
