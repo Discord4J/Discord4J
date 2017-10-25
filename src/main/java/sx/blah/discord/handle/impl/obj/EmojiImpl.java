@@ -31,7 +31,9 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.cache.Cache;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * The default implementation of {@link IEmoji}.
@@ -113,25 +115,33 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public void changeRoles(IRole... roles) {
-		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+		PermissionUtils.requirePermissions(getGuild(), getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
 
-		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(), new EmojiEditRequest(getName(), roles), EmojiObject.class);
+
+		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(),
+				new EmojiEditRequest(getName(), roles),
+				EmojiObject.class);
 		IEmoji emoji = DiscordUtils.getEmojiFromJSON(getGuild(), response);
 	}
 
 	@Override
 	public void changeName(String name) {
-		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+		PermissionUtils.requirePermissions(getGuild(), getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
 
-		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(), new EmojiEditRequest(name, getRoles().toArray(new IRole[getRoles().size()])), EmojiObject.class);
+		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(),
+				new EmojiEditRequest(name, getRoles().toArray(new IRole[getRoles().size()])),
+				EmojiObject.class);
 		IEmoji emoji = DiscordUtils.getEmojiFromJSON(getGuild(), response);
 	}
 
 	@Override
 	public void deleteEmoji() {
-		PermissionUtils.hasPermissions(getGuild(), getClient().getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+		PermissionUtils.requirePermissions(getGuild(), getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
 
-		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID());
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(
+				DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID());
 
 		((Guild) guild).emojis.remove(this);
 	}

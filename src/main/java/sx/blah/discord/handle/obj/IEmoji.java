@@ -75,8 +75,9 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 
 	/**
 	 * Changes the roles of the emoji.
+	 * Your bot must be whitelisted by Discord to use this feature.
 	 *
-	 * @param roles The roles for which this emoji will be whitelisted, if empty all roles will be allowed. Your bot must be whitelisted by Discord to use this feature.
+	 * @param roles The roles for which this emoji will be whitelisted, if empty all roles will be allowed.
 	 */
 	void changeRoles(IRole... roles);
 

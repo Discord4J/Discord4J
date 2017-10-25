@@ -849,9 +849,12 @@ public class Guild implements IGuild {
 		if (!DiscordUtils.EMOJI_NAME_PATTERN.matcher(name).find())
 			throw new DiscordException("Emoji name must be between 2-32 characters and consist only of alphanumeric characters and underscores.");
 
-		PermissionUtils.hasPermissions(this, client.getOurUser(), EnumSet.of(Permissions.MANAGE_EMOJIS));
+		PermissionUtils.requirePermissions(this, getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
 
-		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(DiscordEndpoints.GUILDS + getStringID() + "/emojis", new EmojiCreateRequest(name, image.getData(), roles), EmojiObject.class);
+		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS + getStringID() + "/emojis",
+				new EmojiCreateRequest(name, image.getData(), roles),
+				EmojiObject.class);
 
 		if (response == null)
 			throw new DiscordException("Emoji was unable to be created (Discord didn't return a response).");

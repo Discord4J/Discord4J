@@ -22,7 +22,7 @@ import sx.blah.discord.handle.obj.IRole;
 import java.util.Arrays;
 
 /**
- * Represents a json custom emoji create object.
+ * Sent to create a new emoji.
  */
 public class EmojiCreateRequest {
 
