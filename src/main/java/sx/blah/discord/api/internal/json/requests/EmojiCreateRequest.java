@@ -44,6 +44,8 @@ public class EmojiCreateRequest {
 	public EmojiCreateRequest(String name, String image, IRole[] roles) {
 		this.name = name;
 		this.image = image;
-		this.roles = Arrays.stream(roles).map(IRole::getStringID).toArray(String[]::new);
+		this.roles = Arrays.stream(roles)
+				.map(IRole::getStringID)
+				.toArray(String[]::new);
 	}
 }

@@ -64,12 +64,7 @@ public class EmojiImpl implements IEmoji {
 	private final boolean isManaged;
 
 	public EmojiImpl(long id, IGuild guild, String name, boolean requiresColons, boolean isManaged) {
-		this.id = id;
-		this.guild = guild;
-		this.name = name;
-		this.roles = new Cache<>((DiscordClientImpl) getClient(), IRole.class);
-		this.requiresColons = requiresColons;
-		this.isManaged = isManaged;
+		this(id, guild, name, new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class), requiresColons, isManaged);
 	}
 
 	public EmojiImpl(long id, IGuild guild, String name, Cache<IRole> roles, boolean requiresColons, boolean isManaged) {
