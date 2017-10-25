@@ -22,10 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.request.ChannelModifyRequest;
-import discord4j.common.json.request.MessageCreateRequest;
-import discord4j.common.json.response.ChannelResponse;
-import discord4j.common.json.response.MessageResponse;
+import discord4j.common.json.request.*;
 import discord4j.rest.http.EmptyReaderStrategy;
 import discord4j.rest.http.EmptyWriterStrategy;
 import discord4j.rest.http.JacksonReaderStrategy;
@@ -35,19 +32,18 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collections;
-
-import static org.junit.Assert.assertNotNull;
 
 public class ChannelServiceTest {
 
-	@Test
-	public void testGetChannel() {
-		long channelId = Long.parseUnsignedLong(System.getenv("permanentChannel"));
-
-		ChannelResponse channel = getChannelService().getChannel(channelId).block();
-		assertNotNull(channel);
-	}
+	private static final long permanentChannel = Long.parseUnsignedLong(System.getenv("permanentChannel"));
+	private static final long permanentMessage = Long.parseUnsignedLong(System.getenv("permanentMessage"));
+	private static final long modifyChannel = Long.parseUnsignedLong(System.getenv("modifyChannel"));
+	private static final long reactionMessage = Long.parseUnsignedLong(System.getenv("reactionMessage"));
+	private static final long editMessage = Long.parseUnsignedLong(System.getenv("editMessage"));
+	private static final long permanentOverwrite = Long.parseUnsignedLong(System.getenv("permanentOverwrite"));
 
 	private ChannelService getChannelService() {
 		String token = System.getenv("token");
@@ -76,52 +72,121 @@ public class ChannelServiceTest {
 	}
 
 	@Test
+	public void testGetChannel() {
+		getChannelService().getChannel(permanentChannel).block();
+	}
+
+	@Test
 	public void testModifyChannel() {
-		long channelId = Long.parseUnsignedLong(System.getenv("modifyChannel"));
-
-		ChannelModifyRequest req =
-				new ChannelModifyRequest(Possible.absent(), Possible.absent(), Possible.of("test modify"), Possible
-						.absent(), Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent());
-		ChannelResponse channel = getChannelService().modifyChannel(channelId, req).block();
-
-		assertNotNull(channel);
+		ChannelModifyRequest req = new ChannelModifyRequest(Possible.absent(), Possible.absent(),
+				Possible.of("test modify"), Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent(),
+				Possible.absent());
+		getChannelService().modifyChannel(modifyChannel, req).block();
 	}
 
 	@Test
 	public void testDeleteChannel() {
-		long channelId = Long.parseUnsignedLong(System.getenv("deleteChannel")); // TODO: kinda sucks
-
-		ChannelResponse channel = getChannelService().deleteChannel(channelId).block();
-
-		assertNotNull(channel);
+		// TODO
 	}
 
 	@Test
 	public void testGetMessages() {
-		long channelId = Long.parseUnsignedLong(System.getenv("permanentChannel"));
-
-		MessageResponse[] messages = getChannelService().getMessages(channelId, Collections.emptyMap()).block();
-
-		assertNotNull(messages);
+		getChannelService().getMessages(permanentChannel, Collections.emptyMap()).block();
 	}
 
 	@Test
 	public void testGetMessage() {
-		long channelId = Long.parseUnsignedLong(System.getenv("permanentChannel"));
-		long messageId = Long.parseUnsignedLong(System.getenv("permanentMessage"));
-
-		MessageResponse message = getChannelService().getMessage(channelId, messageId).block();
-
-		assertNotNull(message);
+		getChannelService().getMessage(permanentChannel, permanentMessage).block();
 	}
 
 	@Test
 	public void testCreateMessage() {
-		long channelId = Long.parseUnsignedLong(System.getenv("modifyChannel"));
-
 		MessageCreateRequest req = new MessageCreateRequest("Hello world", null, false, null);
-		MessageResponse message = getChannelService().createMessage(channelId, req).block();
+		getChannelService().createMessage(permanentChannel, req).block();
+	}
 
-		assertNotNull(message);
+	@Test
+	public void testCreateReaction() throws UnsupportedEncodingException {
+		String reaction = URLEncoder.encode("❤", "UTF-8");
+		getChannelService().createReaction(permanentChannel, reactionMessage, reaction).block();
+	}
+
+	@Test
+	public void testDeleteOwnReaction() {
+		// TODO
+	}
+
+	@Test
+	public void testDeleteReaction() {
+		// TODO
+	}
+
+	@Test
+	public void testGetReactions() throws UnsupportedEncodingException {
+		String reaction = URLEncoder.encode("❤", "UTF-8");
+		getChannelService().getReactions(permanentChannel, permanentMessage, reaction, Collections.emptyMap()).block();
+	}
+
+	@Test
+	public void testDeleteAllReactions() {
+		// TODO
+	}
+
+	@Test
+	public void testEditMessage() {
+		MessageEditRequest req = new MessageEditRequest(Possible.of("This is a message I can edit."), Possible.absent());
+		getChannelService().editMessage(permanentChannel, editMessage, req).block();
+	}
+
+	@Test
+	public void testDeleteMessage() {
+		// TODO
+	}
+
+	@Test
+	public void testBulkDeleteMessages() {
+		// TODO
+	}
+
+	@Test
+	public void testEditChannelPermissions() {
+		PermissionsEditRequest req = new PermissionsEditRequest(0, 0, "member");
+		getChannelService().editChannelPermissions(modifyChannel, permanentOverwrite, req).block();
+	}
+
+	@Test
+	public void testGetChannelInvites() {
+		getChannelService().getChannelInvites(permanentChannel).block();
+	}
+
+	@Test
+	public void testCreateChannelInvite() {
+		InviteCreateRequest req = new InviteCreateRequest(0, 0, true, true);
+		getChannelService().createChannelInvite(modifyChannel, req).block();
+	}
+
+	@Test
+	public void testDeleteChannelPermission() {
+		// TODO
+	}
+
+	@Test
+	public void testTriggerTypingIndicator() {
+		getChannelService().triggerTypingIndicator(permanentChannel).block();
+	}
+
+	@Test
+	public void testGetPinnedMessages() {
+		getChannelService().getPinnedMessages(permanentChannel).block();
+	}
+
+	@Test
+	public void testAddPinnedMessage() {
+		// TODO
+	}
+
+	@Test
+	public void testDeletePinnedMessage() {
+		// TODO
 	}
 }

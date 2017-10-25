@@ -59,6 +59,9 @@ public class ChannelResponse {
 	@JsonProperty("parent_id")
 	@Nullable
 	private String parentId;
+	@JsonProperty("last_pin_timestamp")
+	@Nullable
+	private String lastPinTimestamp;
 
 	public String getId() {
 		return id;
@@ -135,5 +138,10 @@ public class ChannelResponse {
 	@Nullable
 	public String getParentId() {
 		return parentId;
+	}
+
+	@Nullable
+	public String getLastPinTimestamp() {
+		return lastPinTimestamp;
 	}
 }

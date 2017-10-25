@@ -146,8 +146,8 @@ public class GuildService extends RestService {
 				.exchange(getRouter());
 	}
 
-	public Mono<RoleResponse> modifyGuildRole(long guildId, RoleModifyRequest request) {
-		return Routes.GUILD_ROLE_MODIFY.newRequest(guildId)
+	public Mono<RoleResponse> modifyGuildRole(long guildId, long roleId, RoleModifyRequest request) {
+		return Routes.GUILD_ROLE_MODIFY.newRequest(guildId, roleId)
 				.body(request)
 				.exchange(getRouter());
 	}

@@ -27,18 +27,6 @@ public class RoleResponse {
 	private boolean managed;
 	private boolean mentionable;
 
-	public RoleResponse(String id, String name, int color, boolean hoist, int position, int permissions, boolean managed,
-	                  boolean mentionable) {
-		this.id = id;
-		this.name = name;
-		this.color = color;
-		this.hoist = hoist;
-		this.position = position;
-		this.permissions = permissions;
-		this.managed = managed;
-		this.mentionable = mentionable;
-	}
-
 	public String getId() {
 		return id;
 	}

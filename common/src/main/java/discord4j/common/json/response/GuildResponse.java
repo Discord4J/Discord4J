@@ -77,6 +77,9 @@ public class GuildResponse {
 	private ChannelResponse[] channels;
 	@Nullable
 	private PresenceResponse[] presences;
+	@JsonProperty("system_channel_id")
+	@Nullable
+	private String systemChannelId;
 
 	public String getId() {
 		return id;
@@ -200,5 +203,10 @@ public class GuildResponse {
 	@Nullable
 	public PresenceResponse[] getPresences() {
 		return presences;
+	}
+
+	@Nullable
+	public String getSystemChannelId() {
+		return systemChannelId;
 	}
 }
