@@ -713,7 +713,7 @@ public class DiscordUtils {
 		EmojiImpl emoji = (EmojiImpl) guild.getEmojiByID(id);
 		if (emoji != null) {
 			emoji.setName(json.name);
-			emoji.setRoles(roles.toArray(new IRole[roles.size()]));
+			emoji.setRoles(roles);
 			return emoji;
 		}
 

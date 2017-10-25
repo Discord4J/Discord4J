@@ -155,9 +155,9 @@ public class EmojiImpl implements IEmoji {
 	 *
 	 * @param roles The roles of the emoji.
 	 */
-	public void setRoles(IRole... roles) {
+	public void setRoles(List<IRole> roles) {
 		this.roles.clear();
-		this.roles.putAll(Arrays.asList(roles));
+		this.roles.putAll(roles);
 	}
 
 	@Override
