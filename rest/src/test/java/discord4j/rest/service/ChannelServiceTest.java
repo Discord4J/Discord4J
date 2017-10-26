@@ -166,7 +166,7 @@ public class ChannelServiceTest {
 
 	@Test
 	public void testCreateChannelInvite() {
-		InviteCreateRequest req = new InviteCreateRequest(0, 0, true, true);
+		InviteCreateRequest req = new InviteCreateRequest(1, 0, true, true);
 		getChannelService().createChannelInvite(modifyChannel, req).block();
 	}
 
@@ -192,6 +192,16 @@ public class ChannelServiceTest {
 
 	@Test
 	public void testDeletePinnedMessage() {
+		// TODO
+	}
+
+	@Test
+	public void testAddGroupDMRecipient() {
+		// TODO
+	}
+
+	@Test
+	public void testDeleteGroupDMRecipient() {
 		// TODO
 	}
 }

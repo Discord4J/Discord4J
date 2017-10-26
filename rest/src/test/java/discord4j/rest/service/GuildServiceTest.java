@@ -23,10 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.request.*;
-import discord4j.rest.http.EmptyReaderStrategy;
-import discord4j.rest.http.EmptyWriterStrategy;
-import discord4j.rest.http.JacksonReaderStrategy;
-import discord4j.rest.http.JacksonWriterStrategy;
+import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -56,6 +53,7 @@ public class GuildServiceTest {
 				.defaultHeader("Content-Type", "application/json")
 				.readerStrategy(new JacksonReaderStrategy<>(mapper))
 				.readerStrategy(new EmptyReaderStrategy())
+				.readerStrategy(new FallbackReaderStrategy())
 				.writerStrategy(new JacksonWriterStrategy(mapper))
 				.writerStrategy(new EmptyWriterStrategy())
 				.build();
@@ -73,6 +71,11 @@ public class GuildServiceTest {
 	}
 
 	@Test
+	public void testCreateGuild() {
+		// TODO
+	}
+
+	@Test
 	public void testGetGuild() {
 		getGuildService().getGuild(guild).block();
 	}
@@ -83,6 +86,11 @@ public class GuildServiceTest {
 				Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent(),
 				Possible.absent());
 		getGuildService().modifyGuild(guild, req).block();
+	}
+
+	@Test
+	public void testDeleteGuild() {
+		// TODO
 	}
 
 	@Test
@@ -111,6 +119,11 @@ public class GuildServiceTest {
 	@Test
 	public void testGetGuildMembers() {
 		getGuildService().getGuildMembers(guild, Collections.emptyMap()).block();
+	}
+
+	@Test
+	public void testAddGuildMember() {
+		// TODO
 	}
 
 	@Test

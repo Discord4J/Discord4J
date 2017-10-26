@@ -21,7 +21,7 @@ public class UserGuildResponse {
 	private String id;
 	private String name;
 	private String icon;
-	private boolean owenr;
+	private boolean owner;
 	private int permissions;
 
 	public String getId() {
@@ -36,8 +36,8 @@ public class UserGuildResponse {
 		return icon;
 	}
 
-	public boolean isOwenr() {
-		return owenr;
+	public boolean isOwner() {
+		return owner;
 	}
 
 	public int getPermissions() {

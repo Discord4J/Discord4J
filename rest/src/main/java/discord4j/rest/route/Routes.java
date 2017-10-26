@@ -729,7 +729,7 @@ public abstract class Routes {
 	 * @see <a href="https://discordapp.com/developers/docs/resources/user#get-current-user-guilds">https://discordapp
 	 * .com/developers/docs/resources/user#get-current-user-guilds</a>
 	 */
-	public static final Route<UserGuildResponse> CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds", UserGuildResponse.class);
+	public static final Route<UserGuildResponse[]> CURRENT_USER_GUILDS_GET = Route.get("/users/@me/guilds", UserGuildResponse[].class);
 
 	/**
 	 * Leave a guild. Returns a 204 empty response on success.

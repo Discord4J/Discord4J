@@ -27,9 +27,17 @@ public class UserResponse {
 	private String discriminator;
 	@Nullable
 	private String avatar;
-	private boolean bot;
+	@Nullable
+	private Boolean bot;
 	@JsonProperty("mfa_enabled")
-	private boolean mfaEnabled;
+	@Nullable
+	private Boolean mfaEnabled;
+	@Nullable
+	private Boolean verified;
+	@Nullable
+	private String email;
+	@Nullable
+	private String token;
 
 	public String getId() {
 		return id;
@@ -48,11 +56,28 @@ public class UserResponse {
 		return avatar;
 	}
 
-	public boolean isBot() {
+	@Nullable
+	public Boolean isBot() {
 		return bot;
 	}
 
-	public boolean isMfaEnabled() {
+	@Nullable
+	public Boolean isMfaEnabled() {
 		return mfaEnabled;
+	}
+
+	@Nullable
+	public Boolean getVerified() {
+		return verified;
+	}
+
+	@Nullable
+	public String getEmail() {
+		return email;
+	}
+
+	@Nullable
+	public String getToken() {
+		return token;
 	}
 }

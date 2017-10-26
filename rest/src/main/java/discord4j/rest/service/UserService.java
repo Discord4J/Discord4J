@@ -49,7 +49,7 @@ public class UserService extends RestService {
 				.exchange(getRouter());
 	}
 
-	public Mono<UserGuildResponse> getCurrentUserGuilds() {
+	public Mono<UserGuildResponse[]> getCurrentUserGuilds() {
 		return Routes.CURRENT_USER_GUILDS_GET.newRequest()
 				.exchange(getRouter());
 	}

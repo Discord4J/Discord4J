@@ -18,11 +18,15 @@ package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nullable;
+
 public class EmojiResponse {
 
 	private String id;
 	private String name;
 	private String[] roles;
+	@Nullable
+	private UserResponse user;
 	@JsonProperty("require_colons")
 	private boolean requireColons;
 	private boolean managed;
@@ -37,6 +41,11 @@ public class EmojiResponse {
 
 	public String[] getRoles() {
 		return roles;
+	}
+
+	@Nullable
+	public UserResponse getUser() {
+		return user;
 	}
 
 	public boolean isRequireColons() {
