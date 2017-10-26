@@ -53,6 +53,22 @@ public interface ICategory extends IDiscordObject<ICategory> {
 	List<IVoiceChannel> getVoiceChannels();
 
 	/**
+	 * Creates a new channel, initially adding it to this category.
+	 *
+	 * @param name The name of the new channel. MUST be between 2-100 characters long.
+	 * @return The new channel.
+	 */
+	IChannel createChannel(String name);
+
+	/**
+	 * Creates a new voice channel, initially adding it to this category.
+	 *
+	 * @param name The name of the new voice channel. MUST be between 2-100 characters long.
+	 * @return The new voice channel.
+	 */
+	IVoiceChannel createVoiceChannel(String name);
+
+	/**
 	 * Gets the parent guild of the category.
 	 *
 	 * @return The parent guild of the category.

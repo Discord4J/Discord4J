@@ -23,9 +23,12 @@ import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.ChannelObject;
 import sx.blah.discord.api.internal.json.objects.OverwriteObject;
+import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
 import sx.blah.discord.api.internal.json.requests.ChannelEditRequest;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.cache.Cache;
@@ -168,6 +171,22 @@ public class Category implements ICategory {
 		return getGuild().getVoiceChannels().stream()
 				.filter(channel -> equals(channel.getCategory()))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IChannel createChannel(String name) {
+		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
+			throw new DiscordException("Channel name must be 2-100 alphanumeric characters.");
+
+		return ((Guild) guild).createChannel(new ChannelCreateRequest(name, ChannelObject.Type.GUILD_TEXT, id));
+	}
+
+	@Override
+	public IVoiceChannel createVoiceChannel(String name) {
+		if (name == null || name.length() < 2 || name.length() > 100)
+			throw new DiscordException("Channel name must be between 2 and 100 characters!");
+
+		return (IVoiceChannel) ((Guild) guild).createChannel(new ChannelCreateRequest(name, ChannelObject.Type.GUILD_VOICE, id));
 	}
 
 	@Override

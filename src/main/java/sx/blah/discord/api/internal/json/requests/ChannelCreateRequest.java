@@ -32,8 +32,14 @@ public class ChannelCreateRequest {
 	 */
 	public int type;
 
-	public ChannelCreateRequest(String name, int type) {
+	/**
+	 * ID of the parent category for a channel.
+	 */
+	public Long parent_id;
+
+	public ChannelCreateRequest(String name, int type, Long parentID) {
 		this.name = name;
 		this.type = type;
+		this.parent_id = parentID;
 	}
 }

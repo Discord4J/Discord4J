@@ -617,42 +617,34 @@ public class Guild implements IGuild {
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(DiscordEndpoints.USERS+"@me/guilds/"+getStringID());
 	}
 
-	@Override
-	public IChannel createChannel(String name) {
+	public IChannel createChannel(ChannelCreateRequest request) {
 		shard.checkReady("create channel");
 		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNELS);
 
-		if (name == null || name.length() < 2 || name.length() > 100)
-			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
-
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-				DiscordEndpoints.GUILDS+getStringID()+"/channels",
-				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_TEXT),
+				DiscordEndpoints.GUILDS + getStringID() + "/channels",
+				request,
 				ChannelObject.class);
 
 		IChannel channel = DiscordUtils.getChannelFromJSON(getShard(), this, response);
 		channels.put(channel);
-
 		return channel;
 	}
 
 	@Override
+	public IChannel createChannel(String name) {
+		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
+			throw new DiscordException("Channel name must be 2-100 alphanumeric characters.");
+
+		return createChannel(new ChannelCreateRequest(name, ChannelObject.Type.GUILD_TEXT, null));
+	}
+
+	@Override
 	public IVoiceChannel createVoiceChannel(String name) {
-		getShard().checkReady("create voice channel");
-		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_CHANNELS);
-
 		if (name == null || name.length() < 2 || name.length() > 100)
-			throw new DiscordException("Channel name can only be between 2 and 100 characters!");
+			throw new DiscordException("Channel name must be between 2 and 100 characters!");
 
-		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
-				DiscordEndpoints.GUILDS+getStringID()+"/channels",
-				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_VOICE),
-				ChannelObject.class);
-
-		IVoiceChannel channel = (IVoiceChannel) DiscordUtils.getChannelFromJSON(getShard(), this, response);
-		channels.put(channel);
-
-		return channel;
+		return (IVoiceChannel) createChannel(new ChannelCreateRequest(name, ChannelObject.Type.GUILD_VOICE, null));
 	}
 
 	@Override
@@ -985,7 +977,7 @@ public class Guild implements IGuild {
 
 		ChannelObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
 				DiscordEndpoints.GUILDS+getStringID()+"/channels",
-				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_CATEGORY),
+				new ChannelCreateRequest(name, ChannelObject.Type.GUILD_CATEGORY, null),
 				ChannelObject.class);
 
 		ICategory category = DiscordUtils.getCategoryFromJSON(getShard(), this, response);
