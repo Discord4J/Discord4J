@@ -33,8 +33,8 @@ import sx.blah.discord.api.internal.json.event.PresenceUpdateEventResponse;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
-import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.handle.audit.ActionType;
+import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.handle.audit.entry.AuditLogEntry;
 import sx.blah.discord.handle.audit.entry.DiscordObjectEntry;
 import sx.blah.discord.handle.audit.entry.TargetedEntry;
@@ -118,6 +118,11 @@ public class DiscordUtils {
 	 * Pattern for Discord's custom emoji.
 	 */
 	public static final Pattern CUSTOM_EMOJI_PATTERN = Pattern.compile("<?:[A-Za-z_0-9]+:\\d+>?");
+
+	/**
+ 	 * Pattern for naming Discord's custom emoji.
+ 	 */
+ 	public static final Pattern EMOJI_NAME_PATTERN = Pattern.compile("([A-Za-z0-9_]{2,32})");
 
 	/**
 	 * Pattern for Discord's emoji aliases (e.g. :heart: or :thinking:).
@@ -705,7 +710,16 @@ public class DiscordUtils {
 				.map(role -> guild.getRoleByID(Long.parseUnsignedLong(role)))
 				.collect(Collectors.toList());
 
-		return new EmojiImpl(id, guild, json.name, roles, json.require_colons, json.managed);
+		EmojiImpl emoji = (EmojiImpl) guild.getEmojiByID(id);
+		if (emoji != null) {
+			emoji.setName(json.name);
+			emoji.setRoles(roles);
+			return emoji;
+		}
+
+		Cache<IRole> roleCache = new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class);
+		roleCache.putAll(roles);
+		return new EmojiImpl(id, guild, json.name, roleCache, json.require_colons, json.managed);
 	}
 
 	/**

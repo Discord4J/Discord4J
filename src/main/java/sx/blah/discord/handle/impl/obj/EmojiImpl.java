@@ -19,12 +19,19 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
+import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.api.internal.json.objects.EmojiObject;
+import sx.blah.discord.api.internal.json.requests.EmojiEditRequest;
 import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.util.PermissionUtils;
+import sx.blah.discord.util.cache.Cache;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,13 +49,13 @@ public class EmojiImpl implements IEmoji {
 	 */
 	private final IGuild guild;
 	/**
-	 * the name of the emoji.
+	 * The name of the emoji.
 	 */
-	private final String name;
+	private volatile String name;
 	/**
 	 * The roles which are allowed to use the emoji.
 	 */
-	private final List<IRole> roles;
+	public final Cache<IRole> roles;
 	/**
 	 * Whether the emoji needs colons in chat.
 	 */
@@ -58,7 +65,11 @@ public class EmojiImpl implements IEmoji {
 	 */
 	private final boolean isManaged;
 
-	public EmojiImpl(long id, IGuild guild, String name, List<IRole> roles, boolean requiresColons, boolean isManaged) {
+	public EmojiImpl(long id, IGuild guild, String name, boolean requiresColons, boolean isManaged) {
+		this(id, guild, name, new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class), requiresColons, isManaged);
+	}
+
+	public EmojiImpl(long id, IGuild guild, String name, Cache<IRole> roles, boolean requiresColons, boolean isManaged) {
 		this.id = id;
 		this.guild = guild;
 		this.name = name;
@@ -84,7 +95,7 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public List<IRole> getRoles() {
-		return roles;
+		return new ArrayList<>(roles.values());
 	}
 
 	@Override
@@ -100,6 +111,63 @@ public class EmojiImpl implements IEmoji {
 	@Override
 	public String getImageUrl() {
 		return String.format(DiscordEndpoints.EMOJI_IMAGE, getStringID());
+	}
+
+	@Override
+	public void changeRoles(IRole[] roles) {
+		PermissionUtils.requirePermissions(getGuild(), getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
+
+
+		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(),
+				new EmojiEditRequest(getName(), roles),
+				EmojiObject.class);
+		IEmoji emoji = DiscordUtils.getEmojiFromJSON(getGuild(), response);
+	}
+
+	@Override
+	public void changeName(String name) {
+		PermissionUtils.requirePermissions(getGuild(), getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
+
+		EmojiObject response = ((DiscordClientImpl) getClient()).REQUESTS.PATCH.makeRequest(
+				DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID(),
+				new EmojiEditRequest(name, getRoles().toArray(new IRole[getRoles().size()])),
+				EmojiObject.class);
+		IEmoji emoji = DiscordUtils.getEmojiFromJSON(getGuild(), response);
+	}
+
+	@Override
+	public void deleteEmoji() {
+		PermissionUtils.requirePermissions(getGuild(), getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
+
+		((DiscordClientImpl) getClient()).REQUESTS.DELETE.makeRequest(
+				DiscordEndpoints.GUILDS + getGuild().getStringID() + "/emojis/" + getStringID());
+
+		((Guild) guild).emojis.remove(this);
+	}
+
+	/**
+	 * Sets the CACHED name of the emoji.
+	 *
+	 * @param name The name of the emoji.
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Sets the CACHED roles of the emoji.
+	 *
+	 * @param roles The roles of the emoji.
+	 */
+	public void setRoles(List<IRole> roles) {
+		this.roles.clear();
+		this.roles.putAll(roles);
+	}
+
+	@Override
+	public boolean isDeleted() {
+		return !this.equals(getGuild().getEmojiByID(getLongID()));
 	}
 
 	@Override

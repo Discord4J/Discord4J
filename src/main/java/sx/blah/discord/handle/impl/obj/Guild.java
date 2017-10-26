@@ -28,9 +28,7 @@ import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
 import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
-import sx.blah.discord.api.internal.json.requests.GuildEditRequest;
-import sx.blah.discord.api.internal.json.requests.MemberEditRequest;
-import sx.blah.discord.api.internal.json.requests.ReorderRolesRequest;
+import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.audio.impl.AudioManager;
@@ -844,6 +842,26 @@ public class Guild implements IGuild {
 		return emojis.stream()
 				.filter(emoji -> emoji.getName().equals(name))
 				.findFirst().orElse(null);
+	}
+
+	@Override
+	public IEmoji createEmoji(String name, Image image, IRole[] roles) {
+		if (!DiscordUtils.EMOJI_NAME_PATTERN.matcher(name).find())
+			throw new DiscordException("Emoji name must be between 2-32 characters and consist only of alphanumeric characters and underscores.");
+
+		PermissionUtils.requirePermissions(this, getClient().getOurUser(), Permissions.MANAGE_EMOJIS);
+
+		EmojiObject response = ((DiscordClientImpl) client).REQUESTS.POST.makeRequest(
+				DiscordEndpoints.GUILDS + getStringID() + "/emojis",
+				new EmojiCreateRequest(name, image.getData(), roles),
+				EmojiObject.class);
+
+		if (response == null)
+			throw new DiscordException("Emoji was unable to be created (Discord didn't return a response).");
+
+		IEmoji emoji = DiscordUtils.getEmojiFromJSON(this, response);
+		this.emojis.put(emoji);
+		return emoji;
 	}
 
 	@Override

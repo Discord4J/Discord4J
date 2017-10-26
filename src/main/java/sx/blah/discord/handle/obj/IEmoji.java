@@ -60,9 +60,36 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	boolean isManaged();
 
 	/**
+	 * Gets whether the emoji is deleted.
+	 *
+	 * @return Whether the emoji is deleted.
+	 */
+	boolean isDeleted();
+
+	/**
 	 * Gets the image URL for the emoji.
 	 *
 	 * @return The image URL for the emoji.
 	 */
 	String getImageUrl();
+
+	/**
+	 * Changes the roles of the emoji.
+	 * Your bot must be whitelisted by Discord to use this feature.
+	 *
+	 * @param roles The roles for which this emoji will be whitelisted, if empty all roles will be allowed.
+	 */
+	void changeRoles(IRole[] roles);
+
+	/**
+	 * Changes the name of the emoji.
+	 *
+	 * @param name The name, <b>without colons</b> of length 2-32 characters only consisting of alphanumeric characters and underscores.
+	 */
+	void changeName(String name);
+
+	/**
+	 * Deletes the emoji.
+	 */
+	void deleteEmoji();
 }
