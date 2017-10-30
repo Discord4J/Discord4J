@@ -786,7 +786,7 @@ class DispatchHandler {
 
 		IUser user;
 		if (channel.isPrivate()) {
-			user = ((PrivateChannel) channel).getRecipient();
+			user = channel.getUsersHere().get(channel.getUsersHere().get(0).getLongID() == Long.parseUnsignedLong(event.user_id) ? 0 : 1);
 		} else {
 			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 		}
@@ -811,7 +811,7 @@ class DispatchHandler {
 
 		IUser user;
 		if (channel.isPrivate()) {
-			user = ((PrivateChannel) channel).getRecipient();
+			user = channel.getUsersHere().get(channel.getUsersHere().get(0).getLongID() == Long.parseUnsignedLong(event.user_id) ? 0 : 1);
 		} else {
 			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 		}
