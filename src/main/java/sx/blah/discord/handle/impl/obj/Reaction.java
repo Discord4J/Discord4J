@@ -110,6 +110,9 @@ public class Reaction implements IReaction {
 				users.add(getMessage().getShard().getUserByID(Long.parseUnsignedLong(obj.id)));
 			}
 
+			// Temporary measure so a refactor can be applied later.
+			if (json.length == 0) break;
+
 			after = json[json.length - 1].id;
 		}
 
