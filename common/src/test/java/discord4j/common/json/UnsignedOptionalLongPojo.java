@@ -14,25 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.json.response;
+package discord4j.common.json;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import java.util.OptionalLong;
 
-public class GuildEmbedResponse {
+public class UnsignedOptionalLongPojo {
 
-	private boolean enabled;
-	@JsonProperty("channel_id")
 	@UnsignedJson
-	private OptionalLong channelId;
-
-	public boolean isEnabled() {
-		return enabled;
-	}
-
-	public OptionalLong getChannelId() {
-		return channelId;
-	}
+	public OptionalLong unsignedLong;
 }

@@ -32,8 +32,11 @@ public class PossibleSerializers extends Serializers.Base {
 	                                                 JsonSerializer<Object> contentValueSerializer) {
 		Class<?> raw = type.getRawClass();
 		boolean staticTyping = config.isEnabled(MapperFeature.USE_STATIC_TYPING);
+
 		if (Possible.class.isAssignableFrom(raw)) {
 			return new PossibleSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
+		} else if (PossibleLong.class.isAssignableFrom(raw)) {
+			return new PossibleLongSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
 		}
 
 		return null;

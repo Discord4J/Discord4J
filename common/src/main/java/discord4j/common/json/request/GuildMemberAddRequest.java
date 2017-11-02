@@ -19,6 +19,7 @@ package discord4j.common.json.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
@@ -29,12 +30,13 @@ public class GuildMemberAddRequest {
 	private final String access_token;
 	@Nullable
 	private final Possible<String> nick;
-	private final Possible<String[]> roles;
+	@UnsignedJson
+	private final Possible<long[]> roles;
 	private final Possible<Boolean> mute;
 	private final Possible<Boolean> deaf;
 
 	public GuildMemberAddRequest(String access_token, @Nullable Possible<String> nick,
-	                             Possible<String[]> roles, Possible<Boolean> mute,
+	                             Possible<long[]> roles, Possible<Boolean> mute,
 	                             Possible<Boolean> deaf) {
 		this.access_token = access_token;
 		this.nick = nick;

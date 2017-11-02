@@ -17,6 +17,7 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
@@ -25,7 +26,8 @@ public class GuildMemberResponse {
 	private UserResponse user;
 	@Nullable
 	private String nick;
-	private String[] roles;
+	@UnsignedJson
+	private long[] roles;
 	@JsonProperty("joined_at")
 	private String joinedAt;
 	private boolean deaf;
@@ -40,7 +42,7 @@ public class GuildMemberResponse {
 		return nick;
 	}
 
-	public String[] getRoles() {
+	public long[] getRoles() {
 		return roles;
 	}
 

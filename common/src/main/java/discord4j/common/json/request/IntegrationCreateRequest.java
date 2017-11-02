@@ -16,12 +16,15 @@
  */
 package discord4j.common.json.request;
 
+import discord4j.common.jackson.UnsignedJson;
+
 public class IntegrationCreateRequest {
 
 	private final String type;
-	private final String id;
+	@UnsignedJson
+	private final long id;
 
-	public IntegrationCreateRequest(String type, String id) {
+	public IntegrationCreateRequest(String type, long id) {
 		this.type = type;
 		this.id = id;
 	}

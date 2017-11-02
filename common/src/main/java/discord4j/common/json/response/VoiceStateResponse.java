@@ -17,15 +17,19 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 public class VoiceStateResponse {
 
 	@JsonProperty("guild_id")
-	private String guildId;
+	@UnsignedJson
+	private long guildId;
 	@JsonProperty("channel_id")
-	private String channelId;
+	@UnsignedJson
+	private long channelId;
 	@JsonProperty("user_id")
-	private String userId;
+	@UnsignedJson
+	private long userId;
 	@JsonProperty("session_id")
 	private String sessionId;
 	private boolean deaf;
@@ -36,15 +40,15 @@ public class VoiceStateResponse {
 	private boolean selfMute;
 	private boolean suppress;
 
-	public String getGuildId() {
+	public long getGuildId() {
 		return guildId;
 	}
 
-	public String getChannelId() {
+	public long getChannelId() {
 		return channelId;
 	}
 
-	public String getUserId() {
+	public long getUserId() {
 		return userId;
 	}
 

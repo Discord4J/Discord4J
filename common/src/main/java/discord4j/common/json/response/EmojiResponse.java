@@ -17,21 +17,25 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 public class EmojiResponse {
 
-	private String id;
+	@UnsignedJson
+	private OptionalLong id;
 	private String name;
-	private String[] roles;
+	@UnsignedJson
+	private long[] roles;
 	@Nullable
 	private UserResponse user;
 	@JsonProperty("require_colons")
 	private boolean requireColons;
 	private boolean managed;
 
-	public String getId() {
+	public OptionalLong getId() {
 		return id;
 	}
 
@@ -39,7 +43,7 @@ public class EmojiResponse {
 		return name;
 	}
 
-	public String[] getRoles() {
+	public long[] getRoles() {
 		return roles;
 	}
 

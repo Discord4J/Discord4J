@@ -18,14 +18,16 @@ package discord4j.common.json.request;
 
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
+import discord4j.common.jackson.UnsignedJson;
 
 @PossibleJson
 public class GuildEmojiModifyRequest {
 
 	private final Possible<String> name;
-	private final Possible<String[]> roles;
+	@UnsignedJson
+	private final Possible<long[]> roles;
 
-	public GuildEmojiModifyRequest(Possible<String> name, Possible<String[]> roles) {
+	public GuildEmojiModifyRequest(Possible<String> name, Possible<long[]> roles) {
 		this.name = name;
 		this.roles = roles;
 	}

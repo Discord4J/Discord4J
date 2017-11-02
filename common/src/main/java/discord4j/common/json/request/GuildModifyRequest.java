@@ -19,6 +19,8 @@ package discord4j.common.json.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
+import discord4j.common.jackson.PossibleLong;
+import discord4j.common.jackson.UnsignedJson;
 
 @PossibleJson
 public class GuildModifyRequest {
@@ -30,20 +32,22 @@ public class GuildModifyRequest {
 	@JsonProperty("default_message_notifications")
 	private final Possible<Integer> defaultMessageNoficiations;
 	@JsonProperty("afk_channel_id")
-	private final Possible<String> afkChannelId;
+	@UnsignedJson
+	private final PossibleLong afkChannelId;
 	@JsonProperty("afk_timeout")
 	private final Possible<Integer> afkTimeout;
 	private final Possible<String> icon;
 	@JsonProperty("owner_id")
-	private final Possible<String> ownerId;
+	@UnsignedJson
+	private final PossibleLong ownerId;
 	private final Possible<String> splash;
 
 	public GuildModifyRequest(Possible<String> name, Possible<String> region,
 	                          Possible<Integer> verificationLevel,
 	                          Possible<Integer> defaultMessageNoficiations,
-	                          Possible<String> afkChannelId,
+	                          PossibleLong afkChannelId,
 	                          Possible<Integer> afkTimeout, Possible<String> icon,
-	                          Possible<String> ownerId, Possible<String> splash) {
+	                          PossibleLong ownerId, Possible<String> splash) {
 		this.name = name;
 		this.region = region;
 		this.verificationLevel = verificationLevel;

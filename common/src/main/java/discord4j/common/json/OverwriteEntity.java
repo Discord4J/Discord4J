@@ -16,14 +16,17 @@
  */
 package discord4j.common.json;
 
+import discord4j.common.jackson.UnsignedJson;
+
 public class OverwriteEntity {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private String type;
 	private int allow;
 	private int deny;
 
-	public OverwriteEntity(String id, String type, int allow, int deny) {
+	public OverwriteEntity(long id, String type, int allow, int deny) {
 		this.id = id;
 		this.type = type;
 		this.allow = allow;
@@ -33,11 +36,11 @@ public class OverwriteEntity {
 	public OverwriteEntity() {
 	}
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 

@@ -34,7 +34,7 @@ public class PossibleTypeModifier extends TypeModifier {
 
 		Class<?> raw = type.getRawClass();
 
-		if (raw == Possible.class) {
+		if (raw == Possible.class || raw == PossibleLong.class) {
 			return ReferenceType.upgradeFrom(type, type.containedTypeOrUnknown(0));
 		}
 

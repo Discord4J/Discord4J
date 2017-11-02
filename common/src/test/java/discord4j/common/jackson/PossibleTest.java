@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.json.Pojo;
+import discord4j.common.json.PossiblePojo;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -30,9 +30,9 @@ public class PossibleTest {
 	@Test
 	public void testPresent() throws Exception {
 		ObjectMapper mapper = getMapper();
-		String expected = "{\"string\":\"Hello world\"}";
+		String expected = "{\"string\":\"Hello world\",\"llong\":123}";
 
-		Pojo pojo = new Pojo(Possible.of("Hello world"));
+		PossiblePojo pojo = new PossiblePojo(Possible.of("Hello world"), PossibleLong.of(123L));
 		String result = mapper.writeValueAsString(pojo);
 
 		assertEquals(expected, result);
@@ -43,7 +43,7 @@ public class PossibleTest {
 		ObjectMapper mapper = getMapper();
 		String expected = "{}";
 
-		Pojo pojo = new Pojo(Possible.absent());
+		PossiblePojo pojo = new PossiblePojo(Possible.absent(), PossibleLong.absent());
 		String result = mapper.writeValueAsString(pojo);
 
 		assertEquals(expected, result);
@@ -52,9 +52,9 @@ public class PossibleTest {
 	@Test
 	public void testNull() throws Exception {
 		ObjectMapper mapper = getMapper();
-		String expected = "{\"string\":null}";
+		String expected = "{\"string\":null,\"llong\":null}";
 
-		Pojo pojo = new Pojo(null);
+		PossiblePojo pojo = new PossiblePojo(null, null);
 		String result = mapper.writeValueAsString(pojo);
 
 		assertEquals(expected, result);

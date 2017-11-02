@@ -35,7 +35,7 @@ import org.junit.Test;
 
 public class UserServiceTest {
 
-	private static final String user = System.getenv("member");
+	private static final long user = Long.parseUnsignedLong(System.getenv("member"));
 
 	private UserService userService = null;
 
@@ -75,7 +75,7 @@ public class UserServiceTest {
 
 	@Test
 	public void testGetUser() {
-		getUserService().getUser(Long.parseUnsignedLong(user)).block();
+		getUserService().getUser(user).block();
 	}
 
 	@Test

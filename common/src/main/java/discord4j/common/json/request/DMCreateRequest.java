@@ -17,13 +17,15 @@
 package discord4j.common.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 public class DMCreateRequest {
 
 	@JsonProperty("recipient_id")
-	private final String recipientId;
+	@UnsignedJson
+	private final long recipientId;
 
-	public DMCreateRequest(String recipientId) {
+	public DMCreateRequest(long recipientId) {
 		this.recipientId = recipientId;
 	}
 }

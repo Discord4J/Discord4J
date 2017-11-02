@@ -17,29 +17,34 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 public class GuildResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private String name;
 	@Nullable
 	private String icon;
 	@Nullable
 	private String splash;
 	@JsonProperty("owner_id")
-	private String ownerId;
+	@UnsignedJson
+	private long ownerId;
 	private String region;
 	@JsonProperty("afk_channel_id")
-	@Nullable
-	private String afkChannelId;
+	@UnsignedJson
+	private OptionalLong afkChannelId;
 	@JsonProperty("afk_timeout")
 	private int afkTimeout;
 	@JsonProperty("embed_enabled")
 	private boolean embedEnabled;
 	@JsonProperty("embed_channel_id")
-	private String embedChannelId;
+	@UnsignedJson
+	private OptionalLong embedChannelId;
 	@JsonProperty("verification_level")
 	private int verificationLevel;
 	@JsonProperty("default_message_notifications")
@@ -52,12 +57,13 @@ public class GuildResponse {
 	@JsonProperty("mfa_level")
 	private int mfaLevel;
 	@JsonProperty("application_id")
-	@Nullable
-	private String applicationId;
+	@UnsignedJson
+	private OptionalLong applicationId;
 	@JsonProperty("widget_enabled")
 	private boolean widgetEnabled;
 	@JsonProperty("widget_channel_id")
-	private String widgetChannelId;
+	@UnsignedJson
+	private OptionalLong widgetChannelId;
 	@JsonProperty("joined_at")
 	@Nullable
 	private String joinedAt;
@@ -78,10 +84,10 @@ public class GuildResponse {
 	@Nullable
 	private PresenceResponse[] presences;
 	@JsonProperty("system_channel_id")
-	@Nullable
-	private String systemChannelId;
+	@UnsignedJson
+	private OptionalLong systemChannelId;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -99,7 +105,7 @@ public class GuildResponse {
 		return splash;
 	}
 
-	public String getOwnerId() {
+	public long getOwnerId() {
 		return ownerId;
 	}
 
@@ -107,8 +113,7 @@ public class GuildResponse {
 		return region;
 	}
 
-	@Nullable
-	public String getAfkChannelId() {
+	public OptionalLong getAfkChannelId() {
 		return afkChannelId;
 	}
 
@@ -120,7 +125,7 @@ public class GuildResponse {
 		return embedEnabled;
 	}
 
-	public String getEmbedChannelId() {
+	public OptionalLong getEmbedChannelId() {
 		return embedChannelId;
 	}
 
@@ -152,8 +157,7 @@ public class GuildResponse {
 		return mfaLevel;
 	}
 
-	@Nullable
-	public String getApplicationId() {
+	public OptionalLong getApplicationId() {
 		return applicationId;
 	}
 
@@ -161,7 +165,7 @@ public class GuildResponse {
 		return widgetEnabled;
 	}
 
-	public String getWidgetChannelId() {
+	public OptionalLong getWidgetChannelId() {
 		return widgetChannelId;
 	}
 
@@ -205,8 +209,7 @@ public class GuildResponse {
 		return presences;
 	}
 
-	@Nullable
-	public String getSystemChannelId() {
+	public OptionalLong getSystemChannelId() {
 		return systemChannelId;
 	}
 }

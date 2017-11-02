@@ -17,12 +17,14 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
 public class AttachmentResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private String filename;
 	private int size;
 	private String url;
@@ -33,7 +35,7 @@ public class AttachmentResponse {
 	@Nullable
 	private Integer width;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 

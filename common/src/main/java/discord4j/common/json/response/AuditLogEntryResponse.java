@@ -17,19 +17,23 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 public class AuditLogEntryResponse {
 
 	@JsonProperty("target_id")
-	@Nullable
-	private String targetId;
+	@UnsignedJson
+	private OptionalLong targetId;
 	@Nullable
 	private AuditLogChangeResponse[] changes;
 	@JsonProperty("user_id")
-	private String userId;
-	private String id;
+	@UnsignedJson
+	private long userId;
+	@UnsignedJson
+	private long id;
 	@JsonProperty("action_type")
 	private int actionType;
 	@Nullable
@@ -37,8 +41,7 @@ public class AuditLogEntryResponse {
 	@Nullable
 	private String reason;
 
-	@Nullable
-	public String getTargetId() {
+	public OptionalLong getTargetId() {
 		return targetId;
 	}
 
@@ -47,11 +50,11 @@ public class AuditLogEntryResponse {
 		return changes;
 	}
 
-	public String getUserId() {
+	public long getUserId() {
 		return userId;
 	}
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 

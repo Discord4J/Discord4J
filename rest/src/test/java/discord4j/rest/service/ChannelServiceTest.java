@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.request.*;
 import discord4j.rest.http.EmptyReaderStrategy;
@@ -85,7 +86,7 @@ public class ChannelServiceTest {
 	public void testModifyChannel() {
 		ChannelModifyRequest req = new ChannelModifyRequest(Possible.absent(), Possible.absent(),
 				Possible.of("test modify"), Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent(),
-				Possible.absent());
+				PossibleLong.absent());
 		getChannelService().modifyChannel(modifyChannel, req).block();
 	}
 

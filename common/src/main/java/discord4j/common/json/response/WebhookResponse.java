@@ -17,16 +17,20 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
 public class WebhookResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	@JsonProperty("guild_id")
-	private String guildId;
+	@UnsignedJson
+	private long guildId;
 	@JsonProperty("channel_id")
-	private String channelId;
+	@UnsignedJson
+	private long channelId;
 	private UserResponse user;
 	@Nullable
 	private String name;
@@ -34,15 +38,15 @@ public class WebhookResponse {
 	private String avatar;
 	private String token;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
-	public String getGuildId() {
+	public long getGuildId() {
 		return guildId;
 	}
 
-	public String getChannelId() {
+	public long getChannelId() {
 		return channelId;
 	}
 

@@ -17,12 +17,14 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
 public class UserResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private String username;
 	private String discriminator;
 	@Nullable
@@ -39,7 +41,7 @@ public class UserResponse {
 	@Nullable
 	private String token;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 

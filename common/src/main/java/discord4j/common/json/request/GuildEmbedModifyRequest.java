@@ -19,15 +19,18 @@ package discord4j.common.json.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
+import discord4j.common.jackson.PossibleLong;
+import discord4j.common.jackson.UnsignedJson;
 
 @PossibleJson
 public class GuildEmbedModifyRequest {
 
 	private final Possible<Boolean> enabled;
 	@JsonProperty("channel_id")
-	private final Possible<String> channelId;
+	@UnsignedJson
+	private final PossibleLong channelId;
 
-	public GuildEmbedModifyRequest(Possible<Boolean> enabled, Possible<String> channelId) {
+	public GuildEmbedModifyRequest(Possible<Boolean> enabled, PossibleLong channelId) {
 		this.enabled = enabled;
 		this.channelId = channelId;
 	}

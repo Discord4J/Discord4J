@@ -17,6 +17,7 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GameEntity;
 
 import javax.annotation.Nullable;
@@ -24,18 +25,20 @@ import javax.annotation.Nullable;
 public class PresenceResponse {
 
 	private UserResponse user;
-	private String[] roles;
+	@UnsignedJson
+	private long[] roles;
 	@Nullable
 	private GameEntity game;
 	@JsonProperty("guild_id")
-	private String guildId;
+	@UnsignedJson
+	private long guildId;
 	private String status;
 
 	public UserResponse getUser() {
 		return user;
 	}
 
-	public String[] getRoles() {
+	public long[] getRoles() {
 		return roles;
 	}
 
@@ -44,7 +47,7 @@ public class PresenceResponse {
 		return game;
 	}
 
-	public String getGuildId() {
+	public long getGuildId() {
 		return guildId;
 	}
 

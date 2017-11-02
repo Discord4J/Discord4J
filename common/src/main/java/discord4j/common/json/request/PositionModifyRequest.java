@@ -16,12 +16,15 @@
  */
 package discord4j.common.json.request;
 
+import discord4j.common.jackson.UnsignedJson;
+
 public class PositionModifyRequest {
 
-	private final String id;
+	@UnsignedJson
+	private final long id;
 	private final int position;
 
-	public PositionModifyRequest(String id, int position) {
+	public PositionModifyRequest(long id, int position) {
 		this.id = id;
 		this.position = position;
 	}

@@ -16,12 +16,15 @@
  */
 package discord4j.common.json.response;
 
+import discord4j.common.jackson.UnsignedJson;
+
 public class IntegrationAccountResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private String name;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 

@@ -20,9 +20,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.request.*;
+import discord4j.common.json.response.GuildResponse;
 import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
@@ -36,7 +39,7 @@ public class GuildServiceTest {
 	private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
 	private static final long member = Long.parseUnsignedLong(System.getenv("member"));
 	private static final long permanentRole = Long.parseUnsignedLong(System.getenv("permanentRole"));
-	private static final String trashCategory = System.getenv("trashCategory");
+	private static final long trashCategory = Long.parseUnsignedLong(System.getenv("trashCategory"));
 
 	private GuildService guildService = null;
 
@@ -67,7 +70,7 @@ public class GuildServiceTest {
 		return new ObjectMapper()
 				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
+				.registerModules(new PossibleModule(), new Jdk8Module());
 	}
 
 	@Test
@@ -77,13 +80,14 @@ public class GuildServiceTest {
 
 	@Test
 	public void testGetGuild() {
-		getGuildService().getGuild(guild).block();
+		GuildResponse response = getGuildService().getGuild(guild).block();
+		System.out.println(response.getId());
 	}
 
 	@Test
 	public void testModifyGuild() {
 		GuildModifyRequest req = new GuildModifyRequest(Possible.absent(), Possible.of("us-south"), Possible.absent(),
-				Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent(),
+				Possible.absent(), PossibleLong.absent(), Possible.absent(), Possible.absent(), PossibleLong.absent(),
 				Possible.absent());
 		getGuildService().modifyGuild(guild, req).block();
 	}
@@ -102,7 +106,7 @@ public class GuildServiceTest {
 	public void testCreateGuildChannel() {
 		String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
 		ChannelCreateRequest req = new ChannelCreateRequest(randomName, Possible.absent(), Possible.absent(),
-				Possible.absent(), Possible.absent(), Possible.of(trashCategory), Possible.absent());
+				Possible.absent(), Possible.absent(), PossibleLong.of(trashCategory), Possible.absent());
 		getGuildService().createGuildChannel(guild, req).block();
 	}
 
@@ -129,7 +133,7 @@ public class GuildServiceTest {
 	@Test
 	public void testModifyGuildMember() {
 		GuildMemberModifyRequest req = new GuildMemberModifyRequest(Possible.of("nickname"), Possible.absent(),
-				Possible.absent(), Possible.absent(), Possible.absent());
+				Possible.absent(), Possible.absent(), PossibleLong.absent());
 		getGuildService().modifyGuildMember(guild, member, req).block();
 	}
 

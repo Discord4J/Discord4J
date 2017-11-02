@@ -17,14 +17,18 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 public class MessageResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	@JsonProperty("channel_id")
-	private String channelId;
+	@UnsignedJson
+	private long channelId;
 	private UserResponse author;
 	@Nullable
 	private String content;
@@ -37,24 +41,25 @@ public class MessageResponse {
 	private boolean mentionEveryone;
 	private UserResponse[] mentions;
 	@JsonProperty("mention_roles")
-	private String[] mentionRoles;
+	@UnsignedJson
+	private long[] mentionRoles;
 	private AttachmentResponse[] attachments;
 	private EmbedResponse[] embeds;
 	@Nullable
 	private ReactionResponse[] reactions;
-	@Nullable
-	private String nonce;
+	@UnsignedJson
+	private OptionalLong nonce;
 	private boolean pinned;
 	@JsonProperty("webhook_id")
-	@Nullable
-	private String webhookId;
+	@UnsignedJson
+	private OptionalLong webhookId;
 	private int type;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
-	public String getChannelId() {
+	public long getChannelId() {
 		return channelId;
 	}
 
@@ -88,7 +93,7 @@ public class MessageResponse {
 		return mentions;
 	}
 
-	public String[] getMentionRoles() {
+	public long[] getMentionRoles() {
 		return mentionRoles;
 	}
 
@@ -105,8 +110,7 @@ public class MessageResponse {
 		return reactions;
 	}
 
-	@Nullable
-	public String getNonce() {
+	public OptionalLong getNonce() {
 		return nonce;
 	}
 
@@ -114,8 +118,7 @@ public class MessageResponse {
 		return pinned;
 	}
 
-	@Nullable
-	public String getWebhookId() {
+	public OptionalLong getWebhookId() {
 		return webhookId;
 	}
 

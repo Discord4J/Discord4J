@@ -17,17 +17,20 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 public class ChannelResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private int type;
 	@JsonProperty("guild_id")
-	@Nullable
-	private String guildId;
+	@UnsignedJson
+	private OptionalLong guildId;
 	@Nullable
 	private Integer position;
 	@JsonProperty("permission_overwrites")
@@ -39,8 +42,8 @@ public class ChannelResponse {
 	@Nullable
 	private Boolean nsfw;
 	@JsonProperty("last_message_id")
-	@Nullable
-	private String lastMessageId;
+	@UnsignedJson
+	private OptionalLong lastMessageId;
 	@Nullable
 	private Integer bitrate;
 	@JsonProperty("user_limit")
@@ -51,19 +54,19 @@ public class ChannelResponse {
 	@Nullable
 	private String icon;
 	@JsonProperty("owner_id")
-	@Nullable
-	private String ownerId;
+	@UnsignedJson
+	private OptionalLong ownerId;
 	@JsonProperty("application_id")
-	@Nullable
-	private String applicationId;
+	@UnsignedJson
+	private OptionalLong applicationId;
 	@JsonProperty("parent_id")
-	@Nullable
-	private String parentId;
+	@UnsignedJson
+	private OptionalLong parentId;
 	@JsonProperty("last_pin_timestamp")
 	@Nullable
 	private String lastPinTimestamp;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -71,8 +74,7 @@ public class ChannelResponse {
 		return type;
 	}
 
-	@Nullable
-	public String getGuildId() {
+	public OptionalLong getGuildId() {
 		return guildId;
 	}
 
@@ -100,8 +102,7 @@ public class ChannelResponse {
 		return nsfw;
 	}
 
-	@Nullable
-	public String getLastMessageId() {
+	public OptionalLong getLastMessageId() {
 		return lastMessageId;
 	}
 
@@ -125,18 +126,15 @@ public class ChannelResponse {
 		return icon;
 	}
 
-	@Nullable
-	public String getOwnerId() {
+	public OptionalLong getOwnerId() {
 		return ownerId;
 	}
 
-	@Nullable
-	public String getApplicationId() {
+	public OptionalLong getApplicationId() {
 		return applicationId;
 	}
 
-	@Nullable
-	public String getParentId() {
+	public OptionalLong getParentId() {
 		return parentId;
 	}
 

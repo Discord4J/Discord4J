@@ -17,16 +17,19 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 public class IntegrationResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private String name;
 	private String type;
 	private boolean enabled;
 	private boolean syncing;
 	@JsonProperty("role_id")
-	private String roleId;
+	@UnsignedJson
+	private long roleId;
 	@JsonProperty("expire_behavior")
 	private int expireBehavior;
 	@JsonProperty("expire_grace_period")
@@ -36,7 +39,7 @@ public class IntegrationResponse {
 	@JsonProperty("synced_at")
 	private String syncedAt;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -56,7 +59,7 @@ public class IntegrationResponse {
 		return syncing;
 	}
 
-	public String getRoleId() {
+	public long getRoleId() {
 		return roleId;
 	}
 

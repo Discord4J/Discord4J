@@ -17,7 +17,9 @@
 package discord4j.common.json.request;
 
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleJson;
 
+@PossibleJson
 public class RoleModifyRequest {
 
 	private final Possible<String> name;

@@ -16,13 +16,16 @@
  */
 package discord4j.common.json.request;
 
+import discord4j.common.jackson.UnsignedJson;
+
 public class GuildEmojiCreateRequest {
 
 	private final String name;
 	private final String image;
-	private final String[] roles;
+	@UnsignedJson
+	private final long[] roles;
 
-	public GuildEmojiCreateRequest(String name, String image, String[] roles) {
+	public GuildEmojiCreateRequest(String name, String image, long[] roles) {
 		this.name = name;
 		this.image = image;
 		this.roles = roles;

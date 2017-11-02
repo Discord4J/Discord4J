@@ -19,6 +19,8 @@ package discord4j.common.json.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
+import discord4j.common.jackson.PossibleLong;
+import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
@@ -39,14 +41,15 @@ public class ChannelModifyRequest {
 	private final Possible<OverwriteEntity> permissionOverwrites;
 	@JsonProperty("parent_id")
 	@Nullable
-	private final Possible<String> parentId;
+	@UnsignedJson
+	private final PossibleLong parentId;
 
 	public ChannelModifyRequest(Possible<String> name, Possible<Integer> position,
 	                            @Nullable Possible<String> topic,
 	                            @Nullable Possible<Boolean> nsfw, Possible<Integer> bitrate,
 	                            Possible<Integer> userLimit,
 	                            Possible<OverwriteEntity> permissionOverwrites,
-	                            @Nullable Possible<String> parentId) {
+	                            @Nullable PossibleLong parentId) {
 		this.name = name;
 		this.position = position;
 		this.topic = topic;

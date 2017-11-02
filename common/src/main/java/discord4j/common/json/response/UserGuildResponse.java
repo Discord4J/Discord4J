@@ -16,15 +16,18 @@
  */
 package discord4j.common.json.response;
 
+import discord4j.common.jackson.UnsignedJson;
+
 public class UserGuildResponse {
 
-	private String id;
+	@UnsignedJson
+	private long id;
 	private String name;
 	private String icon;
 	private boolean owner;
 	private int permissions;
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
