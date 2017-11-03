@@ -37,4 +37,34 @@ public class IntegrationModifyRequest {
 		this.expireGracePeriod = expireGracePeriod;
 		this.enableEmoticons = enableEmoticons;
 	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		private Possible<Integer> expireBehvaior = Possible.absent();
+		private Possible<Integer> expireGracePeriod = Possible.absent();
+		private Possible<Boolean> enableEmoticons = Possible.absent();
+
+		public Builder expireBehavior(int expireBehavior) {
+			this.expireBehvaior = Possible.of(expireBehavior);
+			return this;
+		}
+
+		public Builder expireGracePeriod(int expireGracePeriod) {
+			this.expireGracePeriod = Possible.of(expireGracePeriod);
+			return this;
+		}
+
+		public Builder enableEmoticons(boolean enableEmoticons) {
+			this.enableEmoticons = Possible.of(enableEmoticons);
+			return this;
+		}
+
+		public IntegrationModifyRequest build() {
+			return new IntegrationModifyRequest(expireBehvaior, expireGracePeriod, enableEmoticons);
+		}
+	}
 }

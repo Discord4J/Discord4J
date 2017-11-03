@@ -84,9 +84,7 @@ public class ChannelServiceTest {
 
 	@Test
 	public void testModifyChannel() {
-		ChannelModifyRequest req = new ChannelModifyRequest(Possible.absent(), Possible.absent(),
-				Possible.of("test modify"), Possible.absent(), Possible.absent(), Possible.absent(), Possible.absent(),
-				PossibleLong.absent());
+		ChannelModifyRequest req = ChannelModifyRequest.builder().topic("test modify").build();
 		getChannelService().modifyChannel(modifyChannel, req).block();
 	}
 

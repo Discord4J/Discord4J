@@ -37,4 +37,46 @@ public class RoleModifyRequest {
 		this.hoist = hoist;
 		this.mentionable = mentionable;
 	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		private Possible<String> name = Possible.absent();
+		private Possible<Integer> permissions = Possible.absent();
+		private Possible<Integer> color = Possible.absent();
+		private Possible<Boolean> hoist = Possible.absent();
+		private Possible<Boolean> mentionable = Possible.absent();
+
+		public Builder name(String name) {
+			this.name = Possible.of(name);
+			return this;
+		}
+
+		public Builder permissions(int permissions) {
+			this.permissions = Possible.of(permissions);
+			return this;
+		}
+
+		public Builder color(int color) {
+			this.color = Possible.of(color);
+			return this;
+		}
+
+		public Builder hoist(boolean hoist) {
+			this.hoist = Possible.of(hoist);
+			return this;
+		}
+
+		public Builder mentionable(boolean mentionable) {
+			this.mentionable = Possible.of(mentionable);
+			return this;
+		}
+
+		public RoleModifyRequest build() {
+			return new RoleModifyRequest(name, permissions, color, hoist, mentionable);
+		}
+	}
 }

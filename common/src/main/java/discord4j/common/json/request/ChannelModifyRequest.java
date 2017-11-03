@@ -24,6 +24,7 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 @PossibleJson
 public class ChannelModifyRequest {
@@ -38,7 +39,7 @@ public class ChannelModifyRequest {
 	@JsonProperty("user_limit")
 	private final Possible<Integer> userLimit;
 	@JsonProperty("permission_overwrites")
-	private final Possible<OverwriteEntity> permissionOverwrites;
+	private final Possible<OverwriteEntity[]> permissionOverwrites;
 	@JsonProperty("parent_id")
 	@Nullable
 	@UnsignedJson
@@ -48,7 +49,7 @@ public class ChannelModifyRequest {
 	                            @Nullable Possible<String> topic,
 	                            @Nullable Possible<Boolean> nsfw, Possible<Integer> bitrate,
 	                            Possible<Integer> userLimit,
-	                            Possible<OverwriteEntity> permissionOverwrites,
+	                            Possible<OverwriteEntity[]> permissionOverwrites,
 	                            @Nullable PossibleLong parentId) {
 		this.name = name;
 		this.position = position;
@@ -58,5 +59,66 @@ public class ChannelModifyRequest {
 		this.userLimit = userLimit;
 		this.permissionOverwrites = permissionOverwrites;
 		this.parentId = parentId;
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		private Possible<String> name = Possible.absent();
+		private Possible<Integer> position = Possible.absent();
+		private Possible<String> topic = Possible.absent();
+		private Possible<Boolean> nsfw = Possible.absent();
+		private Possible<Integer> bitrate = Possible.absent();
+		private Possible<Integer> userLimit = Possible.absent();
+		private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
+		private PossibleLong parentId = PossibleLong.absent();
+
+		public Builder name(String name) {
+			this.name = Possible.of(name);
+			return this;
+		}
+
+		public Builder position(int position) {
+			this.position = Possible.of(position);
+			return this;
+		}
+
+		public Builder topic(String topic) {
+			this.topic = Possible.of(topic);
+			return this;
+		}
+
+		public Builder nsfw(boolean nsfw) {
+			this.nsfw = Possible.of(nsfw);
+			return this;
+		}
+
+		public Builder bitrate(int bitrate) {
+			this.bitrate = Possible.of(bitrate);
+			return this;
+		}
+
+		public Builder userLimit(int userLimit) {
+			this.userLimit = Possible.of(userLimit);
+			return this;
+		}
+
+		public Builder permissionOverwrites(OverwriteEntity[] permissionOverwrites) {
+			this.permissionOverwrites = Possible.of(permissionOverwrites);
+			return this;
+		}
+
+		public Builder parentId(OptionalLong parentId) {
+			this.parentId = parentId.isPresent() ? PossibleLong.of(parentId.getAsLong()) : null;
+			return this;
+		}
+
+		public ChannelModifyRequest build() {
+			return new ChannelModifyRequest(name, position, topic, nsfw, bitrate, userLimit, permissionOverwrites, parentId);
+		}
+
 	}
 }

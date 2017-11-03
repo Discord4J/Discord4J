@@ -21,7 +21,6 @@ public class PossibleFilter {
 	@Override
 	public boolean equals(Object obj) {
 		// Nulls should be included. Only exclude values which are Possible.absent
-
 		if (obj == null) {
 			return false;
 		} else if (Possible.class.isAssignableFrom(obj.getClass())) {
@@ -31,14 +30,5 @@ public class PossibleFilter {
 		}
 
 		return false;
-
-//		return (obj != null)
-//				&& ((Possible.class.isAssignableFrom(obj.getClass()) && ((Possible) obj).isAbsent())
-//				|| (PossibleLong.class.isAssignableFrom(obj.getClass()) && ((PossibleLong) obj).isAbsent()));
-
-
-//		return obj != null
-//				&& ((Possible.class.isAssignableFrom(obj.getClass()) && ((Possible) obj).isAbsent())
-//		|| (PossibleLong.class.isAssignableFrom(obj.getClass()) && ((PossibleLong) obj).isAbsent()));
 	}
 }

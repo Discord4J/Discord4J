@@ -33,6 +33,7 @@ import discord4j.rest.route.Routes;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.OptionalLong;
 
 public class GuildServiceTest {
 
@@ -86,9 +87,7 @@ public class GuildServiceTest {
 
 	@Test
 	public void testModifyGuild() {
-		GuildModifyRequest req = new GuildModifyRequest(Possible.absent(), Possible.of("us-south"), Possible.absent(),
-				Possible.absent(), PossibleLong.absent(), Possible.absent(), Possible.absent(), PossibleLong.absent(),
-				Possible.absent());
+		GuildModifyRequest req = GuildModifyRequest.builder().region("us-south").build();
 		getGuildService().modifyGuild(guild, req).block();
 	}
 
@@ -105,8 +104,8 @@ public class GuildServiceTest {
 	@Test
 	public void testCreateGuildChannel() {
 		String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
-		ChannelCreateRequest req = new ChannelCreateRequest(randomName, Possible.absent(), Possible.absent(),
-				Possible.absent(), Possible.absent(), PossibleLong.of(trashCategory), Possible.absent());
+		ChannelCreateRequest req = ChannelCreateRequest.builder().name(randomName)
+				.parentId(OptionalLong.of(trashCategory)).build();
 		getGuildService().createGuildChannel(guild, req).block();
 	}
 
@@ -132,8 +131,7 @@ public class GuildServiceTest {
 
 	@Test
 	public void testModifyGuildMember() {
-		GuildMemberModifyRequest req = new GuildMemberModifyRequest(Possible.of("nickname"), Possible.absent(),
-				Possible.absent(), Possible.absent(), PossibleLong.absent());
+		GuildMemberModifyRequest req = GuildMemberModifyRequest.builder().nick("nickname").build();
 		getGuildService().modifyGuildMember(guild, member, req).block();
 	}
 
@@ -192,8 +190,7 @@ public class GuildServiceTest {
 
 	@Test
 	public void testModifyGuildRole() {
-		RoleModifyRequest req = new RoleModifyRequest(Possible.absent(), Possible.of(0), Possible.absent(),
-				Possible.absent(), Possible.absent());
+		RoleModifyRequest req = RoleModifyRequest.builder().permissions(0).build();
 		getGuildService().modifyGuildRole(guild, permanentRole, req).block();
 	}
 

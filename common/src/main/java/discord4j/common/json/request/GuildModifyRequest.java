@@ -58,4 +58,70 @@ public class GuildModifyRequest {
 		this.ownerId = ownerId;
 		this.splash = splash;
 	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		private Possible<String> name = Possible.absent();
+		private Possible<String> region = Possible.absent();
+		private Possible<Integer> verificationLevel = Possible.absent();
+		private Possible<Integer> defaultMessageNoficiations = Possible.absent();
+		private PossibleLong afkChannelId = PossibleLong.absent();
+		private Possible<Integer> afkTimeout = Possible.absent();
+		private Possible<String> icon = Possible.absent();
+		private PossibleLong ownerId = PossibleLong.absent();
+		private Possible<String> splash = Possible.absent();
+
+		public Builder name(String name) {
+			this.name = Possible.of(name);
+			return this;
+		}
+
+		public Builder region(String region) {
+			this.region = Possible.of(region);
+			return this;
+		}
+
+		public Builder verificationLevel(int verificationLevel) {
+			this.verificationLevel = Possible.of(verificationLevel);
+			return this;
+		}
+
+		public Builder defaultMessageNoficiations(int defaultMessageNoficiations) {
+			this.defaultMessageNoficiations = Possible.of(defaultMessageNoficiations);
+			return this;
+		}
+
+		public Builder afkChannelId(long afkChannelId) {
+			this.afkChannelId = PossibleLong.of(afkChannelId);
+			return this;
+		}
+
+		public Builder afkTimeout(int afkTimeout) {
+			this.afkTimeout = Possible.of(afkTimeout);
+			return this;
+		}
+
+		public Builder icon(String icon) {
+			this.icon = Possible.of(icon);
+			return this;
+		}
+
+		public Builder ownerId(long ownerId) {
+			this.ownerId = PossibleLong.of(ownerId);
+			return this;
+		}
+
+		public Builder splash(String splash) {
+			this.splash = Possible.of(splash);
+			return this;
+		}
+
+		public GuildModifyRequest build() {
+			return new GuildModifyRequest(name, region, verificationLevel, defaultMessageNoficiations, afkChannelId, afkTimeout, icon, ownerId, splash);
+		}
+	}
 }

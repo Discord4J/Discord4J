@@ -23,6 +23,7 @@ import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 @PossibleJson
 public class GuildMemberModifyRequest {
@@ -46,5 +47,47 @@ public class GuildMemberModifyRequest {
 		this.mute = mute;
 		this.deaf = deaf;
 		this.channelId = channelId;
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		private Possible<String> nick = Possible.absent();
+		private Possible<long[]> roles = Possible.absent();
+		private Possible<Boolean> mute = Possible.absent();
+		private Possible<Boolean> deaf = Possible.absent();
+		private PossibleLong channelId = PossibleLong.absent();
+
+		public Builder nick(String nick) {
+			this.nick = Possible.of(nick);
+			return this;
+		}
+
+		public Builder roles(long[] roles) {
+			this.roles = Possible.of(roles);
+			return this;
+		}
+
+		public Builder mute(boolean mute) {
+			this.mute = Possible.of(mute);
+			return this;
+		}
+
+		public Builder deaf(boolean deaf) {
+			this.deaf = Possible.of(deaf);
+			return this;
+		}
+
+		public Builder channelId(OptionalLong channelId) {
+			this.channelId = channelId.isPresent() ? PossibleLong.of(channelId.getAsLong()) : null;
+			return this;
+		}
+
+		public GuildMemberModifyRequest build() {
+			return new GuildMemberModifyRequest(nick, roles, mute, deaf, channelId);
+		}
 	}
 }

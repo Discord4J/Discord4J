@@ -24,6 +24,7 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 @PossibleJson
 public class ChannelCreateRequest {
@@ -53,5 +54,59 @@ public class ChannelCreateRequest {
 		this.permissionOverwrites = permissionOverwrites;
 		this.parentId = parentId;
 		this.nsfw = nsfw;
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		private String name;
+		private Possible<Integer> type = Possible.absent();
+		private Possible<Integer> bitrate = Possible.absent();
+		private Possible<Integer> userLimit = Possible.absent();
+		private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
+		private PossibleLong parentId = PossibleLong.absent();
+		private Possible<Boolean> nsfw = Possible.absent();
+
+		public Builder name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public Builder type(int type) {
+			this.type = Possible.of(type);
+			return this;
+		}
+
+		public Builder bitrate(int bitrate) {
+			this.bitrate = Possible.of(bitrate);
+			return this;
+		}
+
+		public Builder userLimit(int userLimit) {
+			this.userLimit = Possible.of(userLimit);
+			return this;
+		}
+
+		public Builder permissionOverwrites(OverwriteEntity[] permissionOverwrites) {
+			this.permissionOverwrites = Possible.of(permissionOverwrites);
+			return this;
+		}
+
+		public Builder parentId(OptionalLong parentId) {
+			this.parentId = parentId.isPresent() ? PossibleLong.of(parentId.getAsLong()) : null;
+			return this;
+		}
+
+		public Builder nsfw(boolean nsfw) {
+			this.nsfw = Possible.of(nsfw);
+			return this;
+		}
+
+		public ChannelCreateRequest build() {
+			return new ChannelCreateRequest(name, type, bitrate, userLimit, permissionOverwrites, parentId, nsfw);
+		}
 	}
 }
