@@ -19,20 +19,17 @@ package discord4j.gateway.client;
 import discord4j.gateway.HandshakeInfo;
 import discord4j.gateway.WebSocketHandler;
 import discord4j.gateway.adapter.WebSocketSession;
-import discord4j.gateway.buffer.NettyDataBufferFactory;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
-import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -43,26 +40,17 @@ import java.util.stream.Collectors;
 public class WebSocketClient {
 
 	private static final Logger log = Loggers.getLogger(WebSocketClient.class);
-
 	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
 	private final HttpClient httpClient;
 
 
-	/**
-	 * Default constructor.
-	 */
 	public WebSocketClient() {
-		this(options -> {
-		});
+		this(HttpClient.create());
 	}
 
-	/**
-	 * Constructor that accepts an {@link reactor.ipc.netty.http.client.HttpClientOptions} consumer to supply to {@link
-	 * reactor.ipc.netty.http.client.HttpClient#create(java.util.function.Consumer)}.
-	 */
-	public WebSocketClient(Consumer<? super HttpClientOptions.Builder> clientOptions) {
-		this.httpClient = HttpClient.create(clientOptions);
+	public WebSocketClient(HttpClient httpClient) {
+		this.httpClient = httpClient;
 	}
 
 
@@ -78,15 +66,7 @@ public class WebSocketClient {
 			log.debug("Handshake response: " + url + ", " + responseHeaders);
 		}
 		String protocol = responseHeaders.get(SEC_WEBSOCKET_PROTOCOL);
-		return new HandshakeInfo(url, responseHeaders, Mono.empty(), Optional.ofNullable(protocol));
-	}
-
-
-	/**
-	 * Return the configured {@link reactor.ipc.netty.http.client.HttpClient}.
-	 */
-	public HttpClient getHttpClient() {
-		return this.httpClient;
+		return new HandshakeInfo(url, responseHeaders, Optional.ofNullable(protocol));
 	}
 
 
@@ -98,7 +78,7 @@ public class WebSocketClient {
 
 		String[] protocols = beforeHandshake(url, headers, handler);
 
-		return getHttpClient()
+		return this.httpClient
 				.ws(url.toString(),
 						nettyHeaders -> {
 						},
@@ -106,9 +86,8 @@ public class WebSocketClient {
 				.flatMap(response -> {
 					HandshakeInfo info = afterHandshake(url, response.responseHeaders());
 					ByteBufAllocator allocator = response.channel().alloc();
-					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
 					return response.receiveWebsocket((in, out) -> {
-						WebSocketSession session = new WebSocketSession(in, out, info, factory);
+						WebSocketSession session = new WebSocketSession(in, out, info, allocator);
 						return handler.handle(session);
 					});
 				});

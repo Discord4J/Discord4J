@@ -16,8 +16,8 @@
  */
 package discord4j.gateway;
 
-import discord4j.gateway.buffer.NettyDataBuffer;
 import discord4j.gateway.adapter.WebSocketSession;
+import io.netty.buffer.ByteBuf;
 
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
@@ -32,17 +32,16 @@ import java.util.Objects;
 public class WebSocketMessage {
 
 	private final Type type;
-
-	private final NettyDataBuffer payload;
+	private final ByteBuf payload;
 
 
 	/**
 	 * Constructor for a WebSocketMessage. <p>See static factory methods in {@link WebSocketSession} or alternatively
-	 * use {@link WebSocketSession#bufferFactory()} to create the payload and then invoke this constructor.
+	 * use {@link WebSocketSession#byteBufAllocator()} to create the payload and then invoke this constructor.
 	 */
-	public WebSocketMessage(Type type, NettyDataBuffer payload) {
+	public WebSocketMessage(Type type, ByteBuf payload) {
 		Objects.requireNonNull(type, "'type' must not be null");
-		Objects.requireNonNull(payload,"'payload' must not be null");
+		Objects.requireNonNull(payload, "'payload' must not be null");
 		this.type = type;
 		this.payload = payload;
 	}
@@ -58,7 +57,7 @@ public class WebSocketMessage {
 	/**
 	 * Return the message payload.
 	 */
-	public NettyDataBuffer getPayload() {
+	public ByteBuf getPayload() {
 		return this.payload;
 	}
 
@@ -66,43 +65,9 @@ public class WebSocketMessage {
 	 * Return the message payload as UTF-8 text. This is a useful for text WebSocket messages.
 	 */
 	public String getPayloadAsText() {
-		byte[] bytes = new byte[this.payload.readableByteCount()];
-		this.payload.read(bytes);
+		byte[] bytes = new byte[this.payload.readableBytes()];
+		this.payload.readBytes(bytes);
 		return new String(bytes, StandardCharsets.UTF_8);
-	}
-
-	/**
-	 * Retain the data buffer for the message payload, which is useful on runtimes (e.g. Netty) with pooled buffers. A
-	 * shortcut for:
-	 * <pre>
-	 * DataBuffer payload = message.getPayload();
-	 * DataBufferUtils.retain(payload);
-	 * </pre>
-	 */
-	public WebSocketMessage retain() {
-		retain(this.payload);
-		return this;
-	}
-
-	/**
-	 * Release the payload {@code DataBuffer} which is useful on runtimes (e.g. Netty) with pooled buffers such as
-	 * Netty. A shortcut for:
-	 * <pre>
-	 * DataBuffer payload = message.getPayload();
-	 * DataBufferUtils.release(payload);
-	 * </pre>
-	 */
-	public void release() {
-		release(this.payload);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static NettyDataBuffer retain(NettyDataBuffer dataBuffer) {
-		return dataBuffer.retain();
-	}
-
-	private static boolean release(@Nullable NettyDataBuffer dataBuffer) {
-		return dataBuffer != null && dataBuffer.release();
 	}
 
 

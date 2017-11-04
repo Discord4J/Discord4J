@@ -17,10 +17,8 @@
 package discord4j.gateway;
 
 import io.netty.handler.codec.http.HttpHeaders;
-import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.security.Principal;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -33,11 +31,7 @@ import java.util.Optional;
 public class HandshakeInfo {
 
 	private final URI uri;
-
-	private final Mono<Principal> principalMono;
-
 	private final HttpHeaders headers;
-
 	private final Optional<String> protocol;
 
 
@@ -46,17 +40,14 @@ public class HandshakeInfo {
 	 *
 	 * @param uri the endpoint URL
 	 * @param headers request headers for server or response headers or client
-	 * @param principal the principal for the session
 	 * @param protocol the negotiated sub-protocol
 	 */
-	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, Optional<String> protocol) {
+	public HandshakeInfo(URI uri, HttpHeaders headers, Optional<String> protocol) {
 		Objects.requireNonNull(uri, "URI is required.");
 		Objects.requireNonNull(headers, "HttpHeaders are required.");
-		Objects.requireNonNull(principal, "Principal is required.");
 		Objects.requireNonNull(protocol, "Sub-protocol is required.");
 		this.uri = uri;
 		this.headers = headers;
-		this.principalMono = principal;
 		this.protocol = protocol;
 	}
 
@@ -74,13 +65,6 @@ public class HandshakeInfo {
 	 */
 	public HttpHeaders getHeaders() {
 		return this.headers;
-	}
-
-	/**
-	 * Return the principal associated with the handshake HTTP request.
-	 */
-	public Mono<Principal> getPrincipal() {
-		return this.principalMono;
 	}
 
 	/**

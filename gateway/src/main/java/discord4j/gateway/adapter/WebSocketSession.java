@@ -16,12 +16,11 @@
  */
 package discord4j.gateway.adapter;
 
-import discord4j.gateway.CloseStatus;
 import discord4j.gateway.HandshakeInfo;
 import discord4j.gateway.WebSocketMessage;
-import discord4j.gateway.buffer.NettyDataBuffer;
-import discord4j.gateway.buffer.NettyDataBufferFactory;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.*;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -46,18 +45,18 @@ public class WebSocketSession {
 
 
 	public WebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
-			HandshakeInfo info, NettyDataBufferFactory bufferFactory) {
+			HandshakeInfo info, ByteBufAllocator byteBufAllocator) {
 
 		WebSocketConnection delegate = new WebSocketConnection(inbound, outbound);
 
 		Objects.requireNonNull(delegate, "Native session is required.");
 		Objects.requireNonNull(info, "HandshakeInfo is required.");
-		Objects.requireNonNull(bufferFactory, "DataBuffer factory is required.");
+		Objects.requireNonNull(byteBufAllocator, "ByteBuf allocator is required.");
 
 		this.delegate = delegate;
 		this.id = Integer.toHexString(System.identityHashCode(delegate));
 		this.handshakeInfo = info;
-		this.bufferFactory = bufferFactory;
+		this.byteBufAllocator = byteBufAllocator;
 	}
 
 	/**
@@ -79,7 +78,7 @@ public class WebSocketSession {
 	private final WebSocketConnection delegate;
 	private final String id;
 	private final HandshakeInfo handshakeInfo;
-	private final NettyDataBufferFactory bufferFactory;
+	private final ByteBufAllocator byteBufAllocator;
 
 
 	protected WebSocketConnection getDelegate() {
@@ -99,22 +98,22 @@ public class WebSocketSession {
 
 	public WebSocketMessage textMessage(String payload) {
 		byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
-		NettyDataBuffer buffer = bufferFactory().wrap(bytes);
+		ByteBuf buffer = Unpooled.wrappedBuffer(bytes);
 		return new WebSocketMessage(WebSocketMessage.Type.TEXT, buffer);
 	}
 
-	public WebSocketMessage binaryMessage(Function<NettyDataBufferFactory, NettyDataBuffer> payloadFactory) {
-		NettyDataBuffer payload = payloadFactory.apply(bufferFactory());
+	public WebSocketMessage binaryMessage(Function<ByteBufAllocator, ByteBuf> payloadFactory) {
+		ByteBuf payload = payloadFactory.apply(byteBufAllocator());
 		return new WebSocketMessage(WebSocketMessage.Type.BINARY, payload);
 	}
 
-	public WebSocketMessage pingMessage(Function<NettyDataBufferFactory, NettyDataBuffer> payloadFactory) {
-		NettyDataBuffer payload = payloadFactory.apply(bufferFactory());
+	public WebSocketMessage pingMessage(Function<ByteBufAllocator, ByteBuf> payloadFactory) {
+		ByteBuf payload = payloadFactory.apply(byteBufAllocator());
 		return new WebSocketMessage(WebSocketMessage.Type.PING, payload);
 	}
 
-	public WebSocketMessage pongMessage(Function<NettyDataBufferFactory, NettyDataBuffer> payloadFactory) {
-		NettyDataBuffer payload = payloadFactory.apply(bufferFactory());
+	public WebSocketMessage pongMessage(Function<ByteBufAllocator, ByteBuf> payloadFactory) {
+		ByteBuf payload = payloadFactory.apply(byteBufAllocator());
 		return new WebSocketMessage(WebSocketMessage.Type.PONG, payload);
 	}
 
@@ -125,18 +124,18 @@ public class WebSocketSession {
 	}
 
 
-	public NettyDataBufferFactory bufferFactory() {
-		return this.bufferFactory;
+	public ByteBufAllocator byteBufAllocator() {
+		return this.byteBufAllocator;
 	}
 
 
 	protected WebSocketMessage toMessage(WebSocketFrame frame) {
-		NettyDataBuffer payload = bufferFactory().wrap(frame.content());
+		ByteBuf payload = frame.content();
 		return new WebSocketMessage(MESSAGE_TYPES.get(frame.getClass()), payload);
 	}
 
 	protected WebSocketFrame toFrame(WebSocketMessage message) {
-		ByteBuf byteBuf = NettyDataBufferFactory.toByteBuf(message.getPayload());
+		ByteBuf byteBuf = message.getPayload();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			return new TextWebSocketFrame(byteBuf);
 		} else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
@@ -164,13 +163,6 @@ public class WebSocketSession {
 				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)
 				.then();
-	}
-
-	public Mono<Void> close(CloseStatus status) {
-		return Mono.error(new UnsupportedOperationException(
-				"Currently in Reactor Netty applications are expected to use the " +
-						"Cancellation returned from subscribing to the \"receive\"-side Flux " +
-						"in order to close the WebSocket session."));
 	}
 
 
