@@ -590,7 +590,7 @@ public class Channel implements IChannel {
 			TimerTask task = new TimerTask() {
 				@Override
 				public void run() {
-					if (Channel.this.isDeleted()) {
+					if (!isPrivate() && isDeleted()) {
 						this.cancel();
 						return;
 					}
