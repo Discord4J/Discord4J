@@ -25,7 +25,6 @@ import org.eclipse.jetty.websocket.api.UpgradeException;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.apache.commons.io.IOUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.GatewayPayload;
@@ -39,7 +38,6 @@ import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -235,11 +233,10 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		ByteArrayOutputStream out = new ByteArrayOutputStream(payload.length * 2);
-		try (InflaterOutputStream inflated = new InflaterOutputStream(out, inflater)) {
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream(payload.length * 2);
+		     InflaterOutputStream inflated = new InflaterOutputStream(out, inflater)) {
 			inflated.write(payload);
 			onWebSocketText(out.toString("UTF-8"));
-			out.close();
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", e);
 		}
