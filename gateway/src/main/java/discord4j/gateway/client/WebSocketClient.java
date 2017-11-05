@@ -46,7 +46,7 @@ public class WebSocketClient {
 
 
 	public WebSocketClient() {
-		this(HttpClient.create());
+		this(HttpClient.create(builder -> builder.compression(true)));
 	}
 
 	public WebSocketClient(HttpClient httpClient) {

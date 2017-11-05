@@ -21,7 +21,9 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.json.response.GatewayResponse;
+import discord4j.gateway.WebSocketHandler;
 import discord4j.gateway.WebSocketMessage;
+import discord4j.gateway.adapter.WebSocketSession;
 import discord4j.gateway.client.WebSocketClient;
 import discord4j.rest.http.EmptyWriterStrategy;
 import discord4j.rest.http.JacksonReaderStrategy;
@@ -33,15 +35,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.WorkQueueProcessor;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertTrue;
 
@@ -50,10 +48,11 @@ public class GatewayTest {
 	private static final Logger log = LoggerFactory.getLogger(GatewayTest.class);
 
 	private Router router;
+	private String token;
 
 	@Before
 	public void initialize() {
-		String token = System.getenv("token");
+		token = System.getenv("token");
 		ObjectMapper mapper = new ObjectMapper();
 		SimpleHttpClient httpClient = SimpleHttpClient.builder()
 				.baseUrl(Routes.BASE_URL)
@@ -71,46 +70,50 @@ public class GatewayTest {
 
 	@Test
 	public void testGatewayConnect() throws URISyntaxException, InterruptedException {
-		String gateway = getGatewayUrl(router) + "?v=6&encoding=json";
+		String gateway = getGatewayUrl(router) + "?v=6&encoding=json&compression=zlib-stream";
 
-		AtomicBoolean closed = new AtomicBoolean();
-		SynchronousQueue<String> outboundMessages = new SynchronousQueue<>();
-
-		Flux<String> outboundExchange = Flux.create(emitter -> {
-			while (!closed.get()) {
-				try {
-					String message = outboundMessages.poll(1, TimeUnit.SECONDS);
-					if (message != null) {
-						log.debug("Emitting {}", message);
-						emitter.next(message);
-					}
-				} catch (InterruptedException e) {
-					log.warn("Interrupted", e);
-				}
-			}
-			emitter.complete();
-		}, FluxSink.OverflowStrategy.BUFFER);
-		WorkQueueProcessor<String> inboundExchange = WorkQueueProcessor.create();
+		EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
+		EmitterProcessor<String> inboundExchange = EmitterProcessor.create();
 
 		WebSocketClient client = new WebSocketClient();
 
-		inboundExchange.log()
-				.subscribe(message -> {
-					log.info("[Inbound Message] {}", message);
-				});
+		client.execute(new URI(gateway), new WebSocketHandler() {
+			@Override
+			public String[] getSubProtocols() {
+				return new String[]{};
+			}
 
-		client.execute(new URI(gateway),
-				session -> {
-					log.debug("Starting to send messages");
+			@Override
+			public Mono<Void> handle(WebSocketSession session) {
+				log.debug("Starting handshake");
 
-					session.send(outboundExchange.map(session::textMessage))
-							.then();
+				inboundExchange.log()
+						.subscribe(message -> {
+							if (message.contains("\"op\":10") || message.contains("\"op\":9")) {
+								outboundExchange.onNext("{\n" +
+										"  \"op\": 2,\n" +
+										"  \"d\": {\n" +
+										"    \"token\": \"" + token + "\",\n" +
+										"    \"properties\": {\n" +
+										"      \"$os\": \"linux\",\n" +
+										"      \"$browser\": \"disco\",\n" +
+										"      \"$device\": \"disco\"\n" +
+										"    },\n" +
+										"    \"compress\": false,\n" +
+										"    \"large_threshold\": 250\n" +
+										"  }\n" +
+										"}");
+							}
+						});
 
-					return session.receive()
-							.map(WebSocketMessage::getPayloadAsText)
-							.subscribeWith(inboundExchange)
-							.then();
-				}).block();
+				session.receive()
+						.map(WebSocketMessage::getPayloadAsText)
+						.log("session-inbound")
+						.subscribeWith(inboundExchange);
+
+				return session.send(outboundExchange.log("session-outbound").map(session::textMessage));
+			}
+		}).block();
 	}
 
 	private String getGatewayUrl(Router router) {
