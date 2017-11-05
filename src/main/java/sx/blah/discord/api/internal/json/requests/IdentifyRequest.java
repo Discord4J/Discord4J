@@ -33,10 +33,6 @@ public class IdentifyRequest {
 	 */
 	private final Properties properties;
 	/**
-	 * Whether this connection supports compression of the initial ready packet.
-	 */
-	private final boolean compress;
-	/**
 	 * Total number of members at which the gateway will stop sending offline members in the guild member list. Must be
 	 * between 50 and 250.
 	 */
@@ -54,7 +50,6 @@ public class IdentifyRequest {
 	private IdentifyRequest(String token, Properties properties, boolean compress, int large_threshold, int[] shard, PresenceUpdateRequest presence) {
 		this.token = token;
 		this.properties = properties;
-		this.compress = compress;
 		this.large_threshold = large_threshold;
 		this.shard = shard;
 		this.presence = presence;

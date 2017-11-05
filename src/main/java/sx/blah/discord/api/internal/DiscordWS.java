@@ -38,7 +38,7 @@ import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -48,7 +48,8 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.zip.InflaterInputStream;
+import java.util.zip.InflaterOutputStream;
+import java.util.zip.Inflater;
 
 /**
  * Facilitates a websocket connection between the client and Discord's Gateway.
@@ -114,6 +115,10 @@ public class DiscordWS extends WebSocketAdapter {
 	 * Indicates whether the bot has received the initial Ready payload from Discord.
 	 */
 	public boolean hasReceivedReady = false;
+	/**
+	 * Decoder context for zlib-stream compression
+	 */
+	public Inflater inflater;
 
 	DiscordWS(IShard shard, String gateway, int maxMissedPings, PresenceUpdateRequest identifyPresence) {
 		this.client = (DiscordClientImpl) shard.getClient();
@@ -186,6 +191,7 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketConnect(Session sess) {
 		Discord4J.LOGGER.info(LogMarkers.WEBSOCKET, "Websocket Connected.");
+		inflater = new Inflater(); // (Re)set the zlib context
 		super.onWebSocketConnect(sess);
 	}
 
@@ -229,8 +235,10 @@ public class DiscordWS extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		try (InputStream decoded = new InflaterInputStream(new ByteArrayInputStream(payload, offset, len))) {
-			onWebSocketText(IOUtils.toString(decoded));
+		ByteArrayOutputStream out = new ByteArrayOutputStream(payload.length * 2);
+                try (InflaterOutputStream inflated = new InflaterOutputStream(out, inflater)) {
+			inflated.write(payload);
+			onWebSocketText(out.toString("UTF-8"));
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", e);
 		}
