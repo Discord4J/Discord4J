@@ -40,7 +40,8 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.zip.Inflater;
@@ -93,29 +94,11 @@ public class GatewayTest {
 
 			@Override
 			public Mono<Void> handle(WebSocketSession session) {
-				log.debug("Starting handshake");
-
-				inboundExchange.log()
-						.subscribe(message -> {
-							if (message.contains("\"op\":10") || message.contains("\"op\":9")) {
-								outboundExchange.onNext("{\n" +
-										"  \"op\": 2,\n" +
-										"  \"d\": {\n" +
-										"    \"token\": \"" + token + "\",\n" +
-										"    \"properties\": {\n" +
-										"      \"$os\": \"linux\",\n" +
-										"      \"$browser\": \"disco\",\n" +
-										"      \"$device\": \"disco\"\n" +
-										"    },\n" +
-										"    \"large_threshold\": 250\n" +
-										"  }\n" +
-										"}");
-							}
-						});
-
+				WebSocketMessageSubscriber subscriber = new WebSocketMessageSubscriber(inboundExchange,
+						outboundExchange, token);
 				session.receive()
 						.map(message -> {
-							if (message.getType().equals(WebSocketMessage.Type.BINARY)) {
+							if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
 								ByteBuf payload = message.getPayload();
 								byte[] bytes = new byte[payload.readableBytes()];
 								payload.readBytes(bytes);
@@ -132,8 +115,7 @@ public class GatewayTest {
 							}
 						})
 						.log("session-inbound")
-						.subscribeWith(inboundExchange);
-
+						.subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
 				return session.send(outboundExchange.log("session-outbound").map(session::textMessage));
 			}
 		}).block();
@@ -143,5 +125,48 @@ public class GatewayTest {
 		GatewayResponse response = Routes.GATEWAY_GET.newRequest().exchange(router).toFuture().join();
 		assertTrue(response != null);
 		return response.getUrl();
+	}
+
+	private static class WebSocketMessageSubscriber {
+
+		private final EmitterProcessor<String> inboundExchange; // towards our users (eventDispatcher)
+		private final EmitterProcessor<String> outboundExchange; // towards discord (wire)
+		private final String token;
+
+		public WebSocketMessageSubscriber(EmitterProcessor<String> inboundExchange,
+				EmitterProcessor<String> outboundExchange, String token) {
+			this.inboundExchange = inboundExchange;
+			this.outboundExchange = outboundExchange;
+			this.token = token;
+		}
+
+		public void onNext(String message) {
+			if (message.contains("\"op\":10") || message.contains("\"op\":9")) {
+				outboundExchange.onNext("{\n" +
+						"  \"op\": 2,\n" +
+						"  \"d\": {\n" +
+						"    \"token\": \"" + token + "\",\n" +
+						"    \"properties\": {\n" +
+						"      \"$os\": \"linux\",\n" +
+						"      \"$browser\": \"disco\",\n" +
+						"      \"$device\": \"disco\"\n" +
+						"    },\n" +
+						"    \"large_threshold\": 250\n" +
+						"  }\n" +
+						"}");
+			} else {
+				inboundExchange.onNext(message);
+			}
+		}
+
+		public void onError(Throwable error) {
+			log.error("Error", error);
+		}
+
+		public void onComplete() {
+			inboundExchange.onComplete();
+			outboundExchange.onComplete();
+		}
+
 	}
 }
