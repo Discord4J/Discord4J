@@ -31,15 +31,23 @@ import discord4j.rest.http.JacksonWriterStrategy;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import io.netty.buffer.ByteBuf;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.stream.Collectors;
+import java.util.zip.InflaterInputStream;
 
 import static org.junit.Assert.assertTrue;
 
@@ -70,7 +78,7 @@ public class GatewayTest {
 
 	@Test
 	public void testGatewayConnect() throws URISyntaxException, InterruptedException {
-		String gateway = getGatewayUrl(router) + "?v=6&encoding=json&compression=zlib-stream";
+		String gateway = getGatewayUrl(router) + "?v=6&encoding=json";
 
 		EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
 		EmitterProcessor<String> inboundExchange = EmitterProcessor.create();
@@ -99,7 +107,7 @@ public class GatewayTest {
 										"      \"$browser\": \"disco\",\n" +
 										"      \"$device\": \"disco\"\n" +
 										"    },\n" +
-										"    \"compress\": false,\n" +
+										"    \"compress\": true,\n" +
 										"    \"large_threshold\": 250\n" +
 										"  }\n" +
 										"}");
@@ -107,7 +115,22 @@ public class GatewayTest {
 						});
 
 				session.receive()
-						.map(WebSocketMessage::getPayloadAsText)
+						.map(message -> {
+							if (message.getType().equals(WebSocketMessage.Type.BINARY)) {
+								ByteBuf payload = message.getPayload();
+								byte[] bytes = new byte[payload.readableBytes()];
+								payload.readBytes(bytes);
+
+								try (BufferedReader reader = new BufferedReader(new InputStreamReader(new
+										InflaterInputStream(new ByteArrayInputStream(bytes, 0, bytes.length))))) {
+									return reader.lines().collect(Collectors.joining());
+								} catch (IOException e) {
+									throw Exceptions.propagate(e);
+								}
+							} else {
+								return message.getPayloadAsText();
+							}
+						})
 						.log("session-inbound")
 						.subscribeWith(inboundExchange);
 
