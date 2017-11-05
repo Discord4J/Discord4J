@@ -236,9 +236,10 @@ public class DiscordWS extends WebSocketAdapter {
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream(payload.length * 2);
-                try (InflaterOutputStream inflated = new InflaterOutputStream(out, inflater)) {
+		try (InflaterOutputStream inflated = new InflaterOutputStream(out, inflater)) {
 			inflated.write(payload);
 			onWebSocketText(out.toString("UTF-8"));
+			out.close();
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Encountered websocket error: ", e);
 		}
