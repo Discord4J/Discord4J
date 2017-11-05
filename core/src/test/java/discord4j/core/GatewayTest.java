@@ -40,14 +40,11 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.stream.Collectors;
-import java.util.zip.InflaterInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterOutputStream;
 
 import static org.junit.Assert.assertTrue;
 
@@ -58,8 +55,11 @@ public class GatewayTest {
 	private Router router;
 	private String token;
 
+	private Inflater zlibContext;
+
 	@Before
 	public void initialize() {
+		zlibContext = new Inflater();
 		token = System.getenv("token");
 		ObjectMapper mapper = new ObjectMapper();
 		SimpleHttpClient httpClient = SimpleHttpClient.builder()
@@ -78,7 +78,7 @@ public class GatewayTest {
 
 	@Test
 	public void testGatewayConnect() throws URISyntaxException, InterruptedException {
-		String gateway = getGatewayUrl(router) + "?v=6&encoding=json";
+		String gateway = getGatewayUrl(router) + "?v=6&encoding=json&compress=zlib-stream";
 
 		EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
 		EmitterProcessor<String> inboundExchange = EmitterProcessor.create();
@@ -107,7 +107,6 @@ public class GatewayTest {
 										"      \"$browser\": \"disco\",\n" +
 										"      \"$device\": \"disco\"\n" +
 										"    },\n" +
-										"    \"compress\": true,\n" +
 										"    \"large_threshold\": 250\n" +
 										"  }\n" +
 										"}");
@@ -121,9 +120,10 @@ public class GatewayTest {
 								byte[] bytes = new byte[payload.readableBytes()];
 								payload.readBytes(bytes);
 
-								try (BufferedReader reader = new BufferedReader(new InputStreamReader(new
-										InflaterInputStream(new ByteArrayInputStream(bytes, 0, bytes.length))))) {
-									return reader.lines().collect(Collectors.joining());
+								ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length * 2);
+								try (InflaterOutputStream inflater = new InflaterOutputStream(out, zlibContext)) {
+									inflater.write(bytes);
+									return out.toString("UTF-8");
 								} catch (IOException e) {
 									throw Exceptions.propagate(e);
 								}
