@@ -21,6 +21,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.json.response.GatewayResponse;
+import discord4j.gateway.CloseStatus;
 import discord4j.gateway.WebSocketHandler;
 import discord4j.gateway.WebSocketMessage;
 import discord4j.gateway.adapter.WebSocketSession;
@@ -96,6 +97,7 @@ public class GatewayTest {
 			public Mono<Void> handle(WebSocketSession session) {
 				WebSocketMessageSubscriber subscriber = new WebSocketMessageSubscriber(inboundExchange,
 						outboundExchange, token);
+				session.closeFuture().subscribe(subscriber::onClose);
 				session.receive()
 						.map(message -> {
 							if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
@@ -116,7 +118,10 @@ public class GatewayTest {
 						})
 						.log("session-inbound")
 						.subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
-				return session.send(outboundExchange.log("session-outbound").map(session::textMessage));
+				return session.send(outboundExchange
+						.log("session-outbound")
+						.doOnError(t -> log.info("outbound error", t))
+						.map(session::textMessage));
 			}
 		}).block();
 	}
@@ -168,5 +173,8 @@ public class GatewayTest {
 			outboundExchange.onComplete();
 		}
 
+		public void onClose(CloseStatus closeStatus) {
+			log.info("Connection was CLOSED with status code {}", closeStatus.getStatusCode());
+		}
 	}
 }

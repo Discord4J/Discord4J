@@ -16,15 +16,20 @@
  */
 package discord4j.gateway.adapter;
 
+import discord4j.gateway.CloseStatus;
 import discord4j.gateway.HandshakeInfo;
 import discord4j.gateway.WebSocketMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.*;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Schedulers;
 import reactor.ipc.netty.NettyPipeline;
 import reactor.ipc.netty.http.websocket.WebsocketInbound;
 import reactor.ipc.netty.http.websocket.WebsocketOutbound;
@@ -42,7 +47,6 @@ import java.util.function.Function;
  * @author Rossen Stoyanchev
  */
 public class WebSocketSession {
-
 
 	public WebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			HandshakeInfo info, ByteBufAllocator byteBufAllocator) {
@@ -163,6 +167,23 @@ public class WebSocketSession {
 				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)
 				.then();
+	}
+
+	public Mono<CloseStatus> closeFuture() {
+		MonoProcessor<CloseStatus> monoProcessor = MonoProcessor.create();
+		getDelegate().getInbound().context().channel().pipeline().addBefore("reactor.right.reactiveBridge",
+				"close-handler", new ChannelInboundHandlerAdapter() {
+					@Override
+					public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+						if (msg instanceof CloseWebSocketFrame &&
+								((CloseWebSocketFrame) msg).isFinalFragment()) {
+							CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
+							monoProcessor.onNext(new CloseStatus(close.statusCode(), close.reasonText()));
+						}
+						ctx.fireChannelRead(msg);
+					}
+				});
+		return monoProcessor.subscribeOn(Schedulers.elastic());
 	}
 
 
