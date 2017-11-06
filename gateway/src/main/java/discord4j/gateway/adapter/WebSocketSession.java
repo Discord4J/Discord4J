@@ -17,152 +17,42 @@
 package discord4j.gateway.adapter;
 
 import discord4j.gateway.CloseStatus;
-import discord4j.gateway.HandshakeInfo;
 import discord4j.gateway.WebSocketMessage;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.scheduler.Schedulers;
 import reactor.ipc.netty.NettyPipeline;
 import reactor.ipc.netty.http.websocket.WebsocketInbound;
 import reactor.ipc.netty.http.websocket.WebsocketOutbound;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-
 /**
- * Spring WebSocketSession implementation that adapts to Reactor Netty's WebSocket {@link
- * reactor.ipc.netty.NettyInbound} and {@link reactor.ipc.netty.NettyOutbound}.
- *
- * @author Rossen Stoyanchev
+ * WebSocket adapter around {@link reactor.ipc.netty.http.websocket.WebsocketInbound WebSocketInbound} and {@link
+ * reactor.ipc.netty.http.websocket.WebsocketOutbound WebSocketOutbound}.
  */
 public class WebSocketSession {
 
-	public WebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
-			HandshakeInfo info, ByteBufAllocator byteBufAllocator) {
-
-		WebSocketConnection delegate = new WebSocketConnection(inbound, outbound);
-
-		Objects.requireNonNull(delegate, "Native session is required.");
-		Objects.requireNonNull(info, "HandshakeInfo is required.");
-		Objects.requireNonNull(byteBufAllocator, "ByteBuf allocator is required.");
-
-		this.delegate = delegate;
-		this.id = Integer.toHexString(System.identityHashCode(delegate));
-		this.handshakeInfo = info;
-		this.byteBufAllocator = byteBufAllocator;
-	}
-
-	/**
-	 * The default max size for aggregating inbound WebSocket frames.
-	 */
-	protected static final int DEFAULT_FRAME_MAX_SIZE = 64 * 1024;
-
-
-	private static final Map<Class<?>, WebSocketMessage.Type> MESSAGE_TYPES;
-
-	static {
-		MESSAGE_TYPES = new HashMap<>(4);
-		MESSAGE_TYPES.put(TextWebSocketFrame.class, WebSocketMessage.Type.TEXT);
-		MESSAGE_TYPES.put(BinaryWebSocketFrame.class, WebSocketMessage.Type.BINARY);
-		MESSAGE_TYPES.put(PingWebSocketFrame.class, WebSocketMessage.Type.PING);
-		MESSAGE_TYPES.put(PongWebSocketFrame.class, WebSocketMessage.Type.PONG);
-	}
-
 	private final WebSocketConnection delegate;
 	private final String id;
-	private final HandshakeInfo handshakeInfo;
-	private final ByteBufAllocator byteBufAllocator;
 
-
-	protected WebSocketConnection getDelegate() {
-		return this.delegate;
+	public WebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound) {
+		this.delegate = new WebSocketConnection(inbound, outbound);
+		this.id = Integer.toHexString(System.identityHashCode(delegate));
 	}
-
-	public String getId() {
-		return this.id;
-	}
-
-	public HandshakeInfo getHandshakeInfo() {
-		return this.handshakeInfo;
-	}
-
-
-	// WebSocketMessage factory methods
-
-	public WebSocketMessage textMessage(String payload) {
-		byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
-		ByteBuf buffer = Unpooled.wrappedBuffer(bytes);
-		return new WebSocketMessage(WebSocketMessage.Type.TEXT, buffer);
-	}
-
-	public WebSocketMessage binaryMessage(Function<ByteBufAllocator, ByteBuf> payloadFactory) {
-		ByteBuf payload = payloadFactory.apply(byteBufAllocator());
-		return new WebSocketMessage(WebSocketMessage.Type.BINARY, payload);
-	}
-
-	public WebSocketMessage pingMessage(Function<ByteBufAllocator, ByteBuf> payloadFactory) {
-		ByteBuf payload = payloadFactory.apply(byteBufAllocator());
-		return new WebSocketMessage(WebSocketMessage.Type.PING, payload);
-	}
-
-	public WebSocketMessage pongMessage(Function<ByteBufAllocator, ByteBuf> payloadFactory) {
-		ByteBuf payload = payloadFactory.apply(byteBufAllocator());
-		return new WebSocketMessage(WebSocketMessage.Type.PONG, payload);
-	}
-
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getHandshakeInfo().getUri() + "]";
-	}
-
-
-	public ByteBufAllocator byteBufAllocator() {
-		return this.byteBufAllocator;
-	}
-
-
-	protected WebSocketMessage toMessage(WebSocketFrame frame) {
-		ByteBuf payload = frame.content();
-		return new WebSocketMessage(MESSAGE_TYPES.get(frame.getClass()), payload);
-	}
-
-	protected WebSocketFrame toFrame(WebSocketMessage message) {
-		ByteBuf byteBuf = message.getPayload();
-		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			return new TextWebSocketFrame(byteBuf);
-		} else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-			return new BinaryWebSocketFrame(byteBuf);
-		} else if (WebSocketMessage.Type.PING.equals(message.getType())) {
-			return new PingWebSocketFrame(byteBuf);
-		} else if (WebSocketMessage.Type.PONG.equals(message.getType())) {
-			return new PongWebSocketFrame(byteBuf);
-		} else {
-			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
-		}
-	}
-
 
 	public Flux<WebSocketMessage> receive() {
 		return getDelegate().getInbound()
-				.aggregateFrames(DEFAULT_FRAME_MAX_SIZE)
+				.aggregateFrames()
 				.receiveFrames()
-				.map(this::toMessage);
+				.map(WebSocketMessage::fromFrame);
 	}
 
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
-		Flux<WebSocketFrame> frames = Flux.from(messages).map(this::toFrame);
+		Flux<WebSocketFrame> frames = Flux.from(messages).map(WebSocketMessage::toFrame);
 		return getDelegate().getOutbound()
 				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)
@@ -175,27 +65,37 @@ public class WebSocketSession {
 				"close-handler", new ChannelInboundHandlerAdapter() {
 					@Override
 					public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-						if (msg instanceof CloseWebSocketFrame &&
-								((CloseWebSocketFrame) msg).isFinalFragment()) {
+						if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
 							CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
 							monoProcessor.onNext(new CloseStatus(close.statusCode(), close.reasonText()));
 						}
 						ctx.fireChannelRead(msg);
 					}
 				});
-		return monoProcessor.subscribeOn(Schedulers.elastic());
+		return monoProcessor;
 	}
 
+	private WebSocketConnection getDelegate() {
+		return this.delegate;
+	}
+
+	private String getId() {
+		return this.id;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[id=" + getId() + "]";
+	}
 
 	/**
-	 * Simple container for {@link reactor.ipc.netty.NettyInbound} and {@link reactor.ipc.netty.NettyOutbound}.
+	 * Simple container for {@link reactor.ipc.netty.http.websocket.WebsocketInbound WebSocketInbound} and {@link
+	 * reactor.ipc.netty.http.websocket.WebsocketOutbound WebSocketOutbound}.
 	 */
 	public static class WebSocketConnection {
 
 		private final WebsocketInbound inbound;
-
 		private final WebsocketOutbound outbound;
-
 
 		public WebSocketConnection(WebsocketInbound inbound, WebsocketOutbound outbound) {
 			this.inbound = inbound;

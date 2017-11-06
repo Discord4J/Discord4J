@@ -45,7 +45,7 @@ public class WebSocketTest {
 				session -> {
 					log.debug("Starting to send messages");
 					return session
-							.send(input.doOnNext(s -> log.debug("outbound " + s)).map(session::textMessage))
+							.send(input.doOnNext(s -> log.debug("outbound " + s)).map(WebSocketMessage::fromText))
 							.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
 							.subscribeWith(output)
 							.doOnNext(s -> log.debug("inbound " + s))

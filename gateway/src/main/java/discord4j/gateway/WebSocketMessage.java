@@ -16,36 +16,55 @@
  */
 package discord4j.gateway;
 
-import discord4j.gateway.adapter.WebSocketSession;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
-import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
- * Representation of a WebSocket message. <p>See static factory methods in {@link WebSocketSession} for creating
- * messages with the org.springframework.core.io.buffer.DataBufferFactory DataBufferFactory for the session.
- *
- * @author Rossen Stoyanchev
+ * A text or binary message received on a {@link discord4j.gateway.adapter.WebSocketSession}.
  */
 public class WebSocketMessage {
 
 	private final Type type;
 	private final ByteBuf payload;
 
-
-	/**
-	 * Constructor for a WebSocketMessage. <p>See static factory methods in {@link WebSocketSession} or alternatively
-	 * use {@link WebSocketSession#byteBufAllocator()} to create the payload and then invoke this constructor.
-	 */
-	public WebSocketMessage(Type type, ByteBuf payload) {
-		Objects.requireNonNull(type, "'type' must not be null");
-		Objects.requireNonNull(payload, "'payload' must not be null");
-		this.type = type;
-		this.payload = payload;
+	private WebSocketMessage(Type type, ByteBuf payload) {
+		this.type = Objects.requireNonNull(type, "'type' must not be null");
+		this.payload = Objects.requireNonNull(payload, "'payload' must not be null");
 	}
 
+	public static WebSocketMessage fromText(String payload) {
+		byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
+		ByteBuf buffer = Unpooled.wrappedBuffer(bytes);
+		return new WebSocketMessage(WebSocketMessage.Type.TEXT, buffer);
+	}
+
+	public static WebSocketMessage fromBinary(ByteBuf payload) {
+		return new WebSocketMessage(Type.BINARY, payload);
+	}
+
+	public static WebSocketMessage fromFrame(WebSocketFrame frame) {
+		ByteBuf payload = frame.content();
+		return new WebSocketMessage(Type.fromFrameClass(frame.getClass()), payload);
+	}
+
+	public static WebSocketFrame toFrame(WebSocketMessage message) {
+		ByteBuf byteBuf = message.getPayload();
+
+		switch (message.getType()) {
+			case TEXT:
+				return new TextWebSocketFrame(byteBuf);
+			case BINARY:
+				return new BinaryWebSocketFrame(byteBuf);
+			default:
+				throw new IllegalArgumentException("Unknown websocket message type: " + message.getType());
+		}
+	}
 
 	/**
 	 * Return the message type (text, binary, etc).
@@ -70,6 +89,10 @@ public class WebSocketMessage {
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(type, payload);
+	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -80,24 +103,24 @@ public class WebSocketMessage {
 			return false;
 		}
 		WebSocketMessage otherMessage = (WebSocketMessage) other;
-		return (this.type.equals(otherMessage.type) && nullSafeEquals(this.payload, otherMessage.payload));
+		return (this.type.equals(otherMessage.type) && Objects.equals(this.payload, otherMessage.payload));
 	}
-
-	private static boolean nullSafeEquals(@Nullable Object o1, @Nullable Object o2) {
-		return o1 == o2 || o1 != null && o2 != null && o1.equals(o2);
-	}
-
-	@Override
-	public int hashCode() {
-		return this.type.hashCode() * 29 + this.payload.hashCode();
-	}
-
 
 	/**
 	 * WebSocket message types.
 	 */
 	public enum Type {
-		TEXT, BINARY, PING, PONG
+		TEXT, BINARY;
+
+		public static Type fromFrameClass(Class<?> clazz) {
+			if (clazz.equals(TextWebSocketFrame.class)) {
+				return TEXT;
+			} else if (clazz.equals(BinaryWebSocketFrame.class)) {
+				return BINARY;
+			}
+
+			throw new IllegalArgumentException("Unknown frame class: " + clazz);
+		}
 	}
 
 }

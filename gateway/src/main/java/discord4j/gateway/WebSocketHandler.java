@@ -21,17 +21,9 @@ import reactor.core.publisher.Mono;
 
 /**
  * Handler for a WebSocket session.
- *
- * @author Rossen Stoyanchev
  */
+@FunctionalInterface
 public interface WebSocketHandler {
-
-	/**
-	 * Return the list of sub-protocols supported by this handler. <p>By default an empty array is returned.
-	 */
-	default String[] getSubProtocols() {
-		return new String[0];
-	}
 
 	/**
 	 * Handle the WebSocket session.
