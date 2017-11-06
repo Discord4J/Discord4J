@@ -14,24 +14,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+package discord4j.gateway.websocket;
 
-package discord4j.gateway;
+import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.client.HttpClient;
 
-public class CloseStatus {
+import java.net.URI;
 
-	private final int statusCode;
-	private final String reasonText;
+/**
+ * WebSocket client over Reactor Netty.
+ */
+public class WebSocketClient {
 
-	public CloseStatus(int statusCode, String reasonText) {
-		this.statusCode = statusCode;
-		this.reasonText = reasonText;
+	private final HttpClient httpClient;
+
+	public WebSocketClient() {
+		this(HttpClient.create());
 	}
 
-	public int getStatusCode() {
-		return statusCode;
+	public WebSocketClient(HttpClient httpClient) {
+		this.httpClient = httpClient;
 	}
 
-	public String getReasonText() {
-		return reasonText;
+	public Mono<Void> execute(URI url, WebSocketHandler handler) {
+		return this.httpClient
+				.ws(url.toString(), headers -> {}, null)
+				.flatMap(response ->
+						response.receiveWebsocket((in, out) ->
+								handler.handle(new WebSocketSession(in, out))));
 	}
+
 }

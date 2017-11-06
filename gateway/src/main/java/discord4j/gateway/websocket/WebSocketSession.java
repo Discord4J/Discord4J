@@ -14,10 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway.adapter;
+package discord4j.gateway.websocket;
 
-import discord4j.gateway.CloseStatus;
-import discord4j.gateway.WebSocketMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -92,12 +90,12 @@ public class WebSocketSession {
 	 * Simple container for {@link reactor.ipc.netty.http.websocket.WebsocketInbound WebSocketInbound} and {@link
 	 * reactor.ipc.netty.http.websocket.WebsocketOutbound WebSocketOutbound}.
 	 */
-	public static class WebSocketConnection {
+	private static class WebSocketConnection {
 
 		private final WebsocketInbound inbound;
 		private final WebsocketOutbound outbound;
 
-		public WebSocketConnection(WebsocketInbound inbound, WebsocketOutbound outbound) {
+		private WebSocketConnection(WebsocketInbound inbound, WebsocketOutbound outbound) {
 			this.inbound = inbound;
 			this.outbound = outbound;
 		}

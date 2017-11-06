@@ -15,23 +15,13 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.gateway;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.json.response.GatewayResponse;
-import discord4j.gateway.CloseStatus;
-import discord4j.gateway.WebSocketHandler;
-import discord4j.gateway.WebSocketMessage;
-import discord4j.gateway.adapter.WebSocketSession;
-import discord4j.gateway.client.WebSocketClient;
-import discord4j.rest.http.EmptyWriterStrategy;
-import discord4j.rest.http.JacksonReaderStrategy;
-import discord4j.rest.http.JacksonWriterStrategy;
-import discord4j.rest.http.client.SimpleHttpClient;
-import discord4j.rest.request.Router;
-import discord4j.rest.route.Routes;
+import discord4j.gateway.websocket.CloseStatus;
+import discord4j.gateway.websocket.WebSocketMessage;
+import discord4j.gateway.websocket.WebSocketClient;
 import io.netty.buffer.ByteBuf;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,31 +37,18 @@ import java.net.URISyntaxException;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
-import static org.junit.Assert.assertTrue;
-
 public class GatewayTest {
 
+	public static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
 	private static final Logger log = LoggerFactory.getLogger(GatewayTest.class);
 
-	private Router router;
 	private String token;
-
 	private Inflater zlibContext;
 
 	@Before
 	public void initialize() {
 		zlibContext = new Inflater();
 		token = System.getenv("token");
-		ObjectMapper mapper = new ObjectMapper();
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
-		router = new Router(httpClient);
 
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		context.getLogger("discord4j.rest.http.client").setLevel(Level.TRACE);
@@ -80,14 +56,12 @@ public class GatewayTest {
 
 	@Test
 	public void testGatewayConnect() throws URISyntaxException, InterruptedException {
-		String gateway = getGatewayUrl(router) + "?v=6&encoding=json&compress=zlib-stream";
-
 		EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
 		EmitterProcessor<String> inboundExchange = EmitterProcessor.create();
 
 		WebSocketClient client = new WebSocketClient();
 
-		client.execute(new URI(gateway), session -> {
+		client.execute(new URI(gatewayUrl), session -> {
 			WebSocketMessageSubscriber subscriber = new WebSocketMessageSubscriber(inboundExchange, outboundExchange,
 					token);
 			session.closeFuture().subscribe(subscriber::onClose);
@@ -118,12 +92,6 @@ public class GatewayTest {
 					.doOnError(t -> log.info("outbound error", t))
 					.map(WebSocketMessage::fromText));
 		}).block();
-	}
-
-	private String getGatewayUrl(Router router) {
-		GatewayResponse response = Routes.GATEWAY_GET.newRequest().exchange(router).toFuture().join();
-		assertTrue(response != null);
-		return response.getUrl();
 	}
 
 	private static class WebSocketMessageSubscriber {

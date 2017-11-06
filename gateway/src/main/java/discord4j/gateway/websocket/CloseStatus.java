@@ -14,23 +14,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway;
 
-import discord4j.gateway.adapter.WebSocketSession;
-import reactor.core.publisher.Mono;
+package discord4j.gateway.websocket;
 
-/**
- * Handler for a WebSocket session.
- */
-@FunctionalInterface
-public interface WebSocketHandler {
+public class CloseStatus {
 
-	/**
-	 * Handle the WebSocket session.
-	 *
-	 * @param session the session to handle
-	 * @return completion {@code Mono<Void>} to indicate the outcome of the WebSocket session handling.
-	 */
-	Mono<Void> handle(WebSocketSession session);
+	private final int statusCode;
+	private final String reasonText;
 
+	public CloseStatus(int statusCode, String reasonText) {
+		this.statusCode = statusCode;
+		this.reasonText = reasonText;
+	}
+
+	public int getStatusCode() {
+		return statusCode;
+	}
+
+	public String getReasonText() {
+		return reasonText;
+	}
 }

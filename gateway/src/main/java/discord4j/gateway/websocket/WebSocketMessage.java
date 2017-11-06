@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway;
+package discord4j.gateway.websocket;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
- * A text or binary message received on a {@link discord4j.gateway.adapter.WebSocketSession}.
+ * A text or binary message received on a {@link WebSocketSession}.
  */
 public class WebSocketMessage {
 

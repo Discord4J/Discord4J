@@ -14,36 +14,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway.client;
+package discord4j.gateway.websocket;
 
-import discord4j.gateway.WebSocketHandler;
-import discord4j.gateway.adapter.WebSocketSession;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClient;
-
-import java.net.URI;
 
 /**
- * WebSocket client over Reactor Netty.
+ * Handler for a WebSocket session.
  */
-public class WebSocketClient {
+@FunctionalInterface
+public interface WebSocketHandler {
 
-	private final HttpClient httpClient;
-
-	public WebSocketClient() {
-		this(HttpClient.create());
-	}
-
-	public WebSocketClient(HttpClient httpClient) {
-		this.httpClient = httpClient;
-	}
-
-	public Mono<Void> execute(URI url, WebSocketHandler handler) {
-		return this.httpClient
-				.ws(url.toString(), headers -> {}, null)
-				.flatMap(response ->
-						response.receiveWebsocket((in, out) ->
-								handler.handle(new WebSocketSession(in, out))));
-	}
+	/**
+	 * Handle the WebSocket session.
+	 *
+	 * @param session the session to handle
+	 * @return completion {@code Mono<Void>} to indicate the outcome of the WebSocket session handling.
+	 */
+	Mono<Void> handle(WebSocketSession session);
 
 }

@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway;
+package discord4j.gateway.websocket;
 
-import discord4j.gateway.client.WebSocketClient;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ReplayProcessor;
