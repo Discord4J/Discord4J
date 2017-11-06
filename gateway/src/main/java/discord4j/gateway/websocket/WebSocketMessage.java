@@ -33,7 +33,7 @@ public class WebSocketMessage {
 	private final Type type;
 	private final ByteBuf payload;
 
-	private WebSocketMessage(Type type, ByteBuf payload) {
+	public WebSocketMessage(Type type, ByteBuf payload) {
 		this.type = Objects.requireNonNull(type, "'type' must not be null");
 		this.payload = Objects.requireNonNull(payload, "'payload' must not be null");
 	}
