@@ -18,7 +18,8 @@ package discord4j.gateway;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import reactor.core.publisher.UnicastProcessor;
+import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,30 +29,23 @@ import java.util.zip.InflaterOutputStream;
 public class ZlibDecompressor {
 
 	private static final int ZLIB_SUFFIX = 0x0000FFFF;
-
-	private final UnicastProcessor<ByteBuf> completeMessages = UnicastProcessor.create();
 	private final Inflater context = new Inflater();
-	private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-	public void push(ByteBuf buf) throws IOException {
-		byte[] bytes = new byte[buf.readableBytes()];
-		buf.readBytes(bytes);
-		buffer.write(bytes);
+	public Flux<ByteBuf> completeMessages(Flux<ByteBuf> payloads) {
+		return payloads.windowUntil(payload -> payload.readableBytes() >= 4 && payload.getInt(payload.readableBytes() - 4) == ZLIB_SUFFIX)
+				.flatMap(Flux::collectList)
+				.map(list -> {
+					ByteBuf buf = Unpooled.wrappedBuffer(list.toArray(new ByteBuf[list.size()]));
+					byte[] bytes = new byte[buf.readableBytes()];
+					buf.readBytes(bytes);
 
-		if (bytes.length < 4 || buf.getInt(bytes.length - 4) != ZLIB_SUFFIX) {
-			return;
-		}
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length * 2);
-		try (InflaterOutputStream inflater = new InflaterOutputStream(out, context)) {
-			inflater.write(buffer.toByteArray());
-			completeMessages.onNext(Unpooled.wrappedBuffer(out.toByteArray()));
-		} finally {
-			buffer.reset();
-		}
-	}
-
-	public UnicastProcessor<ByteBuf> completeMessages() {
-		return completeMessages;
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					try (InflaterOutputStream inflater = new InflaterOutputStream(out, context)) {
+						inflater.write(bytes);
+						return Unpooled.wrappedBuffer(out.toByteArray());
+					} catch (IOException e) {
+						throw Exceptions.propagate(e);
+					}
+				});
 	}
 }

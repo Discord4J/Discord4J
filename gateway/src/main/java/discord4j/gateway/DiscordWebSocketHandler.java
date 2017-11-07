@@ -69,18 +69,10 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 				.map(status -> new RuntimeException("WebSocket closed with code=" + status.getStatusCode() + " and reason=" + status.getReasonText()))
 				.subscribe(inboundExchange::onError);
 
-		session.receive().subscribe(msg -> {
-			try {
-				decompressor.push(msg.getPayload());
-			} catch (IOException e) {
-				throw Exceptions.propagate(e);
-			}
-		}, inboundExchange::onError, this::onComplete);
-
-		decompressor.completeMessages()
+		decompressor.completeMessages(session.receive().map(WebSocketMessage::getPayload))
 				.log("session-inbound")
 				.map(reader::read)
-				.subscribe(inboundExchange::onNext);
+				.subscribe(inboundExchange::onNext, inboundExchange::onError, this::onComplete);
 
 		Mono<Void> sessionEnd = session.send(outboundExchange
 				.log("session-outbound")
