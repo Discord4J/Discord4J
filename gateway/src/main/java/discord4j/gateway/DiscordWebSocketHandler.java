@@ -36,7 +36,6 @@ package discord4j.gateway;
 import discord4j.common.GatewayPayload;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.websocket.CloseStatus;
 import discord4j.gateway.websocket.WebSocketHandler;
 import discord4j.gateway.websocket.WebSocketMessage;
 import discord4j.gateway.websocket.WebSocketSession;
@@ -47,7 +46,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.UnicastProcessor;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 public class DiscordWebSocketHandler implements WebSocketHandler {
 
@@ -59,17 +57,17 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	private final PayloadReader reader;
 	private final PayloadWriter writer;
-	private final Consumer<CloseStatus> closeHandler;
 
-	public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer, Consumer<CloseStatus> closeHandler) {
+	public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer) {
 		this.reader = reader;
 		this.writer = writer;
-		this.closeHandler = closeHandler;
 	}
 
 	@Override
 	public Mono<Void> handle(WebSocketSession session) {
-		session.closeFuture().subscribe(closeHandler);
+		session.closeFuture()
+				.map(status -> new RuntimeException("WebSocket closed with code=" + status.getStatusCode() + " and reason=" + status.getReasonText()))
+				.subscribe(inboundExchange::onError);
 
 		session.receive().subscribe(msg -> {
 			try {
@@ -80,13 +78,12 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		}, inboundExchange::onError, this::onComplete);
 
 		decompressor.completeMessages()
-				.map(reader::read)
 				.log("session-inbound")
+				.map(reader::read)
 				.subscribe(inboundExchange::onNext);
 
 		Mono<Void> sessionEnd = session.send(outboundExchange
 				.log("session-outbound")
-				.doOnError(t -> log.info("Outbound Error", t))
 				.map(writer::write)
 				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)));
 

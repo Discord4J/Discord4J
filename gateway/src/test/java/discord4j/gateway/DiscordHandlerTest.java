@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DiscordHandlerTest {
 
@@ -61,15 +62,28 @@ public class DiscordHandlerTest {
 		PayloadReader reader = new JacksonPayloadReader(mapper);
 		PayloadWriter writer = new JacksonPayloadWriter(mapper);
 
-		DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer, status -> {
-			log.debug("WebSocket closed with code=" + status.getStatusCode() + " and reason=" + status.getReasonText());
-		});
+		DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer);
+
+		AtomicInteger seq = new AtomicInteger(0);
 
 		handler.inbound().subscribe(payload -> {
 
 			log.debug("Received Payload: " + payload);
 
+			if (payload.getS() != null) {
+				seq.set(payload.getS());
+			}
+
 			if (payload.getOp() == 10) { // HELLO
+
+				// TODO heartbeat
+//				Flux.interval(Duration.ofMillis(41250))
+//						.takeUntil(t -> handler.outbound().isTerminated())
+//						.subscribe(t -> {
+//							GatewayPayload heartbeat = GatewayPayload.of(1, null, seq.get(), null);
+//							handler.outbound().onNext(heartbeat);
+//						});
+
 				Map<String, Object> d = new HashMap<>();
 				Map<String, String> properties = new HashMap<>();
 				properties.put("os", "linux");
@@ -81,6 +95,8 @@ public class DiscordHandlerTest {
 				GatewayPayload identify = GatewayPayload.of(2, d, null, null);
 				handler.outbound().onNext(identify);
 			}
+		}, error -> {
+			log.warn("Gateway connection terminated: {}", error.toString());
 		});
 
 		ws.execute(new URI(gatewayUrl), handler).block();
