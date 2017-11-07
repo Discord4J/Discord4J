@@ -13,9 +13,10 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_version = '3.1.0.RELEASE'
+    reactor_version = '3.1.1.RELEASE'
+    reactor_extra_version = '3.1.2.RELEASE'
     reactor_netty_version = '0.7.0.RELEASE'
-    jackson_version = '2.9.0.pr4'
+    jackson_version = '2.9.2'
     slf4j_version = '1.7.25'
     jsr305_version = '3.0.2'
     junit_version = '4.12'
@@ -82,6 +83,6 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
-    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.2.1-all.zip'
+    gradleVersion = '4.3'
+    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.3-all.zip'
 }
