@@ -17,8 +17,8 @@
 
 package sx.blah.discord.api.internal;
 
+import com.iwebpp.crypto.TweetNaclFast;
 import org.apache.commons.lang3.ArrayUtils;
-import org.peergos.crypto.TweetNaCl;
 
 import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
@@ -59,26 +59,24 @@ class OpusPacket {
 	}
 
 	/**
-	 * Encrypts the data in {@link #audio} with the given key using {@link TweetNaCl#secretbox(byte[], byte[], byte[])}.
+	 * Encrypts the data in {@link #audio} with the given key using {@link TweetNaclFast.Box#box(byte[], byte[])}.
 	 *
 	 * @param secret The secret key to use in encryption.
 	 */
 	void encrypt(byte[] secret) {
 		if (isEncrypted) throw new IllegalStateException("Attempt to encrypt already-encrypted audio packet.");
-
-		audio = TweetNaCl.secretbox(audio, getNonce(), secret);
+		audio = new TweetNaclFast.SecretBox(secret).box(audio, getNonce());
 		isEncrypted = true;
 	}
 
 	/**
-	 * Decrypts the data in {@link #audio} with the given key using {@link TweetNaCl#secretbox_open(byte[], byte[], byte[])}.
+	 * Decrypts the data in {@link #audio} with the given key using {@link TweetNaclFast.Box#open(byte[], byte[])}.
 	 *
 	 * @param secret The secret key to use in decryption.
 	 */
 	void decrypt(byte[] secret) {
 		if (!isEncrypted) throw new IllegalStateException("Attempt to decrypt unencrypted audio packet.");
-
-		audio = TweetNaCl.secretbox_open(audio, getNonce(), secret);
+		audio = new TweetNaclFast.SecretBox(secret).open(audio, getNonce());
 		isEncrypted = false;
 
 		if (header.type == (byte) 0x90 && audio[0] == (byte) 0xBE && audio[1] == (byte) 0xDE) {
