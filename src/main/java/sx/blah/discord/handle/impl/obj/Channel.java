@@ -45,6 +45,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * The default implementation of {@link IChannel}.
@@ -286,7 +287,7 @@ public class Channel implements IChannel {
 	@Override
 	public MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount) {
 		List<IMessage> retrieved = new ArrayList<>();
-		long lastMessage = beginID;
+		long lastMessage = beginID + 1L;
 
 		int chunkSize;
 		int originalMaxCount = maxCount;
@@ -301,9 +302,16 @@ public class Channel implements IChannel {
 
 			lastMessage = chunk[chunk.length - 1].getLongID();
 			Collections.addAll(retrieved, chunk);
-		} while (chunk.length >= chunkSize && retrieved.size() < originalMaxCount && retrieved.stream().noneMatch(m -> m.getLongID() <= endID));
+		} while (retrieved.size() < originalMaxCount && Arrays.stream(chunk).map(IMessage::getLongID).noneMatch(id -> id <= endID));
 
-		return new MessageHistory(retrieved);
+		// Find index of endID (if it exists) so retrieved can be split
+		final int index = IntStream.range(0, retrieved.size())
+				.filter(i -> retrieved.get(i).getLongID() == endID)
+				.findFirst()
+				// + 1 as subList would exclude the endID
+				.orElse(retrieved.size() - 1) + 1;
+
+		return new MessageHistory(retrieved.subList(0, index));
 	}
 
 	@Override
