@@ -16,7 +16,7 @@
  */
 package discord4j.gateway;
 
-import discord4j.common.GatewayPayload;
+import discord4j.common.json.payload.GatewayPayload;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.WebSocketHandler;

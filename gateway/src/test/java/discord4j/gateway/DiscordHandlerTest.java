@@ -22,8 +22,10 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.GatewayPayload;
 import discord4j.common.jackson.PossibleModule;
+import discord4j.common.json.payload.GatewayPayload;
+import discord4j.common.json.payload.Hello;
+import discord4j.common.json.payload.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
@@ -70,21 +72,25 @@ public class DiscordHandlerTest {
 
 			log.debug("Received Payload: " + payload);
 
-			if (payload.getS() != null) {
-				seq.set(payload.getS());
+			if (payload.getSequence() != null) {
+				seq.set(payload.getSequence());
 			}
 
 			if (payload.getOp() == 10) { // HELLO
 
 				// TODO heartbeat
-//				Flux.interval(Duration.ofMillis(41250))
-//						.takeUntil(t -> handler.outbound().isTerminated())
-//						.subscribe(t -> {
-//							GatewayPayload heartbeat = GatewayPayload.of(1, null, seq.get(), null);
-//							handler.outbound().onNext(heartbeat);
-//						});
+				//				Flux.interval(Duration.ofMillis(41250))
+				//						.takeUntil(t -> handler.outbound().isTerminated())
+				//						.subscribe(t -> {
+				//							GatewayPayload heartbeat = GatewayPayload.of(1, null, seq.get(), null);
+				//							handler.outbound().onNext(heartbeat);
+				//						});
 
-				Map<String, Object> d = new HashMap<>();
+				if (payload.getData() instanceof Hello) {
+					throw new RuntimeException("Type is HELLO!");
+				}
+
+				Dispatch d = new Dispatch();
 				Map<String, String> properties = new HashMap<>();
 				properties.put("os", "linux");
 				properties.put("browser", "disco");
@@ -92,7 +98,9 @@ public class DiscordHandlerTest {
 				d.put("token", token);
 				d.put("properties", properties);
 				d.put("large_threshold", 250);
-				GatewayPayload identify = GatewayPayload.of(2, d, null, null);
+				GatewayPayload identify = new GatewayPayload();
+				identify.setOp(2);
+				identify.setData(d);
 				handler.outbound().onNext(identify);
 			}
 		}, error -> {

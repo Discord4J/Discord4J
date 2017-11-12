@@ -16,7 +16,7 @@
  */
 package discord4j.gateway.payload;
 
-import discord4j.common.GatewayPayload;
+import discord4j.common.json.payload.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 
 public interface PayloadWriter {
