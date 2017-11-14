@@ -454,6 +454,74 @@ public class PermissionUtils {
 	}
 
 	/**
+	 * Gets the permissions a user has after applying specific and role overrides.
+	 *
+	 * @param user The user to get permissions for.
+	 * @param guild The guild the user is in.
+	 * @param userOverrides The internal user overrides cache.
+	 * @param roleOverrides The internal role overrides cache.
+	 * @return The permissions the user has in the permissions object.
+	 */
+	public static EnumSet<Permissions> getModifiedPermissions(IUser user, IGuild guild,
+	                                                          Cache<PermissionOverride> userOverrides,
+	                                                          Cache<PermissionOverride> roleOverrides) {
+		EnumSet<Permissions> base = user.getPermissionsForGuild(guild);
+		if (base.contains(Permissions.ADMINISTRATOR)) {
+			return EnumSet.allOf(Permissions.class);
+		}
+
+		PermissionOverride everyoneOverride = roleOverrides.get(guild);
+		if (everyoneOverride != null) {
+			base.retainAll(EnumSet.complementOf(everyoneOverride.deny()));
+			base.addAll(everyoneOverride.allow());
+		}
+
+		EnumSet<Permissions> allow = EnumSet.noneOf(Permissions.class);
+		EnumSet<Permissions> deny = EnumSet.noneOf(Permissions.class);
+
+		for (IRole role : guild.getRolesForUser(user)) {
+			PermissionOverride roleOverride = roleOverrides.get(role);
+			if (roleOverride != null) {
+				allow.addAll(roleOverride.allow());
+				deny.addAll(roleOverride.deny());
+			}
+		}
+
+		base.retainAll(EnumSet.complementOf(deny));
+		base.addAll(allow);
+
+		PermissionOverride userOverride = userOverrides.get(user);
+		if (userOverride != null) {
+			base.retainAll(EnumSet.complementOf(userOverride.deny()));
+			base.addAll(userOverride.allow());
+		}
+
+		return base;
+	}
+
+	/**
+	 * Gets the permissions a role has after applying overrides.
+	 *
+	 * @param role The role to get permissions for.
+	 * @param roleOverrides The internal role overrides cache.
+	 * @return The permissions the role has in the permissions object.
+	 */
+	public static EnumSet<Permissions> getModifiedPermissions(IRole role, Cache<PermissionOverride> roleOverrides) {
+		EnumSet<Permissions> base = role.getPermissions();
+		PermissionOverride override = roleOverrides.get(role.getLongID());
+
+		if (override == null) {
+			if ((override = roleOverrides.get(role.getGuild().getEveryoneRole().getLongID())) == null)
+				return base;
+		}
+
+		base.addAll(new ArrayList<>(override.allow()));
+		override.deny().forEach(base::remove);
+
+		return base;
+	}
+
+	/**
 	 * Determines if the position of roles1's highest role is greater than the position of roles2's highest role.
 	 *
 	 * @param roles1 The list of roles whose highest role's position must be greater.
@@ -477,68 +545,5 @@ public class PermissionUtils {
 		EnumSet<Permissions> set = EnumSet.noneOf(Permissions.class);
 		set.addAll(Arrays.asList(array));
 		return set;
-	}
-
-	/**
-	 * Gets the permissions a user has in some permissions object, taking into account user and role overrides.
-	 *
-	 * @param user The user to get permissions for.
-	 * @param guild The guild the user is in.
-	 * @param userOverrides The internal user overrides cache.
-	 * @param roleOverrides The internal role overrides cache.
-	 * @return The permissions the user has in the permissions object.
-	 */
-	public static EnumSet<Permissions> getModifiedPermissions(IUser user, IGuild guild,
-															  Cache<PermissionOverride> userOverrides,
-															  Cache<PermissionOverride> roleOverrides) {
-
-		if(guild.getOwnerLongID() == user.getLongID()) {
-			return EnumSet.allOf(Permissions.class);
-		}
-
-		List<IRole> roles = user.getRolesForGuild(guild);
-		EnumSet<Permissions> permissions = user.getPermissionsForGuild(guild);
-
-		if (!permissions.contains(Permissions.ADMINISTRATOR)) {
-			PermissionOverride override = userOverrides.get(user.getLongID());
-			List<PermissionOverride> overrideRoles = roles.stream()
-					.filter(r -> roleOverrides.containsKey(r.getLongID()))
-					.map(role -> roleOverrides.get(role.getLongID()))
-					.collect(Collectors.toList());
-			Collections.reverse(overrideRoles);
-			for (PermissionOverride roleOverride : overrideRoles) {
-				permissions.addAll(roleOverride.allow());
-				permissions.removeAll(roleOverride.deny());
-			}
-
-			if (override != null) {
-				permissions.addAll(override.allow());
-				permissions.removeAll(override.deny());
-			}
-		}
-
-		return permissions;
-	}
-
-	/**
-	 * Gets the permissions a role has in some permissions object, taking into account role overrides.
-	 *
-	 * @param role The role to get permissions for.
-	 * @param roleOverrides The internal role overrides cache.
-	 * @return The permissions the role has in the permissions object.
-	 */
-	public static EnumSet<Permissions> getModifiedPermissions(IRole role, Cache<PermissionOverride> roleOverrides) {
-		EnumSet<Permissions> base = role.getPermissions();
-		PermissionOverride override = roleOverrides.get(role.getLongID());
-
-		if (override == null) {
-			if ((override = roleOverrides.get(role.getGuild().getEveryoneRole().getLongID())) == null)
-				return base;
-		}
-
-		base.addAll(new ArrayList<>(override.allow()));
-		override.deny().forEach(base::remove);
-
-		return base;
 	}
 }
