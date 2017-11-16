@@ -14,44 +14,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.json;
+package discord4j.common.json.request;
 
-public class GameEntity {
+import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleJson;
 
-	private String name;
-	private int type;
-	private String url;
+@PossibleJson
+public class GameRequest {
 
-	public GameEntity(String name, int type, String url) {
+	private final String name;
+	private final int type;
+	private final Possible<String> url;
+
+	public GameRequest(String name, int type, Possible<String> url) {
 		this.name = name;
 		this.type = type;
-		this.url = url;
-	}
-
-	public GameEntity() {
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
 		this.url = url;
 	}
 }

@@ -17,62 +17,27 @@
 package discord4j.common.json.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleJson;
 
+@PossibleJson
 public class Identify implements Payload {
 
-	private String token;
-	private IdentifyProperties properties;
-	private boolean compress;
+	private final String token;
+	private final IdentifyProperties properties;
+	private final boolean compress;
 	@JsonProperty("large_threshold")
-	private int largeThreshold;
-	private int[] shard;
-	private StatusUpdate presence;
+	private final int largeThreshold;
+	private final Possible<int[]> shard;
+	private final Possible<StatusUpdate> presence;
 
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
+	public Identify(String token, IdentifyProperties properties, boolean compress, int largeThreshold,
+	                Possible<int[]> shard, Possible<StatusUpdate> presence) {
 		this.token = token;
-	}
-
-	public IdentifyProperties getProperties() {
-		return properties;
-	}
-
-	public void setProperties(IdentifyProperties properties) {
 		this.properties = properties;
-	}
-
-	public boolean isCompress() {
-		return compress;
-	}
-
-	public void setCompress(boolean compress) {
 		this.compress = compress;
-	}
-
-	public int getLargeThreshold() {
-		return largeThreshold;
-	}
-
-	public void setLargeThreshold(int largeThreshold) {
 		this.largeThreshold = largeThreshold;
-	}
-
-	public int[] getShard() {
-		return shard;
-	}
-
-	public void setShard(int[] shard) {
 		this.shard = shard;
-	}
-
-	public StatusUpdate getPresence() {
-		return presence;
-	}
-
-	public void setPresence(StatusUpdate presence) {
 		this.presence = presence;
 	}
 }

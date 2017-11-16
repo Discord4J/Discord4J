@@ -17,35 +17,19 @@
 package discord4j.common.json.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
 public class RequestGuildMembers implements Payload {
 
 	@JsonProperty("guild_id")
-	private long guildId;
-	private String query;
-	private int limit;
+	@UnsignedJson
+	private final long guildId;
+	private final String query;
+	private final int limit;
 
-	public long getGuildId() {
-		return guildId;
-	}
-
-	public void setGuildId(long guildId) {
+	public RequestGuildMembers(long guildId, String query, int limit) {
 		this.guildId = guildId;
-	}
-
-	public String getQuery() {
-		return query;
-	}
-
-	public void setQuery(String query) {
 		this.query = query;
-	}
-
-	public int getLimit() {
-		return limit;
-	}
-
-	public void setLimit(int limit) {
 		this.limit = limit;
 	}
 }

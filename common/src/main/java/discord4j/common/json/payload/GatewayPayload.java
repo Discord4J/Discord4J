@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import discord4j.common.jackson.PayloadTypeIdResolver;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class GatewayPayload {
@@ -34,9 +35,21 @@ public class GatewayPayload {
 	@JsonProperty("d")
 	private Payload data;
 	@JsonProperty("s")
+	@Nullable
 	private Integer sequence;
 	@JsonProperty("t")
+	@Nullable
 	private String type;
+
+	public GatewayPayload(int op, Payload data, @Nullable Integer sequence, @Nullable String type) {
+		this.op = op;
+		this.data = data;
+		this.sequence = sequence;
+		this.type = type;
+	}
+
+	public GatewayPayload() {
+	}
 
 	public int getOp() {
 		return op;
@@ -46,28 +59,14 @@ public class GatewayPayload {
 		return data;
 	}
 
+	@Nullable
 	public Integer getSequence() {
 		return sequence;
 	}
 
+	@Nullable
 	public String getType() {
 		return type;
-	}
-
-	public void setOp(int op) {
-		this.op = op;
-	}
-
-	public void setData(Payload data) {
-		this.data = data;
-	}
-
-	public void setSequence(Integer sequence) {
-		this.sequence = sequence;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	@Override

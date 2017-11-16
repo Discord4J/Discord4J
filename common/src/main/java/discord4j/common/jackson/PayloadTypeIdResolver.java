@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.DatabindContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
 import discord4j.common.json.payload.*;
+import discord4j.common.json.payload.dispatch.Dispatch;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,22 +30,21 @@ import java.util.Map;
 
 public class PayloadTypeIdResolver extends TypeIdResolverBase {
 
-	private Map<Integer, Class<? extends Payload>> opCodes = new HashMap<>();
+	private static final Map<Integer, Class<? extends Payload>> opCodes = new HashMap<>();
 
-	@Override
-	public void init(JavaType baseType) {
+	static {
 		opCodes.put(Opcodes.DISPATCH, Dispatch.class);
 		opCodes.put(Opcodes.HEARTBEAT, Heartbeat.class);
 		opCodes.put(Opcodes.IDENTIFY, Identify.class);
 		opCodes.put(Opcodes.STATUS_UPDATE, StatusUpdate.class);
 		opCodes.put(Opcodes.VOICE_STATE_UPDATE, VoiceStateUpdate.class);
-		opCodes.put(Opcodes.VOICE_SERVER_PING, Dispatch.class); // TODO
-		opCodes.put(Opcodes.RESUME, Dispatch.class); // TODO
-		opCodes.put(Opcodes.RECONNECT, Dispatch.class); // TODO
-		opCodes.put(Opcodes.REQUEST_GUILD_MEMBERS, Dispatch.class); // TODO
+//		opCodes.put(Opcodes.VOICE_SERVER_PING, null); // TODO
+		opCodes.put(Opcodes.RESUME, Resume.class);
+//		opCodes.put(Opcodes.RECONNECT, null); // TODO
+		opCodes.put(Opcodes.REQUEST_GUILD_MEMBERS, RequestGuildMembers.class);
 		opCodes.put(Opcodes.INVALID_SESSION, InvalidSession.class);
 		opCodes.put(Opcodes.HELLO, Hello.class);
-		opCodes.put(Opcodes.HEARTBEAT_ACK, Dispatch.class); // TODO
+//		opCodes.put(Opcodes.HEARTBEAT_ACK, null); // TODO
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class PayloadTypeIdResolver extends TypeIdResolverBase {
 
 	@Override
 	public String idFromValueAndType(Object value, Class<?> subType) {
-		return ((GatewayPayload) value).getOp() + "";
+		return String.valueOf(((GatewayPayload) value).getOp());
 	}
 
 	@Override

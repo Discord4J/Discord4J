@@ -23,44 +23,19 @@ public class VoiceStateUpdate implements Payload {
 
 	@JsonProperty("guild_id")
 	@UnsignedJson
-	private long guildId;
+	private final long guildId;
 	@JsonProperty("channel_id")
 	@UnsignedJson
-	private long channelId; // TODO nullable?
+	private final long channelId; // TODO nullable?
 	@JsonProperty("self_mute")
-	private boolean selfMute;
+	private final boolean selfMute;
 	@JsonProperty("self_deaf")
-	private boolean selfDeaf;
+	private final boolean selfDeaf;
 
-	public long getGuildId() {
-		return guildId;
-	}
-
-	public void setGuildId(long guildId) {
+	public VoiceStateUpdate(long guildId, long channelId, boolean selfMute, boolean selfDeaf) {
 		this.guildId = guildId;
-	}
-
-	public long getChannelId() {
-		return channelId;
-	}
-
-	public void setChannelId(long channelId) {
 		this.channelId = channelId;
-	}
-
-	public boolean isSelfMute() {
-		return selfMute;
-	}
-
-	public void setSelfMute(boolean selfMute) {
 		this.selfMute = selfMute;
-	}
-
-	public boolean isSelfDeaf() {
-		return selfDeaf;
-	}
-
-	public void setSelfDeaf(boolean selfDeaf) {
 		this.selfDeaf = selfDeaf;
 	}
 }

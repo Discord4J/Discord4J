@@ -14,20 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.json.payload;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+package discord4j.common.json.payload.dispatch;
 
-public class Resume implements Payload {
+import discord4j.common.json.payload.Payload;
 
-	private final String token;
-	@JsonProperty("session_id")
-	private final String sessionId;
-	private final int seq;
+import java.util.LinkedHashMap;
 
-	public Resume(String token, String sessionId, int seq) {
-		this.token = token;
-		this.sessionId = sessionId;
-		this.seq = seq;
-	}
+public class Dispatch extends LinkedHashMap<String, Object> implements Payload {
 }

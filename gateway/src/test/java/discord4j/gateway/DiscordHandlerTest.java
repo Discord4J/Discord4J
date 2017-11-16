@@ -22,10 +22,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.Hello;
-import discord4j.common.json.payload.Dispatch;
+import discord4j.common.json.payload.Identify;
+import discord4j.common.json.payload.IdentifyProperties;
+import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
@@ -90,17 +93,20 @@ public class DiscordHandlerTest {
 					throw new RuntimeException("Type is HELLO!");
 				}
 
-				Dispatch d = new Dispatch();
-				Map<String, String> properties = new HashMap<>();
-				properties.put("os", "linux");
-				properties.put("browser", "disco");
-				properties.put("device", "disco");
-				d.put("token", token);
-				d.put("properties", properties);
-				d.put("large_threshold", 250);
-				GatewayPayload identify = new GatewayPayload();
-				identify.setOp(2);
-				identify.setData(d);
+
+//				Map<String, Object> identify = new HashMap<>();
+//				Map<String, String> properties = new HashMap<>();
+//				properties.put("os", "linux");
+//				properties.put("browser", "disco");
+//				properties.put("device", "disco");
+//				d.put("token", token);
+//				d.put("properties", properties);
+//				d.put("large_threshold", 250);
+//				*/
+
+				IdentifyProperties properties = new IdentifyProperties("linux", "disco", "disco");
+				GatewayPayload identify = new GatewayPayload(2, new Identify(token, properties, true, 250, Possible.absent(), Possible.absent()), null, null);
+
 				handler.outbound().onNext(identify);
 			}
 		}, error -> {

@@ -16,50 +16,23 @@
  */
 package discord4j.common.json.payload;
 
-import discord4j.common.json.GameEntity;
+import discord4j.common.json.request.GameRequest;
 
 import javax.annotation.Nullable;
 
 public class StatusUpdate implements Payload {
 
 	@Nullable
-	private Long since;
+	private final Long since;
 	@Nullable
-	private GameEntity game;
-	private String status;
-	private boolean afk;
+	private final GameRequest game;
+	private final String status;
+	private final boolean afk;
 
-	@Nullable
-	public Long getSince() {
-		return since;
-	}
-
-	public void setSince(@Nullable Long since) {
+	public StatusUpdate(@Nullable Long since, @Nullable GameRequest game, String status, boolean afk) {
 		this.since = since;
-	}
-
-	@Nullable
-	public GameEntity getGame() {
-		return game;
-	}
-
-	public void setGame(@Nullable GameEntity game) {
 		this.game = game;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public boolean isAfk() {
-		return afk;
-	}
-
-	public void setAfk(boolean afk) {
 		this.afk = afk;
 	}
 }

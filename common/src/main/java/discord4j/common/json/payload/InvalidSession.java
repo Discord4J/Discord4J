@@ -17,18 +17,15 @@
 
 package discord4j.common.json.payload;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
 public class InvalidSession implements Payload {
 
-	@JsonUnwrapped
-	private boolean valid;
+	private boolean resumable;
 
-	public InvalidSession(boolean valid) {
-		this.valid = valid;
+	public InvalidSession(boolean resumable) { // constructor needed for Jackson, but should not be used manually
+		this.resumable = resumable;
 	}
 
-	public boolean isValid() {
-		return valid;
+	public boolean isResumable() {
+		return resumable;
 	}
 }

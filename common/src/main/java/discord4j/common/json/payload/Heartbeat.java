@@ -17,11 +17,12 @@
 
 package discord4j.common.json.payload;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import discord4j.common.jackson.SequenceExtractor;
 
+@JsonSerialize(converter = SequenceExtractor.class)
 public class Heartbeat implements Payload {
 
-	@JsonUnwrapped
 	private int seq;
 
 	public Heartbeat(int seq) {

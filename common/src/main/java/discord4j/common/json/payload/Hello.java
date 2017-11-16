@@ -30,15 +30,7 @@ public class Hello implements Payload {
 		return heartbeatInterval;
 	}
 
-	public void setHeartbeatInterval(int heartbeatInterval) {
-		this.heartbeatInterval = heartbeatInterval;
-	}
-
 	public String[] getTrace() {
 		return trace;
-	}
-
-	public void setTrace(String[] trace) {
-		this.trace = trace;
 	}
 }
