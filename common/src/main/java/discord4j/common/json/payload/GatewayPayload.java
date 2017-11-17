@@ -18,20 +18,16 @@
 package discord4j.common.json.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
-import discord4j.common.jackson.PayloadTypeIdResolver;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import discord4j.common.jackson.PayloadDeserializer;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
+@JsonDeserialize(using = PayloadDeserializer.class)
 public class GatewayPayload {
 
-	@JsonProperty("op")
 	private int op;
-	@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, property = "op", visible = true,
-			include = JsonTypeInfo.As.EXTERNAL_PROPERTY, defaultImpl = Void.class)
-	@JsonTypeIdResolver(PayloadTypeIdResolver.class)
 	@JsonProperty("d")
 	private Payload data;
 	@JsonProperty("s")

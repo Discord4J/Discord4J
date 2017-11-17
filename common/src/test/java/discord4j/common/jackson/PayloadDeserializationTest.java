@@ -32,9 +32,9 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-public class PolymorphicDeserializationTest {
+public class PayloadDeserializationTest {
 
-	private static final Logger log = LoggerFactory.getLogger(PolymorphicDeserializationTest.class);
+	private static final Logger log = LoggerFactory.getLogger(PayloadDeserializationTest.class);
 
 	private ObjectMapper mapper;
 
@@ -97,7 +97,9 @@ public class PolymorphicDeserializationTest {
 	public void testHeartbeat() throws IOException {
 		String input = "{\n" +
 				"    \"op\": 1,\n" +
-				"    \"d\": 251\n" +
+				"    \"d\": 251,\n" +
+				"    \"s\": null,\n" +
+				"    \"t\": null\n" +
 				"}";
 		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
 
@@ -110,7 +112,9 @@ public class PolymorphicDeserializationTest {
 	public void testReconnect() throws IOException {
 		String input = "{\n" +
 				"    \"op\": 7,\n" +
-				"    \"d\": null\n" +
+				"    \"d\": null,\n" +
+				"    \"s\": null,\n" +
+				"    \"t\": null\n" +
 				"}";
 		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
 
@@ -122,7 +126,9 @@ public class PolymorphicDeserializationTest {
 	public void testInvalidSession() throws IOException {
 		String input = "{\n" +
 				"    \"op\": 9,\n" +
-				"    \"d\": false\n" +
+				"    \"d\": false,\n" +
+				"    \"s\": null,\n" +
+				"    \"t\": null\n" +
 				"}";
 		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
 
@@ -138,7 +144,9 @@ public class PolymorphicDeserializationTest {
 				"    \"d\": {\n" +
 				"        \"heartbeat_interval\": 45000,\n" +
 				"        \"_trace\": [\"discord-gateway-prd-1-99\"]\n" +
-				"    }\n" +
+				"    },\n" +
+				"    \"s\": null,\n" +
+				"    \"t\": null\n" +
 				"}";
 		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
 
@@ -150,7 +158,10 @@ public class PolymorphicDeserializationTest {
 	@Test
 	public void testHeartbeatAck() throws IOException {
 		String input = "{\n" +
-				"    \"op\": 11\n" +
+				"    \"op\": 11,\n" +
+				"    \"d\": null,\n" +
+				"    \"s\": null,\n" +
+				"    \"t\": null\n" +
 				"}";
 		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
 
