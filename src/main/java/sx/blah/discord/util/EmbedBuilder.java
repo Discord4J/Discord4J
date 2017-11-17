@@ -22,9 +22,7 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.*;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -183,9 +181,21 @@ public class EmbedBuilder {
 	 *
 	 * @param ldt The timestamp.
 	 * @return The builder instance.
+	 * @deprecated Use {@link #withTimestamp(ZonedDateTime)} instead.
 	 */
+	@Deprecated
 	public EmbedBuilder withTimestamp(LocalDateTime ldt) {
-		embed.timestamp = ldt.atZone(ZoneId.of("Z")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		return withTimestamp(ldt.atZone(ZoneOffset.UTC));
+	}
+
+	/**
+	 * Sets the timestamp of the embed.
+	 *
+	 * @param zdt The timestamp.
+	 * @return The builder instance.
+	 */
+	public EmbedBuilder withTimestamp(ZonedDateTime zdt) {
+		embed.timestamp = zdt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
 		return this;
 	}
 
@@ -196,7 +206,7 @@ public class EmbedBuilder {
 	 * @return The builder instance.
 	 */
 	public EmbedBuilder withTimestamp(long millis) {
-		return withTimestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.of("Z")));
+		return withTimestamp(ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.UTC));
 	}
 
 	/**
@@ -315,7 +325,7 @@ public class EmbedBuilder {
 	public EmbedBuilder withAuthorName(String name) {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
-		
+
 		if (name.trim().length() > AUTHOR_NAME_LIMIT) {
 			if (lenient)
 				name = name.substring(0, AUTHOR_NAME_LIMIT);

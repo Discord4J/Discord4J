@@ -23,6 +23,7 @@ import sx.blah.discord.util.MessageHistory;
 import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -114,6 +115,14 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
+	MessageHistory getMessageHistoryFrom(ZonedDateTime startDate, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
 	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount);
 
 	/**
@@ -122,7 +131,23 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
+	MessageHistory getMessageHistoryTo(ZonedDateTime endDate, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
 	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryIn(ZonedDateTime startDate, ZonedDateTime endDate, int maxCount);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.
@@ -178,6 +203,14 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
+	MessageHistory getMessageHistoryFrom(ZonedDateTime startDate);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
 	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
 
 	/**
@@ -186,7 +219,23 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
+	MessageHistory getMessageHistoryTo(ZonedDateTime endDate);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
 	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+
+	/**
+	 * @deprecated See {@link IVoiceChannel} for details.
+	 * @throws UnsupportedOperationException Impossible to use as a voice channel.
+	 */
+	@Override
+	@Deprecated
+	MessageHistory getMessageHistoryIn(ZonedDateTime startDate, ZonedDateTime endDate);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.

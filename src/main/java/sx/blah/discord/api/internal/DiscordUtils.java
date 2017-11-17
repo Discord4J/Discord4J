@@ -53,8 +53,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.awt.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -159,29 +159,29 @@ public class DiscordUtils {
 
 	/**
 	 * Gets a snowflake from a unix timestamp.
-	 *
-	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
+	 * <p>
+	 * This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
 	 * The returned snowflake is only one of many that could exist at the given timestamp.
 	 *
 	 * @param date The date that should be converted to a unix timestamp for use in the snowflake.
 	 * @return A snowflake with the given timestamp.
 	 */
-	public static long getSnowflakeFromTimestamp(LocalDateTime date) {
-		return getSnowflakeFromTimestamp(date.atZone(ZoneId.systemDefault()).toEpochSecond());
+	public static long getSnowflakeFromTimestamp(ZonedDateTime date) {
+		return getSnowflakeFromTimestamp(date.toEpochSecond() * 1000);
 	}
 
 	/**
-	 * Converts a String timestamp into a {@link LocalDateTime}.
+	 * Converts a String timestamp into a {@link ZonedDateTime}.
 	 *
 	 * @param time The string timestamp.
-	 * @return The LocalDateTime representing the timestamp.
+	 * @return The ZonedDateTime representing the timestamp.
 	 */
-	public static LocalDateTime convertFromTimestamp(String time) {
-		if (time == null) {
-			return LocalDateTime.now();
+	public static ZonedDateTime convertFromTimestamp(String time) {
+		if (time == null) { // Is this really needed?
+			return ZonedDateTime.now(ZoneOffset.UTC);
 		}
-		return LocalDateTime.parse(time.split("\\+")[0]).atZone(ZoneId.of("UTC+00:00"))
-				.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+
+		return ZonedDateTime.parse(time);
 	}
 
 	/**
@@ -872,14 +872,14 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the timestamp portion of a Snowflake ID as a {@link LocalDateTime} using the system's default timezone.
+	 * Gets the timestamp portion of a Snowflake ID as a {@link ZonedDateTime}.
 	 *
 	 * @param id The Snowflake ID.
 	 * @return The timestamp portion of the ID.
 	 */
-	public static LocalDateTime getSnowflakeTimeFromID(long id) {
+	public static ZonedDateTime getSnowflakeTimeFromID(long id) {
 		long milliseconds = DISCORD_EPOCH + (id >>> 22);
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
+		return ZonedDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneOffset.UTC);
 	}
 
 	/**

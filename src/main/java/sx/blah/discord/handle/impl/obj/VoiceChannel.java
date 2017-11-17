@@ -30,7 +30,7 @@ import sx.blah.discord.util.cache.Cache;
 import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -170,12 +170,27 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
+	public MessageHistory getMessageHistoryFrom(ZonedDateTime startDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
+	public MessageHistory getMessageHistoryTo(ZonedDateTime endDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(ZonedDateTime startDate, ZonedDateTime endDate, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -210,12 +225,27 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
+	public MessageHistory getMessageHistoryFrom(ZonedDateTime startDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
+	public MessageHistory getMessageHistoryTo(ZonedDateTime endDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MessageHistory getMessageHistoryIn(ZonedDateTime startDate, ZonedDateTime endDate) {
 		throw new UnsupportedOperationException();
 	}
 

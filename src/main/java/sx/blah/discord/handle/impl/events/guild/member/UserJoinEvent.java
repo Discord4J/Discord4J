@@ -21,15 +21,16 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Dispatched when a member joins a guild.
  */
 public class UserJoinEvent extends GuildMemberEvent {
 
-	private final LocalDateTime joinTime;
+	private final ZonedDateTime joinTime;
 
-	public UserJoinEvent(IGuild guild, IUser user, LocalDateTime when) {
+	public UserJoinEvent(IGuild guild, IUser user, ZonedDateTime when) {
 		super(guild, user);
 		this.joinTime = when;
 	}
@@ -38,8 +39,14 @@ public class UserJoinEvent extends GuildMemberEvent {
 	 * Gets the timestamp of when the user joined the guild.
 	 *
 	 * @return The timestamp of when the user joined the guild.
+	 * @deprecated Use {@link #getTimeOfJoin()} instead.
 	 */
+	@Deprecated
 	public LocalDateTime getJoinTime() {
+		return getTimeOfJoin().toLocalDateTime();
+	}
+
+	public ZonedDateTime getTimeOfJoin() {
 		return joinTime;
 	}
 }
