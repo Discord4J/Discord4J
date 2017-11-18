@@ -48,6 +48,6 @@ public class MessageComparator implements Comparator<IMessage> {
 
 	@Override
 	public int compare(IMessage o1, IMessage o2) {
-		return o1.equals(o2) ? 0 : (reverse ? -1 : 1) * o1.getDiscordTimestamp().compareTo(o2.getDiscordTimestamp());
+		return o1.equals(o2) ? 0 : (reverse ? -1 : 1) * o1.getTimestamp().compareTo(o2.getTimestamp());
 	}
 }

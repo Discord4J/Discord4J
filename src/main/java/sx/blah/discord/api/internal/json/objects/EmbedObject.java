@@ -105,10 +105,10 @@ public class EmbedObject {
 		this.type = embed.getType();
 		this.description = embed.getDescription();
 		this.url = embed.getUrl();
-		if (embed.getDiscordTimestamp() == null)
+		if (embed.getTimestamp() == null)
 			this.timestamp = null;
 		else
-			this.timestamp = embed.getDiscordTimestamp().toString();
+			this.timestamp = embed.getTimestamp().toString();
 		if (embed.getColor() == null)
 			this.color = new Color(0, 0, 0).getRGB() & 0x00ffffff;
 		else

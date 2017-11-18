@@ -77,7 +77,7 @@ public class TestBot {
 				Discord4J.LOGGER.debug("Discord API has a response time of {}ms", DiscordStatus.getAPIResponseTimeForDay());
 
 				for (DiscordStatus.Maintenance maintenance : DiscordStatus.getUpcomingMaintenances()) {
-					Discord4J.LOGGER.warn("Discord has upcoming maintenance: {} on {}", maintenance.getName(), maintenance.getDiscordStart().toString());
+					Discord4J.LOGGER.warn("Discord has upcoming maintenance: {} on {}", maintenance.getName(), maintenance.getStart().toString());
 				}
 
 				client.login();
