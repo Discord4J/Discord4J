@@ -23,8 +23,7 @@ import sx.blah.discord.handle.audit.ActionType;
 import sx.blah.discord.handle.audit.AuditLog;
 import sx.blah.discord.util.Image;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -509,18 +508,8 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 *
 	 * @param user The user to get the timestamp for.
 	 * @return The timestamp of when the given user joined the guild.
-	 * @deprecated Use {@link #getTimeOfUserJoin(IUser)} instead.
 	 */
-	@Deprecated
-	LocalDateTime getJoinTimeForUser(IUser user);
-
-	/**
-	 * This gets the timestamp of when the given user joined the guild.
-	 *
-	 * @param user The user to get the timestamp for.
-	 * @return The timestamp of when the given user joined the guild.
-	 */
-	ZonedDateTime getTimeOfUserJoin(IUser user);
+	Instant getJoinTimeForUser(IUser user);
 
 	/**
 	 * Gets a message by its unique snowflake ID from the guild's message cache.

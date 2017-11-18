@@ -53,7 +53,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.awt.*;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -166,22 +165,18 @@ public class DiscordUtils {
 	 * @param date The date that should be converted to a unix timestamp for use in the snowflake.
 	 * @return A snowflake with the given timestamp.
 	 */
-	public static long getSnowflakeFromTimestamp(ZonedDateTime date) {
-		return getSnowflakeFromTimestamp(date.toEpochSecond() * 1000);
+	public static long getSnowflakeFromTimestamp(Instant date) {
+		return getSnowflakeFromTimestamp(date.toEpochMilli());
 	}
 
 	/**
-	 * Converts a String timestamp into a {@link ZonedDateTime}.
+	 * Converts a String timestamp into a {@link Instant}.
 	 *
 	 * @param time The string timestamp.
-	 * @return The ZonedDateTime representing the timestamp.
+	 * @return The LocalDateTime representing the timestamp.
 	 */
-	public static ZonedDateTime convertFromTimestamp(String time) {
-		if (time == null) { // Is this really needed?
-			return ZonedDateTime.now(ZoneOffset.UTC);
-		}
-
-		return ZonedDateTime.parse(time);
+	public static Instant convertFromTimestamp(String time) {
+		return time == null ? Instant.now() : ZonedDateTime.parse(time).toInstant();
 	}
 
 	/**
@@ -872,14 +867,13 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the timestamp portion of a Snowflake ID as a {@link ZonedDateTime}.
+	 * Gets the timestamp portion of a Snowflake ID as a {@link Instant} using the system's default timezone.
 	 *
 	 * @param id The Snowflake ID.
 	 * @return The timestamp portion of the ID.
 	 */
-	public static ZonedDateTime getSnowflakeTimeFromID(long id) {
-		long milliseconds = DISCORD_EPOCH + (id >>> 22);
-		return ZonedDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneOffset.UTC);
+	public static Instant getSnowflakeTimeFromID(long id) {
+		return Instant.ofEpochMilli(DISCORD_EPOCH + (id >>> 22));
 	}
 
 	/**

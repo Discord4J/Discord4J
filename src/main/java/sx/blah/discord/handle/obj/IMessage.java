@@ -24,8 +24,7 @@ import sx.blah.discord.handle.impl.obj.ReactionEmoji;
 import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MessageTokenizer;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,17 +65,8 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * Gets the timestamp of when the message was sent.
 	 *
 	 * @return The timestamp of when the message was sent.
-	 * @deprecated Use {@link #getDiscordTimestamp()} instead.
 	 */
-	@Deprecated
-	LocalDateTime getTimestamp();
-
-	/**
-	 * Gets the timestamp of when the message was sent.
-	 *
-	 * @return The timestamp of when the message was sent.
-	 */
-	ZonedDateTime getDiscordTimestamp();
+	Instant getTimestamp();
 
 	/**
 	 * Gets the users mentioned in the message.
@@ -193,14 +183,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @return The timestamp of when the message was last edited.
 	 */
-	Optional<LocalDateTime> getEditedTimestamp();
-
-	/**
-	 * Gets the timestamp of when the message was last edited.
-	 *
-	 * @return The timestamp of when the message was last edited.
-	 */
-	Optional<ZonedDateTime> getDiscordEditedTimestamp();
+	Optional<Instant> getEditedTimestamp();
 
 	/**
 	 * Gets whether the message is pinned in its channel.

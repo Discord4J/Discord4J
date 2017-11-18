@@ -39,9 +39,8 @@ import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
 import java.io.*;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -231,22 +230,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
+	public MessageHistory getMessageHistoryFrom(Instant startDate) {
 		return getMessageHistoryFrom(startDate, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(ZonedDateTime startDate) {
-		return getMessageHistoryFrom(startDate, Integer.MAX_VALUE);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
-		return getMessageHistoryFrom(startDate.atZone(ZoneOffset.UTC), maxCount);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryFrom(ZonedDateTime startDate, int maxCount) {
+	public MessageHistory getMessageHistoryFrom(Instant startDate, int maxCount) {
 		return getMessageHistoryFrom(DiscordUtils.getSnowflakeFromTimestamp(startDate), maxCount);
 	}
 
@@ -257,26 +246,16 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryFrom(long id, int maxCount) {
-		return getMessageHistoryIn(id, DiscordUtils.getSnowflakeFromTimestamp(getDiscordEpoch()), maxCount);
+		return getMessageHistoryIn(id, DiscordUtils.getSnowflakeFromTimestamp(getCreationDate()), maxCount);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+	public MessageHistory getMessageHistoryTo(Instant endDate) {
 		return getMessageHistoryTo(endDate, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(ZonedDateTime endDate) {
-		return getMessageHistoryTo(endDate, Integer.MAX_VALUE);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
-		return getMessageHistoryTo(endDate.atZone(ZoneOffset.UTC), maxCount);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryTo(ZonedDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryTo(Instant endDate, int maxCount) {
 		return getMessageHistoryTo(DiscordUtils.getSnowflakeFromTimestamp(endDate), maxCount);
 	}
 
@@ -291,22 +270,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+	public MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate) {
 		return getMessageHistoryIn(startDate, endDate, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(ZonedDateTime startDate, ZonedDateTime endDate) {
-		return getMessageHistoryIn(startDate, endDate, Integer.MAX_VALUE);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
-		return getMessageHistoryIn(startDate.atZone(ZoneOffset.UTC), endDate.atZone(ZoneOffset.UTC), maxCount);
-	}
-
-	@Override
-	public MessageHistory getMessageHistoryIn(ZonedDateTime startDate, ZonedDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate, int maxCount) {
 		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(startDate),
 				DiscordUtils.getSnowflakeFromTimestamp(endDate), maxCount);
 	}
@@ -353,7 +322,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IMessage> bulkDelete() {
-		return bulkDelete(getMessageHistoryTo(ZonedDateTime.now(ZoneOffset.UTC).minusWeeks(2)));
+		return bulkDelete(getMessageHistoryTo(Instant.now().minus(2L, ChronoUnit.WEEKS)));
 	}
 
 	@Override

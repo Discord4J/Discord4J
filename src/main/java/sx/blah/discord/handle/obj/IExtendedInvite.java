@@ -17,8 +17,7 @@
 
 package sx.blah.discord.handle.obj;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 /**
  * An invite to a guild channel with extra metadata.
@@ -57,17 +56,8 @@ public interface IExtendedInvite extends IInvite {
 	 * Gets the time at which the invite was created.
 	 *
 	 * @return The time at which the invite was created.
-	 * @deprecated Use {@link #getDiscordEpoch()} instead.
 	 */
-	@Deprecated
-	LocalDateTime getCreationTime();
-
-	/**
-	 * Gets the time at which the invite was created.
-	 *
-	 * @return The time at which the invite was created.
-	 */
-	ZonedDateTime getDiscordEpoch();
+	Instant getCreationTime();
 
 	/**
 	 * Gets whether the invite is revoked.

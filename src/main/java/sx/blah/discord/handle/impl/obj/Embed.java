@@ -21,8 +21,7 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.*;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -64,7 +63,7 @@ public class Embed implements IEmbed {
 	/**
 	 * The timestamp of the embed.
 	 */
-	protected final ZonedDateTime timestamp;
+	protected final Instant timestamp;
 
 	/**
 	 * The color of the embed.
@@ -96,7 +95,7 @@ public class Embed implements IEmbed {
 	 */
 	protected final List<IEmbedField> embedFields;
 
-	public Embed(String title, String type, String description, String url, EmbedObject.ThumbnailObject thumbnail, EmbedObject.ProviderObject provider, ZonedDateTime timestamp, Color color, EmbedObject.FooterObject footer, EmbedObject.ImageObject image, EmbedObject.VideoObject video, EmbedObject.AuthorObject author, EmbedObject.EmbedFieldObject[] embedFields) {
+	public Embed(String title, String type, String description, String url, EmbedObject.ThumbnailObject thumbnail, EmbedObject.ProviderObject provider, Instant timestamp, Color color, EmbedObject.FooterObject footer, EmbedObject.ImageObject image, EmbedObject.VideoObject video, EmbedObject.AuthorObject author, EmbedObject.EmbedFieldObject[] embedFields) {
 		this.title = title;
 		this.type = type;
 		this.description = description;
@@ -140,7 +139,7 @@ public class Embed implements IEmbed {
 		}
 	}
 
-	public Embed(String title, String type, String description, String url, String thumbnailUrl, IEmbedProvider provider, ZonedDateTime timestamp, Color color, IEmbedFooter footer, String imageUrl, String videoUrl, IEmbedAuthor author, IEmbedField[] embedFields) {
+	public Embed(String title, String type, String description, String url, String thumbnailUrl, IEmbedProvider provider, Instant timestamp, Color color, IEmbedFooter footer, String imageUrl, String videoUrl, IEmbedAuthor author, IEmbedField[] embedFields) {
 		this.title = title;
 		this.type = type;
 		this.description = description;
@@ -184,12 +183,7 @@ public class Embed implements IEmbed {
 	}
 
 	@Override
-	public LocalDateTime getTimestamp() {
-		return getDiscordTimestamp().toLocalDateTime();
-	}
-
-	@Override
-	public ZonedDateTime getDiscordTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 

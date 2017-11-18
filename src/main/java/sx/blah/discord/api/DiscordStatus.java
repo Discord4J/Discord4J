@@ -25,8 +25,7 @@ import sx.blah.discord.api.internal.json.responses.metrics.StatusResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 /**
  * Utility class used for fetching status information about the Discord API.
@@ -119,9 +118,9 @@ public class DiscordStatus {
 	public static class Maintenance {
 
 		private final String name, description, id;
-		private final ZonedDateTime start, stop;
+		private final Instant start, stop;
 
-		protected Maintenance(String name, String description, String id, ZonedDateTime start, ZonedDateTime stop) {
+		protected Maintenance(String name, String description, String id, Instant start, Instant stop) {
 			this.name = name;
 			this.description = description;
 			this.id = id;
@@ -160,19 +159,8 @@ public class DiscordStatus {
 		 * Gets when the maintenance is scheduled to start.
 		 *
 		 * @return The start time.
-		 * @deprecated Use {@link #getDiscordStart()} instead.
 		 */
-		@Deprecated
-		public LocalDateTime getStart() {
-			return getDiscordStart().toLocalDateTime();
-		}
-
-		/**
-		 * Gets when the maintenance is scheduled to start.
-		 *
-		 * @return The start time.
-		 */
-		public ZonedDateTime getDiscordStart() {
+		public Instant getStart() {
 			return start;
 		}
 
@@ -180,19 +168,8 @@ public class DiscordStatus {
 		 * Gets when the maintenance is scheduled to end.
 		 *
 		 * @return The end time.
-		 * @deprecated Use {@link #getDiscordEnd()} instead.
 		 */
-		@Deprecated
-		public LocalDateTime getEnd() {
-			return getDiscordEnd().toLocalDateTime();
-		}
-
-		/**
-		 * Gets when the maintenance is scheduled to end.
-		 *
-		 * @return The end time.
-		 */
-		public ZonedDateTime getDiscordEnd() {
+		public Instant getEnd() {
 			return stop;
 		}
 	}

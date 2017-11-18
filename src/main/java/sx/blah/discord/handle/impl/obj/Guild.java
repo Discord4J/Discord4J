@@ -43,8 +43,7 @@ import sx.blah.discord.util.cache.Cache;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -234,7 +233,7 @@ public class Guild implements IGuild {
 			int originalPos1 = ((Channel) c1).position;
 			int originalPos2 = ((Channel) c2).position;
 			if (originalPos1 == originalPos2) {
-				return c2.getDiscordEpoch().compareTo(c1.getDiscordEpoch());
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
 			} else {
 				return originalPos1 - originalPos2;
 			}
@@ -316,7 +315,7 @@ public class Guild implements IGuild {
 			int originalPos1 = ((Role) r1).position;
 			int originalPos2 = ((Role) r2).position;
 			if (originalPos1 == originalPos2) {
-				return r2.getDiscordEpoch().compareTo(r1.getDiscordEpoch());
+				return r2.getCreationDate().compareTo(r1.getCreationDate());
 			} else {
 				return originalPos1 - originalPos2;
 			}
@@ -348,7 +347,7 @@ public class Guild implements IGuild {
 			int originalPos1 = ((Channel) c1).position;
 			int originalPos2 = ((Channel) c2).position;
 			if (originalPos1 == originalPos2) {
-				return c2.getDiscordEpoch().compareTo(c1.getDiscordEpoch());
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
 			} else {
 				return originalPos1 - originalPos2;
 			}
@@ -772,12 +771,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public LocalDateTime getJoinTimeForUser(IUser user) {
-		return getTimeOfUserJoin(user).toLocalDateTime();
-	}
-
-	@Override
-	public ZonedDateTime getTimeOfUserJoin(IUser user) {
+	public Instant getJoinTimeForUser(IUser user) {
 		if (!joinTimes.containsKey(user.getLongID()))
 			throw new DiscordException("Cannot find user "+user.getDisplayName(this)+" in this guild!");
 
@@ -999,7 +993,7 @@ public class Guild implements IGuild {
 			int originalPos1 = ((Category) c1).position;
 			int originalPos2 = ((Category) c2).position;
 			if (originalPos1 == originalPos2) {
-				return c2.getDiscordEpoch().compareTo(c1.getDiscordEpoch());
+				return c2.getCreationDate().compareTo(c1.getCreationDate());
 			} else {
 				return originalPos1 - originalPos2;
 			}
@@ -1063,9 +1057,9 @@ public class Guild implements IGuild {
 	/**
 	 * Associates a user ID to their join time.
 	 */
-	public static class TimeStampHolder extends IDLinkedObjectWrapper<ZonedDateTime> {
+	public static class TimeStampHolder extends IDLinkedObjectWrapper<Instant> {
 
-		public TimeStampHolder(long id, ZonedDateTime obj) {
+		public TimeStampHolder(long id, Instant obj) {
 			super(id, obj);
 		}
 	}

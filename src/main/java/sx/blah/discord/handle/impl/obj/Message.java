@@ -32,8 +32,7 @@ import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,12 +63,12 @@ public class Message implements IMessage {
 	/**
 	 * The timestamp of when the message was sent.
 	 */
-	protected volatile ZonedDateTime timestamp;
+	protected volatile Instant timestamp;
 
 	/**
 	 * The timestamp of when the message was last edited.
 	 */
-	protected volatile ZonedDateTime editedTimestamp;
+	protected volatile Instant editedTimestamp;
 
 	/**
 	 * The users mentioned in the message.
@@ -153,7 +152,7 @@ public class Message implements IMessage {
 	private volatile boolean deleted = false;
 
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
-				   ZonedDateTime timestamp, ZonedDateTime editedTimestamp, boolean mentionsEveryone,
+				   Instant timestamp, Instant editedTimestamp, boolean mentionsEveryone,
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
 				   List<Embed> embeds, List<IReaction> reactions, long webhookID, Type type) {
 		this.client = client;
@@ -178,7 +177,7 @@ public class Message implements IMessage {
 	}
 
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
-				   ZonedDateTime timestamp, ZonedDateTime editedTimestamp, boolean mentionsEveryone,
+				   Instant timestamp, Instant editedTimestamp, boolean mentionsEveryone,
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
 				   List<Embed> embeds, long webhookID, Type type) {
 		this(client, id, content, user, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, roleMentions,
@@ -273,17 +272,12 @@ public class Message implements IMessage {
 	 *
 	 * @param timestamp The timestamp of the message.
 	 */
-	public void setTimestamp(ZonedDateTime timestamp) {
+	public void setTimestamp(Instant timestamp) {
 		this.timestamp = timestamp;
 	}
 
 	@Override
-	public LocalDateTime getTimestamp() {
-		return getDiscordTimestamp().toLocalDateTime();
-	}
-
-	@Override
-	public ZonedDateTime getDiscordTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 
@@ -412,12 +406,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public Optional<LocalDateTime> getEditedTimestamp() {
-		return getDiscordEditedTimestamp().map(ZonedDateTime::toLocalDateTime);
-	}
-
-	@Override
-	public Optional<ZonedDateTime> getDiscordEditedTimestamp() {
+	public Optional<Instant> getEditedTimestamp() {
 		return Optional.ofNullable(editedTimestamp);
 	}
 
@@ -426,7 +415,7 @@ public class Message implements IMessage {
 	 *
 	 * @param editedTimestamp The edited timestamp.
 	 */
-	public void setEditedTimestamp(ZonedDateTime editedTimestamp) {
+	public void setEditedTimestamp(Instant editedTimestamp) {
 		this.editedTimestamp = editedTimestamp;
 	}
 

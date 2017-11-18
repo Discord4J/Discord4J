@@ -22,7 +22,8 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.*;
-import java.time.*;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -179,23 +180,11 @@ public class EmbedBuilder {
 	/**
 	 * Sets the timestamp of the embed.
 	 *
-	 * @param ldt The timestamp.
-	 * @return The builder instance.
-	 * @deprecated Use {@link #withTimestamp(ZonedDateTime)} instead.
-	 */
-	@Deprecated
-	public EmbedBuilder withTimestamp(LocalDateTime ldt) {
-		return withTimestamp(ldt.atZone(ZoneOffset.UTC));
-	}
-
-	/**
-	 * Sets the timestamp of the embed.
-	 *
-	 * @param zdt The timestamp.
+	 * @param instant The timestamp.
 	 * @return The builder instance.
 	 */
-	public EmbedBuilder withTimestamp(ZonedDateTime zdt) {
-		embed.timestamp = zdt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+	public EmbedBuilder withTimestamp(Instant instant) {
+		embed.timestamp = instant.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 		return this;
 	}
 
@@ -206,7 +195,7 @@ public class EmbedBuilder {
 	 * @return The builder instance.
 	 */
 	public EmbedBuilder withTimestamp(long millis) {
-		return withTimestamp(ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.UTC));
+		return withTimestamp(Instant.ofEpochMilli(millis));
 	}
 
 	/**
