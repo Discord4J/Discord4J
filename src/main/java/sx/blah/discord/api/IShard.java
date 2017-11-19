@@ -102,7 +102,7 @@ public interface IShard {
 	long getResponseTime();
 
 	/**
-	 * Changes the playing text of the bot on all shards. The previously-set online status will be maintained.
+	 * Changes the playing text of the bot on the shard. The previously-set online status will be maintained.
 	 *
 	 * <p>Note: Due to the fact that Discord doesn't send updates for the bot user's presence, it is possible that using
 	 * this method will overwrite an online status set by a different gateway connection.
