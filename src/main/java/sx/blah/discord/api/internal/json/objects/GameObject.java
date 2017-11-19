@@ -22,15 +22,23 @@ package sx.blah.discord.api.internal.json.objects;
  */
 public class GameObject {
 
-	private static class Type {
+	public static class Type {
 		/**
 		 * The GameObject type integer for playing a game.
 		 */
-		private static final int GAME = 0;
+		public static final int GAME = 0;
 		/**
 		 * The GameObject type integer for streaming.
 		 */
-		private static final int STREAMING = 1;
+		public static final int STREAMING = 1;
+		/**
+		 * The GameObject type integer for listening to something.
+		 */
+		public static final int LISTENING = 2;
+		/**
+		 * The GameObject type integer for watching something.
+		 */
+		public static final int WATCHING = 3;
 	}
 
 	/**
@@ -54,5 +62,10 @@ public class GameObject {
 		this.name = name;
 		this.url = url;
 		this.type = url == null ? Type.GAME : Type.STREAMING;
+	}
+
+	public GameObject(String name, int type) {
+		this.name = name;
+		this.type = type;
 	}
 }

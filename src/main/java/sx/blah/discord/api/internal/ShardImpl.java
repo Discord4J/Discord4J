@@ -21,6 +21,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.objects.ChannelObject;
+import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
@@ -147,7 +148,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void online() {
-		online(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+		online(getClient().getOurUser().getPresence().getText().orElse(null));
 	}
 
 	@Override
@@ -157,7 +158,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void idle() {
-		idle(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+		idle(getClient().getOurUser().getPresence().getText().orElse(null));
 	}
 
 	@Override
@@ -172,7 +173,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void dnd() {
-		dnd(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+		dnd(getClient().getOurUser().getPresence().getText().orElse(null));
 	}
 
 	@Override
@@ -195,7 +196,7 @@ public class ShardImpl implements IShard {
 
 		IUser ourUser = getClient().getOurUser();
 		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new Presence(playing, streamUrl, status);
+		IPresence newPresence = new Presence(playing, streamUrl, status, (streamUrl == null ? GameObject.Type.GAME : GameObject.Type.STREAMING));
 
 		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
@@ -203,6 +204,22 @@ public class ShardImpl implements IShard {
 		}
 
 		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, playing, streamUrl));
+	}
+
+	@Override
+	public void changePresence(StatusType status, GameObject game) {
+		checkLoggedIn("update presence");
+
+		IUser ourUser = getClient().getOurUser();
+		IPresence oldPresence = ourUser.getPresence();
+		IPresence newPresence = new Presence(game.name, null, status, game.type);
+
+		if(!newPresence.equals(oldPresence)) {
+			((User) ourUser).setPresence(newPresence);
+			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
+		}
+
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, game));
 	}
 
 	@Override

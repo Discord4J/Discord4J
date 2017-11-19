@@ -47,4 +47,10 @@ public class PresenceUpdateRequest {
 		this.game = playingText == null && streamUrl == null ? null : new GameObject(playingText, streamUrl);
 		this.status = status.name().toLowerCase();
 	}
+
+	public PresenceUpdateRequest(StatusType status, GameObject game) {
+		this.since = status == StatusType.IDLE ? System.currentTimeMillis() : null;
+		this.game = game;
+		this.status = status.name().toLowerCase();
+	}
 }

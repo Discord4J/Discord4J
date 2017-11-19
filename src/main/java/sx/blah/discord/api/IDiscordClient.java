@@ -18,6 +18,7 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
@@ -105,6 +106,14 @@ public interface IDiscordClient {
 	 * @param playingText The nullable playing text.
 	 */
 	void changePlayingText(String playingText);
+
+	/**
+	 * Sets the bot's presence to the custom GameObject
+	 *
+	 * @param status The bot's status
+	 * @param game The GameObject to use
+	 */
+	void changePresence(StatusType status, GameObject game);
 
 	/**
 	 * Changes the online status of the bot to online with the given playing text in all shards.

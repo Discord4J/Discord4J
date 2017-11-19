@@ -17,6 +17,7 @@
 
 package sx.blah.discord.handle.impl.obj;
 
+import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.handle.obj.IPresence;
 import sx.blah.discord.handle.obj.StatusType;
 
@@ -27,11 +28,10 @@ import java.util.Optional;
  * The default implementation of {@link IPresence}.
  */
 public class Presence implements IPresence {
-
 	/**
-	 * The nullable playing text of the presence.
+	 * The nullable text of the presence.
 	 */
-	private final String playingText;
+	private final String text;
 	/**
 	 * The nullable streaming url of the presence.
 	 */
@@ -40,16 +40,21 @@ public class Presence implements IPresence {
 	 * The type of status of the presence.
 	 */
 	private final StatusType status;
+	/**
+	 * The type of this presence
+	 */
+	private int type;
 
-	public Presence(String playingText, String streamingUrl, StatusType status) {
-		this.playingText = playingText;
+	public Presence(String text, String streamingUrl, StatusType status, int type) {
+		this.text = text;
 		this.streamingUrl = streamingUrl;
 		this.status = status;
+		this.type = type;
 	}
 
 	@Override
-	public Optional<String> getPlayingText() {
-		return Optional.ofNullable(playingText);
+	public Optional<String> getText() {
+		return Optional.ofNullable(text);
 	}
 
 	@Override
@@ -64,7 +69,7 @@ public class Presence implements IPresence {
 
 	@Override
 	public IPresence copy() {
-		return new Presence(playingText, streamingUrl, status);
+		return new Presence(text, streamingUrl, status, type);
 	}
 
 	@Override
@@ -72,14 +77,24 @@ public class Presence implements IPresence {
 		if (!Presence.class.isAssignableFrom(obj.getClass())) return false;
 
 		Presence other = (Presence) obj;
-		return Objects.equals(other.playingText, this.playingText)
+		return Objects.equals(other.text, this.text)
 				&& Objects.equals(other.streamingUrl, this.streamingUrl)
-				&& other.status == this.status;
+				&& other.status == this.status
+				&& other.type == this.type;
 	}
 
 	@Override
 	public String toString() {
-		return status + (getPlayingText().isPresent() ? " - playing " + getPlayingText().get() : "") +
-				(getStreamingUrl().isPresent() ? " with streaming URL " + getStreamingUrl().get() : "");
+		return status +
+				(getText().isPresent() ? " - " +
+						(getType() == GameObject.Type.GAME ? " playing " :
+								(getType() == GameObject.Type.STREAMING ? " streaming " :
+										(getType() == GameObject.Type.LISTENING ? " listening" : "watching")
+								)) + getText().get() : "") + (getStreamingUrl().isPresent() ? " with streaming URL " + getStreamingUrl().get() : "");
+	}
+
+	@Override
+	public int getType() {
+		return type;
 	}
 }

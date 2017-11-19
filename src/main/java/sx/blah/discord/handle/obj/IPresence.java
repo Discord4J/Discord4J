@@ -29,7 +29,7 @@ public interface IPresence {
 	 *
 	 * @return The playing text.
 	 */
-	Optional<String> getPlayingText();
+	Optional<String> getText();
 
 	/**
 	 * Gets the streaming URL.
@@ -52,4 +52,8 @@ public interface IPresence {
 	 */
 	IPresence copy();
 
+	/**
+	 * Gets the type of this Presence
+	 */
+	int getType();
 }
