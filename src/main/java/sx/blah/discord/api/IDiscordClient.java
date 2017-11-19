@@ -107,6 +107,11 @@ public interface IDiscordClient {
 	 */
 	void changePlayingText(String playingText);
 
+	/**
+	 * Changes the online status of the bot to online with the gives presence type and text on all shards.
+	 * @param type The presence type to use
+	 * @param text The text to display
+	 */
 	void online(PresenceType type, String text);
 
 	/**
@@ -121,6 +126,11 @@ public interface IDiscordClient {
 	 */
 	void online();
 
+	/**
+	 * Changes the online status of the bot to idle with the gives presence type and text on all shards.
+	 * @param type The presence type to use
+	 * @param text The text to display
+	 */
 	void idle(PresenceType type, String text);
 
 	/**
@@ -143,6 +153,11 @@ public interface IDiscordClient {
 	 */
 	void streaming(String playingText, String streamingUrl);
 
+	/**
+	 * Changes the online status of the bot to do not disturb with the gives presence type and text on all shards.
+	 * @param type The presence type to use
+	 * @param text The text to display
+	 */
 	void dnd(PresenceType type, String text);
 
 	/**

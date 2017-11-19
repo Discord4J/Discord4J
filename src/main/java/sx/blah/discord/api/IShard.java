@@ -111,42 +111,57 @@ public interface IShard {
 	 */
 	void changePlayingText(String playingText);
 
+	/**
+	 * Changes the online presence of the bot to online with the given presence type and text on the shard.
+	 * @param type The type of the presence
+	 * @param text The text to display
+	 */
 	void online(PresenceType type, String text);
 
 	/**
-	 * Changes the online status of the bot to online with the given playing text in all shards.
+	 * Changes the online status of the bot to online with the given playing text on the shard.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
 	void online(String playingText);
 
 	/**
-	 * Changes the online status of the bot to online in all shards.
+	 * Changes the online status of the bot to online on the shard.
 	 */
 	void online();
 
+	/**
+	 * Changes the online presence of the bot to idle with the given presence type and text on the shard.
+	 * @param type The type of the presence
+	 * @param text The text to display
+	 */
 	void idle(PresenceType type, String text);
 
 	/**
-	 * Changes the online status of the bot to idle with the given playing text in all shards.
+	 * Changes the online status of the bot to idle with the given playing text on the shard.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
 	void idle(String playingText);
 
 	/**
-	 * Changes the online status of the bot to idle in all shards.
+	 * Changes the online status of the bot to idle on the shard.
 	 */
 	void idle();
 
 	/**
-	 * Changes the online status of the bot to streaming with the given playing text and stream url in all shards.
+	 * Changes the online status of the bot to streaming with the given playing text and stream url on the shard.
 	 *
 	 * @param playingText The nullable playing text.
 	 * @param streamingUrl The valid twitch.tv streaming url.
 	 */
 	void streaming(String playingText, String streamingUrl);
 
+	/**
+	 * Changes the online presence of the bot to do not disturb with the given presence type and text on the shard.
+	 * @param type The type of the presence
+	 * @param text The text to display
+	 */
 	void dnd(PresenceType type, String text);
 
 	/**
