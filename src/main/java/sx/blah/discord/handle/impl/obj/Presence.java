@@ -19,6 +19,7 @@ package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.handle.obj.IPresence;
+import sx.blah.discord.handle.obj.PresenceType;
 import sx.blah.discord.handle.obj.StatusType;
 
 import java.util.Objects;
@@ -43,9 +44,9 @@ public class Presence implements IPresence {
 	/**
 	 * The type of this presence
 	 */
-	private int type;
+	private PresenceType type;
 
-	public Presence(String text, String streamingUrl, StatusType status, int type) {
+	public Presence(String text, String streamingUrl, StatusType status, PresenceType type) {
 		this.text = text;
 		this.streamingUrl = streamingUrl;
 		this.status = status;
@@ -87,14 +88,14 @@ public class Presence implements IPresence {
 	public String toString() {
 		return status +
 				(getText().isPresent() ? " - " +
-						(getType() == GameObject.Type.GAME ? " playing " :
-								(getType() == GameObject.Type.STREAMING ? " streaming " :
-										(getType() == GameObject.Type.LISTENING ? " listening to " : "watching")
+						(getType() == PresenceType.PLAYING ? " playing " :
+								(getType() == PresenceType.STREAMING ? " streaming " :
+										(getType() == PresenceType.LISTENING ? " listening to " : "watching")
 								)) + getText().get() : "") + (getStreamingUrl().isPresent() ? " with streaming URL " + getStreamingUrl().get() : "");
 	}
 
 	@Override
-	public int getType() {
+	public PresenceType getType() {
 		return type;
 	}
 }

@@ -102,7 +102,7 @@ public interface IShard {
 	long getResponseTime();
 
 	/**
-	 * Changes the playing text of the bot on the shard. The previously-set online status will be maintained.
+	 * Changes the playing text of the bot on all shards. The previously-set online status will be maintained.
 	 *
 	 * <p>Note: Due to the fact that Discord doesn't send updates for the bot user's presence, it is possible that using
 	 * this method will overwrite an online status set by a different gateway connection.
@@ -111,46 +111,43 @@ public interface IShard {
 	 */
 	void changePlayingText(String playingText);
 
+	void online(PresenceType type, String text);
 
 	/**
-	 * Sets the bot's presence to the custom GameObject
-	 *
-	 * @param status The bot's status
-	 * @param game The GameObject to use
-	 */
-	void changePresence(StatusType status, GameObject game);
-
-	/**
-	 * Changes the online status of the bot to online with the given playing text on the shard.
+	 * Changes the online status of the bot to online with the given playing text in all shards.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
 	void online(String playingText);
 
 	/**
-	 * Changes the online status of the bot to online on the shard.
+	 * Changes the online status of the bot to online in all shards.
 	 */
 	void online();
 
+	void idle(PresenceType type, String text);
+
 	/**
-	 * Changes the online status of the bot to idle with the given playing text on the shard.
+	 * Changes the online status of the bot to idle with the given playing text in all shards.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
 	void idle(String playingText);
 
 	/**
-	 * Changes the online status of the bot to idle on the shard.
+	 * Changes the online status of the bot to idle in all shards.
 	 */
 	void idle();
 
 	/**
-	 * Changes the online status of the bot to streaming with the given playing text and stream url on the shard.
+	 * Changes the online status of the bot to streaming with the given playing text and stream url in all shards.
 	 *
 	 * @param playingText The nullable playing text.
 	 * @param streamingUrl The valid twitch.tv streaming url.
 	 */
 	void streaming(String playingText, String streamingUrl);
+
+	void dnd(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to do not disturb with the given playing text on the shard.

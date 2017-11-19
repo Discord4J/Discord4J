@@ -455,7 +455,13 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void changePresence(StatusType status, GameObject game) { getShards().forEach(s -> s.changePresence(status, game)); }
+	public void online(PresenceType type, String text) { getShards().forEach(s -> s.online(type, text)); }
+
+	@Override
+	public void idle(PresenceType type, String text) { getShards().forEach(s -> s.idle(type, text)); }
+
+	@Override
+	public void dnd(PresenceType type, String text) { getShards().forEach(s -> s.dnd(type, text)); }
 
 	@Override
 	public void online(String playingText) {

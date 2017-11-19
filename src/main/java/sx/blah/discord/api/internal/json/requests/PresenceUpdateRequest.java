@@ -18,6 +18,7 @@
 package sx.blah.discord.api.internal.json.requests;
 
 import sx.blah.discord.api.internal.json.objects.GameObject;
+import sx.blah.discord.handle.obj.PresenceType;
 import sx.blah.discord.handle.obj.StatusType;
 
 /**
@@ -42,15 +43,9 @@ public class PresenceUpdateRequest {
 	 */
 	public boolean afk = false;
 
-	public PresenceUpdateRequest(StatusType status, String playingText, String streamUrl) {
+	public PresenceUpdateRequest(StatusType status, PresenceType type, String text, String streamUrl) {
 		this.since = status == StatusType.IDLE ? System.currentTimeMillis() : null;
-		this.game = playingText == null && streamUrl == null ? null : new GameObject(playingText, streamUrl);
-		this.status = status.name().toLowerCase();
-	}
-
-	public PresenceUpdateRequest(StatusType status, GameObject game) {
-		this.since = status == StatusType.IDLE ? System.currentTimeMillis() : null;
-		this.game = game;
+		this.game = type == PresenceType.STREAMING ? new GameObject(text, streamUrl) : new GameObject(text, type.ordinal());
 		this.status = status.name().toLowerCase();
 	}
 }

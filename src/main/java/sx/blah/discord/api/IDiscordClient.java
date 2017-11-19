@@ -107,13 +107,7 @@ public interface IDiscordClient {
 	 */
 	void changePlayingText(String playingText);
 
-	/**
-	 * Sets the bot's presence to the custom GameObject
-	 *
-	 * @param status The bot's status
-	 * @param game The GameObject to use
-	 */
-	void changePresence(StatusType status, GameObject game);
+	void online(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to online with the given playing text in all shards.
@@ -126,6 +120,8 @@ public interface IDiscordClient {
 	 * Changes the online status of the bot to online in all shards.
 	 */
 	void online();
+
+	void idle(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to idle with the given playing text in all shards.
@@ -146,6 +142,8 @@ public interface IDiscordClient {
 	 * @param streamingUrl The valid twitch.tv streaming url.
 	 */
 	void streaming(String playingText, String streamingUrl);
+
+	void dnd(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to do not disturb with the given playing text in all shards.

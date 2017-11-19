@@ -137,7 +137,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void changePlayingText(String playingText) {
-		updatePresence(getClient().getOurUser().getPresence().getStatus(), playingText,
+		updatePresence(getClient().getOurUser().getPresence().getStatus(), PresenceType.PLAYING, playingText,
 				getClient().getOurUser().getPresence().getStreamingUrl().orElse(null));
 	}
 
@@ -163,7 +163,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void streaming(String playingText, String streamingUrl) {
-		updatePresence(StatusType.ONLINE, playingText, streamingUrl);
+		updatePresence(StatusType.ONLINE, PresenceType.STREAMING, playingText, streamingUrl);
 	}
 
 	@Override
@@ -177,15 +177,28 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
+	public void online(PresenceType type, String text) {
+		updatePresence(StatusType.ONLINE, type, text, null);
+	}
+
+	@Override
+	public void idle(PresenceType type, String text) {
+		updatePresence(StatusType.IDLE, type, text, null);
+	}
+
+	@Override
+	public void dnd(PresenceType type, String text) {
+		updatePresence(StatusType.DND, type, text, null);
+	}
+
+	@Override
 	public void invisible() {
 		updatePresence(StatusType.INVISIBLE, null);
 	}
 
-	private void updatePresence(StatusType status, String playing) {
-		updatePresence(status, playing, null);
-	}
+	private void updatePresence(StatusType status, String playing) { updatePresence(status, PresenceType.PLAYING, playing, null); }
 
-	private void updatePresence(StatusType status, String playing, String streamUrl) {
+	private void updatePresence(StatusType status, PresenceType type, String text, String streamUrl) {
 		checkLoggedIn("update presence");
 
 		if (streamUrl != null) {
@@ -196,30 +209,14 @@ public class ShardImpl implements IShard {
 
 		IUser ourUser = getClient().getOurUser();
 		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new Presence(playing, streamUrl, status, (streamUrl == null ? GameObject.Type.GAME : GameObject.Type.STREAMING));
+		IPresence newPresence = new Presence(text, streamUrl, status, type);
 
 		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
-		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, playing, streamUrl));
-	}
-
-	@Override
-	public void changePresence(StatusType status, GameObject game) {
-		checkLoggedIn("update presence");
-
-		IUser ourUser = getClient().getOurUser();
-		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new Presence(game.name, null, status, game.type);
-
-		if(!newPresence.equals(oldPresence)) {
-			((User) ourUser).setPresence(newPresence);
-			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
-		}
-
-		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, game));
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, type, text, streamUrl));
 	}
 
 	@Override

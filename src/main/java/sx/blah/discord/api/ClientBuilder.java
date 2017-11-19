@@ -25,6 +25,7 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.responses.GatewayBotResponse;
+import sx.blah.discord.handle.obj.PresenceType;
 import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.cache.Cache;
@@ -452,7 +453,7 @@ public class ClientBuilder {
 		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon,
 				maxMissedPings, maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, backpressureHandler,
 				minimumPoolSize, maximumPoolSize, overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit,
-				status == null ? null : new PresenceUpdateRequest(status, playingText, streamUrl));
+				status == null ? null : new PresenceUpdateRequest(status, PresenceType.PLAYING, playingText, streamUrl));
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();
