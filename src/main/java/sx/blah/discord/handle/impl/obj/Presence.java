@@ -89,7 +89,7 @@ public class Presence implements IPresence {
 				(getText().isPresent() ? " - " +
 						(getType() == GameObject.Type.GAME ? " playing " :
 								(getType() == GameObject.Type.STREAMING ? " streaming " :
-										(getType() == GameObject.Type.LISTENING ? " listening" : "watching")
+										(getType() == GameObject.Type.LISTENING ? " listening to " : "watching")
 								)) + getText().get() : "") + (getStreamingUrl().isPresent() ? " with streaming URL " + getStreamingUrl().get() : "");
 	}
 
