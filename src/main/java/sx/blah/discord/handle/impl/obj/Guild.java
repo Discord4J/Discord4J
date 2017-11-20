@@ -627,7 +627,11 @@ public class Guild implements IGuild {
 				ChannelObject.class);
 
 		IChannel channel = DiscordUtils.getChannelFromJSON(getShard(), this, response);
-		channels.put(channel);
+		if (channel instanceof IVoiceChannel) {
+			voiceChannels.put((IVoiceChannel) channel);
+		} else {
+			channels.put(channel);
+		}
 		return channel;
 	}
 
