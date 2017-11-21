@@ -55,15 +55,15 @@ public class UDPVoiceSocket {
 	/**
 	 * The voice gateway associated with this socket.
 	 */
-	private DiscordVoiceWS voiceWS;
+	private volatile DiscordVoiceWS voiceWS;
 	/**
 	 * The underlying udp socket that data is sent and received on.
 	 */
-	private DatagramSocket udpSocket;
+	private volatile DatagramSocket udpSocket;
 	/**
 	 * The socket address data is sent to.
 	 */
-	private InetSocketAddress address;
+	private volatile InetSocketAddress address;
 
 	/**
 	 * The thread send and receive logic is handled on.
@@ -73,39 +73,39 @@ public class UDPVoiceSocket {
 	/**
 	 * The secret used for encryption.
 	 */
-	private byte[] secret;
+	private volatile byte[] secret;
 	/**
 	 * Whether or not audio is currently being sent on this socket.
 	 */
-	private boolean isSpeaking = false;
+	private volatile boolean isSpeaking = false;
 	/**
 	 * Incremented for every packet sent .
 	 */
-	private char sequence = 0;
+	private volatile char sequence = 0;
 	/**
 	 * Incremented by {@link OpusUtil#OPUS_FRAME_TIME} for every packet sent.
 	 */
-	private int timestamp = 0;
+	private volatile int timestamp = 0;
 	/**
 	 * The ssrc associated with our user.
 	 */
-	private int ssrc;
+	private volatile int ssrc;
 
 	/**
 	 * The number of silence frames left to send after the transmission of audio has stopped.
 	 */
-	private int silenceToSend = 5;
+	private volatile int silenceToSend = 5;
 
 	/**
 	 * Indicates whether or not the {@link #begin()} method has been called. This is used in conjunction with
 	 * {@link #wasShutdown} to ensure that {@link #begin()} is called before {@link #shutdown()}.
  	 */
-	private boolean hasBegun = false;
+	private volatile boolean hasBegun = false;
 	/**
 	 * Indicates whether or not the {@link #shutdown()} method has been called. This is used in conjunction with
 	 * {@link #hasBegun} to ensure that {@link #begin()} is called before {@link #shutdown()}.
 	 */
-	private boolean wasShutdown = false;
+	private volatile boolean wasShutdown = false;
 
 	/**
 	 * Function executed on the {@link #audioTask} for sending audio data.
@@ -193,7 +193,7 @@ public class UDPVoiceSocket {
 	 * @param port The port to send audio data on.
 	 * @param ssrc The self user's ssrc.
 	 */
-	void setup(String endpoint, int port, int ssrc) {
+	synchronized void setup(String endpoint, int port, int ssrc) {
 		try {
 			this.udpSocket = new DatagramSocket();
 			this.address = new InetSocketAddress(endpoint, port);
