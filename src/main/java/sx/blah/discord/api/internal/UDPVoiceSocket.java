@@ -111,28 +111,30 @@ public class UDPVoiceSocket {
 	 * Function executed on the {@link #audioTask} for sending audio data.
 	 */
 	private final Runnable sendRunnable = () -> {
-		try {
-			byte[] audio = ((AudioManager) voiceWS.getGuild().getAudioManager()).sendAudio();
-			if (audio != null && audio.length > 0) {
-				OpusPacket packet = new OpusPacket(sequence, timestamp, ssrc, audio);
-				packet.encrypt(secret);
-				byte[] toSend = packet.asByteArray();
+		if (!wasShutdown) {
+			try {
+				byte[] audio = ((AudioManager) voiceWS.getGuild().getAudioManager()).sendAudio();
+				if (audio != null && audio.length > 0) {
+					OpusPacket packet = new OpusPacket(sequence, timestamp, ssrc, audio);
+					packet.encrypt(secret);
+					byte[] toSend = packet.asByteArray();
 
-				if (!isSpeaking) setSpeaking(true);
-				udpSocket.send(new DatagramPacket(toSend, toSend.length, address));
+					if (!isSpeaking) setSpeaking(true);
+					udpSocket.send(new DatagramPacket(toSend, toSend.length, address));
 
-				sequence++;
-				timestamp += OpusUtil.OPUS_FRAME_SIZE;
-				silenceToSend = 5;
-			} else {
-				if (isSpeaking) setSpeaking(false);
-				if (silenceToSend > 0) {
-					sendSilence();
-					silenceToSend--;
+					sequence++;
+					timestamp += OpusUtil.OPUS_FRAME_SIZE;
+					silenceToSend = 5;
+				} else {
+					if (isSpeaking) setSpeaking(false);
+					if (silenceToSend > 0) {
+						sendSilence();
+						silenceToSend--;
+					}
 				}
+			} catch (Exception e) {
+				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 			}
-		} catch (Exception e) {
-			Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 		}
 	};
 
@@ -140,23 +142,25 @@ public class UDPVoiceSocket {
 	 * Function executed on the {@link #audioTask} for receiving audio data.
 	 */
 	private final Runnable receiveRunnable = () -> {
-		//keep receiving audio for 10ms. This will consume as many frames as are readily available, without blocking the thread for more than 10ms.
-		long start = System.nanoTime();
-		while (System.nanoTime() - start < 10_000_000) {
-			try {
-				DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
-				udpSocket.receive(udpPacket);
+		if (!wasShutdown) {
+			//keep receiving audio for 10ms. This will consume as many frames as are readily available, without blocking the thread for more than 10ms.
+			long start = System.nanoTime();
+			while (System.nanoTime() - start < 10_000_000) {
+				try {
+					DatagramPacket udpPacket = new DatagramPacket(new byte[MAX_INCOMING_AUDIO_PACKET], MAX_INCOMING_AUDIO_PACKET);
+					udpSocket.receive(udpPacket);
 
-				OpusPacket opus = new OpusPacket(udpPacket);
-				opus.decrypt(secret);
+					OpusPacket opus = new OpusPacket(udpPacket);
+					opus.decrypt(secret);
 
-				IUser user = voiceWS.users.get(opus.header.ssrc);
-				if (user != null) {
-					((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opus.getAudio(), user, opus.header.sequence, opus.header.timestamp);
+					IUser user = voiceWS.users.get(opus.header.ssrc);
+					if (user != null) {
+						((AudioManager) voiceWS.getGuild().getAudioManager()).receiveAudio(opus.getAudio(), user, opus.header.sequence, opus.header.timestamp);
+					}
+				} catch (SocketTimeoutException ignored) {
+				} catch (Exception e) {
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 				}
-			} catch (SocketTimeoutException ignored) {
-			} catch (Exception e) {
-				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Discord4J Internal Exception", e);
 			}
 		}
 	};
@@ -169,13 +173,15 @@ public class UDPVoiceSocket {
 
 		@Override
 		public void run() {
-			iterations++;
-			if (iterations % (5000 / 20) == 0) { //once every 5 seconds, assuming that each invocation happens every 20ms.
-				try {
-					DatagramPacket packet = new DatagramPacket(KEEP_ALIVE_DATA, KEEP_ALIVE_DATA.length, address);
-					udpSocket.send(packet);
-				} catch (Exception e) {
-					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Internal exception sending UDP keepalive: ", e);
+			if (!wasShutdown) {
+				iterations++;
+				if (iterations % (5000 / 20) == 0) { //once every 5 seconds, assuming that each invocation happens every 20ms.
+					try {
+						DatagramPacket packet = new DatagramPacket(KEEP_ALIVE_DATA, KEEP_ALIVE_DATA.length, address);
+						udpSocket.send(packet);
+					} catch (Exception e) {
+						Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Internal exception sending UDP keepalive: ", e);
+					}
 				}
 			}
 		}
