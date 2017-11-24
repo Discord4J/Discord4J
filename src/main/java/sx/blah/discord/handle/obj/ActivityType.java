@@ -3,7 +3,7 @@ package sx.blah.discord.handle.obj;
 /**
  * The types a presence can have.
  */
-public enum PresenceType {
+public enum ActivityType {
 	/**
 	 * The type of playing.
 	 * Displays: Playing xxx

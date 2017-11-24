@@ -18,7 +18,6 @@
 package sx.blah.discord.api;
 
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.DiscordException;
@@ -105,44 +104,35 @@ public interface IDiscordClient {
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void changePlayingText(String playingText);
-
-	/**
-	 * Changes the online status of the bot to online with the gives presence type and text on all shards.
-	 * @param type The presence type to use
-	 * @param text The text to display
-	 */
-	void online(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to online with the given playing text in all shards.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void online(String playingText);
 
 	/**
 	 * Changes the online status of the bot to online in all shards.
 	 */
+	@Deprecated
 	void online();
-
-	/**
-	 * Changes the online status of the bot to idle with the gives presence type and text on all shards.
-	 * @param type The presence type to use
-	 * @param text The text to display
-	 */
-	void idle(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to idle with the given playing text in all shards.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void idle(String playingText);
 
 	/**
 	 * Changes the online status of the bot to idle in all shards.
 	 */
+	@Deprecated
 	void idle();
 
 	/**
@@ -154,23 +144,26 @@ public interface IDiscordClient {
 	void streaming(String playingText, String streamingUrl);
 
 	/**
-	 * Changes the online status of the bot to do not disturb with the gives presence type and text on all shards.
-	 * @param type The presence type to use
-	 * @param text The text to display
-	 */
-	void dnd(PresenceType type, String text);
-
-	/**
 	 * Changes the online status of the bot to do not disturb with the given playing text in all shards.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void dnd(String playingText);
 
 	/**
 	 * Changes the online status of the bot to do not disturb in all shards.
 	 */
+	@Deprecated
 	void dnd();
+
+	/**
+	 * Changes the presence of the bot
+	 * @param type The status of the bit
+	 * @param activityType The type of activity to display
+	 * @param message The message to show
+	 */
+	void changePresence(StatusType type, ActivityType activityType, String message);
 
 	/**
 	 * Changes the online status of the bot to invisible in all shards.

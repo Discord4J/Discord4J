@@ -21,7 +21,6 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.api.internal.json.objects.InviteObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.objects.VoiceRegionObject;
@@ -455,15 +454,6 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void online(PresenceType type, String text) { getShards().forEach(s -> s.online(type, text)); }
-
-	@Override
-	public void idle(PresenceType type, String text) { getShards().forEach(s -> s.idle(type, text)); }
-
-	@Override
-	public void dnd(PresenceType type, String text) { getShards().forEach(s -> s.dnd(type, text)); }
-
-	@Override
 	public void online(String playingText) {
 		getShards().forEach(s -> s.online(playingText));
 	}
@@ -496,6 +486,11 @@ public final class DiscordClientImpl implements IDiscordClient {
 	@Override
 	public void dnd() {
 		getShards().forEach(IShard::dnd);
+	}
+
+	@Override
+	public void changePresence(StatusType type, ActivityType activityType, String message) {
+		getShards().forEach(shard -> shard.changePresence(type, activityType, message));
 	}
 
 	@Override

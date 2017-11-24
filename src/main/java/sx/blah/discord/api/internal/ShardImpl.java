@@ -21,7 +21,6 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.json.objects.ChannelObject;
-import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.api.internal.json.objects.UserObject;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.PrivateChannelCreateRequest;
@@ -137,13 +136,13 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void changePlayingText(String playingText) {
-		updatePresence(getClient().getOurUser().getPresence().getStatus(), PresenceType.PLAYING, playingText,
+		updatePresence(getClient().getOurUser().getPresence().getStatus(), ActivityType.PLAYING, playingText,
 				getClient().getOurUser().getPresence().getStreamingUrl().orElse(null));
 	}
 
 	@Override
 	public void online(String playingText) {
-		updatePresence(StatusType.ONLINE, playingText);
+		updatePresence(StatusType.ONLINE, ActivityType.PLAYING, playingText, null);
 	}
 
 	@Override
@@ -153,7 +152,7 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void idle(String playingText) {
-		updatePresence(StatusType.IDLE, playingText);
+		updatePresence(StatusType.IDLE, ActivityType.PLAYING, playingText, null);
 	}
 
 	@Override
@@ -163,12 +162,12 @@ public class ShardImpl implements IShard {
 
 	@Override
 	public void streaming(String playingText, String streamingUrl) {
-		updatePresence(StatusType.ONLINE, PresenceType.STREAMING, playingText, streamingUrl);
+		updatePresence(StatusType.ONLINE, ActivityType.STREAMING, playingText, streamingUrl);
 	}
 
 	@Override
 	public void dnd(String playingText) {
-		updatePresence(StatusType.DND, playingText);
+		updatePresence(StatusType.DND, ActivityType.PLAYING, playingText, null);
 	}
 
 	@Override
@@ -177,28 +176,16 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public void online(PresenceType type, String text) {
-		updatePresence(StatusType.ONLINE, type, text, null);
-	}
-
-	@Override
-	public void idle(PresenceType type, String text) {
-		updatePresence(StatusType.IDLE, type, text, null);
-	}
-
-	@Override
-	public void dnd(PresenceType type, String text) {
-		updatePresence(StatusType.DND, type, text, null);
+	public void changePresence(StatusType type, ActivityType activityType, String message) {
+		updatePresence(type, activityType, message, null);
 	}
 
 	@Override
 	public void invisible() {
-		updatePresence(StatusType.INVISIBLE, null);
+		updatePresence(StatusType.INVISIBLE, ActivityType.PLAYING, "", null);
 	}
 
-	private void updatePresence(StatusType status, String playing) { updatePresence(status, PresenceType.PLAYING, playing, null); }
-
-	private void updatePresence(StatusType status, PresenceType type, String text, String streamUrl) {
+	private void updatePresence(StatusType status, ActivityType type, String text, String streamUrl) {
 		checkLoggedIn("update presence");
 
 		if (streamUrl != null) {

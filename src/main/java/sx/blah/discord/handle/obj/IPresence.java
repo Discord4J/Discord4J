@@ -55,5 +55,5 @@ public interface IPresence {
 	/**
 	 * Gets the type of this Presence
 	 */
-	PresenceType getType();
+	ActivityType getType();
 }

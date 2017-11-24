@@ -17,7 +17,6 @@
 
 package sx.blah.discord.api;
 
-import sx.blah.discord.api.internal.json.objects.GameObject;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 
@@ -109,44 +108,35 @@ public interface IShard {
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void changePlayingText(String playingText);
-
-	/**
-	 * Changes the online presence of the bot to online with the given presence type and text on the shard.
-	 * @param type The type of the presence
-	 * @param text The text to display
-	 */
-	void online(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to online with the given playing text on the shard.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void online(String playingText);
 
 	/**
 	 * Changes the online status of the bot to online on the shard.
 	 */
+	@Deprecated
 	void online();
-
-	/**
-	 * Changes the online presence of the bot to idle with the given presence type and text on the shard.
-	 * @param type The type of the presence
-	 * @param text The text to display
-	 */
-	void idle(PresenceType type, String text);
 
 	/**
 	 * Changes the online status of the bot to idle with the given playing text on the shard.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void idle(String playingText);
 
 	/**
 	 * Changes the online status of the bot to idle on the shard.
 	 */
+	@Deprecated
 	void idle();
 
 	/**
@@ -158,23 +148,26 @@ public interface IShard {
 	void streaming(String playingText, String streamingUrl);
 
 	/**
-	 * Changes the online presence of the bot to do not disturb with the given presence type and text on the shard.
-	 * @param type The type of the presence
-	 * @param text The text to display
-	 */
-	void dnd(PresenceType type, String text);
-
-	/**
 	 * Changes the online status of the bot to do not disturb with the given playing text on the shard.
 	 *
 	 * @param playingText The nullable playing text.
 	 */
+	@Deprecated
 	void dnd(String playingText);
 
 	/**
 	 * Changes the online status of the bot to do not disturb on the shard.
 	 */
+	@Deprecated
 	void dnd();
+
+	/**
+	 * Changes the presence of this shard
+	 * @param type The status of the bit
+	 * @param activityType The type of activity to display
+	 * @param message The message to show
+	 */
+	void changePresence(StatusType type, ActivityType activityType, String message);
 
 	/**
 	 * Changes the online status of the bot to invisible on the shard.
