@@ -470,7 +470,7 @@ public class PermissionUtils {
 			return EnumSet.allOf(Permissions.class);
 		}
 
-		PermissionOverride everyoneOverride = roleOverrides.get(guild);
+		PermissionOverride everyoneOverride = roleOverrides.get(guild.getLongID());
 		if (everyoneOverride != null) {
 			base.retainAll(EnumSet.complementOf(everyoneOverride.deny()));
 			base.addAll(everyoneOverride.allow());
@@ -480,7 +480,7 @@ public class PermissionUtils {
 		EnumSet<Permissions> deny = EnumSet.noneOf(Permissions.class);
 
 		for (IRole role : guild.getRolesForUser(user)) {
-			PermissionOverride roleOverride = roleOverrides.get(role);
+			PermissionOverride roleOverride = roleOverrides.get(role.getLongID());
 			if (roleOverride != null) {
 				allow.addAll(roleOverride.allow());
 				deny.addAll(roleOverride.deny());
@@ -490,7 +490,7 @@ public class PermissionUtils {
 		base.retainAll(EnumSet.complementOf(deny));
 		base.addAll(allow);
 
-		PermissionOverride userOverride = userOverrides.get(user);
+		PermissionOverride userOverride = userOverrides.get(user.getLongID());
 		if (userOverride != null) {
 			base.retainAll(EnumSet.complementOf(userOverride.deny()));
 			base.addAll(userOverride.allow());
