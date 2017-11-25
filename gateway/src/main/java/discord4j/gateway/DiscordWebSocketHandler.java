@@ -19,17 +19,16 @@ package discord4j.gateway;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import discord4j.gateway.websocket.CloseException;
 import discord4j.gateway.websocket.WebSocketHandler;
 import discord4j.gateway.websocket.WebSocketMessage;
 import discord4j.gateway.websocket.WebSocketSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.UnicastProcessor;
 
-public class DiscordWebSocketHandler implements WebSocketHandler {
+import java.util.logging.Level;
 
-	private static final Logger log = LoggerFactory.getLogger(DiscordWebSocketHandler.class);
+public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
 	private final UnicastProcessor<GatewayPayload> inboundExchange = UnicastProcessor.create();
@@ -46,22 +45,20 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	@Override
 	public Mono<Void> handle(WebSocketSession session) {
 		session.closeFuture()
-				.map(status -> new RuntimeException("WebSocket closed with code=" + status.getStatusCode() + " and reason=" + status.getReasonText()))
+				.map(CloseException::new)
 				.subscribe(this::onError);
 
 		session.receive()
 				.map(WebSocketMessage::getPayload)
 				.compose(decompressor::completeMessages)
-				.log("session-inbound")
 				.map(reader::read)
+				.log("discord4j.gateway.session.inbound", Level.FINE)
 				.subscribe(inboundExchange::onNext, inboundExchange::onError, this::onComplete);
 
-		Mono<Void> sessionEnd = session.send(outboundExchange
-				.log("session-outbound")
+		return session.send(outboundExchange
+				.log("discord4j.gateway.session.outbound", Level.FINE)
 				.map(writer::write)
 				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)));
-
-		return sessionEnd;
 	}
 
 	private void onError(Throwable t) {

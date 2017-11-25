@@ -14,28 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package discord4j.gateway.websocket;
 
-public class CloseStatus {
+public class CloseException extends RuntimeException {
 
-	private final int statusCode;
-	private final String reasonText;
+	private final CloseStatus closeStatus;
 
-	public CloseStatus(int statusCode, String reasonText) {
-		this.statusCode = statusCode;
-		this.reasonText = reasonText;
+	public CloseException(CloseStatus closeStatus) {
+		this.closeStatus = closeStatus;
+	}
+
+	public CloseStatus getCloseStatus() {
+		return closeStatus;
 	}
 
 	public int getStatusCode() {
-		return statusCode;
+		return closeStatus.getStatusCode();
 	}
 
 	public String getReasonText() {
-		return reasonText;
+		return closeStatus.getReasonText();
 	}
 
 	@Override
-	public String toString() {
-		return statusCode + (reasonText == null || reasonText.isEmpty() ? "" : " " + reasonText);
+	public String getMessage() {
+		return "WebSocket closed: " + closeStatus.toString();
 	}
 }

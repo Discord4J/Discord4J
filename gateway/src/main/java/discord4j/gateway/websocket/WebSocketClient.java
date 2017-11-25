@@ -19,8 +19,6 @@ package discord4j.gateway.websocket;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
 
-import java.net.URI;
-
 /**
  * WebSocket client over Reactor Netty.
  */
@@ -36,9 +34,9 @@ public class WebSocketClient {
 		this.httpClient = httpClient;
 	}
 
-	public Mono<Void> execute(URI url, WebSocketHandler handler) {
+	public Mono<Void> execute(String url, WebSocketHandler handler) {
 		return this.httpClient
-				.ws(url.toString(), headers -> {}, null)
+				.ws(url, headers -> {}, null)
 				.flatMap(response ->
 						response.receiveWebsocket((in, out) ->
 								handler.handle(new WebSocketSession(in, out))));

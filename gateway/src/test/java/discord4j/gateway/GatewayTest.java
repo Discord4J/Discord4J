@@ -20,8 +20,8 @@ package discord4j.gateway;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import discord4j.gateway.websocket.CloseStatus;
-import discord4j.gateway.websocket.WebSocketMessage;
 import discord4j.gateway.websocket.WebSocketClient;
+import discord4j.gateway.websocket.WebSocketMessage;
 import io.netty.buffer.ByteBuf;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +32,6 @@ import reactor.core.publisher.EmitterProcessor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
@@ -61,7 +60,7 @@ public class GatewayTest {
 
 		WebSocketClient client = new WebSocketClient();
 
-		client.execute(new URI(gatewayUrl), session -> {
+		client.execute(gatewayUrl, session -> {
 			WebSocketMessageSubscriber subscriber = new WebSocketMessageSubscriber(inboundExchange, outboundExchange,
 					token);
 			session.closeFuture().subscribe(subscriber::onClose);

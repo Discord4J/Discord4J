@@ -14,28 +14,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway.websocket;
 
-public class CloseStatus {
+package discord4j.rest.http.client;
 
-	private final int statusCode;
-	private final String reasonText;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
-	public CloseStatus(int statusCode, String reasonText) {
-		this.statusCode = statusCode;
-		this.reasonText = reasonText;
+public class ClientException extends RuntimeException {
+
+	private final HttpResponseStatus status;
+	private final HttpHeaders headers;
+
+	public ClientException(HttpResponseStatus status, HttpHeaders headers) {
+		this.status = status;
+		this.headers = headers;
 	}
 
-	public int getStatusCode() {
-		return statusCode;
+	public HttpResponseStatus getStatus() {
+		return status;
 	}
 
-	public String getReasonText() {
-		return reasonText;
-	}
-
-	@Override
-	public String toString() {
-		return statusCode + (reasonText == null || reasonText.isEmpty() ? "" : " " + reasonText);
+	public HttpHeaders getHeaders() {
+		return headers;
 	}
 }

@@ -16,6 +16,7 @@
  */
 package discord4j.rest.request;
 
+import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.ExchangeFilter;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.util.RouteUtils;
@@ -23,7 +24,6 @@ import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.ipc.netty.http.client.HttpClientException;
 import reactor.retry.BackoffDelay;
 import reactor.retry.Retry;
 import reactor.retry.RetryContext;
@@ -61,11 +61,11 @@ class RequestStream<T> {
 		@Override
 		public boolean test(RetryContext<AtomicLong> ctx) {
 			Throwable exception = ctx.exception();
-			if (exception instanceof HttpClientException) {
-				HttpClientException httpException = (HttpClientException) exception;
-				if (httpException.status().code() == 429) {
-					boolean global = Boolean.valueOf(httpException.headers().get("X-RateLimit-Global"));
-					long retryAfter = Long.valueOf(httpException.headers().get("Retry-After"));
+			if (exception instanceof ClientException) {
+				ClientException clientException = (ClientException) exception;
+				if (clientException.getStatus().code() == 429) {
+					boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
+					long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
 
 					if (global) {
 						globalRateLimiter.rateLimitFor(Duration.ofMillis(retryAfter));

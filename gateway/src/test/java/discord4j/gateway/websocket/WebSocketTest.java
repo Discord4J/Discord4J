@@ -22,7 +22,6 @@ import reactor.core.publisher.ReplayProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 
@@ -40,7 +39,7 @@ public class WebSocketTest {
 
 		WebSocketClient client = new WebSocketClient();
 
-		client.execute(new URI("wss://echo.websocket.org/"),
+		client.execute("wss://echo.websocket.org/",
 				session -> {
 					log.debug("Starting to send messages");
 					return session

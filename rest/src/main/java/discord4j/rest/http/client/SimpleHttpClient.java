@@ -114,6 +114,11 @@ public class SimpleHttpClient {
 				.flatMap(response -> {
 					exchangeFilter.getResponseFilter().accept(response);
 
+					int responseStatus = response.status().code();
+					if (responseStatus >= 400 && responseStatus < 600) {
+						throw new ClientException(response.status(), response.responseHeaders());
+					}
+
 					String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
 					return readerStrategies.stream()
 							.filter(s -> s.canRead(responseType, contentType))

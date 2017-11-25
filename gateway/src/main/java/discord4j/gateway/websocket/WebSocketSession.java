@@ -59,8 +59,8 @@ public class WebSocketSession {
 
 	public Mono<CloseStatus> closeFuture() {
 		MonoProcessor<CloseStatus> monoProcessor = MonoProcessor.create();
-		getDelegate().getInbound().context().channel().pipeline().addBefore("reactor.right.reactiveBridge",
-				"close-handler", new ChannelInboundHandlerAdapter() {
+		getDelegate().getInbound().withConnection(connection ->
+				connection.addHandlerLast("close-handler", new ChannelInboundHandlerAdapter() {
 					@Override
 					public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 						if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
@@ -69,7 +69,7 @@ public class WebSocketSession {
 						}
 						ctx.fireChannelRead(msg);
 					}
-				});
+				}));
 		return monoProcessor;
 	}
 

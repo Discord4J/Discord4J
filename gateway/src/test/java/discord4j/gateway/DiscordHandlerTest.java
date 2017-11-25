@@ -27,8 +27,8 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.Ready;
-import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
+import discord4j.gateway.payload.JacksonLenientPayloadReader;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.WebSocketClient;
@@ -39,14 +39,13 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.UnicastProcessor;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DiscordHandlerTest {
 
-	public static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
-	private static final Logger log = LoggerFactory.getLogger(GatewayTest.class);
+	public static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
+	private static final Logger log = LoggerFactory.getLogger(DiscordHandlerTest.class);
 
 	private String token;
 
@@ -56,6 +55,8 @@ public class DiscordHandlerTest {
 
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		context.getLogger("discord4j.rest.http.client").setLevel(Level.TRACE);
+		context.getLogger("reactor.ipc.netty.channel.ContextHandler").setLevel(Level.INFO);
+		context.getLogger("reactor.ipc.netty.http.client.HttpClient").setLevel(Level.INFO);
 	}
 
 	@Test
@@ -63,7 +64,7 @@ public class DiscordHandlerTest {
 		WebSocketClient ws = new WebSocketClient();
 
 		ObjectMapper mapper = getMapper();
-		PayloadReader reader = new JacksonPayloadReader(mapper);
+		PayloadReader reader = new JacksonLenientPayloadReader(mapper);
 		PayloadWriter writer = new JacksonPayloadWriter(mapper);
 
 		DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer);
@@ -72,8 +73,6 @@ public class DiscordHandlerTest {
 		AtomicInteger seq = new AtomicInteger(0);
 
 		handler.inbound().subscribe(payload -> {
-			log.debug("Received Payload: " + payload);
-
 			if (payload.getData() instanceof Hello) {
 				IdentifyProperties properties = new IdentifyProperties("linux", "disco", "disco");
 				GatewayPayload identify = new GatewayPayload(2, new Identify(token, properties, true, 250, Possible.absent(), Possible.absent()), null, null);
@@ -96,7 +95,7 @@ public class DiscordHandlerTest {
 			log.info("Gateway received READY!");
 		});
 
-		ws.execute(new URI(gatewayUrl), handler).block();
+		ws.execute(gatewayUrl, handler).block();
 	}
 
 	private ObjectMapper getMapper() {
