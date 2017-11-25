@@ -47,7 +47,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	public Mono<Void> handle(WebSocketSession session) {
 		session.closeFuture()
 				.map(status -> new RuntimeException("WebSocket closed with code=" + status.getStatusCode() + " and reason=" + status.getReasonText()))
-				.subscribe(inboundExchange::onError);
+				.subscribe(this::onError);
 
 		session.receive()
 				.map(WebSocketMessage::getPayload)
@@ -62,6 +62,11 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)));
 
 		return sessionEnd;
+	}
+
+	private void onError(Throwable t) {
+		inboundExchange.onError(t);
+		outboundExchange.onComplete();
 	}
 
 	private void onComplete() {
