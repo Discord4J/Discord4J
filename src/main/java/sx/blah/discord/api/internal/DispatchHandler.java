@@ -439,24 +439,23 @@ class DispatchHandler {
 		if (channel == null)
 			return;
 
-		Message toUpdate = (Message) channel.messages.get(json.id);
+		IMessage toUpdate = channel.messages.get(json.id);
 
-		IMessage oldMessage = toUpdate == null ? null : toUpdate.copy();
-		toUpdate = (Message) DiscordUtils.getUpdatedMessageFromJSON(client, toUpdate, json);
-
-		if (oldMessage == null) { // Cannot resolve edit type
-			client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
+		if (toUpdate == null) { // Cannot resolve update type
+			client.dispatcher.dispatch(new MessageUpdateEvent(null, DiscordUtils.getMessageFromJSON(channel, json)));
 		} else {
+			IMessage oldMessage = toUpdate.copy();
+			IMessage updatedMessage = DiscordUtils.getUpdatedMessageFromJSON(client, toUpdate, json);
 			if (json.pinned != null && oldMessage.isPinned() && !json.pinned) {
-				client.dispatcher.dispatch(new MessageUnpinEvent(oldMessage, toUpdate));
+				client.dispatcher.dispatch(new MessageUnpinEvent(oldMessage, updatedMessage));
 			} else if (json.pinned != null && !oldMessage.isPinned() && json.pinned) {
-				client.dispatcher.dispatch(new MessagePinEvent(oldMessage, toUpdate));
-			} else if (oldMessage.getEmbeds().size() < toUpdate.getEmbeds().size()) {
-				client.dispatcher.dispatch(new MessageEmbedEvent(oldMessage, toUpdate, oldMessage.getEmbeds()));
+				client.dispatcher.dispatch(new MessagePinEvent(oldMessage, updatedMessage));
+			} else if (oldMessage.getEmbeds().size() < updatedMessage.getEmbeds().size()) {
+				client.dispatcher.dispatch(new MessageEmbedEvent(oldMessage, updatedMessage, oldMessage.getEmbeds()));
 			} else if (json.content != null && !oldMessage.getContent().equals(json.content)) {
-				client.dispatcher.dispatch(new MessageEditEvent(oldMessage, toUpdate));
+				client.dispatcher.dispatch(new MessageEditEvent(oldMessage, updatedMessage));
 			} else {
-				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, toUpdate));
+				client.dispatcher.dispatch(new MessageUpdateEvent(oldMessage, updatedMessage));
 			}
 		}
 	}
