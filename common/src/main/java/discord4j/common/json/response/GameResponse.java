@@ -33,6 +33,9 @@
  */
 package discord4j.common.json.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
+
 import javax.annotation.Nullable;
 
 public class GameResponse {
@@ -41,6 +44,18 @@ public class GameResponse {
 	private int type;
 	@Nullable
 	private String url;
+	private GameTimestampsResponse timestamps;
+	@JsonProperty("application_id")
+	@UnsignedJson
+	private long applicationId; // TODO: nullable?
+	@Nullable
+	private String details;
+	@Nullable
+	private String state;
+	@Nullable
+	private GamePartyResponse party;
+	@Nullable
+	private GameAssetsResponse assets;
 
 	public String getName() {
 		return name;
@@ -53,5 +68,33 @@ public class GameResponse {
 	@Nullable
 	public String getUrl() {
 		return url;
+	}
+
+	public GameTimestampsResponse getTimestamps() {
+		return timestamps;
+	}
+
+	public long getApplicationId() {
+		return applicationId;
+	}
+
+	@Nullable
+	public String getDetails() {
+		return details;
+	}
+
+	@Nullable
+	public String getState() {
+		return state;
+	}
+
+	@Nullable
+	public GamePartyResponse getParty() {
+		return party;
+	}
+
+	@Nullable
+	public GameAssetsResponse getAssets() {
+		return assets;
 	}
 }
