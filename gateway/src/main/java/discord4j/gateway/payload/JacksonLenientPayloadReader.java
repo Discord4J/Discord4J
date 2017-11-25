@@ -23,6 +23,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public class JacksonLenientPayloadReader implements PayloadReader {
 
@@ -39,7 +40,7 @@ public class JacksonLenientPayloadReader implements PayloadReader {
 		try {
 			return mapper.readValue(payload.array(), GatewayPayload.class);
 		} catch (IOException e) {
-			log.warn("Error while decoding JSON", e);
+			log.warn("Error while decoding JSON: " + payload.toString(Charset.forName("UTF-8")), e);
 			return new GatewayPayload();
 		}
 	}
