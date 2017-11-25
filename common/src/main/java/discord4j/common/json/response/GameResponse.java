@@ -45,6 +45,9 @@ public class GameResponse {
 	@Nullable
 	private String url;
 	private GameTimestampsResponse timestamps;
+	@JsonProperty("session_id")
+	@Nullable
+	private String sessionId;
 	@JsonProperty("application_id")
 	@UnsignedJson
 	private long applicationId; // TODO: nullable?
@@ -52,6 +55,7 @@ public class GameResponse {
 	private String details;
 	@Nullable
 	private String state;
+	private int flags;
 	@Nullable
 	private GamePartyResponse party;
 	@Nullable
@@ -74,6 +78,11 @@ public class GameResponse {
 		return timestamps;
 	}
 
+	@Nullable
+	public String getSessionId() {
+		return sessionId;
+	}
+
 	public long getApplicationId() {
 		return applicationId;
 	}
@@ -86,6 +95,10 @@ public class GameResponse {
 	@Nullable
 	public String getState() {
 		return state;
+	}
+
+	public int getFlags() {
+		return flags;
 	}
 
 	@Nullable
@@ -105,9 +118,11 @@ public class GameResponse {
 				", type=" + type +
 				", url='" + url + '\'' +
 				", timestamps=" + timestamps +
+				", sessionId='" + sessionId + '\'' +
 				", applicationId=" + applicationId +
 				", details='" + details + '\'' +
 				", state='" + state + '\'' +
+				", flags=" + flags +
 				", party=" + party +
 				", assets=" + assets +
 				']';
