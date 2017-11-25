@@ -28,4 +28,12 @@ public class PositionModifyRequest {
 		this.id = id;
 		this.position = position;
 	}
+
+	@Override
+	public String toString() {
+		return "PositionModifyRequest[" +
+				"id=" + id +
+				", position=" + position +
+				']';
+	}
 }

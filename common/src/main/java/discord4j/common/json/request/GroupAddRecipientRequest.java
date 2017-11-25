@@ -28,4 +28,12 @@ public class GroupAddRecipientRequest {
 		this.accessToken = accessToken;
 		this.nick = nick;
 	}
+
+	@Override
+	public String toString() {
+		return "GroupAddRecipientRequest[" +
+				"accessToken='" + accessToken + '\'' +
+				", nick='" + nick + '\'' +
+				']';
+	}
 }

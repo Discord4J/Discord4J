@@ -40,4 +40,13 @@ public class TypingStart implements Dispatch {
 	public int getTimestamp() {
 		return timestamp;
 	}
+
+	@Override
+	public String toString() {
+		return "TypingStart[" +
+				"channelId=" + channelId +
+				", userId=" + userId +
+				", timestamp=" + timestamp +
+				']';
+	}
 }

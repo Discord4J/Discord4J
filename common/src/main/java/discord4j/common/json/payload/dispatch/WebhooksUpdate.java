@@ -35,4 +35,12 @@ public class WebhooksUpdate implements Dispatch {
 	public long getChannelId() {
 		return channelId;
 	}
+
+	@Override
+	public String toString() {
+		return "WebhooksUpdate[" +
+				"guildId=" + guildId +
+				", channelId=" + channelId +
+				']';
+	}
 }

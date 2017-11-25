@@ -28,4 +28,11 @@ public class GuildIntegrationsUpdate implements Dispatch {
 	public long getGuildId() {
 		return guildId;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildIntegrationsUpdate[" +
+				"guildId=" + guildId +
+				']';
+	}
 }

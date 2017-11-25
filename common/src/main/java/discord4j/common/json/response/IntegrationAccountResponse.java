@@ -31,4 +31,12 @@ public class IntegrationAccountResponse {
 	public String getName() {
 		return name;
 	}
+
+	@Override
+	public String toString() {
+		return "IntegrationAccountResponse[" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				']';
+	}
 }

@@ -27,4 +27,11 @@ public class GuildDelete implements Dispatch {
 	public UnavailableGuildResponse getGuild() {
 		return guild;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildDelete[" +
+				"guild=" + guild +
+				']';
+	}
 }

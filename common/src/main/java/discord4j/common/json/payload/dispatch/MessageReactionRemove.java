@@ -48,4 +48,14 @@ public class MessageReactionRemove implements Dispatch {
 	public EmojiResponse getEmoji() {
 		return emoji;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageReactionRemove[" +
+				"userId=" + userId +
+				", channelId=" + channelId +
+				", messageId=" + messageId +
+				", emoji=" + emoji +
+				']';
+	}
 }

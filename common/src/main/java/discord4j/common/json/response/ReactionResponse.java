@@ -33,4 +33,13 @@ public class ReactionResponse {
 	public EmojiResponse getEmoji() {
 		return emoji;
 	}
+
+	@Override
+	public String toString() {
+		return "ReactionResponse[" +
+				"count=" + count +
+				", me=" + me +
+				", emoji=" + emoji +
+				']';
+	}
 }

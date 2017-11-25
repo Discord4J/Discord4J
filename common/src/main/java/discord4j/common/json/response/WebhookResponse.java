@@ -67,4 +67,17 @@ public class WebhookResponse {
 	public String getToken() {
 		return token;
 	}
+
+	@Override
+	public String toString() {
+		return "WebhookResponse[" +
+				"id=" + id +
+				", guildId=" + guildId +
+				", channelId=" + channelId +
+				", user=" + user +
+				", name='" + name + '\'' +
+				", avatar='" + avatar + '\'' +
+				", token='" + token + '\'' +
+				']';
+	}
 }

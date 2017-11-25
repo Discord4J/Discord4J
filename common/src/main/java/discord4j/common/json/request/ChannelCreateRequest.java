@@ -109,4 +109,17 @@ public class ChannelCreateRequest {
 			return new ChannelCreateRequest(name, type, bitrate, userLimit, permissionOverwrites, parentId, nsfw);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "ChannelCreateRequest[" +
+				"name='" + name + '\'' +
+				", type=" + type +
+				", bitrate=" + bitrate +
+				", userLimit=" + userLimit +
+				", permissionOverwrites=" + permissionOverwrites +
+				", parentId=" + parentId +
+				", nsfw=" + nsfw +
+				']';
+	}
 }

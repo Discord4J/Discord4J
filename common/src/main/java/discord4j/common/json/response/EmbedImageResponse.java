@@ -41,4 +41,14 @@ public class EmbedImageResponse {
 	public int getWidth() {
 		return width;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedImageResponse[" +
+				"url='" + url + '\'' +
+				", proxyUrl='" + proxyUrl + '\'' +
+				", height=" + height +
+				", width=" + width +
+				']';
+	}
 }

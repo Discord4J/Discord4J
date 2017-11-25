@@ -38,4 +38,12 @@ public class ChannelPinsUpdate implements Dispatch {
 	public String getLastPinTimestamp() {
 		return lastPinTimestamp;
 	}
+
+	@Override
+	public String toString() {
+		return "ChannelPinsUpdate[" +
+				"channelId=" + channelId +
+				", lastPinTimestamp='" + lastPinTimestamp + '\'' +
+				']';
+	}
 }

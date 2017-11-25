@@ -30,7 +30,7 @@ public class GuildModifyRequest {
 	@JsonProperty("verification_level")
 	private final Possible<Integer> verificationLevel;
 	@JsonProperty("default_message_notifications")
-	private final Possible<Integer> defaultMessageNoficiations;
+	private final Possible<Integer> defaultMessageNotifications;
 	@JsonProperty("afk_channel_id")
 	@UnsignedJson
 	private final PossibleLong afkChannelId;
@@ -44,14 +44,14 @@ public class GuildModifyRequest {
 
 	public GuildModifyRequest(Possible<String> name, Possible<String> region,
 	                          Possible<Integer> verificationLevel,
-	                          Possible<Integer> defaultMessageNoficiations,
+	                          Possible<Integer> defaultMessageNotifications,
 	                          PossibleLong afkChannelId,
 	                          Possible<Integer> afkTimeout, Possible<String> icon,
 	                          PossibleLong ownerId, Possible<String> splash) {
 		this.name = name;
 		this.region = region;
 		this.verificationLevel = verificationLevel;
-		this.defaultMessageNoficiations = defaultMessageNoficiations;
+		this.defaultMessageNotifications = defaultMessageNotifications;
 		this.afkChannelId = afkChannelId;
 		this.afkTimeout = afkTimeout;
 		this.icon = icon;
@@ -123,5 +123,20 @@ public class GuildModifyRequest {
 		public GuildModifyRequest build() {
 			return new GuildModifyRequest(name, region, verificationLevel, defaultMessageNoficiations, afkChannelId, afkTimeout, icon, ownerId, splash);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "GuildModifyRequest[" +
+				"name=" + name +
+				", region=" + region +
+				", verificationLevel=" + verificationLevel +
+				", defaultMessageNotifications=" + defaultMessageNotifications +
+				", afkChannelId=" + afkChannelId +
+				", afkTimeout=" + afkTimeout +
+				", icon=" + icon +
+				", ownerId=" + ownerId +
+				", splash=" + splash +
+				']';
 	}
 }

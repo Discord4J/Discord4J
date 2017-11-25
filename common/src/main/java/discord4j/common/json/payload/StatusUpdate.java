@@ -35,4 +35,14 @@ public class StatusUpdate implements Payload {
 		this.status = status;
 		this.afk = afk;
 	}
+
+	@Override
+	public String toString() {
+		return "StatusUpdate[" +
+				"since=" + since +
+				", game=" + game +
+				", status='" + status + '\'' +
+				", afk=" + afk +
+				']';
+	}
 }

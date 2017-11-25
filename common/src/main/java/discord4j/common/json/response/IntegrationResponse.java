@@ -82,4 +82,21 @@ public class IntegrationResponse {
 	public String getSyncedAt() {
 		return syncedAt;
 	}
+
+	@Override
+	public String toString() {
+		return "IntegrationResponse[" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", type='" + type + '\'' +
+				", enabled=" + enabled +
+				", syncing=" + syncing +
+				", roleId=" + roleId +
+				", expireBehavior=" + expireBehavior +
+				", expireGracePeriod=" + expireGracePeriod +
+				", user=" + user +
+				", account=" + account +
+				", syncedAt='" + syncedAt + '\'' +
+				']';
+	}
 }

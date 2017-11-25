@@ -32,4 +32,12 @@ public class WebhookModifyRequest {
 		this.name = name;
 		this.avatar = avatar;
 	}
+
+	@Override
+	public String toString() {
+		return "WebhookModifyRequest[" +
+				"name=" + name +
+				", avatar=" + avatar +
+				']';
+	}
 }

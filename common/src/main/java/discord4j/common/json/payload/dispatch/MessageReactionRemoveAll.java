@@ -35,4 +35,12 @@ public class MessageReactionRemoveAll implements Dispatch {
 	public long getMessageId() {
 		return messageId;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageReactionRemoveAll[" +
+				"channelId=" + channelId +
+				", messageId=" + messageId +
+				']';
+	}
 }

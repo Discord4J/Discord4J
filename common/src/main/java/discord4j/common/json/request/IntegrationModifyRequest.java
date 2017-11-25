@@ -24,16 +24,16 @@ import discord4j.common.jackson.PossibleJson;
 public class IntegrationModifyRequest {
 
 	@JsonProperty("expire_behavior")
-	private final Possible<Integer> expireBehvaior;
+	private final Possible<Integer> expireBehavior;
 	@JsonProperty("expire_grace_period")
 	private final Possible<Integer> expireGracePeriod;
 	@JsonProperty("enable_emoticons")
 	private final Possible<Boolean> enableEmoticons;
 
-	public IntegrationModifyRequest(Possible<Integer> expireBehvaior,
+	public IntegrationModifyRequest(Possible<Integer> expireBehavior,
 	                                Possible<Integer> expireGracePeriod,
 	                                Possible<Boolean> enableEmoticons) {
-		this.expireBehvaior = expireBehvaior;
+		this.expireBehavior = expireBehavior;
 		this.expireGracePeriod = expireGracePeriod;
 		this.enableEmoticons = enableEmoticons;
 	}
@@ -66,5 +66,14 @@ public class IntegrationModifyRequest {
 		public IntegrationModifyRequest build() {
 			return new IntegrationModifyRequest(expireBehvaior, expireGracePeriod, enableEmoticons);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "IntegrationModifyRequest[" +
+				"expireBehavior=" + expireBehavior +
+				", expireGracePeriod=" + expireGracePeriod +
+				", enableEmoticons=" + enableEmoticons +
+				']';
 	}
 }

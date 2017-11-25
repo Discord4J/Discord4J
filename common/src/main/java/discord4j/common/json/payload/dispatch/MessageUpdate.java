@@ -27,4 +27,11 @@ public class MessageUpdate implements Dispatch {
 	public MessageResponse getMessage() {
 		return message;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageUpdate[" +
+				"message=" + message +
+				']';
+	}
 }

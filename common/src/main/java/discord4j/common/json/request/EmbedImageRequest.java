@@ -23,4 +23,11 @@ public class EmbedImageRequest {
 	public EmbedImageRequest(String url) {
 		this.url = url;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedImageRequest[" +
+				"url='" + url + '\'' +
+				']';
+	}
 }

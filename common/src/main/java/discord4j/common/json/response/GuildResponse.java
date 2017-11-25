@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.OptionalLong;
 
 public class GuildResponse {
@@ -211,5 +212,40 @@ public class GuildResponse {
 
 	public OptionalLong getSystemChannelId() {
 		return systemChannelId;
+	}
+
+	@Override
+	public String toString() {
+		return "GuildResponse[" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", icon='" + icon + '\'' +
+				", splash='" + splash + '\'' +
+				", ownerId=" + ownerId +
+				", region='" + region + '\'' +
+				", afkChannelId=" + afkChannelId +
+				", afkTimeout=" + afkTimeout +
+				", embedEnabled=" + embedEnabled +
+				", embedChannelId=" + embedChannelId +
+				", verificationLevel=" + verificationLevel +
+				", defaultMessageNotifications=" + defaultMessageNotifications +
+				", explciitContentFilter=" + explciitContentFilter +
+				", roles=" + Arrays.toString(roles) +
+				", emojis=" + Arrays.toString(emojis) +
+				", features=" + Arrays.toString(features) +
+				", mfaLevel=" + mfaLevel +
+				", applicationId=" + applicationId +
+				", widgetEnabled=" + widgetEnabled +
+				", widgetChannelId=" + widgetChannelId +
+				", joinedAt='" + joinedAt + '\'' +
+				", large=" + large +
+				", unavailable=" + unavailable +
+				", memberCount=" + memberCount +
+				", voiceStates=" + Arrays.toString(voiceStates) +
+				", members=" + Arrays.toString(members) +
+				", channels=" + Arrays.toString(channels) +
+				", presences=" + Arrays.toString(presences) +
+				", systemChannelId=" + systemChannelId +
+				']';
 	}
 }

@@ -47,4 +47,14 @@ public class GameAssetsResponse {
 	public String getSmallText() {
 		return smallText;
 	}
+
+	@Override
+	public String toString() {
+		return "GameAssetsResponse[" +
+				"largeImage=" + largeImage +
+				", largeText='" + largeText + '\'' +
+				", smallImage=" + smallImage +
+				", smallText='" + smallText + '\'' +
+				']';
+	}
 }

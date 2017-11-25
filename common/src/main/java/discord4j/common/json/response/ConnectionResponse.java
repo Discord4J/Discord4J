@@ -18,6 +18,8 @@ package discord4j.common.json.response;
 
 import discord4j.common.jackson.UnsignedJson;
 
+import java.util.Arrays;
+
 public class ConnectionResponse {
 
 	@UnsignedJson
@@ -45,5 +47,16 @@ public class ConnectionResponse {
 
 	public IntegrationResponse[] getIntegrations() {
 		return integrations;
+	}
+
+	@Override
+	public String toString() {
+		return "ConnectionResponse[" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", type='" + type + '\'' +
+				", revoked=" + revoked +
+				", integrations=" + Arrays.toString(integrations) +
+				']';
 	}
 }

@@ -19,6 +19,8 @@ package discord4j.common.json.payload.dispatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
+import java.util.Arrays;
+
 public class MessageDeleteBulk implements Dispatch {
 
 	@UnsignedJson
@@ -33,5 +35,13 @@ public class MessageDeleteBulk implements Dispatch {
 
 	public long getChannelId() {
 		return channelId;
+	}
+
+	@Override
+	public String toString() {
+		return "MessageDeleteBulk[" +
+				"ids=" + Arrays.toString(ids) +
+				", channelId=" + channelId +
+				']';
 	}
 }

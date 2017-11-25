@@ -82,4 +82,19 @@ public class UserResponse {
 	public String getToken() {
 		return token;
 	}
+
+	@Override
+	public String toString() {
+		return "UserResponse[" +
+				"id=" + id +
+				", username='" + username + '\'' +
+				", discriminator='" + discriminator + '\'' +
+				", avatar='" + avatar + '\'' +
+				", bot=" + bot +
+				", mfaEnabled=" + mfaEnabled +
+				", verified=" + verified +
+				", email='" + email + '\'' +
+				", token='" + token + '\'' +
+				']';
+	}
 }

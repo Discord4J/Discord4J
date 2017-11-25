@@ -27,4 +27,11 @@ public class UserUpdate implements Dispatch {
 	public UserResponse getUser() {
 		return user;
 	}
+
+	@Override
+	public String toString() {
+		return "UserUpdate[" +
+				"user=" + user +
+				']';
+	}
 }

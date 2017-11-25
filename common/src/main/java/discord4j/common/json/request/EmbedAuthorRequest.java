@@ -30,4 +30,13 @@ public class EmbedAuthorRequest {
 		this.url = url;
 		this.iconUrl = iconUrl;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedAuthorRequest[" +
+				"name='" + name + '\'' +
+				", url='" + url + '\'' +
+				", iconUrl='" + iconUrl + '\'' +
+				']';
+	}
 }

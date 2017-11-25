@@ -32,4 +32,11 @@ public class Heartbeat implements Payload {
 	public int getSeq() {
 		return seq;
 	}
+
+	@Override
+	public String toString() {
+		return "Heartbeat[" +
+				"seq=" + seq +
+				']';
+	}
 }

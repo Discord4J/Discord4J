@@ -40,4 +40,16 @@ public class Identify implements Payload {
 		this.shard = shard;
 		this.presence = presence;
 	}
+
+	@Override
+	public String toString() {
+		return "Identify[" +
+				"token=hunter2" +
+				", properties=" + properties +
+				", compress=" + compress +
+				", largeThreshold=" + largeThreshold +
+				", shard=" + shard +
+				", presence=" + presence +
+				']';
+	}
 }

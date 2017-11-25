@@ -27,4 +27,11 @@ public class GuildUpdate implements Dispatch {
 	public GuildResponse getGuild() {
 		return guild;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildUpdate[" +
+				"guild=" + guild +
+				']';
+	}
 }

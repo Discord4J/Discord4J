@@ -41,4 +41,14 @@ public class EmbedThumbnailResponse {
 	public int getWidth() {
 		return width;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedThumbnailResponse[" +
+				"url='" + url + '\'' +
+				", proxyUrl='" + proxyUrl + '\'' +
+				", height=" + height +
+				", width=" + width +
+				']';
+	}
 }

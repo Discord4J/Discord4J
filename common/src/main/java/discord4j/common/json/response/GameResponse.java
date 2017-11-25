@@ -97,4 +97,19 @@ public class GameResponse {
 	public GameAssetsResponse getAssets() {
 		return assets;
 	}
+
+	@Override
+	public String toString() {
+		return "GameResponse[" +
+				"name='" + name + '\'' +
+				", type=" + type +
+				", url='" + url + '\'' +
+				", timestamps=" + timestamps +
+				", applicationId=" + applicationId +
+				", details='" + details + '\'' +
+				", state='" + state + '\'' +
+				", party=" + party +
+				", assets=" + assets +
+				']';
+	}
 }

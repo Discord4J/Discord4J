@@ -27,4 +27,11 @@ public class ChannelCreate implements Dispatch {
 	public ChannelResponse getChannel() {
 		return channel;
 	}
+
+	@Override
+	public String toString() {
+		return "ChannelCreate[" +
+				"channel=" + channel +
+				']';
+	}
 }

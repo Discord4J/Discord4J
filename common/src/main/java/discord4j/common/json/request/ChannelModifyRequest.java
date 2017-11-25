@@ -121,4 +121,18 @@ public class ChannelModifyRequest {
 		}
 
 	}
+
+	@Override
+	public String toString() {
+		return "ChannelModifyRequest[" +
+				"name=" + name +
+				", position=" + position +
+				", topic=" + topic +
+				", nsfw=" + nsfw +
+				", bitrate=" + bitrate +
+				", userLimit=" + userLimit +
+				", permissionOverwrites=" + permissionOverwrites +
+				", parentId=" + parentId +
+				']';
+	}
 }

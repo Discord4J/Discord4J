@@ -34,4 +34,12 @@ public class GuildRoleCreate implements Dispatch {
 	public RoleResponse getRole() {
 		return role;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildRoleCreate[" +
+				"guildId=" + guildId +
+				", role=" + role +
+				']';
+	}
 }

@@ -31,4 +31,12 @@ public class UnavailableGuildResponse {
 	public boolean isUnavailable() {
 		return unavailable;
 	}
+
+	@Override
+	public String toString() {
+		return "UnavailableGuildResponse[" +
+				"id=" + id +
+				", unavailable=" + unavailable +
+				']';
+	}
 }

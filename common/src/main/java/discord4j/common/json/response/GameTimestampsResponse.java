@@ -28,4 +28,12 @@ public class GameTimestampsResponse {
 	public int getEnd() {
 		return end;
 	}
+
+	@Override
+	public String toString() {
+		return "GameTimestampsResponse[" +
+				"start=" + start +
+				", end=" + end +
+				']';
+	}
 }

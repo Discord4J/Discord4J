@@ -16,11 +16,20 @@
  */
 package discord4j.common.json.request;
 
+import java.util.Arrays;
+
 public class BulkDeleteRequest {
 
 	private final String[] messages;
 
 	public BulkDeleteRequest(String[] messages) {
 		this.messages = messages;
+	}
+
+	@Override
+	public String toString() {
+		return "BulkDeleteRequest[" +
+				"messages=" + Arrays.toString(messages) +
+				']';
 	}
 }

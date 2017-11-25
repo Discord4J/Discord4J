@@ -75,4 +75,19 @@ public class VoiceStateResponse {
 	public boolean isSuppress() {
 		return suppress;
 	}
+
+	@Override
+	public String toString() {
+		return "VoiceStateResponse[" +
+				"guildId=" + guildId +
+				", channelId=" + channelId +
+				", userId=" + userId +
+				", sessionId='" + sessionId + '\'' +
+				", deaf=" + deaf +
+				", mute=" + mute +
+				", selfDeaf=" + selfDeaf +
+				", selfMute=" + selfMute +
+				", suppress=" + suppress +
+				']';
+	}
 }

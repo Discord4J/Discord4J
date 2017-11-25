@@ -35,4 +35,12 @@ public class GuildRoleDelete implements Dispatch {
 	public long getRoleId() {
 		return roleId;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildRoleDelete[" +
+				"guildId=" + guildId +
+				", roleId=" + roleId +
+				']';
+	}
 }

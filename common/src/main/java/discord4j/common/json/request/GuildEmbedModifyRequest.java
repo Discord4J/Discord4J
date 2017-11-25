@@ -34,4 +34,12 @@ public class GuildEmbedModifyRequest {
 		this.enabled = enabled;
 		this.channelId = channelId;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildEmbedModifyRequest[" +
+				"enabled=" + enabled +
+				", channelId=" + channelId +
+				']';
+	}
 }

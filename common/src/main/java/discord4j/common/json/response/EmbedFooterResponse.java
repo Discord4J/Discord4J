@@ -37,4 +37,13 @@ public class EmbedFooterResponse {
 	public String getProxyIconUrl() {
 		return proxyIconUrl;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedFooterResponse[" +
+				"text='" + text + '\'' +
+				", iconUrl='" + iconUrl + '\'' +
+				", proxyIconUrl='" + proxyIconUrl + '\'' +
+				']';
+	}
 }

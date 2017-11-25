@@ -19,6 +19,7 @@ package discord4j.common.json.response;
 import discord4j.common.json.EmbedFieldEntity;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 public class EmbedResponse {
 
@@ -110,5 +111,24 @@ public class EmbedResponse {
 	@Nullable
 	public EmbedFieldEntity[] getFields() {
 		return fields;
+	}
+
+	@Override
+	public String toString() {
+		return "EmbedResponse[" +
+				"title='" + title + '\'' +
+				", type='" + type + '\'' +
+				", description='" + description + '\'' +
+				", url='" + url + '\'' +
+				", timestamp='" + timestamp + '\'' +
+				", color=" + color +
+				", footer=" + footer +
+				", image=" + image +
+				", thumbnail=" + thumbnail +
+				", video=" + video +
+				", provider=" + provider +
+				", author=" + author +
+				", fields=" + Arrays.toString(fields) +
+				']';
 	}
 }

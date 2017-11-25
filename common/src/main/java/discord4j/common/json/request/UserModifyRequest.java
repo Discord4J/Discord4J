@@ -29,4 +29,12 @@ public class UserModifyRequest {
 		this.username = username;
 		this.avatar = avatar;
 	}
+
+	@Override
+	public String toString() {
+		return "UserModifyRequest[" +
+				"username=" + username +
+				", avatar=" + avatar +
+				']';
+	}
 }

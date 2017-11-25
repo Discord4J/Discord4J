@@ -34,4 +34,14 @@ public class MessageCreateRequest {
 		this.tts = tts;
 		this.embed = embed;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageCreateRequest[" +
+				"content='" + content + '\'' +
+				", nonce='" + nonce + '\'' +
+				", tts=" + tts +
+				", embed=" + embed +
+				']';
+	}
 }

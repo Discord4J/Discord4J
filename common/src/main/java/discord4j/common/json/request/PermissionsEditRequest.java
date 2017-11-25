@@ -27,4 +27,13 @@ public class PermissionsEditRequest {
 		this.deny = deny;
 		this.type = type;
 	}
+
+	@Override
+	public String toString() {
+		return "PermissionsEditRequest[" +
+				"allow=" + allow +
+				", deny=" + deny +
+				", type='" + type + '\'' +
+				']';
+	}
 }

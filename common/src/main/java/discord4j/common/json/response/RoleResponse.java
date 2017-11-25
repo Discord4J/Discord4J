@@ -61,4 +61,18 @@ public class RoleResponse {
 	public boolean isMentionable() {
 		return mentionable;
 	}
+
+	@Override
+	public String toString() {
+		return "RoleResponse[" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", color=" + color +
+				", hoist=" + hoist +
+				", position=" + position +
+				", permissions=" + permissions +
+				", managed=" + managed +
+				", mentionable=" + mentionable +
+				']';
+	}
 }

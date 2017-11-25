@@ -33,4 +33,13 @@ public class EmbedVideoResponse {
 	public int getWidth() {
 		return width;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedVideoResponse[" +
+				"url='" + url + '\'' +
+				", height=" + height +
+				", width=" + width +
+				']';
+	}
 }

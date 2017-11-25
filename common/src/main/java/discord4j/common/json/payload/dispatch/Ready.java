@@ -21,6 +21,8 @@ import discord4j.common.json.response.ChannelResponse;
 import discord4j.common.json.response.UnavailableGuildResponse;
 import discord4j.common.json.response.UserResponse;
 
+import java.util.Arrays;
+
 public class Ready implements Dispatch {
 
 	@JsonProperty("v")
@@ -61,5 +63,20 @@ public class Ready implements Dispatch {
 
 	public String[] getTrace() {
 		return trace;
+	}
+
+	@Override
+	public String toString() {
+		return "Ready[" +
+				"version=" + version +
+				", user=" + user +
+				", privateChannels=" + Arrays.toString(privateChannels) +
+				", guilds=" + Arrays.toString(guilds) +
+				", sessionId='" + sessionId + '\'' +
+				", trace=" + Arrays.toString(trace) +
+				", user_settings=" + user_settings +
+				", relationships=" + Arrays.toString(relationships) +
+				", presences=" + Arrays.toString(presences) +
+				']';
 	}
 }

@@ -18,6 +18,8 @@ package discord4j.common.json.request;
 
 import discord4j.common.jackson.UnsignedJson;
 
+import java.util.Arrays;
+
 public class GuildEmojiCreateRequest {
 
 	private final String name;
@@ -29,5 +31,14 @@ public class GuildEmojiCreateRequest {
 		this.name = name;
 		this.image = image;
 		this.roles = roles;
+	}
+
+	@Override
+	public String toString() {
+		return "GuildEmojiCreateRequest[" +
+				"name='" + name + '\'' +
+				", image='" + image + '\'' +
+				", roles=" + Arrays.toString(roles) +
+				']';
 	}
 }

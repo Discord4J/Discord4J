@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.OptionalLong;
 
 public class MessageResponse {
@@ -124,5 +125,28 @@ public class MessageResponse {
 
 	public int getType() {
 		return type;
+	}
+
+	@Override
+	public String toString() {
+		return "MessageResponse[" +
+				"id=" + id +
+				", channelId=" + channelId +
+				", author=" + author +
+				", content='" + content + '\'' +
+				", timestamp='" + timestamp + '\'' +
+				", editedTimestamp='" + editedTimestamp + '\'' +
+				", tts=" + tts +
+				", mentionEveryone=" + mentionEveryone +
+				", mentions=" + Arrays.toString(mentions) +
+				", mentionRoles=" + Arrays.toString(mentionRoles) +
+				", attachments=" + Arrays.toString(attachments) +
+				", embeds=" + Arrays.toString(embeds) +
+				", reactions=" + Arrays.toString(reactions) +
+				", nonce=" + nonce +
+				", pinned=" + pinned +
+				", webhookId=" + webhookId +
+				", type=" + type +
+				']';
 	}
 }

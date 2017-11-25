@@ -28,4 +28,12 @@ public class IntegrationCreateRequest {
 		this.type = type;
 		this.id = id;
 	}
+
+	@Override
+	public String toString() {
+		return "IntegrationCreateRequest[" +
+				"type='" + type + '\'' +
+				", id=" + id +
+				']';
+	}
 }

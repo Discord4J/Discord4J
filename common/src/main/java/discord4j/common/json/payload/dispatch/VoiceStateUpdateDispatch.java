@@ -27,4 +27,11 @@ public class VoiceStateUpdateDispatch implements Dispatch {
 	public VoiceStateResponse getVoiceState() {
 		return voiceState;
 	}
+
+	@Override
+	public String toString() {
+		return "VoiceStateUpdateDispatch[" +
+				"voiceState=" + voiceState +
+				']';
+	}
 }

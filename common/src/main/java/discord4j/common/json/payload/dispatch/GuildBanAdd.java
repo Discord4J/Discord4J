@@ -36,4 +36,12 @@ public class GuildBanAdd implements Dispatch {
 	public long getGuildId() {
 		return guildId;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildBanAdd[" +
+				"user=" + user +
+				", guildId=" + guildId +
+				']';
+	}
 }

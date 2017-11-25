@@ -90,4 +90,15 @@ public class GuildMemberModifyRequest {
 			return new GuildMemberModifyRequest(nick, roles, mute, deaf, channelId);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "GuildMemberModifyRequest[" +
+				"nick=" + nick +
+				", roles=" + roles +
+				", mute=" + mute +
+				", deaf=" + deaf +
+				", channelId=" + channelId +
+				']';
+	}
 }

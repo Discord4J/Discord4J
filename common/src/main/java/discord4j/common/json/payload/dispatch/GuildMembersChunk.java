@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.response.GuildMemberResponse;
 
+import java.util.Arrays;
+
 public class GuildMembersChunk implements Dispatch {
 
 	@JsonProperty("guild_id")
@@ -33,5 +35,13 @@ public class GuildMembersChunk implements Dispatch {
 
 	public GuildMemberResponse[] getMembers() {
 		return members;
+	}
+
+	@Override
+	public String toString() {
+		return "GuildMembersChunk[" +
+				"guildId=" + guildId +
+				", members=" + Arrays.toString(members) +
+				']';
 	}
 }

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 public class PresenceResponse {
 
@@ -52,5 +53,16 @@ public class PresenceResponse {
 
 	public String getStatus() {
 		return status;
+	}
+
+	@Override
+	public String toString() {
+		return "PresenceResponse[" +
+				"user=" + user +
+				", roles=" + Arrays.toString(roles) +
+				", game=" + game +
+				", guildId=" + guildId +
+				", status='" + status + '\'' +
+				']';
 	}
 }

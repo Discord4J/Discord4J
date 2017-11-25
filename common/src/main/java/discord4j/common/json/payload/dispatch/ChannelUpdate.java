@@ -27,4 +27,11 @@ public class ChannelUpdate implements Dispatch {
 	public ChannelResponse getChannel() {
 		return channel;
 	}
+
+	@Override
+	public String toString() {
+		return "ChannelUpdate[" +
+				"channel=" + channel +
+				']';
+	}
 }

@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.response.EmojiResponse;
 
+import java.util.Arrays;
+
 public class GuildEmojisUpdate implements Dispatch {
 
 	@JsonProperty("guild_id")
@@ -33,5 +35,13 @@ public class GuildEmojisUpdate implements Dispatch {
 
 	public EmojiResponse[] getEmojis() {
 		return emojis;
+	}
+
+	@Override
+	public String toString() {
+		return "GuildEmojisUpdate[" +
+				"guildId=" + guildId +
+				", emojis=" + Arrays.toString(emojis) +
+				']';
 	}
 }

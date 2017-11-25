@@ -31,4 +31,13 @@ public class GameRequest {
 		this.type = type;
 		this.url = url;
 	}
+
+	@Override
+	public String toString() {
+		return "GameRequest[" +
+				"name='" + name + '\'' +
+				", type=" + type +
+				", url=" + url +
+				']';
+	}
 }

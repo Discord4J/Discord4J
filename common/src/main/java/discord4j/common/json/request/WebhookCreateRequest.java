@@ -28,4 +28,12 @@ public class WebhookCreateRequest {
 		this.name = name;
 		this.avatar = avatar;
 	}
+
+	@Override
+	public String toString() {
+		return "WebhookCreateRequest[" +
+				"name='" + name + '\'' +
+				", avatar='" + avatar + '\'' +
+				']';
+	}
 }

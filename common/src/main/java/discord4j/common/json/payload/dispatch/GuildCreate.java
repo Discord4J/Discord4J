@@ -27,4 +27,11 @@ public class GuildCreate implements Dispatch {
 	public GuildResponse getGuild() {
 		return guild;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildCreate[" +
+				"guild=" + guild +
+				']';
+	}
 }

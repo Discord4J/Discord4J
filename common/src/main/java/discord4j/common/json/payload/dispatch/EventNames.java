@@ -16,7 +16,7 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-public class EventNames {
+public abstract class EventNames {
 
 	public static final String READY = "READY";
 	public static final String RESUMED = "RESUMED";

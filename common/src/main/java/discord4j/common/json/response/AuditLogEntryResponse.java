@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.OptionalLong;
 
 public class AuditLogEntryResponse {
@@ -70,5 +71,18 @@ public class AuditLogEntryResponse {
 	@Nullable
 	public String getReason() {
 		return reason;
+	}
+
+	@Override
+	public String toString() {
+		return "AuditLogEntryResponse[" +
+				"targetId=" + targetId +
+				", changes=" + Arrays.toString(changes) +
+				", userId=" + userId +
+				", id=" + id +
+				", actionType=" + actionType +
+				", options=" + options +
+				", reason='" + reason + '\'' +
+				']';
 	}
 }

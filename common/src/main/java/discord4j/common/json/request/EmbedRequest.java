@@ -18,6 +18,8 @@ package discord4j.common.json.request;
 
 import discord4j.common.json.EmbedFieldEntity;
 
+import java.util.Arrays;
+
 public class EmbedRequest {
 
 	private final String title;
@@ -45,5 +47,21 @@ public class EmbedRequest {
 		this.thumbnail = thumbnail;
 		this.author = author;
 		this.fields = fields;
+	}
+
+	@Override
+	public String toString() {
+		return "EmbedRequest[" +
+				"title='" + title + '\'' +
+				", description='" + description + '\'' +
+				", url='" + url + '\'' +
+				", timestamp='" + timestamp + '\'' +
+				", color=" + color +
+				", footer=" + footer +
+				", image=" + image +
+				", thumbnail=" + thumbnail +
+				", author=" + author +
+				", fields=" + Arrays.toString(fields) +
+				']';
 	}
 }

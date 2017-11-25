@@ -21,6 +21,7 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.OptionalLong;
 
 public class ChannelResponse {
@@ -141,5 +142,28 @@ public class ChannelResponse {
 	@Nullable
 	public String getLastPinTimestamp() {
 		return lastPinTimestamp;
+	}
+
+	@Override
+	public String toString() {
+		return "ChannelResponse[" +
+				"id=" + id +
+				", type=" + type +
+				", guildId=" + guildId +
+				", position=" + position +
+				", permissionOverwrites=" + Arrays.toString(permissionOverwrites) +
+				", name='" + name + '\'' +
+				", topic='" + topic + '\'' +
+				", nsfw=" + nsfw +
+				", lastMessageId=" + lastMessageId +
+				", bitrate=" + bitrate +
+				", userLimit=" + userLimit +
+				", recipients=" + Arrays.toString(recipients) +
+				", icon='" + icon + '\'' +
+				", ownerId=" + ownerId +
+				", applicationId=" + applicationId +
+				", parentId=" + parentId +
+				", lastPinTimestamp='" + lastPinTimestamp + '\'' +
+				']';
 	}
 }

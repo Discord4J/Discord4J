@@ -17,7 +17,8 @@
 package discord4j.common.json.payload.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.json.payload.Payload;
+
+import java.util.Arrays;
 
 public class Resumed implements Dispatch {
 
@@ -26,5 +27,12 @@ public class Resumed implements Dispatch {
 
 	public String[] getTrace() {
 		return trace;
+	}
+
+	@Override
+	public String toString() {
+		return "Resumed[" +
+				"trace=" + Arrays.toString(trace) +
+				']';
 	}
 }

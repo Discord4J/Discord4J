@@ -46,4 +46,15 @@ public class UserGuildResponse {
 	public int getPermissions() {
 		return permissions;
 	}
+
+	@Override
+	public String toString() {
+		return "UserGuildResponse[" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", icon='" + icon + '\'' +
+				", owner=" + owner +
+				", permissions=" + permissions +
+				']';
+	}
 }

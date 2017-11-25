@@ -38,4 +38,14 @@ public class VoiceStateUpdate implements Payload {
 		this.selfMute = selfMute;
 		this.selfDeaf = selfDeaf;
 	}
+
+	@Override
+	public String toString() {
+		return "VoiceStateUpdate[" +
+				"guildId=" + guildId +
+				", channelId=" + channelId +
+				", selfMute=" + selfMute +
+				", selfDeaf=" + selfDeaf +
+				']';
+	}
 }

@@ -23,4 +23,11 @@ public class PruneResponse {
 	public int getPruned() {
 		return pruned;
 	}
+
+	@Override
+	public String toString() {
+		return "PruneResponse[" +
+				"pruned=" + pruned +
+				']';
+	}
 }

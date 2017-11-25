@@ -19,6 +19,8 @@ package discord4j.common.json.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
+
 public class Hello implements Payload {
 
 	@JsonProperty("heartbeat_interval")
@@ -32,5 +34,13 @@ public class Hello implements Payload {
 
 	public String[] getTrace() {
 		return trace;
+	}
+
+	@Override
+	public String toString() {
+		return "Hello[" +
+				"heartbeatInterval=" + heartbeatInterval +
+				", trace=" + Arrays.toString(trace) +
+				']';
 	}
 }

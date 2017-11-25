@@ -27,4 +27,11 @@ public class ChannelDelete implements Dispatch {
 	public ChannelResponse getChannel() {
 		return channel;
 	}
+
+	@Override
+	public String toString() {
+		return "ChannelDelete[" +
+				"channel=" + channel +
+				']';
+	}
 }

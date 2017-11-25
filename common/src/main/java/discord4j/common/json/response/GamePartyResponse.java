@@ -17,6 +17,7 @@
 package discord4j.common.json.response;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 public class GamePartyResponse {
 
@@ -31,5 +32,13 @@ public class GamePartyResponse {
 
 	public int[] getSize() {
 		return size;
+	}
+
+	@Override
+	public String toString() {
+		return "GamePartyResponse[" +
+				"id='" + id + '\'' +
+				", size=" + Arrays.toString(size) +
+				']';
 	}
 }

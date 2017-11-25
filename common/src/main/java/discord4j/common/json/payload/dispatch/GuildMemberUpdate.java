@@ -21,6 +21,8 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.response.RoleResponse;
 import discord4j.common.json.response.UserResponse;
 
+import java.util.Arrays;
+
 public class GuildMemberUpdate implements Dispatch {
 
 	@JsonProperty("guild_id")
@@ -44,5 +46,15 @@ public class GuildMemberUpdate implements Dispatch {
 
 	public String getNick() {
 		return nick;
+	}
+
+	@Override
+	public String toString() {
+		return "GuildMemberUpdate[" +
+				"guildId=" + guildId +
+				", roles=" + Arrays.toString(roles) +
+				", user=" + Arrays.toString(user) +
+				", nick='" + nick + '\'' +
+				']';
 	}
 }

@@ -34,4 +34,12 @@ public class MessageEditRequest {
 		this.content = content;
 		this.embed = embed;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageEditRequest[" +
+				"content=" + content +
+				", embed=" + embed +
+				']';
+	}
 }

@@ -25,4 +25,12 @@ public class PartialChannelRequest {
 		this.name = name;
 		this.type = type;
 	}
+
+	@Override
+	public String toString() {
+		return "PartialChannelRequest[" +
+				"name='" + name + '\'' +
+				", type=" + type +
+				']';
+	}
 }

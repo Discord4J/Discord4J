@@ -54,4 +54,13 @@ public class EmbedFieldEntity {
 	public void setInline(boolean inline) {
 		this.inline = inline;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedFieldEntity[" +
+				"name='" + name + '\'' +
+				", value='" + value + '\'' +
+				", inline=" + inline +
+				']';
+	}
 }

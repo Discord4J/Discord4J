@@ -86,4 +86,15 @@ public class GuildMemberAddRequest {
 			return new GuildMemberAddRequest(accessToken, nick, roles, mute, deaf);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "GuildMemberAddRequest[" +
+				"accessToken='" + accessToken + '\'' +
+				", nick=" + nick +
+				", roles=" + roles +
+				", mute=" + mute +
+				", deaf=" + deaf +
+				']';
+	}
 }

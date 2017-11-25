@@ -27,4 +27,11 @@ public class MessageCreate implements Dispatch {
 	public MessageResponse getMessage() {
 		return message;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageCreate[" +
+				"message=" + message +
+				']';
+	}
 }

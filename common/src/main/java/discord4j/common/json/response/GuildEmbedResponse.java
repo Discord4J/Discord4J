@@ -35,4 +35,12 @@ public class GuildEmbedResponse {
 	public OptionalLong getChannelId() {
 		return channelId;
 	}
+
+	@Override
+	public String toString() {
+		return "GuildEmbedResponse[" +
+				"enabled=" + enabled +
+				", channelId=" + channelId +
+				']';
+	}
 }

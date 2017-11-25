@@ -32,4 +32,13 @@ public class IdentifyProperties {
 		this.browser = browser;
 		this.device = device;
 	}
+
+	@Override
+	public String toString() {
+		return "IdentifyProperties[" +
+				"os='" + os + '\'' +
+				", browser='" + browser + '\'' +
+				", device='" + device + '\'' +
+				']';
+	}
 }

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 public class GuildMemberResponse {
 
@@ -56,5 +57,17 @@ public class GuildMemberResponse {
 
 	public boolean isMute() {
 		return mute;
+	}
+
+	@Override
+	public String toString() {
+		return "GuildMemberResponse[" +
+				"user=" + user +
+				", nick='" + nick + '\'' +
+				", roles=" + Arrays.toString(roles) +
+				", joinedAt='" + joinedAt + '\'' +
+				", deaf=" + deaf +
+				", mute=" + mute +
+				']';
 	}
 }

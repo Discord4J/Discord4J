@@ -28,4 +28,12 @@ public class EmbedFooterRequest {
 		this.text = text;
 		this.iconUrl = iconUrl;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedFooterRequest[" +
+				"text='" + text + '\'' +
+				", iconUrl='" + iconUrl + '\'' +
+				']';
+	}
 }

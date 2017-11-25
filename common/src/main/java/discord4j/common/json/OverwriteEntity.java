@@ -67,4 +67,14 @@ public class OverwriteEntity {
 	public void setDeny(int deny) {
 		this.deny = deny;
 	}
+
+	@Override
+	public String toString() {
+		return "OverwriteEntity[" +
+				"id=" + id +
+				", type='" + type + '\'' +
+				", allow=" + allow +
+				", deny=" + deny +
+				']';
+	}
 }

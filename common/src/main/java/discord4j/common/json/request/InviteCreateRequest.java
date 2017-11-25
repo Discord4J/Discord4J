@@ -33,4 +33,14 @@ public class InviteCreateRequest {
 		this.temporary = temporary;
 		this.unique = unique;
 	}
+
+	@Override
+	public String toString() {
+		return "InviteCreateRequest[" +
+				"maxAge=" + maxAge +
+				", maxUses=" + maxUses +
+				", temporary=" + temporary +
+				", unique=" + unique +
+				']';
+	}
 }

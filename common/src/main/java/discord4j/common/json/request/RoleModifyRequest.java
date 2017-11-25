@@ -79,4 +79,15 @@ public class RoleModifyRequest {
 			return new RoleModifyRequest(name, permissions, color, hoist, mentionable);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "RoleModifyRequest[" +
+				"name=" + name +
+				", permissions=" + permissions +
+				", color=" + color +
+				", hoist=" + hoist +
+				", mentionable=" + mentionable +
+				']';
+	}
 }

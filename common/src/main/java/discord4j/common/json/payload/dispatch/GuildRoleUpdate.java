@@ -35,4 +35,11 @@ public class GuildRoleUpdate implements Dispatch {
 		return role;
 	}
 
+	@Override
+	public String toString() {
+		return "GuildRoleUpdate[" +
+				"guildId=" + guildId +
+				", role=" + role +
+				']';
+	}
 }

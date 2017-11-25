@@ -89,4 +89,20 @@ public class InviteResponse {
 	public Boolean getRevoked() {
 		return revoked;
 	}
+
+	@Override
+	public String toString() {
+		return "InviteResponse[" +
+				"code='" + code + '\'' +
+				", guild=" + guild +
+				", channel=" + channel +
+				", inviter=" + inviter +
+				", uses=" + uses +
+				", maxUses=" + maxUses +
+				", maxAge=" + maxAge +
+				", temporary=" + temporary +
+				", createdAt='" + createdAt + '\'' +
+				", revoked=" + revoked +
+				']';
+	}
 }

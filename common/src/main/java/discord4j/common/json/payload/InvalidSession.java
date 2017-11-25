@@ -28,4 +28,11 @@ public class InvalidSession implements Payload {
 	public boolean isResumable() {
 		return resumable;
 	}
+
+	@Override
+	public String toString() {
+		return "InvalidSession[" +
+				"resumable=" + resumable +
+				']';
+	}
 }

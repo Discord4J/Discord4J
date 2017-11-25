@@ -32,4 +32,12 @@ public class GatewayResponse {
 	public Integer getShards() {
 		return shards;
 	}
+
+	@Override
+	public String toString() {
+		return "GatewayResponse[" +
+				"url='" + url + '\'' +
+				", shards=" + shards +
+				']';
+	}
 }

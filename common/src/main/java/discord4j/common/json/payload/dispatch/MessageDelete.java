@@ -34,4 +34,12 @@ public class MessageDelete implements Dispatch {
 	public long getChannelId() {
 		return channelId;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageDelete[" +
+				"id=" + id +
+				", channelId=" + channelId +
+				']';
+	}
 }

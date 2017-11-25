@@ -26,4 +26,11 @@ public class NicknameModifyRequest {
 	public NicknameModifyRequest(@Nullable String nick) {
 		this.nick = nick;
 	}
+
+	@Override
+	public String toString() {
+		return "NicknameModifyRequest[" +
+				"nick='" + nick + '\'' +
+				']';
+	}
 }

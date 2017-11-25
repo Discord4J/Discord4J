@@ -30,4 +30,13 @@ public class Resume implements Payload {
 		this.sessionId = sessionId;
 		this.seq = seq;
 	}
+
+	@Override
+	public String toString() {
+		return "Resume[" +
+				"token='" + token + '\'' +
+				", sessionId='" + sessionId + '\'' +
+				", seq=" + seq +
+				']';
+	}
 }

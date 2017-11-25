@@ -38,4 +38,13 @@ public class VoiceServerUpdate implements Dispatch {
 	public String getEndpoint() {
 		return endpoint;
 	}
+
+	@Override
+	public String toString() {
+		return "VoiceServerUpdate[" +
+				"token='" + token + '\'' +
+				", guildId=" + guildId +
+				", endpoint='" + endpoint + '\'' +
+				']';
+	}
 }

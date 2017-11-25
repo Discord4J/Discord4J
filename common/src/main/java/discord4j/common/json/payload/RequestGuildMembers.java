@@ -32,4 +32,13 @@ public class RequestGuildMembers implements Payload {
 		this.query = query;
 		this.limit = limit;
 	}
+
+	@Override
+	public String toString() {
+		return "RequestGuildMembers[" +
+				"guildId=" + guildId +
+				", query='" + query + '\'' +
+				", limit=" + limit +
+				']';
+	}
 }

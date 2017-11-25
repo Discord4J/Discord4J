@@ -23,4 +23,11 @@ public class EmbedThumbnailRequest {
 	public EmbedThumbnailRequest(String url) {
 		this.url = url;
 	}
+
+	@Override
+	public String toString() {
+		return "EmbedThumbnailRequest[" +
+				"url='" + url + '\'' +
+				']';
+	}
 }

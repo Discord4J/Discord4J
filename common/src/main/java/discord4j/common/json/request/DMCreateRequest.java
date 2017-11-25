@@ -28,4 +28,11 @@ public class DMCreateRequest {
 	public DMCreateRequest(long recipientId) {
 		this.recipientId = recipientId;
 	}
+
+	@Override
+	public String toString() {
+		return "DMCreateRequest[" +
+				"recipientId=" + recipientId +
+				']';
+	}
 }

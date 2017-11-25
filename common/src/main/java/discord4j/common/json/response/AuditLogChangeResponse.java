@@ -43,4 +43,13 @@ public class AuditLogChangeResponse {
 	public String getKey() {
 		return key;
 	}
+
+	@Override
+	public String toString() {
+		return "AuditLogChangeResponse[" +
+				"newValue=" + newValue +
+				", oldValue=" + oldValue +
+				", key='" + key + '\'' +
+				']';
+	}
 }

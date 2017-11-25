@@ -18,6 +18,8 @@ package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
+
 public class AuditLogResponse {
 
 	private WebhookResponse[] webhooks;
@@ -35,5 +37,14 @@ public class AuditLogResponse {
 
 	public AuditLogEntryResponse[] getAuditLogEntries() {
 		return auditLogEntries;
+	}
+
+	@Override
+	public String toString() {
+		return "AuditLogResponse[" +
+				"webhooks=" + Arrays.toString(webhooks) +
+				", users=" + Arrays.toString(users) +
+				", auditLogEntries=" + Arrays.toString(auditLogEntries) +
+				']';
 	}
 }

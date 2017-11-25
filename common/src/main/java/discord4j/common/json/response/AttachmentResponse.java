@@ -64,4 +64,17 @@ public class AttachmentResponse {
 	public Integer getWidth() {
 		return width;
 	}
+
+	@Override
+	public String toString() {
+		return "AttachmentResponse[" +
+				"id=" + id +
+				", filename='" + filename + '\'' +
+				", size=" + size +
+				", url='" + url + '\'' +
+				", proxyUrl='" + proxyUrl + '\'' +
+				", height=" + height +
+				", width=" + width +
+				']';
+	}
 }

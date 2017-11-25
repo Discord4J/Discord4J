@@ -23,6 +23,7 @@ import discord4j.common.json.response.GameResponse;
 import discord4j.common.json.response.UserResponse;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 @PossibleJson
 public class PresenceUpdate implements Dispatch {
@@ -62,5 +63,17 @@ public class PresenceUpdate implements Dispatch {
 
 	public String getStatus() {
 		return status;
+	}
+
+	@Override
+	public String toString() {
+		return "PresenceUpdate[" +
+				"user=" + user +
+				", roles=" + Arrays.toString(roles) +
+				", game=" + game +
+				", guildId=" + guildId +
+				", status='" + status + '\'' +
+				", nick='" + nick + '\'' +
+				']';
 	}
 }

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.OptionalLong;
 
 public class EmojiResponse {
@@ -58,5 +59,17 @@ public class EmojiResponse {
 
 	public boolean isManaged() {
 		return managed;
+	}
+
+	@Override
+	public String toString() {
+		return "EmojiResponse[" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", roles=" + Arrays.toString(roles) +
+				", user=" + user +
+				", requireColons=" + requireColons +
+				", managed=" + managed +
+				']';
 	}
 }

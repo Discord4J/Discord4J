@@ -18,6 +18,8 @@ package discord4j.common.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
+
 public class GuildCreateRequest {
 
 	private final String name;
@@ -40,5 +42,18 @@ public class GuildCreateRequest {
 		this.defaultMessageNotifications = defaultMessageNotifications;
 		this.roles = roles;
 		this.channels = channels;
+	}
+
+	@Override
+	public String toString() {
+		return "GuildCreateRequest[" +
+				"name='" + name + '\'' +
+				", region='" + region + '\'' +
+				", icon='" + icon + '\'' +
+				", verificationLevel=" + verificationLevel +
+				", defaultMessageNotifications=" + defaultMessageNotifications +
+				", roles=" + Arrays.toString(roles) +
+				", channels=" + Arrays.toString(channels) +
+				']';
 	}
 }

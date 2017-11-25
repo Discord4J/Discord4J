@@ -18,6 +18,7 @@ package discord4j.common.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public class GroupDMCreateRequest {
@@ -29,5 +30,13 @@ public class GroupDMCreateRequest {
 	public GroupDMCreateRequest(String[] accessTokens, Map<String, String> nicks) {
 		this.accessTokens = accessTokens;
 		this.nicks = nicks;
+	}
+
+	@Override
+	public String toString() {
+		return "GroupDMCreateRequest[" +
+				"accessTokens=" + Arrays.toString(accessTokens) +
+				", nicks=" + nicks +
+				']';
 	}
 }

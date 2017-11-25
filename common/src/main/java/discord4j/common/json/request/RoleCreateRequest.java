@@ -31,4 +31,15 @@ public class RoleCreateRequest {
 		this.hoist = hoist;
 		this.mentionable = mentionable;
 	}
+
+	@Override
+	public String toString() {
+		return "RoleCreateRequest[" +
+				"name='" + name + '\'' +
+				", permissions=" + permissions +
+				", color=" + color +
+				", hoist=" + hoist +
+				", mentionable=" + mentionable +
+				']';
+	}
 }
