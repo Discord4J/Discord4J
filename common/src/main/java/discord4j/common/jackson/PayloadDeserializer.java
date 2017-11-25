@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import discord4j.common.json.payload.*;
-import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.common.json.payload.dispatch.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,18 +38,52 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload> {
 	private static final Map<String, Class<? extends Dispatch>> dispatchTypes = new HashMap<>();
 
 	static {
-		payloadTypes.put(Opcodes.DISPATCH, Dispatch.class);
+		payloadTypes.put(Opcodes.DISPATCH, null); // should use dispatchTypes. For completion.
 		payloadTypes.put(Opcodes.HEARTBEAT, Heartbeat.class);
 		payloadTypes.put(Opcodes.IDENTIFY, Identify.class);
 		payloadTypes.put(Opcodes.STATUS_UPDATE, StatusUpdate.class);
 		payloadTypes.put(Opcodes.VOICE_STATE_UPDATE, VoiceStateUpdate.class);
-		payloadTypes.put(Opcodes.VOICE_SERVER_PING, null); // Never sent
+		payloadTypes.put(Opcodes.VOICE_SERVER_PING, null); // Never sent. For completion
 		payloadTypes.put(Opcodes.RESUME, Resume.class);
 		payloadTypes.put(Opcodes.RECONNECT, null); // Body always null. For completion
 		payloadTypes.put(Opcodes.REQUEST_GUILD_MEMBERS, RequestGuildMembers.class);
 		payloadTypes.put(Opcodes.INVALID_SESSION, InvalidSession.class);
 		payloadTypes.put(Opcodes.HELLO, Hello.class);
 		payloadTypes.put(Opcodes.HEARTBEAT_ACK, null); // Body always null. For completion
+
+		dispatchTypes.put(EventNames.READY, Ready.class);
+		dispatchTypes.put(EventNames.RESUMED, Resumed.class);
+		dispatchTypes.put(EventNames.CHANNEL_CREATE, ChannelCreate.class);
+		dispatchTypes.put(EventNames.CHANNEL_UPDATE, ChannelUpdate.class);
+		dispatchTypes.put(EventNames.CHANNEL_DELETE, ChannelDelete.class);
+		dispatchTypes.put(EventNames.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
+		dispatchTypes.put(EventNames.GUILD_CREATE, GuildCreate.class);
+		dispatchTypes.put(EventNames.GUILD_UPDATE, GuildUpdate.class);
+		dispatchTypes.put(EventNames.GUILD_DELETE, GuildDelete.class);
+		dispatchTypes.put(EventNames.GUILD_BAN_ADD, GuildBanAdd.class);
+		dispatchTypes.put(EventNames.GUILD_BAN_REMOVE, GuildBanRemove.class);
+		dispatchTypes.put(EventNames.GUILD_EMOJIS_UPDATE, GuildEmojisUpdate.class);
+		dispatchTypes.put(EventNames.GUILD_INTEGRATIONS_UPDATE, GuildIntegrationsUpdate.class);
+		dispatchTypes.put(EventNames.GUILD_MEMBER_ADD, GuildMemberAdd.class);
+		dispatchTypes.put(EventNames.GUILD_MEMBER_REMOVE, GuildMemberRemove.class);
+		dispatchTypes.put(EventNames.GUILD_MEMBER_UPDATE, GuildMemberUpdate.class);
+		dispatchTypes.put(EventNames.GUILD_MEMBERS_CHUNK, GuildMembersChunk.class);
+		dispatchTypes.put(EventNames.GUILD_ROLE_CREATE, GuildRoleCreate.class);
+		dispatchTypes.put(EventNames.GUILD_ROLE_UPDATE, GuildRoleUpdate.class);
+		dispatchTypes.put(EventNames.GUILD_ROLE_DELETE, GuildRoleDelete.class);
+		dispatchTypes.put(EventNames.MESSAGE_CREATE, MessageCreate.class);
+		dispatchTypes.put(EventNames.MESSAGE_UPDATE, MessageUpdate.class);
+		dispatchTypes.put(EventNames.MESSAGE_DELETE, MessageDelete.class);
+		dispatchTypes.put(EventNames.MESSAGE_DELETE_BULK, MessageDeleteBulk.class);
+		dispatchTypes.put(EventNames.MESSAGE_REACTION_ADD, MessageReactionAdd.class);
+		dispatchTypes.put(EventNames.MESSAGE_REACTION_REMOVE, MessageReactionRemove.class);
+		dispatchTypes.put(EventNames.MESSAGE_REACTION_REMOVE_ALL, MessageReactionRemoveAll.class);
+		dispatchTypes.put(EventNames.PRESENCE_UPDATE, PresenceUpdate.class);
+		dispatchTypes.put(EventNames.TYPING_START, TypingStart.class);
+		dispatchTypes.put(EventNames.USER_UPDATE, UserUpdate.class);
+		dispatchTypes.put(EventNames.VOICE_STATE_UPDATE, VoiceStateUpdateDispatch.class);
+		dispatchTypes.put(EventNames.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
+		dispatchTypes.put(EventNames.WEBHOOKS_UPDATE, WebhooksUpdate.class);
 	}
 
 	public PayloadDeserializer() {
@@ -72,7 +106,14 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload> {
 
 	private static Class<? extends Payload> getPayloadType(int op, String t) {
 		if (op == Opcodes.DISPATCH) {
+			if (!dispatchTypes.containsKey(t)) {
+				throw new IllegalArgumentException("Attempt to deserialize payload with unknown event type: " + t);
+			}
 			return dispatchTypes.get(t);
+		}
+
+		if (!payloadTypes.containsKey(op)) {
+			throw new IllegalArgumentException("Attempt to deserialize payload with unknown op: " + op);
 		}
 		return payloadTypes.get(op);
 	}

@@ -16,7 +16,33 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
+import discord4j.common.json.response.RoleResponse;
+import discord4j.common.json.response.UserResponse;
 
-public interface Dispatch extends Payload {
+public class GuildMemberUpdate implements Dispatch {
+
+	@JsonProperty("guild_id")
+	@UnsignedJson
+	private long guildId;
+	private RoleResponse[] roles;
+	private UserResponse[] user;
+	private String nick;
+
+	public long getGuildId() {
+		return guildId;
+	}
+
+	public RoleResponse[] getRoles() {
+		return roles;
+	}
+
+	public UserResponse[] getUser() {
+		return user;
+	}
+
+	public String getNick() {
+		return nick;
+	}
 }

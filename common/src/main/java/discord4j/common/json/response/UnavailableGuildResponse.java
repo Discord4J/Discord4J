@@ -14,9 +14,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.json.payload.dispatch;
+package discord4j.common.json.response;
 
-import discord4j.common.json.payload.Payload;
+import discord4j.common.jackson.UnsignedJson;
 
-public interface Dispatch extends Payload {
+public class UnavailableGuildResponse {
+
+	@UnsignedJson
+	private long id;
+	private boolean unavailable;
+
+	public long getId() {
+		return id;
+	}
+
+	public boolean isUnavailable() {
+		return unavailable;
+	}
 }

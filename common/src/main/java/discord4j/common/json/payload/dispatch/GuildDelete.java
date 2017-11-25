@@ -16,7 +16,15 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import discord4j.common.json.response.UnavailableGuildResponse;
 
-public interface Dispatch extends Payload {
+public class GuildDelete implements Dispatch {
+
+	@JsonUnwrapped
+	private UnavailableGuildResponse guild;
+
+	public UnavailableGuildResponse getGuild() {
+		return guild;
+	}
 }

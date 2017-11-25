@@ -16,7 +16,23 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
-public interface Dispatch extends Payload {
+public class MessageReactionRemoveAll implements Dispatch {
+
+	@JsonProperty("channel_id")
+	@UnsignedJson
+	private long channelId;
+	@JsonProperty("message_id")
+	@UnsignedJson
+	private long messageId;
+
+	public long getChannelId() {
+		return channelId;
+	}
+
+	public long getMessageId() {
+		return messageId;
+	}
 }

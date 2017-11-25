@@ -16,7 +16,15 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import discord4j.common.json.response.VoiceStateResponse;
 
-public interface Dispatch extends Payload {
+public class VoiceStateUpdateDispatch implements Dispatch {
+
+	@JsonUnwrapped
+	private VoiceStateResponse voiceState;
+
+	public VoiceStateResponse getVoiceState() {
+		return voiceState;
+	}
 }

@@ -16,7 +16,23 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
-public interface Dispatch extends Payload {
+public class WebhooksUpdate implements Dispatch {
+
+	@JsonProperty("guild_id")
+	@UnsignedJson
+	private long guildId;
+	@JsonProperty("channel_id")
+	@UnsignedJson
+	private long channelId;
+
+	public long getGuildId() {
+		return guildId;
+	}
+
+	public long getChannelId() {
+		return channelId;
+	}
 }

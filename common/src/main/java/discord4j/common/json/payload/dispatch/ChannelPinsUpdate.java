@@ -16,7 +16,26 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
-public interface Dispatch extends Payload {
+import javax.annotation.Nullable;
+
+public class ChannelPinsUpdate implements Dispatch {
+
+	@JsonProperty("channel_id")
+	@UnsignedJson
+	private long channelId;
+	@JsonProperty("last_pin_timestamp")
+	@Nullable
+	private String lastPinTimestamp;
+
+	public long getChannelId() {
+		return channelId;
+	}
+
+	@Nullable
+	public String getLastPinTimestamp() {
+		return lastPinTimestamp;
+	}
 }

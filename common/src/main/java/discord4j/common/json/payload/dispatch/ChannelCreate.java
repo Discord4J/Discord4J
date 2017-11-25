@@ -16,7 +16,15 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import discord4j.common.json.response.ChannelResponse;
 
-public interface Dispatch extends Payload {
+public class ChannelCreate implements Dispatch {
+
+	@JsonUnwrapped
+	private ChannelResponse channel;
+
+	public ChannelResponse getChannel() {
+		return channel;
+	}
 }

@@ -24,11 +24,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.payload.GatewayPayload;
-import discord4j.common.json.payload.Hello;
-import discord4j.common.json.payload.Identify;
-import discord4j.common.json.payload.IdentifyProperties;
+import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.common.json.payload.dispatch.Ready;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
@@ -38,10 +36,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.UnicastProcessor;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DiscordHandlerTest {
@@ -69,48 +68,32 @@ public class DiscordHandlerTest {
 
 		DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer);
 
+		UnicastProcessor<Dispatch> dispatch = UnicastProcessor.create();
 		AtomicInteger seq = new AtomicInteger(0);
 
 		handler.inbound().subscribe(payload -> {
-
 			log.debug("Received Payload: " + payload);
 
-			if (payload.getSequence() != null) {
-				seq.set(payload.getSequence());
-			}
-
-			if (payload.getOp() == 10) { // HELLO
-
-				// TODO heartbeat
-				//				Flux.interval(Duration.ofMillis(41250))
-				//						.takeUntil(t -> handler.outbound().isTerminated())
-				//						.subscribe(t -> {
-				//							GatewayPayload heartbeat = GatewayPayload.of(1, null, seq.get(), null);
-				//							handler.outbound().onNext(heartbeat);
-				//						});
-
-				if (payload.getData() instanceof Hello) {
-					throw new RuntimeException("Type is HELLO!");
-				}
-
-
-//				Map<String, Object> identify = new HashMap<>();
-//				Map<String, String> properties = new HashMap<>();
-//				properties.put("os", "linux");
-//				properties.put("browser", "disco");
-//				properties.put("device", "disco");
-//				d.put("token", token);
-//				d.put("properties", properties);
-//				d.put("large_threshold", 250);
-//				*/
-
+			if (payload.getData() instanceof Hello) {
 				IdentifyProperties properties = new IdentifyProperties("linux", "disco", "disco");
 				GatewayPayload identify = new GatewayPayload(2, new Identify(token, properties, true, 250, Possible.absent(), Possible.absent()), null, null);
 
 				handler.outbound().onNext(identify);
+			} else if (payload.getData() instanceof Dispatch) {
+				seq.set(payload.getSequence());
+				dispatch.onNext((Dispatch) payload.getData());
 			}
 		}, error -> {
 			log.warn("Gateway connection terminated: {}", error.toString());
+		});
+
+		Flux.interval(Duration.ofMillis(45250))
+				.map(l -> new Heartbeat(seq.get()))
+				.map(h -> new GatewayPayload(Opcodes.HEARTBEAT, h, null, null))
+				.subscribe(handler.outbound()::onNext);
+
+		dispatch.ofType(Ready.class).subscribe(ready -> {
+			log.info("Gateway received READY!");
 		});
 
 		ws.execute(new URI(gatewayUrl), handler).block();

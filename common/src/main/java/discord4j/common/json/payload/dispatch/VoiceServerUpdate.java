@@ -16,7 +16,26 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
-public interface Dispatch extends Payload {
+public class VoiceServerUpdate implements Dispatch {
+
+	private String token;
+	@JsonProperty("guild_id")
+	@UnsignedJson
+	private long guildId;
+	private String endpoint;
+
+	public String getToken() {
+		return token;
+	}
+
+	public long getGuildId() {
+		return guildId;
+	}
+
+	public String getEndpoint() {
+		return endpoint;
+	}
 }

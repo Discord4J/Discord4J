@@ -16,7 +16,22 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
+import discord4j.common.json.response.UserResponse;
 
-public interface Dispatch extends Payload {
+public class GuildMemberRemove implements Dispatch {
+
+	private UserResponse user;
+	@JsonProperty("guild_id")
+	@UnsignedJson
+	private long guildId;
+
+	public UserResponse getUser() {
+		return user;
+	}
+
+	public long getGuildId() {
+		return guildId;
+	}
 }

@@ -16,7 +16,28 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
-public interface Dispatch extends Payload {
+public class TypingStart implements Dispatch {
+
+	@JsonProperty("channel_id")
+	@UnsignedJson
+	private long channelId;
+	@JsonProperty("user_id")
+	@UnsignedJson
+	private long userId;
+	private int timestamp;
+
+	public long getChannelId() {
+		return channelId;
+	}
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public int getTimestamp() {
+		return timestamp;
+	}
 }

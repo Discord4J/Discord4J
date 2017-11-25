@@ -16,7 +16,22 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.UnsignedJson;
 
-public interface Dispatch extends Payload {
+public class MessageDelete implements Dispatch {
+
+	@UnsignedJson
+	private long id;
+	@JsonProperty("channel_id")
+	@UnsignedJson
+	private long channelId;
+
+	public long getId() {
+		return id;
+	}
+
+	public long getChannelId() {
+		return channelId;
+	}
 }

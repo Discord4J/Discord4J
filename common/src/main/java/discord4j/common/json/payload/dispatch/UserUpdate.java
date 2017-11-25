@@ -16,7 +16,15 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import discord4j.common.json.response.UserResponse;
 
-public interface Dispatch extends Payload {
+public class UserUpdate implements Dispatch {
+
+	@JsonUnwrapped
+	private UserResponse user;
+
+	public UserResponse getUser() {
+		return user;
+	}
 }

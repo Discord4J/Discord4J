@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.json.payload.*;
-import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.common.json.payload.dispatch.Ready;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -89,8 +89,8 @@ public class PayloadDeserializationTest {
 		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
 
 		assertEquals(0, payload.getOp());
-		assertTrue(payload.getData() instanceof Dispatch);
-		assertEquals(6, ((Dispatch) payload.getData()).get("v"));
+		assertTrue(payload.getData() instanceof Ready);
+		assertEquals(6, ((Ready) payload.getData()).getVersion());
 	}
 
 	@Test

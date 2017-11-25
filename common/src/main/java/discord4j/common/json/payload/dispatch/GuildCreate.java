@@ -16,7 +16,15 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import discord4j.common.json.response.GuildResponse;
 
-public interface Dispatch extends Payload {
+public class GuildCreate implements Dispatch {
+
+	@JsonUnwrapped
+	private GuildResponse guild;
+
+	public GuildResponse getGuild() {
+		return guild;
+	}
 }

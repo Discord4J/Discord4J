@@ -16,7 +16,15 @@
  */
 package discord4j.common.json.payload.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.json.payload.Payload;
 
-public interface Dispatch extends Payload {
+public class Resumed implements Dispatch {
+
+	@JsonProperty("_trace")
+	private String[] trace;
+
+	public String[] getTrace() {
+		return trace;
+	}
 }
