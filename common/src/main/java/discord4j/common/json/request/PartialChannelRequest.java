@@ -29,7 +29,7 @@ public class PartialChannelRequest {
 	@Override
 	public String toString() {
 		return "PartialChannelRequest[" +
-				"name='" + name + '\'' +
+				"name=" + name +
 				", type=" + type +
 				']';
 	}

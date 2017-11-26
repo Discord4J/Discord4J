@@ -82,7 +82,7 @@ public class AuditLogEntryResponse {
 				", id=" + id +
 				", actionType=" + actionType +
 				", options=" + options +
-				", reason='" + reason + '\'' +
+				", reason=" + reason +
 				']';
 	}
 }

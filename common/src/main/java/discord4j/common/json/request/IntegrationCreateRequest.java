@@ -32,7 +32,7 @@ public class IntegrationCreateRequest {
 	@Override
 	public String toString() {
 		return "IntegrationCreateRequest[" +
-				"type='" + type + '\'' +
+				"type=" + type +
 				", id=" + id +
 				']';
 	}

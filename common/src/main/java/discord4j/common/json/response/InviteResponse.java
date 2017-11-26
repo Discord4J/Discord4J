@@ -93,7 +93,7 @@ public class InviteResponse {
 	@Override
 	public String toString() {
 		return "InviteResponse[" +
-				"code='" + code + '\'' +
+				"code=" + code +
 				", guild=" + guild +
 				", channel=" + channel +
 				", inviter=" + inviter +
@@ -101,7 +101,7 @@ public class InviteResponse {
 				", maxUses=" + maxUses +
 				", maxAge=" + maxAge +
 				", temporary=" + temporary +
-				", createdAt='" + createdAt + '\'' +
+				", createdAt=" + createdAt +
 				", revoked=" + revoked +
 				']';
 	}

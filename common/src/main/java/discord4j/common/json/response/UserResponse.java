@@ -87,14 +87,14 @@ public class UserResponse {
 	public String toString() {
 		return "UserResponse[" +
 				"id=" + id +
-				", username='" + username + '\'' +
-				", discriminator='" + discriminator + '\'' +
-				", avatar='" + avatar + '\'' +
+				", username=" + username +
+				", discriminator=" + discriminator +
+				", avatar=" + avatar +
 				", bot=" + bot +
 				", mfaEnabled=" + mfaEnabled +
 				", verified=" + verified +
-				", email='" + email + '\'' +
-				", token='" + token + '\'' +
+				", email=" + email +
+				", token=" + token +
 				']';
 	}
 }

@@ -51,8 +51,8 @@ public class UserGuildResponse {
 	public String toString() {
 		return "UserGuildResponse[" +
 				"id=" + id +
-				", name='" + name + '\'' +
-				", icon='" + icon + '\'' +
+				", name=" + name +
+				", icon=" + icon +
 				", owner=" + owner +
 				", permissions=" + permissions +
 				']';

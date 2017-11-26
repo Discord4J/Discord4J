@@ -133,9 +133,9 @@ public class MessageResponse {
 				"id=" + id +
 				", channelId=" + channelId +
 				", author=" + author +
-				", content='" + content + '\'' +
-				", timestamp='" + timestamp + '\'' +
-				", editedTimestamp='" + editedTimestamp + '\'' +
+				", content=" + content +
+				", timestamp=" + timestamp +
+				", editedTimestamp=" + editedTimestamp +
 				", tts=" + tts +
 				", mentionEveryone=" + mentionEveryone +
 				", mentions=" + Arrays.toString(mentions) +

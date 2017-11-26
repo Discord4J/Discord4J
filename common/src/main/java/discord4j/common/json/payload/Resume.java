@@ -34,8 +34,8 @@ public class Resume implements Payload {
 	@Override
 	public String toString() {
 		return "Resume[" +
-				"token='" + token + '\'' +
-				", sessionId='" + sessionId + '\'' +
+				"token=hunter2" +
+				", sessionId=" + sessionId +
 				", seq=" + seq +
 				']';
 	}

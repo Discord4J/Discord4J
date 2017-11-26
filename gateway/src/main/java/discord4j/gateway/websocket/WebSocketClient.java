@@ -34,6 +34,13 @@ public class WebSocketClient {
 		this.httpClient = httpClient;
 	}
 
+	/**
+	 * Execute a handshake request to the given url and handle the resulting WebSocket session with the given handler.
+	 *
+	 * @param url the handshake url
+	 * @param handler the handler of the WebSocket session
+	 * @return completion {@code Mono<Void>} to indicate the outcome of the WebSocket session handling.
+	 */
 	public Mono<Void> execute(String url, WebSocketHandler handler) {
 		return this.httpClient
 				.ws(url, headers -> {}, null)

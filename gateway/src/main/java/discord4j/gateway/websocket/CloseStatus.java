@@ -16,26 +16,41 @@
  */
 package discord4j.gateway.websocket;
 
+import javax.annotation.Nullable;
+
+/**
+ * Container for WebSocket "close" status codes and reasons.
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc6455#section-7.4.1"> RFC 6455, Section 7.4.1 "Defined Status Codes"</a>
+ */
 public class CloseStatus {
 
-	private final int statusCode;
-	private final String reasonText;
+	private final int code;
+	@Nullable
+	private final String reason;
 
-	public CloseStatus(int statusCode, String reasonText) {
-		this.statusCode = statusCode;
-		this.reasonText = reasonText;
+	/**
+	 * Create a new {@link CloseStatus} instance.
+	 *
+	 * @param code the status code
+	 * @param reason the reason
+	 */
+	public CloseStatus(int code, @Nullable String reason) {
+		this.code = code;
+		this.reason = reason;
 	}
 
-	public int getStatusCode() {
-		return statusCode;
+	public int getCode() {
+		return code;
 	}
 
-	public String getReasonText() {
-		return reasonText;
+	@Nullable
+	public String getReason() {
+		return reason;
 	}
 
 	@Override
 	public String toString() {
-		return statusCode + (reasonText == null || reasonText.isEmpty() ? "" : " " + reasonText);
+		return code + (reason == null || reason.isEmpty() ? "" : " " + reason);
 	}
 }

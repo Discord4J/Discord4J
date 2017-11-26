@@ -37,7 +37,7 @@ public class EmbedVideoResponse {
 	@Override
 	public String toString() {
 		return "EmbedVideoResponse[" +
-				"url='" + url + '\'' +
+				"url=" + url +
 				", height=" + height +
 				", width=" + width +
 				']';

@@ -35,7 +35,7 @@ public class GameRequest {
 	@Override
 	public String toString() {
 		return "GameRequest[" +
-				"name='" + name + '\'' +
+				"name=" + name +
 				", type=" + type +
 				", url=" + url +
 				']';

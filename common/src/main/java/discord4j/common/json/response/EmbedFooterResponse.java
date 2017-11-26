@@ -41,9 +41,9 @@ public class EmbedFooterResponse {
 	@Override
 	public String toString() {
 		return "EmbedFooterResponse[" +
-				"text='" + text + '\'' +
-				", iconUrl='" + iconUrl + '\'' +
-				", proxyIconUrl='" + proxyIconUrl + '\'' +
+				"text=" + text +
+				", iconUrl=" + iconUrl +
+				", proxyIconUrl=" + proxyIconUrl +
 				']';
 	}
 }

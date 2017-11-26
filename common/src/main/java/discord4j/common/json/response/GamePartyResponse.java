@@ -37,7 +37,7 @@ public class GamePartyResponse {
 	@Override
 	public String toString() {
 		return "GamePartyResponse[" +
-				"id='" + id + '\'' +
+				"id=" + id +
 				", size=" + Arrays.toString(size) +
 				']';
 	}

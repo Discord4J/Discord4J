@@ -27,8 +27,8 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.Ready;
-import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.JacksonLenientPayloadReader;
+import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.WebSocketClient;
@@ -36,8 +36,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.UnicastProcessor;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,6 +57,7 @@ public class DiscordHandlerTest {
 		context.getLogger("discord4j.rest.http.client").setLevel(Level.TRACE);
 		context.getLogger("reactor.ipc.netty.channel.ContextHandler").setLevel(Level.INFO);
 		context.getLogger("reactor.ipc.netty.http.client.HttpClient").setLevel(Level.INFO);
+		context.getLogger("io.netty.handler.codec.http.websocketx").setLevel(Level.INFO);
 	}
 
 	@Test
@@ -69,13 +70,15 @@ public class DiscordHandlerTest {
 
 		DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer);
 
-		UnicastProcessor<Dispatch> dispatch = UnicastProcessor.create();
+		EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create();
 		AtomicInteger seq = new AtomicInteger(0);
 
 		handler.inbound().subscribe(payload -> {
 			if (payload.getData() instanceof Hello) {
 				IdentifyProperties properties = new IdentifyProperties("linux", "disco", "disco");
-				GatewayPayload identify = new GatewayPayload(2, new Identify(token, properties, true, 250, Possible.absent(), Possible.absent()), null, null);
+				GatewayPayload identify = new GatewayPayload(2,
+						new Identify(token, properties, true, 250, Possible.absent(), Possible.absent()),
+						null, null);
 
 				handler.outbound().onNext(identify);
 			} else if (payload.getData() instanceof Dispatch) {

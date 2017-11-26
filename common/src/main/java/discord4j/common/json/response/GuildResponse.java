@@ -218,11 +218,11 @@ public class GuildResponse {
 	public String toString() {
 		return "GuildResponse[" +
 				"id=" + id +
-				", name='" + name + '\'' +
-				", icon='" + icon + '\'' +
-				", splash='" + splash + '\'' +
+				", name=" + name +
+				", icon=" + icon +
+				", splash=" + splash +
 				", ownerId=" + ownerId +
-				", region='" + region + '\'' +
+				", region=" + region +
 				", afkChannelId=" + afkChannelId +
 				", afkTimeout=" + afkTimeout +
 				", embedEnabled=" + embedEnabled +
@@ -237,7 +237,7 @@ public class GuildResponse {
 				", applicationId=" + applicationId +
 				", widgetEnabled=" + widgetEnabled +
 				", widgetChannelId=" + widgetChannelId +
-				", joinedAt='" + joinedAt + '\'' +
+				", joinedAt=" + joinedAt +
 				", large=" + large +
 				", unavailable=" + unavailable +
 				", memberCount=" + memberCount +

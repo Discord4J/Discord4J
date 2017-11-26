@@ -30,7 +30,7 @@ public class NicknameModifyRequest {
 	@Override
 	public String toString() {
 		return "NicknameModifyRequest[" +
-				"nick='" + nick + '\'' +
+				"nick=" + nick +
 				']';
 	}
 }

@@ -52,9 +52,9 @@ public class GameAssetsResponse {
 	public String toString() {
 		return "GameAssetsResponse[" +
 				"largeImage=" + largeImage +
-				", largeText='" + largeText + '\'' +
+				", largeText=" + largeText +
 				", smallImage=" + smallImage +
-				", smallText='" + smallText + '\'' +
+				", smallText=" + smallText +
 				']';
 	}
 }

@@ -36,7 +36,7 @@ public class IntegrationAccountResponse {
 	public String toString() {
 		return "IntegrationAccountResponse[" +
 				"id=" + id +
-				", name='" + name + '\'' +
+				", name=" + name +
 				']';
 	}
 }

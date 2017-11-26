@@ -43,7 +43,7 @@ public class ChannelPinsUpdate implements Dispatch {
 	public String toString() {
 		return "ChannelPinsUpdate[" +
 				"channelId=" + channelId +
-				", lastPinTimestamp='" + lastPinTimestamp + '\'' +
+				", lastPinTimestamp=" + lastPinTimestamp +
 				']';
 	}
 }

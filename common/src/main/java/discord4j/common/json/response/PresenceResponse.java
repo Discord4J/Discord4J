@@ -62,7 +62,7 @@ public class PresenceResponse {
 				", roles=" + Arrays.toString(roles) +
 				", game=" + game +
 				", guildId=" + guildId +
-				", status='" + status + '\'' +
+				", status=" + status +
 				']';
 	}
 }

@@ -113,7 +113,7 @@ public class ChannelCreateRequest {
 	@Override
 	public String toString() {
 		return "ChannelCreateRequest[" +
-				"name='" + name + '\'' +
+				"name=" + name +
 				", type=" + type +
 				", bitrate=" + bitrate +
 				", userLimit=" + userLimit +

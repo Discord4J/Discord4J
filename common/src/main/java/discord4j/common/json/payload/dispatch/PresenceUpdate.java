@@ -72,8 +72,8 @@ public class PresenceUpdate implements Dispatch {
 				", roles=" + Arrays.toString(roles) +
 				", game=" + game +
 				", guildId=" + guildId +
-				", status='" + status + '\'' +
-				", nick='" + nick + '\'' +
+				", status=" + status +
+				", nick=" + nick +
 				']';
 	}
 }

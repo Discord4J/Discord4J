@@ -19,6 +19,17 @@ package discord4j.gateway.payload;
 import discord4j.common.json.payload.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 
+/**
+ * Strategy for encoding a {@link discord4j.common.json.payload.GatewayPayload} and writing its contents to a {@link
+ * io.netty.buffer.ByteBuf}.
+ */
 public interface PayloadWriter {
+
+	/**
+	 * Write a given payload to the output buffer.
+	 *
+	 * @param payload the output payload
+	 * @return the outbound {@code ByteBuf}
+	 */
 	ByteBuf write(GatewayPayload payload);
 }

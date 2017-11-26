@@ -71,6 +71,10 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		inboundExchange.onComplete();
 	}
 
+	void close() {
+		onComplete();
+	}
+
 	public UnicastProcessor<GatewayPayload> inbound() {
 		return inboundExchange;
 	}

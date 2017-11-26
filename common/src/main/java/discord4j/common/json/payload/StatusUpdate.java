@@ -41,7 +41,7 @@ public class StatusUpdate implements Payload {
 		return "StatusUpdate[" +
 				"since=" + since +
 				", game=" + game +
-				", status='" + status + '\'' +
+				", status=" + status +
 				", afk=" + afk +
 				']';
 	}

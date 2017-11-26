@@ -53,8 +53,8 @@ public class ConnectionResponse {
 	public String toString() {
 		return "ConnectionResponse[" +
 				"id=" + id +
-				", name='" + name + '\'' +
-				", type='" + type + '\'' +
+				", name=" + name +
+				", type=" + type +
 				", revoked=" + revoked +
 				", integrations=" + Arrays.toString(integrations) +
 				']';

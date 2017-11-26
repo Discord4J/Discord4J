@@ -69,10 +69,10 @@ public class AttachmentResponse {
 	public String toString() {
 		return "AttachmentResponse[" +
 				"id=" + id +
-				", filename='" + filename + '\'' +
+				", filename=" + filename +
 				", size=" + size +
-				", url='" + url + '\'' +
-				", proxyUrl='" + proxyUrl + '\'' +
+				", url=" + url +
+				", proxyUrl=" + proxyUrl +
 				", height=" + height +
 				", width=" + width +
 				']';

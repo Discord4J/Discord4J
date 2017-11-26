@@ -37,7 +37,7 @@ public class RequestGuildMembers implements Payload {
 	public String toString() {
 		return "RequestGuildMembers[" +
 				"guildId=" + guildId +
-				", query='" + query + '\'' +
+				", query=" + query +
 				", limit=" + limit +
 				']';
 	}

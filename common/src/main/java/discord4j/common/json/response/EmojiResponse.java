@@ -65,7 +65,7 @@ public class EmojiResponse {
 	public String toString() {
 		return "EmojiResponse[" +
 				"id=" + id +
-				", name='" + name + '\'' +
+				", name=" + name +
 				", roles=" + Arrays.toString(roles) +
 				", user=" + user +
 				", requireColons=" + requireColons +

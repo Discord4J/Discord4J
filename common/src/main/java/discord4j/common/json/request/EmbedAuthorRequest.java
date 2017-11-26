@@ -34,9 +34,9 @@ public class EmbedAuthorRequest {
 	@Override
 	public String toString() {
 		return "EmbedAuthorRequest[" +
-				"name='" + name + '\'' +
-				", url='" + url + '\'' +
-				", iconUrl='" + iconUrl + '\'' +
+				"name=" + name +
+				", url=" + url +
+				", iconUrl=" + iconUrl +
 				']';
 	}
 }

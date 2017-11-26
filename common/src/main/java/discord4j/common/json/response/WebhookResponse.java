@@ -75,9 +75,9 @@ public class WebhookResponse {
 				", guildId=" + guildId +
 				", channelId=" + channelId +
 				", user=" + user +
-				", name='" + name + '\'' +
-				", avatar='" + avatar + '\'' +
-				", token='" + token + '\'' +
+				", name=" + name +
+				", avatar=" + avatar +
+				", token=" + token +
 				']';
 	}
 }

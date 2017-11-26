@@ -35,7 +35,7 @@ public class RoleCreateRequest {
 	@Override
 	public String toString() {
 		return "RoleCreateRequest[" +
-				"name='" + name + '\'' +
+				"name=" + name +
 				", permissions=" + permissions +
 				", color=" + color +
 				", hoist=" + hoist +

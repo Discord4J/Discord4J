@@ -29,12 +29,12 @@ public class CloseException extends RuntimeException {
 		return closeStatus;
 	}
 
-	public int getStatusCode() {
-		return closeStatus.getStatusCode();
+	public int getCode() {
+		return closeStatus.getCode();
 	}
 
-	public String getReasonText() {
-		return closeStatus.getReasonText();
+	public String getReason() {
+		return closeStatus.getReason();
 	}
 
 	@Override

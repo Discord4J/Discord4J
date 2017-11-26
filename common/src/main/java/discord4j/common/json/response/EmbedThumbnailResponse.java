@@ -45,8 +45,8 @@ public class EmbedThumbnailResponse {
 	@Override
 	public String toString() {
 		return "EmbedThumbnailResponse[" +
-				"url='" + url + '\'' +
-				", proxyUrl='" + proxyUrl + '\'' +
+				"url=" + url +
+				", proxyUrl=" + proxyUrl +
 				", height=" + height +
 				", width=" + width +
 				']';

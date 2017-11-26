@@ -38,21 +38,43 @@ public class WebSocketMessage {
 		this.payload = Objects.requireNonNull(payload, "'payload' must not be null");
 	}
 
+	/**
+	 * Create a new WebSocket message from a string.
+	 *
+	 * @param payload the payload contents
+	 * @return a {@code WebSocketMessage} with text contents
+	 */
 	public static WebSocketMessage fromText(String payload) {
 		byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
 		ByteBuf buffer = Unpooled.wrappedBuffer(bytes);
 		return new WebSocketMessage(WebSocketMessage.Type.TEXT, buffer);
 	}
 
+	/**
+	 * Create a new WebSocket message from a byte buffer.
+	 *
+	 * @param payload the payload contents
+	 * @return a {@code WebSocketMessage} with binary contents
+	 */
 	public static WebSocketMessage fromBinary(ByteBuf payload) {
 		return new WebSocketMessage(Type.BINARY, payload);
 	}
 
+	/**
+	 * Create a new WebSocket message from a WebSocket frame.
+	 *
+	 * @param frame the original frame
+	 */
 	public static WebSocketMessage fromFrame(WebSocketFrame frame) {
 		ByteBuf payload = frame.content();
 		return new WebSocketMessage(Type.fromFrameClass(frame.getClass()), payload);
 	}
 
+	/**
+	 * Create a new WebSocket frame from a WebSocket message.
+	 *
+	 * @param message the original message
+	 */
 	public static WebSocketFrame toFrame(WebSocketMessage message) {
 		ByteBuf byteBuf = message.getPayload();
 

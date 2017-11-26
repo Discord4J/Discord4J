@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 
 /**
  * A stream of {@link discord4j.rest.request.DiscordRequest DiscordRequests}. Any number of items may be
- * {@link #push(reactor.util.function.Tuple2)} written} to the stream. However, the
+ * {@link #push(reactor.util.function.Tuple2)} written to the stream. However, the
  * {@link discord4j.rest.request.RequestStream.Reader reader} ensures that only one is read at a time. This
  * linearization ensures proper ratelimit handling.
  * <p>

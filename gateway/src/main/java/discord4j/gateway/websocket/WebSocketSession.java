@@ -20,6 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.ssl.SslCloseCompletionEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -42,6 +43,11 @@ public class WebSocketSession {
 		this.id = Integer.toHexString(System.identityHashCode(delegate));
 	}
 
+	/**
+	 * Get the flux of incoming messages, aggregated from frames.
+	 *
+	 * @return a {@code Flux<WebSocketMessage>} inbound from the connection.
+	 */
 	public Flux<WebSocketMessage> receive() {
 		return getDelegate().getInbound()
 				.aggregateFrames()
@@ -49,6 +55,12 @@ public class WebSocketSession {
 				.map(WebSocketMessage::fromFrame);
 	}
 
+	/**
+	 * Write the given messages to the WebSocket connection.
+	 *
+	 * @param messages the messages to write
+	 * @return a Mono signaling completion
+	 */
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
 		Flux<WebSocketFrame> frames = Flux.from(messages).map(WebSocketMessage::toFrame);
 		return getDelegate().getOutbound()
@@ -57,6 +69,11 @@ public class WebSocketSession {
 				.then();
 	}
 
+	/**
+	 * Get a future notifying the closing of the session.
+	 *
+	 * @return a Mono signaling completion, including the code and reason for the event.
+	 */
 	public Mono<CloseStatus> closeFuture() {
 		MonoProcessor<CloseStatus> monoProcessor = MonoProcessor.create();
 		getDelegate().getInbound().withConnection(connection ->
@@ -69,6 +86,17 @@ public class WebSocketSession {
 						}
 						ctx.fireChannelRead(msg);
 					}
+
+					@Override
+					public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+						if (evt instanceof SslCloseCompletionEvent) {
+							SslCloseCompletionEvent closeEvent = (SslCloseCompletionEvent) evt;
+							if (!closeEvent.isSuccess()) {
+								monoProcessor.onNext(new CloseStatus(1006, closeEvent.cause().toString()));
+							}
+						}
+						ctx.fireUserEventTriggered(evt);
+					}
 				}));
 		return monoProcessor;
 	}
@@ -77,7 +105,12 @@ public class WebSocketSession {
 		return this.delegate;
 	}
 
-	private String getId() {
+	/**
+	 * Return the id of the session.
+	 *
+	 * @return a {@code String} representing an hexadecimal number.
+	 */
+	public String getId() {
 		return this.id;
 	}
 

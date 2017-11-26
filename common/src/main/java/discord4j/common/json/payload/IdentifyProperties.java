@@ -36,9 +36,9 @@ public class IdentifyProperties {
 	@Override
 	public String toString() {
 		return "IdentifyProperties[" +
-				"os='" + os + '\'' +
-				", browser='" + browser + '\'' +
-				", device='" + device + '\'' +
+				"os=" + os +
+				", browser=" + browser +
+				", device=" + device +
 				']';
 	}
 }

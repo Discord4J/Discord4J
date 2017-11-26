@@ -46,10 +46,10 @@ public class EmbedAuthorResponse {
 	@Override
 	public String toString() {
 		return "EmbedAuthorResponse[" +
-				"name='" + name + '\'' +
-				", url='" + url + '\'' +
-				", iconUrl='" + iconUrl + '\'' +
-				", proxyIconUrl='" + proxyIconUrl + '\'' +
+				"name=" + name +
+				", url=" + url +
+				", iconUrl=" + iconUrl +
+				", proxyIconUrl=" + proxyIconUrl +
 				']';
 	}
 }

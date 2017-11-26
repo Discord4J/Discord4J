@@ -66,7 +66,7 @@ public class RoleResponse {
 	public String toString() {
 		return "RoleResponse[" +
 				"id=" + id +
-				", name='" + name + '\'' +
+				", name=" + name +
 				", color=" + color +
 				", hoist=" + hoist +
 				", position=" + position +

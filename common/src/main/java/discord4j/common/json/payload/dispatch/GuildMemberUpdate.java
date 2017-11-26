@@ -54,7 +54,7 @@ public class GuildMemberUpdate implements Dispatch {
 				"guildId=" + guildId +
 				", roles=" + Arrays.toString(roles) +
 				", user=" + Arrays.toString(user) +
-				", nick='" + nick + '\'' +
+				", nick=" + nick +
 				']';
 	}
 }

@@ -114,14 +114,14 @@ public class GameResponse {
 	@Override
 	public String toString() {
 		return "GameResponse[" +
-				"name='" + name + '\'' +
+				"name=" + name +
 				", type=" + type +
-				", url='" + url + '\'' +
+				", url=" + url +
 				", timestamps=" + timestamps +
-				", sessionId='" + sessionId + '\'' +
+				", sessionId=" + sessionId +
 				", applicationId=" + applicationId +
-				", details='" + details + '\'' +
-				", state='" + state + '\'' +
+				", details=" + details +
+				", state=" + state +
 				", flags=" + flags +
 				", party=" + party +
 				", assets=" + assets +

@@ -72,7 +72,7 @@ public class Ready implements Dispatch {
 				", user=" + user +
 				", privateChannels=" + Arrays.toString(privateChannels) +
 				", guilds=" + Arrays.toString(guilds) +
-				", sessionId='" + sessionId + '\'' +
+				", sessionId=" + sessionId +
 				", trace=" + Arrays.toString(trace) +
 				", user_settings=" + user_settings +
 				", relationships=" + Arrays.toString(relationships) +

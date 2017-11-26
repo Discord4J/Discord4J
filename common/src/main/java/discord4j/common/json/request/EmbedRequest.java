@@ -52,10 +52,10 @@ public class EmbedRequest {
 	@Override
 	public String toString() {
 		return "EmbedRequest[" +
-				"title='" + title + '\'' +
-				", description='" + description + '\'' +
-				", url='" + url + '\'' +
-				", timestamp='" + timestamp + '\'' +
+				"title=" + title +
+				", description=" + description +
+				", url=" + url +
+				", timestamp=" + timestamp +
 				", color=" + color +
 				", footer=" + footer +
 				", image=" + image +

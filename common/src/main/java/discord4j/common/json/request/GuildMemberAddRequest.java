@@ -90,7 +90,7 @@ public class GuildMemberAddRequest {
 	@Override
 	public String toString() {
 		return "GuildMemberAddRequest[" +
-				"accessToken='" + accessToken + '\'' +
+				"accessToken=" + accessToken +
 				", nick=" + nick +
 				", roles=" + roles +
 				", mute=" + mute +

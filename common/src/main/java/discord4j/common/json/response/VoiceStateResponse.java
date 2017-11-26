@@ -82,7 +82,7 @@ public class VoiceStateResponse {
 				"guildId=" + guildId +
 				", channelId=" + channelId +
 				", userId=" + userId +
-				", sessionId='" + sessionId + '\'' +
+				", sessionId=" + sessionId +
 				", deaf=" + deaf +
 				", mute=" + mute +
 				", selfDeaf=" + selfDeaf +

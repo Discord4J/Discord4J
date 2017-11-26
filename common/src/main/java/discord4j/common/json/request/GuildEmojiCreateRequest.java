@@ -36,8 +36,8 @@ public class GuildEmojiCreateRequest {
 	@Override
 	public String toString() {
 		return "GuildEmojiCreateRequest[" +
-				"name='" + name + '\'' +
-				", image='" + image + '\'' +
+				"name=" + name +
+				", image=" + image +
 				", roles=" + Arrays.toString(roles) +
 				']';
 	}

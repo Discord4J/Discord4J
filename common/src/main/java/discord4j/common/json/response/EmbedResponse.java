@@ -116,11 +116,11 @@ public class EmbedResponse {
 	@Override
 	public String toString() {
 		return "EmbedResponse[" +
-				"title='" + title + '\'' +
-				", type='" + type + '\'' +
-				", description='" + description + '\'' +
-				", url='" + url + '\'' +
-				", timestamp='" + timestamp + '\'' +
+				"title=" + title +
+				", type=" + type +
+				", description=" + description +
+				", url=" + url +
+				", timestamp=" + timestamp +
 				", color=" + color +
 				", footer=" + footer +
 				", image=" + image +

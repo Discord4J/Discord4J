@@ -135,7 +135,7 @@ public class GatewayTest {
 		}
 
 		public void onClose(CloseStatus closeStatus) {
-			log.info("Connection was CLOSED with status code {}", closeStatus.getStatusCode());
+			log.info("Connection was CLOSED with status code {}", closeStatus.getCode());
 		}
 	}
 }

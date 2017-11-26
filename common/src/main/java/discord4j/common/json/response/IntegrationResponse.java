@@ -87,8 +87,8 @@ public class IntegrationResponse {
 	public String toString() {
 		return "IntegrationResponse[" +
 				"id=" + id +
-				", name='" + name + '\'' +
-				", type='" + type + '\'' +
+				", name=" + name +
+				", type=" + type +
 				", enabled=" + enabled +
 				", syncing=" + syncing +
 				", roleId=" + roleId +
@@ -96,7 +96,7 @@ public class IntegrationResponse {
 				", expireGracePeriod=" + expireGracePeriod +
 				", user=" + user +
 				", account=" + account +
-				", syncedAt='" + syncedAt + '\'' +
+				", syncedAt=" + syncedAt +
 				']';
 	}
 }

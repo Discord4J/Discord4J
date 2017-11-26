@@ -49,7 +49,7 @@ public class AuditLogChangeResponse {
 		return "AuditLogChangeResponse[" +
 				"newValue=" + newValue +
 				", oldValue=" + oldValue +
-				", key='" + key + '\'' +
+				", key=" + key +
 				']';
 	}
 }

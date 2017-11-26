@@ -33,7 +33,7 @@ public class PermissionsEditRequest {
 		return "PermissionsEditRequest[" +
 				"allow=" + allow +
 				", deny=" + deny +
-				", type='" + type + '\'' +
+				", type=" + type +
 				']';
 	}
 }
