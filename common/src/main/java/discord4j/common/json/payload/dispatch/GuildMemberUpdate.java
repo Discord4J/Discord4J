@@ -18,7 +18,6 @@ package discord4j.common.json.payload.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
-import discord4j.common.json.response.RoleResponse;
 import discord4j.common.json.response.UserResponse;
 
 import java.util.Arrays;
@@ -28,19 +27,20 @@ public class GuildMemberUpdate implements Dispatch {
 	@JsonProperty("guild_id")
 	@UnsignedJson
 	private long guildId;
-	private RoleResponse[] roles;
-	private UserResponse[] user;
+	@UnsignedJson
+	private long[] roles;
+	private UserResponse user;
 	private String nick;
 
 	public long getGuildId() {
 		return guildId;
 	}
 
-	public RoleResponse[] getRoles() {
+	public long[] getRoles() {
 		return roles;
 	}
 
-	public UserResponse[] getUser() {
+	public UserResponse getUser() {
 		return user;
 	}
 
@@ -53,7 +53,7 @@ public class GuildMemberUpdate implements Dispatch {
 		return "GuildMemberUpdate[" +
 				"guildId=" + guildId +
 				", roles=" + Arrays.toString(roles) +
-				", user=" + Arrays.toString(user) +
+				", user=" + user +
 				", nick=" + nick +
 				']';
 	}
