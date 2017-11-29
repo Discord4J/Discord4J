@@ -441,8 +441,8 @@ class DispatchHandler {
 
 		IMessage toUpdate = channel.messages.get(json.id);
 
-		if (toUpdate == null) { // Cannot resolve update type
-			client.dispatcher.dispatch(new MessageUpdateEvent(null, DiscordUtils.getMessageFromJSON(channel, json)));
+		if (toUpdate == null) { // Cannot resolve update type. MessageObject is incomplete, so we'll have to request for the full message.
+			client.dispatcher.dispatch(new MessageUpdateEvent(null, channel.getMessageByID(Long.parseUnsignedLong(json.id))));
 		} else {
 			IMessage oldMessage = toUpdate.copy();
 			IMessage updatedMessage = DiscordUtils.getUpdatedMessageFromJSON(client, toUpdate, json);
