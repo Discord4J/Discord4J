@@ -145,19 +145,6 @@ public class DiscordUtils {
 
 	/**
 	 * Gets a snowflake from a unix timestamp.
-	 *
-	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
-	 * The returned snowflake is only one of many that could exist at the given timestamp.
-	 *
-	 * @param unixTime The unix timestamp that should be used in the snowflake.
-	 * @return A snowflake with the given timestamp.
-	 */
-	public static long getSnowflakeFromTimestamp(long unixTime) {
-		return (unixTime - DISCORD_EPOCH) << 22;
-	}
-
-	/**
-	 * Gets a snowflake from a unix timestamp.
 	 * <p>
 	 * This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
 	 * The returned snowflake is only one of many that could exist at the given timestamp.
@@ -166,7 +153,7 @@ public class DiscordUtils {
 	 * @return A snowflake with the given timestamp.
 	 */
 	public static long getSnowflakeFromTimestamp(Instant date) {
-		return getSnowflakeFromTimestamp(date.toEpochMilli());
+		return (date.toEpochMilli() - DISCORD_EPOCH) << 22;
 	}
 
 	/**

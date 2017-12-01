@@ -40,7 +40,7 @@ import sx.blah.discord.util.cache.LongMap;
 
 import java.io.*;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -213,7 +213,7 @@ public class Channel implements IChannel {
 			return new MessageHistory(messages.values().stream().limit(messageCount).collect(Collectors.toList()));
 		} else {
 			List<IMessage> retrieved = new ArrayList<>(messageCount);
-			AtomicLong lastMessage = new AtomicLong(DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()));
+			AtomicLong lastMessage = new AtomicLong(DiscordUtils.getSnowflakeFromTimestamp(Instant.now()));
 			int chunkSize = messageCount < MESSAGE_CHUNK_COUNT ? messageCount : MESSAGE_CHUNK_COUNT;
 
 			while (retrieved.size() < messageCount) { // while we dont have messageCount messages
@@ -266,7 +266,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryTo(long id, int maxCount) {
-		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()), id, maxCount);
+		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(Instant.now()), id, maxCount);
 	}
 
 	@Override
@@ -322,7 +322,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IMessage> bulkDelete() {
-		return bulkDelete(getMessageHistoryTo(Instant.now().minus(2L, ChronoUnit.WEEKS)));
+		return bulkDelete(getMessageHistoryTo(Instant.now().minus(Period.ofWeeks(2))));
 	}
 
 	@Override
