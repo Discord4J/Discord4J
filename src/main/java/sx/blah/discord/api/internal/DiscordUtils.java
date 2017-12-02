@@ -307,7 +307,7 @@ public class DiscordUtils {
 		Guild guild;
 
 		long guildId = Long.parseUnsignedLong(json.id);
-		long newMemberMessageChannelId = json.system_channel_id == null ? 0L : Long.parseUnsignedLong(json.system_channel_id);
+		long systemChannelId = json.system_channel_id == null ? 0L : Long.parseUnsignedLong(json.system_channel_id);
 
 		if ((guild = (Guild) shard.getGuildByID(guildId)) != null) {
 			guild.setIcon(json.icon);
@@ -318,7 +318,7 @@ public class DiscordUtils {
 			guild.setRegionID(json.region);
 			guild.setVerificationLevel(json.verification_level);
 			guild.setTotalMemberCount(json.member_count);
-			guild.setNewMemberMessageChannelId(newMemberMessageChannelId);
+			guild.setSystemChannelId(systemChannelId);
 
 			List<IRole> newRoles = new ArrayList<>();
 			for (RoleObject roleResponse : json.roles) {
@@ -337,7 +337,7 @@ public class DiscordUtils {
 		} else {
 			guild = new Guild(shard, json.name, guildId, json.icon, Long.parseUnsignedLong(json.owner_id),
 					json.afk_channel_id == null ? 0 : Long.parseUnsignedLong(json.afk_channel_id), json.afk_timeout,
-					json.region, json.verification_level, newMemberMessageChannelId);
+					json.region, json.verification_level, systemChannelId);
 
 			if (json.roles != null)
 				for (RoleObject roleResponse : json.roles) {

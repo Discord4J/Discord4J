@@ -649,9 +649,9 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	List<ICategory> getCategoriesByName(String name);
 
 	/**
-	 * Gets the channel that displays a message for new members.
+	 * Gets the channel to which system messages are sent.
 	 *
-	 * @return The channel that displays a message for new members, may be null.
+	 * @return The channel to which system messages are sent, may be null.
 	 */
-	IChannel getNewMemberMessageChannel();
+	IChannel getSystemChannel();
 }
