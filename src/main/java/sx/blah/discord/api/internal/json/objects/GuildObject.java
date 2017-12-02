@@ -82,6 +82,10 @@ public class GuildObject {
 	 */
 	public int mfa_level;
 	/**
+	 * The id of the channel to which system messages are sent.
+	 */
+	public String system_channel_id;
+	/**
 	 * The ISO-8601 timestamp of when our user joined the guild.
 	 */
 	public String joined_at;

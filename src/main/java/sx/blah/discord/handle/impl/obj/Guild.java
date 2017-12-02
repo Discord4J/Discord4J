@@ -156,15 +156,20 @@ public class Guild implements IGuild {
 	 */
 	public long connectingVoiceChannelID;
 
-	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout, String region, int verification) {
-		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification,
+	/**
+	 * The ID of the new member message channel.
+	 */
+	private volatile long newMemberMessageChannelId;
+
+	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout, String region, int verification, long newMemberMessageChannelId) {
+		this(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, newMemberMessageChannelId,
 				new Cache<>((DiscordClientImpl) shard.getClient(), IRole.class), new Cache<>((DiscordClientImpl) shard.getClient(), IChannel.class),
 				new Cache<>((DiscordClientImpl) shard.getClient(), IVoiceChannel.class), new Cache<>((DiscordClientImpl) shard.getClient(), IUser.class),
 				new Cache<>((DiscordClientImpl) shard.getClient(), TimeStampHolder.class), new Cache<>((DiscordClientImpl) shard.getClient(), ICategory.class));
 	}
 
 	public Guild(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout,
-				 String region, int verification, Cache<IRole> roles, Cache<IChannel> channels,
+				 String region, int verification, long newMemberMessageChannelId, Cache<IRole> roles, Cache<IChannel> channels,
 				 Cache<IVoiceChannel> voiceChannels, Cache<IUser> users, Cache<TimeStampHolder> joinTimes, Cache<ICategory> categories) {
 		this.shard = shard;
 		this.client = shard.getClient();
@@ -185,6 +190,7 @@ public class Guild implements IGuild {
 		this.audioManager = new AudioManager(this);
 		this.emojis = new Cache<>((DiscordClientImpl) client, IEmoji.class);
 		this.categories = categories;
+		this.newMemberMessageChannelId = newMemberMessageChannelId;
 	}
 
 	@Override
@@ -820,7 +826,8 @@ public class Guild implements IGuild {
 	@Override
 	public IGuild copy() {
 		return new Guild(shard, name, id, icon, ownerID, afkChannel, afkTimeout, regionID, verification.ordinal(),
-				roles.copy(), channels.copy(), voiceChannels.copy(), users.copy(), joinTimes.copy(), categories.copy());
+				newMemberMessageChannelId, roles.copy(), channels.copy(), voiceChannels.copy(), users.copy(),
+				joinTimes.copy(), categories.copy());
 	}
 
 	@Override
@@ -1015,6 +1022,15 @@ public class Guild implements IGuild {
 		return getCategories().stream()
 				.filter(category -> category.getName().equals(name))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public IChannel getNewMemberMessageChannel() {
+		return getChannelByID(newMemberMessageChannelId);
+	}
+
+	public void setNewMemberMessageChannelId(long newMemberMessageChannelId) {
+		this.newMemberMessageChannelId = newMemberMessageChannelId;
 	}
 
 	private AuditLog getAuditLog(IUser user, ActionType actionType, long before) {

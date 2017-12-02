@@ -647,4 +647,11 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @return A list of categories with the provided name.
 	 */
 	List<ICategory> getCategoriesByName(String name);
+
+	/**
+	 * Gets the channel that displays a message for new members.
+	 *
+	 * @return The channel that displays a message for new members, may be null.
+	 */
+	IChannel getNewMemberMessageChannel();
 }
