@@ -200,10 +200,10 @@ public class TestBot {
 										e.printStackTrace();
 									}
 								} else if (m.getContent().startsWith(".presence")) {
-									client.idle();
+									client.changePresence(StatusType.IDLE);
 								} else if (m.getContent().startsWith(".game")) {
 									String game = m.getContent().length() > 6 ? m.getContent().substring(6) : null;
-									client.changePlayingText(game);
+									client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, game);
 								} else if (m.getContent().startsWith(".type")) {
 									m.getChannel().toggleTypingStatus();
 								} else if (m.getContent().startsWith(".invite")) {

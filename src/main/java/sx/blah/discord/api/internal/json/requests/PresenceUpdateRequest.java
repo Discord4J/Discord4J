@@ -45,7 +45,9 @@ public class PresenceUpdateRequest {
 
 	public PresenceUpdateRequest(StatusType status, ActivityType type, String text, String streamUrl) {
 		this.since = status == StatusType.IDLE ? System.currentTimeMillis() : null;
-		this.game = type == ActivityType.STREAMING ? new GameObject(text, streamUrl) : new GameObject(text, type.ordinal());
+		this.game = type == ActivityType.STREAMING
+				? new GameObject(text, streamUrl)
+				: type == null ? null : new GameObject(text, type.ordinal());
 		this.status = status.name().toLowerCase();
 	}
 }

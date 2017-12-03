@@ -20,6 +20,8 @@ package sx.blah.discord.examples;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.obj.ActivityType;
+import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.RateLimitException;
@@ -45,8 +47,7 @@ public class AccountBot extends BaseBot implements IListener<ReadyEvent> {
 		try {
 			this.client.changeUsername("Awesome Bot"); // Changes the bot's username
 			this.client.changeAvatar(Image.forFile(new File("picture.png"))); // Changes the bot's profile picture
-			this.client.idle(); // Sets the bot's presence to idle
-			this.client.changePlayingText("playing text"); // Changes the Playing ... text to "playing text"
+			this.client.changePresence(StatusType.IDLE, ActivityType.PLAYING, "playing text");
 		} catch (RateLimitException | DiscordException e) { // An error occurred
 			e.printStackTrace();
 		}

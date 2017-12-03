@@ -135,54 +135,19 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public void changePlayingText(String playingText) {
-		updatePresence(getClient().getOurUser().getPresence().getStatus(), ActivityType.PLAYING, playingText,
-				getClient().getOurUser().getPresence().getStreamingUrl().orElse(null));
+	public void changePresence(StatusType status, ActivityType activity, String text) {
+		if (activity == ActivityType.STREAMING) throw new IllegalArgumentException("Invalid ActivityType");
+		updatePresence(status, activity, text, null);
 	}
 
 	@Override
-	public void online(String playingText) {
-		updatePresence(StatusType.ONLINE, ActivityType.PLAYING, playingText, null);
+	public void changePresence(StatusType status) {
+		updatePresence(status, null, null, null);
 	}
 
 	@Override
-	public void online() {
-		online(getClient().getOurUser().getPresence().getText().orElse(null));
-	}
-
-	@Override
-	public void idle(String playingText) {
-		updatePresence(StatusType.IDLE, ActivityType.PLAYING, playingText, null);
-	}
-
-	@Override
-	public void idle() {
-		idle(getClient().getOurUser().getPresence().getText().orElse(null));
-	}
-
-	@Override
-	public void streaming(String playingText, String streamingUrl) {
-		updatePresence(StatusType.ONLINE, ActivityType.STREAMING, playingText, streamingUrl);
-	}
-
-	@Override
-	public void dnd(String playingText) {
-		updatePresence(StatusType.DND, ActivityType.PLAYING, playingText, null);
-	}
-
-	@Override
-	public void dnd() {
-		dnd(getClient().getOurUser().getPresence().getText().orElse(null));
-	}
-
-	@Override
-	public void changePresence(StatusType type, ActivityType activityType, String message) {
-		updatePresence(type, activityType, message, null);
-	}
-
-	@Override
-	public void invisible() {
-		updatePresence(StatusType.INVISIBLE, ActivityType.PLAYING, "", null);
+	public void changeStreamingPresence(StatusType status, String text, String streamUrl) {
+		updatePresence(status, ActivityType.STREAMING, text, streamUrl);
 	}
 
 	private void updatePresence(StatusType status, ActivityType type, String text, String streamUrl) {

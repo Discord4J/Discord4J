@@ -41,15 +41,15 @@ public class Presence implements IPresence {
 	 */
 	private final StatusType status;
 	/**
-	 * The type of this presence
+	 * The activity of this presence.
 	 */
-	private ActivityType type;
+	private ActivityType activity;
 
-	public Presence(String text, String streamingUrl, StatusType status, ActivityType type) {
+	public Presence(String text, String streamingUrl, StatusType status, ActivityType activity) {
 		this.text = text;
 		this.streamingUrl = streamingUrl;
 		this.status = status;
-		this.type = type;
+		this.activity = activity;
 	}
 
 	@Override
@@ -69,32 +69,28 @@ public class Presence implements IPresence {
 
 	@Override
 	public IPresence copy() {
-		return new Presence(text, streamingUrl, status, type);
+		return new Presence(text, streamingUrl, status, activity);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!Presence.class.isAssignableFrom(obj.getClass())) return false;
+		if (this == obj) return true;
+		if (!(obj instanceof IPresence)) return false;
 
-		Presence other = (Presence) obj;
-		return Objects.equals(other.text, this.text)
-				&& Objects.equals(other.streamingUrl, this.streamingUrl)
-				&& other.status == this.status
-				&& other.type == this.type;
+		IPresence other = (IPresence) obj;
+		return Objects.equals(other.getText(), getText())
+				&& Objects.equals(other.getStreamingUrl(), getStreamingUrl())
+				&& Objects.equals(other.getStatus(), getStatus())
+				&& Objects.equals(other.getActivity(), getActivity());
 	}
 
 	@Override
-	public String toString() {
-		return status +
-				(getText().isPresent() ? " - " +
-						(getType() == ActivityType.PLAYING ? " playing " :
-								(getType() == ActivityType.STREAMING ? " streaming " :
-										(getType() == ActivityType.LISTENING ? " listening to " : "watching")
-								)) + getText().get() : "") + (getStreamingUrl().isPresent() ? " with streaming URL " + getStreamingUrl().get() : "");
+	public int hashCode() {
+		return Objects.hash(text, streamingUrl, status, activity);
 	}
 
 	@Override
-	public ActivityType getType() {
-		return type;
+	public Optional<ActivityType> getActivity() {
+		return Optional.ofNullable(activity);
 	}
 }
