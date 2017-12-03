@@ -16,6 +16,8 @@
  */
 package discord4j.gateway;
 
+import discord4j.common.jackson.Possible;
+import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
@@ -25,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GatewayClient {
@@ -33,23 +34,47 @@ public class GatewayClient {
 	private static final Logger log = LoggerFactory.getLogger(GatewayClient.class);
 
 	private final WebSocketClient webSocketClient = new WebSocketClient();
-	private final AtomicInteger lastSequence = new AtomicInteger();
-	//private final HeartbeatHandler heartbeatHandler = new HeartbeatHandler(lastSequence);
 	private final DiscordWebSocketHandler wsHandler;
 	private final Flux<Dispatch> dispatch;
+	private final String token;
 
-	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter) {
+	private final AtomicInteger lastSequence = new AtomicInteger();
+
+	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, String token) {
 		this.wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
-		this.dispatch = wsHandler.inbound().ofType(Dispatch.class);
+		this.dispatch = wsHandler.inbound().map(GatewayPayload::getData).ofType(Dispatch.class);
+		this.token = token;
 	}
 
 	public Mono<Void> execute(String gatewayUrl) {
-		wsHandler.inbound().subscribe(payload -> {
-
-		}, error -> {
+		wsHandler.inbound().subscribe(this::handlePayload, error -> {
 			log.warn("Gateway connection terminated: {}", error.toString());
 		});
 
 		return webSocketClient.execute(gatewayUrl, wsHandler);
+	}
+
+	public Flux<Dispatch> dispatch() {
+		return dispatch;
+	}
+
+	private <T extends GatewayPayload> void handlePayload(T payload) {
+		if (payload.getSequence() != null) {
+			lastSequence.set(payload.getSequence());
+		}
+
+		// TODO: can something go here besides a long if else?
+		Payload data = payload.getData();
+		if (data instanceof Hello) {
+			// heartbeatHandler.begin(interval)
+			// log trace
+
+			IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
+			Identify identify = new Identify(token, props, false, 250, Possible.absent(), Possible.absent());
+			GatewayPayload response = new GatewayPayload(Opcodes.IDENTIFY, identify, null, null);
+
+			// payloadSender.send(response)
+			wsHandler.outbound().onNext(response);
+		}
 	}
 }

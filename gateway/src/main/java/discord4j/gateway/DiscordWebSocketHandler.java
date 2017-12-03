@@ -23,6 +23,7 @@ import discord4j.gateway.websocket.CloseException;
 import discord4j.gateway.websocket.WebSocketHandler;
 import discord4j.gateway.websocket.WebSocketMessage;
 import discord4j.gateway.websocket.WebSocketSession;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.UnicastProcessor;
 
@@ -31,7 +32,7 @@ import java.util.logging.Level;
 public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
-	private final UnicastProcessor<GatewayPayload> inboundExchange = UnicastProcessor.create();
+	private final EmitterProcessor<GatewayPayload> inboundExchange = EmitterProcessor.create(false);
 	private final UnicastProcessor<GatewayPayload> outboundExchange = UnicastProcessor.create();
 
 	private final PayloadReader reader;
@@ -75,7 +76,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		onComplete();
 	}
 
-	public UnicastProcessor<GatewayPayload> inbound() {
+	public EmitterProcessor<GatewayPayload> inbound() {
 		return inboundExchange;
 	}
 
