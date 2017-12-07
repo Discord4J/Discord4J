@@ -60,7 +60,7 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.RequestBuilder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -366,7 +366,7 @@ class DispatchHandler {
 			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(guild, new MemberObject(event.user, event.roles));
 			guild.users.put(user);
 			guild.setTotalMemberCount(guild.getTotalMemberCount() + 1);
-			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
+			Instant timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
 			client.dispatcher.dispatch(new UserJoinEvent(guild, user, timestamp));
 		}

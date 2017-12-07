@@ -23,8 +23,7 @@ import sx.blah.discord.handle.obj.IEmbed;
 
 import java.awt.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -181,11 +180,11 @@ public class EmbedBuilder {
 	/**
 	 * Sets the timestamp of the embed.
 	 *
-	 * @param ldt The timestamp.
+	 * @param instant The timestamp.
 	 * @return The builder instance.
 	 */
-	public EmbedBuilder withTimestamp(LocalDateTime ldt) {
-		embed.timestamp = ldt.atZone(ZoneId.of("Z")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	public EmbedBuilder withTimestamp(Instant instant) {
+		embed.timestamp = instant.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 		return this;
 	}
 
@@ -196,7 +195,7 @@ public class EmbedBuilder {
 	 * @return The builder instance.
 	 */
 	public EmbedBuilder withTimestamp(long millis) {
-		return withTimestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.of("Z")));
+		return withTimestamp(Instant.ofEpochMilli(millis));
 	}
 
 	/**
@@ -315,7 +314,7 @@ public class EmbedBuilder {
 	public EmbedBuilder withAuthorName(String name) {
 		if (embed.author == null)
 			embed.author = new EmbedObject.AuthorObject(null, null, null, null);
-		
+
 		if (name.trim().length() > AUTHOR_NAME_LIMIT) {
 			if (lenient)
 				name = name.substring(0, AUTHOR_NAME_LIMIT);

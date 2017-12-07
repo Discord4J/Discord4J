@@ -18,7 +18,7 @@
 package sx.blah.discord.handle.obj;
 
 import java.awt.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -59,7 +59,7 @@ public interface IEmbed {
      *
      * @return The timestamp of the embed.
      */
-    LocalDateTime getTimestamp();
+    Instant getTimestamp();
 
     /**
      * Gets the color of the embed.

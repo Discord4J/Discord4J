@@ -22,7 +22,7 @@ import sx.blah.discord.util.MessageHistory;
 
 import java.io.File;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -106,7 +106,7 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount);
+	MessageHistory getMessageHistoryFrom(Instant startDate, int maxCount);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.
@@ -114,7 +114,7 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount);
+	MessageHistory getMessageHistoryTo(Instant endDate, int maxCount);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.
@@ -122,7 +122,7 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount);
+	MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate, int maxCount);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.
@@ -170,7 +170,7 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate);
+	MessageHistory getMessageHistoryFrom(Instant startDate);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.
@@ -178,7 +178,7 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
+	MessageHistory getMessageHistoryTo(Instant endDate);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.
@@ -186,7 +186,7 @@ public interface IVoiceChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+	MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate);
 
 	/**
 	 * @deprecated See {@link IVoiceChannel} for details.

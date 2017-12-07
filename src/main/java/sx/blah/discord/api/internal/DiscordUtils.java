@@ -53,8 +53,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.awt.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -146,42 +145,25 @@ public class DiscordUtils {
 
 	/**
 	 * Gets a snowflake from a unix timestamp.
-	 *
-	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
-	 * The returned snowflake is only one of many that could exist at the given timestamp.
-	 *
-	 * @param unixTime The unix timestamp that should be used in the snowflake.
-	 * @return A snowflake with the given timestamp.
-	 */
-	public static long getSnowflakeFromTimestamp(long unixTime) {
-		return (unixTime - DISCORD_EPOCH) << 22;
-	}
-
-	/**
-	 * Gets a snowflake from a unix timestamp.
-	 *
-	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
+	 * <p>
+	 * This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
 	 * The returned snowflake is only one of many that could exist at the given timestamp.
 	 *
 	 * @param date The date that should be converted to a unix timestamp for use in the snowflake.
 	 * @return A snowflake with the given timestamp.
 	 */
-	public static long getSnowflakeFromTimestamp(LocalDateTime date) {
-		return getSnowflakeFromTimestamp(date.atZone(ZoneId.systemDefault()).toEpochSecond());
+	public static long getSnowflakeFromTimestamp(Instant date) {
+		return (date.toEpochMilli() - DISCORD_EPOCH) << 22;
 	}
 
 	/**
-	 * Converts a String timestamp into a {@link LocalDateTime}.
+	 * Converts a String timestamp into a {@link Instant}.
 	 *
 	 * @param time The string timestamp.
 	 * @return The LocalDateTime representing the timestamp.
 	 */
-	public static LocalDateTime convertFromTimestamp(String time) {
-		if (time == null) {
-			return LocalDateTime.now();
-		}
-		return LocalDateTime.parse(time.split("\\+")[0]).atZone(ZoneId.of("UTC+00:00"))
-				.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+	public static Instant convertFromTimestamp(String time) {
+		return time == null ? Instant.now() : ZonedDateTime.parse(time).toInstant();
 	}
 
 	/**
@@ -877,14 +859,13 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the timestamp portion of a Snowflake ID as a {@link LocalDateTime} using the system's default timezone.
+	 * Gets the timestamp portion of a Snowflake ID as a {@link Instant} using the system's default timezone.
 	 *
 	 * @param id The Snowflake ID.
 	 * @return The timestamp portion of the ID.
 	 */
-	public static LocalDateTime getSnowflakeTimeFromID(long id) {
-		long milliseconds = DISCORD_EPOCH + (id >>> 22);
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
+	public static Instant getSnowflakeTimeFromID(long id) {
+		return Instant.ofEpochMilli(DISCORD_EPOCH + (id >>> 22));
 	}
 
 	/**

@@ -29,7 +29,7 @@ import sx.blah.discord.util.cache.Cache;
 
 import java.io.File;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -165,17 +165,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
+	public MessageHistory getMessageHistoryFrom(Instant startDate, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryTo(Instant endDate, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate, int maxCount) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -205,17 +205,17 @@ public class VoiceChannel extends Channel implements IVoiceChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
+	public MessageHistory getMessageHistoryFrom(Instant startDate) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+	public MessageHistory getMessageHistoryTo(Instant endDate) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+	public MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate) {
 		throw new UnsupportedOperationException();
 	}
 

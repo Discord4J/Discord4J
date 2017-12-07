@@ -24,7 +24,7 @@ import sx.blah.discord.util.cache.LongMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -66,7 +66,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param startDate The date to start at. (Inclusive)
 	 * @return The messages from a given date to the beginning of the channel.
 	 */
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate);
+	MessageHistory getMessageHistoryFrom(Instant startDate);
 
 	/**
 	 * Gets the messages from a given date to the beginning of the channel.
@@ -77,7 +77,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The maximum number of messages to retrieve.
 	 * @return The messages from a given date to the beginning of the channel.
 	 */
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount);
+	MessageHistory getMessageHistoryFrom(Instant startDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages from a given message ID to the beginning of the channel.
@@ -108,7 +108,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param endDate The date to stop at. (Inclusive)
 	 * @return The messages from the current time to the given date.
 	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
+	MessageHistory getMessageHistoryTo(Instant endDate);
 
 	/**
 	 * Gets the messages from the current time to the given date.
@@ -119,7 +119,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The maximum number of messages to retrieve.
 	 * @return The messages from the current time to the given date.
 	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxMessageCount);
+	MessageHistory getMessageHistoryTo(Instant endDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages from the current time to the given message ID.
@@ -151,7 +151,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param endDate The date to stop at (Inclusive)
 	 * @return The messages in the given range of dates.
 	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+	MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate);
 
 	/**
 	 * Gets the messages in the specified range of dates.
@@ -163,7 +163,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The maximum number of messages to retrieve.
 	 * @return The messages in the given range of dates.
 	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
+	MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages in the given range of message IDs.

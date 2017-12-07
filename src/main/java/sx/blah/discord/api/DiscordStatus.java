@@ -25,7 +25,7 @@ import sx.blah.discord.api.internal.json.responses.metrics.StatusResponse;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Utility class used for fetching status information about the Discord API.
@@ -118,9 +118,9 @@ public class DiscordStatus {
 	public static class Maintenance {
 
 		private final String name, description, id;
-		private final LocalDateTime start, stop;
+		private final Instant start, stop;
 
-		protected Maintenance(String name, String description, String id, LocalDateTime start, LocalDateTime stop) {
+		protected Maintenance(String name, String description, String id, Instant start, Instant stop) {
 			this.name = name;
 			this.description = description;
 			this.id = id;
@@ -160,7 +160,7 @@ public class DiscordStatus {
 		 *
 		 * @return The start time.
 		 */
-		public LocalDateTime getStart() {
+		public Instant getStart() {
 			return start;
 		}
 
@@ -169,7 +169,7 @@ public class DiscordStatus {
 		 *
 		 * @return The end time.
 		 */
-		public LocalDateTime getEnd() {
+		public Instant getEnd() {
 			return stop;
 		}
 	}

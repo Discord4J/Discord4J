@@ -43,7 +43,7 @@ import sx.blah.discord.util.cache.Cache;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -781,7 +781,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public LocalDateTime getJoinTimeForUser(IUser user) {
+	public Instant getJoinTimeForUser(IUser user) {
 		if (!joinTimes.containsKey(user.getLongID()))
 			throw new DiscordException("Cannot find user "+user.getDisplayName(this)+" in this guild!");
 
@@ -1077,9 +1077,9 @@ public class Guild implements IGuild {
 	/**
 	 * Associates a user ID to their join time.
 	 */
-	public static class TimeStampHolder extends IDLinkedObjectWrapper<LocalDateTime> {
+	public static class TimeStampHolder extends IDLinkedObjectWrapper<Instant> {
 
-		public TimeStampHolder(long id, LocalDateTime obj) {
+		public TimeStampHolder(long id, Instant obj) {
 			super(id, obj);
 		}
 	}
