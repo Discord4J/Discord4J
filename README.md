@@ -31,7 +31,6 @@ In your `pom.xml` add (without the ellipses):
     <groupId>com.github.austinv11</groupId>
     <artifactId>Discord4J</artifactId>
     <version>@VERSION@</version>
-   <!-- <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
   </dependency>
 </dependencies>
 ...
@@ -51,7 +50,6 @@ repositories {
 dependencies {
   ...
   compile "com.github.austinv11:Discord4J:@VERSION@"
-  //compile "com.github.austinv11:Discord4J:@VERSION@:shaded" //Use this line instead of the one above it if you want a shaded jar (all the Discord4J dependencies bundled into one jar)
 }
 ...
 ```
