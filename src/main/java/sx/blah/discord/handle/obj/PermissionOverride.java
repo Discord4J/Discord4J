@@ -21,7 +21,7 @@ import java.util.EnumSet;
 /**
  * A permission override for a role or user.
  */
-public class PermissionOverride extends IChannel.PermissionOverride {
+public class PermissionOverride implements IIDLinkedObject {
 
 	/**
 	 * The permissions explicitly allowed by the override.
@@ -39,7 +39,6 @@ public class PermissionOverride extends IChannel.PermissionOverride {
 	protected final long id;
 
 	public PermissionOverride(EnumSet<Permissions> allow, EnumSet<Permissions> deny, long id) {
-		super(allow, deny, id);
 		this.allow = allow;
 		this.deny = deny;
 		this.id = id;

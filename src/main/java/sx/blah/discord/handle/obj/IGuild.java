@@ -443,16 +443,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IRole getEveryoneRole();
 
 	/**
-	 * Gets the default channel for the guild.
-	 *
-	 * @return The default/general channel.
-	 *
-	 * @deprecated Use {@link #getDefaultChannel()} instead.
-	 */
-	@Deprecated
-	IChannel getGeneralChannel();
-
-	/**
 	 * Gets the channel in the guild with the highest position that the bot user can read.
 	 *
 	 * @return The channel in the guild with the highest position that the bot user can read.

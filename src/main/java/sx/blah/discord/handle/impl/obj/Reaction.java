@@ -72,28 +72,6 @@ public class Reaction implements IReaction {
 	}
 
 	@Override
-	public boolean isCustomEmoji() {
-		return !emoji.isUnicode();
-	}
-
-	@Override
-	public IEmoji getCustomEmoji() {
-		if (!isCustomEmoji()) return null;
-
-		IEmoji emoji = getMessage().getGuild().getEmojiByID(getEmoji().getLongID());
-		if (emoji == null) {
-			// Make up information that we don't have. Temporary until this method is removed.
-			emoji = new EmojiImpl(getEmoji().getLongID(), null, getEmoji().getName(), false, false);
-		}
-		return emoji;
-	}
-
-	@Override
-	public Emoji getUnicodeEmoji() {
-		return EmojiManager.getByUnicode(emoji.getName());
-	}
-
-	@Override
 	public List<IUser> getUsers() {
 		List<IUser> users = new ArrayList<>();
 
@@ -122,11 +100,6 @@ public class Reaction implements IReaction {
 	@Override
 	public boolean getUserReacted(IUser user) {
 		return getUsers().contains(user);
-	}
-
-	@Override
-	public boolean getClientReacted() {
-		return getUserReacted(getClient().getOurUser());
 	}
 
 	@Override

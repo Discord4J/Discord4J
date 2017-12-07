@@ -483,11 +483,6 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public IReaction getReactionByIEmoji(IEmoji emoji) {
-		return getReactionByEmoji(emoji);
-	}
-
-	@Override
 	public IReaction getReactionByEmoji(IEmoji emoji) {
 		return getReactionByID(emoji.getLongID());
 	}
@@ -534,30 +529,6 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void addReaction(String emoji) {
-		if (EmojiManager.isEmoji(emoji)) { // unicode char
-			addReaction(EmojiManager.getByUnicode(emoji));
-		} else if (DiscordUtils.CUSTOM_EMOJI_PATTERN.matcher(emoji).matches()) { // custom emoji
-			String s = emoji.replaceAll("[<>]", "");
-			String name = s.substring(0, s.indexOf(":"));
-			long id = Long.parseUnsignedLong(s.substring(s.indexOf(":" + 1), s.length()));
-
-			addReaction(ReactionEmoji.of(name, id));
-		} else if (DiscordUtils.EMOJI_ALIAS_PATTERN.matcher(emoji).matches()) { // unicode alias
-			String alias = emoji.replace(":", "");
-			Emoji e = EmojiManager.getForAlias(alias);
-
-			if (e == null) { // alias is wrong
-				throw new IllegalArgumentException("Emoji alias \"" + emoji + "\" could not be found.");
-			}
-
-			addReaction(e);
-		} else {
-			throw new IllegalArgumentException("Emoji \"" + emoji + "\" didn't match unicode char, unicode alias, or custom emoji string.");
-		}
-	}
-
-	@Override
 	public void addReaction(ReactionEmoji reactionEmoji) {
 		if (getReactionByEmoji(reactionEmoji) == null) { // only need perms when adding a new emoji
 			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.ADD_REACTIONS);
@@ -574,11 +545,6 @@ public class Message implements IMessage {
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
-	}
-
-	@Override
-	public void removeReaction(IReaction reaction) {
-		removeReaction(getClient().getOurUser(), reaction);
 	}
 
 	@Override

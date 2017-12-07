@@ -614,26 +614,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Gets the permissions overrides for users. (Key = User ID)
 	 *
 	 * @return The user permissions overrides for the channel.
-	 * @deprecated Use {@link #getUserOverrides()} instead.
-	 */
-	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong();
-
-	/**
-	 * Gets the permissions overrides for users. (Key = User ID)
-	 *
-	 * @return The user permissions overrides for the channel.
 	 */
 	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverrides();
-
-	/**
-	 * Gets the permissions overrides for roles. (Key = Role ID)
-	 *
-	 * @return The role permissions overrides for this channel.
-	 * @deprecated Use {{@link #getRoleOverrides()}} instead.
-	 */
-	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
 
 	/**
 	 * Gets the permissions overrides for roles. (Key = Role ID)
@@ -794,76 +776,4 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The category of the channel, may be null.
 	 */
 	ICategory getCategory();
-
-	/**
-	 * A permission override for a role or user.
-	 *
-	 * @deprecated Use {@link sx.blah.discord.handle.obj.PermissionOverride} instead.
-	 */
-	@Deprecated
-	class PermissionOverride implements IIDLinkedObject {
-
-		/**
-		 * The permissions explicitly allowed by the override.
-		 */
-		protected final EnumSet<Permissions> allow;
-
-		/**
-		 * The permissions explicitly denied by the override.
-		 */
-		protected final EnumSet<Permissions> deny;
-
-		/**
-		 * The ID of the user or role the override is for.
-		 */
-		protected final long id;
-
-		public PermissionOverride(EnumSet<Permissions> allow, EnumSet<Permissions> deny, long id) {
-			this.allow = allow;
-			this.deny = deny;
-			this.id = id;
-		}
-
-		/**
-		 * Gets the permissions explicitly allowed by the override.
-		 *
-		 * @return The permissions explicitly allowed by the override.
-		 */
-		public EnumSet<Permissions> allow() {
-			return allow;
-		}
-
-		/**
-		 * Gets the permissions explicitly denied by the override.
-		 *
-		 * @return The permissions explicitly denied by the override.
-		 */
-		public EnumSet<Permissions> deny() {
-			return deny;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (other == null)
-				return false;
-
-			if (!this.getClass().isAssignableFrom(other.getClass()))
-				return false;
-
-			if (!((PermissionOverride) other).deny.equals(this.deny)) return false;
-			if (!((PermissionOverride) other).allow.equals(this.allow)) return false;
-
-			return true;
-		}
-
-		@Override
-		public String toString() {
-			return "PermissionOverride (Allow: " + allow + ", Deny: " + deny + ")";
-		}
-
-		@Override
-		public long getLongID() {
-			return id;
-		}
-	}
 }

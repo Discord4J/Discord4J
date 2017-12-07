@@ -50,22 +50,6 @@ public interface IPrivateChannel extends IChannel {
 	 */
 	@Override
 	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong();
-
-	/**
-	 * @deprecated See {@link IPrivateChannel} for details.
-	 * @throws UnsupportedOperationException Impossible to use as a private channel.
-	 */
-	@Override
-	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
-
-	/**
-	 * @deprecated See {@link IPrivateChannel} for details.
-	 * @throws UnsupportedOperationException Impossible to use as a private channel.
-	 */
-	@Override
-	@Deprecated
 	void edit(String name, int position, String topic);
 
 	/**

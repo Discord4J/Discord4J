@@ -47,14 +47,6 @@ public enum StatusType {
 	 */
 	OFFLINE,
 	/**
-	 * A status of Streaming.
-	 *
-	 * @deprecated There is no such thing as streaming status. A user will <b>never</b> appear to have this status.
-	 * Instead, they will have {@link #ONLINE} status with a streaming url.
-	 */
-	@Deprecated
-	STREAMING,
-	/**
 	 * An unknown presence.
 	 */
 	UNKNOWN;

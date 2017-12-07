@@ -244,7 +244,6 @@ public class DiscordWS extends WebSocketAdapter {
 		WebSocketClient previous = wsClient; // for cleanup
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
-			wsClient.setDaemon(true);
 			wsClient.getPolicy().setMaxBinaryMessageSize(Integer.MAX_VALUE);
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
 			wsClient.start();

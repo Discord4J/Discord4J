@@ -700,11 +700,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IChannel getGeneralChannel() {
-		return getChannelByID(this.id);
-	}
-
-	@Override
 	public IChannel getDefaultChannel() {
 		return getChannels().stream()
 				.filter(c -> PermissionUtils.hasPermissions(c, client.getOurUser(), Permissions.READ_MESSAGES))
