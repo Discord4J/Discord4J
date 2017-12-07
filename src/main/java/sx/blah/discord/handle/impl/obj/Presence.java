@@ -17,8 +17,8 @@
 
 package sx.blah.discord.handle.impl.obj;
 
-import sx.blah.discord.handle.obj.IPresence;
 import sx.blah.discord.handle.obj.ActivityType;
+import sx.blah.discord.handle.obj.IPresence;
 import sx.blah.discord.handle.obj.StatusType;
 
 import java.util.Objects;

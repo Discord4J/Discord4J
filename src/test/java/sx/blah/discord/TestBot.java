@@ -31,7 +31,6 @@ import sx.blah.discord.util.*;
 import sx.blah.discord.util.audio.AudioPlayer;
 
 import java.io.File;
-import java.net.URL;
 import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;

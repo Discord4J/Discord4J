@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.audit.entry.change;
 
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.PermissionOverride;
 import sx.blah.discord.util.LogMarkers;

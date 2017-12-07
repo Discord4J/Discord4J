@@ -18,9 +18,9 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.audio.IAudioManager;
-import sx.blah.discord.util.Ban;
 import sx.blah.discord.handle.audit.ActionType;
 import sx.blah.discord.handle.audit.AuditLog;
+import sx.blah.discord.util.Ban;
 import sx.blah.discord.util.Image;
 
 import java.time.Instant;

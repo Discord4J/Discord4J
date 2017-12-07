@@ -25,9 +25,10 @@ import sx.blah.discord.util.AttachmentPartEntry;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.cache.Cache;
-import sx.blah.discord.util.cache.LongMap;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
 
 /**
  * The default implementation of {@link IPrivateChannel}.

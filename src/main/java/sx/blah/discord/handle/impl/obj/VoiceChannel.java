@@ -30,7 +30,6 @@ import sx.blah.discord.util.cache.Cache;
 import java.io.File;
 import java.io.InputStream;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

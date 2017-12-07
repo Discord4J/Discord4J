@@ -31,7 +31,7 @@ import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.PermissionUtils;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;

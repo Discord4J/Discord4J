@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.audit.entry.change;
 
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogChangeObject;
-import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
 
 import java.util.EnumSet;
 import java.util.HashMap;

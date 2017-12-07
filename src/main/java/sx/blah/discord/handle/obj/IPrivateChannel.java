@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.cache.LongMap;
 
 import java.util.EnumSet;
 import java.util.List;

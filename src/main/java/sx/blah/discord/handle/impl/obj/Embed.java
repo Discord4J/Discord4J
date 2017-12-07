@@ -20,7 +20,7 @@ package sx.blah.discord.handle.impl.obj;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IEmbed;
 
-import java.awt.*;
+import java.awt.Color;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;

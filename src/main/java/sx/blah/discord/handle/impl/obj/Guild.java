@@ -27,7 +27,6 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
-import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
 import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;

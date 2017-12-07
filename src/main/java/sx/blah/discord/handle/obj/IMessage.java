@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.obj;
 
 import com.vdurmont.emoji.Emoji;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.obj.ReactionEmoji;
 import sx.blah.discord.util.EmbedBuilder;

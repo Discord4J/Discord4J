@@ -17,7 +17,7 @@
 
 package sx.blah.discord.handle.obj;
 
-import java.awt.*;
+import java.awt.Color;
 import java.time.Instant;
 import java.util.List;
 

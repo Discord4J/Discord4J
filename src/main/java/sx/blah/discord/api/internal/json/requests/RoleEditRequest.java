@@ -19,7 +19,7 @@ package sx.blah.discord.api.internal.json.requests;
 
 import sx.blah.discord.handle.obj.Permissions;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.EnumSet;
 
 /**

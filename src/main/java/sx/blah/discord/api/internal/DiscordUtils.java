@@ -51,7 +51,7 @@ import sx.blah.discord.util.cache.LongMap;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.awt.*;
+import java.awt.Color;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

@@ -29,7 +29,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RoleBuilder;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.EnumSet;
 
 /**

@@ -19,7 +19,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.cache.LongMap;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.EnumSet;
 import java.util.List;
 
