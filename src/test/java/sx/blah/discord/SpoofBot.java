@@ -101,7 +101,7 @@ public class SpoofBot {
 												break;
 
 											case GAME:
-												client.online(rng.nextBoolean() ? getRandString() : null);
+												client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, rng.nextBoolean() ? getRandString() : null);
 												break;
 
 											case PRESENCE:

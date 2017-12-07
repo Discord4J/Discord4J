@@ -18,6 +18,7 @@
 package sx.blah.discord.handle.impl.obj;
 
 import sx.blah.discord.handle.obj.IPresence;
+import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.StatusType;
 
 import java.util.Objects;
@@ -27,11 +28,10 @@ import java.util.Optional;
  * The default implementation of {@link IPresence}.
  */
 public class Presence implements IPresence {
-
 	/**
-	 * The nullable playing text of the presence.
+	 * The nullable text of the presence.
 	 */
-	private final String playingText;
+	private final String text;
 	/**
 	 * The nullable streaming url of the presence.
 	 */
@@ -40,16 +40,21 @@ public class Presence implements IPresence {
 	 * The type of status of the presence.
 	 */
 	private final StatusType status;
+	/**
+	 * The activity of this presence.
+	 */
+	private ActivityType activity;
 
-	public Presence(String playingText, String streamingUrl, StatusType status) {
-		this.playingText = playingText;
+	public Presence(String text, String streamingUrl, StatusType status, ActivityType activity) {
+		this.text = text;
 		this.streamingUrl = streamingUrl;
 		this.status = status;
+		this.activity = activity;
 	}
 
 	@Override
-	public Optional<String> getPlayingText() {
-		return Optional.ofNullable(playingText);
+	public Optional<String> getText() {
+		return Optional.ofNullable(text);
 	}
 
 	@Override
@@ -64,22 +69,28 @@ public class Presence implements IPresence {
 
 	@Override
 	public IPresence copy() {
-		return new Presence(playingText, streamingUrl, status);
+		return new Presence(text, streamingUrl, status, activity);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!Presence.class.isAssignableFrom(obj.getClass())) return false;
+		if (this == obj) return true;
+		if (!(obj instanceof IPresence)) return false;
 
-		Presence other = (Presence) obj;
-		return Objects.equals(other.playingText, this.playingText)
-				&& Objects.equals(other.streamingUrl, this.streamingUrl)
-				&& other.status == this.status;
+		IPresence other = (IPresence) obj;
+		return Objects.equals(other.getText(), getText())
+				&& Objects.equals(other.getStreamingUrl(), getStreamingUrl())
+				&& Objects.equals(other.getStatus(), getStatus())
+				&& Objects.equals(other.getActivity(), getActivity());
 	}
 
 	@Override
-	public String toString() {
-		return status + (getPlayingText().isPresent() ? " - playing " + getPlayingText().get() : "") +
-				(getStreamingUrl().isPresent() ? " with streaming URL " + getStreamingUrl().get() : "");
+	public int hashCode() {
+		return Objects.hash(text, streamingUrl, status, activity);
+	}
+
+	@Override
+	public Optional<ActivityType> getActivity() {
+		return Optional.ofNullable(activity);
 	}
 }

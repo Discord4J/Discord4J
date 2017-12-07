@@ -203,7 +203,7 @@ public class DiscordUtils {
 			user.setDiscriminator(response.discriminator);
 		} else {
 			user = new User(shard, response.username, Long.parseUnsignedLong(response.id), response.discriminator, response.avatar,
-					new Presence(null, null, StatusType.OFFLINE), response.bot);
+					new Presence(null, null, StatusType.OFFLINE, ActivityType.PLAYING), response.bot);
 		}
 		return user;
 	}
@@ -698,7 +698,8 @@ public class DiscordUtils {
 		return new Presence(
 				game == null ? null : game.name,
 				game == null ? null : game.url,
-				StatusType.get(status));
+				StatusType.get(status),
+				game == null ? ActivityType.PLAYING : ActivityType.values()[game.type]);
 	}
 
 	/**

@@ -449,48 +449,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void changePlayingText(String playingText) {
-		getShards().forEach(s -> s.changePlayingText(playingText));
+	public void changePresence(StatusType status, ActivityType activity, String text) {
+		getShards().forEach(shard -> shard.changePresence(status, activity, text));
 	}
 
 	@Override
-	public void online(String playingText) {
-		getShards().forEach(s -> s.online(playingText));
+	public void changePresence(StatusType status) {
+		getShards().forEach(shard -> shard.changePresence(status));
 	}
 
 	@Override
-	public void online() {
-		getShards().forEach(IShard::online);
-	}
-
-	@Override
-	public void idle(String playingText) {
-		getShards().forEach(s -> s.idle(playingText));
-	}
-
-	@Override
-	public void idle() {
-		getShards().forEach(IShard::idle);
-	}
-
-	@Override
-	public void streaming(String playingText, String streamingUrl) {
-		getShards().forEach(s -> s.streaming(playingText, streamingUrl));
-	}
-
-	@Override
-	public void dnd(String playingText) {
-		getShards().forEach(s -> s.dnd(playingText));
-	}
-
-	@Override
-	public void dnd() {
-		getShards().forEach(IShard::dnd);
-	}
-
-	@Override
-	public void invisible() {
-		getShards().forEach(IShard::invisible);
+	public void changeStreamingPresence(StatusType status, String text, String streamUrl) {
+		getShards().forEach(shard -> shard.changeStreamingPresence(status, text, streamUrl));
 	}
 
 	@Override
