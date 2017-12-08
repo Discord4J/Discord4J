@@ -32,7 +32,7 @@ import java.util.logging.Level;
 public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
-	private final EmitterProcessor<GatewayPayload> inboundExchange = EmitterProcessor.create(false);
+	private final UnicastProcessor<GatewayPayload> inboundExchange = UnicastProcessor.create();
 	private final UnicastProcessor<GatewayPayload> outboundExchange = UnicastProcessor.create();
 
 	private final PayloadReader reader;
@@ -76,7 +76,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		onComplete();
 	}
 
-	public EmitterProcessor<GatewayPayload> inbound() {
+	public UnicastProcessor<GatewayPayload> inbound() {
 		return inboundExchange;
 	}
 

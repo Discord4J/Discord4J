@@ -16,6 +16,7 @@
  */
 package discord4j.gateway;
 
+import discord4j.common.ResettableInterval;
 import discord4j.common.jackson.Possible;
 import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
@@ -24,9 +25,11 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.WebSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GatewayClient {
@@ -35,20 +38,26 @@ public class GatewayClient {
 
 	private final WebSocketClient webSocketClient = new WebSocketClient();
 	private final DiscordWebSocketHandler wsHandler;
-	private final Flux<Dispatch> dispatch;
+	private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
 	private final String token;
 
-	private final AtomicInteger lastSequence = new AtomicInteger();
+	private final AtomicInteger lastSequence = new AtomicInteger(0);
+	private final ResettableInterval heartbeatHandler = new ResettableInterval();
 
 	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, String token) {
 		this.wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
-		this.dispatch = wsHandler.inbound().map(GatewayPayload::getData).ofType(Dispatch.class);
 		this.token = token;
 	}
 
 	public Mono<Void> execute(String gatewayUrl) {
 		wsHandler.inbound().subscribe(this::handlePayload, error -> {
 			log.warn("Gateway connection terminated: {}", error.toString());
+		});
+
+		heartbeatHandler.subscribe(l -> {
+			GatewayPayload heartbeat =
+					new GatewayPayload(Opcodes.HEARTBEAT, new Heartbeat(lastSequence.get()), null, null);
+			wsHandler.outbound().onNext(heartbeat);
 		});
 
 		return webSocketClient.execute(gatewayUrl, wsHandler);
@@ -65,8 +74,12 @@ public class GatewayClient {
 
 		// TODO: can something go here besides a long if else?
 		Payload data = payload.getData();
-		if (data instanceof Hello) {
-			// heartbeatHandler.begin(interval)
+		if (data instanceof Dispatch) {
+			dispatch.onNext((Dispatch) data);
+		} else if (data instanceof Hello) {
+			Duration interval = Duration.ofMillis(((Hello) data).getHeartbeatInterval());
+			heartbeatHandler.start(interval);
+
 			// log trace
 
 			IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
