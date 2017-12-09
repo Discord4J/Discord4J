@@ -63,7 +63,7 @@ class RequestStream<T> {
 			Throwable exception = ctx.exception();
 			if (exception instanceof ClientException) {
 				ClientException clientException = (ClientException) exception;
-				if (clientException.getStatus().code() == 429) {
+				if (clientException.getStatus().code() == 429) { // TODO: retry on other status codes?
 					boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
 					long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
 
@@ -72,6 +72,7 @@ class RequestStream<T> {
 					} else {
 						ctx.applicationContext().set(retryAfter);
 					}
+					return true;
 				}
 			}
 			return false;
