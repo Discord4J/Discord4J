@@ -35,7 +35,7 @@ public class ResettableInterval {
 		task.dispose();
 	}
 
-	public Flux<Long> out() {
+	public Flux<Long> ticks() {
 		return backing;
 	}
 }

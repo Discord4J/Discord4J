@@ -29,27 +29,49 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.UnicastProcessor;
 import reactor.retry.Backoff;
 import reactor.retry.Retry;
 
 import java.time.Duration;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class GatewayClient {
 
 	private static final Logger log = LoggerFactory.getLogger(GatewayClient.class);
 
+	private static final Set<PayloadHandler<?>> HANDLERS = new LinkedHashSet<>();
+
+	static {
+		HANDLERS.add(new PayloadHandler<>(Dispatch.class, context -> context.client.dispatch.onNext(context
+				.payload)));
+		HANDLERS.add(new PayloadHandler<>(Hello.class, context -> {
+			Duration interval = Duration.ofMillis(context.payload.getHeartbeatInterval());
+			context.client.heartbeat.start(interval);
+
+			// log trace
+
+			IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
+			Identify identify = new Identify(context.client.token, props, false, 250, Possible.absent(), Possible
+					.absent());
+			GatewayPayload response = new GatewayPayload(Opcodes.IDENTIFY, identify, null, null);
+
+			// payloadSender.send(response)
+			context.handler.outbound().onNext(response);
+		}));
+	}
+
 	private final WebSocketClient webSocketClient = new WebSocketClient();
 	private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
 	private final AtomicInteger lastSequence = new AtomicInteger(0);
-	private final ResettableInterval heartbeatHandler = new ResettableInterval();
+	private final ResettableInterval heartbeat = new ResettableInterval();
 
 	private final PayloadReader payloadReader;
 	private final PayloadWriter payloadWriter;
 	private final String token;
-
-	private UnicastProcessor<GatewayPayload> outbound;
 
 	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, String token) {
 		this.payloadReader = payloadReader;
@@ -60,13 +82,11 @@ public class GatewayClient {
 	public Mono<Void> execute(String gatewayUrl) {
 		return Mono.defer(() -> {
 			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
-			this.outbound = wsHandler.outbound();
+			wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
 
-			wsHandler.inbound().subscribe(this::handlePayload);
-
-			heartbeatHandler.out()
+			heartbeat.ticks()
 					.map(l -> new GatewayPayload(Opcodes.HEARTBEAT, new Heartbeat(lastSequence.get()), null, null))
-					.subscribe(outbound()::onNext);
+					.subscribe(wsHandler.outbound()::onNext);
 
 			return webSocketClient.execute(gatewayUrl, wsHandler);
 		}).retryWhen(Retry.onlyIf(ctx -> {
@@ -79,31 +99,68 @@ public class GatewayClient {
 		return dispatch;
 	}
 
-	public UnicastProcessor<GatewayPayload> outbound() {
-		return outbound;
-	}
-
-	private <T extends GatewayPayload> void handlePayload(T payload) {
+	private <T extends GatewayPayload> void handlePayload(T payload, DiscordWebSocketHandler handler) {
 		if (payload.getSequence() != null) {
 			lastSequence.set(payload.getSequence());
 		}
+		HANDLERS.stream()
+				.filter(h -> h.canHandle(payload.getData()))
+				.findFirst()
+				.map(GatewayClient::cast)
+				.ifPresent(h -> h.handle(new Context<>(this, handler, payload.getData())));
+	}
 
-		// TODO: can something go here besides a long if else?
-		Payload data = payload.getData();
-		if (data instanceof Dispatch) {
-			dispatch.onNext((Dispatch) data);
-		} else if (data instanceof Hello) {
-			Duration interval = Duration.ofMillis(((Hello) data).getHeartbeatInterval());
-			heartbeatHandler.start(interval);
+	private static class PayloadHandler<T extends Payload> {
 
-			// log trace
+		private final Class<T> type;
+		private final Consumer<Context<T>> consumer;
 
-			IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
-			Identify identify = new Identify(token, props, false, 250, Possible.absent(), Possible.absent());
-			GatewayPayload response = new GatewayPayload(Opcodes.IDENTIFY, identify, null, null);
-
-			// payloadSender.send(response)
-			outbound().onNext(response);
+		PayloadHandler(Class<T> type, Consumer<Context<T>> consumer) {
+			this.type = type;
+			this.consumer = consumer;
 		}
+
+		public boolean canHandle(Payload obj) {
+			return type.isInstance(obj);
+		}
+
+		public void handle(Context<T> context) {
+			consumer.accept(context);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			PayloadHandler<?> that = (PayloadHandler<?>) o;
+			return Objects.equals(type, that.type);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(type);
+		}
+	}
+
+	private static class Context<T extends Payload> {
+
+		private final GatewayClient client;
+		private final DiscordWebSocketHandler handler;
+		private final T payload;
+
+		Context(GatewayClient client, DiscordWebSocketHandler handler, T payload) {
+			this.client = client;
+			this.handler = handler;
+			this.payload = payload;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends Payload> PayloadHandler<T> cast(PayloadHandler<?> handler) {
+		return (PayloadHandler<T>) handler;
 	}
 }
