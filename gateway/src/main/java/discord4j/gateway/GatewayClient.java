@@ -22,12 +22,16 @@ import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import discord4j.gateway.websocket.CloseException;
 import discord4j.gateway.websocket.WebSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.UnicastProcessor;
+import reactor.retry.Backoff;
+import reactor.retry.Retry;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,34 +41,46 @@ public class GatewayClient {
 	private static final Logger log = LoggerFactory.getLogger(GatewayClient.class);
 
 	private final WebSocketClient webSocketClient = new WebSocketClient();
-	private final DiscordWebSocketHandler wsHandler;
 	private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
-	private final String token;
-
 	private final AtomicInteger lastSequence = new AtomicInteger(0);
 	private final ResettableInterval heartbeatHandler = new ResettableInterval();
 
+	private final PayloadReader payloadReader;
+	private final PayloadWriter payloadWriter;
+	private final String token;
+
+	private UnicastProcessor<GatewayPayload> outbound;
+
 	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, String token) {
-		this.wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
+		this.payloadReader = payloadReader;
+		this.payloadWriter = payloadWriter;
 		this.token = token;
 	}
 
 	public Mono<Void> execute(String gatewayUrl) {
-		wsHandler.inbound().subscribe(this::handlePayload, error -> {
-			log.warn("Gateway connection terminated: {}", error.toString());
-		});
+		return Mono.defer(() -> {
+			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
+			this.outbound = wsHandler.outbound();
 
-		heartbeatHandler.subscribe(l -> {
-			GatewayPayload heartbeat =
-					new GatewayPayload(Opcodes.HEARTBEAT, new Heartbeat(lastSequence.get()), null, null);
-			wsHandler.outbound().onNext(heartbeat);
-		});
+			wsHandler.inbound().subscribe(this::handlePayload);
 
-		return webSocketClient.execute(gatewayUrl, wsHandler);
+			heartbeatHandler.out()
+					.map(l -> new GatewayPayload(Opcodes.HEARTBEAT, new Heartbeat(lastSequence.get()), null, null))
+					.subscribe(outbound()::onNext);
+
+			return webSocketClient.execute(gatewayUrl, wsHandler);
+		}).retryWhen(Retry.onlyIf(ctx -> {
+			Throwable t = ctx.exception();
+			return !(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
+		}).backoff(Backoff.fixed(Duration.ofSeconds(5))).retryMax(5));
 	}
 
 	public Flux<Dispatch> dispatch() {
 		return dispatch;
+	}
+
+	public UnicastProcessor<GatewayPayload> outbound() {
+		return outbound;
 	}
 
 	private <T extends GatewayPayload> void handlePayload(T payload) {
@@ -87,7 +103,7 @@ public class GatewayClient {
 			GatewayPayload response = new GatewayPayload(Opcodes.IDENTIFY, identify, null, null);
 
 			// payloadSender.send(response)
-			wsHandler.outbound().onNext(response);
+			outbound().onNext(response);
 		}
 	}
 }

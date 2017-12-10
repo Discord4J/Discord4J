@@ -16,16 +16,13 @@
  */
 package discord4j.common;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
-import java.util.function.Consumer;
 
-public class ResettableInterval implements Publisher<Long> {
+public class ResettableInterval {
 
 	private final EmitterProcessor<Long> backing = EmitterProcessor.create();
 	private Disposable task;
@@ -38,12 +35,7 @@ public class ResettableInterval implements Publisher<Long> {
 		task.dispose();
 	}
 
-	@Override
-	public void subscribe(Subscriber<? super Long> s) {
-		backing.subscribe(s);
-	}
-
-	public Disposable subscribe(Consumer<Long> consumer) {
-		return backing.subscribe(consumer);
+	public Flux<Long> out() {
+		return backing;
 	}
 }

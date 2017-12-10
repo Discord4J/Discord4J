@@ -19,12 +19,9 @@ package discord4j.gateway;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.websocket.CloseException;
-import discord4j.gateway.websocket.WebSocketHandler;
-import discord4j.gateway.websocket.WebSocketMessage;
-import discord4j.gateway.websocket.WebSocketSession;
-import reactor.core.publisher.EmitterProcessor;
+import discord4j.gateway.websocket.*;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.UnicastProcessor;
 
 import java.util.logging.Level;
@@ -34,6 +31,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
 	private final UnicastProcessor<GatewayPayload> inboundExchange = UnicastProcessor.create();
 	private final UnicastProcessor<GatewayPayload> outboundExchange = UnicastProcessor.create();
+	private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
 
 	private final PayloadReader reader;
 	private final PayloadWriter writer;
@@ -47,33 +45,28 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	public Mono<Void> handle(WebSocketSession session) {
 		session.closeFuture()
 				.map(CloseException::new)
-				.subscribe(this::onError);
+				.subscribe(completionNotifier::onError);
 
 		session.receive()
 				.map(WebSocketMessage::getPayload)
 				.compose(decompressor::completeMessages)
 				.map(reader::read)
 				.log("discord4j.gateway.session.inbound", Level.FINE)
-				.subscribe(inboundExchange::onNext, inboundExchange::onError, this::onComplete);
+				.subscribe(inboundExchange::onNext, this::onError, completionNotifier::onComplete);
 
-		return session.send(outboundExchange
+		session.send(outboundExchange
 				.log("discord4j.gateway.session.outbound", Level.FINE)
 				.map(writer::write)
-				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)));
+				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)))
+				.subscribe();
+
+		return completionNotifier;
 	}
 
-	private void onError(Throwable t) {
-		inboundExchange.onError(t);
-		outboundExchange.onComplete();
-	}
-
-	private void onComplete() {
+	public void close() {
 		outboundExchange.onComplete();
 		inboundExchange.onComplete();
-	}
-
-	void close() {
-		onComplete();
+		completionNotifier.onComplete();
 	}
 
 	public UnicastProcessor<GatewayPayload> inbound() {
@@ -82,5 +75,9 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	public UnicastProcessor<GatewayPayload> outbound() {
 		return outboundExchange;
+	}
+
+	private void onError(Throwable error) {
+		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
 	}
 }
