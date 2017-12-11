@@ -17,7 +17,7 @@
 
 package discord4j.common.json.payload;
 
-public class InvalidSession implements Payload {
+public class InvalidSession implements PayloadData {
 
 	private boolean resumable;
 

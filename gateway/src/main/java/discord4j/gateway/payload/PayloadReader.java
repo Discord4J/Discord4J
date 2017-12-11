@@ -31,5 +31,5 @@ public interface PayloadReader {
 	 * @param payload the input byte buffer
 	 * @return a {@code GatewayPayload} representing the inbound payload
 	 */
-	GatewayPayload read(ByteBuf payload);
+	GatewayPayload<?> read(ByteBuf payload);
 }

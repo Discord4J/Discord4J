@@ -16,7 +16,7 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import discord4j.common.json.payload.Payload;
+import discord4j.common.json.payload.PayloadData;
 
-public interface Dispatch extends Payload {
+public interface Dispatch extends PayloadData {
 }

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
 
-public class Hello implements Payload {
+public class Hello implements PayloadData {
 
 	@JsonProperty("heartbeat_interval")
 	private int heartbeatInterval;

@@ -29,39 +29,44 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.retry.Backoff;
 import reactor.retry.Retry;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class GatewayClient {
 
 	private static final Logger log = LoggerFactory.getLogger(GatewayClient.class);
+	private static final Predicate<? super Throwable> ABNORMAL_ERROR = t ->
+			!(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
 
-	private static final Set<PayloadHandler<?>> HANDLERS = new LinkedHashSet<>();
+	private static final Map<Opcode<?>, PayloadHandler<?>> HANDLERS = new HashMap<>();
 
 	static {
-		HANDLERS.add(new PayloadHandler<>(Dispatch.class, context -> context.client.dispatch.onNext(context
-				.payload)));
-		HANDLERS.add(new PayloadHandler<>(Hello.class, context -> {
-			Duration interval = Duration.ofMillis(context.payload.getHeartbeatInterval());
-			context.client.heartbeat.start(interval);
+		addHandler(Opcode.DISPATCH, ctx -> ctx.client.dispatch.onNext(ctx.payload));
+
+		addHandler(Opcode.HELLO, ctx -> {
+			Duration interval = Duration.ofMillis(ctx.payload.getHeartbeatInterval());
+			ctx.client.heartbeat.start(interval);
 
 			// log trace
 
 			IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
-			Identify identify = new Identify(context.client.token, props, false, 250, Possible.absent(), Possible
+			Identify identify = new Identify(ctx.client.token, props, false, 250, Possible.absent(), Possible
 					.absent());
-			GatewayPayload response = new GatewayPayload(Opcodes.IDENTIFY, identify, null, null);
+			GatewayPayload<Identify> response = GatewayPayload.identify(identify);
 
 			// payloadSender.send(response)
-			context.handler.outbound().onNext(response);
-		}));
+			ctx.handler.outbound().onNext(response);
+		});
+
+		addHandler(Opcode.HEARTBEAT_ACK, ctx -> {
+			log.debug("Received heartbeat ack.");
+		});
 	}
 
 	private final WebSocketClient webSocketClient = new WebSocketClient();
@@ -79,88 +84,62 @@ public class GatewayClient {
 		this.token = token;
 	}
 
+	private static <T extends PayloadData> void addHandler(Opcode<T> op, PayloadHandler<T> handler) {
+		HANDLERS.put(op, handler);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends PayloadData> PayloadHandler<T> getHandler(Opcode<T> op) {
+		return (PayloadHandler<T>) HANDLERS.get(op);
+	}
+
 	public Mono<Void> execute(String gatewayUrl) {
 		return Mono.defer(() -> {
 			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
 			wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
 
 			heartbeat.ticks()
-					.map(l -> new GatewayPayload(Opcodes.HEARTBEAT, new Heartbeat(lastSequence.get()), null, null))
+					.map(l -> new Heartbeat(lastSequence.get()))
+					.map(GatewayPayload::heartbeat)
 					.subscribe(wsHandler.outbound()::onNext);
 
 			return webSocketClient.execute(gatewayUrl, wsHandler);
-		}).retryWhen(Retry.onlyIf(ctx -> {
-			Throwable t = ctx.exception();
-			return !(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
-		}).backoff(Backoff.fixed(Duration.ofSeconds(5))).retryMax(5));
+		}).doOnError(ABNORMAL_ERROR, t -> heartbeat.stop())
+				.retryWhen(Retry.onlyIf(ctx -> ABNORMAL_ERROR.test(ctx.exception()))
+						.exponentialBackoffWithJitter(Duration.ofSeconds(5), Duration.ofSeconds(120)));
 	}
 
 	public Flux<Dispatch> dispatch() {
 		return dispatch;
 	}
 
-	private <T extends GatewayPayload> void handlePayload(T payload, DiscordWebSocketHandler handler) {
+	private <T extends PayloadData> void handlePayload(GatewayPayload<T> payload, DiscordWebSocketHandler wsHandler) {
 		if (payload.getSequence() != null) {
 			lastSequence.set(payload.getSequence());
 		}
-		HANDLERS.stream()
-				.filter(h -> h.canHandle(payload.getData()))
-				.findFirst()
-				.map(GatewayClient::cast)
-				.ifPresent(h -> h.handle(new Context<>(this, handler, payload.getData())));
-	}
 
-	private static class PayloadHandler<T extends Payload> {
-
-		private final Class<T> type;
-		private final Consumer<Context<T>> consumer;
-
-		PayloadHandler(Class<T> type, Consumer<Context<T>> consumer) {
-			this.type = type;
-			this.consumer = consumer;
-		}
-
-		public boolean canHandle(Payload obj) {
-			return type.isInstance(obj);
-		}
-
-		public void handle(Context<T> context) {
-			consumer.accept(context);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			PayloadHandler<?> that = (PayloadHandler<?>) o;
-			return Objects.equals(type, that.type);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(type);
+		PayloadHandler<T> payloadHandler = getHandler(payload.getOp());
+		if (payloadHandler != null) {
+			payloadHandler.handle(new Context<>(this, wsHandler, payload.getData()));
 		}
 	}
 
-	private static class Context<T extends Payload> {
+	@FunctionalInterface
+	private interface PayloadHandler<T extends PayloadData> {
+		void handle(Context<T> context);
+	}
+
+	private static class Context<T extends PayloadData> {
 
 		private final GatewayClient client;
 		private final DiscordWebSocketHandler handler;
+		@Nullable
 		private final T payload;
 
-		Context(GatewayClient client, DiscordWebSocketHandler handler, T payload) {
+		Context(GatewayClient client, DiscordWebSocketHandler handler, @Nullable T payload) {
 			this.client = client;
 			this.handler = handler;
 			this.payload = payload;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Payload> PayloadHandler<T> cast(PayloadHandler<?> handler) {
-		return (PayloadHandler<T>) handler;
 	}
 }

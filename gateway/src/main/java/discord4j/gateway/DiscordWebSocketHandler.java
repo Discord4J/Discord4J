@@ -29,8 +29,8 @@ import java.util.logging.Level;
 public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
-	private final UnicastProcessor<GatewayPayload> inboundExchange = UnicastProcessor.create();
-	private final UnicastProcessor<GatewayPayload> outboundExchange = UnicastProcessor.create();
+	private final UnicastProcessor<GatewayPayload<?>> inboundExchange = UnicastProcessor.create();
+	private final UnicastProcessor<GatewayPayload<?>> outboundExchange = UnicastProcessor.create();
 	private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
 
 	private final PayloadReader reader;
@@ -69,11 +69,11 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		completionNotifier.onComplete();
 	}
 
-	public UnicastProcessor<GatewayPayload> inbound() {
+	public UnicastProcessor<GatewayPayload<?>> inbound() {
 		return inboundExchange;
 	}
 
-	public UnicastProcessor<GatewayPayload> outbound() {
+	public UnicastProcessor<GatewayPayload<?>> outbound() {
 		return outboundExchange;
 	}
 

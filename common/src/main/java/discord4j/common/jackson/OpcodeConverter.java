@@ -17,12 +17,12 @@
 package discord4j.common.jackson;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
-import discord4j.common.json.payload.Heartbeat;
+import discord4j.common.json.payload.Opcode;
 
-public class SequenceExtractor extends StdConverter<Heartbeat, Integer> {
+public class OpcodeConverter extends StdConverter<Opcode<?>, Integer> {
 
 	@Override
-	public Integer convert(Heartbeat value) {
-		return value.getSeq();
+	public Integer convert(Opcode<?> value) {
+		return value.getRawOp();
 	}
 }

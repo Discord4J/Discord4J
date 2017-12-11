@@ -18,10 +18,10 @@
 package discord4j.common.json.payload;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import discord4j.common.jackson.SequenceExtractor;
+import discord4j.common.jackson.HeartbeatConverter;
 
-@JsonSerialize(converter = SequenceExtractor.class)
-public class Heartbeat implements Payload {
+@JsonSerialize(converter = HeartbeatConverter.class)
+public class Heartbeat implements PayloadData {
 
 	private int seq;
 

@@ -31,5 +31,5 @@ public interface PayloadWriter {
 	 * @param payload the output payload
 	 * @return the outbound {@code ByteBuf}
 	 */
-	ByteBuf write(GatewayPayload payload);
+	ByteBuf write(GatewayPayload<?> payload);
 }

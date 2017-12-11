@@ -19,7 +19,7 @@ package discord4j.common.json.payload;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
-public class VoiceStateUpdate implements Payload {
+public class VoiceStateUpdate implements PayloadData {
 
 	@JsonProperty("guild_id")
 	@UnsignedJson
