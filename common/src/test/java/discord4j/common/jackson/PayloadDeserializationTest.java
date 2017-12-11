@@ -116,7 +116,7 @@ public class PayloadDeserializationTest {
 				"    \"s\": null,\n" +
 				"    \"t\": null\n" +
 				"}";
-		GatewayPayload<Null> payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
 
 		assertEquals(7, payload.getOp().getRawOp());
 		assertNull(payload.getData());
@@ -163,7 +163,7 @@ public class PayloadDeserializationTest {
 				"    \"s\": null,\n" +
 				"    \"t\": null\n" +
 				"}";
-		GatewayPayload<Null> payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
 
 		assertEquals(11, payload.getOp().getRawOp());
 		assertNull(payload.getData());

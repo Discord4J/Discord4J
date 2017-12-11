@@ -26,13 +26,13 @@ public final class Opcode<T extends PayloadData> {
 	public static final Opcode<Identify> IDENTIFY = newOp(2, Identify.class);
 	public static final Opcode<StatusUpdate> STATUS_UPDATE = newOp(3, StatusUpdate.class);
 	public static final Opcode<VoiceStateUpdate> VOICE_STATE_UPDATE = newOp(4, VoiceStateUpdate.class);
-	public static final Opcode<Null> VOICE_SERVER_PING = newOp(5, Null.class);
+	public static final Opcode<?> VOICE_SERVER_PING = newOp(5, null);
 	public static final Opcode<Resume> RESUME = newOp(6, Resume.class);
-	public static final Opcode<Null> RECONNECT = newOp(7, Null.class);
+	public static final Opcode<?> RECONNECT = newOp(7, null);
 	public static final Opcode<RequestGuildMembers> REQUEST_GUILD_MEMBERS = newOp(8, RequestGuildMembers.class);
 	public static final Opcode<InvalidSession> INVALID_SESSION = newOp(9, InvalidSession.class);
 	public static final Opcode<Hello> HELLO = newOp(10, Hello.class);
-	public static final Opcode<Null> HEARTBEAT_ACK = newOp(11, Null.class);
+	public static final Opcode<?> HEARTBEAT_ACK = newOp(11, null);
 
 	private final int rawOp;
 	private final Class<T> payloadType;
