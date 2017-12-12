@@ -17,8 +17,10 @@
 package discord4j.gateway;
 
 import discord4j.common.ResettableInterval;
-import discord4j.common.jackson.Possible;
-import discord4j.common.json.payload.*;
+import discord4j.common.json.payload.GatewayPayload;
+import discord4j.common.json.payload.Heartbeat;
+import discord4j.common.json.payload.Opcode;
+import discord4j.common.json.payload.PayloadData;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
@@ -31,7 +33,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.retry.Retry;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,36 +48,22 @@ public class GatewayClient {
 	private static final Map<Opcode<?>, PayloadHandler<?>> HANDLERS = new HashMap<>();
 
 	static {
-		addHandler(Opcode.DISPATCH, ctx -> ctx.client.dispatch.onNext(ctx.payload));
-
-		addHandler(Opcode.HELLO, ctx -> {
-			Duration interval = Duration.ofMillis(ctx.payload.getHeartbeatInterval());
-			ctx.client.heartbeat.start(interval);
-
-			// log trace
-
-			IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
-			Identify identify = new Identify(ctx.client.token, props, false, 250, Possible.absent(), Possible
-					.absent());
-			GatewayPayload<Identify> response = GatewayPayload.identify(identify);
-
-			// payloadSender.send(response)
-			ctx.handler.outbound().onNext(response);
-		});
-
-		addHandler(Opcode.HEARTBEAT_ACK, ctx -> {
-			log.debug("Received heartbeat ack.");
-		});
+		addHandler(Opcode.DISPATCH, PayloadHandlers::handleDispatch);
+		addHandler(Opcode.HEARTBEAT, PayloadHandlers::handleHeartbeat);
+		addHandler(Opcode.RECONNECT, PayloadHandlers::handleReconnect);
+		addHandler(Opcode.INVALID_SESSION, PayloadHandlers::handleInvalidSession);
+		addHandler(Opcode.HELLO, PayloadHandlers::handleHello);
+		addHandler(Opcode.HEARTBEAT_ACK, PayloadHandlers::handleHeartbeatAck);
 	}
 
 	private final WebSocketClient webSocketClient = new WebSocketClient();
-	private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
-	private final AtomicInteger lastSequence = new AtomicInteger(0);
-	private final ResettableInterval heartbeat = new ResettableInterval();
-
 	private final PayloadReader payloadReader;
 	private final PayloadWriter payloadWriter;
-	private final String token;
+
+	final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
+	final AtomicInteger lastSequence = new AtomicInteger(0);
+	final ResettableInterval heartbeat = new ResettableInterval();
+	final String token;
 
 	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, String token) {
 		this.payloadReader = payloadReader;
@@ -120,26 +107,9 @@ public class GatewayClient {
 
 		PayloadHandler<T> payloadHandler = getHandler(payload.getOp());
 		if (payloadHandler != null) {
-			payloadHandler.handle(new Context<>(this, wsHandler, payload.getData()));
-		}
-	}
-
-	@FunctionalInterface
-	private interface PayloadHandler<T extends PayloadData> {
-		void handle(Context<T> context);
-	}
-
-	private static class Context<T extends PayloadData> {
-
-		private final GatewayClient client;
-		private final DiscordWebSocketHandler handler;
-		@Nullable
-		private final T payload;
-
-		Context(GatewayClient client, DiscordWebSocketHandler handler, @Nullable T payload) {
-			this.client = client;
-			this.handler = handler;
-			this.payload = payload;
+			payloadHandler.handle(new PayloadContext<>(this, wsHandler, payload.getData()));
+		} else {
+			log.warn("Received GatewayPayload with no registered handler: " + payload.getOp());
 		}
 	}
 }
