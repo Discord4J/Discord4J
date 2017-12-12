@@ -16,13 +16,13 @@ public enum ActivityType {
 	 */
 	STREAMING,
 	/**
-	 * The type of watching.
-	 * Displays: Watching xxx
-	 */
-	WATCHING,
-	/**
 	 * The type of listening.
 	 * Displays: Listening to xxx
 	 */
-	LISTENING
+	LISTENING,
+	/**
+	 * The type of watching.
+	 * Displays: Watching xxx
+	 */
+	WATCHING
 }
