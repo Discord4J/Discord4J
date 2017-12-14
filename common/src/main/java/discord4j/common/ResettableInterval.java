@@ -24,7 +24,7 @@ import java.time.Duration;
 
 public class ResettableInterval {
 
-	private final EmitterProcessor<Long> backing = EmitterProcessor.create();
+	private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
 	private Disposable task;
 
 	public void start(Duration duration) {

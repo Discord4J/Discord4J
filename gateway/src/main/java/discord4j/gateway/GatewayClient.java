@@ -28,6 +28,7 @@ import discord4j.gateway.websocket.CloseException;
 import discord4j.gateway.websocket.WebSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -83,17 +84,22 @@ public class GatewayClient {
 	public Mono<Void> execute(String gatewayUrl) {
 		return Mono.defer(() -> {
 			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
-			wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
 
-			heartbeat.ticks()
+			Disposable inboundSub = wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
+
+			Disposable heartbeatSub = heartbeat.ticks()
 					.map(l -> new Heartbeat(lastSequence.get()))
 					.map(GatewayPayload::heartbeat)
 					.subscribe(wsHandler.outbound()::onNext);
 
-			return webSocketClient.execute(gatewayUrl, wsHandler);
-		}).doOnError(ABNORMAL_ERROR, t -> heartbeat.stop())
-				.retryWhen(Retry.onlyIf(ctx -> ABNORMAL_ERROR.test(ctx.exception()))
-						.exponentialBackoffWithJitter(Duration.ofSeconds(5), Duration.ofSeconds(120)));
+			return webSocketClient.execute(gatewayUrl, wsHandler)
+					.doOnTerminate(() -> {
+						inboundSub.dispose();
+						heartbeatSub.dispose();
+						heartbeat.stop();
+					});
+		}).retryWhen(Retry.onlyIf(ctx -> ABNORMAL_ERROR.test(ctx.exception()))
+				.exponentialBackoffWithJitter(Duration.ofSeconds(5), Duration.ofSeconds(120)));
 	}
 
 	public Flux<Dispatch> dispatch() {
