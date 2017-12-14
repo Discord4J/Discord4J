@@ -62,6 +62,7 @@ public class GatewayClient {
 	private final PayloadWriter payloadWriter;
 
 	final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
+	final EmitterProcessor<GatewayPayload<?>> outbound = EmitterProcessor.create(false);
 	final AtomicInteger lastSequence = new AtomicInteger(0);
 	final ResettableInterval heartbeat = new ResettableInterval();
 	final String token;
@@ -86,6 +87,7 @@ public class GatewayClient {
 			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
 
 			Disposable inboundSub = wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
+			Disposable outboundSub = outbound().subscribe(wsHandler.outbound()::onNext, wsHandler::onError, wsHandler::close);
 
 			Disposable heartbeatSub = heartbeat.ticks()
 					.map(l -> new Heartbeat(lastSequence.get()))
@@ -95,6 +97,7 @@ public class GatewayClient {
 			return webSocketClient.execute(gatewayUrl, wsHandler)
 					.doOnTerminate(() -> {
 						inboundSub.dispose();
+						outboundSub.dispose();
 						heartbeatSub.dispose();
 						heartbeat.stop();
 					});
@@ -102,8 +105,20 @@ public class GatewayClient {
 				.exponentialBackoffWithJitter(Duration.ofSeconds(5), Duration.ofSeconds(120)));
 	}
 
+	public void close(boolean reconnect) {
+		if (reconnect) {
+			outbound().onError(new RuntimeException("Reconnect"));
+		} else {
+			outbound().onComplete();
+		}
+	}
+
 	public Flux<Dispatch> dispatch() {
 		return dispatch;
+	}
+
+	public EmitterProcessor<GatewayPayload<?>> outbound() {
+		return outbound;
 	}
 
 	private <T extends PayloadData> void handlePayload(GatewayPayload<T> payload, DiscordWebSocketHandler wsHandler) {

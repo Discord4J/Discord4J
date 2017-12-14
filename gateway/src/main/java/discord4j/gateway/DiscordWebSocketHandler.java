@@ -68,6 +68,11 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		inboundExchange.onComplete();
 		completionNotifier.onComplete();
 	}
+	public void onError(Throwable error) {
+		outboundExchange.onComplete();
+		inboundExchange.onComplete();
+		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
+	}
 
 	public UnicastProcessor<GatewayPayload<?>> inbound() {
 		return inboundExchange;
@@ -75,9 +80,5 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	public UnicastProcessor<GatewayPayload<?>> outbound() {
 		return outboundExchange;
-	}
-
-	private void onError(Throwable error) {
-		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
 	}
 }
