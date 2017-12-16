@@ -210,7 +210,10 @@ public class Channel implements IChannel {
 	@Override
 	public MessageHistory getMessageHistory(int messageCount) {
 		if (messageCount <= messages.size()) { // we already have all of the wanted messages in the cache
-			return new MessageHistory(messages.values().stream().limit(messageCount).collect(Collectors.toList()));
+			return new MessageHistory(messages.values().stream()
+				.sorted(new MessageComparator(true))
+				.limit(messageCount)
+				.collect(Collectors.toList()));
 		} else {
 			List<IMessage> retrieved = new ArrayList<>(messageCount);
 			AtomicLong lastMessage = new AtomicLong(DiscordUtils.getSnowflakeFromTimestamp(Instant.now()));
