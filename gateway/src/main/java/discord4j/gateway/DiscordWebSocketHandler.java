@@ -8,11 +8,11 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 package discord4j.gateway;
 
@@ -23,10 +23,14 @@ import discord4j.gateway.websocket.*;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.UnicastProcessor;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.logging.Level;
 
 public class DiscordWebSocketHandler implements WebSocketHandler {
+
+	private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
 
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
 	private final UnicastProcessor<GatewayPayload<?>> inboundExchange = UnicastProcessor.create();
@@ -45,33 +49,33 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	public Mono<Void> handle(WebSocketSession session) {
 		session.closeFuture()
 				.map(CloseException::new)
+				.filter(x -> !completionNotifier.isTerminated())
 				.subscribe(completionNotifier::onError);
 
 		session.receive()
 				.map(WebSocketMessage::getPayload)
 				.compose(decompressor::completeMessages)
+				.filter(buf -> buf.readableBytes() > 0)
 				.map(reader::read)
 				.log("discord4j.gateway.session.inbound", Level.FINE)
-				.subscribe(inboundExchange::onNext, this::onError, completionNotifier::onComplete);
+				.subscribe(inboundExchange::onNext, this::error, completionNotifier::onComplete);
 
-		session.send(outboundExchange
+		return session.send(outboundExchange
 				.log("discord4j.gateway.session.outbound", Level.FINE)
 				.map(writer::write)
 				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)))
-				.subscribe();
-
-		return completionNotifier;
+				.then(completionNotifier);
 	}
 
 	public void close() {
-		outboundExchange.onComplete();
-		inboundExchange.onComplete();
 		completionNotifier.onComplete();
-	}
-	public void onError(Throwable error) {
 		outboundExchange.onComplete();
 		inboundExchange.onComplete();
+	}
+	public void error(Throwable error) {
 		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
+		outboundExchange.onComplete();
+		inboundExchange.onComplete();
 	}
 
 	public UnicastProcessor<GatewayPayload<?>> inbound() {

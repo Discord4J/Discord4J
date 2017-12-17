@@ -32,6 +32,9 @@ public class ResettableInterval {
 	}
 
 	public void stop() {
+		if (task == null) {
+			throw new IllegalStateException("Emitter has not started!");
+		}
 		task.dispose();
 	}
 

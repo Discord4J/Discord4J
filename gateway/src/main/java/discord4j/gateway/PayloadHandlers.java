@@ -8,25 +8,25 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 package discord4j.gateway;
 
 import discord4j.common.jackson.Possible;
 import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.time.Duration;
 
 public class PayloadHandlers {
 
-	private static final Logger log = LoggerFactory.getLogger(PayloadHandlers.class);
+	private static final Logger log = Loggers.getLogger(PayloadHandlers.class);
 
 	public static void handleDispatch(PayloadContext<Dispatch> ctx) {
 		ctx.getClient().dispatch.onNext(ctx.getData());
