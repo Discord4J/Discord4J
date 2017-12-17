@@ -32,7 +32,7 @@ public class JacksonPayloadReader implements PayloadReader {
 	}
 
 	@Override
-	public GatewayPayload read(ByteBuf payload) {
+	public GatewayPayload<?> read(ByteBuf payload) {
 		try {
 			return mapper.readValue(payload.array(), GatewayPayload.class);
 		} catch (IOException e) {

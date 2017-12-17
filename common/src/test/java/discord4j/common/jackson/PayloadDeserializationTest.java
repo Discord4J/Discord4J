@@ -86,11 +86,11 @@ public class PayloadDeserializationTest {
 				"    ]\n" +
 				"  }\n" +
 				"}";
-		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<Ready> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(0, payload.getOp());
-		assertTrue(payload.getData() instanceof Ready);
-		assertEquals(6, ((Ready) payload.getData()).getVersion());
+		assertEquals(0, payload.getOp().getRawOp());
+		assertNotNull(payload.getData());
+		assertEquals(6, payload.getData().getVersion());
 	}
 
 	@Test
@@ -101,11 +101,11 @@ public class PayloadDeserializationTest {
 				"    \"s\": null,\n" +
 				"    \"t\": null\n" +
 				"}";
-		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<Heartbeat> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(1, payload.getOp());
-		assertTrue(payload.getData() instanceof Heartbeat);
-		assertEquals(251, ((Heartbeat) payload.getData()).getSeq());
+		assertEquals(1, payload.getOp().getRawOp());
+		assertNotNull(payload.getData());
+		assertEquals(251, payload.getData().getSeq());
 	}
 
 	@Test
@@ -116,9 +116,9 @@ public class PayloadDeserializationTest {
 				"    \"s\": null,\n" +
 				"    \"t\": null\n" +
 				"}";
-		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(7, payload.getOp());
+		assertEquals(7, payload.getOp().getRawOp());
 		assertNull(payload.getData());
 	}
 
@@ -130,11 +130,11 @@ public class PayloadDeserializationTest {
 				"    \"s\": null,\n" +
 				"    \"t\": null\n" +
 				"}";
-		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<InvalidSession> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(9, payload.getOp());
-		assertTrue(payload.getData() instanceof InvalidSession);
-		assertEquals(false, ((InvalidSession) payload.getData()).isResumable());
+		assertEquals(9, payload.getOp().getRawOp());
+		assertNotNull(payload.getData());
+		assertEquals(false, payload.getData().isResumable());
 	}
 
 	@Test
@@ -148,11 +148,11 @@ public class PayloadDeserializationTest {
 				"    \"s\": null,\n" +
 				"    \"t\": null\n" +
 				"}";
-		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<Hello> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(10, payload.getOp());
-		assertTrue(payload.getData() instanceof Hello);
-		assertEquals(45000, ((Hello) payload.getData()).getHeartbeatInterval());
+		assertEquals(10, payload.getOp().getRawOp());
+		assertNotNull(payload.getData());
+		assertEquals(45000, payload.getData().getHeartbeatInterval());
 	}
 
 	@Test
@@ -163,9 +163,9 @@ public class PayloadDeserializationTest {
 				"    \"s\": null,\n" +
 				"    \"t\": null\n" +
 				"}";
-		GatewayPayload payload = mapper.readValue(input, GatewayPayload.class);
+		GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(11, payload.getOp());
+		assertEquals(11, payload.getOp().getRawOp());
 		assertNull(payload.getData());
 	}
 }

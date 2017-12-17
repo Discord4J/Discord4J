@@ -36,12 +36,12 @@ public class JacksonLenientPayloadReader implements PayloadReader {
 	}
 
 	@Override
-	public GatewayPayload read(ByteBuf payload) {
+	public GatewayPayload<?> read(ByteBuf payload) {
 		try {
 			return mapper.readValue(payload.array(), GatewayPayload.class);
 		} catch (IOException e) {
 			log.warn("Error while decoding JSON: " + payload.toString(Charset.forName("UTF-8")), e);
-			return new GatewayPayload();
+			return new GatewayPayload<>();
 		}
 	}
 }

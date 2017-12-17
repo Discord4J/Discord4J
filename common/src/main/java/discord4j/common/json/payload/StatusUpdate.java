@@ -20,7 +20,7 @@ import discord4j.common.json.request.GameRequest;
 
 import javax.annotation.Nullable;
 
-public class StatusUpdate implements Payload {
+public class StatusUpdate implements PayloadData {
 
 	@Nullable
 	private final Long since;

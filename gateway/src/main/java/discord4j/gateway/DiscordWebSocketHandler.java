@@ -8,32 +8,34 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 package discord4j.gateway;
 
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.websocket.CloseException;
-import discord4j.gateway.websocket.WebSocketHandler;
-import discord4j.gateway.websocket.WebSocketMessage;
-import discord4j.gateway.websocket.WebSocketSession;
-import reactor.core.publisher.EmitterProcessor;
+import discord4j.gateway.websocket.*;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.UnicastProcessor;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.logging.Level;
 
 public class DiscordWebSocketHandler implements WebSocketHandler {
 
+	private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
+
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
-	private final UnicastProcessor<GatewayPayload> inboundExchange = UnicastProcessor.create();
-	private final UnicastProcessor<GatewayPayload> outboundExchange = UnicastProcessor.create();
+	private final UnicastProcessor<GatewayPayload<?>> inboundExchange = UnicastProcessor.create();
+	private final UnicastProcessor<GatewayPayload<?>> outboundExchange = UnicastProcessor.create();
+	private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
 
 	private final PayloadReader reader;
 	private final PayloadWriter writer;
@@ -47,40 +49,40 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	public Mono<Void> handle(WebSocketSession session) {
 		session.closeFuture()
 				.map(CloseException::new)
-				.subscribe(this::onError);
+				.filter(x -> !completionNotifier.isTerminated())
+				.subscribe(completionNotifier::onError);
 
 		session.receive()
 				.map(WebSocketMessage::getPayload)
 				.compose(decompressor::completeMessages)
+				.filter(buf -> buf.readableBytes() > 0)
 				.map(reader::read)
 				.log("discord4j.gateway.session.inbound", Level.FINE)
-				.subscribe(inboundExchange::onNext, inboundExchange::onError, this::onComplete);
+				.subscribe(inboundExchange::onNext, this::error, completionNotifier::onComplete);
 
 		return session.send(outboundExchange
 				.log("discord4j.gateway.session.outbound", Level.FINE)
 				.map(writer::write)
-				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)));
+				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)))
+				.then(completionNotifier);
 	}
 
-	private void onError(Throwable t) {
-		inboundExchange.onError(t);
+	public void close() {
+		completionNotifier.onComplete();
 		outboundExchange.onComplete();
+		inboundExchange.onComplete();
 	}
-
-	private void onComplete() {
+	public void error(Throwable error) {
+		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
 		outboundExchange.onComplete();
 		inboundExchange.onComplete();
 	}
 
-	void close() {
-		onComplete();
-	}
-
-	public UnicastProcessor<GatewayPayload> inbound() {
+	public UnicastProcessor<GatewayPayload<?>> inbound() {
 		return inboundExchange;
 	}
 
-	public UnicastProcessor<GatewayPayload> outbound() {
+	public UnicastProcessor<GatewayPayload<?>> outbound() {
 		return outboundExchange;
 	}
 }

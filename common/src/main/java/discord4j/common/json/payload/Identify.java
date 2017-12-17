@@ -21,7 +21,7 @@ import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
 
 @PossibleJson
-public class Identify implements Payload {
+public class Identify implements PayloadData {
 
 	private final String token;
 	private final IdentifyProperties properties;

@@ -50,7 +50,7 @@ public class PayloadSerializationTest {
 	public void testHeartbeat() throws IOException {
 		String expected = "{\"op\":1,\"d\":251,\"s\":null,\"t\":null}";
 
-		GatewayPayload payload = new GatewayPayload(1, new Heartbeat(251), null, null);
+		GatewayPayload<Heartbeat> payload = GatewayPayload.heartbeat(new Heartbeat(251));
 		String result = mapper.writeValueAsString(payload);
 
 		assertEquals(mapper.readTree(expected), mapper.readTree(result));
@@ -75,7 +75,7 @@ public class PayloadSerializationTest {
 				"}").replaceAll("\\s+", "");
 
 		Identify identify = new Identify("my_token", new IdentifyProperties("linux", "disco", "disco"), true, 250, Possible.absent(), Possible.absent());
-		GatewayPayload payload = new GatewayPayload(2, identify, null, null);
+		GatewayPayload<Identify> payload = GatewayPayload.identify(identify);
 		String result = mapper.writeValueAsString(payload);
 
 		assertEquals(mapper.readTree(expected), mapper.readTree(result));
@@ -99,7 +99,7 @@ public class PayloadSerializationTest {
 				"}").replaceAll("\\s+", "");
 
 		StatusUpdate statusUpdate = new StatusUpdate(91879201L, new GameRequest("some_game", 0, Possible.absent()), "online", false);
-		GatewayPayload payload = new GatewayPayload(3, statusUpdate, null, null);
+		GatewayPayload<StatusUpdate> payload = GatewayPayload.statusUpdate(statusUpdate);
 		String result = mapper.writeValueAsString(payload);
 
 		assertEquals(expected, result);
@@ -120,7 +120,7 @@ public class PayloadSerializationTest {
 				"}").replaceAll("\\s+", "");
 
 		VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(41771983423143937L, 127121515262115840L, false, false);
-		GatewayPayload payload = new GatewayPayload(4, voiceStateUpdate, null, null);
+		GatewayPayload<VoiceStateUpdate> payload = GatewayPayload.voiceStateUpdate(voiceStateUpdate);
 		String result = mapper.writeValueAsString(payload);
 
 		assertEquals(expected, result);
@@ -145,7 +145,7 @@ public class PayloadSerializationTest {
 				"}").replaceAll("\\s+", "");
 
 		Resume resume = new Resume("randomstring", "evenmorerandomstring", 1337);
-		GatewayPayload payload = new GatewayPayload(6, resume, null, null);
+		GatewayPayload<Resume> payload = GatewayPayload.resume(resume);
 		String result = mapper.writeValueAsString(payload);
 
 		assertEquals(mapper.readTree(expected), mapper.readTree(result));
@@ -165,7 +165,7 @@ public class PayloadSerializationTest {
 				"}").replaceAll("\\s+", "");
 
 		RequestGuildMembers requestGuildMembers = new RequestGuildMembers(41771983444115456L, "", 0);
-		GatewayPayload payload = new GatewayPayload(8, requestGuildMembers, null, null);
+		GatewayPayload<RequestGuildMembers> payload = GatewayPayload.requestGuildMembers(requestGuildMembers);
 		String result = mapper.writeValueAsString(payload);
 
 		assertEquals(mapper.readTree(expected), mapper.readTree(result));

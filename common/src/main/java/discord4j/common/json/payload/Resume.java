@@ -18,7 +18,7 @@ package discord4j.common.json.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Resume implements Payload {
+public class Resume implements PayloadData {
 
 	private final String token;
 	@JsonProperty("session_id")
