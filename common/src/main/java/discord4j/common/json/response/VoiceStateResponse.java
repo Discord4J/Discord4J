@@ -36,6 +36,8 @@ public class VoiceStateResponse {
 	private boolean mute;
 	@JsonProperty("self_deaf")
 	private boolean selfDeaf;
+	@JsonProperty("self_video")
+	private boolean selfVideo;
 	@JsonProperty("self_mute")
 	private boolean selfMute;
 	private boolean suppress;
@@ -68,6 +70,10 @@ public class VoiceStateResponse {
 		return selfDeaf;
 	}
 
+	public boolean isSelfVideo() {
+		return selfVideo;
+	}
+
 	public boolean isSelfMute() {
 		return selfMute;
 	}
@@ -86,6 +92,7 @@ public class VoiceStateResponse {
 				", deaf=" + deaf +
 				", mute=" + mute +
 				", selfDeaf=" + selfDeaf +
+				", selfVideo=" + selfVideo +
 				", selfMute=" + selfMute +
 				", suppress=" + suppress +
 				']';
