@@ -243,7 +243,7 @@ public class ModuleLoader {
 		if (file.isFile() && file.getName().endsWith(".jar")) { // Can't be a directory and must be a jar
 			try (JarFile jar = new JarFile(file)) {
 				Manifest man = jar.getManifest();
-				String moduleAttrib = man.getMainAttributes().getValue("Discord4J-ModuleClass");
+				String moduleAttrib = man == null ? null : man.getMainAttributes().getValue("Discord4J-ModuleClass");
 				String[] moduleClasses = new String[0];
 				if (moduleAttrib != null) {
 					moduleClasses = moduleAttrib.split(";");
