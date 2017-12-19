@@ -109,16 +109,6 @@ public class ModuleLoader {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + clazz.getName() + "!", e);
 			}
 		}
-
-		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
-			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
-			while (toLoad.size() > 0) {
-				for (IModule module : toLoad) {
-					if (loadModule(module))
-						toLoad.remove(module);
-				}
-			}
-		}
 	}
 
 	/**
