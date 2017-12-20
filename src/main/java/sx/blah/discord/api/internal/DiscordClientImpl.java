@@ -36,7 +36,6 @@ import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.impl.obj.VoiceState;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.modules.Configuration;
-import sx.blah.discord.modules.IModule;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.ICacheDelegateProvider;
@@ -163,13 +162,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		// Fixes null from getModuleLoader from enable().
 		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {
-			List<IModule> toLoad = new CopyOnWriteArrayList<>(loader.getLoadedModules());
-			while (toLoad.size() > 0) {
-				for (IModule module : toLoad) {
-					if (loader.loadModule(module))
-						toLoad.remove(module);
-				}
-			}
+			loader.loadModules();
 		}
 
 		this.identifyPresence = identifyPresence;

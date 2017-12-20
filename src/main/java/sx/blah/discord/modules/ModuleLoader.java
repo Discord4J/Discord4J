@@ -131,6 +131,19 @@ public class ModuleLoader {
 	}
 
 	/**
+	 * Attempts to {@link #loadModule(IModule) load} all {@link #getLoadedModules() loaded modules}.
+	 */
+	public void loadModules() {
+		List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
+		while (toLoad.size() > 0) {
+			for (IModule module : toLoad) {
+				if (loadModule(module))
+					toLoad.remove(module);
+			}
+		}
+	}
+
+	/**
 	 * Manually loads a module.
 	 *
 	 * @param module The module to load.
