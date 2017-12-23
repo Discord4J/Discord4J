@@ -19,13 +19,13 @@ package discord4j.core.entity;
 import reactor.core.publisher.Mono;
 
 /** A Discord object that can be deleted. */
-public interface Deletable<T extends Deletable<T>> {
+public interface Deletable {
 
 	/**
 	 * Requests for this object to be deleted.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits a <i>new</i> instance of itself; indicating the
-	 * object was deleted. If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the object was deleted. If an
+	 * error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<T> delete();
+	Mono<Void> delete();
 }

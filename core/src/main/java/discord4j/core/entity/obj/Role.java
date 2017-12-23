@@ -23,5 +23,5 @@ import discord4j.core.entity.*;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
-public interface Role extends Deletable<Role>, Entity, Mentionable, Positionable<Role>, Renameable<Role> {
+public interface Role extends Deletable, Entity, Mentionable, Positionable<Role>, Renameable<Role> {
 }

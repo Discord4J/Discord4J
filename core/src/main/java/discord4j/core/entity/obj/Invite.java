@@ -24,5 +24,5 @@ import discord4j.core.entity.Entity;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
  */
-public interface Invite<T extends Invite<T>> extends Deletable<T>, Entity {
+public interface Invite extends Deletable, Entity {
 }

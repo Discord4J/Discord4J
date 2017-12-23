@@ -19,6 +19,8 @@ package discord4j.core.entity.obj;
 import discord4j.core.entity.Entity;
 import discord4j.core.entity.Mentionable;
 import discord4j.core.entity.Nameable;
+import discord4j.core.entity.Snowflake;
+import reactor.core.publisher.Mono;
 
 /**
  * A Discord user.
@@ -26,4 +28,75 @@ import discord4j.core.entity.Nameable;
  * @see <a href="https://discordapp.com/developers/docs/resources/user">Users Resource</a>
  */
 public interface User extends Entity, Mentionable, Nameable {
+
+	/**
+	 * Gets the user's username, not unique across the platform.
+	 *
+	 * @return The user's username, not unique across the platform.
+	 */
+	String getUsername();
+
+	/**
+	 * Gets the user's 4-digit discord-tag.
+	 *
+	 * @return The user's 4-digit discord-tag.
+	 */
+	String getDiscriminator();
+
+	/**
+	 * Gets the user's avatar hash.
+	 *
+	 * @return The user's avatar hash.
+	 */
+	String getAvatarHash();
+
+	/**
+	 * Gets whether the user belongs to an OAuth2 application.
+	 *
+	 * @return {@code true} if the user belongs to an OAuth2 application, false otherwise.
+	 */
+	boolean isBot();
+
+	@Override
+	default String getMention() {
+		return "<@" + getId().asString() + ">";
+	}
+
+	@Override
+	default String getFormattedMention() {
+		return "@" + getName();
+	}
+
+	@Override
+	default String getName() {
+		return getUsername();
+	}
+
+	/**
+	 * Requests to retrieve this user as a {@link Member}.
+	 *
+	 * @param guildId The ID of the guild to associate this user as a {@link Member}.
+	 * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member}. If an error is
+	 * received, it is emitted through the {@code Mono}.
+	 */
+	Mono<Member> asMember(Snowflake guildId);
+
+	/**
+	 * Requests to retrieve this user as a {@link Member}.
+	 *
+	 * @param guild The guild to associate this user as a {@link Member}.
+	 * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member}. If an error is
+	 * received, it is emitted through the {@code Mono}.
+	 */
+	default Mono<Member> asMember(Guild guild) {
+		return asMember(guild.getId());
+	}
+
+	/**
+	 * Requests to retrieve the private channel (DM) to this user.
+	 * 
+	 * @return A {@link Mono} where, upon successful completion, emits a {@link PrivateChannel}. If an error is
+	 * received, it is emitted through the {@code Mono}.
+	 */
+	Mono<PrivateChannel> getPrivateChannel();
 }

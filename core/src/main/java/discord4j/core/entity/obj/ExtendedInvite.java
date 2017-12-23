@@ -17,5 +17,5 @@
 package discord4j.core.entity.obj;
 
 /** A Discord invite with metadata. */
-public interface ExtendedInvite extends Invite<ExtendedInvite> {
+public interface ExtendedInvite extends Invite {
 }

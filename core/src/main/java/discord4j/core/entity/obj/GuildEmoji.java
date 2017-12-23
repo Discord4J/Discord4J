@@ -22,5 +22,5 @@ import discord4j.core.entity.Positionable;
 import discord4j.core.entity.Renameable;
 
 /** A customized emoji created by a {@link Guild}. */
-public interface GuildEmoji extends Deletable<GuildEmoji>, Entity, Emoji, Positionable<GuildEmoji>, Renameable<GuildEmoji> {
+public interface GuildEmoji extends Deletable, Entity, Emoji, Positionable<GuildEmoji>, Renameable<GuildEmoji> {
 }

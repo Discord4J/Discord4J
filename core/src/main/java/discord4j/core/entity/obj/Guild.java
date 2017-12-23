@@ -25,5 +25,5 @@ import discord4j.core.entity.Renameable;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
  */
-public interface Guild extends Deletable<Guild>, Entity, Renameable<Guild> {
+public interface Guild extends Deletable, Entity, Renameable<Guild> {
 }

@@ -17,5 +17,5 @@
 package discord4j.core.entity.obj;
 
 /** A Discord message originating from a {@link Guild}. */
-public interface GuildMessage extends Message<GuildMessage> {
+public interface GuildMessage extends Message {
 }

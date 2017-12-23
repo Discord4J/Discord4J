@@ -17,5 +17,5 @@
 package discord4j.core.entity.obj;
 
 /** A Discord message originating from a {@link PrivateChannel}. */
-public interface PrivateMessage extends Message<PrivateMessage> {
+public interface PrivateMessage extends Message {
 }

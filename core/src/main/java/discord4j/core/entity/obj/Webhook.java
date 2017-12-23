@@ -20,5 +20,10 @@ import discord4j.core.entity.Deletable;
 import discord4j.core.entity.Entity;
 import discord4j.core.entity.Renameable;
 
-public interface Webhook extends Deletable<Webhook>, Entity, Renameable<Webhook> {
+/**
+ * A Discord webhook.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/webhook">Webhook Resource</a>
+ */
+public interface Webhook extends Deletable, Entity, Renameable<Webhook> {
 }

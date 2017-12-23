@@ -20,5 +20,5 @@ import discord4j.core.entity.Deletable;
 import discord4j.core.entity.Entity;
 
 /** A Discord message. */
-public interface Message<T extends Message<T>> extends Deletable<T>, Entity {
+public interface Message extends Deletable, Entity {
 }

@@ -21,5 +21,5 @@ import discord4j.core.entity.Positionable;
 import discord4j.core.entity.Renameable;
 
 /** A Discord channel associated to a {@link Guild}. */
-public interface GuildChannel<T extends GuildChannel<T>> extends Channel, Deletable<T>, Positionable<T>, Renameable<T> {
+public interface GuildChannel<T extends GuildChannel<T>> extends Channel, Deletable, Positionable<T>, Renameable<T> {
 }
