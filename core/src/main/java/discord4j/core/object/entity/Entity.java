@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity;
+package discord4j.core.object.entity;
 
-import reactor.core.publisher.Mono;
+import discord4j.core.object.Snowflake;
 
-/** A Discord object that can be deleted. */
-public interface Deletable {
+/** An uniquely identifiable Discord object. */
+public interface Entity {
 
 	/**
-	 * Requests for this object to be deleted.
+	 * Gets the ID that uniquely identifies this object.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the object was deleted. If an
-	 * error is received, it is emitted through the {@code Mono}.
+	 * @return The ID that unique identifies this object.
 	 */
-	Mono<Void> delete();
+	Snowflake getId();
 }

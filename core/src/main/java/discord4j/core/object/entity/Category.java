@@ -14,26 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity;
+package discord4j.core.object.entity;
 
-import reactor.core.publisher.Mono;
-
-/** A Discord object that has some relative position in respect to another object. */
-public interface Positionable<T extends Positionable<T>> {
-
-	/**
-	 * Gets the position of this object.
-	 *
-	 * @return The position of this object.
-	 */
-	int getPosition();
-
-	/**
-	 * Requests for this object to be repositioned.
-	 *
-	 * @param position The new position for this object.
-	 * @return A {@link Mono} where, upon successful completion, emits a <i>new</i> instance of itself; indicating the
-	 * object was repositioned. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	Mono<T> changePosition(int position);
+/** A Discord category. */
+public interface Category extends GuildChannel<Category> {
 }

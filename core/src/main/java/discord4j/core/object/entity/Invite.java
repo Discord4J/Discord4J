@@ -14,19 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity;
+package discord4j.core.object.entity;
 
-import reactor.core.publisher.Mono;
+import discord4j.core.trait.Deletable;
 
-/** A Discord object that can be renamed. */
-public interface Renameable<T extends Renameable<T>> extends Nameable {
-
-	/**
-	 * Requests for this object to be renamed.
-	 *
-	 * @param name The new name for this object.
-	 * @return A {@link Mono} where, upon successful completion, emits a <i>new</i> instance of itself; indicating the
-	 * object was renamed. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	Mono<T> changeName(String name);
+/**
+ * A Discord invite.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
+ */
+public interface Invite extends Deletable, Entity {
 }

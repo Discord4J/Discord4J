@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity;
+package discord4j.core.object.entity;
 
-/** A Discord object that can be named. */
-public interface Nameable {
+import discord4j.core.trait.Nameable;
 
-	/**
-	 * Gets the name of this object.
-	 *
-	 * @return The name of this object.
-	 */
-	String getName();
+/**
+ * A Discord channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel">Channel Resource</a>
+ */
+public interface Channel extends Entity, Nameable {
 }

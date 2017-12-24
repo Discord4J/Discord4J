@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.object.entity;
 
-/** A Discord channel that can utilizes audio. */
-public interface AudioChannel extends Channel {
+import discord4j.core.trait.Deletable;
+import discord4j.core.trait.Positionable;
+import discord4j.core.trait.Renameable;
+
+/** A Discord channel associated to a {@link Guild}. */
+public interface GuildChannel<T extends GuildChannel<T>> extends Channel, Deletable, Positionable<T>, Renameable<T> {
 }

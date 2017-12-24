@@ -14,10 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.object.entity;
 
-import discord4j.core.entity.Mentionable;
+import discord4j.core.trait.Deletable;
+import discord4j.core.trait.Renameable;
 
-/** A Discord text channel. */
-public interface TextChannel extends GuildChannel<TextChannel>, Mentionable, MessageChannel {
+/**
+ * A Discord webhook.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/webhook">Webhook Resource</a>
+ */
+public interface Webhook extends Deletable, Entity, Renameable<Webhook> {
 }

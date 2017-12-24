@@ -14,11 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.trait;
 
-import discord4j.core.entity.Deletable;
-import discord4j.core.entity.Entity;
+import reactor.core.publisher.Mono;
 
-/** A Discord message. */
-public interface Message extends Deletable, Entity {
+/** A Discord object that can be deleted. */
+public interface Deletable {
+
+	/**
+	 * Requests for this object to be deleted.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the object was deleted. If an
+	 * error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<Void> delete();
 }

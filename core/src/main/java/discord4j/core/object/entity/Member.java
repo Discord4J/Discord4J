@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.object.entity;
 
-import discord4j.core.entity.Renameable;
-import discord4j.core.entity.Snowflake;
+import discord4j.core.trait.Renameable;
+import discord4j.core.object.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

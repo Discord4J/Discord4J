@@ -14,8 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.object.entity;
 
-/** A Discord message originating from a {@link Guild}. */
-public interface GuildMessage extends Message {
+import discord4j.core.trait.*;
+
+/**
+ * A Discord role.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
+ */
+public interface Role extends Deletable, Entity, Mentionable, Positionable<Role>, Renameable<Role> {
 }

@@ -14,17 +14,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.trait;
 
-import discord4j.core.entity.Mentionable;
-import discord4j.core.entity.Nameable;
+/** A Discord object that can be mentioned. */
+public interface Mentionable {
 
-/**
- * TODO
- * <p>
- * This should <i>NOT</i> be a part of the entity hierarchy. However, GuildEmoji should most certainly inherit some
- * {@code Emoji} interface, since its behaviors reflects that of which you can normally do with any typical emoji,
- * except adding (extending) some behaviors. What and where this interface should be needs to be discussed later.
- */
-public interface Emoji extends Mentionable, Nameable {
+	/**
+	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another object (assuming the object
+	 * exists in context of the mention).
+	 *
+	 * @return The <i>raw</i> mention.
+	 */
+	String getMention();
+
+	/**
+	 * Gets the formatted mention. This is the format seen directly in Discord (assuming the object exists in context of
+	 * the mention). It should <i>not</i> be used to directly mention another object; use {@link #getMention()} instead.
+	 *
+	 * @return The formatted mention.
+	 */
+	String getFormattedMention();
 }

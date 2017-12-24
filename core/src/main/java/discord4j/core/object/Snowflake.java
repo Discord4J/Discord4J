@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity;
+package discord4j.core.object;
 
 /**
  * An <i>unsigned</i> 64-bit ID that is guaranteed to be unique across all of Discord, except in some unique scenarios

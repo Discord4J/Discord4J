@@ -14,15 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity;
+package discord4j.core.object.entity;
 
-/** An uniquely identifiable Discord object. */
-public interface Entity {
-
-	/**
-	 * Gets the ID that uniquely identifies this object.
-	 *
-	 * @return The ID that unique identifies this object.
-	 */
-	Snowflake getId();
+/** A Discord invite with metadata. */
+public interface ExtendedInvite extends Invite {
 }

@@ -14,13 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.trait;
 
-import discord4j.core.entity.Deletable;
-import discord4j.core.entity.Entity;
-import discord4j.core.entity.Positionable;
-import discord4j.core.entity.Renameable;
+import reactor.core.publisher.Mono;
 
-/** A customized emoji created by a {@link Guild}. */
-public interface GuildEmoji extends Deletable, Entity, Emoji, Positionable<GuildEmoji>, Renameable<GuildEmoji> {
+/** A Discord object that can be renamed. */
+public interface Renameable<T extends Renameable<T>> extends Nameable {
+
+	/**
+	 * Requests for this object to be renamed.
+	 *
+	 * @param name The new name for this object.
+	 * @return A {@link Mono} where, upon successful completion, emits a <i>new</i> instance of itself; indicating the
+	 * object was renamed. If an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<T> changeName(String name);
 }

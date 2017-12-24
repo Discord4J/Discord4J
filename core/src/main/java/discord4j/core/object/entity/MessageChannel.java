@@ -14,16 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.object.entity;
 
-import discord4j.core.entity.Deletable;
-import discord4j.core.entity.Entity;
-import discord4j.core.entity.Renameable;
-
-/**
- * A Discord guild.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
- */
-public interface Guild extends Deletable, Entity, Renameable<Guild> {
+/** A Discord channel that can utilizes messages. */
+public interface MessageChannel extends Channel {
 }

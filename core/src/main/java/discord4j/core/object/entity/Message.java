@@ -14,24 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity;
+package discord4j.core.object.entity;
 
-/** A Discord object that can be mentioned. */
-public interface Mentionable {
+import discord4j.core.trait.Deletable;
 
-	/**
-	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another object (assuming the object
-	 * exists in context of the mention).
-	 *
-	 * @return The <i>raw</i> mention.
-	 */
-	String getMention();
-
-	/**
-	 * Gets the formatted mention. This is the format seen directly in Discord (assuming the object exists in context of
-	 * the mention). It should <i>not</i> be used to directly mention another object; use {@link #getMention()} instead.
-	 *
-	 * @return The formatted mention.
-	 */
-	String getFormattedMention();
+/** A Discord message. */
+public interface Message extends Deletable, Entity {
 }

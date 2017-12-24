@@ -14,15 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.object.entity;
 
-import discord4j.core.entity.Deletable;
-import discord4j.core.entity.Entity;
+import discord4j.core.object.Emoji;
+import discord4j.core.trait.Deletable;
+import discord4j.core.trait.Positionable;
+import discord4j.core.trait.Renameable;
 
-/**
- * A Discord invite.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
- */
-public interface Invite extends Deletable, Entity {
+/** A customized emoji created by a {@link Guild}. */
+public interface GuildEmoji extends Deletable, Entity, Emoji, Positionable<GuildEmoji>, Renameable<GuildEmoji> {
 }

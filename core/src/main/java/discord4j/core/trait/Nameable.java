@@ -14,8 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.trait;
 
-/** A Discord voice channel. */
-public interface VoiceChannel extends AudioChannel, GuildChannel<VoiceChannel> {
+/** A Discord object that can be named. */
+public interface Nameable {
+
+	/**
+	 * Gets the name of this object.
+	 *
+	 * @return The name of this object.
+	 */
+	String getName();
 }

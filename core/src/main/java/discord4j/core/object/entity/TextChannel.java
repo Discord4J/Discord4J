@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.entity.obj;
+package discord4j.core.object.entity;
 
-/** A Discord channel that can utilizes messages. */
-public interface MessageChannel extends Channel {
+import discord4j.core.trait.Mentionable;
+
+/** A Discord text channel. */
+public interface TextChannel extends GuildChannel<TextChannel>, Mentionable, MessageChannel {
 }
