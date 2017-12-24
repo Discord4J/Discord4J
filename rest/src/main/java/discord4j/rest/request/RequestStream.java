@@ -31,6 +31,7 @@ import reactor.retry.RetryContext;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -134,8 +135,9 @@ class RequestStream<T> {
 			MonoProcessor<T> callback = tuple.getT1();
 			DiscordRequest<T> req = tuple.getT2();
 			ExchangeFilter exchangeFilter = ExchangeFilter.builder()
-					.requestFilter(request -> req.getHeaders()
-							.forEach((key, values) -> values.forEach(value -> request.header(key, value))))
+					.requestFilter(request -> Optional.ofNullable(req.getHeaders())
+							.ifPresent(headers -> headers.forEach(
+									(key, values) -> values.forEach(value -> request.header(key, value)))))
 					.responseFilter(rateLimitHandler)
 					.build();
 
