@@ -16,6 +16,11 @@
  */
 package discord4j.rest.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.json.request.MessageCreateRequest;
+import discord4j.rest.util.MultipartRequest;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClientRequest;
 
@@ -28,7 +33,13 @@ import java.util.function.Consumer;
  *
  * @see HttpClientRequest.Form
  */
-public class MultipartWriterStrategy implements WriterStrategy<Consumer<HttpClientRequest.Form>> {
+public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest> {
+
+	private final ObjectMapper objectMapper;
+
+	public MultipartWriterStrategy(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	@Override
 	public boolean canWrite(@Nullable Class<?> type, @Nullable String contentType) {
@@ -36,7 +47,20 @@ public class MultipartWriterStrategy implements WriterStrategy<Consumer<HttpClie
 	}
 
 	@Override
-	public Mono<Void> write(HttpClientRequest request, @Nullable Consumer<HttpClientRequest.Form> body) {
-		return request.chunkedTransfer(false).sendForm(body).then();
+	public Mono<Void> write(HttpClientRequest request, @Nullable MultipartRequest body) {
+		if (body == null) {
+			return Mono.empty(); // or .error() ?
+		}
+		Consumer<HttpClientRequest.Form> formConsumer = body.getFormConsumer();
+		MessageCreateRequest createRequest = body.getCreateRequest();
+		if (createRequest != null) {
+			try {
+				String payload = objectMapper.writeValueAsString(createRequest);
+				formConsumer = formConsumer.andThen(form -> form.attr("payload_json", payload));
+			} catch (JsonProcessingException e) {
+				throw Exceptions.propagate(e);
+			}
+		}
+		return request.chunkedTransfer(false).sendForm(formConsumer).then();
 	}
 }

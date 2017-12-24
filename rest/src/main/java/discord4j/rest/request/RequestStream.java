@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.ipc.netty.http.client.HttpClientResponse;
 import reactor.retry.BackoffDelay;
 import reactor.retry.Retry;
 import reactor.retry.RetryContext;
@@ -78,7 +79,9 @@ class RequestStream<T> {
 			return false;
 		}
 	}).backoff(context -> {
-		if (context.applicationContext() == null) return new BackoffDelay(Duration.ZERO);
+		if (context.applicationContext() == null) {
+			return new BackoffDelay(Duration.ZERO);
+		}
 
 		long delay = ((AtomicLong) context.applicationContext()).get();
 		((AtomicLong) context.applicationContext()).set(0L);
@@ -108,30 +111,33 @@ class RequestStream<T> {
 	 * necessary according to the response headers.
 	 *
 	 * @see #sleepTime
-	 * @see #exchangeFilter
+	 * @see #rateLimitHandler
 	 */
 	private class Reader implements Consumer<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> {
 
 		private volatile Duration sleepTime = Duration.ZERO;
-		private final ExchangeFilter exchangeFilter = ExchangeFilter.builder()
-				.responseFilter(response -> {
-					HttpHeaders headers = response.responseHeaders();
+		private final Consumer<HttpClientResponse> rateLimitHandler = response -> {
+			HttpHeaders headers = response.responseHeaders();
 
-					int remaining = headers.getInt("X-RateLimit-Remaining", -1);
-					if (remaining == 0) {
-						long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
-						long discordTime = headers.getTimeMillis("Date") / 1000;
+			int remaining = headers.getInt("X-RateLimit-Remaining", -1);
+			if (remaining == 0) {
+				long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
+				long discordTime = headers.getTimeMillis("Date") / 1000;
 
-						sleepTime = Duration.ofSeconds(resetAt - discordTime);
-					}
-				})
-				.build();
+				sleepTime = Duration.ofSeconds(resetAt - discordTime);
+			}
+		};
 
 		@SuppressWarnings("ConstantConditions")
 		@Override
 		public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
 			MonoProcessor<T> callback = tuple.getT1();
 			DiscordRequest<T> req = tuple.getT2();
+			ExchangeFilter exchangeFilter = ExchangeFilter.builder()
+					.requestFilter(request -> req.getHeaders()
+							.forEach((key, values) -> values.forEach(value -> request.header(key, value))))
+					.responseFilter(rateLimitHandler)
+					.build();
 
 			Mono.when(globalRateLimiter)
 					.materialize()

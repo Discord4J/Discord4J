@@ -23,9 +23,14 @@ import discord4j.common.json.response.MessageResponse;
 import discord4j.common.json.response.UserResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.MultipartRequest;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.Unpooled;
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ChannelService extends RestService {
 
@@ -63,6 +68,17 @@ public class ChannelService extends RestService {
 	public Mono<MessageResponse> createMessage(long channelId, MessageCreateRequest request) {
 		return Routes.MESSAGE_CREATE.newRequest(channelId)
 				.body(request)
+				.exchange(getRouter());
+	}
+
+	public Mono<MessageResponse> createMessage(long channelId, MessageCreateRequest request,
+			byte[] file, String fileName) {
+		Consumer<HttpClientRequest.Form> formConsumer = form -> form.multipart(true)
+				.file("file", fileName, new ByteBufInputStream(Unpooled.wrappedBuffer(file)),
+						"application/octet-stream");
+		return Routes.MESSAGE_CREATE.newRequest(channelId)
+				.header("content-type", "multipart/form-data")
+				.body(new MultipartRequest(formConsumer, request))
 				.exchange(getRouter());
 	}
 
