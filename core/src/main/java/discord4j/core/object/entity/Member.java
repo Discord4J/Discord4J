@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.VoiceState;
 import discord4j.core.trait.Renameable;
 import discord4j.core.object.Snowflake;
 import reactor.core.publisher.Flux;
@@ -36,10 +37,10 @@ public interface Member extends Renameable<Member>, User {
 	Snowflake getGuildId();
 
 	/**
-	 * Requests the guild this user is associated to.
+	 * Requests to retrieve the guild this user is associated to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits a {@link Guild}. If an error is received, it is
-	 * emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this user is associated to. If
+	 * an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Guild> getGuild();
 
@@ -58,7 +59,7 @@ public interface Member extends Renameable<Member>, User {
 	Set<Snowflake> getRoleIds();
 
 	/**
-	 * Requests the user's guild roles.
+	 * Requests to retrieve the user's guild roles.
 	 *
 	 * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
 	 * emitted through the {@code Mono}.
@@ -97,4 +98,12 @@ public interface Member extends Renameable<Member>, User {
 	default Optional<String> getFormattedNicknameMention() {
 		return getNickname().map(nickname -> "@" + nickname);
 	}
+
+	/**
+	 * Requests to retrieve this user's voice state for this guild.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState} for this user for this
+	 * guild. If an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<VoiceState> getVoiceState();
 }

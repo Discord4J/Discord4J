@@ -16,9 +16,18 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Nameable;
+/** The type of a presence. */
+public enum ActivityType {
 
-/** A small digital image or icon used to express an idea, emotion, etc., in electronic communication. */
-public interface Emoji extends Mentionable, Nameable {
+	/** Playing {@code {name}} */
+	GAME,
+
+	/** Streaming {@code {name}} */
+	STREAMING,
+
+	/** Listening to {@code {name}} */
+	LISTENING,
+
+	/** Watching {@code {name}} */
+	WATCHING
 }

@@ -16,9 +16,26 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Nameable;
+/** The status of a presence. */
+public enum StatusType {
 
-/** A small digital image or icon used to express an idea, emotion, etc., in electronic communication. */
-public interface Emoji extends Mentionable, Nameable {
+	/** A status of Idle. */
+	IDLE,
+
+	/** A status of Do Not Disturb. */
+	DND,
+
+	/** A status of Online. */
+	ONLINE,
+
+	/** A status of Offline. */
+	OFFLINE,
+
+	/**
+	 * A status of Invisible.
+	 *
+	 * @apiNote Another user will never appear to have this status, as Discord does not send this information. Instead,
+	 * they will appear to be {@link #OFFLINE}. This status is used only for setting this user's status to Invisible.
+	 */
+	INVISIBLE
 }

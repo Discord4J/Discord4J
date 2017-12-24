@@ -16,9 +16,25 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Nameable;
+/**
+ * {@link discord4j.core.object.entity.Member Members} of the server must meet the following criteria before they can
+ * send messages in text channels or initiate a direct message conversation. If a member has an assigned role this does
+ * not apply.
+ */
+public enum VerificationLevel {
 
-/** A small digital image or icon used to express an idea, emotion, etc., in electronic communication. */
-public interface Emoji extends Mentionable, Nameable {
+	/** Unrestricted. */
+	NONE,
+
+	/** Must have verified email on account. */
+	LOW,
+
+	/** Must be registered on Discord for longer than 5 minutes. */
+	MEDIUM,
+
+	/** (╯°□°）╯︵ ┻━┻ - Must be a member of the server for longer than 10 minutes. */
+	HIGH,
+
+	/** ┻━┻ミヽ(ಠ益ಠ)ﾉ彡┻━┻ - Must have a verified phone number. */
+	VERY_HIGH
 }

@@ -16,8 +16,15 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.*;
 import discord4j.core.trait.Deletable;
 import discord4j.core.trait.Renameable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Instant;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * A Discord guild.
@@ -25,4 +32,39 @@ import discord4j.core.trait.Renameable;
  * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
  */
 public interface Guild extends Deletable, Entity, Renameable<Guild> {
+
+	String getIconHash();
+	String getSplashHash();
+	Snowflake getOwnerId();
+	Mono<Member> getOwner();
+	String getRegionId();
+	Mono<Region> getRegion();
+	Optional<Snowflake> getAfkChannelId();
+	Mono<VoiceChannel> getAfkChannel();
+	int getAfkTimeout();
+	boolean isEmbedEnabled();
+	Optional<Snowflake> getEmbedChannelId();
+	Mono<GuildChannel<?>> getEmbedChannel();
+	VerificationLevel getVerificationLevel();
+	NotificationLevel getNotificationLevel();
+	ContentFilterLevel getContentFilterLevel();
+	Set<Role> getRoles();
+	Set<Emoji> getEmojis();
+	Set<String> getFeatures();
+	MfaLevel getMfaLevel();
+	Optional<Snowflake> getApplicationId();
+	boolean isWidgetEnabled();
+	Optional<Snowflake> getWidgetChannelId();
+	Mono<GuildChannel<?>> getWidgetChannel();
+	Optional<Snowflake> getSystemChannelId();
+	Mono<TextChannel> getSystemChannel();
+
+	Mono<Instant> getJoinTime();
+	Mono<Boolean> isLarge();
+	Mono<Boolean> isAvailable();
+	Mono<Integer> getMemberCount();
+	Flux<VoiceState> getVoiceStates();
+	Flux<Member> getMembers();
+	Flux<GuildChannel<?>> getChannels();
+	// TODO getPresences()
 }

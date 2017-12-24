@@ -16,9 +16,15 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Nameable;
+/** Automatically scan and delete messages sent in the server that contain explicit content. */
+public enum ContentFilterLevel {
 
-/** A small digital image or icon used to express an idea, emotion, etc., in electronic communication. */
-public interface Emoji extends Mentionable, Nameable {
+	/** Don't scan any messages. */
+	DISABLED,
+
+	/** Scan messages from members without a role. */
+	MEMBERS_WITHOUT_ROLES,
+
+	/** Scan messages sent by all members. */
+	ALL_MEMBERS
 }

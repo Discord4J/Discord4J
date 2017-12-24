@@ -16,9 +16,15 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Nameable;
+/**
+ * Prevent potentially dangerous administrative actions for users without two-factor authentication enabled. This
+ * setting can only be changed by the server owner if they have 2FA enabled on their account.
+ */
+public enum MfaLevel {
 
-/** A small digital image or icon used to express an idea, emotion, etc., in electronic communication. */
-public interface Emoji extends Mentionable, Nameable {
+	/** Disabled 2FA requirement. */
+	NONE,
+
+	/** Enabled 2FA requirement. */
+	ELEVATED
 }

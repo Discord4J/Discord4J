@@ -16,9 +16,15 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Nameable;
+/**
+ * Determines whether {@link discord4j.core.object.entity.Member Members} who have not explicitly set their notification
+ * settings receive a notification for every message sent in the server or not.
+ */
+public enum NotificationLevel {
 
-/** A small digital image or icon used to express an idea, emotion, etc., in electronic communication. */
-public interface Emoji extends Mentionable, Nameable {
+	/** Receive a notification for all messages. */
+	ALL_MESSAGES,
+
+	/** Receive a notification only for mentions. */
+	ONLY_MENTIONS
 }

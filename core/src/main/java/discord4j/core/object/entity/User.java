@@ -52,7 +52,7 @@ public interface User extends Entity, Mentionable, Nameable {
 	/**
 	 * Gets whether the user belongs to an OAuth2 application.
 	 *
-	 * @return {@code true} if the user belongs to an OAuth2 application, false otherwise.
+	 * @return {@code true} if the user belongs to an OAuth2 application, {@code false} otherwise.
 	 */
 	boolean isBot();
 
@@ -94,8 +94,8 @@ public interface User extends Entity, Mentionable, Nameable {
 	/**
 	 * Requests to retrieve the private channel (DM) to this user.
 	 * 
-	 * @return A {@link Mono} where, upon successful completion, emits a {@link PrivateChannel}. If an error is
-	 * received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link PrivateChannel} to this user. If an
+	 * error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<PrivateChannel> getPrivateChannel();
 }
