@@ -33,6 +33,14 @@ RequestBuffer.request(() -> {
     }
 });
 ``` 
+
+Last of all, if you want to actually use the result of the RequestBuffer by blocking until it returns you can do so by just returning the type you wish to return and the lambda will infer it, as usual this is just a more-easily-readable version of instantiating a IRequest implementation from the RequestBuffer class:
+
+```java
+IMessage returnedMessage = RequestBuffer.request(() -> {
+    return IDiscordClient.getMessageByID(someID);
+}).get();
+```
 #### RequestBuilder
 
 Another alternative to solving RLEs is to use the `RequestBuilder` class. The main advantage to `RequestBuilder` over `RequestBuffer` is `RequestBuilder` will automatically log any exceptions thrown for you versus either letting exceptions be thrown or you having to do so manually.
