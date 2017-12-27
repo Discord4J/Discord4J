@@ -47,18 +47,19 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	@Override
 	public Mono<Void> handle(WebSocketSession session) {
+		// Listen to a custom handler's response to retrieve the actual close code and reason, or an error signal if
+		// the channel was closed abruptly.
 		session.closeFuture()
+				.log("discord4j.gateway.session.close", Level.FINE)
 				.map(CloseException::new)
-				.filter(x -> !completionNotifier.isTerminated())
-				.subscribe(completionNotifier::onError);
+				.subscribe(this::error, this::error);
 
 		session.receive()
 				.map(WebSocketMessage::getPayload)
 				.compose(decompressor::completeMessages)
-				.filter(buf -> buf.readableBytes() > 0)
 				.map(reader::read)
 				.log("discord4j.gateway.session.inbound", Level.FINE)
-				.subscribe(inboundExchange::onNext, this::error, completionNotifier::onComplete);
+				.subscribe(inboundExchange::onNext, this::error);
 
 		return session.send(outboundExchange
 				.log("discord4j.gateway.session.outbound", Level.FINE)
@@ -68,11 +69,14 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	}
 
 	public void close() {
+		log.info("Triggering close sequence");
 		completionNotifier.onComplete();
 		outboundExchange.onComplete();
 		inboundExchange.onComplete();
 	}
+
 	public void error(Throwable error) {
+		log.info("Triggering error sequence");
 		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
 		outboundExchange.onComplete();
 		inboundExchange.onComplete();

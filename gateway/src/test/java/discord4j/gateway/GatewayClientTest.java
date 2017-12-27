@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.PossibleModule;
+import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.dispatch.MessageCreate;
 import discord4j.common.json.payload.dispatch.Ready;
 import discord4j.gateway.payload.JacksonLenientPayloadReader;
@@ -32,6 +33,7 @@ import discord4j.gateway.payload.PayloadWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.FluxSink;
 
 public class GatewayClientTest {
 
@@ -64,6 +66,8 @@ public class GatewayClientTest {
 			}
 		});
 
+		FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
+
 		gatewayClient.dispatch().ofType(MessageCreate.class)
 				.subscribe(message -> {
 					String content = message.getMessage().getContent();
@@ -71,6 +75,8 @@ public class GatewayClientTest {
 						gatewayClient.close(false);
 					} else if ("!retry".equals(content)) {
 						gatewayClient.close(true);
+					} else if ("!fail".equals(content)) {
+						outboundSink.next(new GatewayPayload<>());
 					}
 				});
 

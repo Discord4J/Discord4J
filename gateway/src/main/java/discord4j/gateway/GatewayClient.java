@@ -86,7 +86,7 @@ public class GatewayClient {
 			Disposable inboundSub = wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
 			Disposable senderSub = sender.map(payload -> {
 				if (Opcode.RECONNECT.equals(payload.getOp())) {
-					wsHandler.error(new RuntimeException("Reconnecting..."));
+					wsHandler.error(new RuntimeException("Reconnecting due to user action"));
 				}
 				return payload;
 			}).subscribe(wsHandler.outbound()::onNext, t -> wsHandler.close(), wsHandler::close);
@@ -104,7 +104,9 @@ public class GatewayClient {
 						heartbeat.stop();
 					});
 		}).retryWhen(Retry.onlyIf(ctx -> ABNORMAL_ERROR.test(ctx.exception()))
-				.exponentialBackoffWithJitter(Duration.ofSeconds(5), Duration.ofSeconds(120)));
+				.exponentialBackoffWithJitter(Duration.ofSeconds(5), Duration.ofSeconds(120))
+				.retryMax(50)
+				.doOnRetry(ctx -> log.info("Reconnecting in {}", ctx.backoff().toMillis() + "ms")));
 	}
 
 	/**
