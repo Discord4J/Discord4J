@@ -20,7 +20,7 @@ package discord4j.core.object;
 public enum ActivityType {
 
 	/** Playing {@code {name}} */
-	GAME,
+	PLAYING,
 
 	/** Streaming {@code {name}} */
 	STREAMING,

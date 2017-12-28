@@ -59,6 +59,11 @@ public interface Guild extends Deletable, Entity, Renameable<Guild> {
 	Optional<Snowflake> getSystemChannelId();
 	Mono<TextChannel> getSystemChannel();
 
+	// TODO: Note for Panda
+	// The reason these are Monos is because this data isn't always provided (in fact, it's never provided except for
+	// create). So when, for say, we retrieve a Guild object from REST, we need to point towards a "GuildCreateData"
+	// *store*, not the data itself. So all these fields below have to come from a cache, not from an already given
+	// data object (because that is not provided 99% of the time)
 	Mono<Instant> getJoinTime();
 	Mono<Boolean> isLarge();
 	Mono<Boolean> isAvailable();
@@ -66,5 +71,5 @@ public interface Guild extends Deletable, Entity, Renameable<Guild> {
 	Flux<VoiceState> getVoiceStates();
 	Flux<Member> getMembers();
 	Flux<GuildChannel<?>> getChannels();
-	// TODO getPresences()
+	Flux<Presence> getPresences();
 }

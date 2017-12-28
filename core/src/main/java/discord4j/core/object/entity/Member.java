@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.Presence;
 import discord4j.core.object.VoiceState;
 import discord4j.core.trait.Renameable;
 import discord4j.core.object.Snowflake;
@@ -106,4 +107,12 @@ public interface Member extends Renameable<Member>, User {
 	 * guild. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<VoiceState> getVoiceState();
+
+	/**
+	 * Requests to retrieve the presence for this user for this guild.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits a {@link Presence} for this user for this guild.
+	 * If an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<Presence> getPresence();
 }
