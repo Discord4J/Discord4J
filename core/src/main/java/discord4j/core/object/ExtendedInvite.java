@@ -14,14 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object;
 
-import discord4j.core.trait.Deletable;
-
-/**
- * A Discord invite.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
- */
-public interface Invite extends Deletable, Entity {
+/** A Discord invite with metadata. */
+public interface ExtendedInvite extends Invite {
 }
