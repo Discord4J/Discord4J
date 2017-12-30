@@ -35,6 +35,7 @@ public class EmojiResponse {
 	@JsonProperty("require_colons")
 	private boolean requireColons;
 	private boolean managed;
+	private boolean animated;
 
 	public OptionalLong getId() {
 		return id;
@@ -61,6 +62,10 @@ public class EmojiResponse {
 		return managed;
 	}
 
+	public boolean isAnimated() {
+		return animated;
+	}
+
 	@Override
 	public String toString() {
 		return "EmojiResponse[" +
@@ -70,6 +75,7 @@ public class EmojiResponse {
 				", user=" + user +
 				", requireColons=" + requireColons +
 				", managed=" + managed +
+				", animated=" + animated +
 				']';
 	}
 }

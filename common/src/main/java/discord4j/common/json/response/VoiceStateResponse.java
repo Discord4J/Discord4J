@@ -19,6 +19,8 @@ package discord4j.common.json.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
+import java.util.OptionalLong;
+
 public class VoiceStateResponse {
 
 	@JsonProperty("guild_id")
@@ -26,7 +28,7 @@ public class VoiceStateResponse {
 	private long guildId;
 	@JsonProperty("channel_id")
 	@UnsignedJson
-	private long channelId;
+	private OptionalLong channelId;
 	@JsonProperty("user_id")
 	@UnsignedJson
 	private long userId;
@@ -46,7 +48,7 @@ public class VoiceStateResponse {
 		return guildId;
 	}
 
-	public long getChannelId() {
+	public OptionalLong getChannelId() {
 		return channelId;
 	}
 
