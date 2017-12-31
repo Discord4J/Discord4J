@@ -17,5 +17,5 @@
 package discord4j.core.object.entity;
 
 /** A Discord voice channel. */
-public interface VoiceChannel extends AudioChannel, GuildChannel<VoiceChannel> {
+public interface VoiceChannel extends GuildChannel<VoiceChannel>, Channel {
 }

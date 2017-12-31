@@ -16,9 +16,9 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.object.entity.AudioChannel;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.VoiceChannel;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -51,10 +51,10 @@ public interface VoiceState {
 	/**
 	 * Requests to retrieve the channel this user is connected to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link AudioChannel} this user is connected
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
 	 * to. If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<AudioChannel> getChannel();
+	Mono<VoiceChannel> getChannel();
 
 	/**
 	 * Gets the user ID this voice state is for.
