@@ -62,11 +62,6 @@ public interface User extends Entity, Mentionable, Nameable {
 	}
 
 	@Override
-	default String getFormattedMention() {
-		return "@" + getName();
-	}
-
-	@Override
 	default String getName() {
 		return getUsername();
 	}

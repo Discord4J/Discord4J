@@ -26,12 +26,4 @@ public interface Mentionable {
 	 * @return The <i>raw</i> mention.
 	 */
 	String getMention();
-
-	/**
-	 * Gets the formatted mention. This is the format seen directly in Discord (assuming the object exists in context of
-	 * the mention). It should <i>not</i> be used to directly mention another object; use {@link #getMention()} instead.
-	 *
-	 * @return The formatted mention.
-	 */
-	String getFormattedMention();
 }
