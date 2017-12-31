@@ -29,13 +29,5 @@ public enum StatusType {
 	ONLINE,
 
 	/** A status of Offline. */
-	OFFLINE,
-
-	/**
-	 * A status of Invisible.
-	 *
-	 * @apiNote Another user will never appear to have this status, as Discord does not send this information. Instead,
-	 * they will appear to be {@link #OFFLINE}. This status is used only for setting this user's status to Invisible.
-	 */
-	INVISIBLE
+	OFFLINE
 }
