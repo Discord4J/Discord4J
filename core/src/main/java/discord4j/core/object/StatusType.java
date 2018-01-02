@@ -19,15 +19,28 @@ package discord4j.core.object;
 /** The status of a presence. */
 public enum StatusType {
 
-	/** A status of Idle. */
-	IDLE,
+	/** A status of Online. */
+	ONLINE("online"),
 
 	/** A status of Do Not Disturb. */
-	DND,
+	DND("dnd"),
 
-	/** A status of Online. */
-	ONLINE,
+	/** A status of Idle. */
+	IDLE("idle"),
+
+	/** A status of Invisible. */
+	INVISIBLE("invisible"),
 
 	/** A status of Offline. */
-	OFFLINE
+	OFFLINE("offline");
+
+	private final String value;
+
+	StatusType(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return value;
+	}
 }

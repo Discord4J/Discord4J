@@ -20,14 +20,25 @@ package discord4j.core.object;
 public enum ActivityType {
 
 	/** Playing {@code {name}} */
-	PLAYING,
+	PLAYING(0),
 
 	/** Streaming {@code {name}} */
-	STREAMING,
+	STREAMING(1),
 
 	/** Listening to {@code {name}} */
-	LISTENING,
+	LISTENING(2),
 
 	/** Watching {@code {name}} */
-	WATCHING
+	WATCHING(3);
+
+	private final int value;
+
+	ActivityType(int value) {
+
+		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
 }

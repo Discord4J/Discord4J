@@ -24,17 +24,27 @@ package discord4j.core.object;
 public enum VerificationLevel {
 
 	/** Unrestricted. */
-	NONE,
+	NONE(0),
 
 	/** Must have verified email on account. */
-	LOW,
+	LOW(1),
 
 	/** Must be registered on Discord for longer than 5 minutes. */
-	MEDIUM,
+	MEDIUM(2),
 
 	/** (╯°□°）╯︵ ┻━┻ - Must be a member of the server for longer than 10 minutes. */
-	HIGH,
+	HIGH(3),
 
 	/** ┻━┻ミヽ(ಠ益ಠ)ﾉ彡┻━┻ - Must have a verified phone number. */
-	VERY_HIGH
+	VERY_HIGH(4);
+
+	private final int value;
+
+	VerificationLevel(int value) {
+		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
 }

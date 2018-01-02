@@ -23,8 +23,18 @@ package discord4j.core.object;
 public enum MfaLevel {
 
 	/** Disabled 2FA requirement. */
-	NONE,
+	NONE(0),
 
 	/** Enabled 2FA requirement. */
-	ELEVATED
+	ELEVATED(1);
+
+	private final int value;
+
+	MfaLevel(int value) {
+		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
 }

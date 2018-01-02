@@ -23,8 +23,18 @@ package discord4j.core.object;
 public enum NotificationLevel {
 
 	/** Receive a notification for all messages. */
-	ALL_MESSAGES,
+	ALL_MESSAGES(0),
 
 	/** Receive a notification only for mentions. */
-	ONLY_MENTIONS
+	ONLY_MENTIONS(1);
+
+	private final int value;
+
+	NotificationLevel(int value) {
+		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
 }

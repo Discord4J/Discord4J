@@ -20,11 +20,21 @@ package discord4j.core.object;
 public enum ContentFilterLevel {
 
 	/** Don't scan any messages. */
-	DISABLED,
+	DISABLED(0),
 
 	/** Scan messages from members without a role. */
-	MEMBERS_WITHOUT_ROLES,
+	MEMBERS_WITHOUT_ROLES(1),
 
 	/** Scan messages sent by all members. */
-	ALL_MEMBERS
+	ALL_MEMBERS(2);
+
+	private final int value;
+
+	ContentFilterLevel(int value) {
+		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
 }
