@@ -16,8 +16,12 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.Snowflake;
 import discord4j.core.trait.Deletable;
 import discord4j.core.trait.Renameable;
+import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 /**
  * A Discord webhook.
@@ -25,4 +29,12 @@ import discord4j.core.trait.Renameable;
  * @see <a href="https://discordapp.com/developers/docs/resources/webhook">Webhook Resource</a>
  */
 public interface Webhook extends Deletable, Entity, Renameable<Webhook> {
+
+	Snowflake getGuildId();
+	Mono<Guild> getGuild();
+	Snowflake getChannelId();
+	Mono<TextChannel> getChannel();
+	User getCreator();
+	Optional<String> getAvatar();
+	String getToken();
 }

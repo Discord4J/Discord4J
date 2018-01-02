@@ -16,7 +16,10 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.PermissionSet;
 import discord4j.core.trait.*;
+
+import java.awt.*;
 
 /**
  * A Discord role.
@@ -24,4 +27,10 @@ import discord4j.core.trait.*;
  * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
 public interface Role extends Deletable, Entity, Mentionable, Positionable<Role>, Renameable<Role> {
+
+	Color getColor();
+	boolean isHoisted();
+	PermissionSet getPermissions();
+	boolean isManaged();
+	boolean isMentionable();
 }
