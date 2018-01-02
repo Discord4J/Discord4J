@@ -146,29 +146,4 @@ public enum Permission {
 	public int getValue() {
 		return value;
 	}
-
-	/**
-	 * Gets whether the given "permissions number" contains this permission.
-	 *
-	 * @param permissionsNumber The permissions number, or a number containing a set of permissions in binary form.
-	 * @param checkAdmin Whether the check should take into account having the {@link #ADMINISTRATOR} permission.
-	 * @return {@code true} if the given "permissions number" contains this permission, {@code false} otherwise.
-	 */
-	public boolean hasPermission(final int permissionsNumber, final boolean checkAdmin) {
-		return ((value & permissionsNumber) > 0) // Checks if permissionsNumber "contains" the value
-				|| (checkAdmin && ADMINISTRATOR.hasPermission(permissionsNumber, false));
-	}
-
-	/**
-	 * Gets whether the given "permissions number" contains this permission.
-	 *
-	 * @param permissionsNumber The permissions number, or a number containing a set of permissions in binary form.
-	 * @return {@code true} if the given "permissions number" contains this permission, {@code false} otherwise.
-	 *
-	 * @apiNote This method is equivalent to invoking {@link #hasPermission(int, boolean)} using the same
-	 * {@code permissionsNumber} value and a {@code checkAdmin} value of {@code true}.
-	 */
-	public boolean hasPermission(final int permissionsNumber) {
-		return hasPermission(permissionsNumber, true);
-	}
 }
