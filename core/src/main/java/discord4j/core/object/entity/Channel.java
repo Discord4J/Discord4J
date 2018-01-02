@@ -16,12 +16,10 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.trait.Nameable;
-
 /**
  * A Discord channel.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel">Channel Resource</a>
  */
-public interface Channel extends Entity, Nameable {
+public interface Channel extends Entity {
 }

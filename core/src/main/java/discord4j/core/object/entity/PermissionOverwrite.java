@@ -16,10 +16,27 @@
  */
 package discord4j.core.object.entity;
 
-import java.util.Set;
+import discord4j.core.object.PermissionSet;
 
-/** A Discord private channel (also known as a DM). */
-public interface PrivateChannel extends MessageChannel {
+public interface PermissionOverwrite extends Entity {
 
-	Set<User> getRecipients();
+	Type getType();
+	PermissionSet getAllowed();
+	PermissionSet getDenied();
+
+	enum Type {
+
+		ROLE("role"),
+		MEMBER("member");
+
+		private final String value;
+
+		Type(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return value;
+		}
+	}
 }

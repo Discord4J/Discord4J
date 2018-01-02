@@ -16,6 +16,10 @@
  */
 package discord4j.core.object.entity;
 
+import java.util.Set;
+
 /** A Discord category. */
 public interface Category extends GuildChannel<Category> {
+
+	Set<GuildChannel<?>> getChannels();
 }

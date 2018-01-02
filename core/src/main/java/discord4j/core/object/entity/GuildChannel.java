@@ -16,10 +16,20 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.Snowflake;
 import discord4j.core.trait.Deletable;
 import discord4j.core.trait.Positionable;
 import discord4j.core.trait.Renameable;
+import reactor.core.publisher.Mono;
+
+import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel<T extends GuildChannel<T>> extends Channel, Deletable, Positionable<T>, Renameable<T> {
+
+	Snowflake getGuildId();
+	Mono<Guild> getGuild();
+	Set<PermissionOverwrite> getPermissionOverwrites();
+	Snowflake getParentId();
+	Category getParent();
 }

@@ -16,6 +16,14 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.Snowflake;
+
+import java.time.Instant;
+import java.util.Optional;
+
 /** A Discord channel that can utilizes messages. */
 public interface MessageChannel extends Channel {
+
+	Optional<Snowflake> getLastMessageId();
+	Optional<Instant> getLastPinTimestamp();
 }

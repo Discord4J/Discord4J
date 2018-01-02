@@ -20,4 +20,7 @@ import discord4j.core.trait.Mentionable;
 
 /** A Discord text channel. */
 public interface TextChannel extends GuildChannel<TextChannel>, Mentionable, MessageChannel {
+
+	String getTopic();
+	boolean isNsfw();
 }
