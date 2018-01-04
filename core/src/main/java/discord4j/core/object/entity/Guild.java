@@ -16,7 +16,10 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.object.*;
+import discord4j.core.object.Presence;
+import discord4j.core.object.Region;
+import discord4j.core.object.Snowflake;
+import discord4j.core.object.VoiceState;
 import discord4j.core.trait.Deletable;
 import discord4j.core.trait.Renameable;
 import reactor.core.publisher.Flux;
@@ -49,7 +52,7 @@ public interface Guild extends Deletable, Entity, Renameable<Guild> {
 	NotificationLevel getNotificationLevel();
 	ContentFilterLevel getContentFilterLevel();
 	Set<Role> getRoles();
-	Set<Emoji> getEmojis();
+	Set<GuildEmoji> getEmojis();
 	Set<String> getFeatures();
 	MfaLevel getMfaLevel();
 	Optional<Snowflake> getApplicationId();
@@ -72,4 +75,149 @@ public interface Guild extends Deletable, Entity, Renameable<Guild> {
 	Flux<Member> getMembers();
 	Flux<GuildChannel<?>> getChannels();
 	Flux<Presence> getPresences();
+
+	/** Automatically scan and delete messages sent in the server that contain explicit content. */
+	enum ContentFilterLevel {
+
+		/** Don't scan any messages. */
+		DISABLED(0),
+
+		/** Scan messages from members without a role. */
+		MEMBERS_WITHOUT_ROLES(1),
+
+		/** Scan messages sent by all members. */
+		ALL_MEMBERS(2);
+
+		/** The underlying value as represented by Discord. */
+		private final int value;
+
+		/**
+		 * Constructs a {@code Guild.ContentFilterLevel}.
+		 *
+		 * @param value The underlying value as represented by Discord.
+		 */
+		ContentFilterLevel(final int value) {
+			this.value = value;
+		}
+
+		/**
+		 * Gets the underlying value as represented by Discord.
+		 *
+		 * @return The underlying value as represented by Discord.
+		 */
+		public int getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * Prevent potentially dangerous administrative actions for users without two-factor authentication enabled. This
+	 * setting can only be changed by the server owner if they have 2FA enabled on their account.
+	 */
+	enum MfaLevel {
+
+		/** Disabled 2FA requirement. */
+		NONE(0),
+
+		/** Enabled 2FA requirement. */
+		ELEVATED(1);
+
+		/** The underlying value as represented by Discord. */
+		private final int value;
+
+		/**
+		 * Constructs a {@code Guild.MfaLevel}.
+		 *
+		 * @param value THe underlying value as represented by Discord.
+		 */
+		MfaLevel(final int value) {
+			this.value = value;
+		}
+
+		/**
+		 * Gets the underlying value as represented by Discord.
+		 *
+		 * @return The underlying value as represented by Discord.
+		 */
+		public int getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * Determines whether {@link Member Members} who have not explicitly set their notification settings receive a
+	 * notification for every message sent in the server or not.
+	 */
+	enum NotificationLevel {
+
+		/** Receive a notification for all messages. */
+		ALL_MESSAGES(0),
+
+		/** Receive a notification only for mentions. */
+		ONLY_MENTIONS(1);
+
+		/** The underlying value as represented by Discord. */
+		private final int value;
+
+		/**
+		 * Constructs a {@code Guild.NotificationLevel}.
+		 *
+		 * @param value The underlying value as represented by Discord.
+		 */
+		NotificationLevel(final int value) {
+			this.value = value;
+		}
+
+		/**
+		 * Gets the underlying value as represented by Discord.
+		 *
+		 * @return The underlying value as represented by Discord.
+		 */
+		public int getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * {@link Member Members} of the server must meet the following criteria before they can send messages in text
+	 * channels or initiate a direct message conversation. If a member has an assigned role this does not apply.
+	 */
+	enum VerificationLevel {
+
+		/** Unrestricted. */
+		NONE(0),
+
+		/** Must have verified email on account. */
+		LOW(1),
+
+		/** Must be registered on Discord for longer than 5 minutes. */
+		MEDIUM(2),
+
+		/** (╯°□°）╯︵ ┻━┻ - Must be a member of the server for longer than 10 minutes. */
+		HIGH(3),
+
+		/** ┻━┻ミヽ(ಠ益ಠ)ﾉ彡┻━┻ - Must have a verified phone number. */
+		VERY_HIGH(4);
+
+		/** The underlying value as represented by Discord. */
+		private final int value;
+
+		/**
+		 * Constructs a {@code Guild.VerificationLevel}.
+		 *
+		 * @param value The underlying value as represented by Discord.
+		 */
+		VerificationLevel(final int value) {
+			this.value = value;
+		}
+
+		/**
+		 * Gets the underlying value as represented by Discord.
+		 *
+		 * @return The underlying value as represented by Discord.
+		 */
+		public int getValue() {
+			return value;
+		}
+	}
 }

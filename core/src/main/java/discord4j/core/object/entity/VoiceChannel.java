@@ -19,6 +19,17 @@ package discord4j.core.object.entity;
 /** A Discord voice channel. */
 public interface VoiceChannel extends GuildChannel<VoiceChannel>, Channel {
 
+	/**
+	 * Gets the bitrate (in bits) for this voice channel.
+	 *
+	 * @return Gets the bitrate (in bits) for this voice channel.
+	 */
 	int getBitrate();
+
+	/**
+	 * Gets the user limit of this voice channel.
+	 *
+	 * @return The user limit of this voice channel.
+	 */
 	int getUserLimit();
 }

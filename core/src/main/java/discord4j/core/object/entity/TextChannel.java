@@ -21,6 +21,17 @@ import discord4j.core.trait.Mentionable;
 /** A Discord text channel. */
 public interface TextChannel extends GuildChannel<TextChannel>, Mentionable, MessageChannel {
 
+	/**
+	 * Gets the channel topic.
+	 *
+	 * @return The channel topic.
+	 */
 	String getTopic();
+
+	/**
+	 * Gets whether this channel is considered NSFW (Not Safe For Work).
+	 *
+	 * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
+	 */
 	boolean isNsfw();
 }

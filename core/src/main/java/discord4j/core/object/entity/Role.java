@@ -28,9 +28,38 @@ import java.awt.*;
  */
 public interface Role extends Deletable, Entity, Mentionable, Positionable<Role>, Renameable<Role> {
 
+	/**
+	 * Gets the color assigned to this role.
+	 *
+	 * @return The color assigned to this role.
+	 */
 	Color getColor();
+
+	/**
+	 * Gets whether if this role is pinned in the user listing.
+	 *
+	 * @return {@code true} if this role is pinned in the user listing, {@code false} otherwise.
+	 */
 	boolean isHoisted();
+
+	/**
+	 * Gets the permissions assigned to this role.
+	 *
+	 * @return The permissions assigned to this role.
+	 */
 	PermissionSet getPermissions();
+
+	/**
+	 * Gets whether this role is managed by an integration.
+	 *
+	 * @return {@code true} if this role is managed by an integration, {@code false} otherwise.
+	 */
 	boolean isManaged();
+
+	/**
+	 * Gets whether this role is mentionable.
+	 *
+	 * @return {@code true} if this role is mentionable, {@code false} otherwise.
+	 */
 	boolean isMentionable();
 }

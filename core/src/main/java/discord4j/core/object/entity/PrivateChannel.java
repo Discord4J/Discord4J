@@ -21,5 +21,10 @@ import java.util.Set;
 /** A Discord private channel (also known as a DM). */
 public interface PrivateChannel extends MessageChannel {
 
+	/**
+	 * Gets the recipients for this private channel.
+	 *
+	 * @return The recipients for this private channel.
+	 */
 	Set<User> getRecipients();
 }

@@ -63,7 +63,7 @@ public interface Member extends Renameable<Member>, User {
 	 * Requests to retrieve the user's guild roles.
 	 *
 	 * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
-	 * emitted through the {@code Mono}.
+	 * emitted through the {@code Flux}.
 	 */
 	Flux<Role> getRoles();
 
@@ -87,17 +87,6 @@ public interface Member extends Renameable<Member>, User {
 	 */
 	default String getNicknameMention() {
 		return "<@!" + getId().asString() + ">";
-	}
-
-	/**
-	 * Gets the formatted nickname mention. This is the format seen directly in Discord (assuming the user exists in
-	 * context of the mention). It should <i>not</i> be used to directly mention another user; use
-	 * {@link #getNicknameMention()} instead.
-	 *
-	 * @return The formatted nickname mention.
-	 */
-	default Optional<String> getFormattedNicknameMention() {
-		return getNickname().map(nickname -> "@" + nickname);
 	}
 
 	/**

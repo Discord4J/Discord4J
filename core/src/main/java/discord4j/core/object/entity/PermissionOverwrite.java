@@ -18,23 +18,56 @@ package discord4j.core.object.entity;
 
 import discord4j.core.object.PermissionSet;
 
+/** Explicit permission overwrite for various {@link Type types}. */
 public interface PermissionOverwrite extends Entity {
 
+	/**
+	 * Gets the type of entity this overwrite is for.
+	 *
+	 * @return The type of entity this overwrite is for.
+	 */
 	Type getType();
+
+	/**
+	 * Gets the permissions explicitly allowed for this overwrite.
+	 *
+	 * @return The permissions explicitly allowed for this overwrite.
+	 */
 	PermissionSet getAllowed();
+
+	/**
+	 * Gets the permissions explicitly denied for this overwrite.
+	 *
+	 * @return The permissions explicitly denied for this overwrite.
+	 */
 	PermissionSet getDenied();
 
+	/** The type of entity a {@link PermissionOverwrite} is explicitly for. */
 	enum Type {
 
+		/** The {@link Role} entity. */
 		ROLE("role"),
+
+		/** The {@link Member} entity. */
 		MEMBER("member");
 
+		/** The underlying value as represented by Discord. */
 		private final String value;
 
-		Type(String value) {
+		/**
+		 * Constructs a {@code PermissionOverwrite.Type}.
+		 *
+		 * @param value The underlying value as represented by Discord.
+		 */
+		Type(final String value) {
 			this.value = value;
 		}
 
+		/**
+		 * Gets the underlying value as represented by Discord.
+		 *
+		 * @return The underlying value as represented by Discord.
+		 */
 		public String getValue() {
 			return value;
 		}

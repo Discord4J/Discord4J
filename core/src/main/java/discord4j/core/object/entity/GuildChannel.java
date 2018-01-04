@@ -22,14 +22,46 @@ import discord4j.core.trait.Positionable;
 import discord4j.core.trait.Renameable;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel<T extends GuildChannel<T>> extends Channel, Deletable, Positionable<T>, Renameable<T> {
 
+	/**
+	 * Gets the ID of the guild this channel is associated to.
+	 *
+	 * @return The ID of the guild this channel is associated to.
+	 */
 	Snowflake getGuildId();
+
+	/**
+	 * Requests to retrieve the guild this channel is associated to.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this channel is associated to.
+	 * If an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<Guild> getGuild();
+
+	/**
+	 * Gets the permission overwrites for this channel.
+	 *
+	 * @return The permission overwrites for this channel.
+	 */
 	Set<PermissionOverwrite> getPermissionOverwrites();
-	Snowflake getParentId();
-	Category getParent();
+
+	/**
+	 * Gets the ID of the category for this channel, if present.
+	 *
+	 * @return The ID of the category for this channel, if present.
+	 */
+	Optional<Snowflake> getCategoryId();
+
+	/**
+	 * Requests to retrieve the category for this channel, if present.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Category} this channel, if present. If
+	 * an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<Category> getCategory();
 }

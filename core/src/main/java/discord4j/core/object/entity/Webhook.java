@@ -30,11 +30,54 @@ import java.util.Optional;
  */
 public interface Webhook extends Deletable, Entity, Renameable<Webhook> {
 
-	Snowflake getGuildId();
+	/**
+	 * Gets the ID of the guild this webhook is associated to, if present.
+	 *
+	 * @return The ID of the guild this webhook is associated to, if present.
+	 */
+	Optional<Snowflake> getGuildId();
+
+	/**
+	 * Requests to retrieve the guild this webhook is associated to.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this webhook is associated to,
+	 * if present. If an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<Guild> getGuild();
+
+	/**
+	 * Gets the ID of the channel this webhook is associated to.
+	 *
+	 * @return The ID of the channel this webhook is associated to.
+	 */
 	Snowflake getChannelId();
+
+	/**
+	 * Requests to retrieve the channel this webhook is associated to.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel} this webhook is
+	 * associated to. If an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<TextChannel> getChannel();
-	User getCreator();
+
+	/**
+	 * Gets the user this webhook was created by, if present.
+	 *
+	 * @return The user this webhook was created by, if present.
+	 */
+	Optional<User> getCreator();
+
+	/**
+	 * Gets the avatar of this webhook, if present.
+	 *
+	 * @return The avatar of this webhook, if present.
+	 */
 	Optional<String> getAvatar();
+
+	/**
+	 * Gets the secure token of this webhook.
+	 *
+	 * @return The secure token of this webhook.
+	 */
 	String getToken();
 }
