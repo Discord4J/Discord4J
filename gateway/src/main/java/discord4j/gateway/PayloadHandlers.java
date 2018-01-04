@@ -19,6 +19,7 @@ package discord4j.gateway;
 import discord4j.common.jackson.Possible;
 import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.common.json.payload.dispatch.Ready;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -29,6 +30,10 @@ public class PayloadHandlers {
 	private static final Logger log = Loggers.getLogger(PayloadHandlers.class);
 
 	public static void handleDispatch(PayloadContext<Dispatch> ctx) {
+		if (ctx.getData() instanceof Ready) {
+			String newSessionId = ((Ready) ctx.getData()).getSessionId();
+			ctx.getClient().sessionId.set(newSessionId);
+		}
 		ctx.getClient().dispatch.onNext(ctx.getData());
 	}
 
@@ -37,11 +42,18 @@ public class PayloadHandlers {
 	}
 
 	public static void handleReconnect(PayloadContext<?> ctx) {
-		// TODO
+		ctx.getHandler().error(new RuntimeException("Reconnecting due to reconnect packet received"));
 	}
 
 	public static void handleInvalidSession(PayloadContext<InvalidSession> ctx) {
-		// TODO
+		// TODO polish
+		if (ctx.getData().isResumable()) {
+			String token = ctx.getClient().token;
+			ctx.getHandler().outbound().onNext(GatewayPayload.resume(
+					new Resume(token, ctx.getClient().sessionId.get(), ctx.getClient().lastSequence.get())));
+		} else {
+			ctx.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
+		}
 	}
 
 	public static void handleHello(PayloadContext<Hello> ctx) {
@@ -59,7 +71,7 @@ public class PayloadHandlers {
 	}
 
 	public static void handleHeartbeatAck(PayloadContext<?> ctx) {
-		log.debug("Received heartbeat ack.");
+		log.debug("Received heartbeat ack");
 	}
 
 

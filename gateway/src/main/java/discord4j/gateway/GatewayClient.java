@@ -39,6 +39,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 public class GatewayClient {
@@ -64,6 +65,7 @@ public class GatewayClient {
 	final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
 	final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
 	final AtomicInteger lastSequence = new AtomicInteger(0);
+	final AtomicReference<String> sessionId = new AtomicReference<>("");
 	final ResettableInterval heartbeat = new ResettableInterval();
 	final String token;
 
