@@ -20,5 +20,5 @@ import discord4j.core.trait.Mentionable;
 import discord4j.core.trait.Nameable;
 
 /** A small digital image or icon used to express an idea, emotion, etc., in electronic communication. */
-public interface Emoji extends Mentionable, Nameable {
+public interface Emoji extends Mentionable, Identifiable<Integer> {
 }

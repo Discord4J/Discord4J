@@ -23,5 +23,5 @@ import discord4j.core.trait.Deletable;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
  */
-public interface Invite extends Deletable {
+public interface Invite extends Deletable, Identifiable<String> {
 }

@@ -14,12 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object;
 
-import discord4j.core.trait.Deletable;
-import discord4j.core.trait.Positionable;
-import discord4j.core.trait.Renameable;
+/** An uniquely identifiable object. */
+public interface Identifiable<T> {
 
-/** A customized emoji created by a {@link Guild}. */
-public interface GuildEmoji extends Deletable, Entity, Positionable<GuildEmoji>, Renameable<GuildEmoji> {
+	/**
+	 * Gets the ID that uniquely identifies this object.
+	 *
+	 * @return The ID that uniquely identifies this object.
+	 */
+	T getId();
 }

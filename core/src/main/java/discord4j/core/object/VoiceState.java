@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 /** Used to represent a user's voice connection status. */
-public interface VoiceState {
+public interface VoiceState extends Identifiable<String> {
 
 	/**
 	 * Gets the guild ID this voice state is for, if present.
@@ -70,13 +70,6 @@ public interface VoiceState {
 	 * error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<User> getUser();
-
-	/**
-	 * Gets the session ID for this voice state.
-	 *
-	 * @return The session ID for this voice state.
-	 */
-	String getSessionId();
 
 	/**
 	 * Gets whether this user is deafened by the server.
