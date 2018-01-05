@@ -34,4 +34,9 @@ public interface TextChannel extends GuildChannel<TextChannel>, Mentionable, Mes
 	 * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
 	 */
 	boolean isNsfw();
+
+	@Override
+	default String getMention() {
+		return "<#" + getId().asString() + ">";
+	}
 }

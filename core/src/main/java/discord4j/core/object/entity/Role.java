@@ -62,4 +62,9 @@ public interface Role extends Deletable, Entity, Mentionable, Positionable<Role>
 	 * @return {@code true} if this role is mentionable, {@code false} otherwise.
 	 */
 	boolean isMentionable();
+
+	@Override
+	default String getMention() {
+		return "<@&" + getId().asString() + ">";
+	}
 }
