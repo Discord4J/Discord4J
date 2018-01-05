@@ -14,31 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object;
+package discord4j.core.trait;
 
-/** The type of a presence. */
-public enum ActivityType {
+/** An uniquely identifiable object. */
+public interface Identifiable<T> {
 
-	/** Playing {@code {name}} */
-	PLAYING(0),
-
-	/** Streaming {@code {name}} */
-	STREAMING(1),
-
-	/** Listening to {@code {name}} */
-	LISTENING(2),
-
-	/** Watching {@code {name}} */
-	WATCHING(3);
-
-	private final int value;
-
-	ActivityType(int value) {
-
-		this.value = value;
-	}
-
-	public int getValue() {
-		return value;
-	}
+	/**
+	 * Gets the ID that uniquely identifies this object.
+	 *
+	 * @return The ID that uniquely identifies this object.
+	 */
+	T getId();
 }

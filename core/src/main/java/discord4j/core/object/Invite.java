@@ -17,6 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.trait.Deletable;
+import discord4j.core.trait.Identifiable;
 
 /**
  * A Discord invite.

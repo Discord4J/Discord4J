@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -26,60 +26,83 @@ import java.util.Optional;
 public interface Presence {
 
 	/**
-	 * Gets the ID of the user this presence is for.
+	 * Gets the ID of the user this presence is associated to.
 	 *
-	 * @return The ID of the user this presence is for.
+	 * @return The ID of the user this presence is associated to.
 	 */
 	Snowflake getUserId();
 
 	/**
-	 * Requests to retrieve the user this presence is for.
+	 * Requests to retrieve the user this presence is associated to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits a {@link Member} this presence is for. If an
-	 * error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link User} this presence is associated to.
+	 * If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<Member> getUser();
+	Mono<User> getUser();
 
 	/**
-	 * Gets the ID of the guild this presence is for.
+	 * Gets the activity for the user this presence is associated to, if present.
 	 *
-	 * @return The ID of the guild this presence is for.
+	 * @return The activity for the user this presence is associated to, if present.
 	 */
-	Snowflake getGuildId();
+	Optional<Activity> getActivity();
 
 	/**
-	 * Requests to retrieve the guild this presence is for.
+	 * Gets the ID of the guild this presence is associated to, if present.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits a {@link Guild} this presence is for. If an
-	 * error is received, it is emitted through the {@code Mono}.
+	 * @return The ID for the guild this presence is associated to, if present.
+	 */
+	Optional<Snowflake> getGuildId();
+
+	/**
+	 * Requests to retrieve the guild this presence is associated to, if present.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this presence is associated to,
+	 * if present. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Guild> getGuild();
 
 	/**
-	 * Gets the text for this presence, if possible.
+	 * Gets the status of this presence, if possible.
 	 *
-	 * @return The text for this presence, if possible.
+	 * @return The status of this presence, if possible.
 	 */
-	Optional<String> getText();
+	Optional<Status> getStatus();
 
-	/**
-	 * Gets the streaming URL for this presence, if possible.
-	 *
-	 * @return The streaming URL for this presence, if possible.
-	 */
-	Optional<String> getStreamingUrl();
+	/** The status of a presence, indicated by a tiny colored circle next to an user's profile picture. */
+	enum Status {
 
-	/**
-	 * Gets the activity for this presence, if possible.
-	 *
-	 * @return The activity for this presence, if possible.
-	 */
-	Optional<ActivityType> getActivityType();
+		/** A status of Idle. */
+		IDLE("idle"),
 
-	/**
-	 * Gets the status for this presence.
-	 *
-	 * @return The status for this presence.
-	 */
-	StatusType getStatusType();
+		/** A status of Do Not Disturb. */
+		DND("dnd"),
+
+		/** A status of Online. */
+		ONLINE("online"),
+
+		/** A status of Offline. */
+		OFFLINE("offline");
+
+		/** The underlying value as represented by Discord. */
+		private final String value;
+
+		/**
+		 * Constructs a {@code Presence.Status}.
+		 *
+		 * @param value The underlying value as represented by Discord.
+		 */
+		Status(final String value) {
+			this.value = value;
+		}
+
+		/**
+		 * Gets the underlying value as represented by Discord.
+		 *
+		 * @return The underlying value as represented by Discord.
+		 */
+		public String getValue() {
+			return value;
+		}
+	}
 }

@@ -16,6 +16,7 @@
  */
 package discord4j.core.object;
 
+import discord4j.core.trait.Identifiable;
 import discord4j.core.trait.Nameable;
 
 /** A Discord voice region. */

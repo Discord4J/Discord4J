@@ -19,6 +19,7 @@ package discord4j.core.object;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.trait.Identifiable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;

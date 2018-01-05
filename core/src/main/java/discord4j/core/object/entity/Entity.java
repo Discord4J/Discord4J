@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.object.Identifiable;
+import discord4j.core.trait.Identifiable;
 import discord4j.core.object.Snowflake;
 
 /** An uniquely identifiable object by {@link Snowflake}. */
