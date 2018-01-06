@@ -231,7 +231,7 @@ class DispatchHandler {
 			client.getDispatcher().waitFor((GuildCreateEvent e) -> {
 				waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getStringID()));
 				return loadedGuilds.incrementAndGet() >= ready.guilds.length;
-			}, (long) Math.ceil(Math.sqrt(ready.guilds.length)), TimeUnit.SECONDS);
+			}, (long) Math.ceil(Math.sqrt(2 * ready.guilds.length)), TimeUnit.SECONDS);
 
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(Long.parseUnsignedLong(guild.id))));
 			return true;
