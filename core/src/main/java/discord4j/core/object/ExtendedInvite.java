@@ -16,6 +16,53 @@
  */
 package discord4j.core.object;
 
+import discord4j.core.object.entity.User;
+
+import java.time.Instant;
+import java.util.Optional;
+
 /** A Discord invite with metadata. */
 public interface ExtendedInvite extends Invite {
+
+	/**
+	 * Gets the user who created the invite.
+	 *
+	 * @return The user who created the invite.
+	 */
+	User getUser();
+
+	/**
+	 * Gets the number of times this invite has been used.
+	 *
+	 * @return The number of times this invite has been used.
+	 */
+	int getUses();
+
+	/**
+	 * Gets the max number of times this invite can be used.
+	 *
+	 * @return The max number of times this invite can be used.
+	 */
+	int getMaxUses();
+
+	/**
+	 * Gets the instant this invite expires, if possible.
+	 *
+	 * @return The instant this invite expires, if possible.
+	 */
+	Optional<Instant> getExpiration();
+
+	/**
+	 * Gets when this invite was created.
+	 *
+	 * @return When this invite was created.
+	 */
+	Instant getCreation();
+
+	/**
+	 * Gets whether this invite is revoked.
+	 *
+	 * @return {@code true} if this invite was revoked, {@code false} otherwise.
+	 */
+	boolean isRevoked();
 }
