@@ -19,7 +19,7 @@ package discord4j.core.object.entity;
 import reactor.core.publisher.Flux;
 
 /** A Discord category. */
-public interface Category extends GuildChannel<Category> {
+public interface Category extends GuildChannel {
 
 	/**
 	 * Requests to retrieve the channels residing in this category.
@@ -27,5 +27,5 @@ public interface Category extends GuildChannel<Category> {
 	 * @return A {@link Flux} that continually emits the {@link GuildChannel channels} residing in this category. If an
 	 * error is received , it is emitted through the {@code Flux}.
 	 */
-	Flux<GuildChannel<?>> getChannels();
+	Flux<GuildChannel> getChannels();
 }

@@ -21,7 +21,6 @@ import discord4j.core.object.Region;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
 import discord4j.core.trait.Deletable;
-import discord4j.core.trait.Renameable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,7 +33,7 @@ import java.util.Set;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
  */
-public interface Guild extends Deletable, Entity, Renameable<Guild> {
+public interface Guild extends Deletable, Entity {
 
 	String getIconHash();
 	String getSplashHash();
@@ -47,7 +46,7 @@ public interface Guild extends Deletable, Entity, Renameable<Guild> {
 	int getAfkTimeout();
 	boolean isEmbedEnabled();
 	Optional<Snowflake> getEmbedChannelId();
-	Mono<GuildChannel<?>> getEmbedChannel();
+	Mono<GuildChannel> getEmbedChannel();
 	VerificationLevel getVerificationLevel();
 	NotificationLevel getNotificationLevel();
 	ContentFilterLevel getContentFilterLevel();
@@ -58,7 +57,7 @@ public interface Guild extends Deletable, Entity, Renameable<Guild> {
 	Optional<Snowflake> getApplicationId();
 	boolean isWidgetEnabled();
 	Optional<Snowflake> getWidgetChannelId();
-	Mono<GuildChannel<?>> getWidgetChannel();
+	Mono<GuildChannel> getWidgetChannel();
 	Optional<Snowflake> getSystemChannelId();
 	Mono<TextChannel> getSystemChannel();
 
@@ -73,7 +72,7 @@ public interface Guild extends Deletable, Entity, Renameable<Guild> {
 	Mono<Integer> getMemberCount();
 	Flux<VoiceState> getVoiceStates();
 	Flux<Member> getMembers();
-	Flux<GuildChannel<?>> getChannels();
+	Flux<GuildChannel> getChannels();
 	Flux<Presence> getPresences();
 
 	/** Automatically scan and delete messages sent in the server that contain explicit content. */

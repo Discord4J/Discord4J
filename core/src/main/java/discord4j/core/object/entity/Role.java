@@ -26,7 +26,7 @@ import java.awt.*;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
-public interface Role extends Deletable, Entity, Mentionable, Positionable<Role>, Renameable<Role> {
+public interface Role extends Deletable, Entity, Mentionable, Positionable {
 
 	/**
 	 * Gets the color assigned to this role.

@@ -18,7 +18,6 @@ package discord4j.core.object.entity;
 
 import discord4j.core.object.Snowflake;
 import discord4j.core.trait.Deletable;
-import discord4j.core.trait.Renameable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -28,7 +27,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/webhook">Webhook Resource</a>
  */
-public interface Webhook extends Deletable, Entity, Renameable<Webhook> {
+public interface Webhook extends Deletable, Entity {
 
 	/**
 	 * Gets the ID of the guild this webhook is associated to, if present.

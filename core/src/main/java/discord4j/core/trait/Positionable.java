@@ -16,10 +16,8 @@
  */
 package discord4j.core.trait;
 
-import reactor.core.publisher.Mono;
-
 /** A Discord object that has some relative position in respect to another object. */
-public interface Positionable<T extends Positionable<T>> {
+public interface Positionable {
 
 	/**
 	 * Gets the position of this object.
@@ -27,13 +25,4 @@ public interface Positionable<T extends Positionable<T>> {
 	 * @return The position of this object.
 	 */
 	int getPosition();
-
-	/**
-	 * Requests for this object to be repositioned.
-	 *
-	 * @param position The new position for this object.
-	 * @return A {@link Mono} where, upon successful completion, emits a <i>new</i> instance of itself; indicating the
-	 * object was repositioned. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	Mono<T> changePosition(int position);
 }

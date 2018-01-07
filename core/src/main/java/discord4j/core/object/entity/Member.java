@@ -18,7 +18,6 @@ package discord4j.core.object.entity;
 
 import discord4j.core.object.Presence;
 import discord4j.core.object.VoiceState;
-import discord4j.core.trait.Renameable;
 import discord4j.core.object.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /** A Discord user associated to a {@link Guild}. */
-public interface Member extends Renameable<Member>, User {
+public interface Member extends User {
 
 	/**
 	 * Gets the ID of the guild this user is associated to.

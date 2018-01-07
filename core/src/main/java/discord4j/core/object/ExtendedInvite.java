@@ -29,7 +29,7 @@ public interface ExtendedInvite extends Invite {
 	 *
 	 * @return The user who created the invite.
 	 */
-	User getUser();
+	User getInviter();
 
 	/**
 	 * Gets the number of times this invite has been used.
