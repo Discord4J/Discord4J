@@ -18,42 +18,39 @@ package discord4j.store.base.primitive;
 
 import discord4j.store.primitive.LongObjDataConnection;
 import discord4j.store.util.LongObjTuple2;
-import discord4j.store.util.MappingIterable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
 
     @Override
-    public Mono<Optional<V>> storeWithLong(long key, V value) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> storeWithLong(long key, V value) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> storeWithLong(Mono<LongObjTuple2<V>> entry) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
-        return Flux.fromIterable(new MappingIterable<>(it -> Optional.empty(), entries));
+    public Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> storeWithLong(Flux<LongObjTuple2<V>> entryStream) {
-        return Flux.from(entryStream).map(it -> Optional.empty());
+    public Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> find(long id) {
-        return Mono.just(Optional.empty());
+    public Mono<V> find(long id) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> find(Mono<Long> id) {
-        return Mono.just(Optional.empty());
+    public Mono<V> find(Mono<Long> id) {
+        return Mono.empty();
     }
 
     @Override
@@ -67,8 +64,8 @@ public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
-    public Flux<Boolean> exists(Flux<Long> ids) {
-        return Flux.from(ids).map(it -> false);
+    public Mono<Boolean> exists(Flux<Long> ids) {
+        return Mono.just(false);
     }
 
     @Override
@@ -77,13 +74,13 @@ public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Iterable<Long> ids) {
-        return Flux.fromIterable(new MappingIterable<>(it -> Optional.empty(), ids));
+    public Flux<V> findAll(Iterable<Long> ids) {
+        return Flux.empty();
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Flux<Long> ids) {
-        return Flux.from(ids).map(it -> Optional.empty());
+    public Flux<V> findAll(Flux<Long> ids) {
+        return Flux.empty();
     }
 
     @Override
@@ -92,23 +89,23 @@ public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
-    public Mono<Optional<V>> delete(long id) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> delete(long id) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> delete(Mono<Long> id) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> delete(Mono<Long> id) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> delete(Flux<Long> ids) {
-        return Flux.from(ids).map(it -> Optional.empty());
+    public Mono<Void> delete(Flux<Long> ids) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<V> deleteAll() {
-        return Flux.empty();
+    public Mono<Void> deleteAll() {
+        return Mono.empty();
     }
 
     @Override
@@ -132,17 +129,17 @@ public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
-    public Mono<Optional<V>> delete(LongObjTuple2<V> entry) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> delete(LongObjTuple2<V> entry) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
-        return Flux.fromIterable(new MappingIterable<>(it -> Optional.empty(), entries));
+    public Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries) {
-        return Flux.from(entries).map(it -> Optional.empty());
+    public Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries) {
+        return Mono.empty();
     }
 }

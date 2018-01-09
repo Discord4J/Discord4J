@@ -1,5 +1,5 @@
 dependencies {
-    compile "io.projectreactor.ipc:reactor:$reactor_version"
+    compile "io.projectreactor:reactor-core:$reactor_version"
     compile "org.slf4j:slf4j-api:$slf4j_version"
     compile "com.google.code.findbugs:jsr305:$jsr305_version"
 

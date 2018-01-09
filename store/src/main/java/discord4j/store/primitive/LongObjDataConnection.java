@@ -39,42 +39,42 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
     }
 
     @Override
-    default Mono<Optional<V>> store(Long key, V value) {
+    default Mono<Void> store(Long key, V value) {
         return storeWithLong(key, value);
     }
 
-    Mono<Optional<V>> storeWithLong(long key, V value);
+    Mono<Void> storeWithLong(long key, V value);
 
     @Override
-    default Mono<Optional<V>> store(Mono<Tuple2<Long, V>> entry) {
+    default Mono<Void> store(Mono<Tuple2<Long, V>> entry) {
         return storeWithLong(entry.map(LongObjTuple2::from));
     }
 
-    Mono<Optional<V>> storeWithLong(Mono<LongObjTuple2<V>> entry);
+    Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry);
 
     @Override
-    default Flux<Optional<V>> store(Iterable<Tuple2<Long, V>> entries) {
+    default Mono<Void> store(Iterable<Tuple2<Long, V>> entries) {
         return storeWithLong(new MappingIterable<>(LongObjTuple2::from, entries));
     }
 
-    Flux<Optional<V>> storeWithLong(Iterable<LongObjTuple2<V>> entries);
+    Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries);
 
     @Override
-    default Flux<Optional<V>> store(Flux<Tuple2<Long, V>> entryStream) {
+    default Mono<Void> store(Flux<Tuple2<Long, V>> entryStream) {
         return storeWithLong(entryStream.map(LongObjTuple2::from));
     }
 
-    Flux<Optional<V>> storeWithLong(Flux<LongObjTuple2<V>> entryStream);
+    Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream);
 
     @Override
-    default Mono<Optional<V>> find(Long id) {
-        return find(id);
+    default Mono<V> find(Long id) {
+        return find((long) id);
     }
 
-    Mono<Optional<V>> find(long id);
+    Mono<V> find(long id);
 
     @Override
-    Mono<Optional<V>> find(Mono<Long> id); //No way around this q.q
+    Mono<V> find(Mono<Long> id); //No way around this q.q
 
     @Override
     default Mono<Boolean> exists(Long id) {
@@ -87,47 +87,47 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
     Mono<Boolean> exists(Mono<Long> id); //No way around this q.q
 
     @Override
-    Flux<Boolean> exists(Flux<Long> ids); //No way around this q.q
+    Mono<Boolean> exists(Flux<Long> ids); //No way around this q.q
 
     @Override
-    Flux<Optional<V>> findAll(Iterable<Long> ids); //No way around this q.q
+    Flux<V> findAll(Iterable<Long> ids); //No way around this q.q
 
     @Override
-    Flux<Optional<V>> findAll(Flux<Long> ids); //No way around this q.q
+    Flux<V> findAll(Flux<Long> ids); //No way around this q.q
 
     @Override
-    default Mono<Optional<V>> delete(Long id) {
+    default Mono<Void> delete(Long id) {
         return delete((long) id);
     }
 
-    Mono<Optional<V>> delete(long id);
+    Mono<Void> delete(long id);
 
     @Override
-    Mono<Optional<V>> delete(Mono<Long> id); //No way around this q.q
+    Mono<Void> delete(Mono<Long> id); //No way around this q.q
 
     @Override
-    Flux<Optional<V>> delete(Flux<Long> ids); //No way around this q.q
+    Mono<Void> delete(Flux<Long> ids); //No way around this q.q
 
     @Override
-    default Mono<Optional<V>> delete(Tuple2<Long, V> entry) {
+    default Mono<Void> delete(Tuple2<Long, V> entry) {
         return delete(LongObjTuple2.from(entry));
     }
 
-    Mono<Optional<V>> delete(LongObjTuple2<V> entry);
+    Mono<Void> delete(LongObjTuple2<V> entry);
 
     @Override
-    default Flux<Optional<V>> deleteAll(Iterable<Tuple2<Long, V>> entries) {
+    default Mono<Void> deleteAll(Iterable<Tuple2<Long, V>> entries) {
         return deleteAllWithLongs(new MappingIterable<>(LongObjTuple2::from, entries));
     }
 
-    Flux<Optional<V>> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries);
+    Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries);
 
     @Override
-    default Flux<Optional<V>> deleteAll(Flux<Tuple2<Long, V>> entries) {
+    default Mono<Void> deleteAll(Flux<Tuple2<Long, V>> entries) {
         return deleteAllWithLongs(entries.map(LongObjTuple2::from));
     }
 
-    Flux<Optional<V>> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries);
+    Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries);
 
     @Override
     default Flux<Tuple2<Long, V>> entries() {

@@ -48,48 +48,48 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
     }
 
     @Override
-    public Mono<Optional<V>> storeWithLong(long key, V value) {
+    public Mono<Void> storeWithLong(long key, V value) {
         return connection.storeWithLong(key, value);
     }
 
-    public Mono<Optional<V>> storeValue(V value) {
+    public Mono<Void> storeValue(V value) {
         return connection.storeWithLong(idMapper.applyAsLong(value), value);
     }
 
     @Override
-    public Mono<Optional<V>> storeWithLong(Mono<LongObjTuple2<V>> entry) {
+    public Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry) {
         return connection.storeWithLong(entry);
     }
 
-    public Mono<Optional<V>> storeValue(Mono<V> entry) {
+    public Mono<Void> storeValue(Mono<V> entry) {
         return connection.storeWithLong(entry.map(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it)));
     }
 
     @Override
-    public Flux<Optional<V>> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
+    public Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
         return connection.storeWithLong(entries);
     }
 
-    public Flux<Optional<V>> storeValues(Iterable<V> entries) {
+    public Mono<Void> storeValues(Iterable<V> entries) {
         return connection.storeWithLong(new MappingIterable<>(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it), entries));
     }
 
     @Override
-    public Flux<Optional<V>> storeWithLong(Flux<LongObjTuple2<V>> entryStream) {
+    public Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream) {
         return connection.storeWithLong(entryStream);
     }
 
-    public Flux<Optional<V>> storeValues(Flux<V> entryStream) {
+    public Mono<Void> storeValues(Flux<V> entryStream) {
         return connection.storeWithLong(entryStream.map(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it)));
     }
 
     @Override
-    public Mono<Optional<V>> find(long id) {
+    public Mono<V> find(long id) {
         return connection.find(id);
     }
 
     @Override
-    public Mono<Optional<V>> find(Mono<Long> id) {
+    public Mono<V> find(Mono<Long> id) {
         return connection.find(id);
     }
 
@@ -104,59 +104,59 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
     }
 
     @Override
-    public Flux<Boolean> exists(Flux<Long> ids) {
+    public Mono<Boolean> exists(Flux<Long> ids) {
         return connection.exists(ids);
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Iterable<Long> ids) {
+    public Flux<V> findAll(Iterable<Long> ids) {
         return connection.findAll(ids);
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Flux<Long> ids) {
+    public Flux<V> findAll(Flux<Long> ids) {
         return connection.findAll(ids);
     }
 
     @Override
-    public Mono<Optional<V>> delete(long id) {
+    public Mono<Void> delete(long id) {
         return connection.delete(id);
     }
 
     @Override
-    public Mono<Optional<V>> delete(Mono<Long> id) {
+    public Mono<Void> delete(Mono<Long> id) {
         return connection.delete(id);
     }
 
     @Override
-    public Flux<Optional<V>> delete(Flux<Long> ids) {
+    public Mono<Void> delete(Flux<Long> ids) {
         return connection.delete(ids);
     }
 
     @Override
-    public Mono<Optional<V>> delete(LongObjTuple2<V> entry) {
+    public Mono<Void> delete(LongObjTuple2<V> entry) {
         return connection.delete(entry);
     }
 
-    public Mono<Optional<V>> deleteValue(V entry) {
+    public Mono<Void> deleteValue(V entry) {
         return connection.delete(LongObjTuple2.of(idMapper.applyAsLong(entry), entry));
     }
 
     @Override
-    public Flux<Optional<V>> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
+    public Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
         return connection.deleteAllWithLongs(entries);
     }
 
-    public Flux<Optional<V>> deleteAllValues(Iterable<V> entries) {
+    public Mono<Void> deleteAllValues(Iterable<V> entries) {
         return connection.deleteAllWithLongs(new MappingIterable<>(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it), entries));
     }
 
     @Override
-    public Flux<Optional<V>> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries) {
+    public Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries) {
         return connection.deleteAllWithLongs(entries);
     }
 
-    public Flux<Optional<V>> deleteAllValues(Flux<V> entries) {
+    public Mono<Void> deleteAllValues(Flux<V> entries) {
         return connection.deleteAllWithLongs(entries.map(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it)));
     }
 
@@ -171,7 +171,7 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
     }
 
     @Override
-    public Flux<V> deleteAll() {
+    public Mono<Void> deleteAll() {
         return connection.deleteAll();
     }
 

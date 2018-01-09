@@ -29,45 +29,45 @@ public interface DataConnection<K, V> extends AutoCloseable {
         return new MappedDataConnection<>(this, idMapper);
     }
 
-    Mono<Optional<V>> store(K key, V value);
+    Mono<Void> store(K key, V value);
 
-    Mono<Optional<V>> store(Mono<Tuple2<K, V>> entry);
+    Mono<Void> store(Mono<Tuple2<K, V>> entry);
 
-    Flux<Optional<V>> store(Iterable<Tuple2<K, V>> entries);
+    Mono<Void> store(Iterable<Tuple2<K, V>> entries);
 
-    Flux<Optional<V>> store(Flux<Tuple2<K, V>> entryStream);
+    Mono<Void> store(Flux<Tuple2<K, V>> entryStream);
 
-    Mono<Optional<V>> find(K id);
+    Mono<V> find(K id);
 
-    Mono<Optional<V>> find(Mono<K> id);
+    Mono<V> find(Mono<K> id);
 
     Mono<Boolean> exists(K id);
 
     Mono<Boolean> exists(Mono<K> id);
 
-    Flux<Boolean> exists(Flux<K> ids);
+    Mono<Boolean> exists(Flux<K> ids);
 
     Flux<V> findAll();
 
-    Flux<Optional<V>> findAll(Iterable<K> ids);
+    Flux<V> findAll(Iterable<K> ids);
 
-    Flux<Optional<V>> findAll(Flux<K> ids);
+    Flux<V> findAll(Flux<K> ids);
 
     Mono<Long> count();
 
-    Mono<Optional<V>> delete(K id);
+    Mono<Void> delete(K id);
 
-    Mono<Optional<V>> delete(Mono<K> id);
+    Mono<Void> delete(Mono<K> id);
 
-    Flux<Optional<V>> delete(Flux<K> ids);
+    Mono<Void> delete(Flux<K> ids);
 
-    Mono<Optional<V>> delete(Tuple2<K, V> entry);
+    Mono<Void> delete(Tuple2<K, V> entry);
 
-    Flux<Optional<V>> deleteAll(Iterable<Tuple2<K, V>> entries);
+    Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries);
 
-    Flux<Optional<V>> deleteAll(Flux<Tuple2<K, V>> entries);
+    Mono<Void> deleteAll(Flux<Tuple2<K, V>> entries);
 
-    Flux<V> deleteAll();
+    Mono<Void> deleteAll();
 
     Flux<K> keys();
 

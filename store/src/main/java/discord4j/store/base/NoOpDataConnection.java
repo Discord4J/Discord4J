@@ -27,33 +27,33 @@ import java.util.Optional;
 public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
 
     @Override
-    public Mono<Optional<V>> store(K key, V value) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> store(K key, V value) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> store(Mono<Tuple2<K, V>> entry) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> store(Mono<Tuple2<K, V>> entry) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> store(Iterable<Tuple2<K, V>> entries) {
-        return Flux.fromIterable(new MappingIterable<>(it -> Optional.empty(), entries));
+    public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> store(Flux<Tuple2<K, V>> entryStream) {
-        return Flux.from(entryStream).map(it -> Optional.empty());
+    public Mono<Void> store(Flux<Tuple2<K, V>> entryStream) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> find(K id) {
-        return Mono.just(Optional.empty());
+    public Mono<V> find(K id) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> find(Mono<K> id) {
-        return Mono.just(Optional.empty());
+    public Mono<V> find(Mono<K> id) {
+        return Mono.empty();
     }
 
     @Override
@@ -67,8 +67,8 @@ public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
-    public Flux<Boolean> exists(Flux<K> ids) {
-        return Flux.from(ids).map(it -> false);
+    public Mono<Boolean> exists(Flux<K> ids) {
+        return Mono.just(false);
     }
 
     @Override
@@ -77,13 +77,13 @@ public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Iterable<K> ids) {
-        return Flux.fromIterable(new MappingIterable<>(it -> Optional.empty(), ids));
+    public Flux<V> findAll(Iterable<K> ids) {
+        return Flux.empty();
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Flux<K> ids) {
-        return Flux.from(ids).map(it -> Optional.empty());
+    public Flux<V> findAll(Flux<K> ids) {
+        return Flux.empty();
     }
 
     @Override
@@ -92,38 +92,38 @@ public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
-    public Mono<Optional<V>> delete(K id) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> delete(K id) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> delete(Mono<K> id) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> delete(Mono<K> id) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> delete(Flux<K> ids) {
-        return Flux.from(ids).map(it -> Optional.empty());
+    public Mono<Void> delete(Flux<K> ids) {
+        return Mono.empty();
     }
 
     @Override
-    public Mono<Optional<V>> delete(Tuple2<K, V> entry) {
-        return Mono.just(Optional.empty());
+    public Mono<Void> delete(Tuple2<K, V> entry) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> deleteAll(Iterable<Tuple2<K, V>> entries) {
-        return Flux.fromIterable(new MappingIterable<>(it -> Optional.empty(), entries));
+    public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<Optional<V>> deleteAll(Flux<Tuple2<K, V>> entries) {
-        return Flux.from(entries).map(it -> Optional.empty());
+    public Mono<Void> deleteAll(Flux<Tuple2<K, V>> entries) {
+        return Mono.empty();
     }
 
     @Override
-    public Flux<V> deleteAll() {
-        return Flux.empty();
+    public Mono<Void> deleteAll() {
+        return Mono.empty();
     }
 
     @Override

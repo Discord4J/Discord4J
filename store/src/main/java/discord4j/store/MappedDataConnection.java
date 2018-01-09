@@ -41,48 +41,48 @@ public class MappedDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
-    public Mono<Optional<V>> store(K key, V value) {
+    public Mono<Void> store(K key, V value) {
         return connection.store(key, value);
     }
 
-    public Mono<Optional<V>> storeValue(V value) {
+    public Mono<Void> storeValue(V value) {
         return connection.store(idMapper.apply(value), value);
     }
 
     @Override
-    public Mono<Optional<V>> store(Mono<Tuple2<K, V>> entry) {
+    public Mono<Void> store(Mono<Tuple2<K, V>> entry) {
         return connection.store(entry);
     }
 
-    public Mono<Optional<V>> storeValue(Mono<V> entry) {
+    public Mono<Void> storeValue(Mono<V> entry) {
         return connection.store(entry.map(it -> Tuples.of(idMapper.apply(it), it)));
     }
 
     @Override
-    public Flux<Optional<V>> store(Iterable<Tuple2<K, V>> entries) {
+    public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
         return connection.store(entries);
     }
 
-    public Flux<Optional<V>> storeValues(Iterable<V> entries) {
+    public Mono<Void> storeValues(Iterable<V> entries) {
         return connection.store(new MappingIterable<>(it -> Tuples.of(idMapper.apply(it), it), entries));
     }
 
     @Override
-    public Flux<Optional<V>> store(Flux<Tuple2<K, V>> entryStream) {
+    public Mono<Void> store(Flux<Tuple2<K, V>> entryStream) {
         return connection.store(entryStream);
     }
 
-    public Flux<Optional<V>> storeValues(Flux<V> entryStream) {
+    public Mono<Void> storeValues(Flux<V> entryStream) {
         return connection.store(entryStream.map(it -> Tuples.of(idMapper.apply(it), it)));
     }
 
     @Override
-    public Mono<Optional<V>> find(K id) {
+    public Mono<V> find(K id) {
         return connection.find(id);
     }
 
     @Override
-    public Mono<Optional<V>> find(Mono<K> id) {
+    public Mono<V> find(Mono<K> id) {
         return connection.find(id);
     }
 
@@ -97,7 +97,7 @@ public class MappedDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
-    public Flux<Boolean> exists(Flux<K> ids) {
+    public Mono<Boolean> exists(Flux<K> ids) {
         return connection.exists(ids);
     }
 
@@ -107,12 +107,12 @@ public class MappedDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Iterable<K> ids) {
+    public Flux<V> findAll(Iterable<K> ids) {
         return connection.findAll(ids);
     }
 
     @Override
-    public Flux<Optional<V>> findAll(Flux<K> ids) {
+    public Flux<V> findAll(Flux<K> ids) {
         return connection.findAll(ids);
     }
 
@@ -122,49 +122,49 @@ public class MappedDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
-    public Mono<Optional<V>> delete(K id) {
+    public Mono<Void> delete(K id) {
         return connection.delete(id);
     }
 
     @Override
-    public Mono<Optional<V>> delete(Mono<K> id) {
+    public Mono<Void> delete(Mono<K> id) {
         return connection.delete(id);
     }
 
     @Override
-    public Flux<Optional<V>> delete(Flux<K> ids) {
+    public Mono<Void> delete(Flux<K> ids) {
         return connection.delete(ids);
     }
 
     @Override
-    public Mono<Optional<V>> delete(Tuple2<K, V> entry) {
+    public Mono<Void> delete(Tuple2<K, V> entry) {
         return connection.delete(entry);
     }
 
-    public Mono<Optional<V>> deleteValue(V entry) {
+    public Mono<Void> deleteValue(V entry) {
         return connection.delete(Tuples.of(idMapper.apply(entry), entry));
     }
 
     @Override
-    public Flux<Optional<V>> deleteAll(Iterable<Tuple2<K, V>> entries) {
+    public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
         return connection.deleteAll(entries);
     }
 
-    public Flux<Optional<V>> deleteAllValues(Iterable<V> entries) {
+    public Mono<Void> deleteAllValues(Iterable<V> entries) {
         return connection.deleteAll(new MappingIterable<>(it -> Tuples.of(idMapper.apply(it), it), entries));
     }
 
     @Override
-    public Flux<Optional<V>> deleteAll(Flux<Tuple2<K, V>> entries) {
+    public Mono<Void> deleteAll(Flux<Tuple2<K, V>> entries) {
         return connection.deleteAll(entries);
     }
 
-    public Flux<Optional<V>> deleteAllValues(Flux<V> entries) {
+    public Mono<Void> deleteAllValues(Flux<V> entries) {
         return connection.deleteAll(entries.map(it -> Tuples.of(idMapper.apply(it), it)));
     }
 
     @Override
-    public Flux<V> deleteAll() {
+    public Mono<Void> deleteAll() {
         return connection.deleteAll();
     }
 
