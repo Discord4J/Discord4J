@@ -122,7 +122,7 @@ public final class DiscordEndpoints {
 	/**
 	 * Formatted string for getting emoji images.
 	 */
-	public static final String EMOJI_IMAGE = "https://cdn.discordapp.com/emojis/%s.png";
+	public static final String EMOJI_IMAGE = "https://cdn.discordapp.com/emojis/%s";
 
 	/**
 	 * The reactions list url for a message. Replacements in order: channel ID, message ID

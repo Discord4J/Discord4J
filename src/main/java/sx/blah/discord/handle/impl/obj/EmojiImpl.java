@@ -116,7 +116,7 @@ public class EmojiImpl implements IEmoji {
 
 	@Override
 	public String getImageUrl() {
-		return String.format(DiscordEndpoints.EMOJI_IMAGE, getStringID());
+		return String.format(DiscordEndpoints.EMOJI_IMAGE + (isAnimated ? ".gif" : ".png"), getStringID());
 	}
 
 	@Override
