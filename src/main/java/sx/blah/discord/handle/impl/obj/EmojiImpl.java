@@ -65,17 +65,23 @@ public class EmojiImpl implements IEmoji {
 	 */
 	private final boolean isManaged;
 
-	public EmojiImpl(long id, IGuild guild, String name, boolean requiresColons, boolean isManaged) {
-		this(id, guild, name, new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class), requiresColons, isManaged);
+	/**
+	 * Whether the emoji is animated.
+	 */
+	private final boolean isAnimated;
+
+	public EmojiImpl(long id, IGuild guild, String name, boolean requiresColons, boolean isManaged, boolean isAnimated) {
+		this(id, guild, name, new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class), requiresColons, isManaged, isAnimated);
 	}
 
-	public EmojiImpl(long id, IGuild guild, String name, Cache<IRole> roles, boolean requiresColons, boolean isManaged) {
+	public EmojiImpl(long id, IGuild guild, String name, Cache<IRole> roles, boolean requiresColons, boolean isManaged, boolean isAnimated) {
 		this.id = id;
 		this.guild = guild;
 		this.name = name;
 		this.roles = roles;
 		this.requiresColons = requiresColons;
 		this.isManaged = isManaged;
+		this.isAnimated = isAnimated;
 	}
 
 	@Override
@@ -181,13 +187,18 @@ public class EmojiImpl implements IEmoji {
 	}
 
 	@Override
+	public boolean isAnimated() {
+		return isAnimated;
+	}
+
+	@Override
 	public IEmoji copy() {
-		return new EmojiImpl(id, guild, name, roles, requiresColons, isManaged);
+		return new EmojiImpl(id, guild, name, roles, requiresColons, isManaged, isAnimated);
 	}
 
 	@Override
 	public String toString() {
-		return "<:" + getName() + ":" + getStringID() + ">";
+		return "<" + (isAnimated ? "a" : "") + ":" + getName() + ":" + getStringID() + ">";
 	}
 
 	@Override

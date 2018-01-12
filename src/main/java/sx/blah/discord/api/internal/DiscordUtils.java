@@ -707,7 +707,7 @@ public class DiscordUtils {
 
 		Cache<IRole> roleCache = new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class);
 		roleCache.putAll(roles);
-		return new EmojiImpl(id, guild, json.name, roleCache, json.require_colons, json.managed);
+		return new EmojiImpl(id, guild, json.name, roleCache, json.require_colons, json.managed, json.animated);
 	}
 
 	/**
