@@ -57,6 +57,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
@@ -717,7 +718,7 @@ public class DiscordUtils {
 	 * @return The converted reaction objects.
 	 */
 	public static List<IReaction> getReactionsFromJSON(IMessage message, MessageObject.ReactionObject[] json) {
-		List<IReaction> reactions = new ArrayList<>();
+		List<IReaction> reactions = new CopyOnWriteArrayList<>();
 		if (json != null)
 			for (MessageObject.ReactionObject object : json) {
 				long id = object.emoji.id == null ? 0 : Long.parseUnsignedLong(object.emoji.id);

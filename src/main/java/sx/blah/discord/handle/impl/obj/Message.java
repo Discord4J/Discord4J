@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -180,7 +181,7 @@ public class Message implements IMessage {
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
 				   List<Embed> embeds, long webhookID, Type type) {
 		this(client, id, content, user, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, roleMentions,
-				attachments, pinned, embeds, new ArrayList<>(), webhookID, type);
+				attachments, pinned, embeds, new CopyOnWriteArrayList<>(), webhookID, type);
 	}
 
 	@Override
@@ -529,7 +530,8 @@ public class Message implements IMessage {
 
 	@Override
 	public void addReaction(ReactionEmoji reactionEmoji) {
-		if (getReactionByEmoji(reactionEmoji) == null) { // only need perms when adding a new emoji
+		Reaction reaction = (Reaction) getReactionByEmoji(reactionEmoji);
+		if (reaction == null) { // only need perms when adding a new emoji
 			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.ADD_REACTIONS);
 		}
 
@@ -541,6 +543,12 @@ public class Message implements IMessage {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getStringID(), getStringID(),
 							URLEncoder.encode(emoji, "UTF-8"), "@me"));
+
+			if (reaction == null) {
+				reactions.add(new Reaction(this, 1, reactionEmoji));
+			} else {
+				reaction.setCount(reaction.getCount()+1);
+			}
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -566,11 +574,17 @@ public class Message implements IMessage {
 		String emoji = reactionEmoji.isUnicode()
 				? reactionEmoji.getName()
 				: reactionEmoji.getName() + ":" + reactionEmoji.getStringID();
-		removeReaction(user, emoji);
+		removeReaction(user, emoji, (Reaction) getReactionByEmoji(reactionEmoji));
 	}
 
 	@Override
 	public void removeReaction(IUser user, String emoji) {
+		Reaction reaction = (Reaction) getReactions().stream().filter(it -> it.getUserReacted(user)
+				&& it.getEmoji().toString().contains(emoji)).findFirst().orElse(null);
+		removeReaction(user, emoji, reaction);
+	}
+
+	private void removeReaction(IUser user, String emoji, Reaction reaction) {
 		if (!user.equals(client.getOurUser())) { // no perms for deleting our own reaction
 			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
 		}
@@ -579,6 +593,12 @@ public class Message implements IMessage {
 			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getStringID(), getStringID(),
 							URLEncoder.encode(emoji, "UTF-8"), user.getStringID()));
+
+			if (reaction != null) {
+				reaction.setCount(reaction.getCount()-1);
+				if (reaction.getCount() <= 0)
+					reactions.remove(reaction);
+			}
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -590,6 +610,8 @@ public class Message implements IMessage {
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
 				String.format(DiscordEndpoints.REACTIONS, getChannel().getStringID(), getStringID()));
+
+		reactions.clear();
 	}
 
 	@Override
