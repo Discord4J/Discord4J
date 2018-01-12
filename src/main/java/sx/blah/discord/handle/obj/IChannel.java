@@ -234,6 +234,16 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	int getInternalCacheCount();
 
 	/**
+	 * Gets a message by its unique snowflake ID from the channels's message cache.
+	 *
+	 * @param messageID The ID of the desired message.
+	 * @return The message with the provided ID (or null if one was not found).
+	 *
+	 * @see #fetchMessage(long)
+	 */
+	IMessage getMessageByID(long messageID);
+
+	/**
 	 * Gets a message by its unique snowflake ID from the channels's message cache <b>or</b> by fetching it from Discord.
 	 *
 	 * <p>Discord allows fetching individual messages in a channel. This method first checks the channel's message cache
@@ -241,8 +251,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @param messageID The ID of the desired message.
 	 * @return The message with the provided ID (or null if one was not found).
+	 *
+	 * @see #getMessageByID(long)
 	 */
-	IMessage getMessageByID(long messageID);
+	IMessage fetchMessage(long messageID);
 
 	/**
 	 * Gets the parent guild of the channel.

@@ -377,6 +377,11 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage getMessageByID(long messageID) {
+		return messages.get(messageID);
+	}
+
+	@Override
+	public IMessage fetchMessage(long messageID) {
 		return messages.getOrElseGet(messageID, () -> {
 			PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY);
 			return RequestBuffer.request(() ->

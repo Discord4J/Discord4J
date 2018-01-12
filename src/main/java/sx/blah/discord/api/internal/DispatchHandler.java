@@ -767,14 +767,24 @@ class DispatchHandler {
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		boolean wasCached = true;
+
+		if (message == null) {
+			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
+			wasCached = false;
+		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
 
-		if (reaction == null) { // Only happens in the case of a cached message with a new reaction
-			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-			reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
-			message.getReactions().add(reaction);
+		if (wasCached) {
+			if (reaction == null) { // Only happens in the case of a cached message with a new reaction
+				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+				reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
+				message.getReactions().add(reaction);
+			} else {
+				((Reaction) reaction).setCount(reaction.getCount() + 1);
+			}
 		}
 
 		IUser user;
@@ -793,13 +803,28 @@ class DispatchHandler {
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		boolean wasCached = true;
+
+		if (message == null) {
+			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
+			wasCached = false;
+		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
 
-		if (reaction == null) { // the last reaction of the emoji was removed
-			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
+		if (wasCached) {
+			if (reaction == null) { // the last reaction of the emoji was removed
+				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+				reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
+			} else {
+				((Reaction) reaction).setCount(reaction.getCount() - 1);
+				if (reaction.getCount() <= 0) {
+					List<IReaction> currReactions = message.getReactions();
+					currReactions.remove(reaction);
+					((Message) message).setReactions(currReactions);
+				}
+			}
 		}
 
 		IUser user;

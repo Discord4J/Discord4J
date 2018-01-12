@@ -41,7 +41,7 @@ public class Reaction implements IReaction {
 	/**
 	 * The number of people who reacted.
 	 */
-	private final int count;
+	private volatile int count;
 	/**
 	 * The emoji of the reaction.
 	 */
@@ -61,6 +61,10 @@ public class Reaction implements IReaction {
 	@Override
 	public int getCount() {
 		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 
 	@Override
