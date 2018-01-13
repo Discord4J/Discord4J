@@ -16,9 +16,15 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.trait.Identifiable;
 import discord4j.core.object.Snowflake;
 
 /** An uniquely identifiable object by {@link Snowflake}. */
-public interface Entity extends Identifiable<Snowflake> {
+public interface Entity {
+
+	/**
+	 * Gets the Snowflake that uniquely identifies this entity.
+	 *
+	 * @return The Snowflake that uniquely identifies this entity.
+	 */
+	Snowflake getId();
 }

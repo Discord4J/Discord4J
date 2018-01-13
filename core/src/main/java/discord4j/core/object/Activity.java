@@ -16,14 +16,19 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Nameable;
-
 import java.time.Instant;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 /** Activity for a {@link Presence}. */
-public interface Activity extends Nameable {
+public interface Activity {
+
+	/**
+	 * Gets the activity's name.
+	 *
+	 * @return The activity's name.
+	 */
+	String getName();
 
 	/**
 	 * Gets the specific "action" for this activity.

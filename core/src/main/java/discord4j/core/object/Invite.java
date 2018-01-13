@@ -18,8 +18,6 @@ package discord4j.core.object;
 
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
-import discord4j.core.trait.Deletable;
-import discord4j.core.trait.Identifiable;
 import reactor.core.publisher.Mono;
 
 /**
@@ -27,7 +25,14 @@ import reactor.core.publisher.Mono;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
  */
-public interface Invite extends Deletable, Identifiable<String> {
+public interface Invite {
+
+	/**
+	 * Gets the invite code (unique ID).
+	 *
+	 * @return The invite code (unique ID).
+	 */
+	String getCode();
 
 	/**
 	 * Gets the ID of the guild this invite is associated to.

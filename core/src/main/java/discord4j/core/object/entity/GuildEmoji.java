@@ -16,10 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.trait.Deletable;
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Positionable;
-
 /** A customized emoji created by a {@link Guild}. */
-public interface GuildEmoji extends Deletable, Entity, Mentionable, Positionable {
+public interface GuildEmoji extends Entity {
 }

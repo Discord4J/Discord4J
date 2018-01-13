@@ -16,8 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.trait.Mentionable;
-import discord4j.core.trait.Nameable;
 import discord4j.core.object.Snowflake;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +24,7 @@ import reactor.core.publisher.Mono;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/user">Users Resource</a>
  */
-public interface User extends Entity, Mentionable, Nameable {
+public interface User extends Entity {
 
 	/**
 	 * Gets the user's username, not unique across the platform.
@@ -56,14 +54,14 @@ public interface User extends Entity, Mentionable, Nameable {
 	 */
 	boolean isBot();
 
-	@Override
+	/**
+	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another user (assuming the user
+	 * exists in context of the mention).
+	 *
+	 * @return The <i>raw</i> mention.
+	 */
 	default String getMention() {
 		return "<@" + getId().asString() + ">";
-	}
-
-	@Override
-	default String getName() {
-		return getUsername();
 	}
 
 	/**

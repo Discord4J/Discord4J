@@ -16,8 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.trait.Deletable;
-
 /** A Discord message. */
-public interface Message extends Deletable, Entity {
+public interface Message extends Entity {
 }

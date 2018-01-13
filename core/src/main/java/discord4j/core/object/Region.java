@@ -16,11 +16,22 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.trait.Identifiable;
-import discord4j.core.trait.Nameable;
-
 /** A Discord voice region. */
-public interface Region extends Identifiable<String>, Nameable {
+public interface Region {
+
+	/**
+	 * Gets the unique ID for the region.
+	 *
+	 * @return The unique ID for the region.
+	 */
+	String getId();
+
+	/**
+	 * Gets the name of the region.
+	 *
+	 * @return The name of the region.
+	 */
+	String getName();
 
 	/**
 	 * Gets an example hostname for the region.

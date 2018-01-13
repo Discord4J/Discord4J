@@ -26,7 +26,7 @@ import java.awt.*;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
-public interface Role extends Deletable, Entity, Mentionable, Positionable {
+public interface Role extends Entity, Positionable {
 
 	/**
 	 * Gets the color assigned to this role.
@@ -63,7 +63,12 @@ public interface Role extends Deletable, Entity, Mentionable, Positionable {
 	 */
 	boolean isMentionable();
 
-	@Override
+	/**
+	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another role (assuming the role
+	 * exists in context of the mention).
+	 *
+	 * @return The <i>raw</i> mention.
+	 */
 	default String getMention() {
 		return "<@&" + getId().asString() + ">";
 	}

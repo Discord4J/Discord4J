@@ -17,7 +17,6 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.Snowflake;
-import discord4j.core.trait.Deletable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -27,7 +26,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/webhook">Webhook Resource</a>
  */
-public interface Webhook extends Deletable, Entity {
+public interface Webhook extends Entity {
 
 	/**
 	 * Gets the ID of the guild this webhook is associated to, if present.
@@ -37,7 +36,7 @@ public interface Webhook extends Deletable, Entity {
 	Optional<Snowflake> getGuildId();
 
 	/**
-	 * Requests to retrieve the guild this webhook is associated to.
+	 * Requests to retrieve the guild this webhook is associated to, if present.
 	 *
 	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this webhook is associated to,
 	 * if present. If an error is received, it is emitted through the {@code Mono}.

@@ -17,7 +17,6 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.Snowflake;
-import discord4j.core.trait.Deletable;
 import discord4j.core.trait.Positionable;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
-public interface GuildChannel extends Channel, Deletable, Positionable {
+public interface GuildChannel extends Channel, Positionable {
 
 	/**
 	 * Gets the ID of the guild this channel is associated to.

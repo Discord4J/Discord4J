@@ -73,8 +73,12 @@ public interface Member extends User {
 	 */
 	Instant getJoinTime();
 
-	@Override
-	default String getName() {
+	/**
+	 * Gets the name that is displayed in client.
+	 *
+	 * @return The name that is displayed in client.
+	 */
+	default String getDisplayName() {
 		return getNickname().orElse(getUsername());
 	}
 

@@ -20,7 +20,6 @@ import discord4j.core.object.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
-import discord4j.core.trait.Deletable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,8 +32,9 @@ import java.util.Set;
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
  */
-public interface Guild extends Deletable, Entity {
+public interface Guild extends Entity {
 
+	String getName();
 	String getIconHash();
 	String getSplashHash();
 	Snowflake getOwnerId();

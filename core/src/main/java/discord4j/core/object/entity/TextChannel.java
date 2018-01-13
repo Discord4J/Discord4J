@@ -16,10 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.trait.Mentionable;
-
 /** A Discord text channel. */
-public interface TextChannel extends GuildChannel, Mentionable, MessageChannel {
+public interface TextChannel extends GuildChannel, MessageChannel {
 
 	/**
 	 * Gets the channel topic.
@@ -35,7 +33,12 @@ public interface TextChannel extends GuildChannel, Mentionable, MessageChannel {
 	 */
 	boolean isNsfw();
 
-	@Override
+	/**
+	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another text channel (assuming the
+	 * text channel exists in context of the mention).
+	 *
+	 * @return The <i>raw</i> mention.
+	 */
 	default String getMention() {
 		return "<#" + getId().asString() + ">";
 	}
