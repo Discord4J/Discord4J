@@ -22,6 +22,7 @@ import discord4j.common.json.payload.Heartbeat;
 import discord4j.common.json.payload.Opcode;
 import discord4j.common.json.payload.PayloadData;
 import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.common.json.payload.dispatch.Ready;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.CloseException;
@@ -31,6 +32,8 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.retry.BackoffDelay;
+import reactor.retry.Jitter;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -82,9 +85,11 @@ public class GatewayClient {
 	 * @return a Mono signaling completion
 	 */
 	public Mono<Void> execute(String gatewayUrl) {
+		RetryContext retryContext = new RetryContext(Duration.ofSeconds(5), Duration.ofSeconds(120));
 		return Mono.defer(() -> {
 			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
 
+			Disposable readySub = dispatch.ofType(Ready.class).subscribe(d -> retryContext.reset());
 			Disposable inboundSub = wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
 			Disposable senderSub = sender.map(payload -> {
 				if (Opcode.RECONNECT.equals(payload.getOp())) {
@@ -103,12 +108,26 @@ public class GatewayClient {
 						inboundSub.dispose();
 						senderSub.dispose();
 						heartbeatSub.dispose();
+						readySub.dispose();
 						heartbeat.stop();
 					});
-		}).retryWhen(Retry.onlyIf(ctx -> ABNORMAL_ERROR.test(ctx.exception()))
-				.exponentialBackoffWithJitter(Duration.ofSeconds(5), Duration.ofSeconds(120))
-				.retryMax(50)
-				.doOnRetry(ctx -> log.info("Reconnecting in {}", ctx.backoff().toMillis() + "ms")));
+		}).retryWhen(Retry.<RetryContext>onlyIf(ctx -> ABNORMAL_ERROR.test(ctx.exception()))
+				.withApplicationContext(retryContext)
+				.backoff(context -> {
+					RetryContext appContext = (RetryContext) context.applicationContext();
+					Duration nextBackoff;
+					try {
+						nextBackoff = appContext.firstBackoff.multipliedBy((long) Math.pow(2, (appContext.attempts - 1)));
+					} catch (ArithmeticException e) {
+						nextBackoff = appContext.maxBackoffInterval;
+					}
+					return new BackoffDelay(appContext.firstBackoff, appContext.maxBackoffInterval, nextBackoff);
+				})
+				.jitter(Jitter.random())
+				.doOnRetry(context -> {
+					log.info("Attempt {} retrying in {} ms", context.applicationContext().attempts, context.backoff().toMillis());
+					context.applicationContext().next();
+				}));
 	}
 
 	/**
@@ -171,6 +190,29 @@ public class GatewayClient {
 			payloadHandler.handle(new PayloadContext<>(this, wsHandler, payload.getData()));
 		} else {
 			log.warn("Received GatewayPayload with no registered handler: " + payload.getOp());
+		}
+	}
+
+	private static class RetryContext {
+
+		final Duration firstBackoff;
+		final Duration maxBackoffInterval;
+		boolean connected = false;
+		int attempts = 1;
+
+		private RetryContext(Duration firstBackoff, Duration maxBackoffInterval) {
+			this.firstBackoff = firstBackoff;
+			this.maxBackoffInterval = maxBackoffInterval;
+		}
+
+		void next() {
+			connected = false;
+			attempts++;
+		}
+
+		void reset() {
+			connected = true;
+			attempts = 1;
 		}
 	}
 }
