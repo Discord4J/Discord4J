@@ -29,7 +29,7 @@ public interface StoreService {
 
     <K, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
 
-    boolean hasPrimitiveStores();
+    boolean hasLongObjStores();
 
-    <V> Mono<LongObjReactiveStore<V>> providePrimitiveStore(Class<V> valueClass);
+    <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass);
 }

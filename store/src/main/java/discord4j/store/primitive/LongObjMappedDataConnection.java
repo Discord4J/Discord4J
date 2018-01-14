@@ -174,19 +174,4 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
     public Mono<Void> deleteAll() {
         return connection.deleteAll();
     }
-
-    @Override
-    public Mono<Boolean> isConnected() {
-        return connection.isConnected();
-    }
-
-    @Override
-    public Mono<Void> disconnect() {
-        return connection.disconnect();
-    }
-
-    @Override
-    public void close() throws Exception {
-        connection.close();
-    }
 }

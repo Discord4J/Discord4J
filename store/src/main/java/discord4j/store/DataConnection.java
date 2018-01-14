@@ -23,7 +23,7 @@ import reactor.util.function.Tuple2;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface DataConnection<K, V> extends AutoCloseable {
+public interface DataConnection<K, V> {
 
     default MappedDataConnection<K, V> withMapper(Function<V, K> idMapper) {
         return new MappedDataConnection<>(this, idMapper);
@@ -75,14 +75,5 @@ public interface DataConnection<K, V> extends AutoCloseable {
 
     default Flux<Tuple2<K, V>> entries() {
         return keys().zipWith(values());
-    }
-
-    Mono<Boolean> isConnected();
-
-    Mono<Void> disconnect();
-
-    @Override
-    default void close() throws Exception {
-        disconnect().block();
     }
 }

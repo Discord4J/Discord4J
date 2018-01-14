@@ -135,14 +135,4 @@ public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
     public Flux<V> values() {
         return Flux.empty();
     }
-
-    @Override
-    public Mono<Boolean> isConnected() {
-        return Mono.just(true);
-    }
-
-    @Override
-    public Mono<Void> disconnect() {
-        return Mono.empty();
-    }
 }

@@ -26,4 +26,9 @@ public class NoOpReactiveStore<K, V> implements ReactiveStore<K, V> {
     public Mono<? extends DataConnection<K, V>> openConnection(boolean lock) {
         return Mono.just(new NoOpDataConnection<>());
     }
+
+    @Override
+    public <C extends DataConnection<K, V>> Mono<Void> closeConnection(C connection) {
+        return Mono.empty();
+    }
 }

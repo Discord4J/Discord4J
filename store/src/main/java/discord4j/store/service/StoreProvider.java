@@ -18,17 +18,22 @@ package discord4j.store.service;
 
 import discord4j.store.ReactiveStore;
 import discord4j.store.primitive.LongObjReactiveStore;
+import discord4j.store.util.ForwardingStoreService;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
-public final class StoreProvider {
+public class StoreProvider {
 
-    private static final List<StoreService> services = new Vector<>();
+    private final List<StoreService> services = new Vector<>();
 
-    static {
+    private final AtomicReference<StoreService> genericService = new AtomicReference<>();
+    private final AtomicReference<StoreService> longObjService = new AtomicReference<>();
+
+    public StoreProvider() {
         ServiceLoader<StoreService> serviceLoader = ServiceLoader.load(StoreService.class);
 
         serviceLoader.iterator().forEachRemaining(services::add);
@@ -36,19 +41,35 @@ public final class StoreProvider {
         services.add(new NoOpStoreService()); //No-op is lowest priority
     }
 
-    public static StoreService getGenericStoreProvider() {
-        return services.stream().filter(StoreService::hasGenericStores).findFirst().get();
+    public StoreService getGenericStoreProvider() {
+        if (genericService.get() == null) {
+            services.stream().filter(StoreService::hasGenericStores).findFirst().ifPresent(genericService::set);
+        }
+        return genericService.get();
     }
 
-    public static StoreService getPrimitiveStoreProvider() {
-        return services.stream().filter(StoreService::hasPrimitiveStores).findFirst().get();
+    public StoreService getLongObjStoreProvider() {
+        boolean firstRetrieval = false;
+
+        if (longObjService.get() == null) {
+            services.stream().filter(StoreService::hasLongObjStores).findFirst().ifPresent(longObjService::set);
+            firstRetrieval = true;
+        }
+
+        if (firstRetrieval) { //Fallback to boxed impl if one is present
+            if (longObjService.get().getClass().equals(NoOpStoreService.class)
+                    && !getGenericStoreProvider().getClass().equals(NoOpStoreService.class))
+                longObjService.set(new ForwardingStoreService(getGenericStoreProvider()));
+        }
+
+        return longObjService.get();
     }
 
-    public static <K, V> Mono<ReactiveStore<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K, V> Mono<ReactiveStore<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return getGenericStoreProvider().provideGenericStore(keyClass, valueClass);
     }
 
-    public static <V> Mono<LongObjReactiveStore<V>> newPrimitiveStore(Class<V> valueClass) {
-        return getPrimitiveStoreProvider().providePrimitiveStore(valueClass);
+    public <V> Mono<LongObjReactiveStore<V>> newLongObjStore(Class<V> valueClass) {
+        return getLongObjStoreProvider().provideLongObjStore(valueClass);
     }
 }

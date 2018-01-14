@@ -16,6 +16,7 @@
  */
 package discord4j.store.base.primitive;
 
+import discord4j.store.DataConnection;
 import discord4j.store.primitive.LongObjDataConnection;
 import discord4j.store.primitive.LongObjReactiveStore;
 import reactor.core.publisher.Mono;
@@ -25,5 +26,10 @@ public class NoOpLongObjReactiveStore<V> implements LongObjReactiveStore<V> {
     @Override
     public Mono<LongObjDataConnection<V>> openConnection(boolean lock) {
         return Mono.just(new NoOpLongObjDataConnection<>());
+    }
+
+    @Override
+    public <C extends DataConnection<Long, V>> Mono<Void> closeConnection(C connection) {
+        return Mono.empty();
     }
 }

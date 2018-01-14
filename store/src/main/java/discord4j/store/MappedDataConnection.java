@@ -182,19 +182,4 @@ public class MappedDataConnection<K, V> implements DataConnection<K, V> {
     public Flux<Tuple2<K, V>> entries() {
         return connection.entries();
     }
-
-    @Override
-    public Mono<Boolean> isConnected() {
-        return connection.isConnected();
-    }
-
-    @Override
-    public Mono<Void> disconnect() {
-        return connection.disconnect();
-    }
-
-    @Override
-    public void close() throws Exception {
-        connection.close();
-    }
 }

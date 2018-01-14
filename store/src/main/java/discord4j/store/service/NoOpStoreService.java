@@ -35,12 +35,12 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public boolean hasPrimitiveStores() {
+    public boolean hasLongObjStores() {
         return true;
     }
 
     @Override
-    public <V> Mono<LongObjReactiveStore<V>> providePrimitiveStore(Class<V> valueClass) {
+    public <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass) {
         return Mono.just(new NoOpLongObjReactiveStore<>());
     }
 }

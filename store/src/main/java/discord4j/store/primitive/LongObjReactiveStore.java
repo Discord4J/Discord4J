@@ -26,7 +26,4 @@ public interface LongObjReactiveStore<V> extends ReactiveStore<Long, V> {
 
     @Override
     Mono<LongObjDataConnection<V>> openConnection(boolean lock);
-
-//    @Override
-//    Mono<Void> openConnection(boolean lock, Consumer<LongObjDataConnection<V>> autoClosingConsumer);
 }
