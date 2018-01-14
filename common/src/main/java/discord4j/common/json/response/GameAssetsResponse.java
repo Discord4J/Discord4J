@@ -17,22 +17,24 @@
 package discord4j.common.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.common.jackson.UnsignedJson;
+
+import javax.annotation.Nullable;
 
 public class GameAssetsResponse {
 
 	@JsonProperty("large_image")
-	@UnsignedJson
-	private long largeImage; // TODO: nullable?
+	@Nullable
+	private String largeImage;
 	@JsonProperty("large_text")
 	private String largeText;
 	@JsonProperty("small_image")
-	@UnsignedJson
-	private long smallImage; // TODO: nullable?
+	@Nullable
+	private String smallImage;
 	@JsonProperty("small_text")
 	private String smallText;
 
-	public long getLargeImage() {
+	@Nullable
+	public String getLargeImage() {
 		return largeImage;
 	}
 
@@ -40,7 +42,8 @@ public class GameAssetsResponse {
 		return largeText;
 	}
 
-	public long getSmallImage() {
+	@Nullable
+	public String getSmallImage() {
 		return smallImage;
 	}
 
