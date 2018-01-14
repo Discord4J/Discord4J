@@ -22,4 +22,51 @@ package discord4j.core.object.entity;
  * @see <a href="https://discordapp.com/developers/docs/resources/channel">Channel Resource</a>
  */
 public interface Channel extends Entity {
+
+	/**
+	 * Gets the type of channel.
+	 *
+	 * @return The type of channel.
+	 */
+	Type getType();
+
+	/** Represents the various types of channels. */
+	enum Type {
+
+		/** Represents a {@link TextChannel}. */
+		GUILD_TEXT(0),
+
+		/** Represents a {@link PrivateChannel}. */
+		DM(1),
+
+		/** Represents a {@link VoiceChannel}. */
+		GUILD_VOICE(2),
+
+		/** Represents a group DM. */
+		GROUP_DM(3),
+
+		/** Represents a {@link Category}. */
+		GUILD_CATEGORY(4);
+
+		/** The underlying value as represented by Discord. */
+		private final int value;
+
+		/**
+		 * Constructs a {@code Channel.Type}.
+		 *
+		 * @param value The underlying value as represented by Discord.
+		 */
+		Type(final int value) {
+			this.value = value;
+		}
+
+		/**
+		 * Gets the underlying value as represented by Discord.
+		 *
+		 * @return The underlying value as represented by Discord.
+		 */
+		public int getValue() {
+			return value;
+		}
+	}
 }

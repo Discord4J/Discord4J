@@ -17,7 +17,9 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.PermissionSet;
-import discord4j.core.trait.*;
+import discord4j.core.object.Snowflake;
+import discord4j.core.trait.Positionable;
+import reactor.core.publisher.Mono;
 
 import java.awt.*;
 
@@ -27,6 +29,13 @@ import java.awt.*;
  * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
 public interface Role extends Entity, Positionable {
+
+	/**
+	 * Gets the role name.
+	 *
+	 * @return The role name.
+	 */
+	String getName();
 
 	/**
 	 * Gets the color assigned to this role.
@@ -62,6 +71,21 @@ public interface Role extends Entity, Positionable {
 	 * @return {@code true} if this role is mentionable, {@code false} otherwise.
 	 */
 	boolean isMentionable();
+
+	/**
+	 * Gets the ID of the guild this role is associated to.
+	 *
+	 * @return The ID of the guild this role is associated to.
+	 */
+	Snowflake getGuildId();
+
+	/**
+	 * Requests to retireve the guild this role is associated to.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
+	 * to. If an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<Guild> getGuild();
 
 	/**
 	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another role (assuming the role

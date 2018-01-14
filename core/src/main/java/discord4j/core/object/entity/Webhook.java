@@ -74,6 +74,13 @@ public interface Webhook extends Entity {
 	Mono<User> getCreator();
 
 	/**
+	 * Gets the default name of the webhook.
+	 *
+	 * @return The default name of the webhook.
+	 */
+	Optional<String> getName();
+
+	/**
 	 * Gets the avatar of this webhook, if present.
 	 *
 	 * @return The avatar of this webhook, if present.

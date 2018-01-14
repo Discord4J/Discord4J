@@ -17,8 +17,8 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.Presence;
-import discord4j.core.object.VoiceState;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.VoiceState;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,21 +28,6 @@ import java.util.Set;
 
 /** A Discord user associated to a {@link Guild}. */
 public interface Member extends User {
-
-	/**
-	 * Gets the ID of the guild this user is associated to.
-	 *
-	 * @return The ID of the guild this user is associated to.
-	 */
-	Snowflake getGuildId();
-
-	/**
-	 * Requests to retrieve the guild this user is associated to.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
-	 * to. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	Mono<Guild> getGuild();
 
 	/**
 	 * Gets the user's guild nickname (if one is set).
@@ -72,6 +57,21 @@ public interface Member extends User {
 	 * @return When the user joined the guild.
 	 */
 	Instant getJoinTime();
+
+	/**
+	 * Gets the ID of the guild this user is associated to.
+	 *
+	 * @return The ID of the guild this user is associated to.
+	 */
+	Snowflake getGuildId();
+
+	/**
+	 * Requests to retrieve the guild this user is associated to.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
+	 * to. If an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<Guild> getGuild();
 
 	/**
 	 * Gets the name that is displayed in client.

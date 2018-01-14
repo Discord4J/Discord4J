@@ -49,6 +49,13 @@ public interface GuildChannel extends Channel, Positionable {
 	Set<PermissionOverwrite> getPermissionOverwrites();
 
 	/**
+	 * Gets the name of the channel.
+	 *
+	 * @return The name of the channel.
+	 */
+	String getName();
+
+	/**
 	 * Gets the ID of the category for this channel, if present.
 	 *
 	 * @return The ID of the category for this channel, if present.

@@ -329,7 +329,7 @@ public interface Guild extends Entity {
 		/**
 		 * Constructs a {@code Guild.MfaLevel}.
 		 *
-		 * @param value THe underlying value as represented by Discord.
+		 * @param value The underlying value as represented by Discord.
 		 */
 		MfaLevel(final int value) {
 			this.value = value;
