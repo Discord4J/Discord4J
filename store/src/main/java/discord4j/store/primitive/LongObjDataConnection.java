@@ -90,6 +90,13 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
     Mono<Boolean> exists(Flux<Long> ids); //No way around this q.q
 
     @Override
+    default Flux<V> findInRange(Long start, Long end) {
+        return findInRange((long) start, (long) end);
+    }
+
+    Flux<V> findInRange(long start, long end);
+
+    @Override
     Flux<V> findAll(Iterable<Long> ids); //No way around this q.q
 
     @Override
@@ -114,6 +121,13 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
     }
 
     Mono<Void> delete(LongObjTuple2<V> entry);
+
+    @Override
+    default Mono<Void> deleteInRange(Long start, Long end) {
+        return deleteInRange((long) start, (long) end);
+    }
+
+    Mono<Void> deleteInRange(long start, long end);
 
     @Override
     default Mono<Void> deleteAll(Iterable<Tuple2<Long, V>> entries) {

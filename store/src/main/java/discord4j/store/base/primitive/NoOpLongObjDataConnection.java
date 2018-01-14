@@ -69,6 +69,11 @@ public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
+    public Flux<V> findInRange(long start, long end) {
+        return Flux.empty();
+    }
+
+    @Override
     public Flux<V> findAll() {
         return Flux.empty();
     }
@@ -119,17 +124,12 @@ public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
-    public Mono<Boolean> isConnected() {
-        return Mono.just(true);
-    }
-
-    @Override
-    public Mono<Void> disconnect() {
+    public Mono<Void> delete(LongObjTuple2<V> entry) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> delete(LongObjTuple2<V> entry) {
+    public Mono<Void> deleteInRange(long start, long end) {
         return Mono.empty();
     }
 

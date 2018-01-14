@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-public interface ReactiveStore<K, V> {
+public interface ReactiveStore<K extends Comparable<K>, V> {
 
     Mono<? extends DataConnection<K, V>> openConnection(boolean lock);
 

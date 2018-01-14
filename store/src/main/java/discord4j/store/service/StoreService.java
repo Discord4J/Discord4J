@@ -27,7 +27,7 @@ public interface StoreService {
 
     boolean hasGenericStores();
 
-    <K, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
+    <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
 
     boolean hasLongObjStores();
 

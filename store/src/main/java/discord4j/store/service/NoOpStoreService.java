@@ -30,7 +30,7 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <K, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return Mono.just(new NoOpReactiveStore<>());
     }
 

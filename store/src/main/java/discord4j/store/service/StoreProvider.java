@@ -65,7 +65,7 @@ public class StoreProvider {
         return longObjService.get();
     }
 
-    public <K, V> Mono<ReactiveStore<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return getGenericStoreProvider().provideGenericStore(keyClass, valueClass);
     }
 

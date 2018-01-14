@@ -25,7 +25,7 @@ import reactor.util.function.Tuples;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class MappedDataConnection<K, V> implements DataConnection<K, V> {
+public class MappedDataConnection<K extends Comparable<K>, V> implements DataConnection<K, V> {
 
     private final DataConnection<K, V> connection;
     private final Function<V, K> idMapper;
@@ -117,6 +117,11 @@ public class MappedDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
+    public Flux<V> findInRange(K start, K end) {
+        return connection.findInRange(start, end);
+    }
+
+    @Override
     public Mono<Long> count() {
         return connection.count();
     }
@@ -139,6 +144,11 @@ public class MappedDataConnection<K, V> implements DataConnection<K, V> {
     @Override
     public Mono<Void> delete(Tuple2<K, V> entry) {
         return connection.delete(entry);
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(K start, K end) {
+        return connection.deleteInRange(start, end);
     }
 
     public Mono<Void> deleteValue(V entry) {

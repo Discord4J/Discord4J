@@ -109,6 +109,11 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
     }
 
     @Override
+    public Flux<V> findInRange(long start, long end) {
+        return connection.findInRange(start, end);
+    }
+
+    @Override
     public Flux<V> findAll(Iterable<Long> ids) {
         return connection.findAll(ids);
     }
@@ -136,6 +141,11 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
     @Override
     public Mono<Void> delete(LongObjTuple2<V> entry) {
         return connection.delete(entry);
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(long start, long end) {
+        return connection.deleteInRange(start, end);
     }
 
     public Mono<Void> deleteValue(V entry) {

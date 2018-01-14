@@ -35,7 +35,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <K, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return toForward.provideGenericStore(keyClass, valueClass);
     }
 

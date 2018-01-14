@@ -24,7 +24,7 @@ import reactor.util.function.Tuple2;
 
 import java.util.Optional;
 
-public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
+public class NoOpDataConnection<K extends Comparable<K>, V> implements DataConnection<K, V> {
 
     @Override
     public Mono<Void> store(K key, V value) {
@@ -87,6 +87,11 @@ public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
     }
 
     @Override
+    public Flux<V> findInRange(K start, K end) {
+        return Flux.empty();
+    }
+
+    @Override
     public Mono<Long> count() {
         return Mono.just(0L);
     }
@@ -108,6 +113,11 @@ public class NoOpDataConnection<K, V> implements DataConnection<K, V> {
 
     @Override
     public Mono<Void> delete(Tuple2<K, V> entry) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(K start, K end) {
         return Mono.empty();
     }
 

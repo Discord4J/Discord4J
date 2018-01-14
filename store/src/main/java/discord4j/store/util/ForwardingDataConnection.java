@@ -118,6 +118,16 @@ public class ForwardingDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
+    public Flux<V> findInRange(Long start, Long end) {
+        return toForward.findInRange(start, end);
+    }
+
+    @Override
+    public Flux<V> findInRange(long start, long end) {
+        return this.findInRange((Long) start, (Long) end);
+    }
+
+    @Override
     public Flux<V> findAll() {
         return toForward.findAll();
     }
@@ -165,6 +175,16 @@ public class ForwardingDataConnection<V> implements LongObjDataConnection<V> {
     @Override
     public Mono<Void> delete(LongObjTuple2<V> entry) {
         return this.delete(LongObjTuple2.convert(entry));
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(Long start, Long end) {
+        return toForward.deleteInRange(start, end);
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(long start, long end) {
+        return this.deleteInRange((Long) start, (Long) end);
     }
 
     @Override

@@ -20,7 +20,7 @@ import discord4j.store.DataConnection;
 import discord4j.store.ReactiveStore;
 import reactor.core.publisher.Mono;
 
-public class NoOpReactiveStore<K, V> implements ReactiveStore<K, V> {
+public class NoOpReactiveStore<K extends Comparable<K>, V> implements ReactiveStore<K, V> {
 
     @Override
     public Mono<? extends DataConnection<K, V>> openConnection(boolean lock) {

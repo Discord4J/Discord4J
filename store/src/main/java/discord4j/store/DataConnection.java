@@ -23,7 +23,7 @@ import reactor.util.function.Tuple2;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface DataConnection<K, V> {
+public interface DataConnection<K extends Comparable<K>, V> {
 
     default MappedDataConnection<K, V> withMapper(Function<V, K> idMapper) {
         return new MappedDataConnection<>(this, idMapper);
@@ -53,6 +53,8 @@ public interface DataConnection<K, V> {
 
     Flux<V> findAll(Flux<K> ids);
 
+    Flux<V> findInRange(K start, K end);
+
     Mono<Long> count();
 
     Mono<Void> delete(K id);
@@ -62,6 +64,8 @@ public interface DataConnection<K, V> {
     Mono<Void> delete(Flux<K> ids);
 
     Mono<Void> delete(Tuple2<K, V> entry);
+
+    Mono<Void> deleteInRange(K start, K end);
 
     Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries);
 
