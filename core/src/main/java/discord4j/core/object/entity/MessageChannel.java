@@ -35,8 +35,8 @@ public interface MessageChannel extends Channel {
 	/**
 	 * Requests to retrieve the last message sent in this channel, if present.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the last {@link Message} sent in this channel, if
-	 * present. If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the last {@link Message message} sent in this
+	 * channel, if present. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Message> getLastMessage();
 

@@ -25,7 +25,7 @@ public interface Category extends GuildChannel {
 	 * Requests to retrieve the channels residing in this category.
 	 *
 	 * @return A {@link Flux} that continually emits the {@link GuildChannel channels} residing in this category. If an
-	 * error is received , it is emitted through the {@code Flux}.
+	 * error is received, it is emitted through the {@code Flux}.
 	 */
 	Flux<GuildChannel> getChannels();
 }

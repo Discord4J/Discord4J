@@ -44,8 +44,8 @@ public interface Invite {
 	/**
 	 * Requests to retrieve the guild this invite is associated to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this invite is associated to.
-	 * If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
+	 * to. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Guild> getGuild();
 
@@ -59,8 +59,8 @@ public interface Invite {
 	/**
 	 * Requests to retrieve the channel this invite is associated to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel} this invite is associated
-	 * to. If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this invite is
+	 * associated to. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<TextChannel> getChannel();
 }

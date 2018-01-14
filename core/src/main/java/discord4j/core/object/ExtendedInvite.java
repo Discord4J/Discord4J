@@ -17,6 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.object.entity.User;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -25,11 +26,19 @@ import java.util.Optional;
 public interface ExtendedInvite extends Invite {
 
 	/**
-	 * Gets the user who created the invite.
+	 * Gets the ID of the user who created the invite.
 	 *
-	 * @return The user who created the invite.
+	 * @return The ID of the user who created the invite.
 	 */
-	User getInviter();
+	Snowflake getInviterId();
+
+	/**
+	 * Requests to retrieve the user who created the invite.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
+	 * an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<User> getInviter();
 
 	/**
 	 * Gets the number of times this invite has been used.

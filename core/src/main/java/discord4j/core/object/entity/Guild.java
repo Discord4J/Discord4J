@@ -34,45 +34,247 @@ import java.util.Set;
  */
 public interface Guild extends Entity {
 
+	/**
+	 * Gets the guild name.
+	 *
+	 * @return The guild name.
+	 */
 	String getName();
+
+	/**
+	 * Gets the icon hash.
+	 *
+	 * @return The icon hash.
+	 */
 	String getIconHash();
+
+	/**
+	 * Gets the splash hash.
+	 *
+	 * @return The splash hash.
+	 */
 	String getSplashHash();
+
+	/**
+	 * Gets the ID of the owner of the guild.
+	 *
+	 * @return The ID of the owner of the guild.
+	 */
 	Snowflake getOwnerId();
+
+	/**
+	 * Requests to retrieve the owner of the guild.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Member owner} of the guild. If an
+	 * error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<Member> getOwner();
+
+	/**
+	 * Gets the voice region ID for the guild.
+	 *
+	 * @return The voice region ID for the guild.
+	 */
 	String getRegionId();
+
+	/**
+	 * Requests to retrieve the voice region for the guild.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the voice {@link Region region} for the guild. If
+	 * an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<Region> getRegion();
+
+	/**
+	 * Gets the ID of the AFK channel, if present.
+	 *
+	 * @return The ID of the AFK channel, if present.
+	 */
 	Optional<Snowflake> getAfkChannelId();
+
+	/**
+	 * Requests to retrieve the AFK channel, if present.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the AFK {@link VoiceChannel channel}, if present.
+	 * If an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<VoiceChannel> getAfkChannel();
+
+	/**
+	 * Gets the AFK timeout in seconds.
+	 *
+	 * @return The AFK timeout in seconds.
+	 */
 	int getAfkTimeout();
-	boolean isEmbedEnabled();
+
+	/**
+	 * Gets the ID of the embedded channel, if present.
+	 *
+	 * @return The ID of the embedded channel, if present.
+	 */
 	Optional<Snowflake> getEmbedChannelId();
+
+	/**
+	 * Requests to retrieve the embedded channel, if present.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
+	 * present. If an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<GuildChannel> getEmbedChannel();
+
+	/**
+	 * Gets the level of verification required for the guild.
+	 *
+	 * @return The level of verification required for the guild.
+	 */
 	VerificationLevel getVerificationLevel();
+
+	/**
+	 * Gets the default message notification level.
+	 *
+	 * @return The default message notification level.
+	 */
 	NotificationLevel getNotificationLevel();
+
+	/**
+	 * Gets the default explicit content filter level.
+	 *
+	 * @return The default explicit content filter level.
+	 */
 	ContentFilterLevel getContentFilterLevel();
-	Set<Role> getRoles();
-	Set<GuildEmoji> getEmojis();
+
+	/**
+	 * Gets the guild's roles' IDs.
+	 *
+	 * @return The guild's roles' IDs.
+	 */
+	Set<Snowflake> getRoleIds();
+
+	/**
+	 * Requests to retrieve the guild's roles.
+	 *
+	 * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
+	 * emitted through the {@code Flux}.
+	 */
+	Flux<Role> getRoles();
+
+	/**
+	 * Gets the guild's emoji's IDs.
+	 *
+	 * @return The guild's emoji's IDs.
+	 */
+	Set<Snowflake> getEmojiIds();
+
+	/**
+	 * Requests to retrieve the guild's emojis.
+	 *
+	 * @return A {@link Flux} that continually emits guild's {@link GuildEmoji emojis}. If an error is received, it is
+	 * emitted through the {@code Flux}.
+	 */
+	Flux<GuildEmoji> getEmojis();
+
+	/**
+	 * Gets the enabled guild features.
+	 *
+	 * @return The enabled guild features.
+	 */
 	Set<String> getFeatures();
+
+	/**
+	 * Gets the required MFA level for the guild.
+	 *
+	 * @return The required MFA level for the guild.
+	 */
 	MfaLevel getMfaLevel();
+
+	/**
+	 * Gets the application ID of the guild creator if it is bot-created.
+	 *
+	 * @return The application ID of the guild creator if it is bot-created.
+	 */
 	Optional<Snowflake> getApplicationId();
-	boolean isWidgetEnabled();
+
+	/**
+	 * Gets the channel ID for the server widget, if present.
+	 *
+	 * @return The channel ID for the server widget, if present.
+	 */
 	Optional<Snowflake> getWidgetChannelId();
+
+	/**
+	 * Requests to retrieve the channel for the server widget, if present.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel channel} for the server
+	 * widget, if present. If an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<GuildChannel> getWidgetChannel();
+
+	/**
+	 * Gets the ID of the channel to which system messages are sent, if present.
+	 *
+	 * @return The ID of the channel to which system messages are sent, if present.
+	 */
 	Optional<Snowflake> getSystemChannelId();
+
+	/**
+	 * Requests to retrieve the channel to which system messages are sent, if present.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} to which system
+	 * messages are sent, if present. If an error is received, it is emitted through the {@code Mono}.
+	 */
 	Mono<TextChannel> getSystemChannel();
 
-	// TODO: Note for Panda
-	// The reason these are Monos is because this data isn't always provided (in fact, it's never provided except for
-	// create). So when, for say, we retrieve a Guild object from REST, we need to point towards a "GuildCreateData"
-	// *store*, not the data itself. So all these fields below have to come from a cache, not from an already given
-	// data object (because that is not provided 99% of the time)
-	Mono<Instant> getJoinTime();
-	Mono<Boolean> isLarge();
-	Mono<Boolean> isAvailable();
-	Mono<Integer> getMemberCount();
+	/**
+	 * Gets when this guild was joined at, if present.
+	 *
+	 * @return When this guild was joined at, if present.
+	 */
+	Optional<Instant> getJoinTime();
+
+	/**
+	 * Gets whether this guild is considered large, if present.
+	 *
+	 * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
+	 */
+	Optional<Boolean> isLarge();
+
+	/**
+	 * Gets the total number of members in the guild, if present.
+	 *
+	 * @return The total number of members in the guild, if present.
+	 */
+	Optional<Integer> getMemberCount();
+
+	/**
+	 * Requests to retrieve the voice states of the guild.
+	 *
+	 * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
+	 * received, it is emitted through the {@code Flux}.
+	 */
 	Flux<VoiceState> getVoiceStates();
+
+	/**
+	 * Requests to retrieve the members of the guild.
+	 *
+	 * @return A {@link Flux} that continually emits the {@link Member members} of the guild. If an error is received,
+	 * it is emitted through the {@code Flux}.
+	 */
 	Flux<Member> getMembers();
+
+	/**
+	 * Requests to retrieve the channels of the guild.
+	 *
+	 * @return A {@link Flux} that continually emits the {@link GuildChannel channels} of the guild. If an error is
+	 * received, it is emitted through the {@code Flux}.
+	 */
 	Flux<GuildChannel> getChannels();
+
+	/**
+	 * Requests to retrieve the presences of the guild.
+	 *
+	 * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
+	 * received, it is emitted through the {@code Flux}.
+	 */
 	Flux<Presence> getPresences();
 
 	/** Automatically scan and delete messages sent in the server that contain explicit content. */

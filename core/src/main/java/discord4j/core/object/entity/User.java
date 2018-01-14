@@ -68,8 +68,8 @@ public interface User extends Entity {
 	 * Requests to retrieve this user as a {@link Member}.
 	 *
 	 * @param guildId The ID of the guild to associate this user as a {@link Member}.
-	 * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member}. If an error is
-	 * received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member member}. If an error
+	 * is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Member> asMember(Snowflake guildId);
 
@@ -77,8 +77,8 @@ public interface User extends Entity {
 	 * Requests to retrieve this user as a {@link Member}.
 	 *
 	 * @param guild The guild to associate this user as a {@link Member}.
-	 * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member}. If an error is
-	 * received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member member}. If an error
+	 * is received, it is emitted through the {@code Mono}.
 	 */
 	default Mono<Member> asMember(Guild guild) {
 		return asMember(guild.getId());
@@ -87,8 +87,8 @@ public interface User extends Entity {
 	/**
 	 * Requests to retrieve the private channel (DM) to this user.
 	 * 
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link PrivateChannel} to this user. If an
-	 * error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link PrivateChannel private channel} to
+	 * this user. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<PrivateChannel> getPrivateChannel();
 }

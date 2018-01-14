@@ -16,15 +16,26 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.Snowflake;
+import reactor.core.publisher.Flux;
+
 import java.util.Set;
 
 /** A Discord private channel (also known as a DM). */
 public interface PrivateChannel extends MessageChannel {
 
 	/**
-	 * Gets the recipients for this private channel.
+	 * Gets the IDs of the recipients for this private channel.
 	 *
-	 * @return The recipients for this private channel.
+	 * @return The IDs of the recipients for this private channel.
 	 */
-	Set<User> getRecipients();
+	Set<Snowflake> getRecipientIds();
+
+	/**
+	 * Requests to retrieve the recipients for this private channel.
+	 *
+	 * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
+	 * is received, it is emitted through the {@code Flux}.
+	 */
+	Flux<User> getRecipients();
 }

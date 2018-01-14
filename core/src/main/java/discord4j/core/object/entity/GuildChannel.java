@@ -36,8 +36,8 @@ public interface GuildChannel extends Channel, Positionable {
 	/**
 	 * Requests to retrieve the guild this channel is associated to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this channel is associated to.
-	 * If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this channel is
+	 * associated to. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Guild> getGuild();
 
@@ -58,8 +58,8 @@ public interface GuildChannel extends Channel, Positionable {
 	/**
 	 * Requests to retrieve the category for this channel, if present.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Category} this channel, if present. If
-	 * an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Category category} this channel, if
+	 * present. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Category> getCategory();
 }

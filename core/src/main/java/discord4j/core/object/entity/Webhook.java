@@ -38,8 +38,8 @@ public interface Webhook extends Entity {
 	/**
 	 * Requests to retrieve the guild this webhook is associated to, if present.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this webhook is associated to,
-	 * if present. If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this webhook is
+	 * associated to, if present. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Guild> getGuild();
 
@@ -53,17 +53,25 @@ public interface Webhook extends Entity {
 	/**
 	 * Requests to retrieve the channel this webhook is associated to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel} this webhook is
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this webhook is
 	 * associated to. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<TextChannel> getChannel();
 
 	/**
-	 * Gets the user this webhook was created by, if present.
+	 * Gets the ID of the user this webhook was created by, if present.
 	 *
-	 * @return The user this webhook was created by, if present.
+	 * @return The ID of the user this webhook was created by, if present.
 	 */
-	Optional<User> getCreator();
+	Optional<Snowflake> getCreatorId();
+
+	/**
+	 * Requests to retrieve the user this webhook was created by, if present.
+	 *
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link User user} this webhook was created
+	 * by, if present. If an error is received, it is emitted through the {@code Mono}.
+	 */
+	Mono<User> getCreator();
 
 	/**
 	 * Gets the avatar of this webhook, if present.

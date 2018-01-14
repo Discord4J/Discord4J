@@ -39,8 +39,8 @@ public interface Member extends User {
 	/**
 	 * Requests to retrieve the guild this user is associated to.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this user is associated to. If
-	 * an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
+	 * to. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Guild> getGuild();
 
@@ -95,16 +95,16 @@ public interface Member extends User {
 	/**
 	 * Requests to retrieve this user's voice state for this guild.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState} for this user for this
-	 * guild. If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
+	 * for this guild. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<VoiceState> getVoiceState();
 
 	/**
 	 * Requests to retrieve the presence for this user for this guild.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits a {@link Presence} for this user for this guild.
-	 * If an error is received, it is emitted through the {@code Mono}.
+	 * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
+	 * this guild. If an error is received, it is emitted through the {@code Mono}.
 	 */
 	Mono<Presence> getPresence();
 }
