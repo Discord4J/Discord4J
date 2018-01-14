@@ -14,29 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.util;
+package discord4j.store.noop;
 
 import discord4j.store.ReactiveStore;
+import discord4j.store.noop.NoOpReactiveStore;
+import discord4j.store.noop.primitive.NoOpLongObjReactiveStore;
 import discord4j.store.primitive.LongObjReactiveStore;
 import discord4j.store.service.StoreService;
 import reactor.core.publisher.Mono;
 
-public class ForwardingStoreService implements StoreService {
-
-    private final StoreService toForward;
-
-    public ForwardingStoreService(StoreService toForward) {
-        this.toForward = toForward;
-    }
+/**
+ * Service which provides stores that do nothing. This is automatically used if no valid store services are found.
+ *
+ * @see NoOpReactiveStore
+ * @see NoOpLongObjReactiveStore
+ */
+public class NoOpStoreService implements StoreService {
 
     @Override
     public boolean hasGenericStores() {
-        return toForward.hasGenericStores();
+        return true;
     }
 
     @Override
     public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return toForward.provideGenericStore(keyClass, valueClass);
+        return Mono.just(new NoOpReactiveStore<>());
     }
 
     @Override
@@ -46,6 +48,6 @@ public class ForwardingStoreService implements StoreService {
 
     @Override
     public <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return toForward.provideGenericStore(Long.class, valueClass).map(ForwardingReactiveStore::new);
+        return Mono.just(new NoOpLongObjReactiveStore<>());
     }
 }

@@ -16,12 +16,16 @@
  */
 package discord4j.store.primitive;
 
-import discord4j.store.DataConnection;
 import discord4j.store.ReactiveStore;
 import reactor.core.publisher.Mono;
 
-import java.util.function.Consumer;
-
+/**
+ * This represents the long-object variation of a {@link ReactiveStore}.
+ *
+ * @param <V> The object linked to a long key.
+ *
+ * @see discord4j.store.ReactiveStore
+ */
 public interface LongObjReactiveStore<V> extends ReactiveStore<Long, V> {
 
     @Override

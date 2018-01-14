@@ -14,33 +14,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.service;
+package discord4j.store.noop.primitive;
 
-import discord4j.store.ReactiveStore;
-import discord4j.store.base.NoOpReactiveStore;
-import discord4j.store.base.primitive.NoOpLongObjReactiveStore;
+import discord4j.store.DataConnection;
+import discord4j.store.primitive.LongObjDataConnection;
 import discord4j.store.primitive.LongObjReactiveStore;
 import reactor.core.publisher.Mono;
 
-public class NoOpStoreService implements StoreService {
+/**
+ * Store implementation which does nothing.
+ *
+ * @see discord4j.store.noop.NoOpStoreService
+ * @see discord4j.store.noop.NoOpReactiveStore
+ */
+public class NoOpLongObjReactiveStore<V> implements LongObjReactiveStore<V> {
 
     @Override
-    public boolean hasGenericStores() {
-        return true;
+    public Mono<LongObjDataConnection<V>> openConnection(boolean lock) {
+        return Mono.just(new NoOpLongObjDataConnection<>());
     }
 
     @Override
-    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return Mono.just(new NoOpReactiveStore<>());
-    }
-
-    @Override
-    public boolean hasLongObjStores() {
-        return true;
-    }
-
-    @Override
-    public <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return Mono.just(new NoOpLongObjReactiveStore<>());
+    public <C extends DataConnection<Long, V>> Mono<Void> closeConnection(C connection) {
+        return Mono.empty();
     }
 }

@@ -14,13 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.base.primitive;
+package discord4j.store.noop.primitive;
 
 import discord4j.store.primitive.LongObjDataConnection;
 import discord4j.store.util.LongObjTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Data connection implementation which does nothing.
+ *
+ * @see NoOpLongObjReactiveStore
+ * @see discord4j.store.noop.NoOpDataConnection
+ */
 public class NoOpLongObjDataConnection<V> implements LongObjDataConnection<V> {
 
     @Override

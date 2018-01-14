@@ -25,12 +25,23 @@ import reactor.util.function.Tuples;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * This provides a data connection which automatically maps values to keys in order to allow for simplified
+ * operations.
+ *
+ * @param <K> The key type which provides a 1:1 mapping to the value type. This type is also expected to be
+ *           {@link Comparable} in order to allow for range operations.
+ * @param <V> The value type.
+ *
+ * @see DataConnection
+ * @see DataConnection#withMapper(Function)
+ */
 public class MappedDataConnection<K extends Comparable<K>, V> implements DataConnection<K, V> {
 
     private final DataConnection<K, V> connection;
     private final Function<V, K> idMapper;
 
-    public MappedDataConnection(DataConnection<K, V> connection, Function<V, K> idMapper) {
+    protected MappedDataConnection(DataConnection<K, V> connection, Function<V, K> idMapper) {
         this.connection = connection;
         this.idMapper = idMapper;
     }
@@ -45,6 +56,14 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
         return connection.store(key, value);
     }
 
+    /**
+     * Simplified version of {@link #store(Comparable, Object)} which doesn't require a key.
+     *
+     * @param value The value to store.
+     * @return A mono to signal the completion of the storage of a value.
+     *
+     * @see #store(Comparable, Object)
+     */
     public Mono<Void> storeValue(V value) {
         return connection.store(idMapper.apply(value), value);
     }
@@ -54,6 +73,14 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
         return connection.store(entry);
     }
 
+    /**
+     * Simplified version of {@link #store(Mono)} which doesn't require a key.
+     *
+     * @param entry The mono providing a value to store.
+     * @return A mono to signal the completion of the storage of a value.
+     *
+     * @see #store(Mono)
+     */
     public Mono<Void> storeValue(Mono<V> entry) {
         return connection.store(entry.map(it -> Tuples.of(idMapper.apply(it), it)));
     }
@@ -63,6 +90,14 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
         return connection.store(entries);
     }
 
+    /**
+     * Simplified version of {@link #store(Iterable)} which doesn't require keys.
+     *
+     * @param entries The iterable providing values to store.
+     * @return A mono to signal the completion of the storage of the values.
+     *
+     * @see #store(Iterable)
+     */
     public Mono<Void> storeValues(Iterable<V> entries) {
         return connection.store(new MappingIterable<>(it -> Tuples.of(idMapper.apply(it), it), entries));
     }
@@ -72,6 +107,14 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
         return connection.store(entryStream);
     }
 
+    /**
+     * Simplified version of {@link #store(Flux)} which doesn't require keys.
+     *
+     * @param entryStream The flux providing values to store.
+     * @return A mono to signal the completion of the storage of the values.
+     *
+     * @see #store(Flux)
+     */
     public Mono<Void> storeValues(Flux<V> entryStream) {
         return connection.store(entryStream.map(it -> Tuples.of(idMapper.apply(it), it)));
     }
@@ -151,6 +194,14 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
         return connection.deleteInRange(start, end);
     }
 
+    /**
+     * Simplified version of {@link #delete(Comparable)} which doesn't require a key.
+     *
+     * @param entry The value to delete.
+     * @return A mono to signal the completion of the deletion of a value.
+     *
+     * @see #delete(Tuple2)
+     */
     public Mono<Void> deleteValue(V entry) {
         return connection.delete(Tuples.of(idMapper.apply(entry), entry));
     }
@@ -160,6 +211,14 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
         return connection.deleteAll(entries);
     }
 
+    /**
+     * Simplified version of {@link #deleteAll(Iterable)} which doesn't require keys.
+     *
+     * @param entries The values to delete.
+     * @return A mono to signal the completion of the deletion of values.
+     *
+     * @see #deleteAll(Iterable)
+     */
     public Mono<Void> deleteAllValues(Iterable<V> entries) {
         return connection.deleteAll(new MappingIterable<>(it -> Tuples.of(idMapper.apply(it), it), entries));
     }
@@ -169,6 +228,14 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
         return connection.deleteAll(entries);
     }
 
+    /**
+     * Simplified version of {@link #deleteAll(Flux)} which doesn't require keys.
+     *
+     * @param entries The values to delete.
+     * @return A mono to signal the completion of the deletion of values.
+     *
+     * @see #deleteAll(Flux)
+     */
     public Mono<Void> deleteAllValues(Flux<V> entries) {
         return connection.deleteAll(entries.map(it -> Tuples.of(idMapper.apply(it), it)));
     }

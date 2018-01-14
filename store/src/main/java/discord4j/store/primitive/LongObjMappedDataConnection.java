@@ -26,12 +26,21 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
+/**
+ * This provides a data connection which automatically maps values to keys in order to allow for simplified
+ * operations.
+ *
+ * @param <V> The value type.
+ *
+ * @see LongObjDataConnection
+ * @see LongObjDataConnection#withMapper(ToLongFunction)
+ */
 public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V> implements LongObjDataConnection<V> {
 
     private final LongObjDataConnection<V> connection;
     private final ToLongFunction<V> idMapper;
 
-    public LongObjMappedDataConnection(LongObjDataConnection<V> connection, ToLongFunction<V> idMapper) {
+    protected LongObjMappedDataConnection(LongObjDataConnection<V> connection, ToLongFunction<V> idMapper) {
         super(connection, idMapper::applyAsLong);
         this.connection = connection;
         this.idMapper = idMapper;
@@ -52,6 +61,14 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
         return connection.storeWithLong(key, value);
     }
 
+    /**
+     * Simplified version of {@link #storeWithLong(long, Object)} which doesn't require a key.
+     *
+     * @param value The value to store.
+     * @return A mono to signal the completion of the storage of a value.
+     *
+     * @see #storeWithLong(long, Object)
+     */
     public Mono<Void> storeValue(V value) {
         return connection.storeWithLong(idMapper.applyAsLong(value), value);
     }
@@ -61,6 +78,14 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
         return connection.storeWithLong(entry);
     }
 
+    /**
+     * Simplified version of {@link #storeWithLong(Mono)} which doesn't require a key.
+     *
+     * @param entry The mono providing a value to store.
+     * @return A mono to signal the completion of the storage of a value.
+     *
+     * @see #storeWithLong(Mono)
+     */
     public Mono<Void> storeValue(Mono<V> entry) {
         return connection.storeWithLong(entry.map(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it)));
     }
@@ -70,6 +95,14 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
         return connection.storeWithLong(entries);
     }
 
+    /**
+     * Simplified version of {@link #storeWithLong(Iterable)} which doesn't require keys.
+     *
+     * @param entries The iterable providing values to store.
+     * @return A mono to signal the completion of the storage of the values.
+     *
+     * @see #storeWithLong(Iterable)
+     */
     public Mono<Void> storeValues(Iterable<V> entries) {
         return connection.storeWithLong(new MappingIterable<>(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it), entries));
     }
@@ -79,6 +112,14 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
         return connection.storeWithLong(entryStream);
     }
 
+    /**
+     * Simplified version of {@link #storeWithLong(Flux)} which doesn't require keys.
+     *
+     * @param entryStream The flux providing values to store.
+     * @return A mono to signal the completion of the storage of the values.
+     *
+     * @see #storeWithLong(Flux)
+     */
     public Mono<Void> storeValues(Flux<V> entryStream) {
         return connection.storeWithLong(entryStream.map(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it)));
     }
@@ -148,6 +189,14 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
         return connection.deleteInRange(start, end);
     }
 
+    /**
+     * Simplified version of {@link #delete(long)} which doesn't require a key.
+     *
+     * @param entry The value to delete.
+     * @return A mono to signal the completion of the deletion of a value.
+     *
+     * @see #delete(LongObjTuple2)
+     */
     public Mono<Void> deleteValue(V entry) {
         return connection.delete(LongObjTuple2.of(idMapper.applyAsLong(entry), entry));
     }
@@ -157,6 +206,14 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
         return connection.deleteAllWithLongs(entries);
     }
 
+    /**
+     * Simplified version of {@link #deleteAllWithLongs(Iterable)} which doesn't require keys.
+     *
+     * @param entries The values to delete.
+     * @return A mono to signal the completion of the deletion of values.
+     *
+     * @see #deleteAllWithLongs(Iterable)
+     */
     public Mono<Void> deleteAllValues(Iterable<V> entries) {
         return connection.deleteAllWithLongs(new MappingIterable<>(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it), entries));
     }
@@ -166,6 +223,14 @@ public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V
         return connection.deleteAllWithLongs(entries);
     }
 
+    /**
+     * Simplified version of {@link #deleteAllWithLongs(Flux)} which doesn't require keys.
+     *
+     * @param entries The values to delete.
+     * @return A mono to signal the completion of the deletion of values.
+     *
+     * @see #deleteAllWithLongs(Flux)
+     */
     public Mono<Void> deleteAllValues(Flux<V> entries) {
         return connection.deleteAllWithLongs(entries.map(it -> LongObjTuple2.of(idMapper.applyAsLong(it), it)));
     }

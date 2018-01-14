@@ -17,19 +17,56 @@
 package discord4j.store.service;
 
 import discord4j.store.ReactiveStore;
+import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.LongObjReactiveStore;
 import reactor.core.publisher.Mono;
 
 /**
+ * This represents a java service which provides stores.
+ *
+ * @see java.util.ServiceLoader
  * @see <a href="https://github.com/google/auto/tree/master/service">Google AutoService</a>
+ * @see StoreProvider
+ * @see NoOpStoreService
  */
 public interface StoreService {
 
+    /**
+     * This is used to check if this service can provide generic stores.
+     *
+     * @return True if possible, else false.
+     *
+     * @see ReactiveStore
+     */
     boolean hasGenericStores();
 
+    /**
+     * This is called to provide a new store instance for the provided configuration.
+     *
+     * @param keyClass The class of the keys.
+     * @param valueClass The class of the values.
+     * @param <K> The key type which provides a 1:1 mapping to the value type. This type is also expected to be
+     *           {@link Comparable} in order to allow for range operations.
+     * @param <V> The value type.
+     * @return A mono which provides a store instance.
+     */
     <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
 
+    /**
+     * This is used to check if this service can provide long-object stores.
+     *
+     * @return True if possible, else false.
+     *
+     * @see LongObjReactiveStore
+     */
     boolean hasLongObjStores();
 
+    /**
+     * This is called to provide a new store instance with a long key and object values.
+     *
+     * @param valueClass The class of the values.
+     * @param <V> The value type.
+     * @return A mono which provides a store instance.
+     */
     <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass);
 }

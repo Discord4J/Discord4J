@@ -27,6 +27,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
+/**
+ * This provides an active data connection to a store's data source.
+ *
+ * @param <V> The value type.
+ *
+ * @see DataConnection
+ */
 public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
 
     @Override
@@ -34,6 +41,14 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return withMapper((ToLongFunction<V>) v -> (long) idMapper.apply(v));
     }
 
+    /**
+     * Provides a data connection which is able to automatically map values to a key, allowing for simplified operations.
+     *
+     * @param idMapper The mapper which is able to connect values to unique ids.
+     * @return The data connection with automatic value -> key mapping.
+     *
+     * @see LongObjMappedDataConnection
+     */
     default LongObjMappedDataConnection<V> withMapper(ToLongFunction<V> idMapper) {
         return new LongObjMappedDataConnection<>(this, idMapper);
     }
@@ -43,6 +58,13 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return storeWithLong(key, value);
     }
 
+    /**
+     * Stores a key value pair.
+     *
+     * @param key The key representing the value.
+     * @param value The value.
+     * @return A mono which signals the completion of the storage of the pair.
+     */
     Mono<Void> storeWithLong(long key, V value);
 
     @Override
@@ -50,6 +72,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return storeWithLong(entry.map(LongObjTuple2::from));
     }
 
+    /**
+     * Stores a key value pair.
+     *
+     * @param entry A mono providing the key value pair.
+     * @return A mono which signals the completion of the storage of the pair.
+     */
     Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry);
 
     @Override
@@ -57,6 +85,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return storeWithLong(new MappingIterable<>(LongObjTuple2::from, entries));
     }
 
+    /**
+     * Stores key value pairs.
+     *
+     * @param entries A mono providing the key value pairs.
+     * @return A mono which signals the completion of the storage of the pairs.
+     */
     Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries);
 
     @Override
@@ -64,6 +98,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return storeWithLong(entryStream.map(LongObjTuple2::from));
     }
 
+    /**
+     * Stores key value pairs.
+     *
+     * @param entryStream A flux providing the key value pairs.
+     * @return A mono which signals the completion of the storage of the pairs.
+     */
     Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream);
 
     @Override
@@ -71,6 +111,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return find((long) id);
     }
 
+    /**
+     * Attempts to find the value associated with the provided id.
+     *
+     * @param id The id to search with.
+     * @return A mono, which may or may not contain an associated object.
+     */
     Mono<V> find(long id);
 
     @Override
@@ -81,6 +127,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return exists((long) id);
     }
 
+    /**
+     * Checks if a value is associated with the provided id.
+     *
+     * @param id The id to search with.
+     * @return A mono which provides true or false, depending on whether the id is associated with a value.
+     */
     Mono<Boolean> exists(long id);
 
     @Override
@@ -94,6 +146,13 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return findInRange((long) start, (long) end);
     }
 
+    /**
+     * Retrieves all stored values with ids within a provided range.
+     *
+     * @param start The starting key (inclusive).
+     * @param end The ending key (exclusive).
+     * @return The stream of values with ids within the provided range.
+     */
     Flux<V> findInRange(long start, long end);
 
     @Override
@@ -107,6 +166,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return delete((long) id);
     }
 
+    /**
+     * Deletes a value associated with the provided id.
+     *
+     * @param id The id of the value to delete.
+     * @return A mono which signals the completion of the deletion of the value.
+     */
     Mono<Void> delete(long id);
 
     @Override
@@ -120,6 +185,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return delete(LongObjTuple2.from(entry));
     }
 
+    /**
+     * Deletes a key value pair.
+     *
+     * @param entry The entry to delete.
+     * @return A mono which signals the completion of the deletion of the value.
+     */
     Mono<Void> delete(LongObjTuple2<V> entry);
 
     @Override
@@ -127,6 +198,13 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return deleteInRange((long) start, (long) end);
     }
 
+    /**
+     * Deletes values within a range of ids.
+     *
+     * @param start The starting key (inclusive).
+     * @param end The ending key (exclusive).
+     * @return A mono which signals the completion of the deletion of values.
+     */
     Mono<Void> deleteInRange(long start, long end);
 
     @Override
@@ -134,6 +212,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return deleteAllWithLongs(new MappingIterable<>(LongObjTuple2::from, entries));
     }
 
+    /**
+     * Deletes all provided entries.
+     *
+     * @param entries The entries to delete.
+     * @return A mono which signals the completion of the deletion of values.
+     */
     Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries);
 
     @Override
@@ -141,6 +225,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return deleteAllWithLongs(entries.map(LongObjTuple2::from));
     }
 
+    /**
+     * Deletes all provided entries.
+     *
+     * @param entries A stream of entries to delete.
+     * @return A mono which signals the completion of the deletion of values.
+     */
     Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries);
 
     @Override
@@ -148,7 +238,12 @@ public interface LongObjDataConnection<V> extends DataConnection<Long, V> {
         return DataConnection.super.entries();
     }
 
-    default Flux<LongObjTuple2<V>> primitiveEntries() { //TODO: Figure out how to make this more efficient (maybe)
+    /**
+     * Gets a stream of all entries in the data source.
+     *
+     * @return The stream of all entries stored.
+     */
+    default Flux<LongObjTuple2<V>> longObjEntries() { //TODO: Figure out how to make this more efficient (maybe)
         return entries().map(LongObjTuple2::from);
     }
 }

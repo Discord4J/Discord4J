@@ -15,6 +15,6 @@
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 @NonNullApi
-package discord4j.store.base.primitive;
+package discord4j.store.noop.primitive;
 
 import reactor.util.annotation.NonNullApi;

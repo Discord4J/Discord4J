@@ -20,11 +20,25 @@ import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.*;
 
+/**
+ * This class is an iterable which lazily maps an input type to an output type from a provided iterable.
+ *
+ * @param <I> The type to map.
+ * @param <O> The type to map to.
+ *
+ * @see java.lang.Iterable
+ */
 public class MappingIterable<I, O> implements Iterable<O> {
 
     private final Function<I, O> mapper;
     private final Iterable<I> original;
 
+    /**
+     * Constructs a mapping iterable.
+     *
+     * @param mapper The function to map the original iterable to the desired type.
+     * @param original The original iterable to map.
+     */
     public MappingIterable(Function<I, O> mapper, Iterable<I> original) {
         this.mapper = mapper;
         this.original = original;

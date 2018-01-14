@@ -14,21 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.base;
+@NonNullApi
+package discord4j.store.service;
 
-import discord4j.store.DataConnection;
-import discord4j.store.ReactiveStore;
-import reactor.core.publisher.Mono;
-
-public class NoOpReactiveStore<K extends Comparable<K>, V> implements ReactiveStore<K, V> {
-
-    @Override
-    public Mono<? extends DataConnection<K, V>> openConnection(boolean lock) {
-        return Mono.just(new NoOpDataConnection<>());
-    }
-
-    @Override
-    public <C extends DataConnection<K, V>> Mono<Void> closeConnection(C connection) {
-        return Mono.empty();
-    }
-}
+import reactor.util.annotation.NonNullApi;

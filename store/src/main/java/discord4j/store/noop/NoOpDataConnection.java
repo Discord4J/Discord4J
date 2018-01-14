@@ -14,16 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.base;
+package discord4j.store.noop;
 
 import discord4j.store.DataConnection;
-import discord4j.store.util.MappingIterable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-import java.util.Optional;
-
+/**
+ * Data connection implementation which does nothing.
+ *
+ * @see NoOpReactiveStore
+ * @see discord4j.store.noop.primitive.NoOpLongObjDataConnection
+ */
 public class NoOpDataConnection<K extends Comparable<K>, V> implements DataConnection<K, V> {
 
     @Override

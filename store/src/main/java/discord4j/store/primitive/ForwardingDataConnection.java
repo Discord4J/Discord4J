@@ -14,25 +14,43 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.util;
+package discord4j.store.primitive;
 
 import discord4j.store.DataConnection;
 import discord4j.store.primitive.LongObjDataConnection;
 import discord4j.store.primitive.LongObjMappedDataConnection;
+import discord4j.store.util.LongObjTuple2;
+import discord4j.store.util.MappingIterable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.util.function.ToLongFunction;
 
+/**
+ * An implementation of {@link LongObjDataConnection} which is a data connection that delegates to another, generic
+ * one.
+ *
+ * @see LongObjDataConnection
+ */
 public class ForwardingDataConnection<V> implements LongObjDataConnection<V> {
 
     private final DataConnection<Long, V> toForward;
 
+    /**
+     * Constructs the data connection.
+     *
+     * @param toForward The generic data connection to forward to.
+     */
     public ForwardingDataConnection(DataConnection<Long, V> toForward) {
         this.toForward = toForward;
     }
 
+    /**
+     * Gets the original, generic data connection.
+     *
+     * @return The original data connection.
+     */
     protected DataConnection<Long, V> getOriginal() {
         return toForward;
     }
