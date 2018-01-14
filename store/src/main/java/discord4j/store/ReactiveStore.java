@@ -24,7 +24,5 @@ public interface ReactiveStore<K, V> {
 
     Mono<? extends DataConnection<K, V>> openConnection(boolean lock);
 
-//    default Mono<Void> openConnection(boolean lock, Consumer<? super DataConnection<K, V>> autoClosingConsumer) {
-//        return openConnection(lock).doOnNext(autoClosingConsumer::accept).flatMap(DataConnection::disconnect);
-//    }
+    <C extends DataConnection<K, V>> Mono<Void> closeConnection(C connection);
 }

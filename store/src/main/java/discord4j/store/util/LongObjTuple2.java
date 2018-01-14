@@ -57,6 +57,17 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable { //Meth
         return of(tuple2.getT1(), tuple2.getT2());
     }
 
+    /**
+     * Converts a {@link LongObjTuple2} to a {@link Tuple2}.
+     *
+     * @param tuple The {@link LongObjTuple2} to convert.
+     * @param <T> The type of the second value.
+     * @return The new converted {@link Tuple2}.
+     */
+    public static <T> Tuple2<Long, T> convert(LongObjTuple2<T> tuple) {
+        return Tuples.of(tuple.getT1(), tuple.getT2());
+    }
+
     private static final long serialVersionUID = 6977984978741213834L;
 
     final long t1;
