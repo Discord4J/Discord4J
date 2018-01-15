@@ -21,6 +21,7 @@ ext {
     jsr305_version = '3.0.2'
     junit_version = '4.12'
     logback_version = '1.2.3'
+    autoservice_version = '1.0-rc4'
 
     /** Function returns a new manifest that can be customized per module */
     defaultManifest = {

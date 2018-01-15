@@ -14,56 +14,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.primitive;
+package discord4j.store.service;
 
+import com.google.auto.service.AutoService;
 import discord4j.store.ReactiveStore;
-import discord4j.store.service.StoreService;
+import discord4j.store.primitive.LongObjReactiveStore;
 import reactor.core.publisher.Mono;
 
-/**
- * An implementation of {@link StoreService} which creates primitive stores which delegate to another, generic store.
- *
- * @see StoreService
- */
-public class ForwardingStoreService implements StoreService {
-
-    private final StoreService toForward;
-
-    /**
-     * Constructs the service.
-     *
-     * @param toForward The generic store service to forward to.
-     */
-    public ForwardingStoreService(StoreService toForward) {
-        this.toForward = toForward;
-    }
-
-    /**
-     * Gets the original, generic capable, service.
-     *
-     * @return The service being forwarded to.
-     */
-    public StoreService getOriginal() {
-        return toForward;
-    }
+@AutoService(StoreService.class)
+public class TestService implements StoreService {
 
     @Override
     public boolean hasGenericStores() {
-        return getOriginal().hasGenericStores();
-    }
-
-    @Override
-    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return getOriginal().provideGenericStore(keyClass, valueClass);
-    }
-
-    @Override
-    public boolean hasLongObjStores() {
         return true;
     }
 
     @Override
+    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+        return Mono.defer(() -> Mono.just(new MapStore<>()));
+    }
+
+    @Override
+    public boolean hasLongObjStores() {
+        return false;
+    }
+
+    @Override
     public <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return getOriginal().provideGenericStore(Long.class, valueClass).map(ForwardingReactiveStore::new);
+        return Mono.empty();
     }
 }

@@ -246,7 +246,7 @@ public class ForwardingDataConnection<V> implements LongObjDataConnection<V> {
     }
 
     @Override
-    public Flux<LongObjTuple2<V>> primitiveEntries() {
+    public Flux<LongObjTuple2<V>> longObjEntries() {
         return this.entries().map(LongObjTuple2::from);
     }
 }
