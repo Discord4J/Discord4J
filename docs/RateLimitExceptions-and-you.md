@@ -44,6 +44,6 @@ builder.shouldBufferRequests(true);
 builder.doAction(() -> {
     // Some code here
     // Return true or false depending if the action "succeeded"
-});
-// Optionally, you can even chain more actions by using the andThen() method!
+}).execute();
+// Optionally, you can even chain more actions by using the andThen() method before the execute()!
 ```
