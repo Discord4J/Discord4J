@@ -437,7 +437,8 @@ class DispatchHandler {
 		IMessage toUpdate = channel.messages.get(json.id);
 
 		if (toUpdate == null) { // Cannot resolve update type. MessageObject is incomplete, so we'll have to request for the full message.
-			if (PermissionUtils.hasHierarchicalPermissions(channel, client.ourUser, channel.getGuild().getRolesForUser(client.ourUser), Permissions.READ_MESSAGE_HISTORY))
+			if (channel.isPrivate() ||
+					PermissionUtils.hasHierarchicalPermissions(channel, client.ourUser, channel.getGuild().getRolesForUser(client.ourUser), Permissions.READ_MESSAGE_HISTORY))
 				client.dispatcher.dispatch(new MessageUpdateEvent(null, channel.fetchMessage(Long.parseUnsignedLong(json.id))));
 //			else
 //FIXME: unable to fire message update events when the user doesn't have the read message history permission
