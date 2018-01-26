@@ -199,7 +199,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IUser getOwner() {
-		return client.getUserByID(ownerID);
+		return client.fetchUser(ownerID);
 	}
 
 	/**
