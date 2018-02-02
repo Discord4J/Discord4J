@@ -286,7 +286,7 @@ class DispatchHandler {
 
 			IMessage message = DiscordUtils.getMessageFromJSON(channel, json);
 
-			if (!channel.getMessageHistory().contains(message)) {
+			// if (!channel.getMessageHistory().contains(message)) {
 				Discord4J.LOGGER.debug(LogMarkers.MESSAGES, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
@@ -305,7 +305,7 @@ class DispatchHandler {
 						client.dispatcher.dispatch(new MessageEmbedEvent(null, message, new ArrayList<>()));
 					}
 				}
-			}
+			//}
 		}
 	}
 
