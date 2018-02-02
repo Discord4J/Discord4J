@@ -16,20 +16,42 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.response.ChannelResponse;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import reactor.core.publisher.Flux;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** A Discord private channel (also known as a DM). */
-public interface PrivateChannel extends MessageChannel {
+public final class PrivateChannel extends BaseMessageChannel {
+
+	/**
+	 * Constructs an {@code PrivateChannel} with an associated client and Discord data.
+	 *
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param channel The raw data as represented by Discord, must be non-null.
+	 */
+	public PrivateChannel(final Client client, final ChannelResponse channel) {
+		super(client, channel);
+	}
 
 	/**
 	 * Gets the IDs of the recipients for this private channel.
 	 *
 	 * @return The IDs of the recipients for this private channel.
 	 */
-	Set<Snowflake> getRecipientIds();
+	public Set<Snowflake> getRecipientIds() {
+		return Optional.ofNullable(getChannel().getRecipients())
+				.map(Arrays::stream)
+				.map(users -> users.map(user -> Snowflake.of(user.getId())))
+				.map(snowflakes -> snowflakes.collect(Collectors.toSet()))
+				.orElse(Collections.emptySet());
+	}
 
 	/**
 	 * Requests to retrieve the recipients for this private channel.
@@ -37,5 +59,7 @@ public interface PrivateChannel extends MessageChannel {
 	 * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
 	 * is received, it is emitted through the {@code Flux}.
 	 */
-	Flux<User> getRecipients();
+	public Flux<User> getRecipients() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 }

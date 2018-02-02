@@ -16,68 +16,122 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.response.RoleResponse;
+import discord4j.core.Client;
 import discord4j.core.object.PermissionSet;
 import discord4j.core.object.Snowflake;
 import discord4j.core.trait.Positionable;
 import reactor.core.publisher.Mono;
 
 import java.awt.*;
+import java.util.Objects;
 
 /**
  * A Discord role.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
-public interface Role extends Entity, Positionable {
+public final class Role implements Entity, Positionable {
+
+	/** The Client associated to this object. */
+	private final Client client;
+
+	/** The raw data as represented by Discord. */
+	private final RoleResponse role;
+
+	/** The ID of the guild this role is associated to. */
+	private final long guildId;
+
+	/**
+	 * Constructs a {@code Role} with an associated client and Discord data.
+	 *
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param role The raw data as represented by Discord, must be non-null.
+	 * @param guildId The ID of the guild this role is associated to.
+	 */
+	public Role(final Client client, final RoleResponse role, final long guildId) {
+		this.client = Objects.requireNonNull(client);
+		this.role = Objects.requireNonNull(role);
+		this.guildId = guildId;
+	}
+
+	@Override
+	public Client getClient() {
+		return client;
+	}
+
+	@Override
+	public Snowflake getId() {
+		return Snowflake.of(role.getId());
+	}
+
+	@Override
+	public Mono<Integer> getPosition() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets the role name.
 	 *
 	 * @return The role name.
 	 */
-	String getName();
+	public String getName() {
+		return role.getName();
+	}
 
 	/**
 	 * Gets the color assigned to this role.
 	 *
 	 * @return The color assigned to this role.
 	 */
-	Color getColor();
+	public Color getColor() {
+		return new Color(role.getColor(), true);
+	}
 
 	/**
 	 * Gets whether if this role is pinned in the user listing.
 	 *
 	 * @return {@code true} if this role is pinned in the user listing, {@code false} otherwise.
 	 */
-	boolean isHoisted();
+	public boolean isHoisted() {
+		return role.isHoist();
+	}
 
 	/**
 	 * Gets the permissions assigned to this role.
 	 *
 	 * @return The permissions assigned to this role.
 	 */
-	PermissionSet getPermissions();
+	public PermissionSet getPermissions() {
+		return PermissionSet.of(role.getPermissions());
+	}
 
 	/**
 	 * Gets whether this role is managed by an integration.
 	 *
 	 * @return {@code true} if this role is managed by an integration, {@code false} otherwise.
 	 */
-	boolean isManaged();
+	public boolean isManaged() {
+		return role.isManaged();
+	}
 
 	/**
 	 * Gets whether this role is mentionable.
 	 *
 	 * @return {@code true} if this role is mentionable, {@code false} otherwise.
 	 */
-	boolean isMentionable();
+	public boolean isMentionable() {
+		return role.isMentionable();
+	}
 
 	/**
 	 * Gets the ID of the guild this role is associated to.
 	 *
 	 * @return The ID of the guild this role is associated to.
 	 */
-	Snowflake getGuildId();
+	public Snowflake getGuildId() {
+		return Snowflake.of(guildId);
+	}
 
 	/**
 	 * Requests to retireve the guild this role is associated to.
@@ -85,7 +139,9 @@ public interface Role extends Entity, Positionable {
 	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
 	 * to. If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<Guild> getGuild();
+	public Mono<Guild> getGuild() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another role (assuming the role
@@ -93,7 +149,7 @@ public interface Role extends Entity, Positionable {
 	 *
 	 * @return The <i>raw</i> mention.
 	 */
-	default String getMention() {
+	public String getMention() {
 		return "<@&" + getId().asString() + ">";
 	}
 }

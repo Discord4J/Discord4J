@@ -28,14 +28,18 @@ public class EmojiResponse {
 	@UnsignedJson
 	private OptionalLong id;
 	private String name;
+	@Nullable
 	@UnsignedJson
 	private long[] roles;
 	@Nullable
 	private UserResponse user;
+	@Nullable
 	@JsonProperty("require_colons")
-	private boolean requireColons;
-	private boolean managed;
-	private boolean animated;
+	private Boolean requireColons;
+	@Nullable
+	private Boolean managed;
+	@Nullable
+	private Boolean animated;
 
 	public OptionalLong getId() {
 		return id;
@@ -45,6 +49,7 @@ public class EmojiResponse {
 		return name;
 	}
 
+	@Nullable
 	public long[] getRoles() {
 		return roles;
 	}
@@ -54,15 +59,18 @@ public class EmojiResponse {
 		return user;
 	}
 
-	public boolean isRequireColons() {
+	@Nullable
+	public Boolean isRequireColons() {
 		return requireColons;
 	}
 
-	public boolean isManaged() {
+	@Nullable
+	public Boolean isManaged() {
 		return managed;
 	}
 
-	public boolean isAnimated() {
+	@Nullable
+	public Boolean isAnimated() {
 		return animated;
 	}
 

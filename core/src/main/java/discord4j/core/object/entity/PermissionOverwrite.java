@@ -16,34 +16,80 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.OverwriteEntity;
+import discord4j.core.Client;
 import discord4j.core.object.PermissionSet;
+import discord4j.core.object.Snowflake;
 
-/** Explicit permission overwrite for various {@link Type types}. */
-public interface PermissionOverwrite extends Entity {
+import java.util.Arrays;
+import java.util.Objects;
+
+/**
+ * A Discord permission overwrite.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
+ */
+public final class PermissionOverwrite implements Entity {
+
+	/** The Client associated to this object. */
+	private final Client client;
+
+	/** The raw data as represented by Discord, must be non-null. */
+	private final OverwriteEntity overwrite;
+
+	/**
+	 * Constructs a {@code PermissionOverwrite} with an associated client and Discord data.
+	 *
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param overwrite The raw data as represented by Discord, must be non-null.
+	 */
+	public PermissionOverwrite(final Client client, final OverwriteEntity overwrite) {
+		this.client = Objects.requireNonNull(client);
+		this.overwrite = Objects.requireNonNull(overwrite);
+	}
+
+	@Override
+	public Client getClient() {
+		return client;
+	}
+
+	@Override
+	public Snowflake getId() {
+		return Snowflake.of(overwrite.getId());
+	}
 
 	/**
 	 * Gets the type of entity this overwrite is for.
 	 *
 	 * @return The type of entity this overwrite is for.
 	 */
-	Type getType();
+	public Type getType() {
+		return Arrays.stream(Type.values())
+				.filter(type -> Objects.equals(overwrite.getType(), type.value))
+				.findFirst() // If this throws Discord added something
+				.orElseThrow(UnsupportedOperationException::new);
+	}
 
 	/**
 	 * Gets the permissions explicitly allowed for this overwrite.
 	 *
 	 * @return The permissions explicitly allowed for this overwrite.
 	 */
-	PermissionSet getAllowed();
+	public PermissionSet getAllowed() {
+		return PermissionSet.of(overwrite.getAllow());
+	}
 
 	/**
 	 * Gets the permissions explicitly denied for this overwrite.
 	 *
 	 * @return The permissions explicitly denied for this overwrite.
 	 */
-	PermissionSet getDenied();
+	public PermissionSet getDenied() {
+		return PermissionSet.of(overwrite.getDeny());
+	}
 
 	/** The type of entity a {@link PermissionOverwrite} is explicitly for. */
-	enum Type {
+	public enum Type {
 
 		/** The {@link Role} entity. */
 		ROLE("role"),

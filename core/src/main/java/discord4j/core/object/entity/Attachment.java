@@ -16,50 +16,105 @@
  */
 package discord4j.core.object.entity;
 
-import java.util.OptionalInt;
+import discord4j.common.json.response.AttachmentResponse;
+import discord4j.core.Client;
+import discord4j.core.object.Snowflake;
 
-/** Represents an attachment residing in a message. */
-public interface Attachment extends Entity {
+import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.stream.Stream;
+
+/**
+ * A Discord attachment.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#attachment-object">Attachment Object</a>
+ */
+public final class Attachment implements Entity {
+
+	/** The Client associated to this object. */
+	private final Client client;
+
+	/** The raw data as represented by Discord. */
+	private final AttachmentResponse attachment;
+
+	/**
+	 * Constructs an {@code Attachment} with an associated client and Discord data.
+	 *
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param attachment The raw data as represented by Discord, must be non-null.
+	 */
+	public Attachment(final Client client, final AttachmentResponse attachment) {
+		this.client = Objects.requireNonNull(client);
+		this.attachment = Objects.requireNonNull(attachment);
+	}
+
+	@Override
+	public Client getClient() {
+		return client;
+	}
+
+	@Override
+	public Snowflake getId() {
+		return Snowflake.of(attachment.getId());
+	}
 
 	/**
 	 * Gets the name of the file attached.
 	 *
 	 * @return The name of the file attached.
 	 */
-	String getFilename();
+	public String getFilename() {
+		return attachment.getFilename();
+	}
 
 	/**
 	 * Gets the size of the file in bytes.
 	 *
 	 * @return The size of the file in bytes.
 	 */
-	int getSize();
+	public int getSize() {
+		return attachment.getSize();
+	}
 
 	/**
 	 * Gets the source URL of the file.
 	 *
 	 * @return The source URL of the file.
 	 */
-	String getUrl();
+	public String getUrl() {
+		return attachment.getUrl();
+	}
 
 	/**
 	 * Gets a proxied URL of the file.
 	 *
 	 * @return A proxied URL of the file.
 	 */
-	String getProxyUrl();
+	public String getProxyUrl() {
+		return attachment.getProxyUrl();
+	}
 
 	/**
 	 * Gets the height of the file, if present.
 	 *
 	 * @return The height of the file, if present.
 	 */
-	OptionalInt getHeight();
+	public OptionalInt getHeight() {
+		return Stream.of(attachment.getHeight())
+				.filter(Objects::nonNull)
+				.mapToInt(value -> value)
+				.findFirst();
+	}
 
 	/**
 	 * Gets the width of the file, if present.
 	 *
 	 * @return The width of the file, if present.
 	 */
-	OptionalInt getWidth();
+	public OptionalInt getWidth() {
+		return Stream.of(attachment.getWidth())
+				.filter(Objects::nonNull)
+				.mapToInt(value -> value)
+				.findFirst();
+	}
 }

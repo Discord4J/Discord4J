@@ -18,37 +18,39 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
+import discord4j.core.object.Snowflake;
+import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.OptionalLong;
 
-/** A Discord voice channel. */
-public final class VoiceChannel extends BaseGuildChannel {
+/** An internal implementation of {@link MessageChannel} designed to streamline inheritance. */
+class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
 	/**
-	 * Constructs an {@code VoiceChannel} with an associated client and Discord data.
+	 * Constructs an {@code BaseMessageChannel} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
 	 * @param channel The raw data as represented by Discord, must be non-null.
 	 */
-	public VoiceChannel(final Client client, final ChannelResponse channel) {
+	BaseMessageChannel(final Client client, final ChannelResponse channel) {
 		super(client, channel);
 	}
 
-	/**
-	 * Gets the bitrate (in bits) for this voice channel.
-	 *
-	 * @return Gets the bitrate (in bits) for this voice channel.
-	 */
-	public int getBitrate() {
-		return Optional.ofNullable(getChannel().getBitrate()).orElseThrow(IllegalStateException::new);
+	@Override
+	public Optional<Snowflake> getLastMessageId() {
+		final OptionalLong id = getChannel().getLastMessageId();
+		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
 	}
 
-	/**
-	 * Gets the user limit of this voice channel.
-	 *
-	 * @return The user limit of this voice channel.
-	 */
-	public int getUserLimit() {
-		return Optional.ofNullable(getChannel().getUserLimit()).orElseThrow(IllegalStateException::new);
+	@Override
+	public Mono<Message> getLastMessage() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
+
+	@Override
+	public Optional<Instant> getLastPinTimestamp() {
+		return Optional.ofNullable(getChannel().getLastPinTimestamp()).map(Instant::parse);
 	}
 }

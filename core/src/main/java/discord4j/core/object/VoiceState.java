@@ -16,52 +16,93 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.json.response.VoiceStateResponse;
+import discord4j.core.Client;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.VoiceChannel;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalLong;
 
-/** Used to represent a user's voice connection status. */
-public interface VoiceState {
+/**
+ * A Discord voice state.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-resource">Voice Resource</a>
+ */
+public final class VoiceState implements DiscordObject {
+
+	/** The Client associated to this object. */
+	private final Client client;
+
+	/** The raw data as represented by Discord. */
+	private final VoiceStateResponse voiceState;
 
 	/**
-	 * Gets the guild ID this voice state is for, if present.
+	 * Constructs a {@code VoiceState} with an associated client and Discord data.
 	 *
-	 * @return The guild ID this voice state is for, if present.
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param voiceState The raw data as represented by Discord, must be non-null.
 	 */
-	Optional<Snowflake> getGuildId();
+	public VoiceState(final Client client, final VoiceStateResponse voiceState) {
+		this.client = Objects.requireNonNull(client);
+		this.voiceState = Objects.requireNonNull(voiceState);
+	}
+
+	@Override
+	public Client getClient() {
+		return client;
+	}
 
 	/**
-	 * Requests to retrieve the guild this voice state is for, if present.
+	 * Gets the guild ID this voice state is for.
 	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this voice state is for, if
-	 * present. If an error is received, it is emitted through the {@code Mono}.
+	 * @return The guild ID this voice state is for.
 	 */
-	Mono<Guild> getGuild();
+	public Snowflake getGuildId() {
+		return Snowflake.of(voiceState.getGuildId());
+	}
 
 	/**
-	 * Gets the channel ID this user is connected to.
+	 * Requests to retrieve the guild this voice state is for.
 	 *
-	 * @return The channel ID this user is connected to.
+	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this voice state is for. If an
+	 * error is received, it is emitted through the {@code Mono}.
 	 */
-	Snowflake getChannelId();
+	public Mono<Guild> getGuild() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
-	 * Requests to retrieve the channel this user is connected to.
+	 * Gets the channel ID this user is connected to, if present.
+	 *
+	 * @return The channel ID this user is connected to, if present.
+	 */
+	public Optional<Snowflake> getChannelId() {
+		final OptionalLong id = voiceState.getChannelId();
+		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+	}
+
+	/**
+	 * Requests to retrieve the channel this user is connected to, if present.
 	 *
 	 * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
-	 * to. If an error is received, it is emitted through the {@code Mono}.
+	 * to, if present. If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<VoiceChannel> getChannel();
+	public Mono<VoiceChannel> getChannel() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets the user ID this voice state is for.
 	 *
 	 * @return The user ID this voice state is for.
 	 */
-	Snowflake getUserId();
+	public Snowflake getUserId() {
+		return Snowflake.of(voiceState.getUserId());
+	}
 
 	/**
 	 * Requests to retrieve the user this voice state is for.
@@ -69,47 +110,61 @@ public interface VoiceState {
 	 * @return A {@link Mono} where, upon successful completion, emits the {@link User} this voice state is for. If an
 	 * error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<User> getUser();
+	public Mono<User> getUser() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets the session ID for this voice state.
 	 *
 	 * @return The session ID for this voice state.
 	 */
-	String getSessionId();
+	public String getSessionId() {
+		return voiceState.getSessionId();
+	}
 
 	/**
 	 * Gets whether this user is deafened by the server.
 	 *
 	 * @return {@code true} if the user is deafened by the server, {@code false} otherwise.
 	 */
-	boolean isDeaf();
+	public boolean isDeaf() {
+		return voiceState.isDeaf();
+	}
 
 	/**
 	 * Gets whether this user is muted by the server.
 	 *
 	 * @return {@code true} if the user is deafened by the server, {@code false} otherwise.
 	 */
-	boolean isMuted();
+	public boolean isMuted() {
+		return voiceState.isMute();
+	}
 
 	/**
 	 * Gets whether this user is locally deafened.
 	 *
 	 * @return {@code true} if this user is locally deafened, {@code false} otherwise.
 	 */
-	boolean isSelfDeaf();
+	public boolean isSelfDeaf() {
+		return voiceState.isSelfDeaf();
+	}
 
 	/**
 	 * Gets whether this user is locally muted.
 	 *
 	 * @return {@code true} if this user is locally muted, {@code false} otherwise.
 	 */
-	boolean isSelfMuted();
+	public boolean isSelfMuted() {
+		return voiceState.isSelfMute();
+	}
 
 	/**
 	 * Gets whether this user is muted by the current user.
 	 *
 	 * @return {@code true} if this user is muted by the current user, {@code false} otherwise.
 	 */
-	boolean isSuppressed();
+	public boolean isSuppressed() {
+		return voiceState.isSuppress();
+	}
 }

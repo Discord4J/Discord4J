@@ -16,6 +16,8 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.response.GuildMemberResponse;
+import discord4j.core.Client;
 import discord4j.core.object.Presence;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
@@ -23,25 +25,62 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-/** A Discord user associated to a {@link Guild}. */
-public interface Member extends User {
+/**
+ * A Discord guild member.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-member-object">Guild Member Object</a>
+ */
+public final class Member extends User {
+
+	/** The raw data as represented by Discord. */
+	private final GuildMemberResponse member;
+
+	/** The ID of the guild this user is associated to. */
+	private final long guildId;
+
+	/**
+	 * Constructs a {@code Member} with an associated client and Discord data.
+	 *
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param member The raw data as represented by Discord, must be non-null.
+	 * @param guildId The ID of the guild this user is associated to.
+	 */
+	public Member(final Client client, final GuildMemberResponse member, final long guildId) {
+		super(client, member.getUser());
+		this.member = Objects.requireNonNull(member);
+		this.guildId = guildId;
+	}
+
+	@Override
+	public Mono<Member> asMember(final Snowflake guildId) {
+		return Mono.just(this);
+	}
 
 	/**
 	 * Gets the user's guild nickname (if one is set).
 	 *
 	 * @return The user's guild nickname (if one is set).
 	 */
-	Optional<String> getNickname();
+	public Optional<String> getNickname() {
+		return Optional.ofNullable(member.getNick());
+	}
 
 	/**
 	 * Gets the user's guild roles' IDs.
 	 *
 	 * @return The user's guild roles' IDs.
 	 */
-	Set<Snowflake> getRoleIds();
+	public Set<Snowflake> getRoleIds() {
+		return Arrays.stream(member.getRoles())
+				.mapToObj(Snowflake::of)
+				.collect(Collectors.toSet());
+	}
 
 	/**
 	 * Requests to retrieve the user's guild roles.
@@ -49,21 +88,27 @@ public interface Member extends User {
 	 * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
 	 * emitted through the {@code Flux}.
 	 */
-	Flux<Role> getRoles();
+	public Flux<Role> getRoles() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets when the user joined the guild.
 	 *
 	 * @return When the user joined the guild.
 	 */
-	Instant getJoinTime();
+	public Instant getJoinTime() {
+		return Instant.parse(member.getJoinedAt());
+	}
 
 	/**
 	 * Gets the ID of the guild this user is associated to.
 	 *
 	 * @return The ID of the guild this user is associated to.
 	 */
-	Snowflake getGuildId();
+	public Snowflake getGuildId() {
+		return Snowflake.of(guildId);
+	}
 
 	/**
 	 * Requests to retrieve the guild this user is associated to.
@@ -71,14 +116,16 @@ public interface Member extends User {
 	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
 	 * to. If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<Guild> getGuild();
+	public Mono<Guild> getGuild() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets the name that is displayed in client.
 	 *
 	 * @return The name that is displayed in client.
 	 */
-	default String getDisplayName() {
+	public String getDisplayName() {
 		return getNickname().orElse(getUsername());
 	}
 
@@ -88,7 +135,7 @@ public interface Member extends User {
 	 *
 	 * @return The <i>raw</i> nickname mention.
 	 */
-	default String getNicknameMention() {
+	public String getNicknameMention() {
 		return "<@!" + getId().asString() + ">";
 	}
 
@@ -98,7 +145,9 @@ public interface Member extends User {
 	 * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
 	 * for this guild. If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<VoiceState> getVoiceState();
+	public Mono<VoiceState> getVoiceState() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Requests to retrieve the presence for this user for this guild.
@@ -106,5 +155,7 @@ public interface Member extends User {
 	 * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
 	 * this guild. If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<Presence> getPresence();
+	public Mono<Presence> getPresence() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 }

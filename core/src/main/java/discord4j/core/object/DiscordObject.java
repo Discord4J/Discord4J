@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object;
 
-import discord4j.core.object.DiscordObject;
-import discord4j.core.object.Snowflake;
+import discord4j.core.Client;
 
-/** An uniquely identifiable object by {@link Snowflake}. */
-public interface Entity extends DiscordObject {
+/** An object characterized by the Discord platform. */
+public interface DiscordObject {
 
 	/**
-	 * Gets the Snowflake that uniquely identifies this entity.
+	 * Gets the Client associated to this object.
 	 *
-	 * @return The Snowflake that uniquely identifies this entity.
+	 * @return The Client associated to this object.
 	 */
-	Snowflake getId();
+	Client getClient();
 }

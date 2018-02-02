@@ -14,18 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core;
 
-import discord4j.core.object.DiscordObject;
-import discord4j.core.object.Snowflake;
+import discord4j.rest.service.RestService;
 
-/** An uniquely identifiable object by {@link Snowflake}. */
-public interface Entity extends DiscordObject {
+public final class Client {
 
-	/**
-	 * Gets the Snowflake that uniquely identifies this entity.
-	 *
-	 * @return The Snowflake that uniquely identifies this entity.
-	 */
-	Snowflake getId();
+	public <T extends RestService> T getRestService(final Class<T> type) {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 }
