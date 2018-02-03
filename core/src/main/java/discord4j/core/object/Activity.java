@@ -16,117 +16,192 @@
  */
 package discord4j.core.object;
 
-import java.time.Instant;
-import java.util.Optional;
-import java.util.OptionalInt;
+import discord4j.common.json.response.GameAssetsResponse;
+import discord4j.common.json.response.GamePartyResponse;
+import discord4j.common.json.response.GameResponse;
+import discord4j.common.json.response.GameTimestampsResponse;
+import discord4j.core.Client;
 
-/** Activity for a {@link Presence}. */
-public interface Activity {
+import java.time.Instant;
+import java.util.*;
+
+/**
+ * A Discord presence activity.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#activity-object">Activity Object</a>
+ */
+public final class Activity implements DiscordObject {
+
+	/** The Client associated to this object. */
+	private final Client client;
+
+	/** The raw data as represented by Discord. */
+	private final GameResponse activity;
+
+	/**
+	 * Constructs a {@code Activity} with an associated client and Discord data.
+	 *
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param activity The raw data as represented by Discord, must be non-null.
+	 */
+	public Activity(final Client client, final GameResponse activity) {
+		this.client = Objects.requireNonNull(client);
+		this.activity = Objects.requireNonNull(activity);
+	}
+
+	@Override
+	public Client getClient() {
+		return client;
+	}
 
 	/**
 	 * Gets the activity's name.
 	 *
 	 * @return The activity's name.
 	 */
-	String getName();
+	public String getName() {
+		return activity.getName();
+	}
 
 	/**
 	 * Gets the specific "action" for this activity.
 	 *
 	 * @return The specific "action" for this activity.
 	 */
-	Type getType();
+	public Type getType() {
+		return Arrays.stream(Type.values())
+				.filter(value -> value.value == activity.getType())
+				.findFirst() // If this throws Discord added something
+				.orElseThrow(UnsupportedOperationException::new);
+	}
 
 	/**
 	 * Gets the stream URL, if present.
 	 *
 	 * @return The stream url, if present.
 	 */
-	Optional<String> getStreamingUrl();
+	public Optional<String> getStreamingUrl() {
+		return Optional.ofNullable(activity.getUrl());
+	}
 
 	/**
 	 * Gets the UNIX time (in milliseconds) of when the activity started, if present.
 	 *
 	 * @return The UNIX time (in milliseconds) of when the activity started, if present.
 	 */
-	Optional<Instant> getStart();
+	public Optional<Instant> getStart() {
+		return Optional.ofNullable(activity.getTimestamps())
+				.map(GameTimestampsResponse::getStart)
+				.map(Instant::ofEpochMilli);
+	}
 
 	/**
 	 * Gets the UNIX time (in milliseconds) of when the activity ends, if present.
 	 *
 	 * @return The UNIX time (in milliseconds) of when the activity ends, if present.
 	 */
-	Optional<Instant> getEnd();
+	public Optional<Instant> getEnd() {
+		return Optional.ofNullable(activity.getTimestamps())
+				.map(GameTimestampsResponse::getStart)
+				.map(Instant::ofEpochMilli);
+	}
 
 	/**
 	 * Gets the application ID for the game, if present.
 	 *
 	 * @return The application ID for the game, if present.
 	 */
-	Optional<Snowflake> getApplicationId();
+	public Optional<Snowflake> getApplicationId() {
+		final OptionalLong id = activity.getApplicationId();
+		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+	}
 
 	/**
 	 * Gets what the player is currently doing, if present.
 	 *
 	 * @return What the player is currently doing, if present.
 	 */
-	Optional<String> getDetails();
+	public Optional<String> getDetails() {
+		return Optional.ofNullable(activity.getDetails());
+	}
 
 	/**
 	 * Gets the user's current party status, if present.
 	 *
 	 * @return The user's current party status, if present.
 	 */
-	Optional<String> getState();
+	public Optional<String> getState() {
+		return Optional.ofNullable(activity.getState());
+	}
 
 	/**
 	 * Gets the ID of the party, if present.
 	 *
 	 * @return The ID of the party, if present.
 	 */
-	Optional<String> getPartyId();
+	public Optional<String> getPartyId() {
+		return Optional.ofNullable(activity.getParty()).map(GamePartyResponse::getId);
+	}
 
 	/**
 	 * Gets the party's current size, if present.
 	 *
 	 * @return The party's current size, if present.
 	 */
-	OptionalInt getCurrentPartySize();
+	public OptionalInt getCurrentPartySize() {
+		return Optional.ofNullable(activity.getParty())
+				.map(GamePartyResponse::getSize)
+				.map(sizes -> OptionalInt.of(sizes[0]))
+				.orElse(OptionalInt.empty());
+	}
 
 	/**
 	 * Gets the party's max size, if present.
 	 *
 	 * @return The party's max size, if present.
 	 */
-	OptionalInt getMaxPartySize();
+	public OptionalInt getMaxPartySize() {
+		return Optional.ofNullable(activity.getParty())
+				.map(GamePartyResponse::getSize)
+				.map(sizes -> OptionalInt.of(sizes[1]))
+				.orElse(OptionalInt.empty());
+	}
 
 	/**
 	 * Gets the ID for a large asset of the activity, usually a {@code Snowflake}, if present.
 	 *
 	 * @return The ID for a large asset of the activity, usually a {@code Snowflake}, if present.
 	 */
-	Optional<String> getLargeImageId();
+	public Optional<String> getLargeImageId() {
+		return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getLargeImage);
+	}
 
 	/**
 	 * Gets the text displayed when hovering over the large image of the activity, if present.
 	 *
 	 * @return The text displayed when hovering over the large image of the activity, if present.
 	 */
-	Optional<String> getLargeText();
+	public Optional<String> getLargeText() {
+		return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getLargeText);
+	}
 
 	/**
 	 * Gets the ID for a small asset of the activity, usually a {@code Snowflake}, if present.
 	 *
 	 * @return The ID for a small asset of the activity, usually a {@code Snowflake}, if present.
 	 */
-	Optional<String> getSmallImageId();
+	public Optional<String> getSmallImageId() {
+		return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getSmallImage);
+	}
 
 	/**
 	 * Gets the text displayed when hovering over the small image of the activity, if present.
 	 *
 	 * @return The text displayed when hovering over the small image of the activity, if present.
 	 */
-	Optional<String> getSmallText();
+	public Optional<String> getSmallText() {
+		return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getSmallText);
+	}
 
 	/** The type of "action" for an activity. */
 	enum Type {

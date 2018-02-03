@@ -16,21 +16,54 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.json.response.PresenceResponse;
+import discord4j.core.Client;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalLong;
 
-/** An user's presence. */
-public interface Presence {
+/**
+ * A Discord presence.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence">Presence</a>
+ */
+public final class Presence implements DiscordObject {
+
+	/** The client associated to this object. */
+	private final Client client;
+
+	/** The raw data as represented by Discord. */
+	private final PresenceResponse presence;
+
+	/**
+	 * Constructs a {@code Presence} with an associated client and Discord data.
+	 *
+	 * @param client The Client associated to this object, must be non-null.
+	 * @param presence The raw data as represented by Discord, must be non-null.
+	 */
+	public Presence(final Client client, final PresenceResponse presence) {
+		this.client = Objects.requireNonNull(client);
+		this.presence = Objects.requireNonNull(presence);
+	}
+
+	@Override
+	public Client getClient() {
+		return client;
+	}
 
 	/**
 	 * Gets the ID of the user this presence is associated to.
 	 *
 	 * @return The ID of the user this presence is associated to.
 	 */
-	Snowflake getUserId();
+	public Snowflake getUserId() {
+		return Snowflake.of(presence.getUser().getId());
+	}
 
 	/**
 	 * Requests to retrieve the user this presence is associated to.
@@ -38,21 +71,28 @@ public interface Presence {
 	 * @return A {@link Mono} where, upon successful completion, emits the {@link User} this presence is associated to.
 	 * If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<User> getUser();
+	public Mono<User> getUser() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets the activity for the user this presence is associated to, if present.
 	 *
 	 * @return The activity for the user this presence is associated to, if present.
 	 */
-	Optional<Activity> getActivity();
+	public Optional<Activity> getActivity() {
+		return Optional.ofNullable(presence.getGame()).map(game -> new Activity(client, game));
+	}
 
 	/**
 	 * Gets the ID of the guild this presence is associated to, if present.
 	 *
 	 * @return The ID for the guild this presence is associated to, if present.
 	 */
-	Optional<Snowflake> getGuildId();
+	public Optional<Snowflake> getGuildId() {
+		final OptionalLong id = presence.getGuildId();
+		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+	}
 
 	/**
 	 * Requests to retrieve the guild this presence is associated to, if present.
@@ -60,14 +100,20 @@ public interface Presence {
 	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this presence is associated to,
 	 * if present. If an error is received, it is emitted through the {@code Mono}.
 	 */
-	Mono<Guild> getGuild();
+	public Mono<Guild> getGuild() {
+		throw new UnsupportedOperationException("Not yet implemented...");
+	}
 
 	/**
 	 * Gets the status of this presence, if possible.
 	 *
 	 * @return The status of this presence, if possible.
 	 */
-	Optional<Status> getStatus();
+	public Optional<Status> getStatus() {
+		return Arrays.stream(Status.values())
+				.filter(status -> status.value.equals(presence.getStatus()))
+				.findFirst();
+	}
 
 	/** The status of a presence, indicated by a tiny colored circle next to an user's profile picture. */
 	enum Status {

@@ -37,6 +37,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
+import java.util.OptionalLong;
 
 public class GameResponse {
 
@@ -44,18 +45,20 @@ public class GameResponse {
 	private int type;
 	@Nullable
 	private String url;
+	@Nullable
 	private GameTimestampsResponse timestamps;
 	@JsonProperty("session_id")
 	@Nullable
 	private String sessionId;
 	@JsonProperty("application_id")
 	@UnsignedJson
-	private long applicationId; // TODO: nullable?
+	private OptionalLong applicationId;
 	@Nullable
 	private String details;
 	@Nullable
 	private String state;
-	private int flags;
+	@Nullable
+	private Integer flags;
 	@Nullable
 	private GamePartyResponse party;
 	@Nullable
@@ -74,6 +77,7 @@ public class GameResponse {
 		return url;
 	}
 
+	@Nullable
 	public GameTimestampsResponse getTimestamps() {
 		return timestamps;
 	}
@@ -83,7 +87,7 @@ public class GameResponse {
 		return sessionId;
 	}
 
-	public long getApplicationId() {
+	public OptionalLong getApplicationId() {
 		return applicationId;
 	}
 
@@ -97,7 +101,8 @@ public class GameResponse {
 		return state;
 	}
 
-	public int getFlags() {
+	@Nullable
+	public Integer getFlags() {
 		return flags;
 	}
 

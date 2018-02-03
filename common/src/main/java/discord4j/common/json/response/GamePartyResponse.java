@@ -23,6 +23,7 @@ public class GamePartyResponse {
 
 	@Nullable
 	private String id;
+	@Nullable
 	private int[] size;
 
 	@Nullable
@@ -30,6 +31,7 @@ public class GamePartyResponse {
 		return id;
 	}
 
+	@Nullable
 	public int[] getSize() {
 		return size;
 	}

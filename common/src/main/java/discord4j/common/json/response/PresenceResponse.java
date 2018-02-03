@@ -21,23 +21,27 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.OptionalLong;
 
 public class PresenceResponse {
 
 	private UserResponse user;
 	@UnsignedJson
+	@Nullable
 	private long[] roles;
 	@Nullable
 	private GameResponse game;
 	@JsonProperty("guild_id")
 	@UnsignedJson
-	private long guildId;
+	private OptionalLong guildId;
+	@Nullable
 	private String status;
 
 	public UserResponse getUser() {
 		return user;
 	}
 
+	@Nullable
 	public long[] getRoles() {
 		return roles;
 	}
@@ -47,10 +51,11 @@ public class PresenceResponse {
 		return game;
 	}
 
-	public long getGuildId() {
+	public OptionalLong getGuildId() {
 		return guildId;
 	}
 
+	@Nullable
 	public String getStatus() {
 		return status;
 	}

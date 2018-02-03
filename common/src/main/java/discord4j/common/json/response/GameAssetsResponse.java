@@ -26,11 +26,13 @@ public class GameAssetsResponse {
 	@Nullable
 	private String largeImage;
 	@JsonProperty("large_text")
+	@Nullable
 	private String largeText;
 	@JsonProperty("small_image")
 	@Nullable
 	private String smallImage;
 	@JsonProperty("small_text")
+	@Nullable
 	private String smallText;
 
 	@Nullable
@@ -38,6 +40,7 @@ public class GameAssetsResponse {
 		return largeImage;
 	}
 
+	@Nullable
 	public String getLargeText() {
 		return largeText;
 	}
@@ -47,6 +50,7 @@ public class GameAssetsResponse {
 		return smallImage;
 	}
 
+	@Nullable
 	public String getSmallText() {
 		return smallText;
 	}
