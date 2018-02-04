@@ -59,6 +59,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static sx.blah.discord.api.internal.DiscordUtils.MAPPER;
@@ -85,6 +87,10 @@ class DispatchHandler {
 	private final ExecutorService dispatchExecutor = new ThreadPoolExecutor(2, Runtime.getRuntime().availableProcessors() * 4, 60L,
 			TimeUnit.SECONDS, new SynchronousQueue<>(false),
 			DiscordUtils.createDaemonThreadFactory("Dispatch Handler"), new ThreadPoolExecutor.CallerRunsPolicy());
+	/**
+	 * Lock used to synchronize initialization
+	 */
+	private final Lock startupLock = new ReentrantLock(true);
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
 		this.ws = ws;
@@ -99,6 +105,11 @@ class DispatchHandler {
 	 */
 	public void handle(final JsonNode event) {
 		dispatchExecutor.submit(() -> {
+			boolean locked = false;
+			if (!client.isReady()) {
+				startupLock.lock();
+				locked = true;
+			}
 			try {
 				String type = event.get("t").asText();
 				JsonNode json = event.get("d");
@@ -209,6 +220,9 @@ class DispatchHandler {
 				}
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Unable to process JSON!", e);
+			} finally {
+				if (locked)
+					startupLock.unlock();
 			}
 		});
 	}
