@@ -41,4 +41,8 @@ public class EmojiObject {
 	 * Whether the emoji is managed.
 	 */
 	public boolean managed;
+	/**
+	 * Whether the emoji is animated.
+	 */
+	public boolean animated;
 }

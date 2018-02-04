@@ -31,6 +31,14 @@ public class GameObject {
 		 * The GameObject type integer for streaming.
 		 */
 		private static final int STREAMING = 1;
+		/**
+		 * The GameObject type integer for listening to something.
+		 */
+		private static final int LISTENING = 2;
+		/**
+		 * The GameObject type integer for watching something.
+		 */
+		private static final int WATCHING = 3;
 	}
 
 	/**
@@ -54,5 +62,10 @@ public class GameObject {
 		this.name = name;
 		this.url = url;
 		this.type = url == null ? Type.GAME : Type.STREAMING;
+	}
+
+	public GameObject(String name, int type) {
+		this.name = name;
+		this.type = type;
 	}
 }

@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.impl.obj;
 
 import com.vdurmont.emoji.Emoji;
-import com.vdurmont.emoji.EmojiManager;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -32,8 +31,9 @@ import sx.blah.discord.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,12 +63,12 @@ public class Message implements IMessage {
 	/**
 	 * The timestamp of when the message was sent.
 	 */
-	protected volatile LocalDateTime timestamp;
+	protected volatile Instant timestamp;
 
 	/**
 	 * The timestamp of when the message was last edited.
 	 */
-	protected volatile LocalDateTime editedTimestamp;
+	protected volatile Instant editedTimestamp;
 
 	/**
 	 * The users mentioned in the message.
@@ -152,7 +152,7 @@ public class Message implements IMessage {
 	private volatile boolean deleted = false;
 
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
-				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
+				   Instant timestamp, Instant editedTimestamp, boolean mentionsEveryone,
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
 				   List<Embed> embeds, List<IReaction> reactions, long webhookID, Type type) {
 		this.client = client;
@@ -177,11 +177,11 @@ public class Message implements IMessage {
 	}
 
 	public Message(IDiscordClient client, long id, String content, IUser user, IChannel channel,
-				   LocalDateTime timestamp, LocalDateTime editedTimestamp, boolean mentionsEveryone,
+				   Instant timestamp, Instant editedTimestamp, boolean mentionsEveryone,
 				   List<Long> mentions, List<Long> roleMentions, List<Attachment> attachments, boolean pinned,
 				   List<Embed> embeds, long webhookID, Type type) {
 		this(client, id, content, user, channel, timestamp, editedTimestamp, mentionsEveryone, mentions, roleMentions,
-				attachments, pinned, embeds, new ArrayList<>(), webhookID, type);
+				attachments, pinned, embeds, new CopyOnWriteArrayList<>(), webhookID, type);
 	}
 
 	@Override
@@ -272,12 +272,12 @@ public class Message implements IMessage {
 	 *
 	 * @param timestamp The timestamp of the message.
 	 */
-	public void setTimestamp(LocalDateTime timestamp) {
+	public void setTimestamp(Instant timestamp) {
 		this.timestamp = timestamp;
 	}
 
 	@Override
-	public LocalDateTime getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 
@@ -406,7 +406,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public Optional<LocalDateTime> getEditedTimestamp() {
+	public Optional<Instant> getEditedTimestamp() {
 		return Optional.ofNullable(editedTimestamp);
 	}
 
@@ -415,7 +415,7 @@ public class Message implements IMessage {
 	 *
 	 * @param editedTimestamp The edited timestamp.
 	 */
-	public void setEditedTimestamp(LocalDateTime editedTimestamp) {
+	public void setEditedTimestamp(Instant editedTimestamp) {
 		this.editedTimestamp = editedTimestamp;
 	}
 
@@ -483,11 +483,6 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public IReaction getReactionByIEmoji(IEmoji emoji) {
-		return getReactionByEmoji(emoji);
-	}
-
-	@Override
 	public IReaction getReactionByEmoji(IEmoji emoji) {
 		return getReactionByID(emoji.getLongID());
 	}
@@ -534,32 +529,9 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public void addReaction(String emoji) {
-		if (EmojiManager.isEmoji(emoji)) { // unicode char
-			addReaction(EmojiManager.getByUnicode(emoji));
-		} else if (DiscordUtils.CUSTOM_EMOJI_PATTERN.matcher(emoji).matches()) { // custom emoji
-			String s = emoji.replaceAll("[<>]", "");
-			String name = s.substring(0, s.indexOf(":"));
-			long id = Long.parseUnsignedLong(s.substring(s.indexOf(":" + 1), s.length()));
-
-			addReaction(ReactionEmoji.of(name, id));
-		} else if (DiscordUtils.EMOJI_ALIAS_PATTERN.matcher(emoji).matches()) { // unicode alias
-			String alias = emoji.replace(":", "");
-			Emoji e = EmojiManager.getForAlias(alias);
-
-			if (e == null) { // alias is wrong
-				throw new IllegalArgumentException("Emoji alias \"" + emoji + "\" could not be found.");
-			}
-
-			addReaction(e);
-		} else {
-			throw new IllegalArgumentException("Emoji \"" + emoji + "\" didn't match unicode char, unicode alias, or custom emoji string.");
-		}
-	}
-
-	@Override
 	public void addReaction(ReactionEmoji reactionEmoji) {
-		if (getReactionByEmoji(reactionEmoji) == null) { // only need perms when adding a new emoji
+		Reaction reaction = (Reaction) getReactionByEmoji(reactionEmoji);
+		if (reaction == null) { // only need perms when adding a new emoji
 			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.ADD_REACTIONS);
 		}
 
@@ -571,14 +543,15 @@ public class Message implements IMessage {
 			((DiscordClientImpl) client).REQUESTS.PUT.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getStringID(), getStringID(),
 							URLEncoder.encode(emoji, "UTF-8"), "@me"));
+
+			if (reaction == null) {
+				reactions.add(new Reaction(this, 1, reactionEmoji));
+			} else {
+				reaction.setCount(reaction.getCount()+1);
+			}
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
-	}
-
-	@Override
-	public void removeReaction(IReaction reaction) {
-		removeReaction(getClient().getOurUser(), reaction);
 	}
 
 	@Override
@@ -601,11 +574,17 @@ public class Message implements IMessage {
 		String emoji = reactionEmoji.isUnicode()
 				? reactionEmoji.getName()
 				: reactionEmoji.getName() + ":" + reactionEmoji.getStringID();
-		removeReaction(user, emoji);
+		removeReaction(user, emoji, (Reaction) getReactionByEmoji(reactionEmoji));
 	}
 
 	@Override
 	public void removeReaction(IUser user, String emoji) {
+		Reaction reaction = (Reaction) getReactions().stream().filter(it -> it.getUserReacted(user)
+				&& it.getEmoji().toString().contains(emoji)).findFirst().orElse(null);
+		removeReaction(user, emoji, reaction);
+	}
+
+	private void removeReaction(IUser user, String emoji, Reaction reaction) {
 		if (!user.equals(client.getOurUser())) { // no perms for deleting our own reaction
 			PermissionUtils.requirePermissions(getChannel(), client.getOurUser(), Permissions.MANAGE_MESSAGES);
 		}
@@ -614,6 +593,12 @@ public class Message implements IMessage {
 			((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
 					String.format(DiscordEndpoints.REACTIONS_USER, getChannel().getStringID(), getStringID(),
 							URLEncoder.encode(emoji, "UTF-8"), user.getStringID()));
+
+			if (reaction != null) {
+				reaction.setCount(reaction.getCount()-1);
+				if (reaction.getCount() <= 0)
+					reactions.remove(reaction);
+			}
 		} catch (UnsupportedEncodingException e) {
 			Discord4J.LOGGER.error(LogMarkers.HANDLE, "Discord4J Internal Exception", e);
 		}
@@ -625,6 +610,8 @@ public class Message implements IMessage {
 
 		((DiscordClientImpl) client).REQUESTS.DELETE.makeRequest(
 				String.format(DiscordEndpoints.REACTIONS, getChannel().getStringID(), getStringID()));
+
+		reactions.clear();
 	}
 
 	@Override

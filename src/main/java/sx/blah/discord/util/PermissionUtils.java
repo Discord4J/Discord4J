@@ -21,7 +21,6 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.cache.Cache;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Utility for permission checking.

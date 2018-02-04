@@ -25,6 +25,7 @@ import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.Requests;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.responses.GatewayBotResponse;
+import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.cache.Cache;
@@ -63,8 +64,9 @@ public class ClientBuilder {
 	private long eventThreadTimeout = 60L;
 	private TimeUnit eventThreadTimeoutUnit = TimeUnit.SECONDS;
 	private int overflowCapacity = 128;
-	private StatusType status;
-	private String playingText;
+	private StatusType status = StatusType.ONLINE;
+	private ActivityType activity;
+	private String text;
 	private String streamUrl;
 	//Early registered listeners:
 	private final List<IListener> iListeners = new ArrayList<>();
@@ -340,94 +342,56 @@ public class ClientBuilder {
 	}
 
 	/**
-	 * Sets the online status of the bot to online on all shards when the bot logs in.
+	 * Sets the presence of the bot when it logs in.
 	 *
+	 * @param status The status to display.
+	 * @param activity The type of activity to display.
+	 * @param text The text to display.
 	 * @return The builder instance.
+	 *
+	 * @throws IllegalArgumentException If activity is {@link ActivityType#STREAMING}.
+	 * Use {@link #setStreamingPresence(StatusType, String, String)} instead.
 	 */
-	public ClientBuilder online() {
-		return online(null);
+	public ClientBuilder setPresence(StatusType status, ActivityType activity, String text) {
+		if (activity == ActivityType.STREAMING) throw new IllegalArgumentException("Invalid ActivityType");
+		return setPresence(status, activity, text, null);
 	}
 
 	/**
-	 * Sets the online status of the bot to online with the given playing text on all shards when the bot logs in.
+	 * Sets the presence of the bot when it logs in.
 	 *
-	 * @param playingText The nullable playing text.
+	 * @param status The status to display.
 	 * @return The builder instance.
 	 */
-	public ClientBuilder online(String playingText) {
-		return setPresence(StatusType.ONLINE, playingText, null);
+	public ClientBuilder setPresence(StatusType status) {
+		return setPresence(status, null, null, null);
 	}
 
 	/**
-	 * Sets the online status of the bot to idle on all shards when the bot logs in.
+	 * Sets the presence of the bot when it logs in to streaming.
 	 *
-	 * @return The builder instance.
-	 */
-	public ClientBuilder idle() {
-		return idle(null);
-	}
-
-	/**
-	 * Sets the online status of the bot to idle with the given playing text on all shards when the bot logs in.
-	 *
-	 * @param playingText The nullable playing text.
-	 * @return The builder instance.
-	 */
-	public ClientBuilder idle(String playingText) {
-		return setPresence(StatusType.IDLE, playingText, null);
-	}
-
-	/**
-	 * Sets the online status of the bot to do not disturb on all shards when the bot logs in.
-	 *
-	 * @return The builder instance.
-	 */
-	public ClientBuilder dnd() {
-		return dnd(null);
-	}
-
-	/**
-	 * Sets the online status of the bot to do not disturb with the given playing text on all shards when the bot logs in.
-	 *
-	 * @param playingText The nullable playing text.
-	 * @return The builder instance.
-	 */
-	public ClientBuilder dnd(String playingText) {
-		return setPresence(StatusType.DND, playingText, null);
-	}
-
-	/**
-	 * Sets the online status of the bot to invisible on all shards when the bot logs in.
-	 *
-	 * @return The builder instance.
-	 */
-	public ClientBuilder invisible() {
-		return setPresence(StatusType.INVISIBLE, null, null);
-	}
-
-	/**
-	 * Sets the online status of the bot to streaming with the given playing text and stream url on all shards when the
-	 * bot logs in.
-	 *
-	 * @param playingText The nullable playing text.
+	 * @param status The status to display.
+	 * @param text The text to display, may be null.
 	 * @param streamUrl The valid twitch.tv streaming url.
 	 * @return The builder instance.
 	 */
-	public ClientBuilder streaming(String playingText, String streamUrl) {
-		return setPresence(StatusType.ONLINE, playingText, streamUrl);
+	public ClientBuilder setStreamingPresence(StatusType status, String text, String streamUrl) {
+		return setPresence(status, ActivityType.STREAMING, text, streamUrl);
 	}
 
 	/**
-	 * Sets online status of the bot when it logs in.
+	 * Sets the presence of the bot when it logs in.
 	 *
-	 * @param status The status type.
-	 * @param playingText The nullable game playing text.
-	 * @param streamUrl The nullable stream url.
+	 * @param status The status to display.
+	 * @param activity The type of activity to display.
+	 * @param text The text to display.
+	 * @param streamUrl The valid twitch.tv url.
 	 * @return The builder instance.
 	 */
-	private ClientBuilder setPresence(StatusType status, String playingText, String streamUrl) {
+	private ClientBuilder setPresence(StatusType status, ActivityType activity, String text, String streamUrl) {
 		this.status = status;
-		this.playingText = playingText;
+		this.activity = activity;
+		this.text = text;
 		this.streamUrl = streamUrl;
 		return this;
 	}
@@ -452,7 +416,7 @@ public class ClientBuilder {
 		final IDiscordClient client = new DiscordClientImpl(botToken, shard != null ? -1 : shardCount, isDaemon,
 				maxMissedPings, maxReconnectAttempts, retryCount, maxCacheCount, provider, shard, backpressureHandler,
 				minimumPoolSize, maximumPoolSize, overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit,
-				status == null ? null : new PresenceUpdateRequest(status, playingText, streamUrl));
+				new PresenceUpdateRequest(status, activity, text, streamUrl));
 
 		//Registers events as soon as client is initialized
 		final EventDispatcher dispatcher = client.getDispatcher();

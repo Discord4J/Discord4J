@@ -20,14 +20,11 @@ package sx.blah.discord.handle.audit;
 import sx.blah.discord.handle.audit.entry.AuditLogEntry;
 import sx.blah.discord.handle.audit.entry.DiscordObjectEntry;
 import sx.blah.discord.handle.audit.entry.TargetedEntry;
-import sx.blah.discord.handle.audit.entry.option.OptionKey;
 import sx.blah.discord.handle.obj.IDiscordObject;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IWebhook;
 import sx.blah.discord.util.cache.LongMap;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;

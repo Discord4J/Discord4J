@@ -35,7 +35,7 @@ import sx.blah.discord.util.LogMarkers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,7 +75,7 @@ public class Discord4J {
 	/**
 	 * When this class was loaded.
 	 */
-	protected static final LocalDateTime launchTime = LocalDateTime.now();
+	protected static final Instant launchTime = Instant.now();
 	/**
 	 * Whether to allow for audio to be used.
 	 */
@@ -198,7 +198,7 @@ public class Discord4J {
 	 *
 	 * @return The time when this class was loaded.
 	 */
-	public static LocalDateTime getLaunchTime() {
+	public static Instant getLaunchTime() {
 		return launchTime;
 	}
 

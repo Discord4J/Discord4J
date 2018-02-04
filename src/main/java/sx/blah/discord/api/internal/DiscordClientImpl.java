@@ -35,6 +35,7 @@ import sx.blah.discord.handle.impl.obj.Guild;
 import sx.blah.discord.handle.impl.obj.User;
 import sx.blah.discord.handle.impl.obj.VoiceState;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.modules.Configuration;
 import sx.blah.discord.modules.ModuleLoader;
 import sx.blah.discord.util.*;
 import sx.blah.discord.util.cache.ICacheDelegateProvider;
@@ -158,6 +159,12 @@ public final class DiscordClientImpl implements IDiscordClient {
 				overflowCapacity, eventThreadTimeout, eventThreadTimeoutUnit);
 		this.reconnectManager = new ReconnectManager(this, maxReconnectAttempts);
 		this.loader = new ModuleLoader(this);
+
+		// Fixes null from getModuleLoader from enable().
+		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) {
+			loader.loadModules();
+		}
+
 		this.identifyPresence = identifyPresence;
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -449,48 +456,18 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 
 	@Override
-	public void changePlayingText(String playingText) {
-		getShards().forEach(s -> s.changePlayingText(playingText));
+	public void changePresence(StatusType status, ActivityType activity, String text) {
+		getShards().forEach(shard -> shard.changePresence(status, activity, text));
 	}
 
 	@Override
-	public void online(String playingText) {
-		getShards().forEach(s -> s.online(playingText));
+	public void changePresence(StatusType status) {
+		getShards().forEach(shard -> shard.changePresence(status));
 	}
 
 	@Override
-	public void online() {
-		getShards().forEach(IShard::online);
-	}
-
-	@Override
-	public void idle(String playingText) {
-		getShards().forEach(s -> s.idle(playingText));
-	}
-
-	@Override
-	public void idle() {
-		getShards().forEach(IShard::idle);
-	}
-
-	@Override
-	public void streaming(String playingText, String streamingUrl) {
-		getShards().forEach(s -> s.streaming(playingText, streamingUrl));
-	}
-
-	@Override
-	public void dnd(String playingText) {
-		getShards().forEach(s -> s.dnd(playingText));
-	}
-
-	@Override
-	public void dnd() {
-		getShards().forEach(IShard::dnd);
-	}
-
-	@Override
-	public void invisible() {
-		getShards().forEach(IShard::invisible);
+	public void changeStreamingPresence(StatusType status, String text, String streamUrl) {
+		getShards().forEach(shard -> shard.changeStreamingPresence(status, text, streamUrl));
 	}
 
 	@Override

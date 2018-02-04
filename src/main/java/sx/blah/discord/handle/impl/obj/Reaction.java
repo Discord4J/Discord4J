@@ -17,14 +17,11 @@
 
 package sx.blah.discord.handle.impl.obj;
 
-import com.vdurmont.emoji.Emoji;
-import com.vdurmont.emoji.EmojiManager;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordClientImpl;
 import sx.blah.discord.api.internal.DiscordEndpoints;
 import sx.blah.discord.api.internal.json.objects.UserObject;
-import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
@@ -44,7 +41,7 @@ public class Reaction implements IReaction {
 	/**
 	 * The number of people who reacted.
 	 */
-	private final int count;
+	private volatile int count;
 	/**
 	 * The emoji of the reaction.
 	 */
@@ -66,31 +63,13 @@ public class Reaction implements IReaction {
 		return count;
 	}
 
+	public void setCount(int count) {
+		this.count = count;
+	}
+
 	@Override
 	public ReactionEmoji getEmoji() {
 		return emoji;
-	}
-
-	@Override
-	public boolean isCustomEmoji() {
-		return !emoji.isUnicode();
-	}
-
-	@Override
-	public IEmoji getCustomEmoji() {
-		if (!isCustomEmoji()) return null;
-
-		IEmoji emoji = getMessage().getGuild().getEmojiByID(getEmoji().getLongID());
-		if (emoji == null) {
-			// Make up information that we don't have. Temporary until this method is removed.
-			emoji = new EmojiImpl(getEmoji().getLongID(), null, getEmoji().getName(), false, false);
-		}
-		return emoji;
-	}
-
-	@Override
-	public Emoji getUnicodeEmoji() {
-		return EmojiManager.getByUnicode(emoji.getName());
 	}
 
 	@Override
@@ -122,11 +101,6 @@ public class Reaction implements IReaction {
 	@Override
 	public boolean getUserReacted(IUser user) {
 		return getUsers().contains(user);
-	}
-
-	@Override
-	public boolean getClientReacted() {
-		return getUserReacted(getClient().getOurUser());
 	}
 
 	@Override

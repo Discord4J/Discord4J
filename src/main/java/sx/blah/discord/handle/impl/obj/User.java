@@ -259,11 +259,6 @@ public class User implements IUser {
 	}
 
 	@Override
-	public LongMap<IVoiceState> getVoiceStatesLong() {
-		return getVoiceStates();
-	}
-
-	@Override
 	public LongMap<IVoiceState> getVoiceStates() {
 		return voiceStates.mapCopy();
 	}

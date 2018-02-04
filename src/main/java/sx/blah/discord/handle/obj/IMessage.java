@@ -18,13 +18,12 @@
 package sx.blah.discord.handle.obj;
 
 import com.vdurmont.emoji.Emoji;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.obj.ReactionEmoji;
 import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MessageTokenizer;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +65,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @return The timestamp of when the message was sent.
 	 */
-	LocalDateTime getTimestamp();
+	Instant getTimestamp();
 
 	/**
 	 * Gets the users mentioned in the message.
@@ -183,7 +182,7 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 *
 	 * @return The timestamp of when the message was last edited.
 	 */
-	Optional<LocalDateTime> getEditedTimestamp();
+	Optional<Instant> getEditedTimestamp();
 
 	/**
 	 * Gets whether the message is pinned in its channel.
@@ -212,16 +211,6 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	 * @return The reactions on the message.
 	 */
 	List<IReaction> getReactions();
-
-	/**
-	 * Gets a reaction by its custom guild emoji.
-	 *
-	 * @param emoji The emoji of the desired reaction.
-	 * @return The reaction with the provided emoji (or null if one was not found).
-	 * @deprecated Use {@link #getReactionByEmoji(IEmoji)} instead.
-	 */
-	@Deprecated
-	IReaction getReactionByIEmoji(IEmoji emoji);
 
 	/**
 	 * Gets a reaction by its custom guild emoji.
@@ -287,41 +276,9 @@ public interface IMessage extends IDiscordObject<IMessage> {
 	/**
 	 * Adds a reaction to the message.
 	 *
-	 * <p>This method accepts a string in three forms:
-	 * <ul>
-	 *     <li>A unicode emoji alias (e.g. ":thinking:")</li>
-	 *     <li>A unicode emoji character (e.g. "\u1F914")</li>
-	 *     <li>A custom guild emoji mention (e.g. "<:rainblob:304759070680809474>")</li>
-	 * </ul>
-	 *
-	 * @throws IllegalArgumentException If the passed emoji does not match any of the allowed formats or it matches the
-	 * format of a unicode alias and a corresponding emoji could not be found.
-	 *
-	 * @param emoji The emoji to react with.
-	 *
-	 * @deprecated Each form of accepted parameter to this method has its own method.
-	 * Use {@link #addReaction(ReactionEmoji)} or {@link #addReaction(Emoji)} instead.
-	 */
-	@Deprecated
-	void addReaction(String emoji);
-
-	/**
-	 * Adds a reaction to the message.
-	 *
 	 * @param emoji The emoji to react with.
 	 */
 	void addReaction(ReactionEmoji emoji);
-
-	/**
-	 * Removes a reaction from the message.
-	 *
-	 * @param reaction The reaction to remove.
-	 *
-	 * @deprecated This is an overload for {@link #removeReaction(IUser, IReaction)} with
-	 * {@link IDiscordClient#getOurUser()}. Use that instead.
-	 */
-	@Deprecated
-	void removeReaction(IReaction reaction);
 
 	/**
 	 * Removes a reaction from the message for the given user.

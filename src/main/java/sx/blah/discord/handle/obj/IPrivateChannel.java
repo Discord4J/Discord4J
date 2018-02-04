@@ -18,7 +18,6 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.Image;
-import sx.blah.discord.util.cache.LongMap;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -43,22 +42,6 @@ public interface IPrivateChannel extends IChannel {
 	 * {@inheritDoc}
 	 */
 	IPrivateChannel copy();
-
-	/**
-	 * @deprecated See {@link IPrivateChannel} for details.
-	 * @throws UnsupportedOperationException Impossible to use as a private channel.
-	 */
-	@Override
-	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong();
-
-	/**
-	 * @deprecated See {@link IPrivateChannel} for details.
-	 * @throws UnsupportedOperationException Impossible to use as a private channel.
-	 */
-	@Override
-	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
 
 	/**
 	 * @deprecated See {@link IPrivateChannel} for details.

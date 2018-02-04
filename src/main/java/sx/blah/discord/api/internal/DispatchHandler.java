@@ -17,8 +17,8 @@
 
 package sx.blah.discord.api.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
 import sx.blah.discord.api.internal.json.objects.*;
@@ -29,23 +29,18 @@ import sx.blah.discord.handle.impl.events.guild.*;
 import sx.blah.discord.handle.impl.events.guild.category.CategoryCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.category.CategoryDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.category.CategoryUpdateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelUpdateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.TypingEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.*;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.*;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.*;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
-import sx.blah.discord.handle.impl.events.guild.voice.*;
-import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.member.*;
 import sx.blah.discord.handle.impl.events.guild.role.RoleCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.role.RoleDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.role.RoleUpdateEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
@@ -60,7 +55,7 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.RequestBuilder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -237,7 +232,7 @@ class DispatchHandler {
 			client.getDispatcher().waitFor((GuildCreateEvent e) -> {
 				waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getStringID()));
 				return loadedGuilds.incrementAndGet() >= ready.guilds.length;
-			}, 10, TimeUnit.SECONDS);
+			}, (long) Math.ceil(Math.sqrt(2 * ready.guilds.length)), TimeUnit.SECONDS);
 
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(Long.parseUnsignedLong(guild.id))));
 			return true;
@@ -291,7 +286,7 @@ class DispatchHandler {
 
 			IMessage message = DiscordUtils.getMessageFromJSON(channel, json);
 
-			if (!channel.getMessageHistory().contains(message)) {
+			// if (!channel.getMessageHistory().contains(message)) {
 				Discord4J.LOGGER.debug(LogMarkers.MESSAGES, "Message from: {} ({}) in channel ID {}: {}", message.getAuthor().getName(),
 						json.author.id, json.channel_id, json.content);
 
@@ -310,7 +305,7 @@ class DispatchHandler {
 						client.dispatcher.dispatch(new MessageEmbedEvent(null, message, new ArrayList<>()));
 					}
 				}
-			}
+			//}
 		}
 	}
 
@@ -366,7 +361,7 @@ class DispatchHandler {
 			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(guild, new MemberObject(event.user, event.roles));
 			guild.users.put(user);
 			guild.setTotalMemberCount(guild.getTotalMemberCount() + 1);
-			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
+			Instant timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
 			client.dispatcher.dispatch(new UserJoinEvent(guild, user, timestamp));
 		}
@@ -442,7 +437,11 @@ class DispatchHandler {
 		IMessage toUpdate = channel.messages.get(json.id);
 
 		if (toUpdate == null) { // Cannot resolve update type. MessageObject is incomplete, so we'll have to request for the full message.
-			client.dispatcher.dispatch(new MessageUpdateEvent(null, channel.getMessageByID(Long.parseUnsignedLong(json.id))));
+			if (channel.isPrivate() ||
+					PermissionUtils.hasHierarchicalPermissions(channel, client.ourUser, channel.getGuild().getRolesForUser(client.ourUser), Permissions.READ_MESSAGE_HISTORY))
+				client.dispatcher.dispatch(new MessageUpdateEvent(null, channel.fetchMessage(Long.parseUnsignedLong(json.id))));
+//			else
+//FIXME: unable to fire message update events when the user doesn't have the read message history permission
 		} else {
 			IMessage oldMessage = toUpdate.copy();
 			IMessage updatedMessage = DiscordUtils.getUpdatedMessageFromJSON(client, toUpdate, json);
@@ -773,14 +772,28 @@ class DispatchHandler {
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		boolean wasCached = true;
+
+		if (message == null) {
+			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
+			wasCached = false;
+			if (message == null) {
+				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction add event\nObject={}", ToStringBuilder.reflectionToString(event));
+				return;
+			}
+		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
 
-		if (reaction == null) { // Only happens in the case of a cached message with a new reaction
-			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-			reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
-			message.getReactions().add(reaction);
+		if (wasCached) {
+			if (reaction == null) { // Only happens in the case of a cached message with a new reaction
+				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+				reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
+				message.getReactions().add(reaction);
+			} else {
+				((Reaction) reaction).setCount(reaction.getCount() + 1);
+			}
 		}
 
 		IUser user;
@@ -799,13 +812,32 @@ class DispatchHandler {
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		boolean wasCached = true;
+
+		if (message == null) {
+			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
+			wasCached = false;
+			if (message == null) {
+				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction remove event\nObject={}", ToStringBuilder.reflectionToString(event));
+				return;
+			}
+		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
 
-		if (reaction == null) { // the last reaction of the emoji was removed
-			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
+		if (wasCached) {
+			if (reaction == null) { // the last reaction of the emoji was removed
+				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+				reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
+			} else {
+				((Reaction) reaction).setCount(reaction.getCount() - 1);
+				if (reaction.getCount() <= 0) {
+					List<IReaction> currReactions = message.getReactions();
+					currReactions.remove(reaction);
+					((Message) message).setReactions(currReactions);
+				}
+			}
 		}
 
 		IUser user;

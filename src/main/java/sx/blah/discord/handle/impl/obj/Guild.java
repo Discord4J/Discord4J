@@ -27,7 +27,6 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.*;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogEntryObject;
 import sx.blah.discord.api.internal.json.objects.audit.AuditLogObject;
-import sx.blah.discord.api.internal.json.requests.ChannelCreateRequest;
 import sx.blah.discord.api.internal.json.requests.*;
 import sx.blah.discord.api.internal.json.responses.PruneResponse;
 import sx.blah.discord.handle.audio.IAudioManager;
@@ -43,7 +42,7 @@ import sx.blah.discord.util.cache.Cache;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -200,7 +199,7 @@ public class Guild implements IGuild {
 
 	@Override
 	public IUser getOwner() {
-		return client.getUserByID(ownerID);
+		return client.fetchUser(ownerID);
 	}
 
 	/**
@@ -700,11 +699,6 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public IChannel getGeneralChannel() {
-		return getChannelByID(this.id);
-	}
-
-	@Override
 	public IChannel getDefaultChannel() {
 		return getChannels().stream()
 				.filter(c -> PermissionUtils.hasPermissions(c, client.getOurUser(), Permissions.READ_MESSAGES))
@@ -781,7 +775,7 @@ public class Guild implements IGuild {
 	}
 
 	@Override
-	public LocalDateTime getJoinTimeForUser(IUser user) {
+	public Instant getJoinTimeForUser(IUser user) {
 		if (!joinTimes.containsKey(user.getLongID()))
 			throw new DiscordException("Cannot find user "+user.getDisplayName(this)+" in this guild!");
 
@@ -1077,9 +1071,9 @@ public class Guild implements IGuild {
 	/**
 	 * Associates a user ID to their join time.
 	 */
-	public static class TimeStampHolder extends IDLinkedObjectWrapper<LocalDateTime> {
+	public static class TimeStampHolder extends IDLinkedObjectWrapper<Instant> {
 
-		public TimeStampHolder(long id, LocalDateTime obj) {
+		public TimeStampHolder(long id, Instant obj) {
 			super(id, obj);
 		}
 	}

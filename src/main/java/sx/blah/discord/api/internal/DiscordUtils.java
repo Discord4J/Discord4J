@@ -51,13 +51,13 @@ import sx.blah.discord.util.cache.LongMap;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.awt.*;
+import java.awt.Color;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
@@ -146,42 +146,25 @@ public class DiscordUtils {
 
 	/**
 	 * Gets a snowflake from a unix timestamp.
-	 *
-	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
-	 * The returned snowflake is only one of many that could exist at the given timestamp.
-	 *
-	 * @param unixTime The unix timestamp that should be used in the snowflake.
-	 * @return A snowflake with the given timestamp.
-	 */
-	public static long getSnowflakeFromTimestamp(long unixTime) {
-		return (unixTime - DISCORD_EPOCH) << 22;
-	}
-
-	/**
-	 * Gets a snowflake from a unix timestamp.
-	 *
-	 * <p>This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
+	 * <p>
+	 * This snowflake only contains accurate information about the timestamp (not about other parts of the snowflake).
 	 * The returned snowflake is only one of many that could exist at the given timestamp.
 	 *
 	 * @param date The date that should be converted to a unix timestamp for use in the snowflake.
 	 * @return A snowflake with the given timestamp.
 	 */
-	public static long getSnowflakeFromTimestamp(LocalDateTime date) {
-		return getSnowflakeFromTimestamp(date.atZone(ZoneId.systemDefault()).toEpochSecond());
+	public static long getSnowflakeFromTimestamp(Instant date) {
+		return (date.toEpochMilli() - DISCORD_EPOCH) << 22;
 	}
 
 	/**
-	 * Converts a String timestamp into a {@link LocalDateTime}.
+	 * Converts a String timestamp into a {@link Instant}.
 	 *
 	 * @param time The string timestamp.
 	 * @return The LocalDateTime representing the timestamp.
 	 */
-	public static LocalDateTime convertFromTimestamp(String time) {
-		if (time == null) {
-			return LocalDateTime.now();
-		}
-		return LocalDateTime.parse(time.split("\\+")[0]).atZone(ZoneId.of("UTC+00:00"))
-				.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+	public static Instant convertFromTimestamp(String time) {
+		return time == null ? Instant.now() : ZonedDateTime.parse(time).toInstant();
 	}
 
 	/**
@@ -203,7 +186,7 @@ public class DiscordUtils {
 			user.setDiscriminator(response.discriminator);
 		} else {
 			user = new User(shard, response.username, Long.parseUnsignedLong(response.id), response.discriminator, response.avatar,
-					new Presence(null, null, StatusType.OFFLINE), response.bot);
+					new Presence(null, null, StatusType.OFFLINE, ActivityType.PLAYING), response.bot);
 		}
 		return user;
 	}
@@ -698,7 +681,8 @@ public class DiscordUtils {
 		return new Presence(
 				game == null ? null : game.name,
 				game == null ? null : game.url,
-				StatusType.get(status));
+				StatusType.get(status),
+				game == null ? ActivityType.PLAYING : ActivityType.values()[game.type]);
 	}
 
 	/**
@@ -723,7 +707,7 @@ public class DiscordUtils {
 
 		Cache<IRole> roleCache = new Cache<>((DiscordClientImpl) guild.getClient(), IRole.class);
 		roleCache.putAll(roles);
-		return new EmojiImpl(id, guild, json.name, roleCache, json.require_colons, json.managed);
+		return new EmojiImpl(id, guild, json.name, roleCache, json.require_colons, json.managed, json.animated);
 	}
 
 	/**
@@ -734,7 +718,7 @@ public class DiscordUtils {
 	 * @return The converted reaction objects.
 	 */
 	public static List<IReaction> getReactionsFromJSON(IMessage message, MessageObject.ReactionObject[] json) {
-		List<IReaction> reactions = new ArrayList<>();
+		List<IReaction> reactions = new CopyOnWriteArrayList<>();
 		if (json != null)
 			for (MessageObject.ReactionObject object : json) {
 				long id = object.emoji.id == null ? 0 : Long.parseUnsignedLong(object.emoji.id);
@@ -876,14 +860,13 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Gets the timestamp portion of a Snowflake ID as a {@link LocalDateTime} using the system's default timezone.
+	 * Gets the timestamp portion of a Snowflake ID as a {@link Instant} using the system's default timezone.
 	 *
 	 * @param id The Snowflake ID.
 	 * @return The timestamp portion of the ID.
 	 */
-	public static LocalDateTime getSnowflakeTimeFromID(long id) {
-		long milliseconds = DISCORD_EPOCH + (id >>> 22);
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
+	public static Instant getSnowflakeTimeFromID(long id) {
+		return Instant.ofEpochMilli(DISCORD_EPOCH + (id >>> 22));
 	}
 
 	/**

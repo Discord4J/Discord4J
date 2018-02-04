@@ -19,7 +19,7 @@ package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.util.cache.LongMap;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -127,15 +127,6 @@ public interface IUser extends IDiscordObject<IUser> {
 	 * @return The user's voice state for the given guild.
 	 */
 	IVoiceState getVoiceStateForGuild(IGuild guild);
-
-	/**
-	 * Gets the user's voice states for every guild. (Key = Guild ID).
-	 *
-	 * @return The user's voice states for every guild.
-	 * @deprecated Use {{@link #getVoiceStates()}} instead.
-	 */
-	@Deprecated
-	LongMap<IVoiceState> getVoiceStatesLong();
 
 	/**
 	 * Gets the user's voice states for every guild. (Key = Guild ID).

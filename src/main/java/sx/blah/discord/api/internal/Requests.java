@@ -158,7 +158,7 @@ public class Requests {
 		 */
 		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
-				byte[] response = makeRequest(url, entity, headers);
+				String response = makeRequest(url, entity, headers);
 				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
 			} catch (IOException e) {
 				throw new DiscordException("Unable to serialize request!", e);
@@ -176,7 +176,7 @@ public class Requests {
 		 */
 		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
-				byte[] response = makeRequest(url, headers);
+				String response = makeRequest(url, headers);
 				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
 			} catch (IOException e) {
 				throw new DiscordException("Unable to serialize request!", e);
@@ -206,7 +206,7 @@ public class Requests {
 		 * @param headers The headers to include in the request.
 		 * @return The response as a byte array.
 		 */
-		public byte[] makeRequest(String url, String entity, BasicNameValuePair... headers) {
+		public String makeRequest(String url, String entity, BasicNameValuePair... headers) {
 			return makeRequest(url, new StringEntity(entity, "UTF-8"), headers);
 		}
 
@@ -217,7 +217,7 @@ public class Requests {
 		 * @param headers The headers to include in the request.
 		 * @return The response as a byte array.
 		 */
-		public byte[] makeRequest(String url, BasicNameValuePair... headers) {
+		public String makeRequest(String url, BasicNameValuePair... headers) {
 			try {
 				HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
 				for (BasicNameValuePair header : headers) {
@@ -240,7 +240,7 @@ public class Requests {
 		 * @param headers The headers to include in the request.
 		 * @return The response as a byte array.
 		 */
-		public byte[] makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) {
+		public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) {
 			try {
 				if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
 					HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
@@ -259,11 +259,11 @@ public class Requests {
 			return null;
 		}
 
-		private byte[] request(HttpUriRequest request) {
+		private String request(HttpUriRequest request) {
 			return request(request, 1, client == null ? 0 : client.getRetryCount());
 		}
 
-		private byte[] request(HttpUriRequest request, long sleepTime, int retry) {
+		private String request(HttpUriRequest request, long sleepTime, int retry) {
 			if (client != null)
 				request.addHeader("Authorization", client.getToken());
 
@@ -305,6 +305,10 @@ public class Requests {
 					}
 				}
 
+				String data = null;
+				if (response.getEntity() != null)
+					data = EntityUtils.toString(response.getEntity());
+
 				if (responseCode == 404) {
 					if (!request.getURI().toString().contains("invite") && !request.getURI().toString().contains("messages") && !request.getURI().toString().contains("users")) //Suppresses common 404s which are a result on queries to verify if something exists or not
 						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
@@ -314,7 +318,7 @@ public class Requests {
 					return null;
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
-				} else if (responseCode >= 500 && responseCode < 600) {
+				} else if ((responseCode >= 500 && responseCode < 600) || (responseCode == 400 && data != null && data.contains("cloudflare"))) {
 					if (retry == 0)
 						throw new DiscordException(String.format("Failed to make a %s failed request after %s tries!",
 								responseCode, client == null ? 0 : client.getRetryCount()));
@@ -326,12 +330,8 @@ public class Requests {
 					return request(request, (long) (Math.pow(sleepTime, 2) * ThreadLocalRandom.current().nextLong(5)), retry - 1);
 
 				} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
-					throw new DiscordException("Error on request to " + request.getURI() + ". Received response code " + responseCode + ". With response text: " + EntityUtils.toString(response.getEntity()));
+					throw new DiscordException("Error on request to " + request.getURI() + ". Received response code " + responseCode + ". With response text: " + data);
 				}
-
-				byte[] data = new byte[0];
-				if (response.getEntity() != null)
-					data = EntityUtils.toByteArray(response.getEntity());
 
 				if (responseCode == 429) {
 					RateLimitResponse rateLimitResponse = DiscordUtils.MAPPER.readValue(data, RateLimitResponse.class);

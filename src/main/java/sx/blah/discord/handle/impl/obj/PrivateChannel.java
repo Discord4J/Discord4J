@@ -25,9 +25,10 @@ import sx.blah.discord.util.AttachmentPartEntry;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.cache.Cache;
-import sx.blah.discord.util.cache.LongMap;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
 
 /**
  * The default implementation of {@link IPrivateChannel}.
@@ -56,16 +57,6 @@ public class PrivateChannel extends Channel implements IPrivateChannel {
 	public IMessage sendFiles(String content, boolean tts, EmbedObject embed, AttachmentPartEntry... entries) {
 		if (recipient.isBot()) throw new DiscordException("Bots may not DM other bots.");
 		return super.sendFiles(content, tts, embed, entries);
-	}
-
-	@Override
-	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong() {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

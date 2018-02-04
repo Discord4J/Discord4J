@@ -20,16 +20,16 @@ package sx.blah.discord.handle.obj;
 import java.util.Optional;
 
 /**
- * A user's presence. This consists of an online status, an optional playing text, and an optional streaming URL.
+ * An user's presence. This consists of a status, optional text, an optional streaming URL, and an optional activity.
  */
 public interface IPresence {
 
 	/**
-	 * Gets the playing text. This is the text shown after <i>Playing</i> in the Discord client.
+	 * Gets the text for this presence.
 	 *
-	 * @return The playing text.
+	 * @return The text for this presence.
 	 */
-	Optional<String> getPlayingText();
+	Optional<String> getText();
 
 	/**
 	 * Gets the streaming URL.
@@ -39,9 +39,9 @@ public interface IPresence {
 	Optional<String> getStreamingUrl();
 
 	/**
-	 * Gets the online status.
+	 * Gets the status.
 	 *
-	 * @return The online status.
+	 * @return The status.
 	 */
 	StatusType getStatus();
 
@@ -52,4 +52,10 @@ public interface IPresence {
 	 */
 	IPresence copy();
 
+	/**
+	 * Gets the activity.
+	 *
+	 * @return The activity.
+	 */
+	Optional<ActivityType> getActivity();
 }

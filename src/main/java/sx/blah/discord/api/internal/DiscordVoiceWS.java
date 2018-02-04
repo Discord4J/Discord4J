@@ -100,7 +100,6 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 	void connect() {
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
-			wsClient.setDaemon(true);
 			wsClient.getPolicy().setMaxBinaryMessageSize(Integer.MAX_VALUE);
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
 			wsClient.start();
