@@ -57,10 +57,7 @@ import sx.blah.discord.util.RequestBuilder;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -85,7 +82,9 @@ class DispatchHandler {
 	/**
 	 * The thread on which every payload is handled.
 	 */
-	private final ExecutorService dispatchExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("Dispatch Handler"));
+	private final ExecutorService dispatchExecutor = new ThreadPoolExecutor(2, Runtime.getRuntime().availableProcessors() * 4, 60L,
+			TimeUnit.SECONDS, new SynchronousQueue<>(false),
+			DiscordUtils.createDaemonThreadFactory("Dispatch Handler"), new ThreadPoolExecutor.CallerRunsPolicy());
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
 		this.ws = ws;
