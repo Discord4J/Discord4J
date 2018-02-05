@@ -16,18 +16,18 @@
  */
 package discord4j.store.primitive;
 
-import discord4j.store.ReactiveStore;
+import discord4j.store.ConnectionSource;
 import reactor.core.publisher.Mono;
 
 /**
- * This represents the long-object variation of a {@link ReactiveStore}.
+ * This represents the long-object variation of a {@link ConnectionSource}.
  *
  * @param <V> The object linked to a long key.
  *
- * @see discord4j.store.ReactiveStore
+ * @see ConnectionSource
  */
-public interface LongObjReactiveStore<V> extends ReactiveStore<Long, V> {
+public interface LongObjConnectionSource<V> extends ConnectionSource<Long, V> {
 
     @Override
-    Mono<LongObjDataConnection<V>> openConnection(boolean lock);
+    Mono<LongObjStoreConnection<V>> getConnection(boolean lock);
 }

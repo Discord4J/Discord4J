@@ -16,9 +16,7 @@
  */
 package discord4j.store.primitive;
 
-import discord4j.store.DataConnection;
-import discord4j.store.primitive.LongObjDataConnection;
-import discord4j.store.primitive.LongObjMappedDataConnection;
+import discord4j.store.StoreConnection;
 import discord4j.store.util.LongObjTuple2;
 import discord4j.store.util.MappingIterable;
 import reactor.core.publisher.Flux;
@@ -28,21 +26,21 @@ import reactor.util.function.Tuple2;
 import java.util.function.ToLongFunction;
 
 /**
- * An implementation of {@link LongObjDataConnection} which is a data connection that delegates to another, generic
+ * An implementation of {@link LongObjStoreConnection} which is a data connection that delegates to another, generic
  * one.
  *
- * @see LongObjDataConnection
+ * @see LongObjStoreConnection
  */
-public class ForwardingDataConnection<V> implements LongObjDataConnection<V> {
+public class ForwardingStoreConnection<V> implements LongObjStoreConnection<V> {
 
-    private final DataConnection<Long, V> toForward;
+    private final StoreConnection<Long, V> toForward;
 
     /**
      * Constructs the data connection.
      *
      * @param toForward The generic data connection to forward to.
      */
-    public ForwardingDataConnection(DataConnection<Long, V> toForward) {
+    public ForwardingStoreConnection(StoreConnection<Long, V> toForward) {
         this.toForward = toForward;
     }
 
@@ -51,13 +49,13 @@ public class ForwardingDataConnection<V> implements LongObjDataConnection<V> {
      *
      * @return The original data connection.
      */
-    protected DataConnection<Long, V> getOriginal() {
+    protected StoreConnection<Long, V> getOriginal() {
         return toForward;
     }
 
     @Override
-    public LongObjMappedDataConnection<V> withMapper(ToLongFunction<V> idMapper) {
-        return new LongObjMappedDataConnection<>(this, idMapper);
+    public LongObjMappedStoreConnection<V> withMapper(ToLongFunction<V> idMapper) {
+        return new LongObjMappedStoreConnection<>(this, idMapper);
     }
 
     @Override
@@ -243,6 +241,11 @@ public class ForwardingDataConnection<V> implements LongObjDataConnection<V> {
     @Override
     public Flux<Tuple2<Long, V>> entries() {
         return toForward.entries();
+    }
+
+    @Override
+    public void close() throws RuntimeException {
+        toForward.close();
     }
 
     @Override

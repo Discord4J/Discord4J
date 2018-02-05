@@ -14,33 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.service;
+package discord4j.store.noop;
 
-import com.google.auto.service.AutoService;
 import discord4j.store.ConnectionSource;
-import discord4j.store.primitive.LongObjConnectionSource;
+import discord4j.store.StoreConnection;
+import discord4j.store.noop.primitive.NoOpLongObjConnectionSource;
 import reactor.core.publisher.Mono;
 
-@AutoService(StoreService.class)
-public class TestService implements StoreService {
+/**
+ * Store implementation which does nothing.
+ *
+ * @see NoOpStoreService
+ * @see NoOpLongObjConnectionSource
+ */
+public class NoOpConnectionSource<K extends Comparable<K>, V> implements ConnectionSource<K, V> {
 
     @Override
-    public boolean hasGenericStores() {
-        return true;
-    }
-
-    @Override
-    public <K extends Comparable<K>, V> Mono<ConnectionSource<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return Mono.defer(() -> Mono.just(new MapStore<>()));
-    }
-
-    @Override
-    public boolean hasLongObjStores() {
-        return false;
-    }
-
-    @Override
-    public <V> Mono<LongObjConnectionSource<V>> provideLongObjStore(Class<V> valueClass) {
-        return Mono.empty();
+    public Mono<? extends StoreConnection<K, V>> getConnection(boolean lock) {
+        return Mono.just(new NoOpStoreConnection<>());
     }
 }

@@ -16,18 +16,17 @@
  */
 package discord4j.store.noop;
 
-import discord4j.store.ReactiveStore;
-import discord4j.store.noop.NoOpReactiveStore;
-import discord4j.store.noop.primitive.NoOpLongObjReactiveStore;
-import discord4j.store.primitive.LongObjReactiveStore;
+import discord4j.store.ConnectionSource;
+import discord4j.store.noop.primitive.NoOpLongObjConnectionSource;
+import discord4j.store.primitive.LongObjConnectionSource;
 import discord4j.store.service.StoreService;
 import reactor.core.publisher.Mono;
 
 /**
  * Service which provides stores that do nothing. This is automatically used if no valid store services are found.
  *
- * @see NoOpReactiveStore
- * @see NoOpLongObjReactiveStore
+ * @see NoOpConnectionSource
+ * @see NoOpLongObjConnectionSource
  */
 public class NoOpStoreService implements StoreService {
 
@@ -37,8 +36,8 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return Mono.just(new NoOpReactiveStore<>());
+    public <K extends Comparable<K>, V> Mono<ConnectionSource<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+        return Mono.just(new NoOpConnectionSource<>());
     }
 
     @Override
@@ -47,7 +46,7 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return Mono.just(new NoOpLongObjReactiveStore<>());
+    public <V> Mono<LongObjConnectionSource<V>> provideLongObjStore(Class<V> valueClass) {
+        return Mono.just(new NoOpLongObjConnectionSource<>());
     }
 }

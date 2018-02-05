@@ -16,9 +16,9 @@
  */
 package discord4j.store.service;
 
-import discord4j.store.ReactiveStore;
+import discord4j.store.ConnectionSource;
 import discord4j.store.noop.NoOpStoreService;
-import discord4j.store.primitive.LongObjReactiveStore;
+import discord4j.store.primitive.LongObjConnectionSource;
 import reactor.core.publisher.Mono;
 
 /**
@@ -36,7 +36,7 @@ public interface StoreService {
      *
      * @return True if possible, else false.
      *
-     * @see ReactiveStore
+     * @see ConnectionSource
      */
     boolean hasGenericStores();
 
@@ -50,14 +50,14 @@ public interface StoreService {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
+    <K extends Comparable<K>, V> Mono<ConnectionSource<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
 
     /**
      * This is used to check if this service can provide long-object stores.
      *
      * @return True if possible, else false.
      *
-     * @see LongObjReactiveStore
+     * @see LongObjConnectionSource
      */
     boolean hasLongObjStores();
 
@@ -68,5 +68,5 @@ public interface StoreService {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass);
+    <V> Mono<LongObjConnectionSource<V>> provideLongObjStore(Class<V> valueClass);
 }

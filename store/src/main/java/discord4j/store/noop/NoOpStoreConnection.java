@@ -16,7 +16,8 @@
  */
 package discord4j.store.noop;
 
-import discord4j.store.DataConnection;
+import discord4j.store.StoreConnection;
+import discord4j.store.noop.primitive.NoOpLongObjStoreConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -24,10 +25,10 @@ import reactor.util.function.Tuple2;
 /**
  * Data connection implementation which does nothing.
  *
- * @see NoOpReactiveStore
- * @see discord4j.store.noop.primitive.NoOpLongObjDataConnection
+ * @see NoOpConnectionSource
+ * @see NoOpLongObjStoreConnection
  */
-public class NoOpDataConnection<K extends Comparable<K>, V> implements DataConnection<K, V> {
+public class NoOpStoreConnection<K extends Comparable<K>, V> implements StoreConnection<K, V> {
 
     @Override
     public Mono<Void> store(K key, V value) {
@@ -147,5 +148,10 @@ public class NoOpDataConnection<K extends Comparable<K>, V> implements DataConne
     @Override
     public Flux<V> values() {
         return Flux.empty();
+    }
+
+    @Override
+    public void close() throws RuntimeException {
+
     }
 }

@@ -16,10 +16,10 @@
  */
 package discord4j.store.service;
 
-import discord4j.store.ReactiveStore;
+import discord4j.store.ConnectionSource;
 import discord4j.store.noop.NoOpStoreService;
-import discord4j.store.primitive.LongObjReactiveStore;
 import discord4j.store.primitive.ForwardingStoreService;
+import discord4j.store.primitive.LongObjConnectionSource;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -94,7 +94,7 @@ public class StoreProvider {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V> Mono<ConnectionSource<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return getGenericStoreProvider().provideGenericStore(keyClass, valueClass);
     }
 
@@ -105,7 +105,7 @@ public class StoreProvider {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    public <V> Mono<LongObjReactiveStore<V>> newLongObjStore(Class<V> valueClass) {
+    public <V> Mono<LongObjConnectionSource<V>> newLongObjStore(Class<V> valueClass) {
         return getLongObjStoreProvider().provideLongObjStore(valueClass);
     }
 }

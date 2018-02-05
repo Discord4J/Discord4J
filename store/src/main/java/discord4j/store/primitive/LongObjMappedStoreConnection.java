@@ -16,13 +16,12 @@
  */
 package discord4j.store.primitive;
 
-import discord4j.store.MappedDataConnection;
+import discord4j.store.MappedStoreConnection;
 import discord4j.store.util.LongObjTuple2;
 import discord4j.store.util.MappingIterable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
@@ -32,27 +31,27 @@ import java.util.function.ToLongFunction;
  *
  * @param <V> The value type.
  *
- * @see LongObjDataConnection
- * @see LongObjDataConnection#withMapper(ToLongFunction)
+ * @see LongObjStoreConnection
+ * @see LongObjStoreConnection#withMapper(ToLongFunction)
  */
-public class LongObjMappedDataConnection<V> extends MappedDataConnection<Long, V> implements LongObjDataConnection<V> {
+public class LongObjMappedStoreConnection<V> extends MappedStoreConnection<Long, V> implements LongObjStoreConnection<V> {
 
-    private final LongObjDataConnection<V> connection;
+    private final LongObjStoreConnection<V> connection;
     private final ToLongFunction<V> idMapper;
 
-    protected LongObjMappedDataConnection(LongObjDataConnection<V> connection, ToLongFunction<V> idMapper) {
+    protected LongObjMappedStoreConnection(LongObjStoreConnection<V> connection, ToLongFunction<V> idMapper) {
         super(connection, idMapper::applyAsLong);
         this.connection = connection;
         this.idMapper = idMapper;
     }
 
     @Override
-    public LongObjMappedDataConnection<V> withMapper(Function<V, Long> idMapper) {
+    public LongObjMappedStoreConnection<V> withMapper(Function<V, Long> idMapper) {
         throw new UnsupportedOperationException("A mapper is already in use!");
     }
 
     @Override
-    public LongObjMappedDataConnection<V> withMapper(ToLongFunction<V> idMapper) {
+    public LongObjMappedStoreConnection<V> withMapper(ToLongFunction<V> idMapper) {
         throw new UnsupportedOperationException("A mapper is already in use!");
     }
 

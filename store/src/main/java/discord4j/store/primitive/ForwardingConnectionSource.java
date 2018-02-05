@@ -14,27 +14,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.noop;
+package discord4j.store.primitive;
 
-import discord4j.store.DataConnection;
-import discord4j.store.ReactiveStore;
+import discord4j.store.ConnectionSource;
 import reactor.core.publisher.Mono;
 
 /**
- * Store implementation which does nothing.
+ * An implementation of {@link LongObjConnectionSource} which creates primitive connections which delegate to another,
+ * generic connection.
  *
- * @see NoOpStoreService
- * @see discord4j.store.noop.primitive.NoOpLongObjReactiveStore
+ * @see LongObjConnectionSource
  */
-public class NoOpReactiveStore<K extends Comparable<K>, V> implements ReactiveStore<K, V> {
+public class ForwardingConnectionSource<V> implements LongObjConnectionSource<V> {
 
-    @Override
-    public Mono<? extends DataConnection<K, V>> openConnection(boolean lock) {
-        return Mono.just(new NoOpDataConnection<>());
+    private final ConnectionSource<Long, V> toForward;
+
+    /**
+     * Constructs the store.
+     *
+     * @param toForward The generic store to forward to.
+     */
+    public ForwardingConnectionSource(ConnectionSource<Long, V> toForward) {
+        this.toForward = toForward;
     }
 
     @Override
-    public <C extends DataConnection<K, V>> Mono<Void> closeConnection(C connection) {
-        return Mono.empty();
+    public Mono<LongObjStoreConnection<V>> getConnection(boolean lock) {
+        return toForward.getConnection(lock).map(ForwardingStoreConnection::new);
     }
 }

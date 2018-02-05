@@ -16,7 +16,7 @@
  */
 package discord4j.store.primitive;
 
-import discord4j.store.ReactiveStore;
+import discord4j.store.ConnectionSource;
 import discord4j.store.service.StoreService;
 import reactor.core.publisher.Mono;
 
@@ -53,7 +53,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V> Mono<ReactiveStore<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V> Mono<ConnectionSource<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return getOriginal().provideGenericStore(keyClass, valueClass);
     }
 
@@ -63,7 +63,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <V> Mono<LongObjReactiveStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return getOriginal().provideGenericStore(Long.class, valueClass).map(ForwardingReactiveStore::new);
+    public <V> Mono<LongObjConnectionSource<V>> provideLongObjStore(Class<V> valueClass) {
+        return getOriginal().provideGenericStore(Long.class, valueClass).map(ForwardingConnectionSource::new);
     }
 }

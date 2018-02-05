@@ -22,7 +22,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -33,21 +32,21 @@ import java.util.function.Function;
  *           {@link Comparable} in order to allow for range operations.
  * @param <V> The value type.
  *
- * @see DataConnection
- * @see DataConnection#withMapper(Function)
+ * @see StoreConnection
+ * @see StoreConnection#withMapper(Function)
  */
-public class MappedDataConnection<K extends Comparable<K>, V> implements DataConnection<K, V> {
+public class MappedStoreConnection<K extends Comparable<K>, V> implements StoreConnection<K, V> {
 
-    private final DataConnection<K, V> connection;
+    private final StoreConnection<K, V> connection;
     private final Function<V, K> idMapper;
 
-    protected MappedDataConnection(DataConnection<K, V> connection, Function<V, K> idMapper) {
+    protected MappedStoreConnection(StoreConnection<K, V> connection, Function<V, K> idMapper) {
         this.connection = connection;
         this.idMapper = idMapper;
     }
 
     @Override
-    public MappedDataConnection<K, V> withMapper(Function<V, K> idMapper) {
+    public MappedStoreConnection<K, V> withMapper(Function<V, K> idMapper) {
         throw new UnsupportedOperationException("A mapper is already in use!");
     }
 
@@ -258,5 +257,10 @@ public class MappedDataConnection<K extends Comparable<K>, V> implements DataCon
     @Override
     public Flux<Tuple2<K, V>> entries() {
         return connection.entries();
+    }
+
+    @Override
+    public void close() throws RuntimeException {
+        connection.close();
     }
 }

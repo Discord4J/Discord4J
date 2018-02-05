@@ -16,26 +16,21 @@
  */
 package discord4j.store.noop.primitive;
 
-import discord4j.store.DataConnection;
-import discord4j.store.primitive.LongObjDataConnection;
-import discord4j.store.primitive.LongObjReactiveStore;
+import discord4j.store.noop.NoOpConnectionSource;
+import discord4j.store.primitive.LongObjConnectionSource;
+import discord4j.store.primitive.LongObjStoreConnection;
 import reactor.core.publisher.Mono;
 
 /**
  * Store implementation which does nothing.
  *
  * @see discord4j.store.noop.NoOpStoreService
- * @see discord4j.store.noop.NoOpReactiveStore
+ * @see NoOpConnectionSource
  */
-public class NoOpLongObjReactiveStore<V> implements LongObjReactiveStore<V> {
+public class NoOpLongObjConnectionSource<V> implements LongObjConnectionSource<V> {
 
     @Override
-    public Mono<LongObjDataConnection<V>> openConnection(boolean lock) {
-        return Mono.just(new NoOpLongObjDataConnection<>());
-    }
-
-    @Override
-    public <C extends DataConnection<Long, V>> Mono<Void> closeConnection(C connection) {
-        return Mono.empty();
+    public Mono<LongObjStoreConnection<V>> getConnection(boolean lock) {
+        return Mono.just(new NoOpLongObjStoreConnection<>());
     }
 }

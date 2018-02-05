@@ -16,27 +16,25 @@
  */
 package discord4j.store.service;
 
-import discord4j.store.DataConnection;
-import discord4j.store.ReactiveStore;
+import discord4j.store.ConnectionSource;
+import discord4j.store.StoreConnection;
 import discord4j.store.util.WithinRangePredicate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MapStore<K extends Comparable<K>, V> implements ReactiveStore<K, V> {
+public class MapStore<K extends Comparable<K>, V> implements ConnectionSource<K, V> {
 
     private final Map<K, V> map = new ConcurrentHashMap<>();
-    private final AtomicReference<MapStoreDataConnection> lock = new AtomicReference<>();
+    private final AtomicReference<MapStoreStoreConnection> lock = new AtomicReference<>();
 
     @Override
-    public Mono<? extends DataConnection<K, V>> openConnection(boolean lock) {
-        Mono<MapStoreDataConnection> mono = Mono.defer(() -> Mono.just(new MapStoreDataConnection(lock)));
+    public Mono<? extends StoreConnection<K, V>> getConnection(boolean lock) {
+        Mono<MapStoreStoreConnection> mono = Mono.defer(() -> Mono.just(new MapStoreStoreConnection(lock)));
         if (this.lock.get() != null)
             mono = mono.zipWith(Mono.just(this.lock.get()))
                     .delayUntil(tuple -> tuple.getT2().signaler)
@@ -46,21 +44,12 @@ public class MapStore<K extends Comparable<K>, V> implements ReactiveStore<K, V>
         return mono;
     }
 
-    @Override
-    public <C extends DataConnection<K, V>> Mono<Void> closeConnection(C connection) {
-        return Mono.defer(() -> {
-            MapStoreDataConnection conn = (MapStoreDataConnection) connection;
-            conn.unlock();
-            return Mono.empty();
-        });
-    }
-
-    private final class MapStoreDataConnection implements DataConnection<K, V> {
+    private final class MapStoreStoreConnection implements StoreConnection<K, V> {
 
         final Mono<Void> signaler;
         final AtomicReference<Runnable> callback = new AtomicReference<>();
 
-        private MapStoreDataConnection(boolean lock) {
+        private MapStoreStoreConnection(boolean lock) {
             if (lock) {
                 signaler = Mono.create(sink -> callback.set(sink::success));
             } else {
@@ -210,6 +199,11 @@ public class MapStore<K extends Comparable<K>, V> implements ReactiveStore<K, V>
         @Override
         public Flux<V> values() {
             return Flux.defer(() -> Flux.fromIterable(map.values()));
+        }
+
+        @Override
+        public void close() throws RuntimeException {
+            unlock();
         }
     }
 }
