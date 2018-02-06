@@ -21,23 +21,26 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.OptionalLong;
 
-public class EmojiResponse {
+public class ApplicationInfoResponse {
 
 	@UnsignedJson
-	private OptionalLong id;
+	private long id;
 	private String name;
-	@UnsignedJson
-	private long[] roles;
 	@Nullable
-	private UserResponse user;
-	@JsonProperty("require_colons")
-	private boolean requireColons;
-	private boolean managed;
-	private boolean animated;
+	private String icon;
+	@Nullable
+	private String description;
+	@JsonProperty("rpc_origins")
+	@Nullable
+	private String[] rpcOrigins;
+	@JsonProperty("bot_public")
+	private boolean botPublic;
+	@JsonProperty("bot_require_code_grant")
+	private boolean botRequireCodeGrant;
+	private UserResponse owner;
 
-	public OptionalLong getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -45,37 +48,44 @@ public class EmojiResponse {
 		return name;
 	}
 
-	public long[] getRoles() {
-		return roles;
+	@Nullable
+	public String getIcon() {
+		return icon;
 	}
 
 	@Nullable
-	public UserResponse getUser() {
-		return user;
+	public String getDescription() {
+		return description;
 	}
 
-	public boolean isRequireColons() {
-		return requireColons;
+	@Nullable
+	public String[] getRpcOrigins() {
+		return rpcOrigins;
 	}
 
-	public boolean isManaged() {
-		return managed;
+	public boolean isBotPublic() {
+		return botPublic;
 	}
 
-	public boolean isAnimated() {
-		return animated;
+	public boolean isBotRequireCodeGrant() {
+		return botRequireCodeGrant;
+	}
+
+	public UserResponse getOwner() {
+		return owner;
 	}
 
 	@Override
 	public String toString() {
-		return "EmojiResponse[" +
+		return "ApplicationInfoResponse{" +
 				"id=" + id +
-				", name=" + name +
-				", roles=" + Arrays.toString(roles) +
-				", user=" + user +
-				", requireColons=" + requireColons +
-				", managed=" + managed +
-				", animated=" + animated +
-				']';
+				", name='" + name + '\'' +
+				", icon='" + icon + '\'' +
+				", description='" + description + '\'' +
+				", rpcOrigins=" + Arrays.toString(rpcOrigins) +
+				", botPublic=" + botPublic +
+				", botRequireCodeGrant=" + botRequireCodeGrant +
+				", owner=" + owner +
+				'}';
 	}
 }

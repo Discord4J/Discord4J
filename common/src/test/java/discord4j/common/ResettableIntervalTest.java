@@ -27,7 +27,7 @@ public class ResettableIntervalTest {
 	public void test() throws InterruptedException {
 
 		ResettableInterval interval = new ResettableInterval();
-		interval.subscribe(System.out::println);
+		interval.ticks().subscribe(System.out::println);
 
 		interval.start(Duration.ofSeconds(1));
 

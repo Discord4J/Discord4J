@@ -23,17 +23,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.request.*;
-import discord4j.rest.http.EmptyReaderStrategy;
-import discord4j.rest.http.EmptyWriterStrategy;
-import discord4j.rest.http.JacksonReaderStrategy;
-import discord4j.rest.http.JacksonWriterStrategy;
+import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class ChannelServiceTest {
@@ -49,7 +49,9 @@ public class ChannelServiceTest {
 
 	private ChannelService getChannelService() {
 
-		if (channelService != null) return channelService;
+		if (channelService != null) {
+			return channelService;
+		}
 
 		String token = System.getenv("token");
 		ObjectMapper mapper = getMapper();
@@ -61,6 +63,7 @@ public class ChannelServiceTest {
 				.readerStrategy(new JacksonReaderStrategy<>(mapper))
 				.readerStrategy(new EmptyReaderStrategy())
 				.writerStrategy(new JacksonWriterStrategy(mapper))
+				.writerStrategy(new MultipartWriterStrategy(mapper))
 				.writerStrategy(new EmptyWriterStrategy())
 				.build();
 
@@ -106,6 +109,44 @@ public class ChannelServiceTest {
 	public void testCreateMessage() {
 		MessageCreateRequest req = new MessageCreateRequest("Hello world", null, false, null);
 		getChannelService().createMessage(permanentChannel, req).block();
+	}
+
+	@Test
+	public void testCreateMessageWithFile() throws IOException {
+		MessageCreateRequest req = new MessageCreateRequest("Hello world with file!", null, false, null);
+		try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
+			if (inputStream == null) {
+				throw new NullPointerException();
+			}
+			getChannelService().createMessage(permanentChannel, req, readAllBytes(inputStream), "fileTest.txt").block();
+		}
+	}
+
+	private byte[] readAllBytes(InputStream inputStream) throws IOException {
+		int size = 8192;
+		int max = Integer.MAX_VALUE - 8;
+		byte[] buf = new byte[size];
+		int capacity = buf.length;
+		int nread = 0;
+		int n;
+		for (; ; ) {
+			while ((n = inputStream.read(buf, nread, capacity - nread)) > 0) {
+				nread += n;
+			}
+			if (n < 0) {
+				break;
+			}
+			if (capacity <= max - capacity) {
+				capacity = capacity << 1;
+			} else {
+				if (capacity == max) {
+					throw new OutOfMemoryError("Required array size too large");
+				}
+				capacity = max;
+			}
+			buf = Arrays.copyOf(buf, capacity);
+		}
+		return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
 	}
 
 	@Test

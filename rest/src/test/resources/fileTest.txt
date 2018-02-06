@@ -1,0 +1,12 @@
+Discord4J is a wrapper for Discord's websocket and REST API. It provides an easy-to-use implementation which has features suitable for both the most experienced and inexperienced Java programmers.
+
+Why use Discord4J?
+- Although not officially maintained or associated with Discord or Hammer & Chisel, it is officially recommended as a compliant API implementation.
+- Discord's bot api is fairly complicated, requiring the use of websockets in addition to REST calls in order to manage discord-related activities. Discord4J abstracts all of this and keeps an internal cache of data which is updated in real time, allowing for a reduction in REST calls which results in faster code.
+- Discord4J is extensively multithreaded, allowing for operations to be executed quickly.
+- There is an extensive event system. This allows for programs to be reactive to all sorts of situations asynchronously.
+- Discord4J is extremely extensible thanks to its module system.
+- There are many utility classes such as RequestBuffer which allows for automatic handling of ratelimits or RequestBuilder which provides a promise-like structure to logic (a la RxJava)
+- Discord4J is still being actively developed by both its current maintainer, austinv11, and the community who provide invaluable feedback and pull-requests. This means it quickly gets updated to support the latest Discord changes (there are always a lot of them).
+- We have our own Discord server! Alternatively, we have a support channel on the Discord API server.
+- For a more detailed explanation of the API, please stop looking at this test file and go to our README file on the repo.

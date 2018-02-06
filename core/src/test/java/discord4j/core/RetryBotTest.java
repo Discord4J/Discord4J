@@ -8,16 +8,15 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
+package discord4j.core;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -26,61 +25,83 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.dispatch.MessageCreate;
 import discord4j.common.json.payload.dispatch.Ready;
+import discord4j.common.json.response.MessageResponse;
+import discord4j.gateway.GatewayClient;
 import discord4j.gateway.payload.JacksonLenientPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import discord4j.rest.http.*;
+import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.request.Router;
+import discord4j.rest.route.Routes;
+import discord4j.rest.service.ApplicationService;
+import discord4j.rest.service.GatewayService;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.FluxSink;
 
-public class GatewayClientTest {
+import java.util.concurrent.atomic.AtomicLong;
 
-	private static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
+public class RetryBotTest {
 
 	private String token;
 
 	@Before
 	public void initialize() {
 		token = System.getenv("token");
-
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		context.getLogger("discord4j.rest.http.client").setLevel(Level.TRACE);
-		context.getLogger("reactor.ipc.netty.channel.ContextHandler").setLevel(Level.INFO);
-		context.getLogger("reactor.ipc.netty.http.client.HttpClient").setLevel(Level.INFO);
-		context.getLogger("io.netty.handler.codec.http.websocketx").setLevel(Level.INFO);
 	}
 
 	@Test
 	public void test() {
 		ObjectMapper mapper = getMapper();
+
+		SimpleHttpClient httpClient = SimpleHttpClient.builder()
+				.baseUrl(Routes.BASE_URL)
+				.defaultHeader("authorization", "Bot " + token)
+				.defaultHeader("content-type", "application/json")
+				.readerStrategy(new JacksonReaderStrategy<>(mapper))
+				.readerStrategy(new EmptyReaderStrategy())
+				.writerStrategy(new JacksonWriterStrategy(mapper))
+				.writerStrategy(new MultipartWriterStrategy(mapper))
+				.writerStrategy(new EmptyWriterStrategy())
+				.build();
+		Router router = new Router(httpClient);
+		GatewayService gatewayService = new GatewayService(router);
+		ApplicationService applicationService = new ApplicationService(router);
+
 		PayloadReader reader = new JacksonLenientPayloadReader(mapper);
 		PayloadWriter writer = new JacksonPayloadWriter(mapper);
-
 		GatewayClient gatewayClient = new GatewayClient(reader, writer, token);
-
-		gatewayClient.dispatch().subscribe(dispatch -> {
-			if (dispatch instanceof Ready) {
-				System.out.println("Test received READY!");
-			}
-		});
 
 		FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
 
+		AtomicLong ownerId = new AtomicLong();
+
+		gatewayClient.dispatch().ofType(Ready.class)
+				.next()
+				.flatMap(ready -> applicationService.getCurrentApplicationInfo())
+				.map(res -> res.getOwner().getId())
+				.subscribe(ownerId::set);
+
 		gatewayClient.dispatch().ofType(MessageCreate.class)
-				.subscribe(message -> {
-					String content = message.getMessage().getContent();
-					if ("!close".equals(content)) {
-						gatewayClient.close(false);
-					} else if ("!retry".equals(content)) {
-						gatewayClient.close(true);
-					} else if ("!fail".equals(content)) {
-						outboundSink.next(new GatewayPayload<>());
+				.subscribe(event -> {
+					MessageResponse message = event.getMessage();
+					if (ownerId.get() == message.getAuthor().getId()) {
+						String content = message.getContent();
+						if ("!close".equals(content)) {
+							gatewayClient.close(false);
+						} else if ("!retry".equals(content)) {
+							gatewayClient.close(true);
+						} else if ("!fail".equals(content)) {
+							outboundSink.next(new GatewayPayload<>());
+						}
 					}
 				});
 
-		gatewayClient.execute(gatewayUrl).block();
+		gatewayService.getGateway()
+				.flatMap(res -> gatewayClient.execute(res.getUrl() + "?v=6&encoding=json&compress=zlib-stream"))
+				.block();
 	}
 
 	private ObjectMapper getMapper() {
@@ -89,4 +110,6 @@ public class GatewayClientTest {
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
 				.registerModule(new PossibleModule());
 	}
+
+
 }

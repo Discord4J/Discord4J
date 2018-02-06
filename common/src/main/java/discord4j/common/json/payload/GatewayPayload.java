@@ -19,17 +19,21 @@ package discord4j.common.json.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import discord4j.common.jackson.OpcodeConverter;
 import discord4j.common.jackson.PayloadDeserializer;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
 @JsonDeserialize(using = PayloadDeserializer.class)
-public class GatewayPayload {
+public class GatewayPayload<T extends PayloadData> {
 
-	private int op;
+	@JsonSerialize(converter = OpcodeConverter.class)
+	private Opcode<T> op;
 	@JsonProperty("d")
-	private Payload data;
+	@Nullable
+	private T data;
 	@JsonProperty("s")
 	@Nullable
 	private Integer sequence;
@@ -37,7 +41,7 @@ public class GatewayPayload {
 	@Nullable
 	private String type;
 
-	public GatewayPayload(int op, Payload data, @Nullable Integer sequence, @Nullable String type) {
+	public GatewayPayload(Opcode<T> op, @Nullable T data, @Nullable Integer sequence, @Nullable String type) {
 		this.op = op;
 		this.data = data;
 		this.sequence = sequence;
@@ -47,11 +51,36 @@ public class GatewayPayload {
 	public GatewayPayload() {
 	}
 
-	public int getOp() {
+	public static GatewayPayload<Heartbeat> heartbeat(Heartbeat data) {
+		return new GatewayPayload<>(Opcode.HEARTBEAT, data, null, null);
+	}
+
+	public static GatewayPayload<Identify> identify(Identify data) {
+		return new GatewayPayload<>(Opcode.IDENTIFY, data, null, null);
+	}
+
+	public static GatewayPayload<StatusUpdate> statusUpdate(StatusUpdate data) {
+		return new GatewayPayload<>(Opcode.STATUS_UPDATE, data, null, null);
+	}
+
+	public static GatewayPayload<VoiceStateUpdate> voiceStateUpdate(VoiceStateUpdate data) {
+		return new GatewayPayload<>(Opcode.VOICE_STATE_UPDATE, data, null, null);
+	}
+
+	public static GatewayPayload<Resume> resume(Resume data) {
+		return new GatewayPayload<>(Opcode.RESUME, data, null, null);
+	}
+
+	public static GatewayPayload<RequestGuildMembers> requestGuildMembers(RequestGuildMembers data) {
+		return new GatewayPayload<>(Opcode.REQUEST_GUILD_MEMBERS, data, null, null);
+	}
+
+	public Opcode<T> getOp() {
 		return op;
 	}
 
-	public Payload getData() {
+	@Nullable
+	public T getData() {
 		return data;
 	}
 
@@ -76,10 +105,10 @@ public class GatewayPayload {
 			return false;
 		}
 
-		GatewayPayload other = (GatewayPayload) obj;
+		GatewayPayload<?> other = (GatewayPayload<?>) obj;
 
 		return this.op == other.op
-				&& this.data.equals(other.data)
+				&& Objects.equals(this.data, other.data)
 				&& Objects.equals(this.sequence, other.sequence)
 				&& Objects.equals(this.type, other.type);
 	}

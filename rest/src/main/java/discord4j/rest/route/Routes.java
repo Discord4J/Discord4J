@@ -884,5 +884,11 @@ public abstract class Routes {
 	 */
 	public static final Route<Void> WEBHOOK_EXECUTE_GITHUB = Route.post("/webhooks/{webhook.id}/{webhook.token}/github", Void.class);
 
-
+	/**
+	 * Returns the bot's OAuth2 application info.
+	 *
+	 * @see <a href=https://discordapp.com/developers/docs/topics/oauth2#get-current-application-information>https
+	 * ://discordapp.com/developers/docs/topics/oauth2#get-current-application-information</a>
+	 */
+	public static final Route<ApplicationInfoResponse> APPLICATION_INFO_GET = Route.get("/oauth2/applications/@me", ApplicationInfoResponse.class);
 }

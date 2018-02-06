@@ -14,29 +14,35 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway.payload;
+package discord4j.gateway;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.json.payload.GatewayPayload;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import reactor.core.Exceptions;
+import discord4j.common.json.payload.PayloadData;
 
-public class JacksonPayloadWriter implements PayloadWriter {
+import javax.annotation.Nullable;
 
-	private final ObjectMapper mapper;
+public class PayloadContext<T extends PayloadData> {
 
-	public JacksonPayloadWriter(ObjectMapper mapper) {
-		this.mapper = mapper;
+	private final GatewayClient client;
+	private final DiscordWebSocketHandler handler;
+	@Nullable
+	private final T data;
+
+	public PayloadContext(GatewayClient client, DiscordWebSocketHandler handler, @Nullable T data) {
+		this.client = client;
+		this.handler = handler;
+		this.data = data;
 	}
 
-	@Override
-	public ByteBuf write(GatewayPayload<?> payload) {
-		try {
-			return Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload));
-		} catch (JsonProcessingException e) {
-			throw Exceptions.propagate(e);
-		}
+	public GatewayClient getClient() {
+		return client;
+	}
+
+	public DiscordWebSocketHandler getHandler() {
+		return handler;
+	}
+
+	@Nullable
+	public T getData() {
+		return data;
 	}
 }

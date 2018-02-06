@@ -1,6 +1,8 @@
 dependencies {
     compile project(':common')
 
+    compile "io.projectreactor.addons:reactor-extra:$reactor_extra_version"
+
     testCompile "junit:junit:$junit_version"
 
     testRuntime "ch.qos.logback:logback-classic:$logback_version"

@@ -14,29 +14,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway.payload;
+package discord4j.rest.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.json.payload.GatewayPayload;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import reactor.core.Exceptions;
+import discord4j.common.json.response.ApplicationInfoResponse;
+import discord4j.rest.request.Router;
+import discord4j.rest.route.Routes;
+import reactor.core.publisher.Mono;
 
-public class JacksonPayloadWriter implements PayloadWriter {
+public class ApplicationService extends RestService {
 
-	private final ObjectMapper mapper;
-
-	public JacksonPayloadWriter(ObjectMapper mapper) {
-		this.mapper = mapper;
+	public ApplicationService(Router router) {
+		super(router);
 	}
 
-	@Override
-	public ByteBuf write(GatewayPayload<?> payload) {
-		try {
-			return Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload));
-		} catch (JsonProcessingException e) {
-			throw Exceptions.propagate(e);
-		}
+	public Mono<ApplicationInfoResponse> getCurrentApplicationInfo() {
+		return Routes.APPLICATION_INFO_GET.newRequest()
+				.exchange(getRouter());
 	}
 }

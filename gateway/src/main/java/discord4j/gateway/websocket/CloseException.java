@@ -25,6 +25,11 @@ public class CloseException extends RuntimeException {
 		this.closeStatus = closeStatus;
 	}
 
+	public CloseException(CloseStatus closeStatus, Throwable cause) {
+		super(cause);
+		this.closeStatus = closeStatus;
+	}
+
 	public CloseStatus getCloseStatus() {
 		return closeStatus;
 	}

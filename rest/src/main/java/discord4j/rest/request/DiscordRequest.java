@@ -21,7 +21,9 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Encodes all of the needed information to make an HTTP request to Discord.
@@ -39,6 +41,9 @@ public class DiscordRequest<T> {
 
 	@Nullable
 	private Map<String, Object> queryParams;
+
+	@Nullable
+	private Map<String, Set<String>> headers;
 
 	public DiscordRequest(Route<T> route, String completeUri) {
 		this.route = route;
@@ -61,6 +66,11 @@ public class DiscordRequest<T> {
 	@Nullable
 	public Map<String, Object> getQueryParams() {
 		return queryParams;
+	}
+
+	@Nullable
+	public Map<String, Set<String>> getHeaders() {
+		return headers;
 	}
 
 	/**
@@ -97,6 +107,21 @@ public class DiscordRequest<T> {
 	 */
 	public DiscordRequest<T> query(Map<String, Object> params) {
 		params.forEach(this::query);
+		return this;
+	}
+
+	/**
+	 * Adds the given key and value to the headers of this request.
+	 *
+	 * @param key the header key
+	 * @param value the header value
+	 * @return this request
+	 */
+	public DiscordRequest<T> header(String key, String value) {
+		if (headers == null) {
+			headers = new LinkedHashMap<>();
+		}
+		headers.computeIfAbsent(key.toLowerCase(), k -> new LinkedHashSet<>()).add(value);
 		return this;
 	}
 

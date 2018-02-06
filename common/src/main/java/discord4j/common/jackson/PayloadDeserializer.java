@@ -27,30 +27,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PayloadDeserializer extends StdDeserializer<GatewayPayload> {
+public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
 
 	private static final String OP_FIELD = "op";
 	private static final String D_FIELD = "d";
 	private static final String T_FIELD = "t";
 	private static final String S_FIELD = "s";
 
-	private static final Map<Integer, Class<? extends Payload>> payloadTypes = new HashMap<>();
 	private static final Map<String, Class<? extends Dispatch>> dispatchTypes = new HashMap<>();
 
 	static {
-		payloadTypes.put(Opcodes.DISPATCH, null); // should use dispatchTypes. For completion.
-		payloadTypes.put(Opcodes.HEARTBEAT, Heartbeat.class);
-		payloadTypes.put(Opcodes.IDENTIFY, Identify.class);
-		payloadTypes.put(Opcodes.STATUS_UPDATE, StatusUpdate.class);
-		payloadTypes.put(Opcodes.VOICE_STATE_UPDATE, VoiceStateUpdate.class);
-		payloadTypes.put(Opcodes.VOICE_SERVER_PING, null); // Never sent. For completion
-		payloadTypes.put(Opcodes.RESUME, Resume.class);
-		payloadTypes.put(Opcodes.RECONNECT, null); // Body always null. For completion
-		payloadTypes.put(Opcodes.REQUEST_GUILD_MEMBERS, RequestGuildMembers.class);
-		payloadTypes.put(Opcodes.INVALID_SESSION, InvalidSession.class);
-		payloadTypes.put(Opcodes.HELLO, Hello.class);
-		payloadTypes.put(Opcodes.HEARTBEAT_ACK, null); // Body always null. For completion
-
 		dispatchTypes.put(EventNames.READY, Ready.class);
 		dispatchTypes.put(EventNames.RESUMED, Resumed.class);
 		dispatchTypes.put(EventNames.CHANNEL_CREATE, ChannelCreate.class);
@@ -91,30 +77,31 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload> {
 	}
 
 	@Override
-	public GatewayPayload deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+	public GatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 		JsonNode payload = p.getCodec().readTree(p);
 
 		int op = payload.get(OP_FIELD).asInt();
 		String t = payload.get(T_FIELD).asText();
 		Integer s = payload.get(S_FIELD).isNull() ? null : payload.get(S_FIELD).intValue();
 
-		Class<? extends Payload> payloadType = getPayloadType(op, t);
-		Payload data = payloadType == null ? null : p.getCodec().treeToValue(payload.get(D_FIELD), payloadType);
+		Class<? extends PayloadData> payloadType = getPayloadType(op, t);
+		PayloadData data = payloadType == null ? null : p.getCodec().treeToValue(payload.get(D_FIELD), payloadType);
 
-		return new GatewayPayload(op, data, s, t);
+		return new GatewayPayload(Opcode.forRaw(op), data, s, t);
 	}
 
-	private static Class<? extends Payload> getPayloadType(int op, String t) {
-		if (op == Opcodes.DISPATCH) {
+	private static Class<? extends PayloadData> getPayloadType(int op, String t) {
+		if (op == Opcode.DISPATCH.getRawOp()) {
 			if (!dispatchTypes.containsKey(t)) {
 				throw new IllegalArgumentException("Attempt to deserialize payload with unknown event type: " + t);
 			}
 			return dispatchTypes.get(t);
 		}
 
-		if (!payloadTypes.containsKey(op)) {
+		Opcode<?> opcode = Opcode.forRaw(op);
+		if (opcode == null) {
 			throw new IllegalArgumentException("Attempt to deserialize payload with unknown op: " + op);
 		}
-		return payloadTypes.get(op);
+		return opcode.getPayloadType();
 	}
 }

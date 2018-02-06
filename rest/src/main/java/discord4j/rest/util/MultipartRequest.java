@@ -14,35 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.json.payload;
 
-import discord4j.common.json.request.GameRequest;
+package discord4j.rest.util;
+
+import discord4j.common.json.request.MessageCreateRequest;
+import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
-public class StatusUpdate implements PayloadData {
+public class MultipartRequest {
 
-	@Nullable
-	private final Long since;
-	@Nullable
-	private final GameRequest game;
-	private final String status;
-	private final boolean afk;
+	private final Consumer<HttpClientRequest.Form> formConsumer;
+	private final MessageCreateRequest createRequest;
 
-	public StatusUpdate(@Nullable Long since, @Nullable GameRequest game, String status, boolean afk) {
-		this.since = since;
-		this.game = game;
-		this.status = status;
-		this.afk = afk;
+	public MultipartRequest(Consumer<HttpClientRequest.Form> formConsumer, @Nullable MessageCreateRequest createRequest) {
+		this.formConsumer = formConsumer;
+		this.createRequest = createRequest;
 	}
 
-	@Override
-	public String toString() {
-		return "StatusUpdate[" +
-				"since=" + since +
-				", game=" + game +
-				", status=" + status +
-				", afk=" + afk +
-				']';
+	public Consumer<HttpClientRequest.Form> getFormConsumer() {
+		return formConsumer;
+	}
+
+	@Nullable
+	public MessageCreateRequest getCreateRequest() {
+		return createRequest;
 	}
 }
