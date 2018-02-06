@@ -16,7 +16,7 @@
  */
 package discord4j.common.json.response;
 
-import jdk.internal.jline.internal.Nullable;
+import javax.annotation.Nullable;
 
 public class GameTimestampsResponse {
 
