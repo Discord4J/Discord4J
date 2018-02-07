@@ -25,6 +25,7 @@ public class AttachmentResponse {
 
 	@UnsignedJson
 	private long id;
+	@JsonProperty("filename")
 	private String fileName;
 	private int size;
 	private String url;

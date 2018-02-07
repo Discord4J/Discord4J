@@ -41,7 +41,7 @@ public class UnsignedLongDeserializer extends StdDeserializer<Object> implements
 	@Override
 	public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 		Class<?> type = handledType();
-		if (type.equals(long.class)) {
+		if (type.equals(long.class) || type.equals(Long.class)) {
 			return Long.parseUnsignedLong(p.getValueAsString());
 		} else if (type.equals(long[].class)) {
 			String[] ary = p.readValueAs(String[].class);
