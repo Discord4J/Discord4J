@@ -2,6 +2,8 @@
 
 ---
 
+If you are looking for the javadocs they can be found [here](https://jitpack.io/com/github/austinv11/Discord4J/2.9.3/javadoc/).
+
 This wiki will demonstrate some sample use cases of the D4J API and code examples of more complex concepts such as the RequestBuffer and event listeners.
 
 Topics covered:
