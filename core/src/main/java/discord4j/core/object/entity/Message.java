@@ -86,10 +86,8 @@ public final class Message implements Entity {
 	 * @return The ID of the author of this message, if present.
 	 */
 	public Optional<Snowflake> getAuthorId(){
-		return Optional.of(message.getAuthor())
-				// If the webhook is present then the user is not valid
-				.filter(ignored -> !message.getWebhookId().isPresent())
-				.map(author -> Snowflake.of(author.getId()));
+		// author is not a real user if webhook is present (message was sent by webhook)
+		return getWebhookId().map(ignored -> Snowflake.of(message.getAuthor().getId()));
 	}
 
 	/**
@@ -230,8 +228,7 @@ public final class Message implements Entity {
 	 * @return The ID of the webhook that generated this message, if present.
 	 */
 	public Optional<Snowflake> getWebhookId() {
-		final OptionalLong id = message.getWebhookId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(message.getWebhookId()).map(Snowflake::of);
 	}
 
 	/**

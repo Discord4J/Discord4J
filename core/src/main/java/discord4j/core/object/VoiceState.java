@@ -81,8 +81,7 @@ public final class VoiceState implements DiscordObject {
 	 * @return The channel ID this user is connected to, if present.
 	 */
 	public Optional<Snowflake> getChannelId() {
-		final OptionalLong id = voiceState.getChannelId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(voiceState.getChannelId()).map(Snowflake::of);
 	}
 
 	/**

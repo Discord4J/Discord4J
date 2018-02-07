@@ -24,7 +24,6 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
-import java.util.OptionalLong;
 
 @PossibleJson
 public class ChannelModifyRequest {
@@ -111,8 +110,8 @@ public class ChannelModifyRequest {
 			return this;
 		}
 
-		public Builder parentId(OptionalLong parentId) {
-			this.parentId = parentId.isPresent() ? PossibleLong.of(parentId.getAsLong()) : null;
+		public Builder parentId(@Nullable Long parentId) {
+			this.parentId = parentId == null ? null : PossibleLong.of(parentId);
 			return this;
 		}
 

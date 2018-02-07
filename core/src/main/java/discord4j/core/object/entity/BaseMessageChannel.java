@@ -40,8 +40,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
 	@Override
 	public Optional<Snowflake> getLastMessageId() {
-		final OptionalLong id = getChannel().getLastMessageId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(getChannel().getLastMessageId()).map(Snowflake::of);
 	}
 
 	@Override

@@ -22,9 +22,8 @@ import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
-import java.util.OptionalLong;
 
-public class UnsignedLongDeserializer extends StdDeserializer<Object> implements ContextualDeserializer { // <Long | OptionalLong | long[]>
+public class UnsignedLongDeserializer extends StdDeserializer<Object> implements ContextualDeserializer { // <Long | long[]>
 
 	public UnsignedLongDeserializer() {
 		super(Object.class);
@@ -51,15 +50,8 @@ public class UnsignedLongDeserializer extends StdDeserializer<Object> implements
 				ret[i] = Long.parseUnsignedLong(ary[i]);
 			}
 			return ret;
-		} else if (type.equals(OptionalLong.class)) {
-			String s = p.getValueAsString();
-			if (s == null) {
-				return OptionalLong.empty();
-			} else {
-				return OptionalLong.of(Long.parseUnsignedLong(s));
-			}
 		}
 
-		throw new IllegalStateException("Attempt to deserialize field marked with @UnsignedJson which is not of type Long | OptionalLong | long[]: " + type.getSimpleName());
+		throw new IllegalStateException("Attempt to deserialize field marked with @UnsignedJson which is not of type Long | long[]: " + type.getSimpleName());
 	}
 }

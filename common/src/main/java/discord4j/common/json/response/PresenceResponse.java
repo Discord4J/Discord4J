@@ -21,7 +21,6 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.OptionalLong;
 
 public class PresenceResponse {
 
@@ -32,8 +31,9 @@ public class PresenceResponse {
 	@Nullable
 	private GameResponse game;
 	@JsonProperty("guild_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong guildId;
+	private Long guildId;
 	@Nullable
 	private String status;
 
@@ -51,7 +51,8 @@ public class PresenceResponse {
 		return game;
 	}
 
-	public OptionalLong getGuildId() {
+	@Nullable
+	public Long getGuildId() {
 		return guildId;
 	}
 

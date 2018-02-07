@@ -86,8 +86,7 @@ public final class Reaction implements DiscordObject {
 	 * @return The ID of the emoji for this reaction, if present.
 	 */
 	public Optional<Snowflake> getEmojiId() {
-		final OptionalLong id = reaction.getEmoji().getId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(reaction.getEmoji().getId()).map(Snowflake::of);
 	}
 
 	/**

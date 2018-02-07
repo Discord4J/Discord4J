@@ -112,8 +112,7 @@ public final class Activity implements DiscordObject {
 	 * @return The application ID for the game, if present.
 	 */
 	public Optional<Snowflake> getApplicationId() {
-		final OptionalLong id = activity.getApplicationId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(activity.getApplicationId()).map(Snowflake::of);
 	}
 
 	/**

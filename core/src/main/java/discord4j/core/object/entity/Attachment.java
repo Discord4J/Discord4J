@@ -64,7 +64,7 @@ public final class Attachment implements Entity {
 	 * @return The name of the file attached.
 	 */
 	public String getFilename() {
-		return attachment.getFilename();
+		return attachment.getFileName();
 	}
 
 	/**

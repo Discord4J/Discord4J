@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.response.EmojiResponse;
 import discord4j.common.json.response.GuildResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Presence;
@@ -134,8 +135,7 @@ public final class Guild implements Entity {
 	 * @return The ID of the AFK channel, if present.
 	 */
 	public Optional<Snowflake> getAfkChannelId() {
-		final OptionalLong id = guild.getAfkChannelId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(guild.getAfkChannelId()).map(Snowflake::of);
 	}
 
 	/**
@@ -163,8 +163,7 @@ public final class Guild implements Entity {
 	 * @return The ID of the embedded channel, if present.
 	 */
 	public Optional<Snowflake> getEmbedChannelId() {
-		final OptionalLong id = guild.getEmbedChannelId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(guild.getEmbedChannelId()).map(Snowflake::of);
 	}
 
 	/**
@@ -241,7 +240,8 @@ public final class Guild implements Entity {
 	 */
 	public Set<Snowflake> getEmojiIds() {
 		return Arrays.stream(guild.getEmojis())
-				.map(emoji -> Snowflake.of(emoji.getId().orElseThrow(IllegalStateException::new)))
+				.map(EmojiResponse::getId)
+				.map(Snowflake::of)
 				.collect(Collectors.toSet());
 	}
 
@@ -282,8 +282,7 @@ public final class Guild implements Entity {
 	 * @return The application ID of the guild creator if it is bot-created.
 	 */
 	public Optional<Snowflake> getApplicationId() {
-		final OptionalLong id = guild.getApplicationId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(guild.getApplicationId()).map(Snowflake::of);
 	}
 
 	/**
@@ -292,8 +291,7 @@ public final class Guild implements Entity {
 	 * @return The channel ID for the server widget, if present.
 	 */
 	public Optional<Snowflake> getWidgetChannelId() {
-		final OptionalLong id = guild.getWidgetChannelId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(guild.getWidgetChannelId()).map(Snowflake::of);
 	}
 
 	/**
@@ -312,8 +310,7 @@ public final class Guild implements Entity {
 	 * @return The ID of the channel to which system messages are sent, if present.
 	 */
 	public Optional<Snowflake> getSystemChannelId() {
-		final OptionalLong id = guild.getSystemChannelId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(guild.getSystemChannelId()).map(Snowflake::of);
 	}
 
 	/**

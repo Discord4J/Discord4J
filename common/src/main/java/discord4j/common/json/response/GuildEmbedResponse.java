@@ -19,20 +19,22 @@ package discord4j.common.json.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
-import java.util.OptionalLong;
+import javax.annotation.Nullable;
 
 public class GuildEmbedResponse {
 
 	private boolean enabled;
 	@JsonProperty("channel_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong channelId;
+	private Long channelId;
 
 	public boolean isEnabled() {
 		return enabled;
 	}
 
-	public OptionalLong getChannelId() {
+	@Nullable
+	public Long getChannelId() {
 		return channelId;
 	}
 

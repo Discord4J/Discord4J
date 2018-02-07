@@ -25,7 +25,7 @@ public class AttachmentResponse {
 
 	@UnsignedJson
 	private long id;
-	private String filename;
+	private String fileName;
 	private int size;
 	private String url;
 	@JsonProperty("proxy_url")
@@ -39,8 +39,8 @@ public class AttachmentResponse {
 		return id;
 	}
 
-	public String getFilename() {
-		return filename;
+	public String getFileName() {
+		return fileName;
 	}
 
 	public int getSize() {
@@ -69,7 +69,7 @@ public class AttachmentResponse {
 	public String toString() {
 		return "AttachmentResponse[" +
 				"id=" + id +
-				", filename=" + filename +
+				", fileName=" + fileName +
 				", size=" + size +
 				", url=" + url +
 				", proxyUrl=" + proxyUrl +

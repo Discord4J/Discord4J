@@ -37,7 +37,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
-import java.util.OptionalLong;
 
 public class GameResponse {
 
@@ -51,8 +50,9 @@ public class GameResponse {
 	@Nullable
 	private String sessionId;
 	@JsonProperty("application_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong applicationId;
+	private Long applicationId;
 	@Nullable
 	private String details;
 	@Nullable
@@ -87,7 +87,8 @@ public class GameResponse {
 		return sessionId;
 	}
 
-	public OptionalLong getApplicationId() {
+	@Nullable
+	public Long getApplicationId() {
 		return applicationId;
 	}
 

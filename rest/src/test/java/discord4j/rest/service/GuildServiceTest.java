@@ -104,8 +104,7 @@ public class GuildServiceTest {
 	@Test
 	public void testCreateGuildChannel() {
 		String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
-		ChannelCreateRequest req = ChannelCreateRequest.builder().name(randomName)
-				.parentId(OptionalLong.of(trashCategory)).build();
+		ChannelCreateRequest req = ChannelCreateRequest.builder().name(randomName).parentId(trashCategory).build();
 		getGuildService().createGuildChannel(guild, req).block();
 	}
 

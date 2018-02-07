@@ -21,12 +21,12 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.OptionalLong;
 
 public class EmojiResponse {
 
+	@Nullable
 	@UnsignedJson
-	private OptionalLong id;
+	private Long id;
 	private String name;
 	@Nullable
 	@UnsignedJson
@@ -41,7 +41,8 @@ public class EmojiResponse {
 	@Nullable
 	private Boolean animated;
 
-	public OptionalLong getId() {
+	@Nullable
+	public Long getId() {
 		return id;
 	}
 

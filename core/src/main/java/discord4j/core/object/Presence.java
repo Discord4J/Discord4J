@@ -90,8 +90,7 @@ public final class Presence implements DiscordObject {
 	 * @return The ID for the guild this presence is associated to, if present.
 	 */
 	public Optional<Snowflake> getGuildId() {
-		final OptionalLong id = presence.getGuildId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(presence.getGuildId()).map(Snowflake::of);
 	}
 
 	/**

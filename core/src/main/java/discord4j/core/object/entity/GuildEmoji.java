@@ -61,7 +61,8 @@ public final class GuildEmoji implements Entity {
 
 	@Override
 	public Snowflake getId() {
-		return Snowflake.of(emoji.getId().orElseThrow(IllegalStateException::new));
+		if (emoji.getId() == null) throw new IllegalStateException();
+		return Snowflake.of(emoji.getId());
 	}
 
 	/**

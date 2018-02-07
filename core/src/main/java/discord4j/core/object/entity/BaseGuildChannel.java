@@ -39,7 +39,8 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
 	@Override
 	public final Snowflake getGuildId() {
-		return Snowflake.of(getChannel().getGuildId().orElseThrow(IllegalStateException::new));
+		if (getChannel().getGuildId() == null) throw new IllegalStateException();
+		return Snowflake.of(getChannel().getGuildId());
 	}
 
 	@Override
@@ -63,8 +64,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
 	@Override
 	public final Optional<Snowflake> getCategoryId() {
-		final OptionalLong id = getChannel().getParentId();
-		return id.isPresent() ? Optional.of(Snowflake.of(id.getAsLong())) : Optional.empty();
+		return Optional.ofNullable(getChannel().getParentId()).map(Snowflake::of);
 	}
 
 	@Override
