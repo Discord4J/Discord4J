@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
+import discord4j.core.object.data.ChannelData;
 
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ public final class VoiceChannel extends BaseGuildChannel {
 	 * @param client The Client associated to this object, must be non-null.
 	 * @param channel The raw data as represented by Discord, must be non-null.
 	 */
-	public VoiceChannel(final Client client, final ChannelResponse channel) {
+	public VoiceChannel(final Client client, final ChannelData channel) {
 		super(client, channel);
 	}
 
@@ -40,7 +40,7 @@ public final class VoiceChannel extends BaseGuildChannel {
 	 * @return Gets the bitrate (in bits) for this voice channel.
 	 */
 	public int getBitrate() {
-		return Optional.ofNullable(getChannel().getBitrate()).orElseThrow(IllegalStateException::new);
+		return Optional.ofNullable(data.getBitrate()).orElseThrow(IllegalStateException::new);
 	}
 
 	/**
@@ -49,6 +49,6 @@ public final class VoiceChannel extends BaseGuildChannel {
 	 * @return The user limit of this voice channel.
 	 */
 	public int getUserLimit() {
-		return Optional.ofNullable(getChannel().getUserLimit()).orElseThrow(IllegalStateException::new);
+		return Optional.ofNullable(data.getUserLimit()).orElseThrow(IllegalStateException::new);
 	}
 }

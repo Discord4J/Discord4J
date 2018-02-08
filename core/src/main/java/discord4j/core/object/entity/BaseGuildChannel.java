@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.ChannelData;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
@@ -31,16 +31,16 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 	 * Constructs an {@code BaseGuildChannel} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param channel The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	BaseGuildChannel(final Client client, final ChannelResponse channel) {
-		super(client, channel);
+	BaseGuildChannel(final Client client, final ChannelData data) {
+		super(client, data);
 	}
 
 	@Override
 	public final Snowflake getGuildId() {
-		if (getChannel().getGuildId() == null) throw new IllegalStateException();
-		return Snowflake.of(getChannel().getGuildId());
+		if (data.getGuildId() == null) throw new IllegalStateException();
+		return Snowflake.of(data.getGuildId());
 	}
 
 	@Override
@@ -50,21 +50,21 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
 	@Override
 	public final Set<PermissionOverwrite> getPermissionOverwrites() {
-		return Optional.ofNullable(getChannel().getPermissionOverwrites())
-				.map(Arrays::stream)
-				.map(overwrites -> overwrites.map(overwrite -> new PermissionOverwrite(getClient(), overwrite)))
-				.map(overwrites -> overwrites.collect(Collectors.toSet()))
-				.orElse(Collections.emptySet());
+		if (data.getPermissionOverwrites() == null) return Collections.emptySet();
+
+		return Arrays.stream(data.getPermissionOverwrites())
+				.map(overwrite -> new PermissionOverwrite(getClient(), overwrite))
+				.collect(Collectors.toSet());
 	}
 
 	@Override
 	public final String getName() {
-		return getChannel().getName();
+		return data.getName();
 	}
 
 	@Override
 	public final Optional<Snowflake> getCategoryId() {
-		return Optional.ofNullable(getChannel().getParentId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getParentId()).map(Snowflake::of);
 	}
 
 	@Override

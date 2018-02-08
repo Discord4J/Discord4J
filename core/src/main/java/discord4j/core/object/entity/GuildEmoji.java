@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.EmojiResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.GuildEmojiData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,7 +36,7 @@ public final class GuildEmoji implements Entity {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final EmojiResponse emoji;
+	private final GuildEmojiData data;
 
 	/** The ID of the guild this emoji is associated to. */
 	private final long guildId;
@@ -45,12 +45,12 @@ public final class GuildEmoji implements Entity {
 	 * Constructs a {@code GuildEmoji} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param emoji The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 * @param guildId The ID of the guild this emoji is associated to.
 	 */
-	public GuildEmoji(final Client client, final EmojiResponse emoji, final long guildId) {
+	public GuildEmoji(final Client client, final GuildEmojiData data, final long guildId) {
 		this.client = Objects.requireNonNull(client);
-		this.emoji = Objects.requireNonNull(emoji);
+		this.data = Objects.requireNonNull(data);
 		this.guildId = guildId;
 	}
 
@@ -61,8 +61,7 @@ public final class GuildEmoji implements Entity {
 
 	@Override
 	public Snowflake getId() {
-		if (emoji.getId() == null) throw new IllegalStateException();
-		return Snowflake.of(emoji.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	/**
@@ -71,7 +70,7 @@ public final class GuildEmoji implements Entity {
 	 * @return The emoji name.
 	 */
 	public String getName() {
-		return emoji.getName();
+		return data.getName();
 	}
 
 	/**
@@ -80,11 +79,11 @@ public final class GuildEmoji implements Entity {
 	 * @return The IDs of the roles this emoji is whitelisted to.
 	 */
 	public Set<Snowflake> getRoleIds() {
-		return Optional.ofNullable(emoji.getRoles())
-				.map(Arrays::stream)
-				.map(roles -> roles.mapToObj(Snowflake::of))
-				.map(snowflakes -> snowflakes.collect(Collectors.toSet()))
-				.orElse(Collections.emptySet());
+		if (data.getRoles() == null) return Collections.emptySet();
+
+		return Arrays.stream(data.getRoles())
+				.mapToObj(Snowflake::of)
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -103,9 +102,7 @@ public final class GuildEmoji implements Entity {
 	 * @return The ID of the user that created this emoji.
 	 */
 	public Snowflake getUserId() {
-		return Optional.ofNullable(emoji.getUser())
-				.map(user -> Snowflake.of(user.getId()))
-				.orElseThrow(IllegalStateException::new);
+		return Snowflake.of(data.getUser());
 	}
 
 	/**
@@ -123,8 +120,8 @@ public final class GuildEmoji implements Entity {
 	 *
 	 * @return {@code true} if this emoji must be wrapped in colons, {@code false} otherwise.
 	 */
-	public boolean requireColons() {
-		return Optional.ofNullable(emoji.isRequireColons()).orElseThrow(IllegalStateException::new);
+	public boolean requiresColons() {
+		return data.requiresColons();
 	}
 
 	/**
@@ -133,7 +130,7 @@ public final class GuildEmoji implements Entity {
 	 * @return {@code true} if this emoji is managed, {@code false} otherwise.
 	 */
 	public boolean isManaged() {
-		return Optional.ofNullable(emoji.isManaged()).orElseThrow(IllegalStateException::new);
+		return data.isManaged();
 	}
 
 	/**
@@ -142,7 +139,7 @@ public final class GuildEmoji implements Entity {
 	 * @return {@code true} if this emoji is animated, {@code false} otherwise.
 	 */
 	public boolean isAnimated() {
-		return Optional.ofNullable(emoji.isAnimated()).orElseThrow(IllegalStateException::new);
+		return data.isManaged();
 	}
 
 	/**

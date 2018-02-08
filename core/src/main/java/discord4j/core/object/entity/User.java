@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.common.json.response.UserResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.UserData;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -35,17 +36,17 @@ public class User implements Entity {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final UserResponse user;
+	private final UserData data;
 
 	/**
 	 * Constructs an {@code User} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param user The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public User(final Client client, final UserResponse user) {
+	public User(final Client client, final UserData data) {
 		this.client = Objects.requireNonNull(client);
-		this.user = Objects.requireNonNull(user);
+		this.data = Objects.requireNonNull(data);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class User implements Entity {
 
 	@Override
 	public final Snowflake getId() {
-		return Snowflake.of(user.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	/**
@@ -64,7 +65,7 @@ public class User implements Entity {
 	 * @return The user's username, not unique across the platform.
 	 */
 	public final String getUsername() {
-		return user.getUsername();
+		return data.getUsername();
 	}
 
 	/**
@@ -73,7 +74,7 @@ public class User implements Entity {
 	 * @return The user's 4-digit discord-tag.
 	 */
 	public final String getDiscriminator() {
-		return user.getDiscriminator();
+		return data.getDiscriminator();
 	}
 
 	/**
@@ -82,7 +83,7 @@ public class User implements Entity {
 	 * @return The user's avatar hash, if present.
 	 */
 	public final Optional<String> getAvatarHash() {
-		return Optional.ofNullable(user.getAvatar());
+		return Optional.ofNullable(data.getAvatar());
 	}
 
 	/**

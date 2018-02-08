@@ -16,13 +16,12 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.EmojiResponse;
-import discord4j.common.json.response.GuildResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.data.GuildData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -41,17 +40,17 @@ public final class Guild implements Entity {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final GuildResponse guild;
+	private final GuildData data;
 
 	/**
 	 * Constructs an {@code Guild} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param guild The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public Guild(final Client client, final GuildResponse guild) {
+	public Guild(final Client client, final GuildData data) {
 		this.client = Objects.requireNonNull(client);
-		this.guild = Objects.requireNonNull(guild);
+		this.data = Objects.requireNonNull(data);
 	}
 
 	@Override
@@ -61,7 +60,7 @@ public final class Guild implements Entity {
 
 	@Override
 	public Snowflake getId() {
-		return Snowflake.of(guild.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	/**
@@ -70,7 +69,7 @@ public final class Guild implements Entity {
 	 * @return The guild name.
 	 */
 	public String getName() {
-		return guild.getName();
+		return data.getName();
 	}
 
 	/**
@@ -79,7 +78,7 @@ public final class Guild implements Entity {
 	 * @return The icon hash, if present.
 	 */
 	public Optional<String> getIconHash() {
-		return Optional.ofNullable(guild.getIcon());
+		return Optional.ofNullable(data.getIcon());
 	}
 
 	/**
@@ -88,7 +87,7 @@ public final class Guild implements Entity {
 	 * @return The splash hash, if present.
 	 */
 	public Optional<String> getSplashHash() {
-		return Optional.ofNullable(guild.getSplash());
+		return Optional.ofNullable(data.getSplash());
 	}
 
 	/**
@@ -97,7 +96,7 @@ public final class Guild implements Entity {
 	 * @return The ID of the owner of the guild.
 	 */
 	public Snowflake getOwnerId() {
-		return Snowflake.of(guild.getOwnerId());
+		return Snowflake.of(data.getOwnerId());
 	}
 
 	/**
@@ -116,7 +115,7 @@ public final class Guild implements Entity {
 	 * @return The voice region ID for the guild.
 	 */
 	public String getRegionId() {
-		return guild.getRegion();
+		return data.getRegion();
 	}
 
 	/**
@@ -135,7 +134,7 @@ public final class Guild implements Entity {
 	 * @return The ID of the AFK channel, if present.
 	 */
 	public Optional<Snowflake> getAfkChannelId() {
-		return Optional.ofNullable(guild.getAfkChannelId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getAfkChannelId()).map(Snowflake::of);
 	}
 
 	/**
@@ -154,7 +153,7 @@ public final class Guild implements Entity {
 	 * @return The AFK timeout in seconds.
 	 */
 	public int getAfkTimeout() {
-		return guild.getAfkTimeout();
+		return data.getAfkTimeout();
 	}
 
 	/**
@@ -163,7 +162,7 @@ public final class Guild implements Entity {
 	 * @return The ID of the embedded channel, if present.
 	 */
 	public Optional<Snowflake> getEmbedChannelId() {
-		return Optional.ofNullable(guild.getEmbedChannelId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getEmbedChannelId()).map(Snowflake::of);
 	}
 
 	/**
@@ -183,7 +182,7 @@ public final class Guild implements Entity {
 	 */
 	public VerificationLevel getVerificationLevel() {
 		return Arrays.stream(VerificationLevel.values())
-				.filter(level -> level.value == guild.getVerificationLevel())
+				.filter(level -> level.value == data.getVerificationLevel())
 				.findFirst() // If this throws Discord added something
 				.orElseThrow(UnsupportedOperationException::new);
 	}
@@ -195,7 +194,7 @@ public final class Guild implements Entity {
 	 */
 	public NotificationLevel getNotificationLevel() {
 		return Arrays.stream(NotificationLevel.values())
-				.filter(level -> level.value == guild.getDefaultMessageNotifications())
+				.filter(level -> level.value == data.getDefaultMessageNotifications())
 				.findFirst() // If this throws Discord added something
 				.orElseThrow(UnsupportedOperationException::new);
 	}
@@ -207,7 +206,7 @@ public final class Guild implements Entity {
 	 */
 	public ContentFilterLevel getContentFilterLevel() {
 		return Arrays.stream(ContentFilterLevel.values())
-				.filter(level -> level.value == guild.getExplciitContentFilter())
+				.filter(level -> level.value == data.getExplicitContentFilter())
 				.findFirst() // If this throws Discord added something
 				.orElseThrow(UnsupportedOperationException::new);
 	}
@@ -218,8 +217,8 @@ public final class Guild implements Entity {
 	 * @return The guild's roles' IDs.
 	 */
 	public Set<Snowflake> getRoleIds() {
-		return Arrays.stream(guild.getRoles())
-				.map(role -> Snowflake.of(role.getId()))
+		return Arrays.stream(data.getRoles())
+				.mapToObj(Snowflake::of)
 				.collect(Collectors.toSet());
 	}
 
@@ -239,9 +238,8 @@ public final class Guild implements Entity {
 	 * @return The guild's emoji's IDs.
 	 */
 	public Set<Snowflake> getEmojiIds() {
-		return Arrays.stream(guild.getEmojis())
-				.map(EmojiResponse::getId)
-				.map(Snowflake::of)
+		return Arrays.stream(data.getEmojis())
+				.mapToObj(Snowflake::of)
 				.collect(Collectors.toSet());
 	}
 
@@ -261,7 +259,7 @@ public final class Guild implements Entity {
 	 * @return The enabled guild features.
 	 */
 	public Set<String> getFeatures() {
-		return Arrays.stream(guild.getFeatures()).collect(Collectors.toSet());
+		return Arrays.stream(data.getFeatures()).collect(Collectors.toSet());
 	}
 
 	/**
@@ -271,7 +269,7 @@ public final class Guild implements Entity {
 	 */
 	public MfaLevel getMfaLevel() {
 		return Arrays.stream(MfaLevel.values())
-				.filter(level -> level.value == guild.getMfaLevel())
+				.filter(level -> level.value == data.getMfaLevel())
 				.findFirst() // If this throws Discord added something
 				.orElseThrow(UnsupportedOperationException::new);
 	}
@@ -282,7 +280,7 @@ public final class Guild implements Entity {
 	 * @return The application ID of the guild creator if it is bot-created.
 	 */
 	public Optional<Snowflake> getApplicationId() {
-		return Optional.ofNullable(guild.getApplicationId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getApplicationId()).map(Snowflake::of);
 	}
 
 	/**
@@ -291,7 +289,7 @@ public final class Guild implements Entity {
 	 * @return The channel ID for the server widget, if present.
 	 */
 	public Optional<Snowflake> getWidgetChannelId() {
-		return Optional.ofNullable(guild.getWidgetChannelId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getWidgetChannelId()).map(Snowflake::of);
 	}
 
 	/**
@@ -310,7 +308,7 @@ public final class Guild implements Entity {
 	 * @return The ID of the channel to which system messages are sent, if present.
 	 */
 	public Optional<Snowflake> getSystemChannelId() {
-		return Optional.ofNullable(guild.getSystemChannelId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getSystemChannelId()).map(Snowflake::of);
 	}
 
 	/**
@@ -329,7 +327,7 @@ public final class Guild implements Entity {
 	 * @return When this guild was joined at, if present.
 	 */
 	public Optional<Instant> getJoinTime() {
-		return Optional.ofNullable(guild.getJoinedAt()).map(Instant::parse);
+		return Optional.ofNullable(data.getJoinedAt()).map(Instant::parse);
 	}
 
 	/**
@@ -338,7 +336,7 @@ public final class Guild implements Entity {
 	 * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
 	 */
 	public Optional<Boolean> isLarge() {
-		return Optional.ofNullable(guild.getLarge());
+		return Optional.ofNullable(data.getLarge());
 	}
 
 	/**
@@ -347,7 +345,7 @@ public final class Guild implements Entity {
 	 * @return The total number of members in the guild, if present.
 	 */
 	public OptionalInt getMemberCount() {
-		final Integer count = guild.getMemberCount();
+		final Integer count = data.getMemberCount();
 		return (count == null) ? OptionalInt.empty() : OptionalInt.of(count);
 	}
 

@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.RoleResponse;
 import discord4j.core.Client;
 import discord4j.core.object.PermissionSet;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.RoleData;
 import discord4j.core.trait.Positionable;
 import reactor.core.publisher.Mono;
 
@@ -37,7 +37,7 @@ public final class Role implements Entity, Positionable {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final RoleResponse role;
+	private final RoleData data;
 
 	/** The ID of the guild this role is associated to. */
 	private final long guildId;
@@ -49,9 +49,9 @@ public final class Role implements Entity, Positionable {
 	 * @param role The raw data as represented by Discord, must be non-null.
 	 * @param guildId The ID of the guild this role is associated to.
 	 */
-	public Role(final Client client, final RoleResponse role, final long guildId) {
+	public Role(final Client client, final RoleData data, final long guildId) {
 		this.client = Objects.requireNonNull(client);
-		this.role = Objects.requireNonNull(role);
+		this.data = Objects.requireNonNull(data);
 		this.guildId = guildId;
 	}
 
@@ -62,7 +62,7 @@ public final class Role implements Entity, Positionable {
 
 	@Override
 	public Snowflake getId() {
-		return Snowflake.of(role.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public final class Role implements Entity, Positionable {
 	 * @return The role name.
 	 */
 	public String getName() {
-		return role.getName();
+		return data.getName();
 	}
 
 	/**
@@ -85,7 +85,7 @@ public final class Role implements Entity, Positionable {
 	 * @return The color assigned to this role.
 	 */
 	public Color getColor() {
-		return new Color(role.getColor(), true);
+		return new Color(data.getColor(), true);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public final class Role implements Entity, Positionable {
 	 * @return {@code true} if this role is pinned in the user listing, {@code false} otherwise.
 	 */
 	public boolean isHoisted() {
-		return role.isHoist();
+		return data.isHoist();
 	}
 
 	/**
@@ -103,7 +103,7 @@ public final class Role implements Entity, Positionable {
 	 * @return The permissions assigned to this role.
 	 */
 	public PermissionSet getPermissions() {
-		return PermissionSet.of(role.getPermissions());
+		return PermissionSet.of(data.getPermissions());
 	}
 
 	/**
@@ -112,7 +112,7 @@ public final class Role implements Entity, Positionable {
 	 * @return {@code true} if this role is managed by an integration, {@code false} otherwise.
 	 */
 	public boolean isManaged() {
-		return role.isManaged();
+		return data.isManaged();
 	}
 
 	/**
@@ -121,7 +121,7 @@ public final class Role implements Entity, Positionable {
 	 * @return {@code true} if this role is mentionable, {@code false} otherwise.
 	 */
 	public boolean isMentionable() {
-		return role.isMentionable();
+		return data.isMentionable();
 	}
 
 	/**

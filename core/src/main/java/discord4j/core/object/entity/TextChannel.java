@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.ChannelData;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -40,7 +40,7 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
 	 * @param client The Client associated to this object, must be non-null.
 	 * @param channel The raw data as represented by Discord, must be non-null.
 	 */
-	public TextChannel(final Client client, final ChannelResponse channel) {
+	public TextChannel(final Client client, final ChannelData channel) {
 		super(client, channel);
 		guildChannel = new BaseGuildChannel(client, channel);
 		messageChannel = new BaseMessageChannel(client, channel);
@@ -102,7 +102,7 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
 	 * @return The channel topic.
 	 */
 	public String getTopic() {
-		return Optional.ofNullable(getChannel().getTopic()).orElse("");
+		return Optional.ofNullable(data.getTopic()).orElse("");
 	}
 
 	/**
@@ -111,7 +111,7 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
 	 * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
 	 */
 	public boolean isNsfw() {
-		return Optional.ofNullable(getChannel().getNsfw()).orElseThrow(IllegalStateException::new);
+		return Optional.ofNullable(data.getNsfw()).orElseThrow(IllegalStateException::new);
 	}
 
 	/**

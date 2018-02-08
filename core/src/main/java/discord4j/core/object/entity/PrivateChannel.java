@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.ChannelData;
 import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
@@ -34,10 +34,10 @@ public final class PrivateChannel extends BaseMessageChannel {
 	 * Constructs an {@code PrivateChannel} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param channel The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public PrivateChannel(final Client client, final ChannelResponse channel) {
-		super(client, channel);
+	public PrivateChannel(final Client client, final ChannelData data) {
+		super(client, data);
 	}
 
 	/**
@@ -46,11 +46,11 @@ public final class PrivateChannel extends BaseMessageChannel {
 	 * @return The IDs of the recipients for this private channel.
 	 */
 	public Set<Snowflake> getRecipientIds() {
-		return Optional.ofNullable(getChannel().getRecipients())
-				.map(Arrays::stream)
-				.map(users -> users.map(user -> Snowflake.of(user.getId())))
-				.map(snowflakes -> snowflakes.collect(Collectors.toSet()))
-				.orElse(Collections.emptySet());
+		if (data.getRecipients() == null) throw new IllegalStateException();
+
+		return Arrays.stream(data.getRecipients())
+				.mapToObj(Snowflake::of)
+				.collect(Collectors.toSet());
 	}
 
 	/**

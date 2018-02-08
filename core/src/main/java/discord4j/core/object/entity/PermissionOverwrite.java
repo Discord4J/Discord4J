@@ -20,6 +20,7 @@ import discord4j.common.json.OverwriteEntity;
 import discord4j.core.Client;
 import discord4j.core.object.PermissionSet;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.OverwriteData;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -35,17 +36,17 @@ public final class PermissionOverwrite implements Entity {
 	private final Client client;
 
 	/** The raw data as represented by Discord, must be non-null. */
-	private final OverwriteEntity overwrite;
+	private final OverwriteData data;
 
 	/**
 	 * Constructs a {@code PermissionOverwrite} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param overwrite The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public PermissionOverwrite(final Client client, final OverwriteEntity overwrite) {
+	public PermissionOverwrite(final Client client, final OverwriteData data) {
 		this.client = Objects.requireNonNull(client);
-		this.overwrite = Objects.requireNonNull(overwrite);
+		this.data = Objects.requireNonNull(data);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public final class PermissionOverwrite implements Entity {
 
 	@Override
 	public Snowflake getId() {
-		return Snowflake.of(overwrite.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	/**
@@ -65,7 +66,7 @@ public final class PermissionOverwrite implements Entity {
 	 */
 	public Type getType() {
 		return Arrays.stream(Type.values())
-				.filter(type -> Objects.equals(overwrite.getType(), type.value))
+				.filter(type -> Objects.equals(data.getType(), type.value))
 				.findFirst() // If this throws Discord added something
 				.orElseThrow(UnsupportedOperationException::new);
 	}
@@ -76,7 +77,7 @@ public final class PermissionOverwrite implements Entity {
 	 * @return The permissions explicitly allowed for this overwrite.
 	 */
 	public PermissionSet getAllowed() {
-		return PermissionSet.of(overwrite.getAllow());
+		return PermissionSet.of(data.getAllow());
 	}
 
 	/**
@@ -85,7 +86,7 @@ public final class PermissionOverwrite implements Entity {
 	 * @return The permissions explicitly denied for this overwrite.
 	 */
 	public PermissionSet getDenied() {
-		return PermissionSet.of(overwrite.getDeny());
+		return PermissionSet.of(data.getDeny());
 	}
 
 	/** The type of entity a {@link PermissionOverwrite} is explicitly for. */

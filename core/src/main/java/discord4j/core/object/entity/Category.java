@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
+import discord4j.core.object.data.ChannelData;
 import reactor.core.publisher.Flux;
 
 /** A Discord category. */
@@ -27,10 +27,10 @@ public final class Category extends BaseGuildChannel {
 	 * Constructs an {@code Category} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param channel The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public Category(final Client client, final ChannelResponse channel) {
-		super(client, channel);
+	public Category(final Client client, final ChannelData data) {
+		super(client, data);
 	}
 
 	/**

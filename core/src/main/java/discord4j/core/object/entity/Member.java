@@ -16,11 +16,12 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.GuildMemberResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Presence;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.data.MemberData;
+import discord4j.core.object.data.UserData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 public final class Member extends User {
 
 	/** The raw data as represented by Discord. */
-	private final GuildMemberResponse member;
+	private final MemberData data;
 
 	/** The ID of the guild this user is associated to. */
 	private final long guildId;
@@ -48,12 +49,12 @@ public final class Member extends User {
 	 * Constructs a {@code Member} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param member The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 * @param guildId The ID of the guild this user is associated to.
 	 */
-	public Member(final Client client, final GuildMemberResponse member, final long guildId) {
-		super(client, member.getUser());
-		this.member = Objects.requireNonNull(member);
+	public Member(final Client client, final MemberData data, final UserData userData, final long guildId) {
+		super(client, userData);
+		this.data = Objects.requireNonNull(data);
 		this.guildId = guildId;
 	}
 
@@ -68,7 +69,7 @@ public final class Member extends User {
 	 * @return The user's guild nickname (if one is set).
 	 */
 	public Optional<String> getNickname() {
-		return Optional.ofNullable(member.getNick());
+		return Optional.ofNullable(data.getNick());
 	}
 
 	/**
@@ -77,7 +78,7 @@ public final class Member extends User {
 	 * @return The user's guild roles' IDs.
 	 */
 	public Set<Snowflake> getRoleIds() {
-		return Arrays.stream(member.getRoles())
+		return Arrays.stream(data.getRoles())
 				.mapToObj(Snowflake::of)
 				.collect(Collectors.toSet());
 	}
@@ -98,7 +99,7 @@ public final class Member extends User {
 	 * @return When the user joined the guild.
 	 */
 	public Instant getJoinTime() {
-		return Instant.parse(member.getJoinedAt());
+		return Instant.parse(data.getJoinedAt());
 	}
 
 	/**

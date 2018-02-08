@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.ChannelData;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -30,17 +30,17 @@ class BaseChannel implements Channel {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final ChannelResponse channel;
+	protected final ChannelData data;
 
 	/**
 	 * Constructs an {@code BaseChannel} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param channel The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	BaseChannel(final Client client, final ChannelResponse channel) {
+	BaseChannel(final Client client, final ChannelData data) {
 		this.client = Objects.requireNonNull(client);
-		this.channel = Objects.requireNonNull(channel);
+		this.data = Objects.requireNonNull(data);
 	}
 
 	@Override
@@ -50,23 +50,14 @@ class BaseChannel implements Channel {
 
 	@Override
 	public final Snowflake getId() {
-		return Snowflake.of(channel.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	@Override
 	public final Type getType() {
 		return Arrays.stream(Type.values())
-				.filter(type -> type.getValue() == channel.getType())
+				.filter(type -> type.getValue() == data.getType())
 				.findFirst() // If this throws Discord added something
 				.orElseThrow(UnsupportedOperationException::new);
-	}
-
-	/**
-	 * Gets the raw data as represented by Discord.
-	 *
-	 * @return The raw data as represented by Discord.
-	 */
-	final ChannelResponse getChannel() {
-		return channel;
 	}
 }

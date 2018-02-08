@@ -16,14 +16,13 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.ChannelData;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.OptionalLong;
 
 /** An internal implementation of {@link MessageChannel} designed to streamline inheritance. */
 class BaseMessageChannel extends BaseChannel implements MessageChannel {
@@ -32,15 +31,15 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 	 * Constructs an {@code BaseMessageChannel} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param channel The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	BaseMessageChannel(final Client client, final ChannelResponse channel) {
-		super(client, channel);
+	BaseMessageChannel(final Client client, final ChannelData data) {
+		super(client, data);
 	}
 
 	@Override
 	public Optional<Snowflake> getLastMessageId() {
-		return Optional.ofNullable(getChannel().getLastMessageId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getLastMessageId()).map(Snowflake::of);
 	}
 
 	@Override
@@ -50,6 +49,6 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
 	@Override
 	public Optional<Instant> getLastPinTimestamp() {
-		return Optional.ofNullable(getChannel().getLastPinTimestamp()).map(Instant::parse);
+		return Optional.ofNullable(data.getLastPinTimestamp()).map(Instant::parse);
 	}
 }

@@ -20,6 +20,7 @@ import discord4j.common.json.response.MessageResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Reaction;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.MessageData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -38,17 +39,17 @@ public final class Message implements Entity {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final MessageResponse message;
+	private final MessageData data;
 
 	/**
 	 * Constructs a {@code Message} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param message The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public Message(final Client client, final MessageResponse message) {
+	public Message(final Client client, final MessageData data) {
 		this.client = Objects.requireNonNull(client);
-		this.message = Objects.requireNonNull(message);
+		this.data = Objects.requireNonNull(data);
 	}
 
 	@Override
@@ -58,7 +59,7 @@ public final class Message implements Entity {
 
 	@Override
 	public Snowflake getId() {
-		return Snowflake.of(message.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	/**
@@ -67,7 +68,7 @@ public final class Message implements Entity {
 	 * @return The ID of the channel the message was sent in.
 	 */
 	public Snowflake getChannelId() {
-		return Snowflake.of(message.getChannelId());
+		return Snowflake.of(data.getChannelId());
 	}
 
 	/**
@@ -87,7 +88,9 @@ public final class Message implements Entity {
 	 */
 	public Optional<Snowflake> getAuthorId(){
 		// author is not a real user if webhook is present (message was sent by webhook)
-		return getWebhookId().map(ignored -> Snowflake.of(message.getAuthor().getId()));
+		return Optional.of(data.getAuthor())
+				.filter(ignored -> !getWebhookId().isPresent())
+				.map(Snowflake::of);
 	}
 
 	/**
@@ -106,7 +109,7 @@ public final class Message implements Entity {
 	 * @return The contents of the message, if present.
 	 */
 	public Optional<String> getContent() {
-		return Optional.ofNullable(message.getContent());
+		return Optional.ofNullable(data.getContent());
 	}
 
 	/**
@@ -115,7 +118,7 @@ public final class Message implements Entity {
 	 * @return When this message was sent.
 	 */
 	public Instant getTimestamp() {
-		return Instant.parse(message.getTimestamp());
+		return Instant.parse(data.getTimestamp());
 	}
 
 	/**
@@ -124,7 +127,7 @@ public final class Message implements Entity {
 	 * @return When this message was edited, if present.
 	 */
 	public Optional<Instant> getEditedTimestamp() {
-		return Optional.ofNullable(message.getEditedTimestamp()).map(Instant::parse);
+		return Optional.ofNullable(data.getEditedTimestamp()).map(Instant::parse);
 	}
 
 	/**
@@ -133,7 +136,7 @@ public final class Message implements Entity {
 	 * @return {@code true} if this message was a TTS (Text-To-Speech) message, {@code false} otherwise.
 	 */
 	public boolean isTts() {
-		return message.isTts();
+		return data.isTts();
 	}
 
 	/**
@@ -142,7 +145,7 @@ public final class Message implements Entity {
 	 * @return {@code true} if this message mentions everyone, {@code false} otherwise.
 	 */
 	public boolean mentionsEveryone() {
-		return message.isMentionEveryone();
+		return data.isMentionEveryone();
 	}
 
 	/**
@@ -151,8 +154,8 @@ public final class Message implements Entity {
 	 * @return The IDs of the users specifically mentioned in this message.
 	 */
 	public Set<Snowflake> getUserMentionIds() {
-		return Arrays.stream(message.getMentions())
-				.map(user -> Snowflake.of(user.getId()))
+		return Arrays.stream(data.getMentions())
+				.mapToObj(Snowflake::of)
 				.collect(Collectors.toSet());
 	}
 
@@ -172,7 +175,7 @@ public final class Message implements Entity {
 	 * @return The IDs of the roles specifically mentioned in this message.
 	 */
 	public Set<Snowflake> getRoleMentionIds() {
-		return Arrays.stream(message.getMentionRoles())
+		return Arrays.stream(data.getMentionRoles())
 				.mapToObj(Snowflake::of)
 				.collect(Collectors.toSet());
 	}
@@ -193,7 +196,7 @@ public final class Message implements Entity {
 	 * @return Any attached files.
 	 */
 	public Set<Attachment> getAttachments() {
-		return Arrays.stream(message.getAttachments())
+		return Arrays.stream(data.getAttachments())
 				.map(attachment -> new Attachment(client, attachment))
 				.collect(Collectors.toSet());
 	}
@@ -206,11 +209,9 @@ public final class Message implements Entity {
 	 * @return The reactions to this message.
 	 */
 	public Set<Reaction> getReactions() {
-		return Optional.ofNullable(message.getReactions())
-				.map(Arrays::stream)
-				.map(reactions -> reactions.map(reaction -> new Reaction(client, reaction, message.getId())))
-				.map(reactions -> reactions.collect(Collectors.toSet()))
-				.orElse(Collections.emptySet());
+		return Arrays.stream(data.getReactions())
+				.map(reaction -> new Reaction(client, reaction, data.getId()))
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -219,7 +220,7 @@ public final class Message implements Entity {
 	 * @return {@code true} if this message is pinned, {@code false} otherwise.
 	 */
 	public boolean isPinned() {
-		return message.isPinned();
+		return data.isPinned();
 	}
 
 	/**
@@ -228,7 +229,7 @@ public final class Message implements Entity {
 	 * @return The ID of the webhook that generated this message, if present.
 	 */
 	public Optional<Snowflake> getWebhookId() {
-		return Optional.ofNullable(message.getWebhookId()).map(Snowflake::of);
+		return Optional.ofNullable(data.getWebhookId()).map(Snowflake::of);
 	}
 
 	/**
@@ -248,7 +249,7 @@ public final class Message implements Entity {
 	 */
 	public Type getType() {
 		return Arrays.stream(Type.values())
-				.filter(value -> value.value == message.getType())
+				.filter(value -> value.value == data.getType())
 				.findFirst() // If this throws Discord added something
 				.orElseThrow(UnsupportedOperationException::new);
 	}

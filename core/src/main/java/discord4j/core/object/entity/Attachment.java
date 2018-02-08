@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.common.json.response.AttachmentResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.AttachmentData;
 
 import java.util.Objects;
 import java.util.OptionalInt;
@@ -35,17 +36,17 @@ public final class Attachment implements Entity {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final AttachmentResponse attachment;
+	private final AttachmentData data;
 
 	/**
 	 * Constructs an {@code Attachment} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param attachment The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public Attachment(final Client client, final AttachmentResponse attachment) {
+	public Attachment(final Client client, final AttachmentData data) {
 		this.client = Objects.requireNonNull(client);
-		this.attachment = Objects.requireNonNull(attachment);
+		this.data = Objects.requireNonNull(data);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public final class Attachment implements Entity {
 
 	@Override
 	public Snowflake getId() {
-		return Snowflake.of(attachment.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	/**
@@ -64,7 +65,7 @@ public final class Attachment implements Entity {
 	 * @return The name of the file attached.
 	 */
 	public String getFilename() {
-		return attachment.getFileName();
+		return data.getFileName();
 	}
 
 	/**
@@ -73,7 +74,7 @@ public final class Attachment implements Entity {
 	 * @return The size of the file in bytes.
 	 */
 	public int getSize() {
-		return attachment.getSize();
+		return data.getSize();
 	}
 
 	/**
@@ -82,7 +83,7 @@ public final class Attachment implements Entity {
 	 * @return The source URL of the file.
 	 */
 	public String getUrl() {
-		return attachment.getUrl();
+		return data.getUrl();
 	}
 
 	/**
@@ -91,7 +92,7 @@ public final class Attachment implements Entity {
 	 * @return A proxied URL of the file.
 	 */
 	public String getProxyUrl() {
-		return attachment.getProxyUrl();
+		return data.getProxyUrl();
 	}
 
 	/**
@@ -100,10 +101,7 @@ public final class Attachment implements Entity {
 	 * @return The height of the file, if present.
 	 */
 	public OptionalInt getHeight() {
-		return Stream.of(attachment.getHeight())
-				.filter(Objects::nonNull)
-				.mapToInt(value -> value)
-				.findFirst();
+		return data.getHeight() == null ? OptionalInt.empty() : OptionalInt.of(data.getHeight());
 	}
 
 	/**
@@ -112,9 +110,6 @@ public final class Attachment implements Entity {
 	 * @return The width of the file, if present.
 	 */
 	public OptionalInt getWidth() {
-		return Stream.of(attachment.getWidth())
-				.filter(Objects::nonNull)
-				.mapToInt(value -> value)
-				.findFirst();
+		return data.getHeight() == null ? OptionalInt.empty() : OptionalInt.of(data.getHeight());
 	}
 }

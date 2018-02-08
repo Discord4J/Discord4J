@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.common.json.response.WebhookResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.data.WebhookData;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -35,17 +36,17 @@ public final class Webhook implements Entity {
 	private final Client client;
 
 	/** The raw data as represented by Discord. */
-	private final WebhookResponse webhook;
+	private final WebhookData data;
 
 	/**
 	 * Constructs a {@code Webhook} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param webhook The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 */
-	public Webhook(final Client client, final WebhookResponse webhook) {
+	public Webhook(final Client client, final WebhookData data) {
 		this.client = Objects.requireNonNull(client);
-		this.webhook = Objects.requireNonNull(webhook);
+		this.data = Objects.requireNonNull(data);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public final class Webhook implements Entity {
 
 	@Override
 	public Snowflake getId() {
-		return Snowflake.of(webhook.getId());
+		return Snowflake.of(data.getId());
 	}
 
 	/**
@@ -64,7 +65,7 @@ public final class Webhook implements Entity {
 	 * @return The ID of the guild this webhook is associated to.
 	 */
 	public Snowflake getGuildId() {
-		return Snowflake.of(webhook.getGuildId());
+		return Snowflake.of(data.getGuildId());
 	}
 
 	/**
@@ -83,7 +84,7 @@ public final class Webhook implements Entity {
 	 * @return The ID of the channel this webhook is associated to.
 	 */
 	public Snowflake getChannelId() {
-		return Snowflake.of(webhook.getChannelId());
+		return Snowflake.of(data.getChannelId());
 	}
 
 	/**
@@ -97,13 +98,12 @@ public final class Webhook implements Entity {
 	}
 
 	/**
-	 * Gets the ID of the user this webhook was created by, if present.
+	 * Gets the ID of the user this webhook was created by.
 	 *
-	 * @return The ID of the user this webhook was created by, if present.
+	 * @return The ID of the user this webhook was created by.
 	 */
-	public Optional<Snowflake> getCreatorId() {
-		return Optional.ofNullable(webhook.getUser())
-				.map(user -> Snowflake.of(user.getId()));
+	public Snowflake getCreatorId() {
+		return Snowflake.of(data.getUser());
 	}
 
 	/**
@@ -122,7 +122,7 @@ public final class Webhook implements Entity {
 	 * @return The default name of the webhook.
 	 */
 	public Optional<String> getName() {
-		return Optional.ofNullable(webhook.getName());
+		return Optional.ofNullable(data.getName());
 	}
 
 	/**
@@ -131,7 +131,7 @@ public final class Webhook implements Entity {
 	 * @return The avatar of this webhook, if present.
 	 */
 	public Optional<String> getAvatar() {
-		return Optional.ofNullable(webhook.getAvatar());
+		return Optional.ofNullable(data.getAvatar());
 	}
 
 	/**
@@ -140,6 +140,6 @@ public final class Webhook implements Entity {
 	 * @return The secure token of this webhook.
 	 */
 	public String getToken() {
-		return webhook.getToken();
+		return data.getToken();
 	}
 }
