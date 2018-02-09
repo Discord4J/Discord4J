@@ -20,18 +20,22 @@ import discord4j.common.jackson.Possible;
 import discord4j.common.json.request.EmbedRequest;
 import discord4j.common.json.request.MessageEditRequest;
 
+import javax.annotation.Nullable;
+
 public class MessageEditSpec implements Spec<MessageEditRequest> {
 
+	@Nullable
 	private Possible<String> content = Possible.absent();
+	@Nullable
 	private Possible<EmbedRequest> embed = Possible.absent();
 
-	public MessageEditSpec setContent(String content) {
-		this.content = Possible.of(content);
+	public MessageEditSpec setContent(@Nullable String content) {
+		this.content = content == null ? null : Possible.of(content);
 		return this;
 	}
 
-	public MessageEditSpec setEmbed(EmbedSpec embed) {
-		this.embed = Possible.of(embed.asRequest());
+	public MessageEditSpec setEmbed(@Nullable EmbedSpec embed) {
+		this.embed = embed == null ? null : Possible.of(embed.asRequest());
 		return this;
 	}
 

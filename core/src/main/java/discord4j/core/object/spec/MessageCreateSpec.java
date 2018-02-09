@@ -23,7 +23,7 @@ import discord4j.rest.util.MultipartRequest;
 import javax.annotation.Nullable;
 import java.io.InputStream;
 
-public class MessageSpec implements Spec<Object> { // MultipartRequest | MessageCreateRequest
+public class MessageCreateSpec implements Spec<Object> { // MultipartRequest | MessageCreateRequest
 
 	@Nullable
 	private String content;
@@ -34,22 +34,22 @@ public class MessageSpec implements Spec<Object> { // MultipartRequest | Message
 	private String fileName;
 	private InputStream file;
 
-	public MessageSpec setContent(String content) {
+	public MessageCreateSpec setContent(String content) {
 		this.content = content;
 		return this;
 	}
 
-	public MessageSpec setNonce(String nonce) {
+	public MessageCreateSpec setNonce(String nonce) {
 		this.nonce = nonce;
 		return this;
 	}
 
-	public MessageSpec setEmbed(EmbedSpec embed) {
+	public MessageCreateSpec setEmbed(EmbedSpec embed) {
 		this.embed = embed.asRequest();
 		return this;
 	}
 
-	public MessageSpec setFile(String fileName, InputStream file) {
+	public MessageCreateSpec setFile(String fileName, InputStream file) {
 		this.fileName = fileName;
 		this.file = file;
 		return this;

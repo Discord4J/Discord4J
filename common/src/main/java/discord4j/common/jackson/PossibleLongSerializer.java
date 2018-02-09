@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 
+import javax.annotation.Nullable;
+
 public class PossibleLongSerializer extends ReferenceTypeSerializer<PossibleLong> {
 
 	PossibleLongSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts, JsonSerializer<Object> ser) {
@@ -58,6 +60,7 @@ public class PossibleLongSerializer extends ReferenceTypeSerializer<PossibleLong
 		return value.get();
 	}
 
+	@Nullable
 	@Override
 	protected Object _getReferencedIfPresent(PossibleLong value) {
 		return value.isAbsent() ? null : value.get();

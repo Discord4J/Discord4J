@@ -32,7 +32,6 @@ public class ChannelModifyRequest {
 	private final Possible<Integer> position;
 	@Nullable
 	private final Possible<String> topic;
-	@Nullable
 	private final Possible<Boolean> nsfw;
 	private final Possible<Integer> bitrate;
 	@JsonProperty("user_limit")
@@ -45,10 +44,8 @@ public class ChannelModifyRequest {
 	private final PossibleLong parentId;
 
 	public ChannelModifyRequest(Possible<String> name, Possible<Integer> position,
-	                            @Nullable Possible<String> topic,
-	                            @Nullable Possible<Boolean> nsfw, Possible<Integer> bitrate,
-	                            Possible<Integer> userLimit,
-	                            Possible<OverwriteEntity[]> permissionOverwrites,
+	                            @Nullable Possible<String> topic, Possible<Boolean> nsfw, Possible<Integer> bitrate,
+	                            Possible<Integer> userLimit, Possible<OverwriteEntity[]> permissionOverwrites,
 	                            @Nullable PossibleLong parentId) {
 		this.name = name;
 		this.position = position;
@@ -68,11 +65,13 @@ public class ChannelModifyRequest {
 
 		private Possible<String> name = Possible.absent();
 		private Possible<Integer> position = Possible.absent();
+		@Nullable
 		private Possible<String> topic = Possible.absent();
 		private Possible<Boolean> nsfw = Possible.absent();
 		private Possible<Integer> bitrate = Possible.absent();
 		private Possible<Integer> userLimit = Possible.absent();
 		private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
+		@Nullable
 		private PossibleLong parentId = PossibleLong.absent();
 
 		public Builder name(String name) {
@@ -85,8 +84,8 @@ public class ChannelModifyRequest {
 			return this;
 		}
 
-		public Builder topic(String topic) {
-			this.topic = Possible.of(topic);
+		public Builder topic(@Nullable String topic) {
+			this.topic = topic == null ? null : Possible.of(topic);
 			return this;
 		}
 

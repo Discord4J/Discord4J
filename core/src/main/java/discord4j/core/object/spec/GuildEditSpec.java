@@ -23,6 +23,8 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.VoiceChannel;
 
+import javax.annotation.Nullable;
+
 public class GuildEditSpec implements Spec<GuildModifyRequest> {
 
 	private final GuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
@@ -43,19 +45,19 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
 		requestBuilder.defaultMessageNoficiations(notificationsLevel.getValue());
 	}
 
-	public void setAfkChannelId(Snowflake afkChannelId) {
-		requestBuilder.afkChannelId(afkChannelId.asLong());
+	public void setAfkChannelId(@Nullable Snowflake afkChannelId) {
+		requestBuilder.afkChannelId(afkChannelId == null ? null : afkChannelId.asLong());
 	}
 
-	public void setAfkChannel(VoiceChannel afkChannel) {
-		setAfkChannelId(afkChannel.getId());
+	public void setAfkChannel(@Nullable VoiceChannel afkChannel) {
+		setAfkChannelId(afkChannel == null ? null : afkChannel.getId());
 	}
 
 	public void setAfkTimeout(int afkTimeout) {
 		requestBuilder.afkTimeout(afkTimeout);
 	}
 
-	public void setIcon(String icon) { // TODO Icon class
+	public void setIcon(@Nullable String icon) { // TODO Icon class
 		requestBuilder.icon(icon);
 	}
 
@@ -67,7 +69,7 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
 		setOwnerId(member.getId());
 	}
 
-	public void setSplash(String splash) {
+	public void setSplash(@Nullable String splash) {
 		requestBuilder.splash(splash);
 	}
 

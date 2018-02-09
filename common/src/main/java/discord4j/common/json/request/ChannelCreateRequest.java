@@ -67,6 +67,7 @@ public class ChannelCreateRequest {
 		private Possible<Integer> userLimit = Possible.absent();
 		private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
 		private PossibleLong parentId = PossibleLong.absent();
+		@Nullable
 		private Possible<Boolean> nsfw = Possible.absent();
 
 		public Builder name(String name) {

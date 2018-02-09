@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.*;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +91,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
 		return new GatewayPayload(Opcode.forRaw(op), data, s, t);
 	}
 
+	@Nullable
 	private static Class<? extends PayloadData> getPayloadType(int op, String t) {
 		if (op == Opcode.DISPATCH.getRawOp()) {
 			if (!dispatchTypes.containsKey(t)) {

@@ -22,6 +22,7 @@ import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Category;
 import discord4j.core.object.entity.PermissionOverwrite;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
@@ -53,13 +54,13 @@ public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
 		return this;
 	}
 
-	public VoiceChannelEditSpec setParentId(Snowflake parentId) {
-		requestBuilder.parentId(parentId.asLong());
+	public VoiceChannelEditSpec setParentId(@Nullable Snowflake parentId) {
+		requestBuilder.parentId(parentId == null ? null : parentId.asLong());
 		return this;
 	}
 
-	public VoiceChannelEditSpec setParent(Category parent) {
-		return setParentId(parent.getId());
+	public VoiceChannelEditSpec setParent(@Nullable Category parent) {
+		return setParentId(parent == null ? null : parent.getId());
 	}
 
 	public VoiceChannelEditSpec setBitrate(int bitrate) {

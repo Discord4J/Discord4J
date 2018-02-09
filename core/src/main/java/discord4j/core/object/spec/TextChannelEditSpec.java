@@ -22,6 +22,7 @@ import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Category;
 import discord4j.core.object.entity.PermissionOverwrite;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
@@ -53,13 +54,13 @@ public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
 		return this;
 	}
 
-	public TextChannelEditSpec setParentId(Snowflake parentId) {
-		requestBuilder.parentId(parentId.asLong());
+	public TextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
+		requestBuilder.parentId(parentId == null ? null : parentId.asLong());
 		return this;
 	}
 
-	public TextChannelEditSpec setParent(Category parent) {
-		return setParentId(parent.getId());
+	public TextChannelEditSpec setParent(@Nullable Category parent) {
+		return setParentId(parent == null ? null : parent.getId());
 	}
 
 	@Override

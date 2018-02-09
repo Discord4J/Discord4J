@@ -24,8 +24,11 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 
+import javax.annotation.Nullable;
+
 public class PossibleSerializers extends Serializers.Base {
 
+	@Nullable
 	@Override
 	public JsonSerializer<?> findReferenceSerializer(SerializationConfig config, ReferenceType type,
 	                                                 BeanDescription beanDesc, TypeSerializer contentTypeSerializer,
@@ -40,6 +43,5 @@ public class PossibleSerializers extends Serializers.Base {
 		}
 
 		return null;
-
 	}
 }

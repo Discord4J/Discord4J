@@ -18,12 +18,14 @@ package discord4j.common.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class GuildCreateRequest {
 
 	private final String name;
 	private final String region;
+	@Nullable
 	private final String icon;
 	@JsonProperty("verification_level")
 	private final int verificationLevel;
@@ -32,7 +34,7 @@ public class GuildCreateRequest {
 	private final RoleCreateRequest[] roles;
 	private final PartialChannelRequest[] channels;
 
-	public GuildCreateRequest(String name, String region, String icon, int verificationLevel,
+	public GuildCreateRequest(String name, String region, @Nullable String icon, int verificationLevel,
 	                          int defaultMessageNotifications, RoleCreateRequest[] roles,
 	                          PartialChannelRequest[] channels) {
 		this.name = name;

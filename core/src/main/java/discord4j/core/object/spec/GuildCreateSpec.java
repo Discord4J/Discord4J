@@ -23,6 +23,7 @@ import discord4j.core.object.Region;
 import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Guild;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +31,10 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
 	private String name;
 	private String region;
+	@Nullable
 	private String icon;
 	private int verificationLevel;
-	private int defaultMessageNoficationLevel;
+	private int defaultMessageNotificationLevel;
 	private final List<RoleCreateRequest> roles = new ArrayList<>();
 	private final List<PartialChannelRequest> channels = new ArrayList<>();
 
@@ -46,7 +48,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 		return this;
 	}
 
-	public GuildCreateSpec setIcon(String icon) { // TODO icon class
+	public GuildCreateSpec setIcon(@Nullable String icon) { // TODO icon class
 		this.icon = icon;
 		return this;
 	}
@@ -56,8 +58,8 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 		return this;
 	}
 
-	public GuildCreateSpec setDefaultMessageNoficiationLevel(Guild.NotificationLevel noficiationLevel) {
-		this.defaultMessageNoficationLevel = noficiationLevel.getValue();
+	public GuildCreateSpec setDefaultMessageNotificationLevel(Guild.NotificationLevel notificationLevel) {
+		this.defaultMessageNotificationLevel = notificationLevel.getValue();
 		return this;
 	}
 
@@ -80,7 +82,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 	public GuildCreateRequest asRequest() {
 		RoleCreateRequest[] roles = this.roles.toArray(new RoleCreateRequest[this.roles.size()]);
 		PartialChannelRequest[] channels = this.channels.toArray(new PartialChannelRequest[this.channels.size()]);
-		return new GuildCreateRequest(name, region, icon, verificationLevel, defaultMessageNoficationLevel, roles,
+		return new GuildCreateRequest(name, region, icon, verificationLevel, defaultMessageNotificationLevel, roles,
 				channels);
 	}
 }

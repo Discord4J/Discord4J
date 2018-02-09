@@ -19,6 +19,7 @@ package discord4j.core.object.spec;
 import discord4j.common.json.EmbedFieldEntity;
 import discord4j.common.json.request.*;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -26,54 +27,46 @@ import java.util.List;
 
 public class EmbedSpec implements Spec<EmbedRequest> {
 
-	private String title;
-	private String description;
-	private String url;
-	private String timestamp;
-	private Integer color;
-	private EmbedFooterRequest footer;
-	private EmbedImageRequest image;
-	private EmbedThumbnailRequest thumbnail;
-	private EmbedAuthorRequest author;
+	private final EmbedRequest.Builder requestBuilder = EmbedRequest.builder();
 	private final List<EmbedFieldEntity> fields = new ArrayList<>();
 
 	public EmbedSpec setTitle(String title) {
-		this.title = title;
+		requestBuilder.title(title);
 		return this;
 	}
 
 	public EmbedSpec setDescription(String description) {
-		this.description = description;
+		requestBuilder.description(description);
 		return this;
 	}
 
 	public EmbedSpec setUrl(String url) {
-		this.url = url;
+		requestBuilder.url(url);
 		return this;
 	}
 
 	public EmbedSpec setTimestamp(Instant timestamp) {
-		this.timestamp = DateTimeFormatter.ISO_INSTANT.format(timestamp);
+		requestBuilder.timestamp(DateTimeFormatter.ISO_INSTANT.format(timestamp));
 		return this;
 	}
 
 	public EmbedSpec setFooter(String text, String iconUrl) {
-		this.footer = new EmbedFooterRequest(text, iconUrl);
+		requestBuilder.footer(new EmbedFooterRequest(text, iconUrl));
 		return this;
 	}
 
 	public EmbedSpec setImage(String url) {
-		this.image = new EmbedImageRequest(url);
+		requestBuilder.image(new EmbedImageRequest(url));
 		return this;
 	}
 
 	public EmbedSpec setThumbnail(String url) {
-		this.thumbnail = new EmbedThumbnailRequest(url);
+		requestBuilder.thumbnail(new EmbedThumbnailRequest(url));
 		return this;
 	}
 
 	public EmbedSpec setAuthor(String name, String url, String iconUrl) {
-		this.author = new EmbedAuthorRequest(name, url, iconUrl);
+		requestBuilder.author(new EmbedAuthorRequest(name, url, iconUrl));
 		return this;
 	}
 
@@ -84,7 +77,7 @@ public class EmbedSpec implements Spec<EmbedRequest> {
 
 	@Override
 	public EmbedRequest asRequest() {
-		EmbedFieldEntity[] fields = this.fields.toArray(new EmbedFieldEntity[this.fields.size()]);
-		return new EmbedRequest(title, description, url, timestamp, color, footer, image, thumbnail, author, fields);
+		requestBuilder.fields(this.fields.toArray(new EmbedFieldEntity[this.fields.size()]));
+		return requestBuilder.build();
 	}
 }
