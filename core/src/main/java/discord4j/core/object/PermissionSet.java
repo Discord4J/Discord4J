@@ -57,7 +57,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
 	 * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
 	 * @return A {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
 	 */
-	public static PermissionSet of(final long rawValue) {
+	public static PermissionSet of(final int rawValue) {
 		return new PermissionSet(rawValue);
 	}
 
@@ -75,14 +75,14 @@ public final class PermissionSet extends AbstractSet<Permission> {
 	}
 
 	/** A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}. */
-	private final long rawValue;
+	private final int rawValue;
 
 	/**
 	 * Constructs a {@code PermissionSet} with a <i>raw value</i>.
 	 *
 	 * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
 	 */
-	private PermissionSet(final long rawValue) {
+	private PermissionSet(final int rawValue) {
 		this.rawValue = rawValue;
 	}
 
@@ -104,7 +104,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
 	 * @return The <i>raw value</i> for this {@code PermissionSet}.
 	 * @see PermissionSet
 	 */
-	public long getRawValue() {
+	public int getRawValue() {
 		return rawValue;
 	}
 

@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.data.GuildEmojiData;
+import discord4j.core.object.spec.GuildEmojiEditSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

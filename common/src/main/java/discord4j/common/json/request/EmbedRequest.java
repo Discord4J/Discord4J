@@ -26,14 +26,14 @@ public class EmbedRequest {
 	private final String description;
 	private final String url;
 	private final String timestamp;
-	private final Integer color;
+	private final int color;
 	private final EmbedFooterRequest footer;
 	private final EmbedImageRequest image;
 	private final EmbedThumbnailRequest thumbnail;
 	private final EmbedAuthorRequest author;
 	private final EmbedFieldEntity[] fields;
 
-	public EmbedRequest(String title, String description, String url, String timestamp, Integer color,
+	public EmbedRequest(String title, String description, String url, String timestamp, int color,
 	                    EmbedFooterRequest footer, EmbedImageRequest image,
 	                    EmbedThumbnailRequest thumbnail, EmbedAuthorRequest author,
 	                    EmbedFieldEntity[] fields) {
