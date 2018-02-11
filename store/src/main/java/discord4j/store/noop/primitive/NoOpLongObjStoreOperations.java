@@ -14,65 +14,70 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.noop;
+package discord4j.store.noop.primitive;
 
-import discord4j.store.StoreConnection;
-import discord4j.store.noop.primitive.NoOpLongObjStoreConnection;
+import discord4j.store.noop.NoOpStoreOperations;
+import discord4j.store.primitive.LongObjStoreOperations;
+import discord4j.store.util.LongObjTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 /**
  * Data connection implementation which does nothing.
  *
- * @see NoOpConnectionSource
- * @see NoOpLongObjStoreConnection
+ * @see NoOpLongObjStore
+ * @see NoOpStoreOperations
  */
-public class NoOpStoreConnection<K extends Comparable<K>, V> implements StoreConnection<K, V> {
+public class NoOpLongObjStoreOperations<V> implements LongObjStoreOperations<V> {
 
     @Override
-    public Mono<Void> store(K key, V value) {
+    public Mono<Void> storeWithLong(long key, V value) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> store(Mono<Tuple2<K, V>> entry) {
+    public Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
+    public Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> store(Flux<Tuple2<K, V>> entryStream) {
+    public Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<V> find(K id) {
+    public Mono<V> find(long id) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<V> find(Mono<K> id) {
+    public Mono<V> find(Mono<Long> id) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Boolean> exists(K id) {
+    public Mono<Boolean> exists(long id) {
         return Mono.just(false);
     }
 
     @Override
-    public Mono<Boolean> exists(Mono<K> id) {
+    public Mono<Boolean> exists(Mono<Long> id) {
         return Mono.just(false);
     }
 
     @Override
-    public Mono<Boolean> exists(Flux<K> ids) {
+    public Mono<Boolean> exists(Flux<Long> ids) {
         return Mono.just(false);
+    }
+
+    @Override
+    public Flux<V> findInRange(long start, long end) {
+        return Flux.empty();
     }
 
     @Override
@@ -81,17 +86,12 @@ public class NoOpStoreConnection<K extends Comparable<K>, V> implements StoreCon
     }
 
     @Override
-    public Flux<V> findAll(Iterable<K> ids) {
+    public Flux<V> findAll(Iterable<Long> ids) {
         return Flux.empty();
     }
 
     @Override
-    public Flux<V> findAll(Flux<K> ids) {
-        return Flux.empty();
-    }
-
-    @Override
-    public Flux<V> findInRange(K start, K end) {
+    public Flux<V> findAll(Flux<Long> ids) {
         return Flux.empty();
     }
 
@@ -101,37 +101,17 @@ public class NoOpStoreConnection<K extends Comparable<K>, V> implements StoreCon
     }
 
     @Override
-    public Mono<Void> delete(K id) {
+    public Mono<Void> delete(long id) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> delete(Mono<K> id) {
+    public Mono<Void> delete(Mono<Long> id) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> delete(Flux<K> ids) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> delete(Tuple2<K, V> entry) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> deleteInRange(K start, K end) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Flux<Tuple2<K, V>> entries) {
+    public Mono<Void> delete(Flux<Long> ids) {
         return Mono.empty();
     }
 
@@ -141,7 +121,7 @@ public class NoOpStoreConnection<K extends Comparable<K>, V> implements StoreCon
     }
 
     @Override
-    public Flux<K> keys() {
+    public Flux<Long> keys() {
         return Flux.empty();
     }
 
@@ -153,5 +133,25 @@ public class NoOpStoreConnection<K extends Comparable<K>, V> implements StoreCon
     @Override
     public void close() throws RuntimeException {
 
+    }
+
+    @Override
+    public Mono<Void> delete(LongObjTuple2<V> entry) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(long start, long end) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries) {
+        return Mono.empty();
     }
 }

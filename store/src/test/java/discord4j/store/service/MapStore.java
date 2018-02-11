@@ -16,8 +16,8 @@
  */
 package discord4j.store.service;
 
-import discord4j.store.ConnectionSource;
-import discord4j.store.StoreConnection;
+import discord4j.store.Store;
+import discord4j.store.StoreOperations;
 import discord4j.store.util.WithinRangePredicate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,14 +27,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MapStore<K extends Comparable<K>, V> implements ConnectionSource<K, V> {
+public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
 
     private final Map<K, V> map = new ConcurrentHashMap<>();
-    private final AtomicReference<MapStoreStoreConnection> lock = new AtomicReference<>();
+    private final AtomicReference<MapStoreStoreOperations> lock = new AtomicReference<>();
 
     @Override
-    public Mono<? extends StoreConnection<K, V>> getConnection(boolean lock) {
-        Mono<MapStoreStoreConnection> mono = Mono.defer(() -> Mono.just(new MapStoreStoreConnection(lock)));
+    public Mono<? extends StoreOperations<K, V>> getConnection(boolean lock) {
+        Mono<MapStoreStoreOperations> mono = Mono.defer(() -> Mono.just(new MapStoreStoreOperations(lock)));
         if (this.lock.get() != null)
             mono = mono.zipWith(Mono.just(this.lock.get()))
                     .delayUntil(tuple -> tuple.getT2().signaler)
@@ -44,12 +44,12 @@ public class MapStore<K extends Comparable<K>, V> implements ConnectionSource<K,
         return mono;
     }
 
-    private final class MapStoreStoreConnection implements StoreConnection<K, V> {
+    private final class MapStoreStoreOperations implements StoreOperations<K, V> {
 
         final Mono<Void> signaler;
         final AtomicReference<Runnable> callback = new AtomicReference<>();
 
-        private MapStoreStoreConnection(boolean lock) {
+        private MapStoreStoreOperations(boolean lock) {
             if (lock) {
                 signaler = Mono.create(sink -> callback.set(sink::success));
             } else {

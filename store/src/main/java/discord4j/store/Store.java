@@ -16,7 +16,7 @@
  */
 package discord4j.store;
 
-import discord4j.store.primitive.LongObjConnectionSource;
+import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
 /**
@@ -27,9 +27,9 @@ import reactor.core.publisher.Mono;
  *           {@link Comparable} in order to allow for range operations.
  * @param <V> The value type.
  *
- * @see LongObjConnectionSource
+ * @see LongObjStore
  */
-public interface ConnectionSource<K extends Comparable<K>, V> {
+public interface Store<K extends Comparable<K>, V> {
 
     /**
      * This is used to get an active connection to the data source.
@@ -38,5 +38,5 @@ public interface ConnectionSource<K extends Comparable<K>, V> {
      *             This allows for doing operations which require priority to ensure consistency.
      * @return A mono which is expected to provide an open connection as soon as possible.
      */
-    Mono<? extends StoreConnection<K, V>> getConnection(boolean lock);
+    Mono<? extends StoreOperations<K, V>> getConnection(boolean lock);
 }

@@ -16,41 +16,21 @@
  */
 package discord4j.store.primitive;
 
-import discord4j.store.StoreConnection;
+import discord4j.store.StoreOperations;
 import discord4j.store.util.LongObjTuple2;
 import discord4j.store.util.MappingIterable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-import java.util.function.Function;
-import java.util.function.ToLongFunction;
-
 /**
  * This provides an active data connection to a store's data source.
  *
  * @param <V> The value type.
  *
- * @see StoreConnection
+ * @see StoreOperations
  */
-public interface LongObjStoreConnection<V> extends StoreConnection<Long, V> {
-
-    @Override
-    default LongObjMappedStoreConnection<V> withMapper(Function<V, Long> idMapper) {
-        return withMapper((ToLongFunction<V>) v -> (long) idMapper.apply(v));
-    }
-
-    /**
-     * Provides a data connection which is able to automatically map values to a key, allowing for simplified operations.
-     *
-     * @param idMapper The mapper which is able to connect values to unique ids.
-     * @return The data connection with automatic value -> key mapping.
-     *
-     * @see LongObjMappedStoreConnection
-     */
-    default LongObjMappedStoreConnection<V> withMapper(ToLongFunction<V> idMapper) {
-        return new LongObjMappedStoreConnection<>(this, idMapper);
-    }
+public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
 
     @Override
     default Mono<Void> store(Long key, V value) {
@@ -234,7 +214,7 @@ public interface LongObjStoreConnection<V> extends StoreConnection<Long, V> {
 
     @Override
     default Flux<Tuple2<Long, V>> entries() {
-        return StoreConnection.super.entries();
+        return StoreOperations.super.entries();
     }
 
     /**

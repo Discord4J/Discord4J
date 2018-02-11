@@ -14,23 +14,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.noop.primitive;
+package discord4j.common;
 
-import discord4j.store.noop.NoOpConnectionSource;
-import discord4j.store.primitive.LongObjConnectionSource;
-import discord4j.store.primitive.LongObjStoreConnection;
-import reactor.core.publisher.Mono;
+import java.util.function.Supplier;
 
-/**
- * Store implementation which does nothing.
- *
- * @see discord4j.store.noop.NoOpStoreService
- * @see NoOpConnectionSource
- */
-public class NoOpLongObjConnectionSource<V> implements LongObjConnectionSource<V> {
+public class Lazy<T> {
 
-    @Override
-    public Mono<LongObjStoreConnection<V>> getConnection(boolean lock) {
-        return Mono.just(new NoOpLongObjStoreConnection<>());
+    protected T obj;
+    protected final Supplier<T> supplier;
+
+    public Lazy(Supplier<T> supplier) {
+        this.supplier = supplier;
+    }
+
+    /**
+     * Gets the inner object. If {@link #obj} is null, {@link #supplier} is invoked.
+     *
+     * @return The inner object.
+     */
+    public T get() {
+        if (obj == null) obj = supplier.get();
+        return obj;
     }
 }

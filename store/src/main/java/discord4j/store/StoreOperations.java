@@ -16,12 +16,10 @@
  */
 package discord4j.store;
 
-import discord4j.store.primitive.LongObjStoreConnection;
+import discord4j.store.primitive.LongObjStoreOperations;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
-
-import java.util.function.Function;
 
 /**
  * This provides an active data connection to a store's data source.
@@ -30,21 +28,9 @@ import java.util.function.Function;
  *           {@link Comparable} in order to allow for range operations.
  * @param <V> The value type.
  *
- * @see LongObjStoreConnection
+ * @see LongObjStoreOperations
  */
-public interface StoreConnection<K extends Comparable<K>, V> extends AutoCloseable {
-
-    /**
-     * Provides a data connection which is able to automatically map values to a key, allowing for simplified operations.
-     *
-     * @param idMapper The mapper which is able to connect values to unique ids.
-     * @return The data connection with automatic value -> key mapping.
-     *
-     * @see MappedStoreConnection
-     */
-    default MappedStoreConnection<K, V> withMapper(Function<V, K> idMapper) {
-        return new MappedStoreConnection<>(this, idMapper);
-    }
+public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseable {
 
     /**
      * Stores a key value pair.

@@ -16,21 +16,21 @@
  */
 package discord4j.store.noop;
 
-import discord4j.store.ConnectionSource;
-import discord4j.store.StoreConnection;
-import discord4j.store.noop.primitive.NoOpLongObjConnectionSource;
+import discord4j.store.Store;
+import discord4j.store.StoreOperations;
+import discord4j.store.noop.primitive.NoOpLongObjStore;
 import reactor.core.publisher.Mono;
 
 /**
  * Store implementation which does nothing.
  *
  * @see NoOpStoreService
- * @see NoOpLongObjConnectionSource
+ * @see NoOpLongObjStore
  */
-public class NoOpConnectionSource<K extends Comparable<K>, V> implements ConnectionSource<K, V> {
+public class NoOpStore<K extends Comparable<K>, V> implements Store<K, V> {
 
     @Override
-    public Mono<? extends StoreConnection<K, V>> getConnection(boolean lock) {
-        return Mono.just(new NoOpStoreConnection<>());
+    public Mono<? extends StoreOperations<K, V>> getConnection(boolean lock) {
+        return Mono.just(new NoOpStoreOperations<>());
     }
 }

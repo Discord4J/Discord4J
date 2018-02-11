@@ -2,6 +2,7 @@ dependencies {
     compile "io.projectreactor:reactor-core:$reactor_version"
     compile "org.slf4j:slf4j-api:$slf4j_version"
     compile "com.google.code.findbugs:jsr305:$jsr305_version"
+    compile project(':common')
 
     testCompile "junit:junit:$junit_version"
     testCompileOnly "com.google.auto.service:auto-service:$autoservice_version"

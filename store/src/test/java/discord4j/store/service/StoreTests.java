@@ -16,9 +16,8 @@
  */
 package discord4j.store.service;
 
-import discord4j.store.ConnectionSource;
-import discord4j.store.MappedStoreConnection;
-import discord4j.store.StoreConnection;
+import discord4j.store.Store;
+import discord4j.store.StoreOperations;
 import discord4j.store.primitive.ForwardingStoreService;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -38,7 +37,7 @@ public class StoreTests {
     private final StoreProvider provider = new StoreProvider();
 
     @SuppressWarnings("ConstantConditions")
-    private ConnectionSource<String, String> newStore() {
+    private Store<String, String> newStore() {
         return provider.newGenericStore(String.class, String.class).block();
     }
 
@@ -55,24 +54,24 @@ public class StoreTests {
 
     @Test(timeout = 10000L)
     public void testStoreLocking() {
-        ConnectionSource<String, String> store = newStore();
+        Store<String, String> store = newStore();
         long start = System.currentTimeMillis();
-        store.getConnection(true).delayElement(Duration.ofSeconds(5)).doOnNext(StoreConnection::close).subscribe();
+        store.getConnection(true).delayElement(Duration.ofSeconds(5)).doOnNext(StoreOperations::close).subscribe();
         assertTrue(store.getConnection(false).blockOptional().isPresent());
         assertTrue(System.currentTimeMillis() - start >= 5000);
     }
 
     @Test
     public void testGenericStore() {
-        ConnectionSource<String, String> store = newStore();
+        Store<String, String> store = newStore();
         new StoreTest(Objects.requireNonNull(store.getConnection(true).block())).test();
     }
 
     class StoreTest {
 
-        private StoreConnection<String, String> connection;
+        private StoreOperations<String, String> connection;
 
-        StoreTest(StoreConnection<String, String> connection) {
+        StoreTest(StoreOperations<String, String> connection) {
             this.connection = connection;
         }
 
@@ -101,23 +100,6 @@ public class StoreTests {
                     Tuples.of("hello5", "world5")),
                     connection.entries().collectList().block()));
             testDelete();
-            if (!(connection instanceof MappedStoreConnection))
-                testMapped();
-        }
-
-        void testMapped() {
-            MappedStoreConnection<String, String> mapped = connection.withMapper(str -> str.replace("world", "hello"));
-            mapped.storeValue("world").block();
-            mapped.storeValue(Mono.defer(() -> Mono.just("world1"))).block();
-            mapped.storeValues(Flux.fromArray(new String[]{"world2", "world3"})).block();
-            mapped.storeValues(Arrays.asList("world4", "world5")).block();
-            assertEquals(6L, (long) mapped.count().block());
-            mapped.deleteValue("world").block();
-            mapped.deleteAllValues(Flux.fromArray(new String[]{"world2", "world3"})).block();
-            mapped.deleteAllValues(Arrays.asList("world4", "world5")).block();
-            mapped.deleteAll().block();
-            connection = mapped;
-            test();
         }
 
         void testPut() {

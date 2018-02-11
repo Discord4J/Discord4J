@@ -16,10 +16,11 @@
  */
 package discord4j.store.service;
 
-import discord4j.store.ConnectionSource;
+import discord4j.common.Lazy;
+import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
-import discord4j.store.primitive.LongObjConnectionSource;
+import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -38,6 +39,14 @@ public class StoreProvider {
 
     private final AtomicReference<StoreService> genericService = new AtomicReference<>();
     private final AtomicReference<StoreService> longObjService = new AtomicReference<>();
+    private final AtomicReference<Lazy<StoreService>> generalService = new AtomicReference<>(new Lazy<>(() -> {
+        StoreService generic = getGenericStoreProvider();
+        StoreService primitive = getLongObjStoreProvider();
+        if (generic == primitive)
+            return generic;
+        else
+            return new ComposedStoreService(generic, primitive);
+    }));
 
     /**
      * Creates a reusable instance of the provider, service discovery occurs at this point!
@@ -48,6 +57,24 @@ public class StoreProvider {
         serviceLoader.iterator().forEachRemaining(services::add);
 
         services.add(new NoOpStoreService()); //No-op is lowest priority
+    }
+
+    /**
+     * Gets the store definitive {@link StoreService} implementation to use.
+     *
+     * @return The best {@link StoreService} implementation.
+     */
+    public StoreService getStoreService() {
+        return generalService.get().get();
+    }
+
+    /**
+     * Overrides the service to be returned by {@link #getStoreService()}.
+     *
+     * @param service The overriding service instance.
+     */
+    public void overrideStoreService(StoreService service) {
+        generalService.set(new Lazy<>(() -> service));
     }
 
     /**
@@ -94,8 +121,8 @@ public class StoreProvider {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    public <K extends Comparable<K>, V> Mono<ConnectionSource<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return getGenericStoreProvider().provideGenericStore(keyClass, valueClass);
+    public <K extends Comparable<K>, V> Mono<Store<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
+        return getStoreService().provideGenericStore(keyClass, valueClass);
     }
 
     /**
@@ -105,7 +132,37 @@ public class StoreProvider {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    public <V> Mono<LongObjConnectionSource<V>> newLongObjStore(Class<V> valueClass) {
-        return getLongObjStoreProvider().provideLongObjStore(valueClass);
+    public <V> Mono<LongObjStore<V>> newLongObjStore(Class<V> valueClass) {
+        return getStoreService().provideLongObjStore(valueClass);
+    }
+
+    private static final class ComposedStoreService implements StoreService {
+
+        private final StoreService genericService, primitiveService;
+
+        private ComposedStoreService(StoreService genericService, StoreService primitiveService) {
+            this.genericService = genericService;
+            this.primitiveService = primitiveService;
+        }
+
+        @Override
+        public boolean hasGenericStores() {
+            return genericService.hasGenericStores();
+        }
+
+        @Override
+        public <K extends Comparable<K>, V> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+            return genericService.provideGenericStore(keyClass, valueClass);
+        }
+
+        @Override
+        public boolean hasLongObjStores() {
+            return primitiveService.hasLongObjStores();
+        }
+
+        @Override
+        public <V> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
+            return primitiveService.provideLongObjStore(valueClass);
+        }
     }
 }

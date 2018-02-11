@@ -16,31 +16,29 @@
  */
 package discord4j.store.primitive;
 
-import discord4j.store.StoreConnection;
+import discord4j.store.StoreOperations;
 import discord4j.store.util.LongObjTuple2;
 import discord4j.store.util.MappingIterable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-import java.util.function.ToLongFunction;
-
 /**
- * An implementation of {@link LongObjStoreConnection} which is a data connection that delegates to another, generic
+ * An implementation of {@link LongObjStoreOperations} which is a data connection that delegates to another, generic
  * one.
  *
- * @see LongObjStoreConnection
+ * @see LongObjStoreOperations
  */
-public class ForwardingStoreConnection<V> implements LongObjStoreConnection<V> {
+public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
 
-    private final StoreConnection<Long, V> toForward;
+    private final StoreOperations<Long, V> toForward;
 
     /**
      * Constructs the data connection.
      *
      * @param toForward The generic data connection to forward to.
      */
-    public ForwardingStoreConnection(StoreConnection<Long, V> toForward) {
+    public ForwardingStoreOperations(StoreOperations<Long, V> toForward) {
         this.toForward = toForward;
     }
 
@@ -49,13 +47,8 @@ public class ForwardingStoreConnection<V> implements LongObjStoreConnection<V> {
      *
      * @return The original data connection.
      */
-    protected StoreConnection<Long, V> getOriginal() {
+    protected StoreOperations<Long, V> getOriginal() {
         return toForward;
-    }
-
-    @Override
-    public LongObjMappedStoreConnection<V> withMapper(ToLongFunction<V> idMapper) {
-        return new LongObjMappedStoreConnection<>(this, idMapper);
     }
 
     @Override

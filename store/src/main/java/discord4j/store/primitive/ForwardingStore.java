@@ -14,33 +14,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.store.service;
+package discord4j.store.primitive;
 
-import com.google.auto.service.AutoService;
 import discord4j.store.Store;
-import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
-@AutoService(StoreService.class)
-public class TestService implements StoreService {
+/**
+ * An implementation of {@link LongObjStore} which creates primitive connections which delegate to another,
+ * generic connection.
+ *
+ * @see LongObjStore
+ */
+public class ForwardingStore<V> implements LongObjStore<V> {
 
-    @Override
-    public boolean hasGenericStores() {
-        return true;
+    private final Store<Long, V> toForward;
+
+    /**
+     * Constructs the store.
+     *
+     * @param toForward The generic store to forward to.
+     */
+    public ForwardingStore(Store<Long, V> toForward) {
+        this.toForward = toForward;
     }
 
     @Override
-    public <K extends Comparable<K>, V> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return Mono.defer(() -> Mono.just(new MapStore<>()));
-    }
-
-    @Override
-    public boolean hasLongObjStores() {
-        return false;
-    }
-
-    @Override
-    public <V> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return Mono.empty();
+    public Mono<LongObjStoreOperations<V>> getConnection(boolean lock) {
+        return toForward.getConnection(lock).map(ForwardingStoreOperations::new);
     }
 }
