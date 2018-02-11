@@ -80,34 +80,33 @@ public class WebSocketSession {
 	 */
 	public Mono<CloseStatus> closeFuture() {
 		MonoProcessor<CloseStatus> reason = MonoProcessor.create();
-		getDelegate().getInbound().withConnection(connection -> {
-			// listen to netty event loop to retrieve close reason
-			connection.addHandlerLast("d4j.last.closeHandler", new ChannelInboundHandlerAdapter() {
-				@Override
-				public void channelRead(ChannelHandlerContext ctx, Object msg) {
-					if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
-						CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
-						log.warn("Signalling close status: {} {}", close.statusCode(), close.reasonText());
-						// then push it to our MonoProcessor for the reason
-						reason.onNext(new CloseStatus(close.statusCode(), close.reasonText()));
-					}
-					ctx.fireChannelRead(msg);
-				}
-
-				@Override
-				public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-					if (evt instanceof SslCloseCompletionEvent) {
-						SslCloseCompletionEvent closeEvent = (SslCloseCompletionEvent) evt;
-						if (!closeEvent.isSuccess()) {
-							log.warn("Signalling abnormal close status: {}", closeEvent.cause().toString());
+		// listen to netty event loop to retrieve close reason
+		getDelegate().getInbound().context().addHandlerLast("d4j.last.closeHandler",
+				new ChannelInboundHandlerAdapter() {
+					@Override
+					public void channelRead(ChannelHandlerContext ctx, Object msg) {
+						if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
+							CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
+							log.warn("Signalling close status: {} {}", close.statusCode(), close.reasonText());
 							// then push it to our MonoProcessor for the reason
-							reason.onError(closeEvent.cause());
+							reason.onNext(new CloseStatus(close.statusCode(), close.reasonText()));
 						}
+						ctx.fireChannelRead(msg);
 					}
-					ctx.fireUserEventTriggered(evt);
-				}
-			});
-		});
+
+					@Override
+					public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+						if (evt instanceof SslCloseCompletionEvent) {
+							SslCloseCompletionEvent closeEvent = (SslCloseCompletionEvent) evt;
+							if (!closeEvent.isSuccess()) {
+								log.warn("Signalling abnormal close status: {}", closeEvent.cause().toString());
+								// then push it to our MonoProcessor for the reason
+								reason.onError(closeEvent.cause());
+							}
+						}
+						ctx.fireUserEventTriggered(evt);
+					}
+				});
 
 		return reason;
 	}
