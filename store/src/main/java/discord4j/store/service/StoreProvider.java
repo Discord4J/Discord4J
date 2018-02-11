@@ -20,7 +20,6 @@ import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
 import discord4j.store.primitive.LongObjStore;
-import discord4j.store.util.Lazy;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -39,14 +38,7 @@ public class StoreProvider {
 
     private final AtomicReference<StoreService> genericService = new AtomicReference<>();
     private final AtomicReference<StoreService> longObjService = new AtomicReference<>();
-    private final AtomicReference<Lazy<StoreService>> generalService = new AtomicReference<>(new Lazy<>(() -> {
-        StoreService generic = getGenericStoreProvider();
-        StoreService primitive = getLongObjStoreProvider();
-        if (generic == primitive)
-            return generic;
-        else
-            return new ComposedStoreService(generic, primitive);
-    }));
+    private final AtomicReference<StoreService> generalService = new AtomicReference<>();
 
     /**
      * Creates a reusable instance of the provider, service discovery occurs at this point!
@@ -57,6 +49,10 @@ public class StoreProvider {
         serviceLoader.iterator().forEachRemaining(services::add);
 
         services.add(new NoOpStoreService()); //No-op is lowest priority
+
+        StoreService generic = getGenericStoreProvider();
+        StoreService primitive = getLongObjStoreProvider();
+        generalService.set(generic == primitive ? generic : new ComposedStoreService(generic, primitive));
     }
 
     /**
@@ -65,7 +61,7 @@ public class StoreProvider {
      * @return The best {@link StoreService} implementation.
      */
     public StoreService getStoreService() {
-        return generalService.get().get();
+        return generalService.get();
     }
 
     /**
@@ -74,7 +70,7 @@ public class StoreProvider {
      * @param service The overriding service instance.
      */
     public void overrideStoreService(StoreService service) {
-        generalService.set(new Lazy<>(() -> service));
+        generalService.set(service);
     }
 
     /**
