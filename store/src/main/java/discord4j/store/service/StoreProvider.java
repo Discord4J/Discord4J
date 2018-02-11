@@ -16,11 +16,11 @@
  */
 package discord4j.store.service;
 
-import discord4j.common.Lazy;
 import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
 import discord4j.store.primitive.LongObjStore;
+import discord4j.store.util.Lazy;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
