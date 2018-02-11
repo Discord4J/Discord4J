@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 /**
  * POJO fields which represent Snowflake IDs should be annotated with this to indicate that they should be
  * (de)serialized as unsigned longs. This maybe be applied to fields of types Long | PossibleLong | long[] |
- * Possible<long[]> | OptionalLong.
+ * Possible&lt;long[]&gt; | OptionalLong.
  */
 @JacksonAnnotationsInside
 @Target(ElementType.FIELD)

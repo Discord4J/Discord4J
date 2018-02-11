@@ -18,7 +18,6 @@
  * Contains all of the Plain Old Java Objects (POJOs) used to represent requests and responses to and from Discord.
  * <p>
  * The following rules should be followed when creating a new POJO:
- * <p>
  * <h1>Placement</h1>
  * <ul>
  *     <li>Objects which are to be <b>serialized and sent</b> to Discord should be placed in

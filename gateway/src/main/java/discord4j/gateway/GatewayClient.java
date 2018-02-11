@@ -150,7 +150,7 @@ public class GatewayClient {
 	 * <p>
 	 * <pre class="code">
 	 * gatewayClient.dispatch().ofType(MessageCreate.class)
-	 * .subscribe(message -> {
+	 * .subscribe(message -&gt; {
 	 * System.out.println("Got a message with content: " + message.getMessage().getContent());
 	 * });
 	 * </pre>
