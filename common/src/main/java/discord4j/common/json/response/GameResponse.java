@@ -53,6 +53,9 @@ public class GameResponse {
 	private long applicationId; // TODO: nullable?
 	@Nullable
 	private String details;
+	@JsonProperty("sync_id")
+	@Nullable
+	private String syncId;
 	@Nullable
 	private String state;
 	private int flags;
@@ -93,6 +96,11 @@ public class GameResponse {
 	}
 
 	@Nullable
+	public String getSyncId() {
+		return syncId;
+	}
+
+	@Nullable
 	public String getState() {
 		return state;
 	}
@@ -121,6 +129,7 @@ public class GameResponse {
 				", sessionId=" + sessionId +
 				", applicationId=" + applicationId +
 				", details=" + details +
+				", syncId=" + syncId +
 				", state=" + state +
 				", flags=" + flags +
 				", party=" + party +
