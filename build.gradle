@@ -49,6 +49,8 @@ allprojects {
     version = project_version
 
     apply plugin: 'java'
+    apply plugin: "maven-publish"
+
     sourceCompatibility = project_jdk
     targetCompatibility = project_jdk
 
@@ -84,6 +86,6 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
-    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.4-all.zip'
+    gradleVersion = '4.5.1'
+    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.5.1-all.zip'
 }

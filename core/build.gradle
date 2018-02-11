@@ -13,3 +13,16 @@ dependencies {
 
     testRuntime "ch.qos.logback:logback-classic:$logback_version"
 }
+
+publishing {
+    publications {
+        rest(MavenPublication) {
+            artifactId 'discord4j-core'
+
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
