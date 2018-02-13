@@ -78,7 +78,7 @@ public class StoreProvider {
      *
      * @return The generic store providing service.
      */
-    public StoreService getGenericStoreProvider() {
+    private StoreService getGenericStoreProvider() {
         if (genericService.get() == null) {
             services.stream().filter(StoreService::hasGenericStores).findFirst().ifPresent(genericService::set);
         }
@@ -90,7 +90,7 @@ public class StoreProvider {
      *
      * @return The long-object store providing service.
      */
-    public StoreService getLongObjStoreProvider() {
+    private StoreService getLongObjStoreProvider() {
         boolean firstRetrieval = false;
 
         if (longObjService.get() == null) {
