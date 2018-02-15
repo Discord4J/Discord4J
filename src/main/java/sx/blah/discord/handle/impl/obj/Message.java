@@ -144,7 +144,7 @@ public class Message implements IMessage {
 	/**
 	 * Pattern for Discord's channel mentions.
 	 */
-	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
+	private static final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]{1,19})>");
 
 	/**
 	 * Whether the message was deleted.
