@@ -212,7 +212,7 @@ public class User implements IUser {
 		if (roles != null) {
 			RolesHolder retrievedRoles = roles.get(guild.getLongID());
 			if (retrievedRoles != null && retrievedRoles.getObject() != null)
-				return new LinkedList<>(retrievedRoles.getObject().stream().filter(Objects::nonNull).collect(Collectors.toList()));
+				return retrievedRoles.getObject().stream().filter(Objects::nonNull).collect(Collectors.toCollection(LinkedList::new));
 		}
 
 		return new LinkedList<>();
