@@ -111,7 +111,7 @@ public class StoreTests {
 
         void testFind() {
             assertEquals("world", connection.find("hello").block());
-            assertEquals("world1", connection.find(Mono.just("hello1")).block());
+            assertEquals("world1", connection.findAll(Mono.just("hello1")).blockFirst());
             assertTrue(lenientListEquals(Arrays.asList("world2", "world3"), connection.findAll(Flux.fromArray(new String[]{"hello2", "hello3"})).collectList().block()));
             assertTrue(lenientListEquals(Arrays.asList("world4", "world5"), connection.findAll(Arrays.asList("hello4", "hello5")).collectList().block()));
             assertTrue(lenientListEquals(Arrays.asList("world", "world1", "world2", "world3", "world4", "world5"), connection.findAll().collectList().block()));

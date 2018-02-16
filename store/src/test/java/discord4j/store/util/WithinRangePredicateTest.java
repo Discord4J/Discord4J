@@ -28,7 +28,9 @@ public class WithinRangePredicateTest {
     @Test
     public void test() {
         WithinRangePredicate<String> predicate = new WithinRangePredicate<>(strStart, strEnd);
+        assertTrue(predicate.test("a"));
         assertTrue(predicate.test("c"));
         assertFalse(predicate.test("z"));
+        assertFalse(predicate.test("m"));
     }
 }

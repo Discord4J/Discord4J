@@ -19,6 +19,7 @@ package discord4j.store.noop.primitive;
 import discord4j.store.noop.NoOpStoreOperations;
 import discord4j.store.primitive.LongObjStoreOperations;
 import discord4j.store.util.LongObjTuple2;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,17 +37,12 @@ public class NoOpLongObjStoreOperations<V> implements LongObjStoreOperations<V> 
     }
 
     @Override
-    public Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream) {
+    public Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream) {
         return Mono.empty();
     }
 
@@ -56,22 +52,12 @@ public class NoOpLongObjStoreOperations<V> implements LongObjStoreOperations<V> 
     }
 
     @Override
-    public Mono<V> find(Mono<Long> id) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Boolean> exists(long id) {
         return Mono.just(false);
     }
 
     @Override
-    public Mono<Boolean> exists(Mono<Long> id) {
-        return Mono.just(false);
-    }
-
-    @Override
-    public Mono<Boolean> exists(Flux<Long> ids) {
+    public Mono<Boolean> exists(Publisher<Long> ids) {
         return Mono.just(false);
     }
 
@@ -91,7 +77,7 @@ public class NoOpLongObjStoreOperations<V> implements LongObjStoreOperations<V> 
     }
 
     @Override
-    public Flux<V> findAll(Flux<Long> ids) {
+    public Flux<V> findAll(Publisher<Long> ids) {
         return Flux.empty();
     }
 
@@ -106,12 +92,7 @@ public class NoOpLongObjStoreOperations<V> implements LongObjStoreOperations<V> 
     }
 
     @Override
-    public Mono<Void> delete(Mono<Long> id) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> delete(Flux<Long> ids) {
+    public Mono<Void> delete(Publisher<Long> ids) {
         return Mono.empty();
     }
 
@@ -151,7 +132,7 @@ public class NoOpLongObjStoreOperations<V> implements LongObjStoreOperations<V> 
     }
 
     @Override
-    public Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries) {
+    public Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries) {
         return Mono.empty();
     }
 }

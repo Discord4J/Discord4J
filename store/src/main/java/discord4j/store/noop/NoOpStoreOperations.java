@@ -18,6 +18,7 @@ package discord4j.store.noop;
 
 import discord4j.store.StoreOperations;
 import discord4j.store.noop.primitive.NoOpLongObjStoreOperations;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -36,17 +37,12 @@ public class NoOpStoreOperations<K extends Comparable<K>, V> implements StoreOpe
     }
 
     @Override
-    public Mono<Void> store(Mono<Tuple2<K, V>> entry) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> store(Flux<Tuple2<K, V>> entryStream) {
+    public Mono<Void> store(Publisher<Tuple2<K, V>> entryStream) {
         return Mono.empty();
     }
 
@@ -56,22 +52,12 @@ public class NoOpStoreOperations<K extends Comparable<K>, V> implements StoreOpe
     }
 
     @Override
-    public Mono<V> find(Mono<K> id) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Boolean> exists(K id) {
         return Mono.just(false);
     }
 
     @Override
-    public Mono<Boolean> exists(Mono<K> id) {
-        return Mono.just(false);
-    }
-
-    @Override
-    public Mono<Boolean> exists(Flux<K> ids) {
+    public Mono<Boolean> exists(Publisher<K> ids) {
         return Mono.just(false);
     }
 
@@ -86,7 +72,7 @@ public class NoOpStoreOperations<K extends Comparable<K>, V> implements StoreOpe
     }
 
     @Override
-    public Flux<V> findAll(Flux<K> ids) {
+    public Flux<V> findAll(Publisher<K> ids) {
         return Flux.empty();
     }
 
@@ -106,12 +92,7 @@ public class NoOpStoreOperations<K extends Comparable<K>, V> implements StoreOpe
     }
 
     @Override
-    public Mono<Void> delete(Mono<K> id) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> delete(Flux<K> ids) {
+    public Mono<Void> delete(Publisher<K> ids) {
         return Mono.empty();
     }
 
@@ -131,7 +112,7 @@ public class NoOpStoreOperations<K extends Comparable<K>, V> implements StoreOpe
     }
 
     @Override
-    public Mono<Void> deleteAll(Flux<Tuple2<K, V>> entries) {
+    public Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries) {
         return Mono.empty();
     }
 

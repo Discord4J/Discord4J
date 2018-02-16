@@ -19,6 +19,7 @@ package discord4j.store.primitive;
 import discord4j.store.StoreOperations;
 import discord4j.store.util.LongObjTuple2;
 import discord4j.store.util.MappingIterable;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -62,16 +63,6 @@ public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
     }
 
     @Override
-    public Mono<Void> store(Mono<Tuple2<Long, V>> entry) {
-        return toForward.store(entry);
-    }
-
-    @Override
-    public Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry) {
-        return this.store(entry.map(LongObjTuple2::convert));
-    }
-
-    @Override
     public Mono<Void> store(Iterable<Tuple2<Long, V>> entries) {
         return toForward.store(entries);
     }
@@ -82,13 +73,13 @@ public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
     }
 
     @Override
-    public Mono<Void> store(Flux<Tuple2<Long, V>> entryStream) {
+    public Mono<Void> store(Publisher<Tuple2<Long, V>> entryStream) {
         return toForward.store(entryStream);
     }
 
     @Override
-    public Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream) {
-        return this.store(entryStream.map(LongObjTuple2::convert));
+    public Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream) {
+        return this.store(Flux.from(entryStream).map(LongObjTuple2::convert));
     }
 
     @Override
@@ -102,11 +93,6 @@ public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
     }
 
     @Override
-    public Mono<V> find(Mono<Long> id) {
-        return toForward.find(id);
-    }
-
-    @Override
     public Mono<Boolean> exists(Long id) {
         return toForward.exists(id);
     }
@@ -117,12 +103,7 @@ public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
     }
 
     @Override
-    public Mono<Boolean> exists(Mono<Long> id) {
-        return toForward.exists(id);
-    }
-
-    @Override
-    public Mono<Boolean> exists(Flux<Long> ids) {
+    public Mono<Boolean> exists(Publisher<Long> ids) {
         return toForward.exists(ids);
     }
 
@@ -147,7 +128,7 @@ public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
     }
 
     @Override
-    public Flux<V> findAll(Flux<Long> ids) {
+    public Flux<V> findAll(Publisher<Long> ids) {
         return toForward.findAll(ids);
     }
 
@@ -167,12 +148,7 @@ public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
     }
 
     @Override
-    public Mono<Void> delete(Mono<Long> id) {
-        return toForward.delete(id);
-    }
-
-    @Override
-    public Mono<Void> delete(Flux<Long> ids) {
+    public Mono<Void> delete(Publisher<Long> ids) {
         return toForward.delete(ids);
     }
 
@@ -207,13 +183,13 @@ public class ForwardingStoreOperations<V> implements LongObjStoreOperations<V> {
     }
 
     @Override
-    public Mono<Void> deleteAll(Flux<Tuple2<Long, V>> entries) {
+    public Mono<Void> deleteAll(Publisher<Tuple2<Long, V>> entries) {
         return toForward.deleteAll(entries);
     }
 
     @Override
-    public Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries) {
-        return this.deleteAll(entries.map(LongObjTuple2::convert));
+    public Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries) {
+        return this.deleteAll(Flux.from(entries).map(LongObjTuple2::convert));
     }
 
     @Override

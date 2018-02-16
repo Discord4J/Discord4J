@@ -17,6 +17,7 @@
 package discord4j.store;
 
 import discord4j.store.primitive.LongObjStoreOperations;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -42,14 +43,6 @@ public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseab
     Mono<Void> store(K key, V value);
 
     /**
-     * Stores a key value pair.
-     *
-     * @param entry A mono providing the key value pair.
-     * @return A mono which signals the completion of the storage of the pair.
-     */
-    Mono<Void> store(Mono<Tuple2<K, V>> entry);
-
-    /**
      * Stores key value pairs.
      *
      * @param entries A mono providing the key value pairs.
@@ -63,7 +56,7 @@ public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseab
      * @param entryStream A flux providing the key value pairs.
      * @return A mono which signals the completion of the storage of the pairs.
      */
-    Mono<Void> store(Flux<Tuple2<K, V>> entryStream);
+    Mono<Void> store(Publisher<Tuple2<K, V>> entryStream);
 
     /**
      * Attempts to find the value associated with the provided id.
@@ -74,14 +67,6 @@ public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseab
     Mono<V> find(K id);
 
     /**
-     * Attempts to find the value associated with the provided id.
-     *
-     * @param id A mono providing the id to search with.
-     * @return A mono, which may or may not contain an associated object.
-     */
-    Mono<V> find(Mono<K> id);
-
-    /**
      * Checks if a value is associated with the provided id.
      *
      * @param id The id to search with.
@@ -90,20 +75,12 @@ public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseab
     Mono<Boolean> exists(K id);
 
     /**
-     * Checks if a value is associated with the provided id.
-     *
-     * @param id A mono providing the id to search with.
-     * @return A mono which provides true or false, depending on whether the id is associated with a value.
-     */
-    Mono<Boolean> exists(Mono<K> id);
-
-    /**
      * Checks if values are associated with all of the provided ids.
      *
      * @param ids A flux providing a stream of ids to search for.
      * @return A mono which provides true or false, depending on whether all the ids a represented in the data source.
      */
-    Mono<Boolean> exists(Flux<K> ids);
+    Mono<Boolean> exists(Publisher<K> ids);
 
     /**
      * Retrieves all stored values from the data source.
@@ -126,7 +103,7 @@ public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseab
      * @param ids A stream of ids to find values for.
      * @return A stream of id associated data objects from the data source.
      */
-    Flux<V> findAll(Flux<K> ids);
+    Flux<V> findAll(Publisher<K> ids);
 
     /**
      * Retrieves all stored values with ids within a provided range.
@@ -153,20 +130,12 @@ public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseab
     Mono<Void> delete(K id);
 
     /**
-     * Deletes a value associated with the provided id.
-     *
-     * @param id A mono which provides the id of the value to delete.
-     * @return A mono which signals the completion of the deletion of the value.
-     */
-    Mono<Void> delete(Mono<K> id);
-
-    /**
      * Deletes the values associated with the provided ids.
      *
      * @param ids A stream of ids to delete values for.
      * @return A mono which signals the completion of the deletion of the values.
      */
-    Mono<Void> delete(Flux<K> ids);
+    Mono<Void> delete(Publisher<K> ids);
 
     /**
      * Deletes a key value pair.
@@ -199,7 +168,7 @@ public interface StoreOperations<K extends Comparable<K>, V> extends AutoCloseab
      * @param entries A stream of entries to delete.
      * @return A mono which signals the completion of the deletion of values.
      */
-    Mono<Void> deleteAll(Flux<Tuple2<K, V>> entries);
+    Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries);
 
     /**
      * Deletes all entries in the data source.

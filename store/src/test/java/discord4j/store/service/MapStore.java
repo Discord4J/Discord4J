@@ -19,6 +19,7 @@ package discord4j.store.service;
 import discord4j.store.Store;
 import discord4j.store.StoreOperations;
 import discord4j.store.util.WithinRangePredicate;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -71,18 +72,13 @@ public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
         }
 
         @Override
-        public Mono<Void> store(Mono<Tuple2<K, V>> entry) {
-            return entry.flatMap(tuple -> store(tuple.getT1(), tuple.getT2()));
-        }
-
-        @Override
         public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
             return Flux.fromIterable(entries).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
         }
 
         @Override
-        public Mono<Void> store(Flux<Tuple2<K, V>> entryStream) {
-            return entryStream.flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
+        public Mono<Void> store(Publisher<Tuple2<K, V>> entryStream) {
+            return Flux.from(entryStream).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
         }
 
         @Override
@@ -91,23 +87,13 @@ public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
         }
 
         @Override
-        public Mono<V> find(Mono<K> id) {
-            return id.map(map::get);
-        }
-
-        @Override
         public Mono<Boolean> exists(K id) {
             return Mono.defer(() -> Mono.just(map.containsKey(id)));
         }
 
         @Override
-        public Mono<Boolean> exists(Mono<K> id) {
-            return id.map(map::containsKey);
-        }
-
-        @Override
-        public Mono<Boolean> exists(Flux<K> ids) {
-            return ids.all(map::containsKey);
+        public Mono<Boolean> exists(Publisher<K> ids) {
+            return Flux.from(ids).all(map::containsKey);
         }
 
         @Override
@@ -121,8 +107,8 @@ public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
         }
 
         @Override
-        public Flux<V> findAll(Flux<K> ids) {
-            return ids.map(map::get);
+        public Flux<V> findAll(Publisher<K> ids) {
+            return Flux.from(ids).map(map::get);
         }
 
         @Override
@@ -147,13 +133,8 @@ public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
         }
 
         @Override
-        public Mono<Void> delete(Mono<K> id) {
-            return id.doOnNext(map::remove).then();
-        }
-
-        @Override
-        public Mono<Void> delete(Flux<K> ids) {
-            return ids.doOnNext(map::remove).then();
+        public Mono<Void> delete(Publisher<K> ids) {
+            return Flux.from(ids).doOnNext(map::remove).then();
         }
 
         @Override
@@ -179,8 +160,8 @@ public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
         }
 
         @Override
-        public Mono<Void> deleteAll(Flux<Tuple2<K, V>> entries) {
-            return entries.doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
+        public Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries) {
+            return Flux.from(entries).doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
         }
 
         @Override

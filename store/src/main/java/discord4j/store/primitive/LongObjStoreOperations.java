@@ -19,6 +19,7 @@ package discord4j.store.primitive;
 import discord4j.store.StoreOperations;
 import discord4j.store.util.LongObjTuple2;
 import discord4j.store.util.MappingIterable;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -47,19 +48,6 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
     Mono<Void> storeWithLong(long key, V value);
 
     @Override
-    default Mono<Void> store(Mono<Tuple2<Long, V>> entry) {
-        return storeWithLong(entry.map(LongObjTuple2::from));
-    }
-
-    /**
-     * Stores a key value pair.
-     *
-     * @param entry A mono providing the key value pair.
-     * @return A mono which signals the completion of the storage of the pair.
-     */
-    Mono<Void> storeWithLong(Mono<LongObjTuple2<V>> entry);
-
-    @Override
     default Mono<Void> store(Iterable<Tuple2<Long, V>> entries) {
         return storeWithLong(new MappingIterable<>(LongObjTuple2::from, entries));
     }
@@ -73,8 +61,8 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
     Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries);
 
     @Override
-    default Mono<Void> store(Flux<Tuple2<Long, V>> entryStream) {
-        return storeWithLong(entryStream.map(LongObjTuple2::from));
+    default Mono<Void> store(Publisher<Tuple2<Long, V>> entryStream) {
+        return storeWithLong(Flux.from(entryStream).map(LongObjTuple2::from));
     }
 
     /**
@@ -83,7 +71,7 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
      * @param entryStream A flux providing the key value pairs.
      * @return A mono which signals the completion of the storage of the pairs.
      */
-    Mono<Void> storeWithLong(Flux<LongObjTuple2<V>> entryStream);
+    Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream);
 
     @Override
     default Mono<V> find(Long id) {
@@ -99,9 +87,6 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
     Mono<V> find(long id);
 
     @Override
-    Mono<V> find(Mono<Long> id); //No way around this q.q
-
-    @Override
     default Mono<Boolean> exists(Long id) {
         return exists((long) id);
     }
@@ -115,10 +100,7 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
     Mono<Boolean> exists(long id);
 
     @Override
-    Mono<Boolean> exists(Mono<Long> id); //No way around this q.q
-
-    @Override
-    Mono<Boolean> exists(Flux<Long> ids); //No way around this q.q
+    Mono<Boolean> exists(Publisher<Long> ids); //No way around this q.q
 
     @Override
     default Flux<V> findInRange(Long start, Long end) {
@@ -138,7 +120,7 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
     Flux<V> findAll(Iterable<Long> ids); //No way around this q.q
 
     @Override
-    Flux<V> findAll(Flux<Long> ids); //No way around this q.q
+    Flux<V> findAll(Publisher<Long> ids); //No way around this q.q
 
     @Override
     default Mono<Void> delete(Long id) {
@@ -154,10 +136,7 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
     Mono<Void> delete(long id);
 
     @Override
-    Mono<Void> delete(Mono<Long> id); //No way around this q.q
-
-    @Override
-    Mono<Void> delete(Flux<Long> ids); //No way around this q.q
+    Mono<Void> delete(Publisher<Long> ids); //No way around this q.q
 
     @Override
     default Mono<Void> delete(Tuple2<Long, V> entry) {
@@ -200,8 +179,8 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
     Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries);
 
     @Override
-    default Mono<Void> deleteAll(Flux<Tuple2<Long, V>> entries) {
-        return deleteAllWithLongs(entries.map(LongObjTuple2::from));
+    default Mono<Void> deleteAll(Publisher<Tuple2<Long, V>> entries) {
+        return deleteAllWithLongs(Flux.from(entries).map(LongObjTuple2::from));
     }
 
     /**
@@ -210,7 +189,7 @@ public interface LongObjStoreOperations<V> extends StoreOperations<Long, V> {
      * @param entries A stream of entries to delete.
      * @return A mono which signals the completion of the deletion of values.
      */
-    Mono<Void> deleteAllWithLongs(Flux<LongObjTuple2<V>> entries);
+    Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries);
 
     @Override
     default Flux<Tuple2<Long, V>> entries() {
