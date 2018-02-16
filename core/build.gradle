@@ -3,6 +3,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 shadowJar {
     baseName = 'Discord4J'
     classifier = 'shaded'
+    manifest = defaultManifest()
 }
 
 dependencies {
