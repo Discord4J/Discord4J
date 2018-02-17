@@ -45,6 +45,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
+/**
+ * Represents a Discord gateway (websocket) client, implementing its lifecycle.
+ * <p>
+ * This is the next component downstream from {@link discord4j.gateway.websocket.WebSocketHandler}, that keeps track of
+ * a single websocket session. It wraps an instance of {@link discord4j.gateway.DiscordWebSocketHandler} each time a
+ * new connection to the gateway is made, therefore only one instance of this class is enough to handle the lifecycle
+ * of Discord gateway operations, that could span multiple websocket sessions over time.
+ * <p>
+ * It provides automatic reconnecting through exponential backoff with jitter policy, provides {@link #dispatch()}
+ * to subscribe to gateway events coming inbound and {@link #sender()} to submit events going outbound.
+ */
 public class GatewayClient {
 
 	private static final Logger log = Loggers.getLogger(GatewayClient.class);
@@ -117,7 +128,8 @@ public class GatewayClient {
 					RetryContext appContext = (RetryContext) context.applicationContext();
 					Duration nextBackoff;
 					try {
-						nextBackoff = appContext.firstBackoff.multipliedBy((long) Math.pow(2, (appContext.attempts - 1)));
+						long factor = (long) Math.pow(2, (appContext.attempts - 1));
+						nextBackoff = appContext.firstBackoff.multipliedBy(factor);
 					} catch (ArithmeticException e) {
 						nextBackoff = appContext.maxBackoffInterval;
 					}
@@ -125,7 +137,8 @@ public class GatewayClient {
 				})
 				.jitter(Jitter.random())
 				.doOnRetry(context -> {
-					log.info("Attempt {} retrying in {} ms", context.applicationContext().attempts, context.backoff().toMillis());
+					log.info("Attempt {} retrying in {} ms",
+							context.applicationContext().attempts, context.backoff().toMillis());
 					context.applicationContext().next();
 				}));
 	}
@@ -147,11 +160,10 @@ public class GatewayClient {
 	 * Obtains the Flux of Dispatch events inbound from the gateway connection made by this client.
 	 * <p>
 	 * Can be used like this, for example, to get all created message events:
-	 * <p>
-	 * <pre class="code">
+	 * <pre>
 	 * gatewayClient.dispatch().ofType(MessageCreate.class)
-	 * .subscribe(message -&gt; {
-	 * System.out.println("Got a message with content: " + message.getMessage().getContent());
+	 *     .subscribe(message -&gt; {
+	 *         System.out.println("Got a message with content: " + message.getMessage().getContent());
 	 * });
 	 * </pre>
 	 *

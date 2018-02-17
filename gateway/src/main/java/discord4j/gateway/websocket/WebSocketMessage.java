@@ -64,6 +64,7 @@ public class WebSocketMessage {
 	 * Create a new WebSocket message from a WebSocket frame.
 	 *
 	 * @param frame the original frame
+	 * @return the message built from the given frame
 	 */
 	public static WebSocketMessage fromFrame(WebSocketFrame frame) {
 		ByteBuf payload = frame.content();
@@ -74,6 +75,7 @@ public class WebSocketMessage {
 	 * Create a new WebSocket frame from a WebSocket message.
 	 *
 	 * @param message the original message
+	 * @return the frame built from the given message
 	 */
 	public static WebSocketFrame toFrame(WebSocketMessage message) {
 		ByteBuf byteBuf = message.getPayload();
@@ -90,6 +92,8 @@ public class WebSocketMessage {
 
 	/**
 	 * Return the message type (text, binary, etc).
+	 *
+	 * @return the message type
 	 */
 	public Type getType() {
 		return this.type;
@@ -97,6 +101,8 @@ public class WebSocketMessage {
 
 	/**
 	 * Return the message payload.
+	 *
+	 * @return the payload represented as a byte buffer
 	 */
 	public ByteBuf getPayload() {
 		return this.payload;
@@ -104,6 +110,8 @@ public class WebSocketMessage {
 
 	/**
 	 * Return the message payload as UTF-8 text. This is a useful for text WebSocket messages.
+	 *
+	 * @return the payload represented as a String
 	 */
 	public String getPayloadAsText() {
 		byte[] bytes = new byte[this.payload.readableBytes()];

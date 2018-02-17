@@ -28,6 +28,38 @@ import reactor.util.Loggers;
 
 import java.util.logging.Level;
 
+/**
+ * Represents a websocket handler specialized for Discord gateway operations.
+ * <p>
+ * It includes a zlib-based decompressor and dedicated handling of closing events that normally occur during Discord
+ * gateway lifecycle.
+ * <p>
+ * This handler provides two {@link reactor.core.publisher.UnicastProcessor} instances for inbound and outbound
+ * payload operations. Clients are expected to make proper use of both exchanges, therefore "pull" operations only on
+ * the inbound exchange (subscribe), and "push" operations only on the outbound exchange (onNext, onError, onComplete).
+ * <p>
+ * The handler also provides two methods to control the lifecycle and proper cleanup, like {@link #close()} and
+ * {@link #error(Throwable)} which perform operations over both exchanges and the current
+ * {@link discord4j.gateway.websocket.WebSocketSession}. It is required to use these methods to signal closure and
+ * errors in order to cleanly complete the session.
+ * <p>
+ * All payloads going through this handler are passed to the given {@link discord4j.gateway.payload.PayloadReader}
+ * and {@link discord4j.gateway.payload.PayloadWriter}.
+ * <h2>Example usage</h2>
+ * <pre>
+ * // pull operation coming inbound
+ * handler.inbound().subscribe(payload -&lt; {
+ *     if (payload.getData() instanceof Hello) {
+ *         IdentifyProperties properties = new IdentifyProperties(...);
+ *         GatewayPayload&lt;Identify&gt; identify = GatewayPayload.identify(...);
+ *
+ *         handler.outbound().onNext(identify); // push operation going outbound
+ *     }
+ * }, error -&lt; {
+ *     log.warn("Gateway connection terminated: {}", error.toString());
+ * });
+ * </pre>
+ */
 public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
@@ -40,6 +72,12 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	private final PayloadReader reader;
 	private final PayloadWriter writer;
 
+	/**
+	 * Create a new handler with the given payload reader and writer.
+	 *
+	 * @param reader the PayloadReader to process each inbound payload
+	 * @param writer the PayloadWriter to process each outbound payload
+	 */
 	public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer) {
 		this.reader = reader;
 		this.writer = writer;
@@ -68,6 +106,11 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 				.then(completionNotifier);
 	}
 
+	/**
+	 * Initiates a close sequence that will terminate this session. It will notify all exchanges and the session
+	 * completion {@link reactor.core.publisher.Mono} in {@link #handle(discord4j.gateway.websocket.WebSocketSession)}
+	 * through a complete signal, dropping all future signals.
+	 */
 	public void close() {
 		log.info("Triggering close sequence");
 		completionNotifier.onComplete();
@@ -75,6 +118,15 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		inboundExchange.onComplete();
 	}
 
+	/**
+	 * Initiates a close sequence with the given error. It will terminate this session with an error signal on the
+	 * {@link #handle(discord4j.gateway.websocket.WebSocketSession)} method, while completing both exchanges through
+	 * normal complete signals.
+	 * <p>
+	 * The error can then be channeled downstream and acted upon accordingly.
+	 *
+	 * @param error the cause for this session termination
+	 */
 	public void error(Throwable error) {
 		log.info("Triggering error sequence");
 		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
@@ -82,10 +134,23 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		inboundExchange.onComplete();
 	}
 
+	/**
+	 * Obtains the processor dedicated to all inbound (coming from the wire) payloads, which is meant to be operated
+	 * downstream through pull operators only, i.e. a {@link reactor.core.publisher.UnicastProcessor#subscribe()} call.
+	 *
+	 * @return the unicast processor with a stream of inbound payloads
+	 */
 	public UnicastProcessor<GatewayPayload<?>> inbound() {
 		return inboundExchange;
 	}
 
+	/**
+	 * Obtains the processor dedicated to all outbound (going to the wire) payloads, which is meant to be operated
+	 * downstream through push operations only, i.e. {@link reactor.core.publisher.UnicastProcessor#onNext(Object)}
+	 * calls to supply a new payload.
+	 *
+	 * @return the unicast processor with a stream of outbound payloads
+	 */
 	public UnicastProcessor<GatewayPayload<?>> outbound() {
 		return outboundExchange;
 	}
