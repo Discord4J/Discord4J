@@ -24,7 +24,7 @@ ext {
     /** Function returns a new manifest that can be customized per module */
     defaultManifest = {
         return manifest {
-            def git_cmd = 'git rev-parse HEAD'
+            def git_cmd = 'git describe --tags --always --long'
             def git_proc = git_cmd.execute()
             attributes 'SCM-Revision': git_proc.text.trim()
             attributes 'Timestamp': String.valueOf(System.currentTimeMillis())

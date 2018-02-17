@@ -3,7 +3,13 @@ apply plugin: 'com.github.johnrengelman.shadow'
 shadowJar {
     baseName = 'Discord4J'
     classifier = 'shaded'
-    manifest = defaultManifest()
+    manifest {
+        def git_cmd = 'git describe --tags --always --long'
+        def git_proc = git_cmd.execute()
+        attributes 'SCM-Revision': git_proc.text.trim()
+        attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
+        attributes 'Build-Host': InetAddress.localHost.hostName
+    }
 }
 
 dependencies {
