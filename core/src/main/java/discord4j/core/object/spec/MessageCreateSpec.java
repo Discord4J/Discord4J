@@ -23,7 +23,7 @@ import discord4j.rest.util.MultipartRequest;
 import javax.annotation.Nullable;
 import java.io.InputStream;
 
-public class MessageCreateSpec implements Spec<Object> { // MultipartRequest | MessageCreateRequest
+public class MessageCreateSpec implements Spec<MultipartRequest> {
 
 	@Nullable
 	private String content;
@@ -56,14 +56,10 @@ public class MessageCreateSpec implements Spec<Object> { // MultipartRequest | M
 	}
 
 	@Override
-	public Object asRequest() {
+	public MultipartRequest asRequest() {
 		MessageCreateRequest json = new MessageCreateRequest(content, nonce, tts, embed);
 
-		if (file == null) {
-			return json;
-		}
-
-		return new MultipartRequest(form -> form.multipart(true).file("file", fileName, file,
-				"application/octet-stream"), json); // TODO cleanest way?
+		return new MultipartRequest(json, file == null ? null : form ->
+				form.multipart(true).file("file", fileName, file, "application/octet-stream"));
 	}
 }

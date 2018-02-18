@@ -27,7 +27,11 @@ import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.MultipartRequest;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.Unpooled;
 import org.junit.Test;
+import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +39,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 public class ChannelServiceTest {
 
@@ -108,7 +113,7 @@ public class ChannelServiceTest {
 	@Test
 	public void testCreateMessage() {
 		MessageCreateRequest req = new MessageCreateRequest("Hello world", null, false, null);
-		getChannelService().createMessage(permanentChannel, req).block();
+		getChannelService().createMessage(permanentChannel, new MultipartRequest(req)).block();
 	}
 
 	@Test
@@ -118,7 +123,12 @@ public class ChannelServiceTest {
 			if (inputStream == null) {
 				throw new NullPointerException();
 			}
-			getChannelService().createMessage(permanentChannel, req, readAllBytes(inputStream), "fileTest.txt").block();
+			byte[] bytes = readAllBytes(inputStream);
+			Consumer<HttpClientRequest.Form> formConsumer = form -> form.multipart(true)
+					.file("file", "fileTest.txt", new ByteBufInputStream(Unpooled.wrappedBuffer(bytes)),
+							"application/octet-stream");
+			MultipartRequest request = new MultipartRequest(req, formConsumer);
+			getChannelService().createMessage(permanentChannel, request).block();
 		}
 	}
 
