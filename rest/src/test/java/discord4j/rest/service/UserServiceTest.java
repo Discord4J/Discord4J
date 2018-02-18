@@ -28,6 +28,7 @@ import discord4j.rest.http.EmptyReaderStrategy;
 import discord4j.rest.http.EmptyWriterStrategy;
 import discord4j.rest.http.JacksonReaderStrategy;
 import discord4j.rest.http.JacksonWriterStrategy;
+import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -41,7 +42,9 @@ public class UserServiceTest {
 
 	private UserService getUserService() {
 
-		if (userService != null) return userService;
+		if (userService != null) {
+			return userService;
+		}
 
 		String token = System.getenv("token");
 		ObjectMapper mapper = getMapper();
@@ -76,6 +79,18 @@ public class UserServiceTest {
 	@Test
 	public void testGetUser() {
 		getUserService().getUser(user).block();
+	}
+
+	@Test
+	public void testGetInvalidUser() {
+		try {
+			getUserService().getUser(1111222).block(); // should throw ClientException
+		} catch (ClientException e) {
+			e.getErrorResponse().blockOptional().ifPresent(response -> {
+				System.out.println("Error code: " + response.getCode());
+				System.out.println("Error message: " + response.getMessage());
+			});
+		}
 	}
 
 	@Test

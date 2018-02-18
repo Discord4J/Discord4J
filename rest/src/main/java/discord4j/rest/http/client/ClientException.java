@@ -17,17 +17,21 @@
 
 package discord4j.rest.http.client;
 
+import discord4j.common.json.response.ErrorResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import reactor.core.publisher.Mono;
 
 public class ClientException extends RuntimeException {
 
 	private final HttpResponseStatus status;
 	private final HttpHeaders headers;
+	private final Mono<ErrorResponse> errorResponse;
 
-	public ClientException(HttpResponseStatus status, HttpHeaders headers) {
+	public ClientException(HttpResponseStatus status, HttpHeaders headers, Mono<ErrorResponse> errorResponse) {
 		this.status = status;
 		this.headers = headers;
+		this.errorResponse = errorResponse;
 	}
 
 	public HttpResponseStatus getStatus() {
@@ -36,5 +40,9 @@ public class ClientException extends RuntimeException {
 
 	public HttpHeaders getHeaders() {
 		return headers;
+	}
+
+	public Mono<ErrorResponse> getErrorResponse() {
+		return errorResponse;
 	}
 }

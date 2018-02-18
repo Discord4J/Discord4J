@@ -16,6 +16,7 @@
  */
 package discord4j.rest.http.client;
 
+import discord4j.common.json.response.ErrorResponse;
 import discord4j.rest.http.ReaderStrategy;
 import discord4j.rest.http.WriterStrategy;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -23,10 +24,12 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
+import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 
 /**
@@ -44,7 +47,7 @@ public class SimpleHttpClient {
 	private final List<ReaderStrategy<?>> readerStrategies;
 
 	SimpleHttpClient(HttpClient httpClient, String baseUrl, HttpHeaders defaultHeaders,
-	                 List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies) {
+			List<WriterStrategy<?>> writerStrategies, List<ReaderStrategy<?>> readerStrategies) {
 		this.httpClient = httpClient;
 		this.baseUrl = baseUrl;
 		this.defaultHeaders = defaultHeaders;
@@ -91,7 +94,7 @@ public class SimpleHttpClient {
 	 * @return a {@link reactor.core.publisher.Mono} of {@link T} with the response
 	 */
 	public <R, T> Mono<T> exchange(HttpMethod method, String uri, @Nullable R body, Class<T> responseType,
-	                               ExchangeFilter exchangeFilter) {
+			ExchangeFilter exchangeFilter) {
 		Objects.requireNonNull(method);
 		Objects.requireNonNull(uri);
 		Objects.requireNonNull(responseType);
@@ -100,6 +103,9 @@ public class SimpleHttpClient {
 				request -> {
 					defaultHeaders.forEach(entry -> request.header(entry.getKey(), entry.getValue()));
 					exchangeFilter.getRequestFilter().accept(request);
+
+					request.failOnClientError(false); // required to handle 400 errors ourselves
+					request.failOnServerError(false); // and 500 errors
 
 					String contentType = request.requestHeaders().get(HttpHeaderNames.CONTENT_TYPE);
 					return writerStrategies.stream()
@@ -114,20 +120,29 @@ public class SimpleHttpClient {
 				.flatMap(response -> {
 					exchangeFilter.getResponseFilter().accept(response);
 
+					String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+					Optional<ReaderStrategy<?>> readerStrategy = readerStrategies.stream()
+							.filter(s -> s.canRead(responseType, contentType))
+							.findFirst();
+
 					int responseStatus = response.status().code();
 					if (responseStatus >= 400 && responseStatus < 600) {
-						throw new ClientException(response.status(), response.responseHeaders());
+						return readerStrategy.map(SimpleHttpClient::<ErrorResponse>cast)
+								.map(s -> s.read(response, ErrorResponse.class))
+								.map(s -> Mono.<T>error(clientException(response, s)))
+								.orElseThrow(() -> clientException(response, Mono.empty()));
+					} else {
+						return readerStrategy.map(SimpleHttpClient::<T>cast)
+								.map(s -> s.read(response, responseType))
+								.orElseGet(() -> Mono.error(
+										new RuntimeException("No strategies to read this response: " +
+												responseType + " - " + contentType)));
 					}
-
-					String contentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
-					return readerStrategies.stream()
-							.filter(s -> s.canRead(responseType, contentType))
-							.findFirst()
-							.map(SimpleHttpClient::<T>cast)
-							.map(s -> s.read(response, responseType))
-							.orElseGet(() -> Mono.error(new RuntimeException("No strategies to read this response: " +
-									responseType + " - " + contentType)));
 				});
+	}
+
+	private ClientException clientException(HttpClientResponse response, Mono<ErrorResponse> errorResponse) {
+		return new ClientException(response.status(), response.responseHeaders(), errorResponse);
 	}
 
 	/**
