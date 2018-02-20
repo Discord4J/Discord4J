@@ -802,7 +802,7 @@ class DispatchHandler {
 		if (wasCached) {
 			if (reaction == null) { // Only happens in the case of a cached message with a new reaction
 				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-				reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
+				reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id, event.emoji.animated));
 				message.getReactions().add(reaction);
 			} else {
 				((Reaction) reaction).setCount(reaction.getCount() + 1);
@@ -842,7 +842,7 @@ class DispatchHandler {
 		if (wasCached) {
 			if (reaction == null) { // the last reaction of the emoji was removed
 				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-				reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
+				reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id, event.emoji.animated));
 			} else {
 				((Reaction) reaction).setCount(reaction.getCount() - 1);
 				if (reaction.getCount() <= 0) {

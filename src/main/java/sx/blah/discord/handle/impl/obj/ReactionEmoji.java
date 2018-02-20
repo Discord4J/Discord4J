@@ -35,18 +35,30 @@ public class ReactionEmoji implements IIDLinkedObject {
 	 * @return A reaction emoji with the name and ID of the given guild emoji.
 	 */
 	public static ReactionEmoji of(IEmoji emoji) {
-		return of(emoji.getName(), emoji.getLongID());
+		return of(emoji.getName(), emoji.getLongID(), emoji.isAnimated());
+	}
+
+	/**
+	 * Constructs a {@link ReactionEmoji} from the given name, ID and animated flag.
+	 *
+	 * @param name       The name of the emoji.
+	 * @param id         The ID of the emoji.
+	 * @param isAnimated Whether the emoji is animated.
+	 * @return A reaction emoji with the given name and ID.
+	 */
+	public static ReactionEmoji of(String name, long id, boolean isAnimated) {
+		return new ReactionEmoji(name, id, isAnimated);
 	}
 
 	/**
 	 * Constructs a {@link ReactionEmoji} from the given name and ID.
 	 *
 	 * @param name The name of the emoji.
-	 * @param id The ID of the emoji.
+	 * @param id   The ID of the emoji.
 	 * @return A reaction emoji with the given name and ID.
 	 */
 	public static ReactionEmoji of(String name, long id) {
-		return new ReactionEmoji(name, id);
+		return new ReactionEmoji(name, id, false);
 	}
 
 	/**
@@ -56,7 +68,7 @@ public class ReactionEmoji implements IIDLinkedObject {
 	 * @return A reaction emoji with the given unicode emoji.
 	 */
 	public static ReactionEmoji of(String unicode) {
-		return new ReactionEmoji(unicode, 0L);
+		return new ReactionEmoji(unicode, 0L, false);
 	}
 
 	/**
@@ -67,10 +79,15 @@ public class ReactionEmoji implements IIDLinkedObject {
 	 * The unique snowflake ID of the reaction emoji. The the emoji is a unicode emoji, this value is <code>0</code>.
 	 */
 	private final long id;
+	/**
+	 * Whether the emoji is animated.
+	 */
+	private final boolean isAnimated;
 
-	private ReactionEmoji(String name, long id) {
+	private ReactionEmoji(String name, long id, boolean isAnimated) {
 		this.name = name;
 		this.id = id;
+		this.isAnimated = isAnimated;
 	}
 
 	/**
@@ -91,6 +108,16 @@ public class ReactionEmoji implements IIDLinkedObject {
 		return id == 0;
 	}
 
+	/**
+	 * Gets whether the emoji is animated.
+	 *
+	 * @return Whether the emoji is animated.
+	 */
+	public boolean isAnimated() {
+		return isAnimated;
+	}
+
+
 	@Override
 	public long getLongID() {
 		return id;
@@ -98,7 +125,7 @@ public class ReactionEmoji implements IIDLinkedObject {
 
 	@Override
 	public String toString() {
-		return isUnicode() ? getName() : "<:" + getName() + ":" + Long.toUnsignedString(getLongID()) + ">";
+		return isUnicode() ? getName() : "<" + (isAnimated() ? "a" : "") + ":" + getName() + ":" + Long.toUnsignedString(getLongID()) + ">";
 	}
 
 	@Override

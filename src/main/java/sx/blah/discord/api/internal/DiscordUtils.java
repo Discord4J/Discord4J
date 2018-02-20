@@ -722,7 +722,7 @@ public class DiscordUtils {
 		if (json != null)
 			for (MessageObject.ReactionObject object : json) {
 				long id = object.emoji.id == null ? 0 : Long.parseUnsignedLong(object.emoji.id);
-				ReactionEmoji emoji = ReactionEmoji.of(object.emoji.name, id);
+				ReactionEmoji emoji = ReactionEmoji.of(object.emoji.name, id, object.emoji.animated);
 				reactions.add(new Reaction(message, object.count, emoji));
 			}
 
