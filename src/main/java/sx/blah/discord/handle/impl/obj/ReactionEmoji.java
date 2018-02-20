@@ -98,7 +98,7 @@ public class ReactionEmoji implements IIDLinkedObject {
 
 	@Override
 	public String toString() {
-		return isUnicode() ? getName() : "<" + getName() + ":" + Long.toUnsignedString(getLongID()) + ">";
+		return isUnicode() ? getName() : "<:" + getName() + ":" + Long.toUnsignedString(getLongID()) + ">";
 	}
 
 	@Override
