@@ -135,8 +135,8 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 *
 	 * @return The parent guild of the channel the messages were sent in.
 	 */
-	public IGuild getGuild() {
-		return getChannel().isPrivate() ? null : getChannel().getGuild();
+	public Optional<IGuild> getGuild() {
+		return getChannel().filter(IChannel::isPrivate).map(IChannel::getGuild);
 	}
 
 	/**
@@ -144,8 +144,8 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 *
 	 * @return The channel the messages were sent in.
 	 */
-	public IChannel getChannel() {
-		return backing[0].getChannel();
+	public Optional<IChannel> getChannel() {
+		return (backing.length == 0) ? Optional.empty() : Optional.of(backing[0].getChannel());
 	}
 
 	/**
@@ -153,8 +153,8 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 *
 	 * @return The client the history belongs to.
 	 */
-	public IDiscordClient getClient() {
-		return backing[0].getClient();
+	public Optional<IDiscordClient> getClient() {
+		return getChannel().map(IChannel::getClient);
 	}
 
 	/**
@@ -206,6 +206,6 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @see IChannel#bulkDelete()
 	 */
 	public List<IMessage> bulkDelete() {
-		return getChannel().bulkDelete(this);
+		return getChannel().map(channel -> channel.bulkDelete(this)).orElse(Collections.emptyList());
 	}
 }

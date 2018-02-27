@@ -303,12 +303,13 @@ public class Channel implements IChannel {
 			added = 0;
 
 			for (final IMessage message : chunk) {
-				final long messageID = message.getLongID();
-				if ((messageID >= endID)) {
+				if (message.getLongID() >= endID) {
 					// We want to EXCLUDE previous messages later
 					previousMessageID = message.getLongID() - 1L;
 					history.add(message);
 					added++;
+				} else { // We don't need anything else
+					return new MessageHistory(history);
 				}
 			}
 		}
