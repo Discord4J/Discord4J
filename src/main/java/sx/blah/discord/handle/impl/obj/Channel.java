@@ -290,32 +290,30 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount) {
-		List<IMessage> retrieved = new ArrayList<>();
-		long lastMessage = beginID + 1L;
+		final List<IMessage> history = new ArrayList<>();
+		final int originalMaxCount = maxCount;
+		// Adds 1L so beginID will be included
+		long previousMessageID = beginID + 1L;
+		int added = -1;
 
-		int chunkSize;
-		int originalMaxCount = maxCount;
+		while ((history.size() < originalMaxCount) && (added != 0)) {
+			maxCount = originalMaxCount - history.size();
+			final int chunkSize = (maxCount < MESSAGE_CHUNK_COUNT) ? maxCount : MESSAGE_CHUNK_COUNT;
+			final IMessage[] chunk = getHistory(previousMessageID, chunkSize);
+			added = 0;
 
-		IMessage[] chunk;
-		do {
-			maxCount = originalMaxCount - retrieved.size();
-			chunkSize = maxCount < MESSAGE_CHUNK_COUNT ? maxCount : MESSAGE_CHUNK_COUNT;
-			chunk = getHistory(lastMessage, chunkSize);
+			for (final IMessage message : chunk) {
+				final long messageID = message.getLongID();
+				if ((messageID >= endID)) {
+					// We want to EXCLUDE previous messages later
+					previousMessageID = message.getLongID() - 1L;
+					history.add(message);
+					added++;
+				}
+			}
+		}
 
-			if (chunk.length == 0) break; // no more messages
-
-			lastMessage = chunk[chunk.length - 1].getLongID();
-			Collections.addAll(retrieved, chunk);
-		} while (retrieved.size() < originalMaxCount && Arrays.stream(chunk).map(IMessage::getLongID).noneMatch(id -> id <= endID));
-
-		// Find index of endID (if it exists) so retrieved can be split
-		final int index = IntStream.range(0, retrieved.size())
-				.filter(i -> retrieved.get(i).getLongID() == endID)
-				.findFirst()
-				// + 1 as subList would exclude the endID
-				.orElse(retrieved.size() - 1) + 1;
-
-		return new MessageHistory(retrieved.subList(0, index));
+		return new MessageHistory(history);
 	}
 
 	@Override
