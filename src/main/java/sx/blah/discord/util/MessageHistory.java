@@ -131,30 +131,32 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * The parent guild of the channel the messages were sent in.
+	 * The parent guild of the channel the messages were sent in, or null if no messages are present.
 	 *
-	 * @return The parent guild of the channel the messages were sent in.
+	 * @return The parent guild of the channel the messages were sent in, or null if no messages are present.
 	 */
-	public Optional<IGuild> getGuild() {
-		return getChannel().filter(IChannel::isPrivate).map(IChannel::getGuild);
+	public IGuild getGuild() {
+		final IChannel channel = getChannel();
+		return (channel == null) ? null : (channel.isPrivate() ? null : channel.getGuild());
 	}
 
 	/**
-	 * Gets the channel the messages were sent in.
+	 * Gets the channel the messages were sent in, or null if no messages are present.
 	 *
-	 * @return The channel the messages were sent in.
+	 * @return The channel the messages were sent in, or null if no messages are present.
 	 */
-	public Optional<IChannel> getChannel() {
-		return (backing.length == 0) ? Optional.empty() : Optional.of(backing[0].getChannel());
+	public IChannel getChannel() {
+		return (backing.length == 0) ? null : backing[0].getChannel();
 	}
 
 	/**
-	 * Gets the client the history belongs to.
+	 * Gets the client the history belongs to, or null if no messages are present.
 	 *
-	 * @return The client the history belongs to.
+	 * @return The client the history belongs to, or null if no messages are present.
 	 */
-	public Optional<IDiscordClient> getClient() {
-		return getChannel().map(IChannel::getClient);
+	public IDiscordClient getClient() {
+		final IChannel channel = getChannel();
+		return (channel == null) ? null : channel.getClient();
 	}
 
 	/**
@@ -206,6 +208,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @see IChannel#bulkDelete()
 	 */
 	public List<IMessage> bulkDelete() {
-		return getChannel().map(channel -> channel.bulkDelete(this)).orElse(Collections.emptyList());
+		final IChannel channel = getChannel();
+		return (channel == null) ? Collections.emptyList() : channel.bulkDelete(this);
 	}
 }
