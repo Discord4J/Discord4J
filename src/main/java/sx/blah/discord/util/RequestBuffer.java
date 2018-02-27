@@ -80,7 +80,10 @@ public class RequestBuffer {
 	 * @return The result of the request.
 	 */
 	public static RequestFuture<Void> request(IVoidRequest request) {
-		return request((IRequest<Void>) request); //Casted to use the correct request() method
+		return request(() -> {
+			request.doRequest();
+			return null;
+		});
 	}
 
 	/**
