@@ -650,7 +650,7 @@ public class Channel implements IChannel {
 	@Override
 	public void edit(String name, int position, String topic) {
 		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
-			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric OR non-ASCII characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).position(position).topic(topic).build());
 	}
@@ -658,7 +658,7 @@ public class Channel implements IChannel {
 	@Override
 	public void changeName(String name) {
 		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
-			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric OR non-ASCII characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).build());
 	}
