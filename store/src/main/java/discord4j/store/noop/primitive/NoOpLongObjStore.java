@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
 public class NoOpLongObjStore<V> implements LongObjStore<V> {
 
     @Override
-    public Mono<LongObjStoreOperations<V>> getConnection(boolean lock) {
+    public Mono<LongObjStoreOperations<V>> getConnection() {
         return Mono.just(new NoOpLongObjStoreOperations<>());
     }
 }

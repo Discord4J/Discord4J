@@ -39,7 +39,7 @@ public class ForwardingStore<V> implements LongObjStore<V> {
     }
 
     @Override
-    public Mono<LongObjStoreOperations<V>> getConnection(boolean lock) {
-        return toForward.getConnection(lock).map(ForwardingStoreOperations::new);
+    public Mono<LongObjStoreOperations<V>> getConnection() {
+        return toForward.getConnection().map(ForwardingStoreOperations::new);
     }
 }

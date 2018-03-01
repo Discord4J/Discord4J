@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Represents a reactive store. This acts as a symbolic connection to a data source, however it is not active
- * until a connection is opened {@link #getConnection(boolean)}.
+ * until a connection is opened {@link #getConnection()}.
  *
  * @param <K> The key type which provides a 1:1 mapping to the value type. This type is also expected to be
  *           {@link Comparable} in order to allow for range operations.
@@ -34,9 +34,7 @@ public interface Store<K extends Comparable<K>, V> {
     /**
      * This is used to get an active connection to the data source.
      *
-     * @param lock When true, the data source should lock itself while the newly opened connection is active.
-     *             This allows for doing operations which require priority to ensure consistency.
      * @return A mono which is expected to provide an open connection as soon as possible.
      */
-    Mono<? extends StoreOperations<K, V>> getConnection(boolean lock);
+    Mono<? extends StoreOperations<K, V>> getConnection();
 }

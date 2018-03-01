@@ -26,41 +26,20 @@ import reactor.util.function.Tuple2;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
 
     private final Map<K, V> map = new ConcurrentHashMap<>();
-    private final AtomicReference<MapStoreStoreOperations> lock = new AtomicReference<>();
 
     @Override
-    public Mono<? extends StoreOperations<K, V>> getConnection(boolean lock) {
-        Mono<MapStoreStoreOperations> mono = Mono.defer(() -> Mono.just(new MapStoreStoreOperations(lock)));
-        if (this.lock.get() != null)
-            mono = mono.zipWith(Mono.just(this.lock.get()))
-                    .delayUntil(tuple -> tuple.getT2().signaler)
-                    .map(Tuple2::getT1);
-        if (lock)
-            mono = mono.doOnNext(MapStore.this.lock::set);
-        return mono;
+    public Mono<? extends StoreOperations<K, V>> getConnection() {
+        return Mono.defer(() -> Mono.just(new MapStoreStoreOperations()));
     }
 
     private final class MapStoreStoreOperations implements StoreOperations<K, V> {
 
-        final Mono<Void> signaler;
-        final AtomicReference<Runnable> callback = new AtomicReference<>();
+        private MapStoreStoreOperations() {
 
-        private MapStoreStoreOperations(boolean lock) {
-            if (lock) {
-                signaler = Mono.create(sink -> callback.set(sink::success));
-            } else {
-                signaler = Mono.empty();
-            }
-        }
-
-        void unlock() {
-            if (callback.get() != null)
-                callback.get().run();
         }
 
         @Override
@@ -184,7 +163,7 @@ public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
 
         @Override
         public void close() throws RuntimeException {
-            unlock();
+
         }
     }
 }

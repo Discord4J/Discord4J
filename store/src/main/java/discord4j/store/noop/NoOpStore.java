@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
 public class NoOpStore<K extends Comparable<K>, V> implements Store<K, V> {
 
     @Override
-    public Mono<? extends StoreOperations<K, V>> getConnection(boolean lock) {
+    public Mono<? extends StoreOperations<K, V>> getConnection() {
         return Mono.just(new NoOpStoreOperations<>());
     }
 }

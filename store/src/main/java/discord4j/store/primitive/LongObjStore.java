@@ -29,5 +29,5 @@ import reactor.core.publisher.Mono;
 public interface LongObjStore<V> extends Store<Long, V> {
 
     @Override
-    Mono<LongObjStoreOperations<V>> getConnection(boolean lock);
+    Mono<LongObjStoreOperations<V>> getConnection();
 }

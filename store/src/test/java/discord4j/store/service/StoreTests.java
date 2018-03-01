@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -52,19 +51,10 @@ public class StoreTests {
         assertEquals(TestService.class, ((ForwardingStoreService) provider.getLongObjStoreProvider()).getOriginal().getClass());
     }
 
-    @Test(timeout = 10000L)
-    public void testStoreLocking() {
-        Store<String, String> store = newStore();
-        long start = System.currentTimeMillis();
-        store.getConnection(true).delayElement(Duration.ofSeconds(5)).doOnNext(StoreOperations::close).subscribe();
-        assertTrue(store.getConnection(false).blockOptional().isPresent());
-        assertTrue(System.currentTimeMillis() - start >= 5000);
-    }
-
     @Test
     public void testGenericStore() {
         Store<String, String> store = newStore();
-        new StoreTest(Objects.requireNonNull(store.getConnection(true).block())).test();
+        new StoreTest(Objects.requireNonNull(store.getConnection().block())).test();
     }
 
     class StoreTest {
