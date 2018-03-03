@@ -81,6 +81,7 @@ public class EventDispatcher {
 	private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 	private final Map<Class<? extends Event>, EventRegistry> eventsRegistry = new HashMap<Class<? extends Event>, EventRegistry>();
 	private final ExecutorService defaultEventExecutor;
+
 	/**
 	 * Special executor used for waitFor.
 	 *
@@ -669,6 +670,19 @@ public class EventDispatcher {
 		if (registry == null)
 			return; // fail-fast
 		registry.unregister(handler);
+	}
+
+	/**
+	 * Gets the amount of event handlers that are currently registered in this dispatcher.
+	 * 
+	 * @return the event handlers count.
+	 */
+	public int size() {
+		int size = 0;
+		for (EventRegistry registry : eventsRegistry.values()) {
+			size += registry.getHandlers().length;
+		}
+		return size;
 	}
 
 	/**
