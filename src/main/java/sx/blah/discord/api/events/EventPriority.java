@@ -17,14 +17,14 @@
 package sx.blah.discord.api.events;
 
 /**
- * Represents the event execution priority, the lower the priority is, the less important it be
- * comes and the later will be executed.
+ * Represents the event execution order priority, the lower the priority is, the less important it
+ * becomes and the later will be executed.
  */
 public enum EventPriority {
 
 	// Please keep in mind, the priority in our systems works based on the enum order, so take that in
 	// consideration when adding new priorities.
-	
+
 	/**
 	 * The highest priority, events with this priority will be ran first.
 	 */
