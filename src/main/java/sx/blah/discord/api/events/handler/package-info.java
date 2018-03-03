@@ -14,29 +14,7 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package sx.blah.discord.api.events;
-
 /**
- * Represents the event execution priority, the lower the priority is, the less important it be
- * comes and the later will be executed.
+ * This package is responsible for the event handler system and it's implementations.
  */
-public enum EventPriority {
-
-	// Please keep in mind, the priority in our systems works based on the enum order, so take that in
-	// consideration when adding new priorities.
-	
-	/**
-	 * The highest priority, events with this priority will be ran first.
-	 */
-	HIGH,
-
-	/**
-	 * The default priority, neither high or low and will be ran normally.
-	 */
-	NORMAL,
-
-	/**
-	 * The lowest priority, events with this priority will be ran last.
-	 */
-	LOW,
-}
+package sx.blah.discord.api.events.handler;

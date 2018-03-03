@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package sx.blah.discord.api.events;
 
 import java.lang.annotation.*;

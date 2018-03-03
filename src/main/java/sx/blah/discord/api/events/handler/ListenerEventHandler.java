@@ -1,8 +1,25 @@
+/*
+ *     This file is part of Discord4J.
+ *
+ *     Discord4J is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Discord4J is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Lesser General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Lesser General Public License
+ *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package sx.blah.discord.api.events.handler;
 
 import java.util.concurrent.Executor;
 
 import sx.blah.discord.api.events.Event;
+import sx.blah.discord.api.events.EventPriority;
 import sx.blah.discord.api.events.IListener;
 
 /**
@@ -17,7 +34,7 @@ public final class ListenerEventHandler<T extends Event> implements EventHandler
 	/**
 	 * The reflected class type of the event.
 	 */
-	private final Class<?> eventClass;
+	private final Class<? extends Event> eventClass;
 
 	/**
 	 * The listener which we are delegating to.
@@ -46,11 +63,12 @@ public final class ListenerEventHandler<T extends Event> implements EventHandler
 	 * @param temporary
 	 *            tells whether this handler is a temporary handler or not.
 	 */
-	public ListenerEventHandler(Class<?> eventClass, IListener<T> listener, Executor executor, boolean temporary) {
-		this.temporary = temporary;
+	public ListenerEventHandler(Class<? extends Event> eventClass, IListener<T> listener, Executor executor,
+			boolean temporary) {
 		this.eventClass = eventClass;
 		this.listener = listener;
 		this.executor = executor;
+		this.temporary = temporary;
 	}
 
 	/*
@@ -84,6 +102,16 @@ public final class ListenerEventHandler<T extends Event> implements EventHandler
 		return listener.getClass().getSimpleName();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see sx.blah.discord.api.events.handler.EventHandler#getEventClass()
+	 */
+	@Override
+	public Class<? extends Event> getEventClass() {
+		return eventClass;
+	}
+
 	/**
 	 * Gets the listener which we will delegate the invocation to.
 	 * 
@@ -111,6 +139,16 @@ public final class ListenerEventHandler<T extends Event> implements EventHandler
 	@Override
 	public boolean isTemporary() {
 		return temporary;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see sx.blah.discord.api.events.handler.EventHandler#getPriority()
+	 */
+	@Override
+	public EventPriority getPriority() {
+		return EventPriority.NORMAL;
 	}
 
 }

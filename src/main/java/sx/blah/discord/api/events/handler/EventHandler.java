@@ -19,6 +19,7 @@ package sx.blah.discord.api.events.handler;
 import java.util.concurrent.Executor;
 
 import sx.blah.discord.api.events.Event;
+import sx.blah.discord.api.events.EventPriority;
 
 /**
  * An interface which represents our event handling system, it handles the events filtering and
@@ -48,6 +49,13 @@ public interface EventHandler {
 	boolean accepts(Event event);
 
 	/**
+	 * Gets the reflected class type of the event.
+	 * 
+	 * @return the reflected event class type of the event.
+	 */
+	Class<? extends Event> getEventClass();
+
+	/**
 	 * Gets the {@link Executor} object which is responsible about executing this handler in the
 	 * iteration.
 	 * 
@@ -63,5 +71,12 @@ public interface EventHandler {
 	 * @return <code>true</code> if it is a temporary handler otherwise <code>false</code>.
 	 */
 	boolean isTemporary();
+
+	/**
+	 * Gets the event execution priority of this handler.
+	 * 
+	 * @return the event execution priority of this handler.
+	 */
+	EventPriority getPriority();
 
 }

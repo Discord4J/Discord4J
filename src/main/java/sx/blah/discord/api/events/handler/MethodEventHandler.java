@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
 import sx.blah.discord.api.events.Event;
+import sx.blah.discord.api.events.EventPriority;
 
 /**
  * An event handler implementation that depends on an unreflected method invokes using
@@ -31,7 +32,7 @@ public final class MethodEventHandler implements EventHandler {
 	/***
 	 * The reflected class type of the event.
 	 */
-	private final Class<?> eventClass;
+	private final Class<? extends Event> eventClass;
 
 	/**
 	 * The unreflected method handle of the event.
@@ -49,14 +50,19 @@ public final class MethodEventHandler implements EventHandler {
 	private final Object instance;
 
 	/**
+	 * The executor which will be used to execute the event.
+	 */
+	private final Executor executor;
+
+	/**
 	 * Tells whether the handler is a temporary handler or not.
 	 */
 	private final boolean temporary;
 
 	/**
-	 * The executor which will be used to execute the event.
+	 * The event execution order priority.
 	 */
-	private final Executor executor;
+	private final EventPriority priority;
 
 	/**
 	 * Constructs a new {@link MethodEventHandler} object instance.
@@ -69,19 +75,22 @@ public final class MethodEventHandler implements EventHandler {
 	 *            the reflected method handle of the event.
 	 * @param instance
 	 *            the object instance which owns the event.
-	 * @param temporary
-	 *            tells whether the handler is a temporary handler or not.
 	 * @param executor
 	 *            the executor which will be used to execute the event.
+	 * @param temporary
+	 *            tells whether the handler is a temporary handler or not.
+	 * @param priority
+	 *            the event execution order priority.
 	 */
-	public MethodEventHandler(Class<?> eventClass, MethodHandle methodHandle, Method method,
-			Object instance, boolean temporary, Executor executor) {
+	public MethodEventHandler(Class<? extends Event> eventClass, MethodHandle methodHandle, Method method, Object instance,
+			Executor executor, boolean temporary, EventPriority priority) {
 		this.eventClass = eventClass;
 		this.methodHandle = methodHandle;
 		this.method = method;
 		this.instance = instance;
-		this.temporary = temporary;
 		this.executor = executor;
+		this.temporary = temporary;
+		this.priority = priority;
 	}
 
 	/*
@@ -114,12 +123,7 @@ public final class MethodEventHandler implements EventHandler {
 		return method.toString();
 	}
 
-	/**
-	 * Gets the reflected class type of the event.
-	 * 
-	 * @return the reflected class type of the event.
-	 */
-	public Class<?> getEventClass() {
+	public Class<? extends Event> getEventClass() {
 		return eventClass;
 	}
 
@@ -168,6 +172,16 @@ public final class MethodEventHandler implements EventHandler {
 	@Override
 	public boolean isTemporary() {
 		return temporary;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see sx.blah.discord.api.events.handler.EventHandler#getPriority()
+	 */
+	@Override
+	public EventPriority getPriority() {
+		return priority;
 	}
 
 }
