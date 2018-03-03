@@ -18,7 +18,6 @@
 package sx.blah.discord.api.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
 import sx.blah.discord.api.internal.json.objects.*;
@@ -784,35 +783,26 @@ class DispatchHandler {
 		if (channel == null) return;
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
+		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
-		boolean wasCached = true;
-
-		if (message == null) {
-			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
-			wasCached = false;
-			if (message == null) {
-				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction add event\nObject={}", ToStringBuilder.reflectionToString(event));
-				return;
-			}
-		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
+		message.getReactions().remove(reaction);
 
-		if (wasCached) {
-			if (reaction == null) { // Only happens in the case of a cached message with a new reaction
-				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-				reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id, event.emoji.animated));
-				message.getReactions().add(reaction);
-			} else {
-				((Reaction) reaction).setCount(reaction.getCount() + 1);
-			}
+		if (reaction == null) { // Only happens in the case of a cached message with a new reaction
+			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+			reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
+		} else if (cached) {
+			reaction = new Reaction(message, reaction.getCount() + 1, reaction.getEmoji());
 		}
+		message.getReactions().add(reaction);
 
 		IUser user;
 		if (channel.isPrivate()) {
 			user = channel.getUsersHere().get(channel.getUsersHere().get(0).getLongID() == Long.parseUnsignedLong(event.user_id) ? 0 : 1);
-		} else {
+		}
+		else {
 			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 		}
 
@@ -821,47 +811,41 @@ class DispatchHandler {
 
 	private void reactionRemove(ReactionEventResponse event) {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (channel == null) return;
+		if (channel == null)
+			return;
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
+		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
-		boolean wasCached = true;
-
-		if (message == null) {
-			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
-			wasCached = false;
-			if (message == null) {
-				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction remove event\nObject={}", ToStringBuilder.reflectionToString(event));
-				return;
-			}
-		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
+		message.getReactions().remove(reaction);
 
-		if (wasCached) {
-			if (reaction == null) { // the last reaction of the emoji was removed
-				long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
-				reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id, event.emoji.animated));
-			} else {
-				((Reaction) reaction).setCount(reaction.getCount() - 1);
-				if (reaction.getCount() <= 0) {
-					List<IReaction> currReactions = message.getReactions();
-					currReactions.remove(reaction);
-					((Message) message).setReactions(currReactions);
-				}
-			}
+		if (reaction == null) { // the last reaction of the emoji was removed
+			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
+			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
 		}
+		else {
+			reaction = new Reaction(message, !cached ? reaction.getCount() : reaction.getCount() - 1, reaction.getEmoji());
+		}
+
+		if (reaction.getCount() > 0) {
+			message.getReactions().add(reaction);
+		}
+
 
 		IUser user;
 		if (channel.isPrivate()) {
 			user = channel.getUsersHere().get(channel.getUsersHere().get(0).getLongID() == Long.parseUnsignedLong(event.user_id) ? 0 : 1);
-		} else {
+		}
+		else {
 			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 		}
 
 		client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 	}
+
 
 	private void webhookUpdate(WebhookObject event) {
 		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(event.channel_id));

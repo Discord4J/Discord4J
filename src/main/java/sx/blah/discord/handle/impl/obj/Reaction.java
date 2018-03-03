@@ -28,6 +28,7 @@ import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The default implementation of {@link IReaction}.
@@ -116,6 +117,20 @@ public class Reaction implements IReaction {
 	@Override
 	public IReaction copy() {
 		return new Reaction(message, count, emoji);
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) return false;
+		if (!this.getClass().isAssignableFrom(other.getClass())) return false;
+
+		Reaction emoji = (Reaction) other;
+		return emoji.message.equals(this.message) && emoji.emoji.equals(this.emoji);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(message, this.emoji);
 	}
 
 	@Override
