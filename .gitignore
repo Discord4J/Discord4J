@@ -21,3 +21,4 @@ dependency-reduced-pom.xml
 Roadmap.md
 /modules/
 bin/
+/.apt_generated/

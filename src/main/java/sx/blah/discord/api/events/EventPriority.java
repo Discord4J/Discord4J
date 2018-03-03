@@ -16,21 +16,27 @@
  */
 package sx.blah.discord.api.events;
 
-import java.lang.annotation.*;
-
 /**
- * Signifies a method that should be registered for invocation with an {@link EventDispatcher}.
+ * Represents the event execution order priority, the lower the priority is, the less important it
+ * becomes and the later will be executed.
  */
-@Documented
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface EventSubscriber {
+public enum EventPriority {
+
+	// Please keep in mind, the priority in our systems works based on the enum order, so take that in
+	// consideration when adding new priorities.
 
 	/**
-	 * Gets the event execution priority.
-	 * 
-	 * @return the event priority or a default value of {@link EventPriority#NORMAL} if none was
-	 *         present.
+	 * The highest priority, events with this priority will be ran first.
 	 */
-	EventPriority priority() default EventPriority.NORMAL;
+	HIGH,
+
+	/**
+	 * The default priority, neither high or low and will be ran normally.
+	 */
+	NORMAL,
+
+	/**
+	 * The lowest priority, events with this priority will be ran last.
+	 */
+	LOW,
 }
