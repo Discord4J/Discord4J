@@ -14,7 +14,7 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_bom_version = 'Bismuth-SR6'
+    reactor_bom_version = 'Bismuth-SR7'
     jackson_version = '2.9.2'
     slf4j_version = '1.7.25'
     jsr305_version = '3.0.2'
