@@ -603,10 +603,14 @@ public class EventDispatcher {
 		Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Dispatching event of type {}", event.getClass().getSimpleName());
 		event.client = client;
 
-		listenersRegistry.get().stream().filter(e -> e.accepts(event)).forEach(handler -> {
+		HashSet<EventHandler> handlers = listenersRegistry.get();
+		handlers.stream().filter(e -> e.accepts(event)).forEach(handler -> {
 			handler.getExecutor().execute(() -> {
 				try {
-					if (handler.isTemporary()) unregisterHandler(handler);
+					if (event.isCancelled())
+						return;
+					if (handler.isTemporary())
+						unregisterHandler(handler);
 					handler.handle(event);
 				} catch (IllegalAccessException e) {
 					Discord4J.LOGGER.error(LogMarkers.EVENTS, "Error dispatching event " + event.getClass().getSimpleName(), e);

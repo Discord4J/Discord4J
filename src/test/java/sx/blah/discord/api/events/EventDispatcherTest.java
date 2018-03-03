@@ -19,6 +19,7 @@ package sx.blah.discord.api.events;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageEvent;
 
@@ -192,7 +193,8 @@ public class EventDispatcherTest {
 	public void testWaitFor() throws Exception {
 		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
 				1, Runtime.getRuntime().availableProcessors() * 4, 128,
-				60L, TimeUnit.SECONDS);		SynchronousQueue<MyEvent> interThreadExchange = new SynchronousQueue<>();
+				60L, TimeUnit.SECONDS);		
+		SynchronousQueue<MyEvent> interThreadExchange = new SynchronousQueue<>();
 		Thread thread = new Thread(() -> {
 			try {
 				MyEvent e = eventDispatcher.waitFor(MyEvent.class);
@@ -216,7 +218,8 @@ public class EventDispatcherTest {
 	public void testDispatchWithCustomExecutor() throws Exception {
 		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
 				1, Runtime.getRuntime().availableProcessors() * 4, 128,
-				60L, TimeUnit.SECONDS);		AtomicBoolean handled = new AtomicBoolean(false); //doesn't need to be atomic at all, but it's the easiest mutable boolean I can use within a subclas
+				60L, TimeUnit.SECONDS);		
+		AtomicBoolean handled = new AtomicBoolean(false); //doesn't need to be atomic at all, but it's the easiest mutable boolean I can use within a subclas
 		Executor localThreadExecutor = (Runnable command) -> {
 			command.run();
 			handled.set(true);
@@ -231,7 +234,8 @@ public class EventDispatcherTest {
 	public void testDispatcherBackpressure() throws Exception {
 		EventDispatcher eventDispatcher = new EventDispatcher(null, new EventDispatcher.CallerRunsPolicy(),
 				1, Runtime.getRuntime().availableProcessors() * 4, 128,
-				60L, TimeUnit.SECONDS);		AtomicBoolean backpressured = new AtomicBoolean(false);
+				60L, TimeUnit.SECONDS);		
+		AtomicBoolean backpressured = new AtomicBoolean(false);
 		Thread thisThread = Thread.currentThread();
 
 		eventDispatcher.registerListener((IListener<MyEvent>) evt -> {
