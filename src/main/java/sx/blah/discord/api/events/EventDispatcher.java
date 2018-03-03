@@ -16,12 +16,6 @@
  */
 package sx.blah.discord.api.events;
 
-import net.jodah.typetools.TypeResolver;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.DiscordUtils;
-import sx.blah.discord.util.LogMarkers;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
@@ -31,11 +25,26 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import net.jodah.typetools.TypeResolver;
+import sx.blah.discord.Discord4J;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.handler.EventHandler;
+import sx.blah.discord.api.events.handler.ListenerEventHandler;
+import sx.blah.discord.api.events.handler.MethodEventHandler;
+import sx.blah.discord.api.internal.DiscordUtils;
+import sx.blah.discord.util.LogMarkers;
 
 /**
  * Manages event listeners and event logic.
@@ -318,7 +327,7 @@ public class EventDispatcher {
 		Class<?> rawType = TypeResolver.resolveRawArgument(IListener.class, listener.getClass());
 		if (!Event.class.isAssignableFrom(rawType)) throw new IllegalArgumentException("Type " + rawType + " is not a subclass of Event.");
 
-		ListenerEventHandler eventHandler = new ListenerEventHandler(isTemporary, rawType, listener, executor);
+		ListenerEventHandler eventHandler = new ListenerEventHandler(rawType, listener, executor, isTemporary);
 		listenersRegistry.updateAndGet(set -> {
 			HashSet<EventHandler> updatedSet = (HashSet<EventHandler>) set.clone();
 			updatedSet.add(eventHandler);
@@ -550,9 +559,9 @@ public class EventDispatcher {
 				EventHandler eventHandler = it.next();
 				if (eventHandler instanceof MethodEventHandler) {
 					MethodEventHandler handler = (MethodEventHandler) eventHandler;
-					if (methods.contains(handler.method) && instance == handler.instance) {
+					if (methods.contains(handler.getMethod()) && instance == handler.getInstance()) {
 						it.remove();
-						Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered class method listener {}", clazz.getSimpleName(), handler.method.toString());
+						Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered class method listener {}", clazz.getSimpleName(), handler.getMethod().toString());
 					}
 				}
 			}
@@ -574,7 +583,7 @@ public class EventDispatcher {
 					EventHandler eventHandler = iterator.next();
 					if (eventHandler instanceof ListenerEventHandler) {
 						ListenerEventHandler<?> handler = (ListenerEventHandler) eventHandler;
-						if (handler.listener == listener) {//Yes, the == is intentional. We want the exact same instance.
+						if (handler.getListener() == listener) {//Yes, the == is intentional. We want the exact same instance.
 							iterator.remove();
 							Discord4J.LOGGER.trace(LogMarkers.EVENTS, "Unregistered IListener {}", listener);
 						}
@@ -623,123 +632,6 @@ public class EventDispatcher {
 		});
 	}
 
-	/**
-	 * General behavior of an event handler.
-	 */
-	private static interface EventHandler {
-
-		/**
-		 * Should the handler be removed after handling an event.
-		 *
-		 * @return
-		 */
-		boolean isTemporary();
-
-		/**
-		 * Checks whether the handler should process the given event.
-		 *
-		 * @param e
-		 * @return
-		 */
-		boolean accepts(Event e);
-
-		Executor getExecutor();
-
-		void handle(Event e) throws Throwable;
-	}
-
-	/**
-	 * Specialized version of EventHandler that invokes the given MethodHandle for each event.
-	 */
-	private static class MethodEventHandler implements EventHandler {
-
-		private final Class<?> eventClass;
-		private final MethodHandle methodHandle;
-		private final Method method;
-		private final Object instance;
-		private final boolean temporary;
-		private final Executor executor;
-
-		public MethodEventHandler(Class<?> eventClass, MethodHandle methodHandle, Method method, Object instance, boolean temporary, Executor executor) {
-			this.eventClass = eventClass;
-			this.methodHandle = methodHandle;
-			this.method = method;
-			this.instance = instance;
-			this.temporary = temporary;
-			this.executor = executor;
-		}
-
-		@Override
-		public boolean isTemporary() {
-			return temporary;
-		}
-
-		@Override
-		public boolean accepts(Event e) {
-			return eventClass.isInstance(e);
-		}
-
-		@Override
-		public void handle(Event e) throws Throwable {
-			methodHandle.invoke(e);
-		}
-
-		@Override
-		public Executor getExecutor() {
-			return executor;
-		}
-
-		@Override
-		public String toString() {
-			return method.toString();
-		}
-
-	}
-
-	/**
-	 * EventHandler implementation that delegates to an IListener.
-	 *
-	 * @param <T>
-	 */
-	private static class ListenerEventHandler<T extends Event> implements EventHandler {
-
-		private final boolean isTemporary;
-		private final Class<?> rawType;
-		private final IListener<T> listener;
-		private final Executor executor;
-
-		public ListenerEventHandler(boolean isTemporary, Class<?> rawType, IListener<T> listener, Executor executor) {
-			this.isTemporary = isTemporary;
-			this.rawType = rawType;
-			this.listener = listener;
-			this.executor = executor;
-		}
-
-		@Override
-		public boolean isTemporary() {
-			return isTemporary;
-		}
-
-		@Override
-		public boolean accepts(Event e) {
-			return rawType.isInstance(e);
-		}
-
-		@Override
-		public void handle(Event e) throws Throwable {
-			listener.handle((T) e);
-		}
-
-		@Override
-		public Executor getExecutor() {
-			return executor;
-		}
-
-		@Override
-		public String toString() {
-			return listener.getClass().getSimpleName();
-		}
-	}
 
 	public static class CallerRunsPolicy implements RejectedExecutionHandler {
 

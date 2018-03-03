@@ -14,24 +14,26 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package sx.blah.discord.api.events;
 
-import java.lang.annotation.*;
-
 /**
- * Signifies a method that should be registered for invocation with an {@link EventDispatcher}.
+ * Represents the event execution priority, the lower the priority is, the less important it be
+ * comes and the later will be executed.
  */
-@Documented
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface EventSubscriber {
+public enum EventPriority {
 
 	/**
-	 * Gets the event execution priority.
-	 * 
-	 * @return the event priority or a default value of {@link EventPriority#NORMAL} if none was
-	 *         present.
+	 * The highest priority, events with this priority will be ran first.
 	 */
-	EventPriority priority() default EventPriority.NORMAL;
+	HIGH,
+
+	/**
+	 * The default priority, neither high or low and will be ran normally.
+	 */
+	NORMAL,
+
+	/**
+	 * The lowest priority, events with this priority will be ran last.
+	 */
+	LOW,
 }
