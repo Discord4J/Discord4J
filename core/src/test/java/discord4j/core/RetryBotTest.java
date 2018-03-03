@@ -23,14 +23,19 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.GatewayPayload;
+import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.MessageCreate;
-import discord4j.common.json.payload.dispatch.Ready;
 import discord4j.common.json.response.MessageResponse;
+import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.*;
+import discord4j.core.event.function.DispatchContext;
+import discord4j.core.event.function.DispatchHandlers;
 import discord4j.gateway.GatewayClient;
-import discord4j.gateway.payload.JacksonLenientPayloadReader;
+import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import discord4j.gateway.retry.RetryOptions;
 import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
@@ -39,11 +44,18 @@ import discord4j.rest.service.ApplicationService;
 import discord4j.rest.service.GatewayService;
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.*;
+import reactor.core.scheduler.Schedulers;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 
 public class RetryBotTest {
+
+	private static final Logger log = Loggers.getLogger(RetryBotTest.class);
 
 	private String token;
 
@@ -74,34 +86,67 @@ public class RetryBotTest {
 		PayloadWriter writer = new JacksonPayloadWriter(mapper);
 		GatewayClient gatewayClient = new GatewayClient(reader, writer, token);
 
-		FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
+		Object client = new Object();
 
-		AtomicLong ownerId = new AtomicLong();
+		EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
+		EventDispatcher dispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
+		gatewayClient.dispatch()
+				.compose(flux -> wiretap(flux, Loggers.getLogger("discord4j.event.dispatcher")))
+				.map(dispatch -> DispatchContext.of(dispatch, client))
+				.flatMap(context -> Mono.justOrEmpty(DispatchHandlers.<Dispatch, Event>handle(context)))
+				.subscribeWith(eventProcessor);
 
-		gatewayClient.dispatch().ofType(Ready.class)
-				.next()
-				.flatMap(ready -> applicationService.getCurrentApplicationInfo())
-				.map(res -> res.getOwner().getId())
-				.subscribe(ownerId::set);
-
-		gatewayClient.dispatch().ofType(MessageCreate.class)
-				.subscribe(event -> {
-					MessageResponse message = event.getMessage();
-					if (ownerId.get() == message.getAuthor().getId()) {
-						String content = message.getContent();
-						if ("!close".equals(content)) {
-							gatewayClient.close(false);
-						} else if ("!retry".equals(content)) {
-							gatewayClient.close(true);
-						} else if ("!fail".equals(content)) {
-							outboundSink.next(new GatewayPayload<>());
-						}
-					}
-				});
+		RetryCommand command = new RetryCommand(dispatcher, applicationService, gatewayClient);
+		command.configure();
 
 		gatewayService.getGateway()
 				.flatMap(res -> gatewayClient.execute(res.getUrl() + "?v=6&encoding=json&compress=zlib-stream"))
 				.block();
+	}
+
+	private static <V> Flux<V> wiretap(Flux<V> flux, Logger logger) {
+		return flux.log(logger, Level.FINE, false, SignalType.ON_NEXT);
+	}
+
+	static class RetryCommand {
+
+		private final EventDispatcher dispatcher;
+		private final ApplicationService applicationService;
+		private final GatewayClient gatewayClient;
+		private final AtomicLong ownerId = new AtomicLong();
+
+		RetryCommand(EventDispatcher dispatcher, ApplicationService applicationService, GatewayClient
+				gatewayClient) {
+			this.dispatcher = dispatcher;
+			this.applicationService = applicationService;
+			this.gatewayClient = gatewayClient;
+		}
+
+		void configure() {
+			FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
+
+			dispatcher.on(ReadyEvent.class)
+					.next()
+					.flatMap(ready -> applicationService.getCurrentApplicationInfo())
+					.map(res -> res.getOwner().getId())
+					.subscribe(ownerId::set);
+
+			dispatcher.on(MessageCreatedEvent.class)
+					.subscribe(wrappedEvent -> {
+						MessageCreate event = wrappedEvent.getMessageCreate();
+						MessageResponse message = event.getMessage();
+						if (ownerId.get() == message.getAuthor().getId()) {
+							String content = message.getContent();
+							if ("!close".equals(content)) {
+								gatewayClient.close(false);
+							} else if ("!retry".equals(content)) {
+								gatewayClient.close(true);
+							} else if ("!fail".equals(content)) {
+								outboundSink.next(new GatewayPayload<>());
+							}
+						}
+					});
+		}
 	}
 
 	private ObjectMapper getMapper() {
