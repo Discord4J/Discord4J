@@ -49,6 +49,12 @@ public abstract class PayloadHandlers {
 		handlerMap.put(op, handler);
 	}
 
+	/**
+	 * Process a {@link discord4j.common.json.payload.PayloadData} object together with its context, reacting to it.
+	 *
+	 * @param context the PayloadContext used with this PayloadData object
+	 * @param <T> the PayloadData type
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends PayloadData> void handle(PayloadContext<T> context) {
 		PayloadHandler<T> entry = (PayloadHandler<T>) handlerMap.get(context.getPayload().getOp());
@@ -102,6 +108,5 @@ public abstract class PayloadHandlers {
 	private static void handleHeartbeatAck(PayloadContext<?> context) {
 		log.debug("Received heartbeat ack");
 	}
-
 
 }

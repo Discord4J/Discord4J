@@ -21,6 +21,7 @@ import discord4j.core.event.domain.Event;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Distributes events to each subscriber.
@@ -41,6 +42,21 @@ public class EventDispatcher {
 	private final FluxProcessor<Event, Event> processor;
 	private final Scheduler scheduler;
 
+	/**
+	 * Creates a new event dispatcher using the given processor and maintaining its thread affinity.
+	 *
+	 * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
+	 */
+	public EventDispatcher(FluxProcessor<Event, Event> processor) {
+		this(processor, Schedulers.immediate());
+	}
+
+	/**
+	 * Creates a new event dispatcher using the given processor and thread model.
+	 *
+	 * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
+	 * @param scheduler a Scheduler to ensure a certain thread model on each published signal
+	 */
 	public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler) {
 		this.processor = processor;
 		this.scheduler = scheduler;

@@ -17,12 +17,18 @@
 
 package discord4j.gateway.websocket;
 
+/**
+ * Unchecked exception thrown when a websocket session is closed, in an expected way or not.
+ * <p>
+ * Used to wrap an underlying websocket {@link discord4j.gateway.websocket.CloseStatus} so clients can retrieve the
+ * status code and perform actions after it.
+ */
 public class CloseException extends RuntimeException {
 
 	private final CloseStatus closeStatus;
 
 	public CloseException(CloseStatus closeStatus) {
-		this.closeStatus = closeStatus;
+		this(closeStatus, null);
 	}
 
 	public CloseException(CloseStatus closeStatus, Throwable cause) {

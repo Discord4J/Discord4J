@@ -75,6 +75,8 @@ public class GatewayStateChanged implements Dispatch {
 	public String toString() {
 		return "GatewayStateChanged[" +
 				"state=" + state +
+				", currentAttempt=" + currentAttempt +
+				", backoff=" + backoff +
 				']';
 	}
 }

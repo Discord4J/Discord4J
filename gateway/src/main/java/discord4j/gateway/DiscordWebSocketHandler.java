@@ -48,14 +48,14 @@ import java.util.logging.Level;
  * <h2>Example usage</h2>
  * <pre>
  * // pull operation coming inbound
- * handler.inbound().subscribe(payload -&lt; {
+ * handler.inbound().subscribe(payload -&gt; {
  *     if (payload.getData() instanceof Hello) {
  *         IdentifyProperties properties = new IdentifyProperties(...);
  *         GatewayPayload&lt;Identify&gt; identify = GatewayPayload.identify(...);
  *
  *         handler.outbound().onNext(identify); // push operation going outbound
  *     }
- * }, error -&lt; {
+ * }, error -&gt; {
  *     log.warn("Gateway connection terminated: {}", error.toString());
  * });
  * </pre>
@@ -63,6 +63,10 @@ import java.util.logging.Level;
 public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
+
+	private static final Logger closeLogger = Loggers.getLogger("discord4j.gateway.session.close");
+	private static final Logger inboundLogger = Loggers.getLogger("discord4j.gateway.session.inbound");
+	private static final Logger outboundLogger = Loggers.getLogger("discord4j.gateway.session.outbound");
 
 	private final ZlibDecompressor decompressor = new ZlibDecompressor();
 	private final UnicastProcessor<GatewayPayload<?>> inboundExchange = UnicastProcessor.create();
@@ -88,7 +92,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		// Listen to a custom handler's response to retrieve the actual close code and reason, or an error signal if
 		// the channel was closed abruptly.
 		session.closeFuture()
-				.log("discord4j.gateway.session.close", Level.FINE)
+				.log(closeLogger, Level.FINEST, false)
 				.map(CloseException::new)
 				.subscribe(this::error, this::error);
 
@@ -96,11 +100,11 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 				.map(WebSocketMessage::getPayload)
 				.compose(decompressor::completeMessages)
 				.map(reader::read)
-				.log("discord4j.gateway.session.inbound", Level.FINE)
+				.log(inboundLogger, Level.FINEST, false)
 				.subscribe(inboundExchange::onNext, this::error);
 
 		return session.send(outboundExchange
-				.log("discord4j.gateway.session.outbound", Level.FINE)
+				.log(outboundLogger, Level.FINEST, false)
 				.map(writer::write)
 				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)))
 				.then(completionNotifier);
@@ -112,7 +116,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	 * through a complete signal, dropping all future signals.
 	 */
 	public void close() {
-		log.info("Triggering close sequence");
+		log.debug("Triggering close sequence");
 		completionNotifier.onComplete();
 		outboundExchange.onComplete();
 		inboundExchange.onComplete();
@@ -128,7 +132,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	 * @param error the cause for this session termination
 	 */
 	public void error(Throwable error) {
-		log.info("Triggering error sequence");
+		log.debug("Triggering error sequence");
 		if (!completionNotifier.isTerminated()) {
 			completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
 		}

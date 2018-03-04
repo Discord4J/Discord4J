@@ -51,8 +51,8 @@ import java.util.function.Predicate;
  * new connection to the gateway is made, therefore only one instance of this class is enough to handle the lifecycle
  * of Discord gateway operations, that could span multiple websocket sessions over time.
  * <p>
- * It provides automatic reconnecting through a configurable retry policy, and allows downstream consumers to receive
- * inbound events through {@link #dispatch()} and {@link #sender()} to submit events.
+ * It provides automatic reconnecting through a configurable retry policy, allows downstream consumers to receive
+ * inbound events through {@link #dispatch()} and provides {@link #sender()} to submit events.
  */
 public class GatewayClient {
 
@@ -130,7 +130,7 @@ public class GatewayClient {
 				.doOnRetry(context -> {
 					int attempt = context.applicationContext().getAttempts();
 					long backoff = context.backoff().toMillis();
-					log.info("Retry attempt {} in {} ms", attempt, backoff);
+					log.debug("Retry attempt {} in {} ms", attempt, backoff);
 					if (attempt == 1) {
 						dispatch.onNext(GatewayStateChanged.retryStarted(Duration.ofMillis(backoff)));
 					} else {
@@ -192,7 +192,6 @@ public class GatewayClient {
 	public FluxSink<GatewayPayload<?>> sender() {
 		return sender.sink(FluxSink.OverflowStrategy.ERROR);
 	}
-
 
 
 	private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {

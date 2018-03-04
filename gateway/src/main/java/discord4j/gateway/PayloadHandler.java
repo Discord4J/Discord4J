@@ -18,8 +18,18 @@ package discord4j.gateway;
 
 import discord4j.common.json.payload.PayloadData;
 
+/**
+ * Handler for a gateway payload.
+ *
+ * @param <T> the type of the payload data
+ */
 @FunctionalInterface
 public interface PayloadHandler<T extends PayloadData> {
 
-	void handle(PayloadContext<T> ctx);
+	/**
+	 * Perform an action on a payload together with its context, which allows access to various gateway resources.
+	 *
+	 * @param context the payload's gateway context
+	 */
+	void handle(PayloadContext<T> context);
 }

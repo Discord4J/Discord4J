@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
+/**
+ * Implements a zlib inflater on a stream of {@link io.netty.buffer.ByteBuf} elements.
+ */
 public class ZlibDecompressor {
 
 	private static final int ZLIB_SUFFIX = 0x0000FFFF;
