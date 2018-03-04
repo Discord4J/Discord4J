@@ -44,7 +44,7 @@ public interface ReaderStrategy<Res> {
 	 * @param response the response to read from
 	 * @param responseType the type of object in the response which must have been previously checked via {@link
 	 * #canRead(Class, String)}
-	 * @return
+	 * @return a Mono for the resolved response, according to the given response type
 	 */
 	Mono<Res> read(HttpClientResponse response, Class<Res> responseType);
 }

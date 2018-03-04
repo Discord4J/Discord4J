@@ -39,10 +39,14 @@ import java.util.stream.Collectors;
  */
 public final class Member extends User {
 
-	/** The raw data as represented by Discord. */
+	/**
+	 * The raw data as represented by Discord.
+	 */
 	private final MemberData data;
 
-	/** The ID of the guild this user is associated to. */
+	/**
+	 * The ID of the guild this user is associated to.
+	 */
 	private final long guildId;
 
 	/**
@@ -50,6 +54,7 @@ public final class Member extends User {
 	 *
 	 * @param client The Client associated to this object, must be non-null.
 	 * @param data The raw data as represented by Discord, must be non-null.
+	 * @param userData The user data as represented by Discord, must be non-null
 	 * @param guildId The ID of the guild this user is associated to.
 	 */
 	public Member(final Client client, final MemberData data, final UserData userData, final long guildId) {
@@ -86,8 +91,8 @@ public final class Member extends User {
 	/**
 	 * Requests to retrieve the user's guild roles.
 	 *
-	 * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
-	 * emitted through the {@code Flux}.
+	 * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received,
+	 * it is emitted through the {@code Flux}.
 	 */
 	public Flux<Role> getRoles() {
 		throw new UnsupportedOperationException("Not yet implemented...");

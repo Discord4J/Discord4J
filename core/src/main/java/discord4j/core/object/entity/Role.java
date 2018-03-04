@@ -33,20 +33,26 @@ import java.util.Objects;
  */
 public final class Role implements Entity, Positionable {
 
-	/** The Client associated to this object. */
+	/**
+	 * The Client associated to this object.
+	 */
 	private final Client client;
 
-	/** The raw data as represented by Discord. */
+	/**
+	 * The raw data as represented by Discord.
+	 */
 	private final RoleData data;
 
-	/** The ID of the guild this role is associated to. */
+	/**
+	 * The ID of the guild this role is associated to.
+	 */
 	private final long guildId;
 
 	/**
 	 * Constructs a {@code Role} with an associated client and Discord data.
 	 *
 	 * @param client The Client associated to this object, must be non-null.
-	 * @param role The raw data as represented by Discord, must be non-null.
+	 * @param data The raw data as represented by Discord, must be non-null.
 	 * @param guildId The ID of the guild this role is associated to.
 	 */
 	public Role(final Client client, final RoleData data, final long guildId) {
