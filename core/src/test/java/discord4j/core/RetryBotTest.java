@@ -55,8 +55,6 @@ import java.util.logging.Level;
 
 public class RetryBotTest {
 
-	private static final Logger log = Loggers.getLogger(RetryBotTest.class);
-
 	private String token;
 
 	@Before
@@ -66,41 +64,22 @@ public class RetryBotTest {
 
 	@Test
 	public void test() {
-		ObjectMapper mapper = getMapper();
+		FakeClient client = new FakeClient(token);
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("authorization", "Bot " + token)
-				.defaultHeader("content-type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new MultipartWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
-		Router router = new Router(httpClient);
-		GatewayService gatewayService = new GatewayService(router);
-		ApplicationService applicationService = new ApplicationService(router);
-
-		PayloadReader reader = new JacksonLenientPayloadReader(mapper);
-		PayloadWriter writer = new JacksonPayloadWriter(mapper);
-		GatewayClient gatewayClient = new GatewayClient(reader, writer, token);
-
-		Object client = new Object();
-
-		EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
-		EventDispatcher dispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
-		gatewayClient.dispatch()
+		client.gatewayClient.dispatch()
 				.compose(flux -> wiretap(flux, Loggers.getLogger("discord4j.event.dispatcher")))
 				.map(dispatch -> DispatchContext.of(dispatch, client))
 				.flatMap(context -> Mono.justOrEmpty(DispatchHandlers.<Dispatch, Event>handle(context)))
-				.subscribeWith(eventProcessor);
+				.subscribeWith(client.eventProcessor);
 
-		RetryCommand command = new RetryCommand(dispatcher, applicationService, gatewayClient);
-		command.configure();
+		CommandListener commandListener = new CommandListener(client);
+		commandListener.configure();
 
-		gatewayService.getGateway()
-				.flatMap(res -> gatewayClient.execute(res.getUrl() + "?v=6&encoding=json&compress=zlib-stream"))
+		LifecycleListener lifecycleListener = new LifecycleListener(client);
+		lifecycleListener.configure();
+
+		client.gatewayService.getGateway()
+				.flatMap(res -> client.gatewayClient.execute(res.getUrl() + "?v=6&encoding=json&compress=zlib-stream"))
 				.block();
 	}
 
@@ -108,39 +87,81 @@ public class RetryBotTest {
 		return flux.log(logger, Level.FINE, false, SignalType.ON_NEXT);
 	}
 
-	static class RetryCommand {
+	static class FakeClient {
 
-		private final EventDispatcher dispatcher;
+		private final ObjectMapper mapper;
+
+		private final SimpleHttpClient httpClient;
+		private final Router router;
+		private final GatewayService gatewayService;
 		private final ApplicationService applicationService;
+
+		private final PayloadReader reader;
+		private final PayloadWriter writer;
+		private final RetryOptions retryOptions;
 		private final GatewayClient gatewayClient;
+
+		private final EmitterProcessor<Event> eventProcessor;
+		private final EventDispatcher dispatcher;
+
+		FakeClient(String token) {
+			mapper = new ObjectMapper()
+					.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+					.registerModule(new PossibleModule());
+
+			httpClient = SimpleHttpClient.builder()
+					.baseUrl(Routes.BASE_URL)
+					.defaultHeader("authorization", "Bot " + token)
+					.defaultHeader("content-type", "application/json")
+					.readerStrategy(new JacksonReaderStrategy<>(mapper))
+					.readerStrategy(new EmptyReaderStrategy())
+					.writerStrategy(new JacksonWriterStrategy(mapper))
+					.writerStrategy(new MultipartWriterStrategy(mapper))
+					.writerStrategy(new EmptyWriterStrategy())
+					.build();
+
+			router = new Router(httpClient);
+			gatewayService = new GatewayService(router);
+			applicationService = new ApplicationService(router);
+			reader = new JacksonPayloadReader(mapper);
+			writer = new JacksonPayloadWriter(mapper);
+			retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120));
+			gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
+
+			eventProcessor = EmitterProcessor.create(false);
+			dispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
+		}
+	}
+
+	static class CommandListener {
+
+		private final FakeClient client;
 		private final AtomicLong ownerId = new AtomicLong();
 
-		RetryCommand(EventDispatcher dispatcher, ApplicationService applicationService, GatewayClient
-				gatewayClient) {
-			this.dispatcher = dispatcher;
-			this.applicationService = applicationService;
-			this.gatewayClient = gatewayClient;
+		CommandListener(FakeClient client) {
+			this.client = client;
 		}
 
 		void configure() {
-			FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
+			FluxSink<GatewayPayload<?>> outboundSink = client.gatewayClient.sender();
 
-			dispatcher.on(ReadyEvent.class)
+			client.dispatcher.on(ReadyEvent.class)
 					.next()
-					.flatMap(ready -> applicationService.getCurrentApplicationInfo())
+					.flatMap(ready -> client.applicationService.getCurrentApplicationInfo())
 					.map(res -> res.getOwner().getId())
 					.subscribe(ownerId::set);
 
-			dispatcher.on(MessageCreatedEvent.class)
+			client.dispatcher.on(MessageCreatedEvent.class)
 					.subscribe(wrappedEvent -> {
 						MessageCreate event = wrappedEvent.getMessageCreate();
 						MessageResponse message = event.getMessage();
 						if (ownerId.get() == message.getAuthor().getId()) {
 							String content = message.getContent();
 							if ("!close".equals(content)) {
-								gatewayClient.close(false);
+								client.gatewayClient.close(false);
 							} else if ("!retry".equals(content)) {
-								gatewayClient.close(true);
+								client.gatewayClient.close(true);
 							} else if ("!fail".equals(content)) {
 								outboundSink.next(new GatewayPayload<>());
 							}
@@ -149,11 +170,33 @@ public class RetryBotTest {
 		}
 	}
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
+	static class LifecycleListener {
+
+		private static final Logger log = Loggers.getLogger(LifecycleListener.class);
+
+		private final FakeClient client;
+
+		LifecycleListener(FakeClient client) {
+			this.client = client;
+		}
+
+		void configure() {
+			client.dispatcher.on(ConnectedEvent.class)
+					.subscribe(event -> log.info("Connected!"));
+
+			client.dispatcher.on(DisconnectedEvent.class)
+					.subscribe(event -> log.info("Disconnected!"));
+
+			client.dispatcher.on(ReconnectStartedEvent.class)
+					.subscribe(event -> log.info("Reconnects started..."));
+
+			client.dispatcher.on(ReconnectedEvent.class)
+					.subscribe(event -> log.info("Reconnected"));
+
+			client.dispatcher.on(ReconnectFailedEvent.class)
+					.subscribe(event -> log.info("Reconnect failed!"));
+		}
+
 	}
 
 

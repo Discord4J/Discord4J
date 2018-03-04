@@ -8,11 +8,11 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 package discord4j.gateway.payload;
 
@@ -20,15 +20,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.json.payload.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 import reactor.core.Exceptions;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public class JacksonPayloadReader implements PayloadReader {
 
+	private static final Logger log = Loggers.getLogger(JacksonPayloadReader.class);
+
 	private final ObjectMapper mapper;
+	private final boolean lenient;
 
 	public JacksonPayloadReader(ObjectMapper mapper) {
+		this(mapper, true);
+	}
+
+	public JacksonPayloadReader(ObjectMapper mapper, boolean lenient) {
 		this.mapper = mapper;
+		this.lenient = lenient;
 	}
 
 	@Override
@@ -36,7 +47,16 @@ public class JacksonPayloadReader implements PayloadReader {
 		try {
 			return mapper.readValue(payload.array(), GatewayPayload.class);
 		} catch (IOException e) {
-			throw Exceptions.propagate(e);
+			if (lenient) {
+				// if eof input - just ignore
+				if (payload.readableBytes() > 0) {
+					log.warn("Error while decoding JSON ({} bytes): {}", payload.readableBytes(),
+							payload.toString(Charset.forName("UTF-8")), e);
+				}
+				return new GatewayPayload<>();
+			} else {
+				throw Exceptions.propagate(e);
+			}
 		}
 	}
 }

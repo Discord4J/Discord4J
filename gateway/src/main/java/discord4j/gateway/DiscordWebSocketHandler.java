@@ -129,7 +129,9 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	 */
 	public void error(Throwable error) {
 		log.info("Triggering error sequence");
-		completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
+		if (!completionNotifier.isTerminated()) {
+			completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
+		}
 		outboundExchange.onComplete();
 		inboundExchange.onComplete();
 	}

@@ -24,53 +24,77 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
-public class PayloadHandlers {
+public abstract class PayloadHandlers {
 
+	private static final Map<Opcode<?>, PayloadHandler<?>> handlerMap = new HashMap<>();
 	private static final Logger log = Loggers.getLogger(PayloadHandlers.class);
 
-	public static void handleDispatch(PayloadContext<Dispatch> ctx) {
-		if (ctx.getData() instanceof Ready) {
-			String newSessionId = ((Ready) ctx.getData()).getSessionId();
-			ctx.getClient().sessionId.set(newSessionId);
-		}
-		ctx.getClient().dispatch.onNext(ctx.getData());
+	static {
+		addHandler(Opcode.DISPATCH, PayloadHandlers::handleDispatch);
+		addHandler(Opcode.HEARTBEAT, PayloadHandlers::handleHeartbeat);
+		addHandler(Opcode.RECONNECT, PayloadHandlers::handleReconnect);
+		addHandler(Opcode.INVALID_SESSION, PayloadHandlers::handleInvalidSession);
+		addHandler(Opcode.HELLO, PayloadHandlers::handleHello);
+		addHandler(Opcode.HEARTBEAT_ACK, PayloadHandlers::handleHeartbeatAck);
 	}
 
-	public static void handleHeartbeat(PayloadContext<Heartbeat> ctx) {
+	private static <T extends PayloadData> void addHandler(Opcode<T> op, PayloadHandler<T> handler) {
+		handlerMap.put(op, handler);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends PayloadData> void handle(PayloadContext<T> context) {
+		PayloadHandler<T> entry = (PayloadHandler<T>) handlerMap.get(context.getPayload().getOp());
+		if (entry != null) {
+			entry.handle(context);
+		}
+	}
+
+	private static void handleDispatch(PayloadContext<Dispatch> context) {
+		if (context.getData() instanceof Ready) {
+			String newSessionId = ((Ready) context.getData()).getSessionId();
+			context.getClient().sessionId.set(newSessionId);
+		}
+		context.getClient().dispatch.onNext(context.getData());
+	}
+
+	private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
 		// TODO
 	}
 
-	public static void handleReconnect(PayloadContext<?> ctx) {
-		ctx.getHandler().error(new RuntimeException("Reconnecting due to reconnect packet received"));
+	private static void handleReconnect(PayloadContext<?> context) {
+		context.getHandler().error(new RuntimeException("Reconnecting due to reconnect packet received"));
 	}
 
-	public static void handleInvalidSession(PayloadContext<InvalidSession> ctx) {
+	private static void handleInvalidSession(PayloadContext<InvalidSession> context) {
 		// TODO polish
-		if (ctx.getData().isResumable()) {
-			String token = ctx.getClient().token;
-			ctx.getHandler().outbound().onNext(GatewayPayload.resume(
-					new Resume(token, ctx.getClient().sessionId.get(), ctx.getClient().lastSequence.get())));
+		if (context.getData().isResumable()) {
+			String token = context.getClient().token;
+			context.getHandler().outbound().onNext(GatewayPayload.resume(
+					new Resume(token, context.getClient().sessionId.get(), context.getClient().lastSequence.get())));
 		} else {
-			ctx.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
+			context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
 		}
 	}
 
-	public static void handleHello(PayloadContext<Hello> ctx) {
-		Duration interval = Duration.ofMillis(ctx.getData().getHeartbeatInterval());
-		ctx.getClient().heartbeat.start(interval);
+	private static void handleHello(PayloadContext<Hello> context) {
+		Duration interval = Duration.ofMillis(context.getData().getHeartbeatInterval());
+		context.getClient().heartbeat.start(interval);
 
 		// log trace
 
 		IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
-		Identify identify = new Identify(ctx.getClient().token, props, false, 250, Possible.absent(), Possible.absent());
+		Identify identify = new Identify(context.getClient().token, props, false, 250, Possible.absent(), Possible.absent());
 		GatewayPayload<Identify> response = GatewayPayload.identify(identify);
 
 		// payloadSender.send(response)
-		ctx.getHandler().outbound().onNext(response);
+		context.getHandler().outbound().onNext(response);
 	}
 
-	public static void handleHeartbeatAck(PayloadContext<?> ctx) {
+	private static void handleHeartbeatAck(PayloadContext<?> context) {
 		log.debug("Received heartbeat ack");
 	}
 

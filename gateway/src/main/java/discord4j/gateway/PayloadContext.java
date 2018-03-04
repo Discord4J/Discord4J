@@ -8,29 +8,42 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 package discord4j.gateway;
 
+import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.PayloadData;
 
 import javax.annotation.Nullable;
 
 public class PayloadContext<T extends PayloadData> {
 
+	private final GatewayPayload<T> payload;
 	private final GatewayClient client;
 	private final DiscordWebSocketHandler handler;
-	@Nullable
-	private final T data;
 
-	public PayloadContext(GatewayClient client, DiscordWebSocketHandler handler, @Nullable T data) {
+	public static <T extends PayloadData> PayloadContext<T> of(GatewayPayload<T> payload, GatewayClient client, DiscordWebSocketHandler handler) {
+		return new PayloadContext<>(payload, client, handler);
+	}
+
+	private PayloadContext(GatewayPayload<T> payload, GatewayClient client, DiscordWebSocketHandler handler) {
+		this.payload = payload;
 		this.client = client;
 		this.handler = handler;
-		this.data = data;
+	}
+
+	public GatewayPayload<T> getPayload() {
+		return payload;
+	}
+
+	@Nullable
+	public T getData() {
+		return payload.getData();
 	}
 
 	public GatewayClient getClient() {
@@ -39,10 +52,5 @@ public class PayloadContext<T extends PayloadData> {
 
 	public DiscordWebSocketHandler getHandler() {
 		return handler;
-	}
-
-	@Nullable
-	public T getData() {
-		return data;
 	}
 }

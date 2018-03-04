@@ -26,14 +26,17 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.dispatch.MessageCreate;
 import discord4j.common.json.payload.dispatch.Ready;
-import discord4j.gateway.payload.JacksonLenientPayloadReader;
+import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import discord4j.gateway.retry.RetryOptions;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.FluxSink;
+
+import java.time.Duration;
 
 public class GatewayClientTest {
 
@@ -55,10 +58,10 @@ public class GatewayClientTest {
 	@Test
 	public void test() {
 		ObjectMapper mapper = getMapper();
-		PayloadReader reader = new JacksonLenientPayloadReader(mapper);
+		PayloadReader reader = new JacksonPayloadReader(mapper);
 		PayloadWriter writer = new JacksonPayloadWriter(mapper);
-
-		GatewayClient gatewayClient = new GatewayClient(reader, writer, token);
+		RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120));
+		GatewayClient gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
 
 		gatewayClient.dispatch().subscribe(dispatch -> {
 			if (dispatch instanceof Ready) {

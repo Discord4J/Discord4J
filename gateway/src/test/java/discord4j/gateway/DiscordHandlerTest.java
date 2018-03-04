@@ -27,7 +27,7 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.*;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.Ready;
-import discord4j.gateway.payload.JacksonLenientPayloadReader;
+import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
@@ -65,7 +65,7 @@ public class DiscordHandlerTest {
 		WebSocketClient ws = new WebSocketClient();
 
 		ObjectMapper mapper = getMapper();
-		PayloadReader reader = new JacksonLenientPayloadReader(mapper);
+		PayloadReader reader = new JacksonPayloadReader(mapper);
 		PayloadWriter writer = new JacksonPayloadWriter(mapper);
 
 		DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer);

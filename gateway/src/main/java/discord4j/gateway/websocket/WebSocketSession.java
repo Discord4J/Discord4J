@@ -101,7 +101,9 @@ public class WebSocketSession {
 							if (!closeEvent.isSuccess()) {
 								log.warn("Signalling abnormal close status: {}", closeEvent.cause().toString());
 								// then push it to our MonoProcessor for the reason
-								reason.onError(closeEvent.cause());
+								if (!reason.isTerminated()) {
+									reason.onError(closeEvent.cause());
+								}
 							}
 						}
 						ctx.fireUserEventTriggered(evt);

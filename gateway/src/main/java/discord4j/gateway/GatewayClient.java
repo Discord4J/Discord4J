@@ -20,11 +20,13 @@ import discord4j.common.ResettableInterval;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.Heartbeat;
 import discord4j.common.json.payload.Opcode;
-import discord4j.common.json.payload.PayloadData;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.Ready;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import discord4j.gateway.retry.GatewayStateChanged;
+import discord4j.gateway.retry.RetryContext;
+import discord4j.gateway.retry.RetryOptions;
 import discord4j.gateway.websocket.CloseException;
 import discord4j.gateway.websocket.WebSocketClient;
 import reactor.core.Disposable;
@@ -32,15 +34,11 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.retry.BackoffDelay;
-import reactor.retry.Jitter;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -61,20 +59,11 @@ public class GatewayClient {
 	private static final Logger log = Loggers.getLogger(GatewayClient.class);
 	private static final Predicate<? super Throwable> ABNORMAL_ERROR = t ->
 			!(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
-	private static final Map<Opcode<?>, PayloadHandler<?>> HANDLERS = new HashMap<>();
-
-	static {
-		addHandler(Opcode.DISPATCH, PayloadHandlers::handleDispatch);
-		addHandler(Opcode.HEARTBEAT, PayloadHandlers::handleHeartbeat);
-		addHandler(Opcode.RECONNECT, PayloadHandlers::handleReconnect);
-		addHandler(Opcode.INVALID_SESSION, PayloadHandlers::handleInvalidSession);
-		addHandler(Opcode.HELLO, PayloadHandlers::handleHello);
-		addHandler(Opcode.HEARTBEAT_ACK, PayloadHandlers::handleHeartbeatAck);
-	}
 
 	private final WebSocketClient webSocketClient = new WebSocketClient();
 	private final PayloadReader payloadReader;
 	private final PayloadWriter payloadWriter;
+	private final RetryOptions retryOptions;
 
 	final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
 	final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
@@ -83,9 +72,10 @@ public class GatewayClient {
 	final ResettableInterval heartbeat = new ResettableInterval();
 	final String token;
 
-	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, String token) {
+	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, RetryOptions retryOptions, String token) {
 		this.payloadReader = payloadReader;
 		this.payloadWriter = payloadWriter;
+		this.retryOptions = retryOptions;
 		this.token = token;
 	}
 
@@ -96,12 +86,22 @@ public class GatewayClient {
 	 * @return a Mono signaling completion
 	 */
 	public Mono<Void> execute(String gatewayUrl) {
-		RetryContext retryContext = new RetryContext(Duration.ofSeconds(5), Duration.ofSeconds(120));
 		return Mono.defer(() -> {
 			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
 
-			Disposable readySub = dispatch.ofType(Ready.class).subscribe(d -> retryContext.reset());
-			Disposable inboundSub = wsHandler.inbound().subscribe(payload -> handlePayload(payload, wsHandler));
+			Disposable readySub = dispatch.ofType(Ready.class).subscribe(d -> {
+				RetryContext retryContext = retryOptions.getRetryContext();
+				if (retryContext.getResetCount() == 0) {
+					dispatch.onNext(GatewayStateChanged.connected());
+				} else {
+					dispatch.onNext(GatewayStateChanged.retrySucceeded(retryContext.getAttempts()));
+				}
+				retryContext.reset();
+			});
+			Disposable inboundSub = wsHandler.inbound()
+					.map(this::updateSequence)
+					.map(payload -> PayloadContext.of(payload, this, wsHandler))
+					.subscribe(PayloadHandlers::handle);
 			Disposable senderSub = sender.map(payload -> {
 				if (Opcode.RECONNECT.equals(payload.getOp())) {
 					wsHandler.error(new RuntimeException("Reconnecting due to user action"));
@@ -122,25 +122,21 @@ public class GatewayClient {
 						readySub.dispose();
 						heartbeat.stop();
 					});
-		}).retryWhen(Retry.<RetryContext>onlyIf(ctx -> ABNORMAL_ERROR.test(ctx.exception()))
-				.withApplicationContext(retryContext)
-				.backoff(context -> {
-					RetryContext appContext = (RetryContext) context.applicationContext();
-					Duration nextBackoff;
-					try {
-						long factor = (long) Math.pow(2, (appContext.attempts - 1));
-						nextBackoff = appContext.firstBackoff.multipliedBy(factor);
-					} catch (ArithmeticException e) {
-						nextBackoff = appContext.maxBackoffInterval;
-					}
-					return new BackoffDelay(appContext.firstBackoff, appContext.maxBackoffInterval, nextBackoff);
-				})
-				.jitter(Jitter.random())
+		}).retryWhen(Retry.<RetryContext>onlyIf(context -> ABNORMAL_ERROR.test(context.exception()))
+				.withApplicationContext(retryOptions.getRetryContext())
+				.backoff(retryOptions.getBackoff())
+				.jitter(retryOptions.getJitter())
 				.doOnRetry(context -> {
-					log.info("Attempt {} retrying in {} ms",
-							context.applicationContext().attempts, context.backoff().toMillis());
+					int attempt = context.applicationContext().getAttempts();
+					long backoff = context.backoff().toMillis();
+					log.info("Retry attempt {} in {} ms", attempt, backoff);
+					if (attempt == 1) {
+						dispatch.onNext(GatewayStateChanged.retryStarted(Duration.ofMillis(backoff)));
+					} else {
+						dispatch.onNext(GatewayStateChanged.retryFailed(attempt - 1, Duration.ofMillis(backoff)));
+					}
 					context.applicationContext().next();
-				}));
+				})).doOnTerminate(() -> dispatch.onNext(GatewayStateChanged.disconnected()));
 	}
 
 	/**
@@ -183,48 +179,10 @@ public class GatewayClient {
 		return sender.sink(FluxSink.OverflowStrategy.ERROR);
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T extends PayloadData> PayloadHandler<T> getHandler(Opcode<T> op) {
-		return (PayloadHandler<T>) HANDLERS.get(op);
-	}
-
-	private static <T extends PayloadData> void addHandler(Opcode<T> op, PayloadHandler<T> handler) {
-		HANDLERS.put(op, handler);
-	}
-
-	private <T extends PayloadData> void handlePayload(GatewayPayload<T> payload, DiscordWebSocketHandler wsHandler) {
+	private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
 		if (payload.getSequence() != null) {
 			lastSequence.set(payload.getSequence());
 		}
-
-		PayloadHandler<T> payloadHandler = getHandler(payload.getOp());
-		if (payloadHandler != null) {
-			payloadHandler.handle(new PayloadContext<>(this, wsHandler, payload.getData()));
-		} else {
-			log.warn("Received GatewayPayload with no registered handler: " + payload.getOp());
-		}
-	}
-
-	private static class RetryContext {
-
-		final Duration firstBackoff;
-		final Duration maxBackoffInterval;
-		boolean connected = false;
-		int attempts = 1;
-
-		private RetryContext(Duration firstBackoff, Duration maxBackoffInterval) {
-			this.firstBackoff = firstBackoff;
-			this.maxBackoffInterval = maxBackoffInterval;
-		}
-
-		void next() {
-			connected = false;
-			attempts++;
-		}
-
-		void reset() {
-			connected = true;
-			attempts = 1;
-		}
+		return payload;
 	}
 }
