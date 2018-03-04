@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.event.function;
+package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.MessageCreate;
@@ -26,7 +26,11 @@ import discord4j.gateway.retry.GatewayStateChanged;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DispatchHandlers {
+/**
+ * Registry for {@link discord4j.common.json.payload.dispatch.Dispatch} to {@link discord4j.core.event.domain.Event}
+ * mapping operations.
+ */
+public abstract class DispatchHandlers {
 
 	private static final Map<Class<?>, DispatchHandler<?, ?>> typeMaps = new ConcurrentHashMap<>(); // or whatever
 

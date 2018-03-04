@@ -23,6 +23,9 @@ import reactor.retry.Jitter;
 
 import java.time.Duration;
 
+/**
+ * A configuration object to customize the gateway retry (reconnecting) policy.
+ */
 public class RetryOptions {
 
 	private final RetryContext retryContext;

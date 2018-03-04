@@ -51,8 +51,8 @@ import java.util.function.Predicate;
  * new connection to the gateway is made, therefore only one instance of this class is enough to handle the lifecycle
  * of Discord gateway operations, that could span multiple websocket sessions over time.
  * <p>
- * It provides automatic reconnecting through exponential backoff with jitter policy, provides {@link #dispatch()}
- * to subscribe to gateway events coming inbound and {@link #sender()} to submit events going outbound.
+ * It provides automatic reconnecting through a configurable retry policy, and allows downstream consumers to receive
+ * inbound events through {@link #dispatch()} and {@link #sender()} to submit events.
  */
 public class GatewayClient {
 
@@ -72,7 +72,8 @@ public class GatewayClient {
 	final ResettableInterval heartbeat = new ResettableInterval();
 	final String token;
 
-	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter, RetryOptions retryOptions, String token) {
+	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
+			RetryOptions retryOptions, String token) {
 		this.payloadReader = payloadReader;
 		this.payloadWriter = payloadWriter;
 		this.retryOptions = retryOptions;

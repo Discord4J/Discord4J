@@ -15,10 +15,17 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.event.function;
+package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.Dispatch;
 
+/**
+ * Represents gateway dispatch data enriched with context for processing through a
+ * {@link DispatchHandler} defined under
+ * {@link DispatchHandlers}
+ *
+ * @param <D> the type of the {@link discord4j.common.json.payload.dispatch.Dispatch} payload
+ */
 public class DispatchContext<D extends Dispatch> {
 
 	private final D dispatch;

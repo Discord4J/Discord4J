@@ -21,13 +21,20 @@ import discord4j.common.json.payload.PayloadData;
 
 import javax.annotation.Nullable;
 
+/**
+ * Represents gateway payload data enriched with context for processing through a
+ * {@link discord4j.gateway.PayloadHandler} defined under {@link discord4j.gateway.PayloadHandlers}
+ *
+ * @param <T> the type of the {@link discord4j.common.json.payload.PayloadData}
+ */
 public class PayloadContext<T extends PayloadData> {
 
 	private final GatewayPayload<T> payload;
 	private final GatewayClient client;
 	private final DiscordWebSocketHandler handler;
 
-	public static <T extends PayloadData> PayloadContext<T> of(GatewayPayload<T> payload, GatewayClient client, DiscordWebSocketHandler handler) {
+	public static <T extends PayloadData> PayloadContext<T> of(GatewayPayload<T> payload, GatewayClient client,
+			DiscordWebSocketHandler handler) {
 		return new PayloadContext<>(payload, client, handler);
 	}
 

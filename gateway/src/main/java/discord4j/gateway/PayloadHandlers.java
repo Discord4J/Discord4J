@@ -27,6 +27,10 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Registry for operating on gateway {@link discord4j.common.json.payload.PayloadData} objects, handling each lifecycle
+ * {@link discord4j.common.json.payload.Opcode}.
+ */
 public abstract class PayloadHandlers {
 
 	private static final Map<Opcode<?>, PayloadHandler<?>> handlerMap = new HashMap<>();
@@ -87,7 +91,8 @@ public abstract class PayloadHandlers {
 		// log trace
 
 		IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
-		Identify identify = new Identify(context.getClient().token, props, false, 250, Possible.absent(), Possible.absent());
+		Identify identify = new Identify(context.getClient().token, props, false, 250, Possible.absent(), Possible
+				.absent());
 		GatewayPayload<Identify> response = GatewayPayload.identify(identify);
 
 		// payloadSender.send(response)
