@@ -44,13 +44,15 @@ public class GameResponse {
 	private int type;
 	@Nullable
 	private String url;
+	@Nullable
 	private GameTimestampsResponse timestamps;
 	@JsonProperty("session_id")
 	@Nullable
 	private String sessionId;
 	@JsonProperty("application_id")
+	@Nullable
 	@UnsignedJson
-	private long applicationId; // TODO: nullable?
+	private Long applicationId;
 	@Nullable
 	private String details;
 	@JsonProperty("sync_id")
@@ -58,7 +60,8 @@ public class GameResponse {
 	private String syncId;
 	@Nullable
 	private String state;
-	private int flags;
+	@Nullable
+	private Integer flags;
 	@Nullable
 	private GamePartyResponse party;
 	@Nullable
@@ -77,6 +80,7 @@ public class GameResponse {
 		return url;
 	}
 
+	@Nullable
 	public GameTimestampsResponse getTimestamps() {
 		return timestamps;
 	}
@@ -86,7 +90,8 @@ public class GameResponse {
 		return sessionId;
 	}
 
-	public long getApplicationId() {
+	@Nullable
+	public Long getApplicationId() {
 		return applicationId;
 	}
 
@@ -105,7 +110,8 @@ public class GameResponse {
 		return state;
 	}
 
-	public int getFlags() {
+	@Nullable
+	public Integer getFlags() {
 		return flags;
 	}
 

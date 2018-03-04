@@ -21,7 +21,6 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.OptionalLong;
 
 public class GuildResponse {
 
@@ -37,15 +36,17 @@ public class GuildResponse {
 	private long ownerId;
 	private String region;
 	@JsonProperty("afk_channel_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong afkChannelId;
+	private Long afkChannelId;
 	@JsonProperty("afk_timeout")
 	private int afkTimeout;
 	@JsonProperty("embed_enabled")
 	private boolean embedEnabled;
 	@JsonProperty("embed_channel_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong embedChannelId;
+	private Long embedChannelId;
 	@JsonProperty("verification_level")
 	private int verificationLevel;
 	@JsonProperty("default_message_notifications")
@@ -58,13 +59,15 @@ public class GuildResponse {
 	@JsonProperty("mfa_level")
 	private int mfaLevel;
 	@JsonProperty("application_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong applicationId;
+	private Long applicationId;
 	@JsonProperty("widget_enabled")
 	private boolean widgetEnabled;
 	@JsonProperty("widget_channel_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong widgetChannelId;
+	private Long widgetChannelId;
 	@JsonProperty("joined_at")
 	@Nullable
 	private String joinedAt;
@@ -85,8 +88,9 @@ public class GuildResponse {
 	@Nullable
 	private PresenceResponse[] presences;
 	@JsonProperty("system_channel_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong systemChannelId;
+	private Long systemChannelId;
 
 	public long getId() {
 		return id;
@@ -114,7 +118,8 @@ public class GuildResponse {
 		return region;
 	}
 
-	public OptionalLong getAfkChannelId() {
+	@Nullable
+	public Long getAfkChannelId() {
 		return afkChannelId;
 	}
 
@@ -126,7 +131,8 @@ public class GuildResponse {
 		return embedEnabled;
 	}
 
-	public OptionalLong getEmbedChannelId() {
+	@Nullable
+	public Long getEmbedChannelId() {
 		return embedChannelId;
 	}
 
@@ -158,7 +164,8 @@ public class GuildResponse {
 		return mfaLevel;
 	}
 
-	public OptionalLong getApplicationId() {
+	@Nullable
+	public Long getApplicationId() {
 		return applicationId;
 	}
 
@@ -166,7 +173,8 @@ public class GuildResponse {
 		return widgetEnabled;
 	}
 
-	public OptionalLong getWidgetChannelId() {
+	@Nullable
+	public Long getWidgetChannelId() {
 		return widgetChannelId;
 	}
 
@@ -210,7 +218,8 @@ public class GuildResponse {
 		return presences;
 	}
 
-	public OptionalLong getSystemChannelId() {
+	@Nullable
+	public Long getSystemChannelId() {
 		return systemChannelId;
 	}
 

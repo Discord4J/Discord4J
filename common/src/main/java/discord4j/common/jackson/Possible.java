@@ -16,6 +16,7 @@
  */
 package discord4j.common.jackson;
 
+import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -28,9 +29,10 @@ public class Possible<T> {
 
 	private static final Possible<?> ABSENT = new Possible<>(null);
 
+	@Nullable
 	private final T value;
 
-	private Possible(T value) {
+	private Possible(@Nullable T value) {
 		this.value = value;
 	}
 
@@ -64,6 +66,7 @@ public class Possible<T> {
 	 * @return An instance of {@code T}, if it is present. Guaranteed to never be null.
 	 * @throws NoSuchElementException If the value is {@link #isAbsent() absent}.
 	 */
+	@Nullable
 	public T get() {
 		if (isAbsent()) {
 			throw new NoSuchElementException();

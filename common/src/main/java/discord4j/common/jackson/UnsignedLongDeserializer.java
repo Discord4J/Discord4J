@@ -22,9 +22,8 @@ import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
-import java.util.OptionalLong;
 
-public class UnsignedLongDeserializer extends StdDeserializer<Object> implements ContextualDeserializer { // <Long | OptionalLong | long[]>
+public class UnsignedLongDeserializer extends StdDeserializer<Object> implements ContextualDeserializer { // <Long | long[]>
 
 	public UnsignedLongDeserializer() {
 		super(Object.class);
@@ -42,7 +41,7 @@ public class UnsignedLongDeserializer extends StdDeserializer<Object> implements
 	@Override
 	public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 		Class<?> type = handledType();
-		if (type.equals(long.class)) {
+		if (type.equals(long.class) || type.equals(Long.class)) {
 			return Long.parseUnsignedLong(p.getValueAsString());
 		} else if (type.equals(long[].class)) {
 			String[] ary = p.readValueAs(String[].class);
@@ -51,15 +50,8 @@ public class UnsignedLongDeserializer extends StdDeserializer<Object> implements
 				ret[i] = Long.parseUnsignedLong(ary[i]);
 			}
 			return ret;
-		} else if (type.equals(OptionalLong.class)) {
-			String s = p.getValueAsString();
-			if (s == null) {
-				return OptionalLong.empty();
-			} else {
-				return OptionalLong.of(Long.parseUnsignedLong(s));
-			}
 		}
 
-		throw new IllegalStateException("Attempt to deserialize field marked with @UnsignedJson which is not of type Long | OptionalLong | long[]: " + type.getSimpleName());
+		throw new IllegalStateException("Attempt to deserialize field marked with @UnsignedJson which is not of type Long | long[]: " + type.getSimpleName());
 	}
 }

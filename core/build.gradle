@@ -15,6 +15,7 @@ shadowJar {
 dependencies {
     compile project(':rest')
     compile project(':gateway')
+    compile project(':store')
 
     testCompile "junit:junit:$junit_version"
 

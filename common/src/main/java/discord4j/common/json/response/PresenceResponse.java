@@ -26,18 +26,22 @@ public class PresenceResponse {
 
 	private UserResponse user;
 	@UnsignedJson
+	@Nullable
 	private long[] roles;
 	@Nullable
 	private GameResponse game;
 	@JsonProperty("guild_id")
+	@Nullable
 	@UnsignedJson
-	private long guildId;
+	private Long guildId;
+	@Nullable
 	private String status;
 
 	public UserResponse getUser() {
 		return user;
 	}
 
+	@Nullable
 	public long[] getRoles() {
 		return roles;
 	}
@@ -47,10 +51,12 @@ public class PresenceResponse {
 		return game;
 	}
 
-	public long getGuildId() {
+	@Nullable
+	public Long getGuildId() {
 		return guildId;
 	}
 
+	@Nullable
 	public String getStatus() {
 		return status;
 	}

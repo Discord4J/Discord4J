@@ -21,7 +21,6 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.OptionalLong;
 
 public class MessageResponse {
 
@@ -48,12 +47,14 @@ public class MessageResponse {
 	private EmbedResponse[] embeds;
 	@Nullable
 	private ReactionResponse[] reactions;
+	@Nullable
 	@UnsignedJson
-	private OptionalLong nonce;
+	private Long nonce;
 	private boolean pinned;
 	@JsonProperty("webhook_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong webhookId;
+	private Long webhookId;
 	private int type;
 
 	public long getId() {
@@ -111,7 +112,8 @@ public class MessageResponse {
 		return reactions;
 	}
 
-	public OptionalLong getNonce() {
+	@Nullable
+	public Long getNonce() {
 		return nonce;
 	}
 
@@ -119,7 +121,8 @@ public class MessageResponse {
 		return pinned;
 	}
 
-	public OptionalLong getWebhookId() {
+	@Nullable
+	public Long getWebhookId() {
 		return webhookId;
 	}
 

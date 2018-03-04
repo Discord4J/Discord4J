@@ -16,16 +16,22 @@
  */
 package discord4j.common.json.response;
 
+import javax.annotation.Nullable;
+
 public class GameTimestampsResponse {
 
-	private int start; // TODO: nullable?
-	private int end; // TODO: nullable?
+	@Nullable
+	private Integer start;
+	@Nullable
+	private Integer end;
 
-	public int getStart() {
+	@Nullable
+	public Integer getStart() {
 		return start;
 	}
 
-	public int getEnd() {
+	@Nullable
+	public Integer getEnd() {
 		return end;
 	}
 

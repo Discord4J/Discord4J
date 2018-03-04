@@ -22,7 +22,6 @@ import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.OptionalLong;
 
 public class ChannelResponse {
 
@@ -30,8 +29,9 @@ public class ChannelResponse {
 	private long id;
 	private int type;
 	@JsonProperty("guild_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong guildId;
+	private Long guildId;
 	@Nullable
 	private Integer position;
 	@JsonProperty("permission_overwrites")
@@ -43,8 +43,9 @@ public class ChannelResponse {
 	@Nullable
 	private Boolean nsfw;
 	@JsonProperty("last_message_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong lastMessageId;
+	private Long lastMessageId;
 	@Nullable
 	private Integer bitrate;
 	@JsonProperty("user_limit")
@@ -55,14 +56,17 @@ public class ChannelResponse {
 	@Nullable
 	private String icon;
 	@JsonProperty("owner_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong ownerId;
+	private Long ownerId;
 	@JsonProperty("application_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong applicationId;
+	private Long applicationId;
 	@JsonProperty("parent_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong parentId;
+	private Long parentId;
 	@JsonProperty("last_pin_timestamp")
 	@Nullable
 	private String lastPinTimestamp;
@@ -75,7 +79,8 @@ public class ChannelResponse {
 		return type;
 	}
 
-	public OptionalLong getGuildId() {
+	@Nullable
+	public Long getGuildId() {
 		return guildId;
 	}
 
@@ -103,7 +108,8 @@ public class ChannelResponse {
 		return nsfw;
 	}
 
-	public OptionalLong getLastMessageId() {
+	@Nullable
+	public Long getLastMessageId() {
 		return lastMessageId;
 	}
 
@@ -127,15 +133,18 @@ public class ChannelResponse {
 		return icon;
 	}
 
-	public OptionalLong getOwnerId() {
+	@Nullable
+	public Long getOwnerId() {
 		return ownerId;
 	}
 
-	public OptionalLong getApplicationId() {
+	@Nullable
+	public Long getApplicationId() {
 		return applicationId;
 	}
 
-	public OptionalLong getParentId() {
+	@Nullable
+	public Long getParentId() {
 		return parentId;
 	}
 

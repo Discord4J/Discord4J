@@ -24,7 +24,6 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
 
 import javax.annotation.Nullable;
-import java.util.OptionalLong;
 
 @PossibleJson
 public class ChannelCreateRequest {
@@ -68,6 +67,7 @@ public class ChannelCreateRequest {
 		private Possible<Integer> userLimit = Possible.absent();
 		private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
 		private PossibleLong parentId = PossibleLong.absent();
+		@Nullable
 		private Possible<Boolean> nsfw = Possible.absent();
 
 		public Builder name(String name) {
@@ -95,8 +95,8 @@ public class ChannelCreateRequest {
 			return this;
 		}
 
-		public Builder parentId(OptionalLong parentId) {
-			this.parentId = parentId.isPresent() ? PossibleLong.of(parentId.getAsLong()) : null;
+		public Builder parentId(@Nullable Long parentId) {
+			this.parentId = parentId == null ? null : PossibleLong.of(parentId);
 			return this;
 		}
 

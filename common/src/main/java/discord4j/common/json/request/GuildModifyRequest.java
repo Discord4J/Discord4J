@@ -22,6 +22,8 @@ import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.UnsignedJson;
 
+import javax.annotation.Nullable;
+
 @PossibleJson
 public class GuildModifyRequest {
 
@@ -32,22 +34,23 @@ public class GuildModifyRequest {
 	@JsonProperty("default_message_notifications")
 	private final Possible<Integer> defaultMessageNotifications;
 	@JsonProperty("afk_channel_id")
+	@Nullable
 	@UnsignedJson
 	private final PossibleLong afkChannelId;
 	@JsonProperty("afk_timeout")
 	private final Possible<Integer> afkTimeout;
+	@Nullable
 	private final Possible<String> icon;
 	@JsonProperty("owner_id")
 	@UnsignedJson
 	private final PossibleLong ownerId;
+	@Nullable
 	private final Possible<String> splash;
 
-	public GuildModifyRequest(Possible<String> name, Possible<String> region,
-	                          Possible<Integer> verificationLevel,
-	                          Possible<Integer> defaultMessageNotifications,
-	                          PossibleLong afkChannelId,
-	                          Possible<Integer> afkTimeout, Possible<String> icon,
-	                          PossibleLong ownerId, Possible<String> splash) {
+	public GuildModifyRequest(Possible<String> name, Possible<String> region, Possible<Integer> verificationLevel,
+	                          Possible<Integer> defaultMessageNotifications, @Nullable PossibleLong afkChannelId,
+	                          Possible<Integer> afkTimeout, @Nullable Possible<String> icon, PossibleLong ownerId,
+							  @Nullable Possible<String> splash) {
 		this.name = name;
 		this.region = region;
 		this.verificationLevel = verificationLevel;
@@ -69,10 +72,13 @@ public class GuildModifyRequest {
 		private Possible<String> region = Possible.absent();
 		private Possible<Integer> verificationLevel = Possible.absent();
 		private Possible<Integer> defaultMessageNoficiations = Possible.absent();
+		@Nullable
 		private PossibleLong afkChannelId = PossibleLong.absent();
 		private Possible<Integer> afkTimeout = Possible.absent();
+		@Nullable
 		private Possible<String> icon = Possible.absent();
 		private PossibleLong ownerId = PossibleLong.absent();
+		@Nullable
 		private Possible<String> splash = Possible.absent();
 
 		public Builder name(String name) {
@@ -95,8 +101,8 @@ public class GuildModifyRequest {
 			return this;
 		}
 
-		public Builder afkChannelId(long afkChannelId) {
-			this.afkChannelId = PossibleLong.of(afkChannelId);
+		public Builder afkChannelId(@Nullable Long afkChannelId) {
+			this.afkChannelId = afkChannelId == null ? null : PossibleLong.of(afkChannelId);
 			return this;
 		}
 
@@ -105,8 +111,8 @@ public class GuildModifyRequest {
 			return this;
 		}
 
-		public Builder icon(String icon) {
-			this.icon = Possible.of(icon);
+		public Builder icon(@Nullable String icon) {
+			this.icon = icon == null ? null : Possible.of(icon);
 			return this;
 		}
 
@@ -115,13 +121,14 @@ public class GuildModifyRequest {
 			return this;
 		}
 
-		public Builder splash(String splash) {
-			this.splash = Possible.of(splash);
+		public Builder splash(@Nullable String splash) {
+			this.splash = splash == null ? null : Possible.of(splash);
 			return this;
 		}
 
 		public GuildModifyRequest build() {
-			return new GuildModifyRequest(name, region, verificationLevel, defaultMessageNoficiations, afkChannelId, afkTimeout, icon, ownerId, splash);
+			return new GuildModifyRequest(name, region, verificationLevel, defaultMessageNoficiations, afkChannelId,
+					afkTimeout, icon, ownerId, splash);
 		}
 	}
 

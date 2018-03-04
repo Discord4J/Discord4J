@@ -21,13 +21,13 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.OptionalLong;
 
 public class AuditLogEntryResponse {
 
 	@JsonProperty("target_id")
+	@Nullable
 	@UnsignedJson
-	private OptionalLong targetId;
+	private Long targetId;
 	@Nullable
 	private AuditLogChangeResponse[] changes;
 	@JsonProperty("user_id")
@@ -42,7 +42,8 @@ public class AuditLogEntryResponse {
 	@Nullable
 	private String reason;
 
-	public OptionalLong getTargetId() {
+	@Nullable
+	public Long getTargetId() {
 		return targetId;
 	}
 

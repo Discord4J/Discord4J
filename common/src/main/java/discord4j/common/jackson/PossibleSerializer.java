@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 
+import javax.annotation.Nullable;
+
 /**
  * Jackson Serializer for {@link Possible}.
  */
@@ -55,11 +57,13 @@ public class PossibleSerializer extends ReferenceTypeSerializer<Possible<?>> {
 		return !value.isAbsent();
 	}
 
+	@Nullable
 	@Override
 	protected Object _getReferenced(Possible<?> value) {
 		return value.get();
 	}
 
+	@Nullable
 	@Override
 	protected Object _getReferencedIfPresent(Possible<?> value) {
 		return value.isAbsent() ? null : value.get();

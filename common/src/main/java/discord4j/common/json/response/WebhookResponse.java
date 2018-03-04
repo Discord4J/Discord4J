@@ -31,6 +31,7 @@ public class WebhookResponse {
 	@JsonProperty("channel_id")
 	@UnsignedJson
 	private long channelId;
+	@Nullable
 	private UserResponse user;
 	@Nullable
 	private String name;
@@ -50,6 +51,7 @@ public class WebhookResponse {
 		return channelId;
 	}
 
+	@Nullable
 	public UserResponse getUser() {
 		return user;
 	}

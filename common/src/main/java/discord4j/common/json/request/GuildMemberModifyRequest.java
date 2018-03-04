@@ -23,7 +23,6 @@ import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
-import java.util.OptionalLong;
 
 @PossibleJson
 public class GuildMemberModifyRequest {
@@ -81,8 +80,9 @@ public class GuildMemberModifyRequest {
 			return this;
 		}
 
-		public Builder channelId(OptionalLong channelId) {
-			this.channelId = channelId.isPresent() ? PossibleLong.of(channelId.getAsLong()) : null;
+		public Builder channelId(@Nullable Long channelId) {
+//			this.channelId = channelId.isPresent() ? PossibleLong.of(channelId.getAsLong()) : null;
+			this.channelId = channelId == null ? null : PossibleLong.of(channelId);
 			return this;
 		}
 
