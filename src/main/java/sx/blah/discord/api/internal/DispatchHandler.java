@@ -18,6 +18,7 @@
 package sx.blah.discord.api.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
 import sx.blah.discord.api.internal.json.objects.*;
@@ -785,6 +786,13 @@ class DispatchHandler {
 
 		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		if (message == null) {
+			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
+			if (message == null) {
+				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction add event\nObject={}", ToStringBuilder.reflectionToString(event));
+				return;
+			}
+		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
@@ -817,6 +825,13 @@ class DispatchHandler {
 
 		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		if (message == null) {
+			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
+			if (message == null) {
+				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction add event\nObject={}", ToStringBuilder.reflectionToString(event));
+				return;
+			}
+		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
