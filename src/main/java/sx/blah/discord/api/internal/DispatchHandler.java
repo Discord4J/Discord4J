@@ -17,7 +17,6 @@
 
 package sx.blah.discord.api.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.event.*;
@@ -29,23 +28,18 @@ import sx.blah.discord.handle.impl.events.guild.*;
 import sx.blah.discord.handle.impl.events.guild.category.CategoryCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.category.CategoryDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.category.CategoryUpdateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelUpdateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.TypingEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.*;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.*;
-import sx.blah.discord.handle.impl.events.guild.channel.ChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.*;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionRemoveEvent;
-import sx.blah.discord.handle.impl.events.guild.voice.*;
-import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.member.*;
 import sx.blah.discord.handle.impl.events.guild.role.RoleCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.role.RoleDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.role.RoleUpdateEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelDeleteEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceChannelUpdateEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.VoiceDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
@@ -60,13 +54,12 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.RequestBuilder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static sx.blah.discord.api.internal.DiscordUtils.MAPPER;
@@ -90,7 +83,13 @@ class DispatchHandler {
 	/**
 	 * The thread on which every payload is handled.
 	 */
-	private final ExecutorService dispatchExecutor = Executors.newSingleThreadExecutor(DiscordUtils.createDaemonThreadFactory("Dispatch Handler"));
+	private final ExecutorService dispatchExecutor = new ThreadPoolExecutor(2, Runtime.getRuntime().availableProcessors() * 4, 60L,
+			TimeUnit.SECONDS, new SynchronousQueue<>(false),
+			DiscordUtils.createDaemonThreadFactory("Dispatch Handler"), new ThreadPoolExecutor.CallerRunsPolicy());
+	/**
+	 * Lock used to synchronize initialization
+	 */
+	private final Lock startupLock = new ReentrantLock(true);
 
 	DispatchHandler(DiscordWS ws, ShardImpl shard) {
 		this.ws = ws;
@@ -105,6 +104,11 @@ class DispatchHandler {
 	 */
 	public void handle(final JsonNode event) {
 		dispatchExecutor.submit(() -> {
+			boolean locked = false;
+			if (!client.isReady()) {
+				startupLock.lock();
+				locked = true;
+			}
 			try {
 				String type = event.get("t").asText();
 				JsonNode json = event.get("d");
@@ -215,6 +219,9 @@ class DispatchHandler {
 				}
 			} catch (Exception e) {
 				Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "Unable to process JSON!", e);
+			} finally {
+				if (locked)
+					startupLock.unlock();
 			}
 		});
 	}
@@ -237,7 +244,7 @@ class DispatchHandler {
 			client.getDispatcher().waitFor((GuildCreateEvent e) -> {
 				waitingGuilds.removeIf(g -> g.id.equals(e.getGuild().getStringID()));
 				return loadedGuilds.incrementAndGet() >= ready.guilds.length;
-			}, 10, TimeUnit.SECONDS);
+			}, (long) Math.ceil(Math.sqrt(2 * ready.guilds.length)), TimeUnit.SECONDS);
 
 			waitingGuilds.forEach(guild -> client.getDispatcher().dispatch(new GuildUnavailableEvent(Long.parseUnsignedLong(guild.id))));
 			return true;
@@ -366,7 +373,7 @@ class DispatchHandler {
 			User user = (User) DiscordUtils.getUserFromGuildMemberResponse(guild, new MemberObject(event.user, event.roles));
 			guild.users.put(user);
 			guild.setTotalMemberCount(guild.getTotalMemberCount() + 1);
-			LocalDateTime timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
+			Instant timestamp = DiscordUtils.convertFromTimestamp(event.joined_at);
 			Discord4J.LOGGER.debug(LogMarkers.EVENTS, "User \"{}\" joined guild \"{}\".", user.getName(), guild.getName());
 			client.dispatcher.dispatch(new UserJoinEvent(guild, user, timestamp));
 		}
@@ -442,7 +449,11 @@ class DispatchHandler {
 		IMessage toUpdate = channel.messages.get(json.id);
 
 		if (toUpdate == null) { // Cannot resolve update type. MessageObject is incomplete, so we'll have to request for the full message.
-			client.dispatcher.dispatch(new MessageUpdateEvent(null, channel.getMessageByID(Long.parseUnsignedLong(json.id))));
+			if (channel.isPrivate() ||
+					PermissionUtils.hasHierarchicalPermissions(channel, client.ourUser, channel.getGuild().getRolesForUser(client.ourUser), Permissions.READ_MESSAGE_HISTORY))
+				client.dispatcher.dispatch(new MessageUpdateEvent(null, channel.fetchMessage(Long.parseUnsignedLong(json.id))));
+//			else
+//FIXME: unable to fire message update events when the user doesn't have the read message history permission
 		} else {
 			IMessage oldMessage = toUpdate.copy();
 			IMessage updatedMessage = DiscordUtils.getUpdatedMessageFromJSON(client, toUpdate, json);
@@ -772,21 +783,26 @@ class DispatchHandler {
 		if (channel == null) return;
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
+		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
+		message.getReactions().remove(reaction);
 
 		if (reaction == null) { // Only happens in the case of a cached message with a new reaction
 			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
 			reaction = new Reaction(message, 1, ReactionEmoji.of(event.emoji.name, id));
-			message.getReactions().add(reaction);
+		} else if (cached) {
+			reaction = new Reaction(message, reaction.getCount() + 1, reaction.getEmoji());
 		}
+		message.getReactions().add(reaction);
 
 		IUser user;
 		if (channel.isPrivate()) {
 			user = channel.getUsersHere().get(channel.getUsersHere().get(0).getLongID() == Long.parseUnsignedLong(event.user_id) ? 0 : 1);
-		} else {
+		}
+		else {
 			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 		}
 
@@ -795,28 +811,41 @@ class DispatchHandler {
 
 	private void reactionRemove(ReactionEventResponse event) {
 		IChannel channel = shard.getChannelByID(Long.parseUnsignedLong(event.channel_id));
-		if (channel == null) return;
+		if (channel == null)
+			return;
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
+		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
 		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
 				: message.getReactionByID(Long.parseUnsignedLong(event.emoji.id));
+		message.getReactions().remove(reaction);
 
 		if (reaction == null) { // the last reaction of the emoji was removed
 			long id = event.emoji.id == null ? 0 : Long.parseUnsignedLong(event.emoji.id);
 			reaction = new Reaction(message, 0, ReactionEmoji.of(event.emoji.name, id));
 		}
+		else {
+			reaction = new Reaction(message, !cached ? reaction.getCount() : reaction.getCount() - 1, reaction.getEmoji());
+		}
+
+		if (reaction.getCount() > 0) {
+			message.getReactions().add(reaction);
+		}
+
 
 		IUser user;
 		if (channel.isPrivate()) {
 			user = channel.getUsersHere().get(channel.getUsersHere().get(0).getLongID() == Long.parseUnsignedLong(event.user_id) ? 0 : 1);
-		} else {
+		}
+		else {
 			user = channel.getGuild().getUserByID(Long.parseUnsignedLong(event.user_id));
 		}
 
 		client.dispatcher.dispatch(new ReactionRemoveEvent(message, reaction, user));
 	}
+
 
 	private void webhookUpdate(WebhookObject event) {
 		Channel channel = (Channel) client.getChannelByID(Long.parseUnsignedLong(event.channel_id));

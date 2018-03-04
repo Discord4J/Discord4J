@@ -135,56 +135,22 @@ public class ShardImpl implements IShard {
 	}
 
 	@Override
-	public void changePlayingText(String playingText) {
-		updatePresence(getClient().getOurUser().getPresence().getStatus(), playingText,
-				getClient().getOurUser().getPresence().getStreamingUrl().orElse(null));
+	public void changePresence(StatusType status, ActivityType activity, String text) {
+		if (activity == ActivityType.STREAMING) throw new IllegalArgumentException("Invalid ActivityType");
+		updatePresence(status, activity, text, null);
 	}
 
 	@Override
-	public void online(String playingText) {
-		updatePresence(StatusType.ONLINE, playingText);
+	public void changePresence(StatusType status) {
+		updatePresence(status, null, null, null);
 	}
 
 	@Override
-	public void online() {
-		online(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
+	public void changeStreamingPresence(StatusType status, String text, String streamUrl) {
+		updatePresence(status, ActivityType.STREAMING, text, streamUrl);
 	}
 
-	@Override
-	public void idle(String playingText) {
-		updatePresence(StatusType.IDLE, playingText);
-	}
-
-	@Override
-	public void idle() {
-		idle(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
-	}
-
-	@Override
-	public void streaming(String playingText, String streamingUrl) {
-		updatePresence(StatusType.ONLINE, playingText, streamingUrl);
-	}
-
-	@Override
-	public void dnd(String playingText) {
-		updatePresence(StatusType.DND, playingText);
-	}
-
-	@Override
-	public void dnd() {
-		dnd(getClient().getOurUser().getPresence().getPlayingText().orElse(null));
-	}
-
-	@Override
-	public void invisible() {
-		updatePresence(StatusType.INVISIBLE, null);
-	}
-
-	private void updatePresence(StatusType status, String playing) {
-		updatePresence(status, playing, null);
-	}
-
-	private void updatePresence(StatusType status, String playing, String streamUrl) {
+	private void updatePresence(StatusType status, ActivityType type, String text, String streamUrl) {
 		checkLoggedIn("update presence");
 
 		if (streamUrl != null) {
@@ -195,14 +161,14 @@ public class ShardImpl implements IShard {
 
 		IUser ourUser = getClient().getOurUser();
 		IPresence oldPresence = ourUser.getPresence();
-		IPresence newPresence = new Presence(playing, streamUrl, status);
+		IPresence newPresence = new Presence(text, streamUrl, status, type);
 
 		if (!newPresence.equals(oldPresence)) {
 			((User) ourUser).setPresence(newPresence);
 			getClient().getDispatcher().dispatch(new PresenceUpdateEvent(ourUser, oldPresence, newPresence));
 		}
 
-		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, playing, streamUrl));
+		ws.send(GatewayOps.STATUS_UPDATE, new PresenceUpdateRequest(status, type, text, streamUrl));
 	}
 
 	@Override

@@ -18,12 +18,12 @@
 package sx.blah.discord.handle.obj;
 
 import sx.blah.discord.handle.audio.IAudioManager;
-import sx.blah.discord.util.Ban;
 import sx.blah.discord.handle.audit.ActionType;
 import sx.blah.discord.handle.audit.AuditLog;
+import sx.blah.discord.util.Ban;
 import sx.blah.discord.util.Image;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -443,16 +443,6 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	IRole getEveryoneRole();
 
 	/**
-	 * Gets the default channel for the guild.
-	 *
-	 * @return The default/general channel.
-	 *
-	 * @deprecated Use {@link #getDefaultChannel()} instead.
-	 */
-	@Deprecated
-	IChannel getGeneralChannel();
-
-	/**
 	 * Gets the channel in the guild with the highest position that the bot user can read.
 	 *
 	 * @return The channel in the guild with the highest position that the bot user can read.
@@ -509,7 +499,7 @@ public interface IGuild extends IDiscordObject<IGuild> {
 	 * @param user The user to get the timestamp for.
 	 * @return The timestamp of when the given user joined the guild.
 	 */
-	LocalDateTime getJoinTimeForUser(IUser user);
+	Instant getJoinTimeForUser(IUser user);
 
 	/**
 	 * Gets a message by its unique snowflake ID from the guild's message cache.

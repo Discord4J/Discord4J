@@ -22,7 +22,7 @@ import sx.blah.discord.api.internal.DiscordUtils;
 import sx.blah.discord.api.internal.json.objects.ExtendedInviteObject;
 import sx.blah.discord.handle.obj.IExtendedInvite;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * The default implementation of {@link IExtendedInvite}.
@@ -60,7 +60,7 @@ public class ExtendedInvite extends Invite implements IExtendedInvite {
 	}
 
 	@Override
-	public LocalDateTime getCreationTime() {
+	public Instant getCreationTime() {
 		return DiscordUtils.convertFromTimestamp(backing.created_at);
 	}
 

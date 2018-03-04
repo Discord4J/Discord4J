@@ -80,7 +80,10 @@ public class RequestBuffer {
 	 * @return The result of the request.
 	 */
 	public static RequestFuture<Void> request(IVoidRequest request) {
-		return request((IRequest<Void>) request); //Casted to use the correct request() method
+		return request(() -> {
+			request.doRequest();
+			return null;
+		});
 	}
 
 	/**
@@ -144,12 +147,7 @@ public class RequestBuffer {
 	 * A request to be carried out by the buffer that has no result.
 	 */
 	@FunctionalInterface
-	public interface IVoidRequest extends IRequest<Void> {
-
-		default Void request() {
-			doRequest();
-			return null;
-		}
+	public interface IVoidRequest {
 
 		/**
 		 * Attempts the request.
@@ -235,11 +233,11 @@ public class RequestBuffer {
 		public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
 			long timeoutTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
 			long stamp = lock.tryReadLock(timeout, unit);
-			
+
 			if (!lock.validate(stamp)) {
 				if (System.currentTimeMillis() > timeoutTime)
 					throw new TimeoutException();
-		
+
 				if (isCancelled())
 					throw new InterruptedException();
 			}
@@ -299,10 +297,10 @@ public class RequestBuffer {
 				} catch (Exception e) {
 					Discord4J.LOGGER.warn(LogMarkers.UTIL, "RequestBuffer handled an uncaught exception!", e);
 				}
-				
+
 				if (!rateLimited && future.lock.validate(stamp))
 					future.lock.unlockWrite(stamp);
-				
+
 				return null;
 			}
 		}

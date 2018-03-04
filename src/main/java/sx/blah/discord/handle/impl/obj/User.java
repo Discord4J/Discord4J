@@ -36,6 +36,7 @@ import sx.blah.discord.util.cache.LongMap;
 import java.awt.Color;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 /**
  * The default implementation of {@link IUser}.
@@ -211,7 +212,7 @@ public class User implements IUser {
 		if (roles != null) {
 			RolesHolder retrievedRoles = roles.get(guild.getLongID());
 			if (retrievedRoles != null && retrievedRoles.getObject() != null)
-				return new LinkedList<>(retrievedRoles.getObject());
+				return retrievedRoles.getObject().stream().filter(Objects::nonNull).collect(Collectors.toCollection(LinkedList::new));
 		}
 
 		return new LinkedList<>();
@@ -256,11 +257,6 @@ public class User implements IUser {
 	public IVoiceState getVoiceStateForGuild(IGuild guild) {
 		voiceStates.putIfAbsent(guild.getLongID(), () -> new VoiceState(guild, this));
 		return voiceStates.get(guild.getLongID());
-	}
-
-	@Override
-	public LongMap<IVoiceState> getVoiceStatesLong() {
-		return getVoiceStates();
 	}
 
 	@Override

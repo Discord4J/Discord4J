@@ -21,7 +21,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.api.internal.DiscordUtils;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * An object that is identifiable by a unique snowflake ID and belongs to a {@link IDiscordClient}.
@@ -47,7 +47,7 @@ public interface IDiscordObject<SELF extends IDiscordObject<SELF>> extends IIDLi
 	 *
 	 * @return The time at which the object was created.
 	 */
-	default LocalDateTime getCreationDate() {
+	default Instant getCreationDate() {
 		return DiscordUtils.getSnowflakeTimeFromID(getLongID());
 	}
 

@@ -463,17 +463,32 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 
 		@Override
 		public Iterator<T> iterator() {
-			return backing.values().iterator();
+			lock.readLock().lock();
+			try {
+				return backing.values().iterator();
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		@Override
 		public LongSet longIDs() {
-			return backing.keySet();
+			lock.readLock().lock();
+			try {
+				return backing.keySet();
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		@Override
 		public Collection<T> values() {
-			return backing.values();
+			lock.readLock().lock();
+			try {
+				return backing.values();
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		@Override
@@ -493,12 +508,22 @@ public final class Cache<T extends IIDLinkedObject> implements Iterable<T> {
 
 		@Override
 		public void forEach(LongObjConsumer<? super T> action) {
-			backing.forEach(action);
+			lock.readLock().lock();
+			try {
+				backing.forEach(action);
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		@Override
 		public boolean forEachWhile(LongObjPredicate<? super T> predicate) {
-			return backing.forEachWhile(predicate);
+			lock.readLock().lock();
+			try {
+				return backing.forEachWhile(predicate);
+			} finally {
+				lock.readLock().unlock();
+			}
 		}
 
 		@Override

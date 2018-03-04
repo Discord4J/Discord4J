@@ -24,7 +24,7 @@ import sx.blah.discord.util.cache.LongMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -66,7 +66,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param startDate The date to start at. (Inclusive)
 	 * @return The messages from a given date to the beginning of the channel.
 	 */
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate);
+	MessageHistory getMessageHistoryFrom(Instant startDate);
 
 	/**
 	 * Gets the messages from a given date to the beginning of the channel.
@@ -77,7 +77,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The maximum number of messages to retrieve.
 	 * @return The messages from a given date to the beginning of the channel.
 	 */
-	MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxMessageCount);
+	MessageHistory getMessageHistoryFrom(Instant startDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages from a given message ID to the beginning of the channel.
@@ -108,7 +108,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param endDate The date to stop at. (Inclusive)
 	 * @return The messages from the current time to the given date.
 	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate);
+	MessageHistory getMessageHistoryTo(Instant endDate);
 
 	/**
 	 * Gets the messages from the current time to the given date.
@@ -119,7 +119,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The maximum number of messages to retrieve.
 	 * @return The messages from the current time to the given date.
 	 */
-	MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxMessageCount);
+	MessageHistory getMessageHistoryTo(Instant endDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages from the current time to the given message ID.
@@ -151,7 +151,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param endDate The date to stop at (Inclusive)
 	 * @return The messages in the given range of dates.
 	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate);
+	MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate);
 
 	/**
 	 * Gets the messages in the specified range of dates.
@@ -163,7 +163,7 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @param maxMessageCount The maximum number of messages to retrieve.
 	 * @return The messages in the given range of dates.
 	 */
-	MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxMessageCount);
+	MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate, int maxMessageCount);
 
 	/**
 	 * Gets the messages in the given range of message IDs.
@@ -234,6 +234,16 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	int getInternalCacheCount();
 
 	/**
+	 * Gets a message by its unique snowflake ID from the channels's message cache.
+	 *
+	 * @param messageID The ID of the desired message.
+	 * @return The message with the provided ID (or null if one was not found).
+	 *
+	 * @see #fetchMessage(long)
+	 */
+	IMessage getMessageByID(long messageID);
+
+	/**
 	 * Gets a message by its unique snowflake ID from the channels's message cache <b>or</b> by fetching it from Discord.
 	 *
 	 * <p>Discord allows fetching individual messages in a channel. This method first checks the channel's message cache
@@ -241,8 +251,10 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 *
 	 * @param messageID The ID of the desired message.
 	 * @return The message with the provided ID (or null if one was not found).
+	 *
+	 * @see #getMessageByID(long)
 	 */
-	IMessage getMessageByID(long messageID);
+	IMessage fetchMessage(long messageID);
 
 	/**
 	 * Gets the parent guild of the channel.
@@ -614,26 +626,8 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * Gets the permissions overrides for users. (Key = User ID)
 	 *
 	 * @return The user permissions overrides for the channel.
-	 * @deprecated Use {@link #getUserOverrides()} instead.
-	 */
-	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong();
-
-	/**
-	 * Gets the permissions overrides for users. (Key = User ID)
-	 *
-	 * @return The user permissions overrides for the channel.
 	 */
 	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverrides();
-
-	/**
-	 * Gets the permissions overrides for roles. (Key = Role ID)
-	 *
-	 * @return The role permissions overrides for this channel.
-	 * @deprecated Use {{@link #getRoleOverrides()}} instead.
-	 */
-	@Deprecated
-	LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong();
 
 	/**
 	 * Gets the permissions overrides for roles. (Key = Role ID)
@@ -794,76 +788,4 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	 * @return The category of the channel, may be null.
 	 */
 	ICategory getCategory();
-
-	/**
-	 * A permission override for a role or user.
-	 *
-	 * @deprecated Use {@link sx.blah.discord.handle.obj.PermissionOverride} instead.
-	 */
-	@Deprecated
-	class PermissionOverride implements IIDLinkedObject {
-
-		/**
-		 * The permissions explicitly allowed by the override.
-		 */
-		protected final EnumSet<Permissions> allow;
-
-		/**
-		 * The permissions explicitly denied by the override.
-		 */
-		protected final EnumSet<Permissions> deny;
-
-		/**
-		 * The ID of the user or role the override is for.
-		 */
-		protected final long id;
-
-		public PermissionOverride(EnumSet<Permissions> allow, EnumSet<Permissions> deny, long id) {
-			this.allow = allow;
-			this.deny = deny;
-			this.id = id;
-		}
-
-		/**
-		 * Gets the permissions explicitly allowed by the override.
-		 *
-		 * @return The permissions explicitly allowed by the override.
-		 */
-		public EnumSet<Permissions> allow() {
-			return allow;
-		}
-
-		/**
-		 * Gets the permissions explicitly denied by the override.
-		 *
-		 * @return The permissions explicitly denied by the override.
-		 */
-		public EnumSet<Permissions> deny() {
-			return deny;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (other == null)
-				return false;
-
-			if (!this.getClass().isAssignableFrom(other.getClass()))
-				return false;
-
-			if (!((PermissionOverride) other).deny.equals(this.deny)) return false;
-			if (!((PermissionOverride) other).allow.equals(this.allow)) return false;
-
-			return true;
-		}
-
-		@Override
-		public String toString() {
-			return "PermissionOverride (Allow: " + allow + ", Deny: " + deny + ")";
-		}
-
-		@Override
-		public long getLongID() {
-			return id;
-		}
-	}
 }

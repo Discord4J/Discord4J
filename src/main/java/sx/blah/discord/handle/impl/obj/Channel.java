@@ -39,7 +39,8 @@ import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
 import java.io.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -209,10 +210,13 @@ public class Channel implements IChannel {
 	@Override
 	public MessageHistory getMessageHistory(int messageCount) {
 		if (messageCount <= messages.size()) { // we already have all of the wanted messages in the cache
-			return new MessageHistory(messages.values().stream().limit(messageCount).collect(Collectors.toList()));
+			return new MessageHistory(messages.values().stream()
+				.sorted(new MessageComparator(true))
+				.limit(messageCount)
+				.collect(Collectors.toList()));
 		} else {
 			List<IMessage> retrieved = new ArrayList<>(messageCount);
-			AtomicLong lastMessage = new AtomicLong(DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()));
+			AtomicLong lastMessage = new AtomicLong(DiscordUtils.getSnowflakeFromTimestamp(Instant.now()));
 			int chunkSize = messageCount < MESSAGE_CHUNK_COUNT ? messageCount : MESSAGE_CHUNK_COUNT;
 
 			while (retrieved.size() < messageCount) { // while we dont have messageCount messages
@@ -229,12 +233,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate) {
+	public MessageHistory getMessageHistoryFrom(Instant startDate) {
 		return getMessageHistoryFrom(startDate, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryFrom(LocalDateTime startDate, int maxCount) {
+	public MessageHistory getMessageHistoryFrom(Instant startDate, int maxCount) {
 		return getMessageHistoryFrom(DiscordUtils.getSnowflakeFromTimestamp(startDate), maxCount);
 	}
 
@@ -249,12 +253,12 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate) {
+	public MessageHistory getMessageHistoryTo(Instant endDate) {
 		return getMessageHistoryTo(endDate, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryTo(LocalDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryTo(Instant endDate, int maxCount) {
 		return getMessageHistoryTo(DiscordUtils.getSnowflakeFromTimestamp(endDate), maxCount);
 	}
 
@@ -265,16 +269,16 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryTo(long id, int maxCount) {
-		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(System.currentTimeMillis()), id, maxCount);
+		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(Instant.now()), id, maxCount);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate) {
+	public MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate) {
 		return getMessageHistoryIn(startDate, endDate, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public MessageHistory getMessageHistoryIn(LocalDateTime startDate, LocalDateTime endDate, int maxCount) {
+	public MessageHistory getMessageHistoryIn(Instant startDate, Instant endDate, int maxCount) {
 		return getMessageHistoryIn(DiscordUtils.getSnowflakeFromTimestamp(startDate),
 				DiscordUtils.getSnowflakeFromTimestamp(endDate), maxCount);
 	}
@@ -286,32 +290,31 @@ public class Channel implements IChannel {
 
 	@Override
 	public MessageHistory getMessageHistoryIn(long beginID, long endID, int maxCount) {
-		List<IMessage> retrieved = new ArrayList<>();
-		long lastMessage = beginID + 1L;
+		final List<IMessage> history = new ArrayList<>();
+		final int originalMaxCount = maxCount;
+		// Adds 1L so beginID will be included
+		long previousMessageID = beginID + 1L;
+		int added = -1;
 
-		int chunkSize;
-		int originalMaxCount = maxCount;
+		while ((history.size() < originalMaxCount) && (added != 0)) {
+			maxCount = originalMaxCount - history.size();
+			final int chunkSize = (maxCount < MESSAGE_CHUNK_COUNT) ? maxCount : MESSAGE_CHUNK_COUNT;
+			final IMessage[] chunk = getHistory(previousMessageID, chunkSize);
+			added = 0;
 
-		IMessage[] chunk;
-		do {
-			maxCount = originalMaxCount - retrieved.size();
-			chunkSize = maxCount < MESSAGE_CHUNK_COUNT ? maxCount : MESSAGE_CHUNK_COUNT;
-			chunk = getHistory(lastMessage, chunkSize);
+			for (final IMessage message : chunk) {
+				if (message.getLongID() >= endID) {
+					// We want to EXCLUDE previous messages later
+					previousMessageID = message.getLongID() - 1L;
+					history.add(message);
+					added++;
+				} else { // We don't need anything else
+					return new MessageHistory(history);
+				}
+			}
+		}
 
-			if (chunk.length == 0) break; // no more messages
-
-			lastMessage = chunk[chunk.length - 1].getLongID();
-			Collections.addAll(retrieved, chunk);
-		} while (retrieved.size() < originalMaxCount && Arrays.stream(chunk).map(IMessage::getLongID).noneMatch(id -> id <= endID));
-
-		// Find index of endID (if it exists) so retrieved can be split
-		final int index = IntStream.range(0, retrieved.size())
-				.filter(i -> retrieved.get(i).getLongID() == endID)
-				.findFirst()
-				// + 1 as subList would exclude the endID
-				.orElse(retrieved.size() - 1) + 1;
-
-		return new MessageHistory(retrieved.subList(0, index));
+		return new MessageHistory(history);
 	}
 
 	@Override
@@ -321,7 +324,7 @@ public class Channel implements IChannel {
 
 	@Override
 	public List<IMessage> bulkDelete() {
-		return bulkDelete(getMessageHistoryTo(LocalDateTime.now().minusWeeks(2)));
+		return bulkDelete(getMessageHistoryTo(Instant.now().minus(Period.ofWeeks(2))));
 	}
 
 	@Override
@@ -373,6 +376,11 @@ public class Channel implements IChannel {
 
 	@Override
 	public IMessage getMessageByID(long messageID) {
+		return messages.get(messageID);
+	}
+
+	@Override
+	public IMessage fetchMessage(long messageID) {
 		return messages.getOrElseGet(messageID, () -> {
 			PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY);
 			return RequestBuffer.request(() ->
@@ -642,7 +650,7 @@ public class Channel implements IChannel {
 	@Override
 	public void edit(String name, int position, String topic) {
 		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
-			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric OR non-ASCII characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).position(position).topic(topic).build());
 	}
@@ -650,7 +658,7 @@ public class Channel implements IChannel {
 	@Override
 	public void changeName(String name) {
 		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
-			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric characters.");
+			throw new IllegalArgumentException("Channel name must be 2-100 alphanumeric OR non-ASCII characters.");
 
 		edit(new ChannelEditRequest.Builder().name(name).build());
 	}
@@ -692,18 +700,8 @@ public class Channel implements IChannel {
 	}
 
 	@Override
-	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverridesLong() {
-		return getUserOverrides();
-	}
-
-	@Override
 	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getUserOverrides() {
 		return userOverrides.mapCopy();
-	}
-
-	@Override
-	public LongMap<sx.blah.discord.handle.obj.PermissionOverride> getRoleOverridesLong() {
-		return getRoleOverrides();
 	}
 
 	@Override

@@ -31,12 +31,12 @@ import java.util.*;
  * @see IChannel#getMessageHistory()
  * @see IChannel#getFullMessageHistory()
  * @see IChannel#getMessageHistory(int)
- * @see IChannel#getMessageHistoryFrom(java.time.LocalDateTime)
- * @see IChannel#getMessageHistoryFrom(java.time.LocalDateTime, int)
- * @see IChannel#getMessageHistoryIn(java.time.LocalDateTime, java.time.LocalDateTime)
- * @see IChannel#getMessageHistoryIn(java.time.LocalDateTime, java.time.LocalDateTime, int)
- * @see IChannel#getMessageHistoryTo(java.time.LocalDateTime)
- * @see IChannel#getMessageHistoryTo(java.time.LocalDateTime, int)
+ * @see IChannel#getMessageHistoryFrom(java.time.Instant)
+ * @see IChannel#getMessageHistoryFrom(java.time.Instant, int)
+ * @see IChannel#getMessageHistoryIn(java.time.Instant, java.time.Instant)
+ * @see IChannel#getMessageHistoryIn(java.time.Instant, java.time.Instant, int)
+ * @see IChannel#getMessageHistoryTo(java.time.Instant)
+ * @see IChannel#getMessageHistoryTo(java.time.Instant, int)
  */
 public class MessageHistory extends AbstractList<IMessage> implements List<IMessage>, RandomAccess {
 
@@ -131,30 +131,32 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	}
 
 	/**
-	 * The parent guild of the channel the messages were sent in.
+	 * The parent guild of the channel the messages were sent in, or null if no messages are present.
 	 *
-	 * @return The parent guild of the channel the messages were sent in.
+	 * @return The parent guild of the channel the messages were sent in, or null if no messages are present.
 	 */
 	public IGuild getGuild() {
-		return getChannel().isPrivate() ? null : getChannel().getGuild();
+		final IChannel channel = getChannel();
+		return (channel == null) ? null : (channel.isPrivate() ? null : channel.getGuild());
 	}
 
 	/**
-	 * Gets the channel the messages were sent in.
+	 * Gets the channel the messages were sent in, or null if no messages are present.
 	 *
-	 * @return The channel the messages were sent in.
+	 * @return The channel the messages were sent in, or null if no messages are present.
 	 */
 	public IChannel getChannel() {
-		return backing[0].getChannel();
+		return (backing.length == 0) ? null : backing[0].getChannel();
 	}
 
 	/**
-	 * Gets the client the history belongs to.
+	 * Gets the client the history belongs to, or null if no messages are present.
 	 *
-	 * @return The client the history belongs to.
+	 * @return The client the history belongs to, or null if no messages are present.
 	 */
 	public IDiscordClient getClient() {
-		return backing[0].getClient();
+		final IChannel channel = getChannel();
+		return (channel == null) ? null : channel.getClient();
 	}
 
 	/**
@@ -206,6 +208,7 @@ public class MessageHistory extends AbstractList<IMessage> implements List<IMess
 	 * @see IChannel#bulkDelete()
 	 */
 	public List<IMessage> bulkDelete() {
-		return getChannel().bulkDelete(this);
+		final IChannel channel = getChannel();
+		return (channel == null) ? Collections.emptyList() : channel.bulkDelete(this);
 	}
 }

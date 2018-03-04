@@ -32,7 +32,6 @@ import sx.blah.discord.api.internal.json.requests.IdentifyRequest;
 import sx.blah.discord.api.internal.json.requests.PresenceUpdateRequest;
 import sx.blah.discord.api.internal.json.requests.ResumeRequest;
 import sx.blah.discord.api.internal.json.responses.ReadyResponse;
-import sx.blah.discord.api.internal.json.responses.ReadyResponse;
 import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
 import sx.blah.discord.util.LogMarkers;
 
@@ -244,7 +243,6 @@ public class DiscordWS extends WebSocketAdapter {
 		WebSocketClient previous = wsClient; // for cleanup
 		try {
 			wsClient = new WebSocketClient(new SslContextFactory());
-			wsClient.setDaemon(true);
 			wsClient.getPolicy().setMaxBinaryMessageSize(Integer.MAX_VALUE);
 			wsClient.getPolicy().setMaxTextMessageSize(Integer.MAX_VALUE);
 			wsClient.start();

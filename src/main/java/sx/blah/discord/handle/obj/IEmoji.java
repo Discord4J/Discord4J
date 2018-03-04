@@ -92,4 +92,11 @@ public interface IEmoji extends IDiscordObject<IEmoji> {
 	 * Deletes the emoji.
 	 */
 	void deleteEmoji();
+
+	/**
+	 * Gets whether the emoji is animated.
+	 *
+	 * @return Whether the emoji is animated.
+	 */
+	boolean isAnimated();
 }

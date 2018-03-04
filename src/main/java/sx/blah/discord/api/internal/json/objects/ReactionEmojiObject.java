@@ -29,4 +29,8 @@ public class ReactionEmojiObject {
 	 * The ID of the emoji.
 	 */
 	public String id;
+	/**
+	 * Wheter this emoji is animated.
+	 */
+	public boolean animated = false;
 }

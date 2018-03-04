@@ -34,7 +34,6 @@ import sx.blah.discord.util.PermissionUtils;
 import sx.blah.discord.util.cache.Cache;
 import sx.blah.discord.util.cache.LongMap;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -176,7 +175,7 @@ public class Category implements ICategory {
 	@Override
 	public IChannel createChannel(String name) {
 		if (name == null || !DiscordUtils.CHANNEL_NAME_PATTERN.matcher(name).matches())
-			throw new DiscordException("Channel name must be 2-100 alphanumeric characters.");
+			throw new DiscordException("Channel name must be 2-100 alphanumeric OR non-ASCII characters.");
 
 		return ((Guild) guild).createChannel(new ChannelCreateRequest(name, ChannelObject.Type.GUILD_TEXT, id));
 	}

@@ -109,16 +109,6 @@ public class ModuleLoader {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + clazz.getName() + "!", e);
 			}
 		}
-
-		if (Configuration.AUTOMATICALLY_ENABLE_MODULES) { // Handles module load order and loads the modules
-			List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
-			while (toLoad.size() > 0) {
-				for (IModule module : toLoad) {
-					if (loadModule(module))
-						toLoad.remove(module);
-				}
-			}
-		}
 	}
 
 	/**
@@ -138,6 +128,19 @@ public class ModuleLoader {
 	 */
 	public static List<Class<? extends IModule>> getModules() {
 		return modules;
+	}
+
+	/**
+	 * Attempts to {@link #loadModule(IModule) load} all {@link #getLoadedModules() loaded modules}.
+	 */
+	public void loadModules() {
+		List<IModule> toLoad = new CopyOnWriteArrayList<>(loadedModules);
+		while (toLoad.size() > 0) {
+			for (IModule module : toLoad) {
+				if (loadModule(module))
+					toLoad.remove(module);
+			}
+		}
 	}
 
 	/**
@@ -243,7 +246,7 @@ public class ModuleLoader {
 		if (file.isFile() && file.getName().endsWith(".jar")) { // Can't be a directory and must be a jar
 			try (JarFile jar = new JarFile(file)) {
 				Manifest man = jar.getManifest();
-				String moduleAttrib = man.getMainAttributes().getValue("Discord4J-ModuleClass");
+				String moduleAttrib = man == null ? null : man.getMainAttributes().getValue("Discord4J-ModuleClass");
 				String[] moduleClasses = new String[0];
 				if (moduleAttrib != null) {
 					moduleClasses = moduleAttrib.split(";");
