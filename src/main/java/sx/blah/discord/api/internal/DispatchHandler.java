@@ -828,7 +828,7 @@ class DispatchHandler {
 		if (message == null) {
 			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
 			if (message == null) {
-				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction add event\nObject={}", ToStringBuilder.reflectionToString(event));
+				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction remove event\nObject={}", ToStringBuilder.reflectionToString(event));
 				return;
 			}
 		}
