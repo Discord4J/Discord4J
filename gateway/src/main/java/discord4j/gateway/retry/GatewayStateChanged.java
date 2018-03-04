@@ -70,4 +70,11 @@ public class GatewayStateChanged implements Dispatch {
 	public Duration getBackoff() {
 		return backoff;
 	}
+
+	@Override
+	public String toString() {
+		return "GatewayStateChanged[" +
+				"state=" + state +
+				']';
+	}
 }

@@ -60,9 +60,9 @@ public abstract class PayloadHandlers {
 	private static void handleDispatch(PayloadContext<Dispatch> context) {
 		if (context.getData() instanceof Ready) {
 			String newSessionId = ((Ready) context.getData()).getSessionId();
-			context.getClient().sessionId.set(newSessionId);
+			context.getSessionId().set(newSessionId);
 		}
-		context.getClient().dispatch.onNext(context.getData());
+		context.getDispatch().onNext(context.getData());
 	}
 
 	private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
@@ -76,9 +76,9 @@ public abstract class PayloadHandlers {
 	private static void handleInvalidSession(PayloadContext<InvalidSession> context) {
 		// TODO polish
 		if (context.getData().isResumable()) {
-			String token = context.getClient().token;
+			String token = context.getToken();
 			context.getHandler().outbound().onNext(GatewayPayload.resume(
-					new Resume(token, context.getClient().sessionId.get(), context.getClient().lastSequence.get())));
+					new Resume(token, context.getSessionId().get(), context.getLastSequence().get())));
 		} else {
 			context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
 		}
@@ -86,12 +86,12 @@ public abstract class PayloadHandlers {
 
 	private static void handleHello(PayloadContext<Hello> context) {
 		Duration interval = Duration.ofMillis(context.getData().getHeartbeatInterval());
-		context.getClient().heartbeat.start(interval);
+		context.getHeartbeat().start(interval);
 
 		// log trace
 
 		IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
-		Identify identify = new Identify(context.getClient().token, props, false, 250, Possible.absent(), Possible
+		Identify identify = new Identify(context.getToken(), props, false, 250, Possible.absent(), Possible
 				.absent());
 		GatewayPayload<Identify> response = GatewayPayload.identify(identify);
 

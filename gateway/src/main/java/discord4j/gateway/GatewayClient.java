@@ -65,12 +65,12 @@ public class GatewayClient {
 	private final PayloadWriter payloadWriter;
 	private final RetryOptions retryOptions;
 
-	final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
-	final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
-	final AtomicInteger lastSequence = new AtomicInteger(0);
-	final AtomicReference<String> sessionId = new AtomicReference<>("");
-	final ResettableInterval heartbeat = new ResettableInterval();
-	final String token;
+	private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
+	private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
+	private final AtomicInteger lastSequence = new AtomicInteger(0);
+	private final AtomicReference<String> sessionId = new AtomicReference<>("");
+	private final ResettableInterval heartbeat = new ResettableInterval();
+	private final String token;
 
 	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
 			RetryOptions retryOptions, String token) {
@@ -101,7 +101,7 @@ public class GatewayClient {
 			});
 			Disposable inboundSub = wsHandler.inbound()
 					.map(this::updateSequence)
-					.map(payload -> PayloadContext.of(payload, this, wsHandler))
+					.map(payload -> payloadContext(payload, wsHandler))
 					.subscribe(PayloadHandlers::handle);
 			Disposable senderSub = sender.map(payload -> {
 				if (Opcode.RECONNECT.equals(payload.getOp())) {
@@ -138,6 +138,19 @@ public class GatewayClient {
 					}
 					context.applicationContext().next();
 				})).doOnTerminate(() -> dispatch.onNext(GatewayStateChanged.disconnected()));
+	}
+
+	private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler) {
+		return new PayloadContext.Builder()
+				.setPayload(payload)
+				.setDispatch(dispatch)
+				.setSender(sender)
+				.setLastSequence(lastSequence)
+				.setSessionId(sessionId)
+				.setHeartbeat(heartbeat)
+				.setToken(token)
+				.setHandler(handler)
+				.build();
 	}
 
 	/**
@@ -179,6 +192,8 @@ public class GatewayClient {
 	public FluxSink<GatewayPayload<?>> sender() {
 		return sender.sink(FluxSink.OverflowStrategy.ERROR);
 	}
+
+
 
 	private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
 		if (payload.getSequence() != null) {
