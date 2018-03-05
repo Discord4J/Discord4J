@@ -87,7 +87,7 @@ public class WebSocketSession {
 					public void channelRead(ChannelHandlerContext ctx, Object msg) {
 						if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
 							CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
-							log.warn("Signalling close status: {} {}", close.statusCode(), close.reasonText());
+							log.debug("Close status detected: {} {}", close.statusCode(), close.reasonText());
 							// then push it to our MonoProcessor for the reason
 							reason.onNext(new CloseStatus(close.statusCode(), close.reasonText()));
 						}
@@ -99,7 +99,7 @@ public class WebSocketSession {
 						if (evt instanceof SslCloseCompletionEvent) {
 							SslCloseCompletionEvent closeEvent = (SslCloseCompletionEvent) evt;
 							if (!closeEvent.isSuccess()) {
-								log.warn("Signalling abnormal close status: {}", closeEvent.cause().toString());
+								log.debug("Abnormal close status detected: {}", closeEvent.cause().toString());
 								// then push it to our MonoProcessor for the reason
 								if (!reason.isTerminated()) {
 									reason.onError(closeEvent.cause());

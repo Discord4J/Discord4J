@@ -132,7 +132,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	 * @param error the cause for this session termination
 	 */
 	public void error(Throwable error) {
-		log.debug("Triggering error sequence");
+		log.debug("Triggering error sequence ({})", error.toString());
 		if (!completionNotifier.isTerminated()) {
 			completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
 		}
