@@ -785,13 +785,10 @@ class DispatchHandler {
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
-		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IMessage message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
 		if (message == null) {
-			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
-			if (message == null) {
-				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction add event\nObject={}", ToStringBuilder.reflectionToString(event));
-				return;
-			}
+			Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction add event\nObject={}", ToStringBuilder.reflectionToString(event));
+			return;
 		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
@@ -824,13 +821,10 @@ class DispatchHandler {
 		if (!PermissionUtils.hasPermissions(channel, client.ourUser, Permissions.READ_MESSAGES, Permissions.READ_MESSAGE_HISTORY)) return; // Discord sends this event no matter our permissions for some reason.
 
 		boolean cached = ((Channel) channel).messages.containsKey(Long.parseUnsignedLong(event.message_id));
-		IMessage message = channel.getMessageByID(Long.parseUnsignedLong(event.message_id));
+		IMessage message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
 		if (message == null) {
-			message = channel.fetchMessage(Long.parseUnsignedLong(event.message_id));
-			if (message == null) {
-				Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction remove event\nObject={}", ToStringBuilder.reflectionToString(event));
-				return;
-			}
+			Discord4J.LOGGER.debug("Unable to fetch the message specified by a reaction remove event\nObject={}", ToStringBuilder.reflectionToString(event));
+			return;
 		}
 		IReaction reaction = event.emoji.id == null
 				? message.getReactionByUnicode(event.emoji.name)
