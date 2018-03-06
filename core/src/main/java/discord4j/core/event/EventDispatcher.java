@@ -20,8 +20,11 @@ package discord4j.core.event;
 import discord4j.core.event.domain.Event;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
+import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.logging.Level;
 
 /**
  * Distributes events to each subscriber.
@@ -71,6 +74,9 @@ public class EventDispatcher {
 	 * @return a new {@link reactor.core.publisher.Flux} with the requested events
 	 */
 	public <T extends Event> Flux<T> on(Class<T> eventClass) {
-		return processor.publishOn(scheduler).ofType(eventClass);
+		return processor.publishOn(scheduler)
+				.ofType(eventClass)
+				.log("discord4j.dispatch." + eventClass.getSimpleName(), Level.FINE,
+						SignalType.ON_NEXT, SignalType.ON_SUBSCRIBE, SignalType.ON_ERROR, SignalType.CANCEL);
 	}
 }

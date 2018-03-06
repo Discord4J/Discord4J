@@ -18,4 +18,9 @@
 package discord4j.core.event.domain;
 
 public class ReconnectStartedEvent implements Event {
+
+	@Override
+	public String toString() {
+		return "Gateway reconnect attempt started";
+	}
 }

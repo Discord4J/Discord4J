@@ -30,4 +30,11 @@ public class ReadyEvent implements Event {
 	public Ready getReady() {
 		return ready;
 	}
+
+	@Override
+	public String toString() {
+		return "ReadyEvent[" +
+				"ready=" + ready +
+				']';
+	}
 }

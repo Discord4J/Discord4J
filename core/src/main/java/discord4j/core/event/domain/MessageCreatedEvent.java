@@ -30,4 +30,11 @@ public class MessageCreatedEvent implements Event {
 	public MessageCreate getMessageCreate() {
 		return messageCreate;
 	}
+
+	@Override
+	public String toString() {
+		return "MessageCreatedEvent[" +
+				"messageCreate=" + messageCreate +
+				']';
+	}
 }

@@ -26,7 +26,7 @@
         <appender-ref ref="FILE"/>
     </appender>
 
-    <root level="debug">
+    <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="ASYNC"/>
     </root>

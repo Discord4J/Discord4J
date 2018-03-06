@@ -26,10 +26,10 @@ import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.MessageCreate;
 import discord4j.common.json.response.MessageResponse;
-import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.domain.*;
 import discord4j.core.event.DispatchContext;
 import discord4j.core.event.DispatchHandlers;
+import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.*;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -47,7 +47,6 @@ import org.junit.Test;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
@@ -67,7 +66,6 @@ public class RetryBotTest {
 		FakeClient client = new FakeClient(token);
 
 		client.gatewayClient.dispatch()
-				.compose(flux -> wiretap(flux, Loggers.getLogger("discord4j.event.dispatcher")))
 				.map(dispatch -> DispatchContext.of(dispatch, client))
 				.flatMap(context -> Mono.justOrEmpty(DispatchHandlers.<Dispatch, Event>handle(context)))
 				.subscribeWith(client.eventProcessor);
@@ -172,8 +170,6 @@ public class RetryBotTest {
 
 	static class LifecycleListener {
 
-		private static final Logger log = Loggers.getLogger(LifecycleListener.class);
-
 		private final FakeClient client;
 
 		LifecycleListener(FakeClient client) {
@@ -181,20 +177,11 @@ public class RetryBotTest {
 		}
 
 		void configure() {
-			client.dispatcher.on(ConnectedEvent.class)
-					.subscribe(event -> log.info("Connected!"));
-
-			client.dispatcher.on(DisconnectedEvent.class)
-					.subscribe(event -> log.info("Disconnected!"));
-
-			client.dispatcher.on(ReconnectStartedEvent.class)
-					.subscribe(event -> log.info("Reconnects started..."));
-
-			client.dispatcher.on(ReconnectedEvent.class)
-					.subscribe(event -> log.info("Reconnected"));
-
-			client.dispatcher.on(ReconnectFailedEvent.class)
-					.subscribe(event -> log.info("Reconnect failed!"));
+			client.dispatcher.on(ConnectedEvent.class).subscribe();
+			client.dispatcher.on(DisconnectedEvent.class).subscribe();
+			client.dispatcher.on(ReconnectStartedEvent.class).subscribe();
+			client.dispatcher.on(ReconnectedEvent.class).subscribe();
+			client.dispatcher.on(ReconnectFailedEvent.class).subscribe();
 		}
 
 	}
