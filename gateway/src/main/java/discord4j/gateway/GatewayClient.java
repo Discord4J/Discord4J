@@ -24,7 +24,7 @@ import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.Ready;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.GatewayStateChanged;
+import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
 import discord4j.gateway.websocket.CloseException;
@@ -93,9 +93,9 @@ public class GatewayClient {
 			Disposable readySub = dispatch.ofType(Ready.class).subscribe(d -> {
 				RetryContext retryContext = retryOptions.getRetryContext();
 				if (retryContext.getResetCount() == 0) {
-					dispatch.onNext(GatewayStateChanged.connected());
+					dispatch.onNext(GatewayStateChange.connected());
 				} else {
-					dispatch.onNext(GatewayStateChanged.retrySucceeded(retryContext.getAttempts()));
+					dispatch.onNext(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
 				}
 				retryContext.reset();
 			});
@@ -128,12 +128,12 @@ public class GatewayClient {
 					long backoff = context.backoff().toMillis();
 					log.debug("Retry attempt {} in {} ms", attempt, backoff);
 					if (attempt == 1) {
-						dispatch.onNext(GatewayStateChanged.retryStarted(Duration.ofMillis(backoff)));
+						dispatch.onNext(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
 					} else {
-						dispatch.onNext(GatewayStateChanged.retryFailed(attempt - 1, Duration.ofMillis(backoff)));
+						dispatch.onNext(GatewayStateChange.retryFailed(attempt - 1, Duration.ofMillis(backoff)));
 					}
 					context.applicationContext().next();
-				})).doOnTerminate(() -> dispatch.onNext(GatewayStateChanged.disconnected()));
+				})).doOnTerminate(() -> dispatch.onNext(GatewayStateChange.disconnected()));
 	}
 
 	private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler) {

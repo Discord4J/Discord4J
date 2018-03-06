@@ -66,7 +66,7 @@ public class RetryBotTest {
 		FakeClient client = new FakeClient(token);
 
 		client.gatewayClient.dispatch()
-				.map(dispatch -> DispatchContext.of(dispatch, client))
+				.map(dispatch -> DispatchContext.of(dispatch, client.client))
 				.flatMap(context -> Mono.justOrEmpty(DispatchHandlers.<Dispatch, Event>handle(context)))
 				.subscribeWith(client.eventProcessor);
 
@@ -87,6 +87,8 @@ public class RetryBotTest {
 
 	static class FakeClient {
 
+		private final Client client;
+
 		private final ObjectMapper mapper;
 
 		private final SimpleHttpClient httpClient;
@@ -103,6 +105,8 @@ public class RetryBotTest {
 		private final EventDispatcher dispatcher;
 
 		FakeClient(String token) {
+			client = new Client();
+
 			mapper = new ObjectMapper()
 					.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)

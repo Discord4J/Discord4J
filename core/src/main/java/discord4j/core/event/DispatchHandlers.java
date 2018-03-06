@@ -19,7 +19,7 @@ package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.*;
 import discord4j.core.event.domain.*;
-import discord4j.gateway.retry.GatewayStateChanged;
+import discord4j.gateway.retry.GatewayStateChange;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +66,7 @@ public abstract class DispatchHandlers {
 		addHandler(VoiceStateUpdateDispatch.class, DispatchHandlers::voiceStateUpdateDispatch);
 		addHandler(WebhooksUpdate.class, DispatchHandlers::webhooksUpdate);
 
-		addHandler(GatewayStateChanged.class, DispatchHandlers::gatewayStateChanged);
+		addHandler(GatewayStateChange.class, DispatchHandlers::gatewayStateChanged);
 	}
 
 	private static <D extends Dispatch, E extends Event> void addHandler(Class<D> dispatchType,
@@ -252,8 +252,8 @@ public abstract class DispatchHandlers {
 		return null;
 	}
 
-	private static Event gatewayStateChanged(DispatchContext<GatewayStateChanged> context) {
-		GatewayStateChanged dispatch = context.getDispatch();
+	private static Event gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
+		GatewayStateChange dispatch = context.getDispatch();
 		switch (dispatch.getState()) {
 			case CONNECTED:
 				return new ConnectedEvent();

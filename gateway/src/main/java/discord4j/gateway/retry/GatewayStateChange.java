@@ -22,37 +22,37 @@ import discord4j.common.json.payload.dispatch.Dispatch;
 import javax.annotation.Nullable;
 import java.time.Duration;
 
-public class GatewayStateChanged implements Dispatch {
+public class GatewayStateChange implements Dispatch {
 
 	public enum State {
 		CONNECTED, DISCONNECTED, RETRY_STARTED, RETRY_SUCCEEDED, RETRY_FAILED
 	}
 
-	public static GatewayStateChanged connected() {
-		return new GatewayStateChanged(State.CONNECTED, 0, null);
+	public static GatewayStateChange connected() {
+		return new GatewayStateChange(State.CONNECTED, 0, null);
 	}
 
-	public static GatewayStateChanged disconnected() {
-		return new GatewayStateChanged(State.DISCONNECTED, 0, null);
+	public static GatewayStateChange disconnected() {
+		return new GatewayStateChange(State.DISCONNECTED, 0, null);
 	}
 
-	public static GatewayStateChanged retryStarted(Duration nextAttemptBackoff) {
-		return new GatewayStateChanged(State.RETRY_STARTED, 1, nextAttemptBackoff);
+	public static GatewayStateChange retryStarted(Duration nextAttemptBackoff) {
+		return new GatewayStateChange(State.RETRY_STARTED, 1, nextAttemptBackoff);
 	}
 
-	public static GatewayStateChanged retrySucceeded(int currentAttempt) {
-		return new GatewayStateChanged(State.RETRY_SUCCEEDED, currentAttempt, null);
+	public static GatewayStateChange retrySucceeded(int currentAttempt) {
+		return new GatewayStateChange(State.RETRY_SUCCEEDED, currentAttempt, null);
 	}
 
-	public static GatewayStateChanged retryFailed(int currentAttempt, Duration nextAttemptBackoff) {
-		return new GatewayStateChanged(State.RETRY_FAILED, currentAttempt, nextAttemptBackoff);
+	public static GatewayStateChange retryFailed(int currentAttempt, Duration nextAttemptBackoff) {
+		return new GatewayStateChange(State.RETRY_FAILED, currentAttempt, nextAttemptBackoff);
 	}
 
 	private final State state;
 	private final int currentAttempt;
 	private final Duration backoff;
 
-	private GatewayStateChanged(State state, int currentAttempt, Duration backoff) {
+	private GatewayStateChange(State state, int currentAttempt, Duration backoff) {
 		this.state = state;
 		this.currentAttempt = currentAttempt;
 		this.backoff = backoff;

@@ -18,6 +18,7 @@
 package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.core.Client;
 
 /**
  * Represents gateway dispatch data enriched with context for processing through a
@@ -28,13 +29,13 @@ import discord4j.common.json.payload.dispatch.Dispatch;
 public class DispatchContext<D extends Dispatch> {
 
 	private final D dispatch;
-	private final Object client; // TODO use actual Client reference
+	private final Client client;
 
-	public static <D extends Dispatch> DispatchContext<D> of(D dispatch, Object client) {
+	public static <D extends Dispatch> DispatchContext<D> of(D dispatch, Client client) {
 		return new DispatchContext<>(dispatch, client);
 	}
 
-	private DispatchContext(D dispatch, Object client) {
+	private DispatchContext(D dispatch, Client client) {
 		this.dispatch = dispatch;
 		this.client = client;
 	}
@@ -43,7 +44,7 @@ public class DispatchContext<D extends Dispatch> {
 		return dispatch;
 	}
 
-	public Object getClient() {
+	public Client getClient() {
 		return client;
 	}
 }
