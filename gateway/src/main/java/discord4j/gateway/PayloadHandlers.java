@@ -106,7 +106,7 @@ public abstract class PayloadHandlers {
 	}
 
 	private static void handleHeartbeatAck(PayloadContext<?> context) {
-		log.debug("Received heartbeat ack");
+		log.trace("Received heartbeat ack");
 	}
 
 }

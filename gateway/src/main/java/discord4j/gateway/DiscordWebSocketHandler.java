@@ -17,9 +17,11 @@
 package discord4j.gateway;
 
 import discord4j.common.json.payload.GatewayPayload;
+import discord4j.common.json.payload.Opcode;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.UnicastProcessor;
@@ -105,9 +107,19 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
 		return session.send(outboundExchange
 				.log(outboundLogger, Level.FINEST, false)
-				.map(writer::write)
-				.map(buf -> new WebSocketMessage(WebSocketMessage.Type.TEXT, buf)))
+				.flatMap(this::mapOutbound))
 				.then(completionNotifier);
+	}
+
+	private Flux<WebSocketMessage> mapOutbound(GatewayPayload<?> payload) {
+		if (payload.getOp() == null) {
+			return Flux.just(WebSocketMessage.close());
+		} else if (Opcode.RECONNECT.equals(payload.getOp())) {
+			error(new RuntimeException("Reconnecting due to user action"));
+			return Flux.empty();
+		} else {
+			return Flux.just(writer.write(payload)).map(WebSocketMessage::fromText);
+		}
 	}
 
 	/**

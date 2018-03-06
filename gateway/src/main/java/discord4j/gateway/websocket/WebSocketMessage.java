@@ -19,6 +19,7 @@ package discord4j.gateway.websocket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
@@ -51,7 +52,25 @@ public class WebSocketMessage {
 	}
 
 	/**
-	 * Create a new WebSocket message from a byte buffer.
+	 * Create a new text WebSocket message from a byte buffer.
+	 *
+	 * @param payload the payload contents
+	 * @return a {@code WebSocketMessage} with text contents
+	 */
+	public static WebSocketMessage fromText(ByteBuf payload) {
+		return new WebSocketMessage(WebSocketMessage.Type.TEXT, payload);
+	}
+
+	/**
+	 * Create a new closing WebSocket message.
+	 * @return a {@code WebSocketMessage} with close type
+	 */
+	public static WebSocketMessage close() {
+		return new WebSocketMessage(WebSocketMessage.Type.CLOSE, Unpooled.buffer(0));
+	}
+
+	/**
+	 * Create a new binary WebSocket message from a byte buffer.
 	 *
 	 * @param payload the payload contents
 	 * @return a {@code WebSocketMessage} with binary contents
@@ -85,6 +104,8 @@ public class WebSocketMessage {
 				return new TextWebSocketFrame(byteBuf);
 			case BINARY:
 				return new BinaryWebSocketFrame(byteBuf);
+			case CLOSE:
+				return new CloseWebSocketFrame(1000, "Logging off");
 			default:
 				throw new IllegalArgumentException("Unknown websocket message type: " + message.getType());
 		}
@@ -140,13 +161,15 @@ public class WebSocketMessage {
 	 * WebSocket message types.
 	 */
 	public enum Type {
-		TEXT, BINARY;
+		TEXT, BINARY, CLOSE;
 
 		public static Type fromFrameClass(Class<?> clazz) {
 			if (clazz.equals(TextWebSocketFrame.class)) {
 				return TEXT;
 			} else if (clazz.equals(BinaryWebSocketFrame.class)) {
 				return BINARY;
+			} else if (clazz.equals(CloseWebSocketFrame.class)) {
+				return CLOSE;
 			}
 
 			throw new IllegalArgumentException("Unknown frame class: " + clazz);

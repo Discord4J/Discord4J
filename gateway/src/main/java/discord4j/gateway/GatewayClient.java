@@ -103,12 +103,8 @@ public class GatewayClient {
 					.map(this::updateSequence)
 					.map(payload -> payloadContext(payload, wsHandler))
 					.subscribe(PayloadHandlers::handle);
-			Disposable senderSub = sender.map(payload -> {
-				if (Opcode.RECONNECT.equals(payload.getOp())) {
-					wsHandler.error(new RuntimeException("Reconnecting due to user action"));
-				}
-				return payload;
-			}).subscribe(wsHandler.outbound()::onNext, t -> wsHandler.close(), wsHandler::close);
+			Disposable senderSub = sender.subscribe(wsHandler.outbound()::onNext, t -> wsHandler.close(),
+					wsHandler::close);
 
 			Disposable heartbeatSub = heartbeat.ticks()
 					.map(l -> new Heartbeat(lastSequence.get()))
@@ -162,6 +158,7 @@ public class GatewayClient {
 		if (reconnect) {
 			sender.onNext(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
 		} else {
+			sender.onNext(new GatewayPayload<>()); // trigger a graceful shutdown
 			sender.onComplete();
 		}
 	}
@@ -192,7 +189,6 @@ public class GatewayClient {
 	public FluxSink<GatewayPayload<?>> sender() {
 		return sender.sink(FluxSink.OverflowStrategy.ERROR);
 	}
-
 
 	private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
 		if (payload.getSequence() != null) {
