@@ -17,7 +17,6 @@
 package discord4j.store.service;
 
 import discord4j.store.Store;
-import discord4j.store.StoreOperations;
 import discord4j.store.primitive.ForwardingStoreService;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -54,14 +53,14 @@ public class StoreTests {
     @Test
     public void testGenericStore() {
         Store<String, String> store = newStore();
-        new StoreTest(Objects.requireNonNull(store.getConnection().block())).test();
+        new StoreTest(Objects.requireNonNull(store)).test();
     }
 
     class StoreTest {
 
-        private StoreOperations<String, String> connection;
+        private Store<String, String> connection;
 
-        StoreTest(StoreOperations<String, String> connection) {
+        StoreTest(Store<String, String> connection) {
             this.connection = connection;
         }
 

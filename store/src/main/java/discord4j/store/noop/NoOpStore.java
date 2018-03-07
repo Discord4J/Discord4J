@@ -17,20 +17,117 @@
 package discord4j.store.noop;
 
 import discord4j.store.Store;
-import discord4j.store.StoreOperations;
 import discord4j.store.noop.primitive.NoOpLongObjStore;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
- * Store implementation which does nothing.
+ * Data connection implementation which does nothing.
  *
- * @see NoOpStoreService
+ * @see NoOpStore
  * @see NoOpLongObjStore
  */
 public class NoOpStore<K extends Comparable<K>, V> implements Store<K, V> {
 
     @Override
-    public Mono<? extends StoreOperations<K, V>> getConnection() {
-        return Mono.just(new NoOpStoreOperations<>());
+    public Mono<Void> store(K key, V value) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> store(Publisher<Tuple2<K, V>> entryStream) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<V> find(K id) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Boolean> exists(K id) {
+        return Mono.just(false);
+    }
+
+    @Override
+    public Mono<Boolean> exists(Publisher<K> ids) {
+        return Mono.just(false);
+    }
+
+    @Override
+    public Flux<V> findAll() {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> findAll(Iterable<K> ids) {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> findAll(Publisher<K> ids) {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> findInRange(K start, K end) {
+        return Flux.empty();
+    }
+
+    @Override
+    public Mono<Long> count() {
+        return Mono.just(0L);
+    }
+
+    @Override
+    public Mono<Void> delete(K id) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> delete(Publisher<K> ids) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> delete(Tuple2<K, V> entry) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(K start, K end) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAll() {
+        return Mono.empty();
+    }
+
+    @Override
+    public Flux<K> keys() {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> values() {
+        return Flux.empty();
     }
 }

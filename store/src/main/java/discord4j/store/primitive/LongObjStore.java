@@ -17,17 +17,191 @@
 package discord4j.store.primitive;
 
 import discord4j.store.Store;
+import discord4j.store.util.LongObjTuple2;
+import discord4j.store.util.MappingIterable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
- * This represents the long-object variation of a {@link Store}.
+ * This provides an active data connection to a store's data source.
  *
- * @param <V> The object linked to a long key.
+ * @param <V> The value type.
  *
  * @see Store
  */
 public interface LongObjStore<V> extends Store<Long, V> {
 
     @Override
-    Mono<LongObjStoreOperations<V>> getConnection();
+    default Mono<Void> store(Long key, V value) {
+        return storeWithLong(key, value);
+    }
+
+    /**
+     * Stores a key value pair.
+     *
+     * @param key The key representing the value.
+     * @param value The value.
+     * @return A mono which signals the completion of the storage of the pair.
+     */
+    Mono<Void> storeWithLong(long key, V value);
+
+    @Override
+    default Mono<Void> store(Iterable<Tuple2<Long, V>> entries) {
+        return storeWithLong(new MappingIterable<>(LongObjTuple2::from, entries));
+    }
+
+    /**
+     * Stores key value pairs.
+     *
+     * @param entries A mono providing the key value pairs.
+     * @return A mono which signals the completion of the storage of the pairs.
+     */
+    Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries);
+
+    @Override
+    default Mono<Void> store(Publisher<Tuple2<Long, V>> entryStream) {
+        return storeWithLong(Flux.from(entryStream).map(LongObjTuple2::from));
+    }
+
+    /**
+     * Stores key value pairs.
+     *
+     * @param entryStream A flux providing the key value pairs.
+     * @return A mono which signals the completion of the storage of the pairs.
+     */
+    Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream);
+
+    @Override
+    default Mono<V> find(Long id) {
+        return find((long) id);
+    }
+
+    /**
+     * Attempts to find the value associated with the provided id.
+     *
+     * @param id The id to search with.
+     * @return A mono, which may or may not contain an associated object.
+     */
+    Mono<V> find(long id);
+
+    @Override
+    default Mono<Boolean> exists(Long id) {
+        return exists((long) id);
+    }
+
+    /**
+     * Checks if a value is associated with the provided id.
+     *
+     * @param id The id to search with.
+     * @return A mono which provides true or false, depending on whether the id is associated with a value.
+     */
+    Mono<Boolean> exists(long id);
+
+    @Override
+    Mono<Boolean> exists(Publisher<Long> ids); //No way around this q.q
+
+    @Override
+    default Flux<V> findInRange(Long start, Long end) {
+        return findInRange((long) start, (long) end);
+    }
+
+    /**
+     * Retrieves all stored values with ids within a provided range.
+     *
+     * @param start The starting key (inclusive).
+     * @param end The ending key (exclusive).
+     * @return The stream of values with ids within the provided range.
+     */
+    Flux<V> findInRange(long start, long end);
+
+    @Override
+    Flux<V> findAll(Iterable<Long> ids); //No way around this q.q
+
+    @Override
+    Flux<V> findAll(Publisher<Long> ids); //No way around this q.q
+
+    @Override
+    default Mono<Void> delete(Long id) {
+        return delete((long) id);
+    }
+
+    /**
+     * Deletes a value associated with the provided id.
+     *
+     * @param id The id of the value to delete.
+     * @return A mono which signals the completion of the deletion of the value.
+     */
+    Mono<Void> delete(long id);
+
+    @Override
+    Mono<Void> delete(Publisher<Long> ids); //No way around this q.q
+
+    @Override
+    default Mono<Void> delete(Tuple2<Long, V> entry) {
+        return delete(LongObjTuple2.from(entry));
+    }
+
+    /**
+     * Deletes a key value pair.
+     *
+     * @param entry The entry to delete.
+     * @return A mono which signals the completion of the deletion of the value.
+     */
+    Mono<Void> delete(LongObjTuple2<V> entry);
+
+    @Override
+    default Mono<Void> deleteInRange(Long start, Long end) {
+        return deleteInRange((long) start, (long) end);
+    }
+
+    /**
+     * Deletes values within a range of ids.
+     *
+     * @param start The starting key (inclusive).
+     * @param end The ending key (exclusive).
+     * @return A mono which signals the completion of the deletion of values.
+     */
+    Mono<Void> deleteInRange(long start, long end);
+
+    @Override
+    default Mono<Void> deleteAll(Iterable<Tuple2<Long, V>> entries) {
+        return deleteAllWithLongs(new MappingIterable<>(LongObjTuple2::from, entries));
+    }
+
+    /**
+     * Deletes all provided entries.
+     *
+     * @param entries The entries to delete.
+     * @return A mono which signals the completion of the deletion of values.
+     */
+    Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries);
+
+    @Override
+    default Mono<Void> deleteAll(Publisher<Tuple2<Long, V>> entries) {
+        return deleteAllWithLongs(Flux.from(entries).map(LongObjTuple2::from));
+    }
+
+    /**
+     * Deletes all provided entries.
+     *
+     * @param entries A stream of entries to delete.
+     * @return A mono which signals the completion of the deletion of values.
+     */
+    Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries);
+
+    @Override
+    default Flux<Tuple2<Long, V>> entries() {
+        return Store.super.entries();
+    }
+
+    /**
+     * Gets a stream of all entries in the data source.
+     *
+     * @return The stream of all entries stored.
+     */
+    default Flux<LongObjTuple2<V>> longObjEntries() { //TODO: Figure out how to make this more efficient (maybe)
+        return entries().map(LongObjTuple2::from);
+    }
 }

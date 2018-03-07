@@ -18,19 +18,116 @@ package discord4j.store.noop.primitive;
 
 import discord4j.store.noop.NoOpStore;
 import discord4j.store.primitive.LongObjStore;
-import discord4j.store.primitive.LongObjStoreOperations;
+import discord4j.store.util.LongObjTuple2;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Store implementation which does nothing.
+ * Data connection implementation which does nothing.
  *
- * @see discord4j.store.noop.NoOpStoreService
+ * @see NoOpLongObjStore
  * @see NoOpStore
  */
 public class NoOpLongObjStore<V> implements LongObjStore<V> {
 
     @Override
-    public Mono<LongObjStoreOperations<V>> getConnection() {
-        return Mono.just(new NoOpLongObjStoreOperations<>());
+    public Mono<Void> storeWithLong(long key, V value) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<V> find(long id) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Boolean> exists(long id) {
+        return Mono.just(false);
+    }
+
+    @Override
+    public Mono<Boolean> exists(Publisher<Long> ids) {
+        return Mono.just(false);
+    }
+
+    @Override
+    public Flux<V> findInRange(long start, long end) {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> findAll() {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> findAll(Iterable<Long> ids) {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> findAll(Publisher<Long> ids) {
+        return Flux.empty();
+    }
+
+    @Override
+    public Mono<Long> count() {
+        return Mono.just(0L);
+    }
+
+    @Override
+    public Mono<Void> delete(long id) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> delete(Publisher<Long> ids) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAll() {
+        return Mono.empty();
+    }
+
+    @Override
+    public Flux<Long> keys() {
+        return Flux.empty();
+    }
+
+    @Override
+    public Flux<V> values() {
+        return Flux.empty();
+    }
+
+    @Override
+    public Mono<Void> delete(LongObjTuple2<V> entry) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteInRange(long start, long end) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries) {
+        return Mono.empty();
     }
 }

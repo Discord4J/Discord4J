@@ -17,7 +17,6 @@
 package discord4j.store.service;
 
 import discord4j.store.Store;
-import discord4j.store.StoreOperations;
 import discord4j.store.util.WithinRangePredicate;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -32,138 +31,121 @@ public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
     private final Map<K, V> map = new ConcurrentHashMap<>();
 
     @Override
-    public Mono<? extends StoreOperations<K, V>> getConnection() {
-        return Mono.defer(() -> Mono.just(new MapStoreStoreOperations()));
+    public Mono<Void> store(K key, V value) {
+        return Mono.defer(() -> {
+            map.put(key, value);
+            return Mono.empty();
+        });
     }
 
-    private final class MapStoreStoreOperations implements StoreOperations<K, V> {
+    @Override
+    public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
+        return Flux.fromIterable(entries).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
+    }
 
-        private MapStoreStoreOperations() {
+    @Override
+    public Mono<Void> store(Publisher<Tuple2<K, V>> entryStream) {
+        return Flux.from(entryStream).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
+    }
 
-        }
+    @Override
+    public Mono<V> find(K id) {
+        return Mono.defer(() -> Mono.just(map.get(id)));
+    }
 
-        @Override
-        public Mono<Void> store(K key, V value) {
-            return Mono.defer(() -> {
-                map.put(key, value);
-                return Mono.empty();
-            });
-        }
+    @Override
+    public Mono<Boolean> exists(K id) {
+        return Mono.defer(() -> Mono.just(map.containsKey(id)));
+    }
 
-        @Override
-        public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
-            return Flux.fromIterable(entries).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
-        }
+    @Override
+    public Mono<Boolean> exists(Publisher<K> ids) {
+        return Flux.from(ids).all(map::containsKey);
+    }
 
-        @Override
-        public Mono<Void> store(Publisher<Tuple2<K, V>> entryStream) {
-            return Flux.from(entryStream).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
-        }
+    @Override
+    public Flux<V> findAll() {
+        return Flux.defer(() -> Flux.fromIterable(map.values()));
+    }
 
-        @Override
-        public Mono<V> find(K id) {
-            return Mono.defer(() -> Mono.just(map.get(id)));
-        }
+    @Override
+    public Flux<V> findAll(Iterable<K> ids) {
+        return Flux.defer(() -> Flux.fromIterable(ids)).map(map::get);
+    }
 
-        @Override
-        public Mono<Boolean> exists(K id) {
-            return Mono.defer(() -> Mono.just(map.containsKey(id)));
-        }
+    @Override
+    public Flux<V> findAll(Publisher<K> ids) {
+        return Flux.from(ids).map(map::get);
+    }
 
-        @Override
-        public Mono<Boolean> exists(Publisher<K> ids) {
-            return Flux.from(ids).all(map::containsKey);
-        }
+    @Override
+    public Flux<V> findInRange(K start, K end) {
+        WithinRangePredicate<K> predicate = new WithinRangePredicate<>(start, end);
+        return Flux.defer(() -> Flux.fromIterable(map.entrySet()))
+                .filter(entry -> predicate.test(entry.getKey()))
+                .map(Map.Entry::getValue);
+    }
 
-        @Override
-        public Flux<V> findAll() {
-            return Flux.defer(() -> Flux.fromIterable(map.values()));
-        }
+    @Override
+    public Mono<Long> count() {
+        return Mono.defer(() -> Mono.just((long) map.size()));
+    }
 
-        @Override
-        public Flux<V> findAll(Iterable<K> ids) {
-            return Flux.defer(() -> Flux.fromIterable(ids)).map(map::get);
-        }
+    @Override
+    public Mono<Void> delete(K id) {
+        return Mono.defer(() -> {
+            map.remove(id);
+            return Mono.empty();
+        });
+    }
 
-        @Override
-        public Flux<V> findAll(Publisher<K> ids) {
-            return Flux.from(ids).map(map::get);
-        }
+    @Override
+    public Mono<Void> delete(Publisher<K> ids) {
+        return Flux.from(ids).doOnNext(map::remove).then();
+    }
 
-        @Override
-        public Flux<V> findInRange(K start, K end) {
-            WithinRangePredicate<K> predicate = new WithinRangePredicate<>(start, end);
-            return Flux.defer(() -> Flux.fromIterable(map.entrySet()))
-                    .filter(entry -> predicate.test(entry.getKey()))
-                    .map(Map.Entry::getValue);
-        }
+    @Override
+    public Mono<Void> delete(Tuple2<K, V> entry) {
+        return Mono.defer(() -> {
+            map.remove(entry.getT1(), entry.getT2());
+            return Mono.empty();
+        });
+    }
 
-        @Override
-        public Mono<Long> count() {
-            return Mono.defer(() -> Mono.just((long) map.size()));
-        }
+    @Override
+    public Mono<Void> deleteInRange(K start, K end) {
+        WithinRangePredicate<K> predicate = new WithinRangePredicate<>(start, end);
+        return Flux.defer(() -> Flux.fromIterable(map.keySet()))
+                .filter(predicate)
+                .doOnNext(map::remove)
+                .then();
+    }
 
-        @Override
-        public Mono<Void> delete(K id) {
-            return Mono.defer(() -> {
-                map.remove(id);
-                return Mono.empty();
-            });
-        }
+    @Override
+    public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
+        return Flux.fromIterable(entries).doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
+    }
 
-        @Override
-        public Mono<Void> delete(Publisher<K> ids) {
-            return Flux.from(ids).doOnNext(map::remove).then();
-        }
+    @Override
+    public Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries) {
+        return Flux.from(entries).doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
+    }
 
-        @Override
-        public Mono<Void> delete(Tuple2<K, V> entry) {
-            return Mono.defer(() -> {
-                map.remove(entry.getT1(), entry.getT2());
-                return Mono.empty();
-            });
-        }
+    @Override
+    public Mono<Void> deleteAll() {
+        return Mono.defer(() -> {
+            map.clear();
+            return Mono.empty();
+        });
+    }
 
-        @Override
-        public Mono<Void> deleteInRange(K start, K end) {
-            WithinRangePredicate<K> predicate = new WithinRangePredicate<>(start, end);
-            return Flux.defer(() -> Flux.fromIterable(map.keySet()))
-                    .filter(predicate)
-                    .doOnNext(map::remove)
-                    .then();
-        }
+    @Override
+    public Flux<K> keys() {
+        return Flux.defer(() -> Flux.fromIterable(map.keySet()));
+    }
 
-        @Override
-        public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
-            return Flux.fromIterable(entries).doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
-        }
-
-        @Override
-        public Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries) {
-            return Flux.from(entries).doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
-        }
-
-        @Override
-        public Mono<Void> deleteAll() {
-            return Mono.defer(() -> {
-                map.clear();
-                return Mono.empty();
-            });
-        }
-
-        @Override
-        public Flux<K> keys() {
-            return Flux.defer(() -> Flux.fromIterable(map.keySet()));
-        }
-
-        @Override
-        public Flux<V> values() {
-            return Flux.defer(() -> Flux.fromIterable(map.values()));
-        }
-
-        @Override
-        public void close() throws RuntimeException {
-
-        }
+    @Override
+    public Flux<V> values() {
+        return Flux.defer(() -> Flux.fromIterable(map.values()));
     }
 }
