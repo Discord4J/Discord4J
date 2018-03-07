@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 
 public class StoreTests {
 
-    private final StoreProvider provider = new StoreProvider();
+    private final StoreServiceLoader provider = new StoreServiceLoader();
 
     @SuppressWarnings("ConstantConditions")
     private Store<String, String> newStore() {

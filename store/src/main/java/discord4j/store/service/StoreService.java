@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
  *
  * @see java.util.ServiceLoader
  * @see <a href="https://github.com/google/auto/tree/master/service">Google AutoService</a>
- * @see StoreProvider
+ * @see StoreServiceLoader
  * @see NoOpStoreService
  */
 public interface StoreService {

@@ -22,28 +22,25 @@ import discord4j.store.primitive.ForwardingStoreService;
 import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Vector;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A factory-esque object which provides store objects from {@link StoreService}s.
  *
  * @see StoreService
  */
-public class StoreProvider {
+public class StoreServiceLoader {
 
-    private final List<StoreService> services = new Vector<>();
+    private final List<StoreService> services = new LinkedList<>();
 
-    private final AtomicReference<StoreService> genericService = new AtomicReference<>();
-    private final AtomicReference<StoreService> longObjService = new AtomicReference<>();
-    private final AtomicReference<StoreService> generalService = new AtomicReference<>();
+    private final StoreService generalService;
 
     /**
      * Creates a reusable instance of the provider, service discovery occurs at this point!
      */
-    public StoreProvider() {
+    public StoreServiceLoader() {
         ServiceLoader<StoreService> serviceLoader = ServiceLoader.load(StoreService.class);
 
         serviceLoader.iterator().forEachRemaining(services::add);
@@ -52,7 +49,7 @@ public class StoreProvider {
 
         StoreService generic = getGenericStoreProvider();
         StoreService primitive = getLongObjStoreProvider();
-        generalService.set(generic == primitive ? generic : new ComposedStoreService(generic, primitive));
+        generalService = generic == primitive ? generic : new ComposedStoreService(generic, primitive);
     }
 
     /**
@@ -61,16 +58,7 @@ public class StoreProvider {
      * @return The best {@link StoreService} implementation.
      */
     public StoreService getStoreService() {
-        return generalService.get();
-    }
-
-    /**
-     * Overrides the service to be returned by {@link #getStoreService()}.
-     *
-     * @param service The overriding service instance.
-     */
-    public void overrideStoreService(StoreService service) {
-        generalService.set(service);
+        return generalService;
     }
 
     /**
@@ -78,11 +66,8 @@ public class StoreProvider {
      *
      * @return The generic store providing service.
      */
-    protected StoreService getGenericStoreProvider() {
-        if (genericService.get() == null) {
-            services.stream().filter(StoreService::hasGenericStores).findFirst().ifPresent(genericService::set);
-        }
-        return genericService.get();
+    StoreService getGenericStoreProvider() {
+        return services.stream().filter(StoreService::hasGenericStores).findFirst().get();
     }
 
     /**
@@ -90,21 +75,17 @@ public class StoreProvider {
      *
      * @return The long-object store providing service.
      */
-    protected StoreService getLongObjStoreProvider() {
-        boolean firstRetrieval = false;
+    StoreService getLongObjStoreProvider() {
+        StoreService service = services.stream().filter(StoreService::hasLongObjStores).findFirst().get();
 
-        if (longObjService.get() == null) {
-            services.stream().filter(StoreService::hasLongObjStores).findFirst().ifPresent(longObjService::set);
-            firstRetrieval = true;
+        if (service instanceof NoOpStoreService) { //Fallback to boxed impl if one is present
+            StoreService backup = getGenericStoreProvider();
+            if (!(backup instanceof NoOpStoreService)) {
+                return new ForwardingStoreService(backup);
+            }
         }
 
-        if (firstRetrieval) { //Fallback to boxed impl if one is present
-            if (longObjService.get().getClass().equals(NoOpStoreService.class)
-                    && !getGenericStoreProvider().getClass().equals(NoOpStoreService.class))
-                longObjService.set(new ForwardingStoreService(getGenericStoreProvider()));
-        }
-
-        return longObjService.get();
+        return service;
     }
 
     /**
