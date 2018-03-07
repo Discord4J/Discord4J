@@ -69,7 +69,10 @@ allprojects {
         maven { url 'https://jitpack.io' }
     }
 
-    jar { doFirst { manifest = defaultManifest() } }
+    jar {
+        doFirst { manifest = defaultManifest() }
+        baseName = 'discord4j-' + baseName
+    }
 
     javadoc {
         options.encoding = 'UTF-8'
@@ -81,12 +84,14 @@ allprojects {
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
+        baseName = 'discord4j-' + baseName
         classifier = 'javadoc'
         from 'build/docs/javadoc'
         doFirst { manifest = defaultManifest() }
     }
 
     task sourcesJar(type: Jar) {
+        baseName = 'discord4j-' + baseName
         classifier = 'sources'
         from sourceSets.main.allSource
         doFirst { manifest = defaultManifest() }

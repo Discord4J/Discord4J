@@ -25,7 +25,7 @@ dependencies {
 
 publishing {
     publications {
-        rest(MavenPublication) {
+        core(MavenPublication) {
             artifactId 'discord4j-core'
 
             from components.java

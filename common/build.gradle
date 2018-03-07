@@ -12,7 +12,7 @@ dependencies {
 
 publishing {
     publications {
-        rest(MavenPublication) {
+        common(MavenPublication) {
             artifactId 'discord4j-common'
 
             from components.java
