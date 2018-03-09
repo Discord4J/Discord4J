@@ -72,7 +72,7 @@ public abstract class PayloadHandlers {
 	}
 
 	private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
-		// TODO
+		log.trace("Received heartbeat");
 	}
 
 	private static void handleReconnect(PayloadContext<?> context) {
@@ -94,14 +94,11 @@ public abstract class PayloadHandlers {
 		Duration interval = Duration.ofMillis(context.getData().getHeartbeatInterval());
 		context.getHeartbeat().start(interval);
 
-		// log trace
-
-		IdentifyProperties props = new IdentifyProperties("linux", "disco", "disco");
+		IdentifyProperties props = new IdentifyProperties(System.getProperty("os.name"), "Discord4J", "Discord4J");
 		Identify identify = new Identify(context.getToken(), props, false, 250, Possible.absent(), Possible
 				.absent());
 		GatewayPayload<Identify> response = GatewayPayload.identify(identify);
 
-		// payloadSender.send(response)
 		context.getHandler().outbound().onNext(response);
 	}
 

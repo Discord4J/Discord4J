@@ -36,12 +36,11 @@ import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
+import discord4j.rest.RestClient;
 import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
-import discord4j.rest.service.ApplicationService;
-import discord4j.rest.service.GatewayService;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.*;
@@ -66,7 +65,7 @@ public class RetryBotTest {
 		FakeClient client = new FakeClient(token);
 
 		client.gatewayClient.dispatch()
-				.map(dispatch -> DispatchContext.of(dispatch, client.client))
+				.map(dispatch -> DispatchContext.of(dispatch, client.impl))
 				.flatMap(context -> Mono.justOrEmpty(DispatchHandlers.<Dispatch, Event>handle(context)))
 				.subscribeWith(client.eventProcessor);
 
@@ -76,7 +75,7 @@ public class RetryBotTest {
 		LifecycleListener lifecycleListener = new LifecycleListener(client);
 		lifecycleListener.configure();
 
-		client.gatewayService.getGateway()
+		client.impl.getRestClient().getGatewayService().getGateway()
 				.flatMap(res -> client.gatewayClient.execute(res.getUrl() + "?v=6&encoding=json&compress=zlib-stream"))
 				.block();
 	}
@@ -87,14 +86,13 @@ public class RetryBotTest {
 
 	static class FakeClient {
 
-		private final Client client;
+		private final Client impl;
 
 		private final ObjectMapper mapper;
 
 		private final SimpleHttpClient httpClient;
 		private final Router router;
-		private final GatewayService gatewayService;
-		private final ApplicationService applicationService;
+		private final RestClient restClient;
 
 		private final PayloadReader reader;
 		private final PayloadWriter writer;
@@ -105,8 +103,6 @@ public class RetryBotTest {
 		private final EventDispatcher dispatcher;
 
 		FakeClient(String token) {
-			client = new Client();
-
 			mapper = new ObjectMapper()
 					.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
@@ -116,6 +112,7 @@ public class RetryBotTest {
 					.baseUrl(Routes.BASE_URL)
 					.defaultHeader("authorization", "Bot " + token)
 					.defaultHeader("content-type", "application/json")
+					.defaultHeader("user-agent", "Discord4J")
 					.readerStrategy(new JacksonReaderStrategy<>(mapper))
 					.readerStrategy(new EmptyReaderStrategy())
 					.writerStrategy(new JacksonWriterStrategy(mapper))
@@ -124,12 +121,14 @@ public class RetryBotTest {
 					.build();
 
 			router = new Router(httpClient);
-			gatewayService = new GatewayService(router);
-			applicationService = new ApplicationService(router);
 			reader = new JacksonPayloadReader(mapper);
 			writer = new JacksonPayloadWriter(mapper);
 			retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120));
+
+			restClient = new RestClient(router);
 			gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
+
+			impl = new Client(gatewayClient, restClient);
 
 			eventProcessor = EmitterProcessor.create(false);
 			dispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
@@ -150,7 +149,7 @@ public class RetryBotTest {
 
 			client.dispatcher.on(ReadyEvent.class)
 					.next()
-					.flatMap(ready -> client.applicationService.getCurrentApplicationInfo())
+					.flatMap(ready -> client.impl.getRestClient().getApplicationService().getCurrentApplicationInfo())
 					.map(res -> res.getOwner().getId())
 					.subscribe(ownerId::set);
 
