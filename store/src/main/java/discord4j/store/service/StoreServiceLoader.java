@@ -99,7 +99,7 @@ public class StoreServiceLoader {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    public <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return getStoreService().provideGenericStore(keyClass, valueClass);
     }
 
@@ -110,7 +110,7 @@ public class StoreServiceLoader {
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    public <V extends Serializable> Mono<LongObjStore<V>> newLongObjStore(Class<V> valueClass) {
+    public <V extends Serializable> LongObjStore<V> newLongObjStore(Class<V> valueClass) {
         return getStoreService().provideLongObjStore(valueClass);
     }
 
@@ -129,7 +129,7 @@ public class StoreServiceLoader {
         }
 
         @Override
-        public <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+        public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
             return genericService.provideGenericStore(keyClass, valueClass);
         }
 
@@ -139,7 +139,7 @@ public class StoreServiceLoader {
         }
 
         @Override
-        public <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
+        public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
             return primitiveService.provideLongObjStore(valueClass);
         }
     }

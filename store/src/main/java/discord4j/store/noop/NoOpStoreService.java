@@ -38,8 +38,8 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
-        return Mono.just(new NoOpStore<>());
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+        return new NoOpStore<>();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return Mono.just(new NoOpLongObjStore<>());
+    public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
+        return new NoOpLongObjStore<>();
     }
 }

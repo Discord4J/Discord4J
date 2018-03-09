@@ -55,7 +55,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return getOriginal().provideGenericStore(keyClass, valueClass);
     }
 
@@ -65,7 +65,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
-        return getOriginal().provideGenericStore(Long.class, valueClass).map(ForwardingStore::new);
+    public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
+        return new ForwardingStore<>(getOriginal().provideGenericStore(Long.class, valueClass));
     }
 }

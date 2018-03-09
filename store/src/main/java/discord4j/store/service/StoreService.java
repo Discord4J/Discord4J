@@ -53,7 +53,7 @@ public interface StoreService {
      *           <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
      * @return A mono which provides a store instance.
      */
-    <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
+    <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
 
     /**
      * This is used to check if this service can provide long-object stores.
@@ -72,5 +72,5 @@ public interface StoreService {
      *           <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
      * @return A mono which provides a store instance.
      */
-    <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass);
+    <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass);
 }

@@ -25,58 +25,53 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Copy of Reactor's Tuple2 but accepting a long as the first object.
+ * Copy of Reactor's Tuple2 but accepting two longs.
  *
- * @param <T> The second object type.
- *
- * @see LongObjTuple2#of(long, Object)
+ * @see LongLongTuple2#of(long, long)
  * @see Tuple2
  */
-public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Comparable<LongObjTuple2<T>> { //Methods copied from reactor.util.function.Tuple2, it would be extended instead but it has a private constructor
+public class LongLongTuple2 implements Iterable<Long>, Serializable, Comparable<LongLongTuple2> { //Methods copied from reactor.util.function.Tuple2, it would be extended instead but it has a private constructor
 
     /**
-     * Create a {@link LongObjTuple2} with the given objects.
+     * Create a {@link LongLongTuple2} with the given objects.
      *
      * @param t1   The first value in the tuple. Not null.
      * @param t2   The second value in the tuple. Not null.
-     * @param <T> The type of the second value.
-     * @return The new {@link LongObjTuple2}.
+     * @return The new {@link LongLongTuple2}.
      */
-    public static <T> LongObjTuple2<T> of(long t1, T t2) {
-        return new LongObjTuple2<>(t1, t2);
+    public static LongLongTuple2 of(long t1, long t2) {
+        return new LongLongTuple2(t1, t2);
     }
 
     /**
-     * Converts a {@link Tuple2} to a {@link LongObjTuple2}.
+     * Converts a {@link Tuple2} to a {@link LongLongTuple2}.
      *
      * @param tuple2 The {@link Tuple2} to convert.
-     * @param <T> The type of the second value.
-     * @return The new converted {@link LongObjTuple2}.
+     * @return The new converted {@link LongLongTuple2}.
      */
-    public static <T> LongObjTuple2<T> from(Tuple2<Long, T> tuple2) {
+    public static LongLongTuple2 from(Tuple2<Long, Long> tuple2) {
         return of(tuple2.getT1(), tuple2.getT2());
     }
 
     /**
-     * Converts a {@link LongObjTuple2} to a {@link Tuple2}.
+     * Converts a {@link LongLongTuple2} to a {@link Tuple2}.
      *
-     * @param tuple The {@link LongObjTuple2} to convert.
-     * @param <T> The type of the second value.
+     * @param tuple The {@link LongLongTuple2} to convert.
      * @return The new converted {@link Tuple2}.
      */
-    public static <T> Tuple2<Long, T> convert(LongObjTuple2<T> tuple) {
+    public static Tuple2<Long, Long> convert(LongLongTuple2 tuple) {
         return Tuples.of(tuple.getT1(), tuple.getT2());
     }
 
     private static final long serialVersionUID = 6977984978741213834L;
 
     final long t1;
-    @NonNull final T t2;
+    final long t2;
 
 
-    LongObjTuple2(long t1, T t2) {
+    LongLongTuple2(long t1, long t2) {
         this.t1 = t1;
-        this.t2 = Objects.requireNonNull(t2, "t2");
+        this.t2 = t2;
     }
 
     /**
@@ -93,7 +88,7 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
      *
      * @return The second object
      */
-    public T getT2() {
+    public long getT2() {
         return t2;
     }
 
@@ -102,17 +97,17 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
      * Get the object at the given index.
      *
      * @param index The index of the object to retrieve. Starts at 0.
-     * @return The object or {@literal null} if out of bounds.
+     * @return The object or throws {@link IndexOutOfBoundsException} if out of bounds.
+     * @throws IndexOutOfBoundsException
      */
-    @Nullable
-    public Object get(int index) {
+    public long get(int index) {
         switch (index) {
             case 0:
                 return t1;
             case 1:
                 return t2;
             default:
-                return null;
+                throw new IndexOutOfBoundsException();
         }
     }
 
@@ -121,8 +116,11 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
      *
      * @return A new Object list.
      */
-    public List<Object> toList() {
-        return Arrays.asList(toArray());
+    public List<Long> toList() {
+        List<Long> list = new ArrayList<>();
+        list.add(t1);
+        list.add(t2);
+        return list;
     }
 
     /**
@@ -130,12 +128,12 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
      *
      * @return A new Object array.
      */
-    public Object[] toArray() {
-        return new Object[]{t1, t2};
+    public long[] toArray() {
+        return new long[]{t1, t2};
     }
 
     @Override
-    public Iterator<Object> iterator() {
+    public Iterator<Long> iterator() {
         return Collections.unmodifiableList(toList()).iterator();
     }
 
@@ -151,11 +149,11 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
         if (o.getClass().equals(Tuple2.class)) {
             Tuple2<?, ?> tuple2 = (Tuple2<?, ?>) o;
 
-            return tuple2.getT1().equals(t1) && t2.equals(tuple2.getT2());
+            return tuple2.getT1().equals(t1) && tuple2.getT2().equals(t2);
         } else {
-            LongObjTuple2<?> tuple2 = (LongObjTuple2<?>) o;
+            LongLongTuple2 tuple2 = (LongLongTuple2) o;
 
-            return tuple2.t1 == t1 && t2.equals(tuple2.getT2());
+            return tuple2.t1 == t1 && tuple2.t2 == t2;
         }
     }
 
@@ -163,7 +161,7 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
     public int hashCode() {
         int result = size();
         result = 31 * result + Long.hashCode(t1);
-        result = 31 * result + t2.hashCode();
+        result = 31 * result + Long.hashCode(t2);
         return result;
     }
 
@@ -183,7 +181,7 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
      */
     @Override
     public final String toString() {
-        return tupleStringRepresentation(toArray()).insert(0, '[').append(']').toString();
+        return tupleStringRepresentation(t1, t2).insert(0, '[').append(']').toString();
     }
 
     /**
@@ -213,14 +211,13 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
     }
 
     @Override
-    public int compareTo(LongObjTuple2<T> o) { //Considers first object to have priority
+    public int compareTo(LongLongTuple2 o) { //Considers first object to have priority
+        if (o.t1 == t1 && o.t2 == t2)
+            return 0;
+
         if (o.t1 != t1)
             return t1 < o.t1 ? -1 : 1;
 
-        if (t2 instanceof Comparable) {
-            return ((Comparable) t2).compareTo(o.t2);
-        }
-
-        return 0;
+        return t2 < o.t2 ? -1 : 1;
     }
 }

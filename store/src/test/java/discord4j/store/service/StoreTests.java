@@ -36,7 +36,7 @@ public class StoreTests {
 
     @SuppressWarnings("ConstantConditions")
     private Store<String, String> newStore() {
-        return provider.newGenericStore(String.class, String.class).block();
+        return provider.newGenericStore(String.class, String.class);
     }
 
     @Test
