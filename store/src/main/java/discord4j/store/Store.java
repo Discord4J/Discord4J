@@ -37,6 +37,15 @@ import java.io.Serializable;
 public interface Store<K extends Comparable<K>, V extends Serializable> {
 
     /**
+     * Checks if this store is a No-Op implementation.
+     *
+     * @return True if no op, false if otherwise.
+     */
+    default boolean isNoOp() {
+        return false;
+    }
+
+    /**
      * Stores a key value pair.
      *
      * @param key The key representing the value.

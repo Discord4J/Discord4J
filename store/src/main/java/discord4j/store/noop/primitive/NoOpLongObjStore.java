@@ -34,6 +34,11 @@ import java.io.Serializable;
 public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V> {
 
     @Override
+    public boolean isNoOp() {
+        return true;
+    }
+
+    @Override
     public Mono<Void> storeWithLong(long key, V value) {
         return Mono.empty();
     }
