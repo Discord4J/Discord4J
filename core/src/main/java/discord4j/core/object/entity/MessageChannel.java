@@ -25,25 +25,25 @@ import java.util.Optional;
 /** A Discord channel that can utilizes messages. */
 public interface MessageChannel extends Channel {
 
-	/**
-	 * Gets the ID of the last message sent in this channel, if present.
-	 *
-	 * @return The ID of the last message sent in this channel, if present.
-	 */
-	Optional<Snowflake> getLastMessageId();
+    /**
+     * Gets the ID of the last message sent in this channel, if present.
+     *
+     * @return The ID of the last message sent in this channel, if present.
+     */
+    Optional<Snowflake> getLastMessageId();
 
-	/**
-	 * Requests to retrieve the last message sent in this channel, if present.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the last {@link Message message} sent in this
-	 * channel, if present. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	Mono<Message> getLastMessage();
+    /**
+     * Requests to retrieve the last message sent in this channel, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the last {@link Message message} sent in this
+     * channel, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Message> getLastMessage();
 
-	/**
-	 * Gets when the last pinned message was pinned, if present.
-	 *
-	 * @return When the last pinned message was pinned, if present.
-	 */
-	Optional<Instant> getLastPinTimestamp();
+    /**
+     * Gets when the last pinned message was pinned, if present.
+     *
+     * @return When the last pinned message was pinned, if present.
+     */
+    Optional<Instant> getLastPinTimestamp();
 }

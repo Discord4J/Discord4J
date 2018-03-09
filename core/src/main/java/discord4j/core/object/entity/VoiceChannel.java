@@ -17,38 +17,41 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.Client;
-import discord4j.core.object.data.ChannelData;
-
-import java.util.Optional;
+import discord4j.core.object.entity.bean.VoiceChannelBean;
 
 /** A Discord voice channel. */
 public final class VoiceChannel extends BaseGuildChannel {
 
-	/**
-	 * Constructs an {@code VoiceChannel} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param channel The raw data as represented by Discord, must be non-null.
-	 */
-	public VoiceChannel(final Client client, final ChannelData channel) {
-		super(client, channel);
-	}
+    /**
+     * Constructs an {@code VoiceChannel} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param channel The raw data as represented by Discord, must be non-null.
+     */
+    public VoiceChannel(final Client client, final VoiceChannelBean channel) {
+        super(client, channel);
+    }
 
-	/**
-	 * Gets the bitrate (in bits) for this voice channel.
-	 *
-	 * @return Gets the bitrate (in bits) for this voice channel.
-	 */
-	public int getBitrate() {
-		return Optional.ofNullable(data.getBitrate()).orElseThrow(IllegalStateException::new);
-	}
+    /**
+     * Gets the bitrate (in bits) for this voice channel.
+     *
+     * @return Gets the bitrate (in bits) for this voice channel.
+     */
+    public int getBitrate() {
+        return getData().getBitrate();
+    }
 
-	/**
-	 * Gets the user limit of this voice channel.
-	 *
-	 * @return The user limit of this voice channel.
-	 */
-	public int getUserLimit() {
-		return Optional.ofNullable(data.getUserLimit()).orElseThrow(IllegalStateException::new);
-	}
+    @Override
+    protected VoiceChannelBean getData() {
+        return (VoiceChannelBean) super.getData();
+    }
+
+    /**
+     * Gets the user limit of this voice channel.
+     *
+     * @return The user limit of this voice channel.
+     */
+    public int getUserLimit() {
+        return getData().getUserLimit();
+    }
 }

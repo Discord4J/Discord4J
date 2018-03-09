@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
-import discord4j.core.object.data.ChannelData;
+import discord4j.core.object.entity.bean.MessageChannelBean;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -27,28 +27,33 @@ import java.util.Optional;
 /** An internal implementation of {@link MessageChannel} designed to streamline inheritance. */
 class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
-	/**
-	 * Constructs an {@code BaseMessageChannel} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param data The raw data as represented by Discord, must be non-null.
-	 */
-	BaseMessageChannel(final Client client, final ChannelData data) {
-		super(client, data);
-	}
+    /**
+     * Constructs an {@code BaseMessageChannel} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
+     */
+    BaseMessageChannel(final Client client, final MessageChannelBean data) {
+        super(client, data);
+    }
 
-	@Override
-	public Optional<Snowflake> getLastMessageId() {
-		return Optional.ofNullable(data.getLastMessageId()).map(Snowflake::of);
-	}
+    @Override
+    public Optional<Snowflake> getLastMessageId() {
+        return Optional.ofNullable(getData().getLastMessageId()).map(Snowflake::of);
+    }
 
-	@Override
-	public Mono<Message> getLastMessage() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    @Override
+    public Mono<Message> getLastMessage() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	@Override
-	public Optional<Instant> getLastPinTimestamp() {
-		return Optional.ofNullable(data.getLastPinTimestamp()).map(Instant::parse);
-	}
+    @Override
+    public Optional<Instant> getLastPinTimestamp() {
+        return Optional.ofNullable(getData().getLastPinTimestamp()).map(Instant::parse);
+    }
+
+    @Override
+    protected MessageChannelBean getData() {
+        return (MessageChannelBean) super.getData();
+    }
 }

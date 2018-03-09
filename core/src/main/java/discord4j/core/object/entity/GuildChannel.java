@@ -26,47 +26,47 @@ import java.util.Set;
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel extends Channel, Positionable {
 
-	/**
-	 * Gets the ID of the guild this channel is associated to.
-	 *
-	 * @return The ID of the guild this channel is associated to.
-	 */
-	Snowflake getGuildId();
+    /**
+     * Gets the ID of the guild this channel is associated to.
+     *
+     * @return The ID of the guild this channel is associated to.
+     */
+    Snowflake getGuildId();
 
-	/**
-	 * Requests to retrieve the guild this channel is associated to.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this channel is
-	 * associated to. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	Mono<Guild> getGuild();
+    /**
+     * Requests to retrieve the guild this channel is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this channel is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Guild> getGuild();
 
-	/**
-	 * Gets the permission overwrites for this channel.
-	 *
-	 * @return The permission overwrites for this channel.
-	 */
-	Set<PermissionOverwrite> getPermissionOverwrites();
+    /**
+     * Gets the permission overwrites for this channel.
+     *
+     * @return The permission overwrites for this channel.
+     */
+    Set<PermissionOverwrite> getPermissionOverwrites();
 
-	/**
-	 * Gets the name of the channel.
-	 *
-	 * @return The name of the channel.
-	 */
-	String getName();
+    /**
+     * Gets the name of the channel.
+     *
+     * @return The name of the channel.
+     */
+    String getName();
 
-	/**
-	 * Gets the ID of the category for this channel, if present.
-	 *
-	 * @return The ID of the category for this channel, if present.
-	 */
-	Optional<Snowflake> getCategoryId();
+    /**
+     * Gets the ID of the category for this channel, if present.
+     *
+     * @return The ID of the category for this channel, if present.
+     */
+    Optional<Snowflake> getCategoryId();
 
-	/**
-	 * Requests to retrieve the category for this channel, if present.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Category category} this channel, if
-	 * present. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	Mono<Category> getCategory();
+    /**
+     * Requests to retrieve the category for this channel, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Category category} this channel, if
+     * present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Category> getCategory();
 }

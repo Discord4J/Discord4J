@@ -37,6 +37,7 @@ public class ChannelResponse {
 	@JsonProperty("permission_overwrites")
 	@Nullable
 	private OverwriteEntity[] permissionOverwrites;
+	@Nullable
 	private String name;
 	@Nullable
 	private String topic;
@@ -94,6 +95,7 @@ public class ChannelResponse {
 		return permissionOverwrites;
 	}
 
+	@Nullable
 	public String getName() {
 		return name;
 	}

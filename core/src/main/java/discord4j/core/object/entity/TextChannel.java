@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
-import discord4j.core.object.data.ChannelData;
+import discord4j.core.object.entity.bean.TextChannelBean;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -28,99 +28,104 @@ import java.util.Set;
 /** A Discord text channel. */
 public final class TextChannel extends BaseChannel implements GuildChannel, MessageChannel {
 
-	/** Delegates {@link GuildChannel} operations. */
-	private final BaseGuildChannel guildChannel;
+    /** Delegates {@link GuildChannel} operations. */
+    private final BaseGuildChannel guildChannel;
 
-	/** Delegates {@link MessageChannel} operations. */
-	private final BaseMessageChannel messageChannel;
+    /** Delegates {@link MessageChannel} operations. */
+    private final BaseMessageChannel messageChannel;
 
-	/**
-	 * Constructs an {@code TextChannel} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param channel The raw data as represented by Discord, must be non-null.
-	 */
-	public TextChannel(final Client client, final ChannelData channel) {
-		super(client, channel);
-		guildChannel = new BaseGuildChannel(client, channel);
-		messageChannel = new BaseMessageChannel(client, channel);
-	}
+    /**
+     * Constructs an {@code TextChannel} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param channel The raw data as represented by Discord, must be non-null.
+     */
+    public TextChannel(final Client client, final TextChannelBean channel) {
+        super(client, channel);
+        guildChannel = new BaseGuildChannel(client, channel.getGuildChannel());
+        messageChannel = new BaseMessageChannel(client, channel.getMessageChannel());
+    }
 
-	@Override
-	public Snowflake getGuildId() {
-		return guildChannel.getGuildId();
-	}
+    @Override
+    public Snowflake getGuildId() {
+        return guildChannel.getGuildId();
+    }
 
-	@Override
-	public Mono<Guild> getGuild() {
-		return guildChannel.getGuild();
-	}
+    @Override
+    public Mono<Guild> getGuild() {
+        return guildChannel.getGuild();
+    }
 
-	@Override
-	public Set<PermissionOverwrite> getPermissionOverwrites() {
-		return guildChannel.getPermissionOverwrites();
-	}
+    @Override
+    public Set<PermissionOverwrite> getPermissionOverwrites() {
+        return guildChannel.getPermissionOverwrites();
+    }
 
-	@Override
-	public String getName() {
-		return guildChannel.getName();
-	}
+    @Override
+    public String getName() {
+        return guildChannel.getName();
+    }
 
-	@Override
-	public Optional<Snowflake> getCategoryId() {
-		return guildChannel.getCategoryId();
-	}
+    @Override
+    public Optional<Snowflake> getCategoryId() {
+        return guildChannel.getCategoryId();
+    }
 
-	@Override
-	public Mono<Category> getCategory() {
-		return guildChannel.getCategory();
-	}
+    @Override
+    public Mono<Category> getCategory() {
+        return guildChannel.getCategory();
+    }
 
-	@Override
-	public Mono<Integer> getPosition() {
-		return guildChannel.getPosition();
-	}
+    @Override
+    public Mono<Integer> getPosition() {
+        return guildChannel.getPosition();
+    }
 
-	@Override
-	public Optional<Snowflake> getLastMessageId() {
-		return messageChannel.getLastMessageId();
-	}
+    @Override
+    public Optional<Snowflake> getLastMessageId() {
+        return messageChannel.getLastMessageId();
+    }
 
-	@Override
-	public Mono<Message> getLastMessage() {
-		return messageChannel.getLastMessage();
-	}
+    @Override
+    public Mono<Message> getLastMessage() {
+        return messageChannel.getLastMessage();
+    }
 
-	@Override
-	public Optional<Instant> getLastPinTimestamp() {
-		return messageChannel.getLastPinTimestamp();
-	}
+    @Override
+    public Optional<Instant> getLastPinTimestamp() {
+        return messageChannel.getLastPinTimestamp();
+    }
 
-	/**
-	 * Gets the channel topic.
-	 *
-	 * @return The channel topic.
-	 */
-	public String getTopic() {
-		return Optional.ofNullable(data.getTopic()).orElse("");
-	}
+    /**
+     * Gets the channel topic.
+     *
+     * @return The channel topic.
+     */
+    public String getTopic() {
+        return Optional.ofNullable(getData().getTopic()).orElse("");
+    }
 
-	/**
-	 * Gets whether this channel is considered NSFW (Not Safe For Work).
-	 *
-	 * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
-	 */
-	public boolean isNsfw() {
-		return Optional.ofNullable(data.getNsfw()).orElseThrow(IllegalStateException::new);
-	}
+    @Override
+    protected TextChannelBean getData() {
+        return (TextChannelBean) super.getData();
+    }
 
-	/**
-	 * Gets the <i>raw</i> mention. This is the format utilized to directly mention another text channel (assuming the
-	 * text channel exists in context of the mention).
-	 *
-	 * @return The <i>raw</i> mention.
-	 */
-	public String getMention() {
-		return "<#" + getId().asString() + ">";
-	}
+    /**
+     * Gets whether this channel is considered NSFW (Not Safe For Work).
+     *
+     * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
+     */
+    public boolean isNsfw() {
+        return getData().isNsfw();
+    }
+
+    /**
+     * Gets the <i>raw</i> mention. This is the format utilized to directly mention another text channel (assuming the
+     * text channel exists in context of the mention).
+     *
+     * @return The <i>raw</i> mention.
+     */
+    public String getMention() {
+        return "<#" + getId().asString() + ">";
+    }
 }

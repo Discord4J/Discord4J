@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.bean;
 
-import discord4j.core.object.DiscordObject;
-import discord4j.core.object.Snowflake;
+import discord4j.common.json.response.ChannelResponse;
 
-/** An uniquely identifiable object by {@link Snowflake}. */
-public interface Entity extends DiscordObject {
+public final class CategoryBean extends GuildChannelBean {
 
-    /**
-     * Gets the Snowflake that uniquely identifies this entity.
-     *
-     * @return The Snowflake that uniquely identifies this entity.
-     */
-    Snowflake getId();
+    private static final long serialVersionUID = 8028876377340193877L;
+
+    public CategoryBean(final ChannelResponse response) {
+        super(response);
+    }
+
+    public CategoryBean() {}
 }

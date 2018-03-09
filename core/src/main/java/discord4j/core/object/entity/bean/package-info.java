@@ -14,35 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.data;
+@NonNullApi
+package discord4j.core.object.entity.bean;
 
-public class OverwriteData {
-
-	private final long id;
-	private final String type;
-	private final int allow;
-	private final int deny;
-
-	public OverwriteData(long id, String type, int allow, int deny) {
-		this.id = id;
-		this.type = type;
-		this.allow = allow;
-		this.deny = deny;
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public int getAllow() {
-		return allow;
-	}
-
-	public int getDeny() {
-		return deny;
-	}
-}
+import reactor.util.annotation.NonNullApi;

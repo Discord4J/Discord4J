@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
-import discord4j.core.object.data.ChannelData;
+import discord4j.core.object.entity.bean.ChannelBean;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -26,38 +26,47 @@ import java.util.Objects;
 /** An internal implementation of {@link Channel} designed to streamline inheritance. */
 class BaseChannel implements Channel {
 
-	/** The Client associated to this object. */
-	private final Client client;
+    /** The raw data as represented by Discord. */
+    private final ChannelBean data;
 
-	/** The raw data as represented by Discord. */
-	protected final ChannelData data;
+    /** The Client associated to this object. */
+    private final Client client;
 
-	/**
-	 * Constructs an {@code BaseChannel} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param data The raw data as represented by Discord, must be non-null.
-	 */
-	BaseChannel(final Client client, final ChannelData data) {
-		this.client = Objects.requireNonNull(client);
-		this.data = Objects.requireNonNull(data);
-	}
+    /**
+     * Constructs a {@code BaseChannel} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
+     */
+    BaseChannel(final Client client, final ChannelBean data) {
+        this.client = Objects.requireNonNull(client);
+        this.data = Objects.requireNonNull(data);
+    }
 
-	@Override
-	public final Client getClient() {
-		return client;
-	}
+    @Override
+    public final Client getClient() {
+        return client;
+    }
 
-	@Override
-	public final Snowflake getId() {
-		return Snowflake.of(data.getId());
-	}
+    @Override
+    public final Snowflake getId() {
+        return Snowflake.of(data.getId());
+    }
 
-	@Override
-	public final Type getType() {
-		return Arrays.stream(Type.values())
-				.filter(type -> type.getValue() == data.getType())
-				.findFirst() // If this throws Discord added something
-				.orElseThrow(UnsupportedOperationException::new);
-	}
+    @Override
+    public final Type getType() {
+        return Arrays.stream(Type.values())
+                .filter(type -> type.getValue() == data.getType())
+                .findFirst() // If this throws Discord added something
+                .orElseThrow(UnsupportedOperationException::new);
+    }
+
+    /**
+     * Gets the raw data as represented by Discord.
+     *
+     * @return The raw data as represented by Discord.
+     */
+    protected ChannelBean getData() {
+        return data;
+    }
 }

@@ -18,62 +18,62 @@ package discord4j.core.object.entity;
 
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
-import discord4j.core.object.data.ChannelData;
+import discord4j.core.object.entity.bean.GuildChannelBean;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
 
 /** An internal implementation of {@link GuildChannel} designed to streamline inheritance. */
 class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
-	/**
-	 * Constructs an {@code BaseGuildChannel} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param data The raw data as represented by Discord, must be non-null.
-	 */
-	BaseGuildChannel(final Client client, final ChannelData data) {
-		super(client, data);
-	}
+    /**
+     * Constructs an {@code BaseGuildChannel} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
+     */
+    BaseGuildChannel(final Client client, final GuildChannelBean data) {
+        super(client, data);
+    }
 
-	@Override
-	public final Snowflake getGuildId() {
-		if (data.getGuildId() == null) throw new IllegalStateException();
-		return Snowflake.of(data.getGuildId());
-	}
+    @Override
+    public final Snowflake getGuildId() {
+        return Snowflake.of(getData().getGuildId());
+    }
 
-	@Override
-	public final Mono<Guild> getGuild() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    @Override
+    public final Mono<Guild> getGuild() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	@Override
-	public final Set<PermissionOverwrite> getPermissionOverwrites() {
-		if (data.getPermissionOverwrites() == null) return Collections.emptySet();
+    @Override
+    public final Set<PermissionOverwrite> getPermissionOverwrites() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-		return Arrays.stream(data.getPermissionOverwrites())
-				.map(overwrite -> new PermissionOverwrite(getClient(), overwrite))
-				.collect(Collectors.toSet());
-	}
+    @Override
+    public final String getName() {
+        return getData().getName();
+    }
 
-	@Override
-	public final String getName() {
-		return data.getName();
-	}
+    @Override
+    public final Optional<Snowflake> getCategoryId() {
+        return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
+    }
 
-	@Override
-	public final Optional<Snowflake> getCategoryId() {
-		return Optional.ofNullable(data.getParentId()).map(Snowflake::of);
-	}
+    @Override
+    public final Mono<Category> getCategory() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	@Override
-	public final Mono<Category> getCategory() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    @Override
+    protected GuildChannelBean getData() {
+        return (GuildChannelBean) super.getData();
+    }
 
-	@Override
-	public final Mono<Integer> getPosition() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    @Override
+    public final Mono<Integer> getPosition() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 }

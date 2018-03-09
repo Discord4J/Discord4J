@@ -18,146 +18,151 @@ package discord4j.core.object.entity;
 
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
-import discord4j.core.object.data.GuildEmojiData;
+import discord4j.core.object.entity.bean.GuildEmojiBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * A Discord guild emoji.
- *
+ * <p>
  * <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
 public final class GuildEmoji implements Entity {
 
-	/** The Client associated to this object. */
-	private final Client client;
+    /** The Client associated to this object. */
+    private final Client client;
 
-	/** The raw data as represented by Discord. */
-	private final GuildEmojiData data;
+    /** The raw data as represented by Discord. */
+    private final GuildEmojiBean data;
 
-	/** The ID of the guild this emoji is associated to. */
-	private final long guildId;
+    /** The ID of the guild this emoji is associated to. */
+    private final long guildId;
 
-	/**
-	 * Constructs a {@code GuildEmoji} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param data The raw data as represented by Discord, must be non-null.
-	 * @param guildId The ID of the guild this emoji is associated to.
-	 */
-	public GuildEmoji(final Client client, final GuildEmojiData data, final long guildId) {
-		this.client = Objects.requireNonNull(client);
-		this.data = Objects.requireNonNull(data);
-		this.guildId = guildId;
-	}
+    /**
+     * Constructs a {@code GuildEmoji} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
+     * @param guildId The ID of the guild this emoji is associated to.
+     */
+    public GuildEmoji(final Client client, final GuildEmojiBean data, final long guildId) {
+        this.client = Objects.requireNonNull(client);
+        this.data = Objects.requireNonNull(data);
+        this.guildId = guildId;
+    }
 
-	@Override
-	public Client getClient() {
-		return client;
-	}
+    @Override
+    public Client getClient() {
+        return client;
+    }
 
-	@Override
-	public Snowflake getId() {
-		return Snowflake.of(data.getId());
-	}
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.getId());
+    }
 
-	/**
-	 * Gets the emoji name.
-	 *
-	 * @return The emoji name.
-	 */
-	public String getName() {
-		return data.getName();
-	}
+    /**
+     * Gets the emoji name.
+     *
+     * @return The emoji name.
+     */
+    public String getName() {
+        return data.getName();
+    }
 
-	/**
-	 * Gets the IDs of the roles this emoji is whitelisted to.
-	 *
-	 * @return The IDs of the roles this emoji is whitelisted to.
-	 */
-	public Set<Snowflake> getRoleIds() {
-		if (data.getRoles() == null) return Collections.emptySet();
+    /**
+     * Gets the IDs of the roles this emoji is whitelisted to.
+     *
+     * @return The IDs of the roles this emoji is whitelisted to.
+     */
+    public Set<Snowflake> getRoleIds() {
+        if (data.getRoles() == null) {
+            return Collections.emptySet();
+        }
 
-		return Arrays.stream(data.getRoles())
-				.mapToObj(Snowflake::of)
-				.collect(Collectors.toSet());
-	}
+        return Arrays.stream(data.getRoles())
+                .mapToObj(Snowflake::of)
+                .collect(Collectors.toSet());
+    }
 
-	/**
-	 * Requests to retrieve the roles this emoji is whitelisted to.
-	 *
-	 * @return A {@link Flux} that continually emits the {@link Role roles} this emoji is whitelisted for. if an error
-	 * is received, it is emitted through the {@code Flux}.
-	 */
-	public Flux<Role> getRoles() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the roles this emoji is whitelisted to.
+     *
+     * @return A {@link Flux} that continually emits the {@link Role roles} this emoji is whitelisted for. if an error
+     * is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Role> getRoles() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	/**
-	 * Gets the ID of the user that created this emoji.
-	 *
-	 * @return The ID of the user that created this emoji.
-	 */
-	public Snowflake getUserId() {
-		return Snowflake.of(data.getUser());
-	}
+    /**
+     * Gets the ID of the user that created this emoji.
+     *
+     * @return The ID of the user that created this emoji.
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(data.getUser());
+    }
 
-	/**
-	 * Requests to retrieve the user that created this emoji.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link User user} that created this emoji. If
-	 * an error is received, it is emitted through the {@code Mono}.
-	 */
-	public Mono<User> getUser() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the user that created this emoji.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} that created this emoji. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getUser() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	/**
-	 * Gets whether this emoji must be wrapped in colons.
-	 *
-	 * @return {@code true} if this emoji must be wrapped in colons, {@code false} otherwise.
-	 */
-	public boolean requiresColons() {
-		return data.requiresColons();
-	}
+    /**
+     * Gets whether this emoji must be wrapped in colons.
+     *
+     * @return {@code true} if this emoji must be wrapped in colons, {@code false} otherwise.
+     */
+    public boolean requiresColons() {
+        return data.isRequireColons();
+    }
 
-	/**
-	 * Gets whether this emoji is managed.
-	 *
-	 * @return {@code true} if this emoji is managed, {@code false} otherwise.
-	 */
-	public boolean isManaged() {
-		return data.isManaged();
-	}
+    /**
+     * Gets whether this emoji is managed.
+     *
+     * @return {@code true} if this emoji is managed, {@code false} otherwise.
+     */
+    public boolean isManaged() {
+        return data.isManaged();
+    }
 
-	/**
-	 * Gets whether this emoji is animated.
-	 *
-	 * @return {@code true} if this emoji is animated, {@code false} otherwise.
-	 */
-	public boolean isAnimated() {
-		return data.isManaged();
-	}
+    /**
+     * Gets whether this emoji is animated.
+     *
+     * @return {@code true} if this emoji is animated, {@code false} otherwise.
+     */
+    public boolean isAnimated() {
+        return data.isManaged();
+    }
 
-	/**
-	 * Gets the ID of the guild this emoji is associated to.
-	 *
-	 * @return The ID of the guild this emoji is associated to.
-	 */
-	public Snowflake getGuildId() {
-		return Snowflake.of(guildId);
-	}
+    /**
+     * Gets the ID of the guild this emoji is associated to.
+     *
+     * @return The ID of the guild this emoji is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
 
-	/**
-	 * Requests to retrieve the guild this emoji is associated to.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this emoji is associated
-	 * to. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	public Mono<Guild> getGuild() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the guild this emoji is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this emoji is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 }

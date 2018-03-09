@@ -18,48 +18,49 @@ package discord4j.core.object.entity;
 
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
-import discord4j.core.object.data.ChannelData;
+import discord4j.core.object.entity.bean.PrivateChannelBean;
 import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /** A Discord private channel (also known as a DM). */
 public final class PrivateChannel extends BaseMessageChannel {
 
-	/**
-	 * Constructs an {@code PrivateChannel} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param data The raw data as represented by Discord, must be non-null.
-	 */
-	public PrivateChannel(final Client client, final ChannelData data) {
-		super(client, data);
-	}
+    /**
+     * Constructs an {@code PrivateChannel} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
+     */
+    public PrivateChannel(final Client client, final PrivateChannelBean data) {
+        super(client, data);
+    }
 
-	/**
-	 * Gets the IDs of the recipients for this private channel.
-	 *
-	 * @return The IDs of the recipients for this private channel.
-	 */
-	public Set<Snowflake> getRecipientIds() {
-		if (data.getRecipients() == null) throw new IllegalStateException();
+    /**
+     * Gets the IDs of the recipients for this private channel.
+     *
+     * @return The IDs of the recipients for this private channel.
+     */
+    public Set<Snowflake> getRecipientIds() {
+        return Arrays.stream(getData().getRecipients())
+                .mapToObj(Snowflake::of)
+                .collect(Collectors.toSet());
+    }
 
-		return Arrays.stream(data.getRecipients())
-				.mapToObj(Snowflake::of)
-				.collect(Collectors.toSet());
-	}
+    @Override
+    protected PrivateChannelBean getData() {
+        return (PrivateChannelBean) super.getData();
+    }
 
-	/**
-	 * Requests to retrieve the recipients for this private channel.
-	 *
-	 * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
-	 * is received, it is emitted through the {@code Flux}.
-	 */
-	public Flux<User> getRecipients() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the recipients for this private channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
+     * is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<User> getRecipients() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 }

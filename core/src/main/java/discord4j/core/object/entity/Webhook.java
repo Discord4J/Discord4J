@@ -16,10 +16,9 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.WebhookResponse;
 import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
-import discord4j.core.object.data.WebhookData;
+import discord4j.core.object.entity.bean.WebhookBean;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -32,114 +31,114 @@ import java.util.Optional;
  */
 public final class Webhook implements Entity {
 
-	/** The Client associated to this object. */
-	private final Client client;
+    /** The Client associated to this object. */
+    private final Client client;
 
-	/** The raw data as represented by Discord. */
-	private final WebhookData data;
+    /** The raw data as represented by Discord. */
+    private final WebhookBean data;
 
-	/**
-	 * Constructs a {@code Webhook} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param data The raw data as represented by Discord, must be non-null.
-	 */
-	public Webhook(final Client client, final WebhookData data) {
-		this.client = Objects.requireNonNull(client);
-		this.data = Objects.requireNonNull(data);
-	}
+    /**
+     * Constructs a {@code Webhook} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
+     */
+    public Webhook(final Client client, final WebhookBean data) {
+        this.client = Objects.requireNonNull(client);
+        this.data = Objects.requireNonNull(data);
+    }
 
-	@Override
-	public Client getClient() {
-		return client;
-	}
+    @Override
+    public Client getClient() {
+        return client;
+    }
 
-	@Override
-	public Snowflake getId() {
-		return Snowflake.of(data.getId());
-	}
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.getId());
+    }
 
-	/**
-	 * Gets the ID of the guild this webhook is associated to.
-	 *
-	 * @return The ID of the guild this webhook is associated to.
-	 */
-	public Snowflake getGuildId() {
-		return Snowflake.of(data.getGuildId());
-	}
+    /**
+     * Gets the ID of the guild this webhook is associated to.
+     *
+     * @return The ID of the guild this webhook is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(data.getGuildId());
+    }
 
-	/**
-	 * Requests to retrieve the guild this webhook is associated to.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this webhook is
-	 * associated to. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	public Mono<Guild> getGuild() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the guild this webhook is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this webhook is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	/**
-	 * Gets the ID of the channel this webhook is associated to.
-	 *
-	 * @return The ID of the channel this webhook is associated to.
-	 */
-	public Snowflake getChannelId() {
-		return Snowflake.of(data.getChannelId());
-	}
+    /**
+     * Gets the ID of the channel this webhook is associated to.
+     *
+     * @return The ID of the channel this webhook is associated to.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(data.getChannelId());
+    }
 
-	/**
-	 * Requests to retrieve the channel this webhook is associated to.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this webhook is
-	 * associated to. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	public Mono<TextChannel> getChannel() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the channel this webhook is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this webhook is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getChannel() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	/**
-	 * Gets the ID of the user this webhook was created by.
-	 *
-	 * @return The ID of the user this webhook was created by.
-	 */
-	public Snowflake getCreatorId() {
-		return Snowflake.of(data.getUser());
-	}
+    /**
+     * Gets the ID of the user this webhook was created by.
+     *
+     * @return The ID of the user this webhook was created by.
+     */
+    public Snowflake getCreatorId() {
+        return Snowflake.of(data.getUser());
+    }
 
-	/**
-	 * Requests to retrieve the user this webhook was created by, if present.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link User user} this webhook was created
-	 * by, if present. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	public Mono<User> getCreator() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the user this webhook was created by, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} this webhook was created
+     * by, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getCreator() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	/**
-	 * Gets the default name of the webhook.
-	 *
-	 * @return The default name of the webhook.
-	 */
-	public Optional<String> getName() {
-		return Optional.ofNullable(data.getName());
-	}
+    /**
+     * Gets the default name of the webhook.
+     *
+     * @return The default name of the webhook.
+     */
+    public Optional<String> getName() {
+        return Optional.ofNullable(data.getName());
+    }
 
-	/**
-	 * Gets the avatar of this webhook, if present.
-	 *
-	 * @return The avatar of this webhook, if present.
-	 */
-	public Optional<String> getAvatar() {
-		return Optional.ofNullable(data.getAvatar());
-	}
+    /**
+     * Gets the avatar of this webhook, if present.
+     *
+     * @return The avatar of this webhook, if present.
+     */
+    public Optional<String> getAvatar() {
+        return Optional.ofNullable(data.getAvatar());
+    }
 
-	/**
-	 * Gets the secure token of this webhook.
-	 *
-	 * @return The secure token of this webhook.
-	 */
-	public String getToken() {
-		return data.getToken();
-	}
+    /**
+     * Gets the secure token of this webhook.
+     *
+     * @return The secure token of this webhook.
+     */
+    public String getToken() {
+        return data.getToken();
+    }
 }
