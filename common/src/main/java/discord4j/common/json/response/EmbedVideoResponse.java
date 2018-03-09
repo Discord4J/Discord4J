@@ -16,11 +16,15 @@
  */
 package discord4j.common.json.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class EmbedVideoResponse {
 
 	private String url;
 	private int height;
 	private int width;
+	@JsonProperty("proxy_url")
+	private String proxyUrl;
 
 	public String getUrl() {
 		return url;
@@ -34,12 +38,17 @@ public class EmbedVideoResponse {
 		return width;
 	}
 
+	public String getProxyUrl() {
+		return proxyUrl;
+	}
+
 	@Override
 	public String toString() {
 		return "EmbedVideoResponse[" +
 				"url=" + url +
 				", height=" + height +
 				", width=" + width +
+				", proxy_url=" + proxyUrl +
 				']';
 	}
 }
