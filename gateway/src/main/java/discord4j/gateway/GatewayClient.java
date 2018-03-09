@@ -136,6 +136,13 @@ public class GatewayClient {
 				})).doOnTerminate(() -> dispatch.onNext(GatewayStateChange.disconnected()));
 	}
 
+	private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
+		if (payload.getSequence() != null) {
+			lastSequence.set(payload.getSequence());
+		}
+		return payload;
+	}
+
 	private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler) {
 		return new PayloadContext.Builder()
 				.setPayload(payload)
@@ -158,7 +165,7 @@ public class GatewayClient {
 		if (reconnect) {
 			sender.onNext(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
 		} else {
-			sender.onNext(new GatewayPayload<>()); // trigger a graceful shutdown
+			sender.onNext(new GatewayPayload<>());
 			sender.onComplete();
 		}
 	}
@@ -187,13 +194,6 @@ public class GatewayClient {
 	 * @return a serializing FluxSink
 	 */
 	public FluxSink<GatewayPayload<?>> sender() {
-		return sender.sink(FluxSink.OverflowStrategy.ERROR);
-	}
-
-	private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
-		if (payload.getSequence() != null) {
-			lastSequence.set(payload.getSequence());
-		}
-		return payload;
+		return sender.sink();
 	}
 }

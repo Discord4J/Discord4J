@@ -18,9 +18,11 @@ package discord4j.gateway;
 
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.Opcode;
+import discord4j.common.json.payload.PayloadData;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.*;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
@@ -28,6 +30,7 @@ import reactor.core.publisher.UnicastProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.time.Duration;
 import java.util.logging.Level;
 
 /**
@@ -74,6 +77,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 	private final UnicastProcessor<GatewayPayload<?>> inboundExchange = UnicastProcessor.create();
 	private final UnicastProcessor<GatewayPayload<?>> outboundExchange = UnicastProcessor.create();
 	private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
+	private final TokenBucket limiter = new TokenBucket(120, Duration.ofSeconds(60));
 
 	private final PayloadReader reader;
 	private final PayloadWriter writer;
@@ -105,14 +109,26 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 				.log(inboundLogger, Level.FINEST, false)
 				.subscribe(inboundExchange::onNext, this::error);
 
-		return session.send(outboundExchange
+		return session.send(outboundExchange.concatMap(this::limitRate)
 				.log(outboundLogger, Level.FINEST, false)
 				.flatMap(this::mapOutbound))
 				.then(completionNotifier);
 	}
 
+	private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
+		boolean success = limiter.tryConsume(1);
+		if (success) {
+			return Mono.just(payload);
+		} else {
+			return Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
+					.map(x -> limiter.tryConsume(1))
+					.map(consumed -> payload);
+		}
+	}
+
 	private Flux<WebSocketMessage> mapOutbound(GatewayPayload<?> payload) {
 		if (payload.getOp() == null) {
+			// Gracefully close our gateway
 			return Flux.just(WebSocketMessage.close());
 		} else if (Opcode.RECONNECT.equals(payload.getOp())) {
 			error(new RuntimeException("Reconnecting due to user action"));
