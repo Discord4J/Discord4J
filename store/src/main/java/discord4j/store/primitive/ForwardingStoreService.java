@@ -20,6 +20,8 @@ import discord4j.store.Store;
 import discord4j.store.service.StoreService;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
+
 /**
  * An implementation of {@link StoreService} which creates primitive stores which delegate to another, generic store.
  *
@@ -53,7 +55,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return getOriginal().provideGenericStore(keyClass, valueClass);
     }
 
@@ -63,7 +65,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <V> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
+    public <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
         return getOriginal().provideGenericStore(Long.class, valueClass).map(ForwardingStore::new);
     }
 }

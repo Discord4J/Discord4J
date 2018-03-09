@@ -23,10 +23,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MapStore<K extends Comparable<K>, V> implements Store<K, V> {
+public class MapStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
 
     private final Map<K, V> map = new ConcurrentHashMap<>();
 

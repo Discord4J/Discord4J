@@ -21,6 +21,8 @@ import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
+
 /**
  * This represents a java service which provides stores.
  *
@@ -47,10 +49,11 @@ public interface StoreService {
      * @param valueClass The class of the values.
      * @param <K> The key type which provides a 1:1 mapping to the value type. This type is also expected to be
      *           {@link Comparable} in order to allow for range operations.
-     * @param <V> The value type.
+     * @param <V> The value type, these follow
+     *           <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
      * @return A mono which provides a store instance.
      */
-    <K extends Comparable<K>, V> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
+    <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass);
 
     /**
      * This is used to check if this service can provide long-object stores.
@@ -65,8 +68,9 @@ public interface StoreService {
      * This is called to provide a new store instance with a long key and object values.
      *
      * @param valueClass The class of the values.
-     * @param <V> The value type.
+     * @param <V> The value type, these follow
+     *           <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
      * @return A mono which provides a store instance.
      */
-    <V> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass);
+    <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass);
 }

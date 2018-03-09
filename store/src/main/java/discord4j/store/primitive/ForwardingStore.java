@@ -24,13 +24,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+import java.io.Serializable;
+
 /**
  * An implementation of {@link LongObjStore} which is a data connection that delegates to another, generic
  * one.
  *
  * @see LongObjStore
  */
-public class ForwardingStore<V> implements LongObjStore<V> {
+public class ForwardingStore<V extends Serializable> implements LongObjStore<V> {
 
     private final Store<Long, V> toForward;
 

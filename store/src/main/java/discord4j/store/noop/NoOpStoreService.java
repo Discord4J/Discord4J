@@ -22,6 +22,8 @@ import discord4j.store.primitive.LongObjStore;
 import discord4j.store.service.StoreService;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
+
 /**
  * Service which provides stores that do nothing. This is automatically used if no valid store services are found.
  *
@@ -36,7 +38,7 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return Mono.just(new NoOpStore<>());
     }
 
@@ -46,7 +48,7 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <V> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
+    public <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
         return Mono.just(new NoOpLongObjStore<>());
     }
 }

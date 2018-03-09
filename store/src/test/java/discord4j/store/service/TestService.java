@@ -21,6 +21,8 @@ import discord4j.store.Store;
 import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
+
 @AutoService(StoreService.class)
 public class TestService implements StoreService {
 
@@ -30,7 +32,7 @@ public class TestService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Mono<Store<K, V>> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         return Mono.defer(() -> Mono.just(new MapStore<>()));
     }
 
@@ -40,7 +42,7 @@ public class TestService implements StoreService {
     }
 
     @Override
-    public <V> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
+    public <V extends Serializable> Mono<LongObjStore<V>> provideLongObjStore(Class<V> valueClass) {
         return Mono.empty();
     }
 }

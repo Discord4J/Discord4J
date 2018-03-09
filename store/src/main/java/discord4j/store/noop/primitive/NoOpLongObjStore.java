@@ -23,13 +23,15 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
+
 /**
  * Data connection implementation which does nothing.
  *
  * @see NoOpLongObjStore
  * @see NoOpStore
  */
-public class NoOpLongObjStore<V> implements LongObjStore<V> {
+public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V> {
 
     @Override
     public Mono<Void> storeWithLong(long key, V value) {
