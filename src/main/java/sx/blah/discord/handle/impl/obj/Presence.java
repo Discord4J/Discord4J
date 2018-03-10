@@ -89,12 +89,11 @@ public class Presence implements IPresence {
 		return Objects.hash(text, streamingUrl, status, activity);
 	}
 
-	
 	@Override
 	public String toString() {
-		return text;
+		return "Presence(" + text + " : " + streamingUrl + " : " + status.name() + " : " + activity.name() + ")";
 	}
-	
+
 	@Override
 	public Optional<ActivityType> getActivity() {
 		return Optional.ofNullable(activity);
