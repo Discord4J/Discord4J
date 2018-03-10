@@ -20,6 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.logging.LogLevel;
 import io.netty.handler.ssl.SslCloseCompletionEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -71,6 +72,16 @@ public class WebSocketSession {
 				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)
 				.then();
+	}
+
+	/**
+	 * Replace internal reactor-netty logging handler for HttpClients with a custom one that provides more concise
+	 * information.
+	 */
+	public void replaceLoggingHandler() {
+		getDelegate().getInbound().context()
+				.replaceHandler("reactor.left.loggingHandler",
+						new SimpleLoggingHandler(WebSocketSession.class, LogLevel.DEBUG));
 	}
 
 	/**
