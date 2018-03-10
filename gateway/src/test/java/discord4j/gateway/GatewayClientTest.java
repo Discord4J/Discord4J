@@ -16,8 +16,6 @@
  */
 package discord4j.gateway;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -33,7 +31,6 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.FluxSink;
 
 import java.time.Duration;
@@ -47,12 +44,6 @@ public class GatewayClientTest {
 	@Before
 	public void initialize() {
 		token = System.getenv("token");
-
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		context.getLogger("discord4j.rest.http.client").setLevel(Level.TRACE);
-		context.getLogger("reactor.ipc.netty.channel.ContextHandler").setLevel(Level.INFO);
-		context.getLogger("reactor.ipc.netty.http.client.HttpClient").setLevel(Level.INFO);
-		context.getLogger("io.netty.handler.codec.http.websocketx").setLevel(Level.INFO);
 	}
 
 	@Test

@@ -17,18 +17,16 @@
 
 package discord4j.gateway;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import discord4j.gateway.websocket.CloseStatus;
 import discord4j.gateway.websocket.WebSocketClient;
 import discord4j.gateway.websocket.WebSocketMessage;
 import io.netty.buffer.ByteBuf;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,7 +37,7 @@ import java.util.zip.InflaterOutputStream;
 public class GatewayTest {
 
 	public static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
-	private static final Logger log = LoggerFactory.getLogger(GatewayTest.class);
+	private static final Logger log = Loggers.getLogger(GatewayTest.class);
 
 	private String token;
 	private Inflater zlibContext;
@@ -48,9 +46,6 @@ public class GatewayTest {
 	public void initialize() {
 		zlibContext = new Inflater();
 		token = System.getenv("token");
-
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		context.getLogger("discord4j.rest.http.client").setLevel(Level.TRACE);
 	}
 
 	@Test

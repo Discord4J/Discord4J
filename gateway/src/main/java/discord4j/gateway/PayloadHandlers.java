@@ -72,7 +72,7 @@ public abstract class PayloadHandlers {
 	}
 
 	private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
-		log.trace("Received heartbeat");
+		log.debug("Received heartbeat");
 	}
 
 	private static void handleReconnect(PayloadContext<?> context) {
@@ -103,7 +103,7 @@ public abstract class PayloadHandlers {
 	}
 
 	private static void handleHeartbeatAck(PayloadContext<?> context) {
-		log.trace("Received heartbeat ack");
+		log.debug("Received heartbeat ack");
 	}
 
 }

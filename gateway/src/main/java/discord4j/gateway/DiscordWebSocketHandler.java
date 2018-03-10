@@ -95,6 +95,8 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
 	@Override
 	public Mono<Void> handle(WebSocketSession session) {
+		session.replaceLoggingHandler();
+
 		// Listen to a custom handler's response to retrieve the actual close code and reason, or an error signal if
 		// the channel was closed abruptly.
 		session.closeFuture()

@@ -21,20 +21,19 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.json.payload.*;
+import discord4j.common.json.payload.GatewayPayload;
+import discord4j.common.json.payload.Heartbeat;
+import discord4j.common.json.payload.Hello;
+import discord4j.common.json.payload.InvalidSession;
 import discord4j.common.json.payload.dispatch.Ready;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 import static org.junit.Assert.*;
 
 public class PayloadDeserializationTest {
-
-	private static final Logger log = LoggerFactory.getLogger(PayloadDeserializationTest.class);
 
 	private ObjectMapper mapper;
 

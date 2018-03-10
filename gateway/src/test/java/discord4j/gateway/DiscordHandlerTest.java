@@ -16,8 +16,6 @@
  */
 package discord4j.gateway;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -32,12 +30,11 @@ import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.WebSocketClient;
-import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,20 +42,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DiscordHandlerTest {
 
 	public static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
-	private static final Logger log = LoggerFactory.getLogger(DiscordHandlerTest.class);
+	private static final Logger log = Loggers.getLogger(DiscordHandlerTest.class);
 
 	private String token;
-
-	@Before
-	public void initialize() {
-		token = System.getenv("token");
-
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		context.getLogger("discord4j.rest.http.client").setLevel(Level.TRACE);
-		context.getLogger("reactor.ipc.netty.channel.ContextHandler").setLevel(Level.INFO);
-		context.getLogger("reactor.ipc.netty.http.client.HttpClient").setLevel(Level.INFO);
-		context.getLogger("io.netty.handler.codec.http.websocketx").setLevel(Level.INFO);
-	}
 
 	@Test
 	public void testGatewayConnect() throws Exception {

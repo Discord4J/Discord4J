@@ -24,16 +24,12 @@ import discord4j.common.json.payload.*;
 import discord4j.common.json.request.GameRequest;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class PayloadSerializationTest {
-
-	private static final Logger log = LoggerFactory.getLogger(PayloadSerializationTest.class);
 
 	private ObjectMapper mapper;
 

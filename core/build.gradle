@@ -19,8 +19,7 @@ dependencies {
     compile project(':store')
 
     testCompile "junit:junit:$junit_version"
-
-    testRuntime "ch.qos.logback:logback-classic:$logback_version"
+    testCompile "ch.qos.logback:logback-classic:$logback_version"
 }
 
 publishing {

@@ -22,7 +22,6 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.ipc.netty.http.client.HttpClient;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +58,6 @@ class SimpleHttpClientBuilder implements SimpleHttpClient.Builder {
 
 	@Override
 	public SimpleHttpClient build() {
-		return new SimpleHttpClient(HttpClient.create(), baseUrl, headers, writerStrategies, readerStrategies);
+		return new SimpleHttpClient(HttpClient.create(options -> options.compression(true)), baseUrl, headers, writerStrategies, readerStrategies);
 	}
 }

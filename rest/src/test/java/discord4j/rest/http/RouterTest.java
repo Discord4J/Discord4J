@@ -16,8 +16,6 @@
  */
 package discord4j.rest.http;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -28,9 +26,7 @@ import discord4j.common.json.response.MessageResponse;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
-import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -45,13 +41,6 @@ public class RouterTest {
 				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
 				.registerModule(new PossibleModule());
-	}
-
-	@Before
-	public void disableSomeLogs() {
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		context.getLogger("reactor.ipc.netty").setLevel(Level.INFO);
-		context.getLogger("io.netty").setLevel(Level.INFO);
 	}
 
 	@Test

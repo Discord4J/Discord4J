@@ -116,7 +116,7 @@ public class SimpleHttpClient {
 							.orElseGet(() -> Mono.error(new RuntimeException("No strategies to write this request: " +
 									body + " - " + contentType)));
 				})
-				.log(SimpleHttpClient.class.getName(), Level.FINEST)
+				.log(SimpleHttpClient.class.getName(), Level.FINE)
 				.flatMap(response -> {
 					exchangeFilter.getResponseFilter().accept(response);
 
