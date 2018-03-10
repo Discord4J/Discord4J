@@ -90,6 +90,11 @@ public class Presence implements IPresence {
 	}
 
 	@Override
+	public String toString() {
+		return "Presence(" + text + " : " + streamingUrl + " : " + status.name() + " : " + activity.name() + ")";
+	}
+
+	@Override
 	public Optional<ActivityType> getActivity() {
 		return Optional.ofNullable(activity);
 	}
