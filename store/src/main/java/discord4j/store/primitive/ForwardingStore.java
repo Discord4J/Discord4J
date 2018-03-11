@@ -55,11 +55,6 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     }
 
     @Override
-    public boolean isNoOp() {
-        return toForward.isNoOp();
-    }
-
-    @Override
     public Mono<Void> store(Long key, V value) {
         return toForward.store(key, value);
     }

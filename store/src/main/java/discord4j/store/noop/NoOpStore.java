@@ -34,11 +34,6 @@ import java.io.Serializable;
 public class NoOpStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
 
     @Override
-    public boolean isNoOp() {
-        return true;
-    }
-
-    @Override
     public Mono<Void> store(K key, V value) {
         return Mono.empty();
     }

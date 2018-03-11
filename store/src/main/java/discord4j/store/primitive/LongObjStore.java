@@ -33,6 +33,7 @@ import java.io.Serializable;
  *           <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
  *
  * @see Store
+ * @see discord4j.store.util.AbsentValue
  */
 public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
 

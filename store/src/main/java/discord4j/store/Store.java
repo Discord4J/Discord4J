@@ -33,17 +33,9 @@ import java.io.Serializable;
  *           <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
  *
  * @see LongObjStore
+ * @see discord4j.store.util.AbsentValue
  */
 public interface Store<K extends Comparable<K>, V extends Serializable> {
-
-    /**
-     * Checks if this store is a No-Op implementation.
-     *
-     * @return True if no op, false if otherwise.
-     */
-    default boolean isNoOp() {
-        return false;
-    }
 
     /**
      * Stores a key value pair.
