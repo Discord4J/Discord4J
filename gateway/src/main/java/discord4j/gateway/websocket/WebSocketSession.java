@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.ipc.netty.NettyPipeline;
+import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.websocket.WebsocketInbound;
 import reactor.ipc.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
@@ -81,7 +82,7 @@ public class WebSocketSession {
 	public void replaceLoggingHandler() {
 		getDelegate().getInbound().context()
 				.replaceHandler("reactor.left.loggingHandler",
-						new SimpleLoggingHandler(WebSocketSession.class, LogLevel.DEBUG));
+						new SimpleLoggingHandler(HttpClient.class, LogLevel.DEBUG));
 	}
 
 	/**

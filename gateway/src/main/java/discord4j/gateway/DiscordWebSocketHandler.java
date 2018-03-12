@@ -100,7 +100,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 		// Listen to a custom handler's response to retrieve the actual close code and reason, or an error signal if
 		// the channel was closed abruptly.
 		session.closeFuture()
-				.log(closeLogger, Level.FINEST, false)
+				.log(closeLogger, Level.FINE, false)
 				.map(CloseException::new)
 				.subscribe(this::error, this::error);
 
@@ -108,11 +108,11 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 				.map(WebSocketMessage::getPayload)
 				.compose(decompressor::completeMessages)
 				.map(reader::read)
-				.log(inboundLogger, Level.FINEST, false)
+				.log(inboundLogger, Level.FINE, false)
 				.subscribe(inboundExchange::onNext, this::error);
 
 		return session.send(outboundExchange.concatMap(this::limitRate)
-				.log(outboundLogger, Level.FINEST, false)
+				.log(outboundLogger, Level.FINE, false)
 				.flatMap(this::mapOutbound))
 				.then(completionNotifier);
 	}
