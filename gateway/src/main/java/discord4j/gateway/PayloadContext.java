@@ -20,7 +20,7 @@ import discord4j.common.ResettableInterval;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.PayloadData;
 import discord4j.common.json.payload.dispatch.Dispatch;
-import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.FluxSink;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,17 +35,17 @@ import java.util.concurrent.atomic.AtomicReference;
 public class PayloadContext<T extends PayloadData> {
 
 	private final GatewayPayload<T> payload;
-	private final EmitterProcessor<Dispatch> dispatch;
-	private final EmitterProcessor<GatewayPayload<?>> sender;
+	private final FluxSink<Dispatch> dispatch;
+	private final FluxSink<GatewayPayload<?>> sender;
 	private final AtomicInteger lastSequence;
 	private final AtomicReference<String> sessionId;
 	private final ResettableInterval heartbeat;
 	private final String token;
 	private final DiscordWebSocketHandler handler;
 
-	private PayloadContext(GatewayPayload<T> payload, EmitterProcessor<Dispatch> dispatch, EmitterProcessor
-			<GatewayPayload<?>> sender, AtomicInteger lastSequence, AtomicReference<String> sessionId,
-			ResettableInterval heartbeat, String token, DiscordWebSocketHandler handler) {
+	private PayloadContext(GatewayPayload<T> payload, FluxSink<Dispatch> dispatch, FluxSink<GatewayPayload<?>> sender,
+			AtomicInteger lastSequence, AtomicReference<String> sessionId, ResettableInterval heartbeat, String token,
+			DiscordWebSocketHandler handler) {
 		this.payload = payload;
 		this.dispatch = dispatch;
 		this.sender = sender;
@@ -65,11 +65,11 @@ public class PayloadContext<T extends PayloadData> {
 		return payload.getData();
 	}
 
-	public EmitterProcessor<Dispatch> getDispatch() {
+	public FluxSink<Dispatch> getDispatch() {
 		return dispatch;
 	}
 
-	public EmitterProcessor<GatewayPayload<?>> getSender() {
+	public FluxSink<GatewayPayload<?>> getSender() {
 		return sender;
 	}
 
@@ -96,8 +96,8 @@ public class PayloadContext<T extends PayloadData> {
 	public static class Builder {
 
 		private GatewayPayload<?> payload;
-		private EmitterProcessor<Dispatch> dispatch;
-		private EmitterProcessor<GatewayPayload<?>> sender;
+		private FluxSink<Dispatch> dispatch;
+		private FluxSink<GatewayPayload<?>> sender;
 		private AtomicInteger lastSequence;
 		private AtomicReference<String> sessionId;
 		private ResettableInterval heartbeat;
@@ -109,12 +109,12 @@ public class PayloadContext<T extends PayloadData> {
 			return this;
 		}
 
-		public Builder setDispatch(EmitterProcessor<Dispatch> dispatch) {
+		public Builder setDispatch(FluxSink<Dispatch> dispatch) {
 			this.dispatch = dispatch;
 			return this;
 		}
 
-		public Builder setSender(EmitterProcessor<GatewayPayload<?>> sender) {
+		public Builder setSender(FluxSink<GatewayPayload<?>> sender) {
 			this.sender = sender;
 			return this;
 		}

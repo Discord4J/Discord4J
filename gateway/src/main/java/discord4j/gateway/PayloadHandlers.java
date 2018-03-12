@@ -68,7 +68,7 @@ public abstract class PayloadHandlers {
 			String newSessionId = ((Ready) context.getData()).getSessionId();
 			context.getSessionId().set(newSessionId);
 		}
-		context.getDispatch().onNext(context.getData());
+		context.getDispatch().next(context.getData());
 	}
 
 	private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
@@ -83,7 +83,7 @@ public abstract class PayloadHandlers {
 		// TODO polish
 		if (context.getData().isResumable()) {
 			String token = context.getToken();
-			context.getHandler().outbound().onNext(GatewayPayload.resume(
+			context.getSender().next(GatewayPayload.resume(
 					new Resume(token, context.getSessionId().get(), context.getLastSequence().get())));
 		} else {
 			context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
@@ -99,7 +99,7 @@ public abstract class PayloadHandlers {
 				.absent());
 		GatewayPayload<Identify> response = GatewayPayload.identify(identify);
 
-		context.getHandler().outbound().onNext(response);
+		context.getSender().next(response);
 	}
 
 	private static void handleHeartbeatAck(PayloadContext<?> context) {

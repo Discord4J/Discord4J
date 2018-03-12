@@ -52,7 +52,8 @@ import java.util.function.Predicate;
  * of Discord gateway operations, that could span multiple websocket sessions over time.
  * <p>
  * It provides automatic reconnecting through a configurable retry policy, allows downstream consumers to receive
- * inbound events through {@link #dispatch()} and provides {@link #sender()} to submit events.
+ * inbound events through {@link #dispatch()} and direct raw payloads through {@link #receiver()} and provides
+ * {@link #sender()} to submit events.
  */
 public class GatewayClient {
 
@@ -61,16 +62,21 @@ public class GatewayClient {
 			!(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
 
 	private final WebSocketClient webSocketClient = new WebSocketClient();
+
 	private final PayloadReader payloadReader;
 	private final PayloadWriter payloadWriter;
 	private final RetryOptions retryOptions;
+	private final String token;
 
 	private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
+	private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
 	private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
 	private final AtomicInteger lastSequence = new AtomicInteger(0);
 	private final AtomicReference<String> sessionId = new AtomicReference<>("");
 	private final ResettableInterval heartbeat = new ResettableInterval();
-	private final String token;
+	private final FluxSink<Dispatch> dispatchSink;
+	private final FluxSink<GatewayPayload<?>> receiverSink;
+	private final FluxSink<GatewayPayload<?>> senderSink;
 
 	public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
 			RetryOptions retryOptions, String token) {
@@ -78,6 +84,12 @@ public class GatewayClient {
 		this.payloadWriter = payloadWriter;
 		this.retryOptions = retryOptions;
 		this.token = token;
+
+		// initialize the sinks to safely produce values downstream
+		// we use LATEST backpressure handling to avoid overflow on no subscriber situations
+		this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
+		this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
+		this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
 	}
 
 	/**
@@ -88,32 +100,41 @@ public class GatewayClient {
 	 */
 	public Mono<Void> execute(String gatewayUrl) {
 		return Mono.defer(() -> {
-			final DiscordWebSocketHandler wsHandler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
+			final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
 
+			// Internally subscribe to Ready to signal completion of retry mechanism
 			Disposable readySub = dispatch.ofType(Ready.class).subscribe(d -> {
 				RetryContext retryContext = retryOptions.getRetryContext();
 				if (retryContext.getResetCount() == 0) {
-					dispatch.onNext(GatewayStateChange.connected());
+					dispatchSink.next(GatewayStateChange.connected());
 				} else {
-					dispatch.onNext(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
+					dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
 				}
 				retryContext.reset();
 			});
-			Disposable inboundSub = wsHandler.inbound()
-					.map(this::updateSequence)
-					.map(payload -> payloadContext(payload, wsHandler))
-					.subscribe(PayloadHandlers::handle);
-			Disposable senderSub = sender.subscribe(wsHandler.outbound()::onNext, t -> wsHandler.close(),
-					wsHandler::close);
 
+			// Subscribe each inbound GatewayPayload to the receiver sink
+			Disposable inboundSub = handler.inbound().subscribe(receiverSink::next);
+
+			// Subscribe the receiver to process and transform the inbound payloads into Dispatch events
+			Disposable receiverSub = receiver.map(this::updateSequence)
+					.map(payload -> payloadContext(payload, handler))
+					.subscribe(PayloadHandlers::handle);
+
+			// Subscribe the handler's outbound exchange with our outgoing signals
+			// routing error and completion signals to close the gateway
+			Disposable senderSub = sender.subscribe(handler.outbound()::onNext, t -> handler.close(), handler::close);
+
+			// Create the heartbeat loop, and subscribe it using the sender sink
 			Disposable heartbeatSub = heartbeat.ticks()
 					.map(l -> new Heartbeat(lastSequence.get()))
 					.map(GatewayPayload::heartbeat)
-					.subscribe(wsHandler.outbound()::onNext);
+					.subscribe(handler.outbound()::onNext);
 
-			return webSocketClient.execute(gatewayUrl, wsHandler)
+			return webSocketClient.execute(gatewayUrl, handler)
 					.doOnTerminate(() -> {
 						inboundSub.dispose();
+						receiverSub.dispose();
 						senderSub.dispose();
 						heartbeatSub.dispose();
 						readySub.dispose();
@@ -128,12 +149,12 @@ public class GatewayClient {
 					long backoff = context.backoff().toMillis();
 					log.debug("Retry attempt {} in {} ms", attempt, backoff);
 					if (attempt == 1) {
-						dispatch.onNext(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
+						dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
 					} else {
-						dispatch.onNext(GatewayStateChange.retryFailed(attempt - 1, Duration.ofMillis(backoff)));
+						dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, Duration.ofMillis(backoff)));
 					}
 					context.applicationContext().next();
-				})).doOnTerminate(() -> dispatch.onNext(GatewayStateChange.disconnected()));
+				})).doOnTerminate(() -> dispatchSink.next(GatewayStateChange.disconnected()));
 	}
 
 	private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
@@ -146,8 +167,8 @@ public class GatewayClient {
 	private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler) {
 		return new PayloadContext.Builder()
 				.setPayload(payload)
-				.setDispatch(dispatch)
-				.setSender(sender)
+				.setDispatch(dispatchSink)
+				.setSender(senderSink)
 				.setLastSequence(lastSequence)
 				.setSessionId(sessionId)
 				.setHeartbeat(heartbeat)
@@ -163,10 +184,10 @@ public class GatewayClient {
 	 */
 	public void close(boolean reconnect) {
 		if (reconnect) {
-			sender.onNext(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
+			senderSink.next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
 		} else {
-			sender.onNext(new GatewayPayload<>());
-			sender.onComplete();
+			senderSink.next(new GatewayPayload<>());
+			senderSink.complete();
 		}
 	}
 
@@ -188,12 +209,30 @@ public class GatewayClient {
 	}
 
 	/**
+	 * Obtains the Flux of raw payloads inbound from the gateway connection made by this client.
+	 *
+	 * @return a Flux of GatewayPayload values
+	 */
+	public Flux<GatewayPayload<?>> receiver() {
+		return receiver;
+	}
+
+	/**
 	 * Retrieves a new FluxSink to safely produce outbound values. By Reactive Streams Specs Rule 2.12 this can't be
 	 * called twice from the same instance (based on object equality).
 	 *
 	 * @return a serializing FluxSink
 	 */
 	public FluxSink<GatewayPayload<?>> sender() {
-		return sender.sink();
+		return senderSink;
+	}
+
+	/**
+	 * Retrieve the ID of the current gateway session.
+	 *
+	 * @return the ID of the current gateway session. Used for resuming and voice.
+	 */
+	public String getSessionId() {
+		return sessionId.get();
 	}
 }
