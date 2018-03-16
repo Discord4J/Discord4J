@@ -1,6 +1,8 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '2.0.1'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
     id 'io.spring.dependency-management' version '1.0.4.RELEASE'
+    id 'com.github.ben-manes.versions' version '0.17.0'
+    id 'com.gorylenko.gradle-git-properties' version '1.4.21'
     id 'java'
 }
 
@@ -8,32 +10,19 @@ ext {
     // Project constants
     github_org = 'Discord4J'
     project_name = 'Discord4J'
-    artifact_group = 'com.discord4j'
+    artifact_group = 'com.github.austinv11'
     project_version = '3.0.0-SNAPSHOT'
     project_description = 'Java interface for the Discord API'
     project_jdk = '1.8'
 
     // Dependencies
     reactor_bom_version = 'Bismuth-SR7'
-    jackson_version = '2.9.2'
-    slf4j_version = '1.7.25'
+    jackson_version = '2.9.4'
     jsr305_version = '3.0.2'
     junit_version = '4.12'
-    logback_version = '1.2.3'
+    logback_version = '1.3.0-alpha4'
     autoservice_version = '1.0-rc4'
 
-    /** Function returns a new manifest that can be customized per module */
-    defaultManifest = {
-        return manifest {
-            def git_cmd = 'git describe --tags --always --long'
-            def git_proc = git_cmd.execute()
-            attributes 'SCM-Revision': git_proc.text.trim()
-            attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
-            attributes 'Build-Host': InetAddress.localHost.hostName
-        }
-    }
-
-    /** Used where gradle task evaluation would fail because of an undefined value, even if the task wasn't targeted. */
     defaultBlank = { closure ->
         try {
             closure()
@@ -51,6 +40,7 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'com.gorylenko.gradle-git-properties'
 
     sourceCompatibility = project_jdk
     targetCompatibility = project_jdk
@@ -70,8 +60,7 @@ allprojects {
     }
 
     jar {
-        doFirst { manifest = defaultManifest() }
-        baseName = 'discord4j-' + baseName
+        baseName = 'Discord4J-' + baseName
     }
 
     javadoc {
@@ -84,17 +73,15 @@ allprojects {
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
-        baseName = 'discord4j-' + baseName
+        baseName = 'Discord4J-' + baseName
         classifier = 'javadoc'
         from 'build/docs/javadoc'
-        doFirst { manifest = defaultManifest() }
     }
 
     task sourcesJar(type: Jar) {
-        baseName = 'discord4j-' + baseName
+        baseName = 'Discord4J-' + baseName
         classifier = 'sources'
         from sourceSets.main.allSource
-        doFirst { manifest = defaultManifest() }
     }
 
     artifacts {
@@ -107,6 +94,6 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.5.1'
-    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.5.1-all.zip'
+    gradleVersion = '4.6'
+    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.6-all.zip'
 }

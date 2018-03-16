@@ -9,7 +9,7 @@ dependencies {
 publishing {
     publications {
         rest(MavenPublication) {
-            artifactId 'discord4j-rest'
+            artifactId 'Discord4J-rest'
 
             from components.java
 

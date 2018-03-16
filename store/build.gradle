@@ -9,7 +9,7 @@ dependencies {
 publishing {
     publications {
         store(MavenPublication) {
-            artifactId 'discord4j-store'
+            artifactId 'Discord4J-store'
 
             from components.java
 

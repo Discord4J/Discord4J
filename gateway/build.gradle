@@ -9,7 +9,7 @@ dependencies {
 publishing {
     publications {
         gateway(MavenPublication) {
-            artifactId 'discord4j-gateway'
+            artifactId 'Discord4J-gateway'
 
             from components.java
 

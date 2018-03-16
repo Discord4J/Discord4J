@@ -3,14 +3,6 @@ apply plugin: 'com.github.johnrengelman.shadow'
 shadowJar {
     baseName = 'Discord4J'
     classifier = 'shaded'
-    manifest {
-        def git_cmd = 'git describe --tags --always --long'
-        // TODO: Fix for when Git is unavailable
-        // def git_proc = git_cmd.execute()
-        // attributes 'SCM-Revision': git_proc.text.trim()
-        attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
-        attributes 'Build-Host': InetAddress.localHost.hostName
-    }
 }
 
 dependencies {
@@ -25,7 +17,7 @@ dependencies {
 publishing {
     publications {
         core(MavenPublication) {
-            artifactId 'discord4j-core'
+            artifactId 'Discord4J-core'
 
             from components.java
 
