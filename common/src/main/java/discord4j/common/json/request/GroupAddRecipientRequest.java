@@ -20,20 +20,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GroupAddRecipientRequest {
 
-	@JsonProperty("access_token")
-	private final String accessToken;
-	private final String nick;
+    @JsonProperty("access_token")
+    private final String accessToken;
+    private final String nick;
 
-	public GroupAddRecipientRequest(String accessToken, String nick) {
-		this.accessToken = accessToken;
-		this.nick = nick;
-	}
+    public GroupAddRecipientRequest(String accessToken, String nick) {
+        this.accessToken = accessToken;
+        this.nick = nick;
+    }
 
-	@Override
-	public String toString() {
-		return "GroupAddRecipientRequest[" +
-				"accessToken=" + accessToken +
-				", nick=" + nick +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GroupAddRecipientRequest[" +
+                "accessToken=" + accessToken +
+                ", nick=" + nick +
+                ']';
+    }
 }

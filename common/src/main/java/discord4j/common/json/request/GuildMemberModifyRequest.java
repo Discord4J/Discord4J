@@ -27,78 +27,78 @@ import javax.annotation.Nullable;
 @PossibleJson
 public class GuildMemberModifyRequest {
 
-	@Nullable
-	private final Possible<String> nick;
-	@UnsignedJson
-	private final Possible<long[]> roles;
-	private final Possible<Boolean> mute;
-	private final Possible<Boolean> deaf;
-	@JsonProperty("channel_id")
-	@Nullable
-	@UnsignedJson
-	private final PossibleLong channelId;
+    @Nullable
+    private final Possible<String> nick;
+    @UnsignedJson
+    private final Possible<long[]> roles;
+    private final Possible<Boolean> mute;
+    private final Possible<Boolean> deaf;
+    @JsonProperty("channel_id")
+    @Nullable
+    @UnsignedJson
+    private final PossibleLong channelId;
 
-	public GuildMemberModifyRequest(@Nullable Possible<String> nick, Possible<long[]> roles,
-	                                Possible<Boolean> mute, Possible<Boolean> deaf,
-	                                @Nullable PossibleLong channelId) {
-		this.nick = nick;
-		this.roles = roles;
-		this.mute = mute;
-		this.deaf = deaf;
-		this.channelId = channelId;
-	}
+    public GuildMemberModifyRequest(@Nullable Possible<String> nick, Possible<long[]> roles,
+                                    Possible<Boolean> mute, Possible<Boolean> deaf,
+                                    @Nullable PossibleLong channelId) {
+        this.nick = nick;
+        this.roles = roles;
+        this.mute = mute;
+        this.deaf = deaf;
+        this.channelId = channelId;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private Possible<String> nick = Possible.absent();
-		private Possible<long[]> roles = Possible.absent();
-		private Possible<Boolean> mute = Possible.absent();
-		private Possible<Boolean> deaf = Possible.absent();
-		private PossibleLong channelId = PossibleLong.absent();
+        private Possible<String> nick = Possible.absent();
+        private Possible<long[]> roles = Possible.absent();
+        private Possible<Boolean> mute = Possible.absent();
+        private Possible<Boolean> deaf = Possible.absent();
+        private PossibleLong channelId = PossibleLong.absent();
 
-		public Builder nick(String nick) {
-			this.nick = Possible.of(nick);
-			return this;
-		}
+        public Builder nick(String nick) {
+            this.nick = Possible.of(nick);
+            return this;
+        }
 
-		public Builder roles(long[] roles) {
-			this.roles = Possible.of(roles);
-			return this;
-		}
+        public Builder roles(long[] roles) {
+            this.roles = Possible.of(roles);
+            return this;
+        }
 
-		public Builder mute(boolean mute) {
-			this.mute = Possible.of(mute);
-			return this;
-		}
+        public Builder mute(boolean mute) {
+            this.mute = Possible.of(mute);
+            return this;
+        }
 
-		public Builder deaf(boolean deaf) {
-			this.deaf = Possible.of(deaf);
-			return this;
-		}
+        public Builder deaf(boolean deaf) {
+            this.deaf = Possible.of(deaf);
+            return this;
+        }
 
-		public Builder channelId(@Nullable Long channelId) {
-//			this.channelId = channelId.isPresent() ? PossibleLong.of(channelId.getAsLong()) : null;
-			this.channelId = channelId == null ? null : PossibleLong.of(channelId);
-			return this;
-		}
+        public Builder channelId(@Nullable Long channelId) {
+            //			this.channelId = channelId.isPresent() ? PossibleLong.of(channelId.getAsLong()) : null;
+            this.channelId = channelId == null ? null : PossibleLong.of(channelId);
+            return this;
+        }
 
-		public GuildMemberModifyRequest build() {
-			return new GuildMemberModifyRequest(nick, roles, mute, deaf, channelId);
-		}
-	}
+        public GuildMemberModifyRequest build() {
+            return new GuildMemberModifyRequest(nick, roles, mute, deaf, channelId);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "GuildMemberModifyRequest[" +
-				"nick=" + nick +
-				", roles=" + roles +
-				", mute=" + mute +
-				", deaf=" + deaf +
-				", channelId=" + channelId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildMemberModifyRequest[" +
+                "nick=" + nick +
+                ", roles=" + roles +
+                ", mute=" + mute +
+                ", deaf=" + deaf +
+                ", channelId=" + channelId +
+                ']';
+    }
 }

@@ -34,41 +34,43 @@ import java.util.Collections;
 
 public class AuditLogServiceTest {
 
-	private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
+    private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
 
-	private AuditLogService auditLogService = null;
+    private AuditLogService auditLogService = null;
 
-	private AuditLogService getAuditLogService() {
+    private AuditLogService getAuditLogService() {
 
-		if (auditLogService != null) return auditLogService;
+        if (auditLogService != null) {
+            return auditLogService;
+        }
 
-		String token = System.getenv("token");
-		ObjectMapper mapper = getMapper();
+        String token = System.getenv("token");
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl(Routes.BASE_URL)
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .writerStrategy(new EmptyWriterStrategy())
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		return auditLogService = new AuditLogService(router);
-	}
+        return auditLogService = new AuditLogService(router);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testGetAuditLog() {
-		getAuditLogService().getAuditLog(guild, Collections.emptyMap()).block();
-	}
+    @Test
+    public void testGetAuditLog() {
+        getAuditLogService().getAuditLog(guild, Collections.emptyMap()).block();
+    }
 }

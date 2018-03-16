@@ -18,19 +18,19 @@ package discord4j.common.json.request;
 
 public class PartialChannelRequest {
 
-	private final String name;
-	private final int type;
+    private final String name;
+    private final int type;
 
-	public PartialChannelRequest(String name, int type) {
-		this.name = name;
-		this.type = type;
-	}
+    public PartialChannelRequest(String name, int type) {
+        this.name = name;
+        this.type = type;
+    }
 
-	@Override
-	public String toString() {
-		return "PartialChannelRequest[" +
-				"name=" + name +
-				", type=" + type +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "PartialChannelRequest[" +
+                "name=" + name +
+                ", type=" + type +
+                ']';
+    }
 }

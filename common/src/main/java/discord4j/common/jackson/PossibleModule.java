@@ -24,19 +24,19 @@ import com.fasterxml.jackson.databind.Module;
  */
 public class PossibleModule extends Module {
 
-	@Override
-	public String getModuleName() {
-		return "PossibleModule";
-	}
+    @Override
+    public String getModuleName() {
+        return "PossibleModule";
+    }
 
-	@Override
-	public Version version() {
-		return new Version(1, 0, 0, null, null, null);
-	}
+    @Override
+    public Version version() {
+        return new Version(1, 0, 0, null, null, null);
+    }
 
-	@Override
-	public void setupModule(SetupContext context) {
-		context.addSerializers(new PossibleSerializers());
-		context.addTypeModifier(new PossibleTypeModifier());
-	}
+    @Override
+    public void setupModule(SetupContext context) {
+        context.addSerializers(new PossibleSerializers());
+        context.addTypeModifier(new PossibleTypeModifier());
+    }
 }

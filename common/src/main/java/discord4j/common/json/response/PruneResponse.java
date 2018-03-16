@@ -18,16 +18,16 @@ package discord4j.common.json.response;
 
 public class PruneResponse {
 
-	private int pruned;
+    private int pruned;
 
-	public int getPruned() {
-		return pruned;
-	}
+    public int getPruned() {
+        return pruned;
+    }
 
-	@Override
-	public String toString() {
-		return "PruneResponse[" +
-				"pruned=" + pruned +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "PruneResponse[" +
+                "pruned=" + pruned +
+                ']';
+    }
 }

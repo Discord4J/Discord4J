@@ -41,35 +41,35 @@ import java.util.Objects;
  */
 public final class BucketKey {
 
-	private final String uriTemplate;
-	@Nullable
-	private final String majorParam;
+    private final String uriTemplate;
+    @Nullable
+    private final String majorParam;
 
-	private BucketKey(String uriTemplate, String completeUri) {
-		this.uriTemplate = uriTemplate;
-		this.majorParam = RouteUtils.getMajorParam(uriTemplate, completeUri);
-	}
+    private BucketKey(String uriTemplate, String completeUri) {
+        this.uriTemplate = uriTemplate;
+        this.majorParam = RouteUtils.getMajorParam(uriTemplate, completeUri);
+    }
 
-	static BucketKey of(String uriTemplate, String completeUri) {
-		return new BucketKey(uriTemplate, completeUri);
-	}
+    static BucketKey of(String uriTemplate, String completeUri) {
+        return new BucketKey(uriTemplate, completeUri);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(uriTemplate, majorParam);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(uriTemplate, majorParam);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
 
-		BucketKey bucket = (BucketKey) obj;
+        BucketKey bucket = (BucketKey) obj;
 
-		return uriTemplate.equals(bucket.uriTemplate) && Objects.equals(majorParam, bucket.majorParam);
-	}
+        return uriTemplate.equals(bucket.uriTemplate) && Objects.equals(majorParam, bucket.majorParam);
+    }
 }

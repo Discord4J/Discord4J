@@ -19,8 +19,6 @@ package discord4j.store.service;
 import com.google.auto.service.AutoService;
 import discord4j.store.Store;
 import discord4j.store.primitive.LongObjStore;
-import reactor.core.publisher.Mono;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
 
@@ -33,7 +31,8 @@ public class TestService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
+                                                                                             Class<V> valueClass) {
         return new MapStore<>();
     }
 
@@ -44,6 +43,6 @@ public class TestService implements StoreService {
 
     @Override
     public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 }

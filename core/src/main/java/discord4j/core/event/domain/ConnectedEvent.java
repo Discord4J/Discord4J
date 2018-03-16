@@ -19,8 +19,8 @@ package discord4j.core.event.domain;
 
 public class ConnectedEvent implements Event {
 
-	@Override
-	public String toString() {
-		return "Gateway connection established";
-	}
+    @Override
+    public String toString() {
+        return "Gateway connection established";
+    }
 }

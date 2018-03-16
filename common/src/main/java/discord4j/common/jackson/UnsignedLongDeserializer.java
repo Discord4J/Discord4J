@@ -25,33 +25,34 @@ import java.io.IOException;
 
 public class UnsignedLongDeserializer extends StdDeserializer<Object> implements ContextualDeserializer { // <Long | long[]>
 
-	public UnsignedLongDeserializer() {
-		super(Object.class);
-	}
+    public UnsignedLongDeserializer() {
+        super(Object.class);
+    }
 
-	private UnsignedLongDeserializer(JavaType type) {
-		super(type);
-	}
+    private UnsignedLongDeserializer(JavaType type) {
+        super(type);
+    }
 
-	@Override
-	public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
-		return new UnsignedLongDeserializer(property.getType());
-	}
+    @Override
+    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property){
+        return new UnsignedLongDeserializer(property.getType());
+    }
 
-	@Override
-	public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-		Class<?> type = handledType();
-		if (type.equals(long.class) || type.equals(Long.class)) {
-			return Long.parseUnsignedLong(p.getValueAsString());
-		} else if (type.equals(long[].class)) {
-			String[] ary = p.readValueAs(String[].class);
-			long[] ret = new long[ary.length];
-			for (int i = 0; i < ary.length; i++) {
-				ret[i] = Long.parseUnsignedLong(ary[i]);
-			}
-			return ret;
-		}
+    @Override
+    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        Class<?> type = handledType();
+        if (type.equals(long.class) || type.equals(Long.class)) {
+            return Long.parseUnsignedLong(p.getValueAsString());
+        } else if (type.equals(long[].class)) {
+            String[] ary = p.readValueAs(String[].class);
+            long[] ret = new long[ary.length];
+            for (int i = 0; i < ary.length; i++) {
+                ret[i] = Long.parseUnsignedLong(ary[i]);
+            }
+            return ret;
+        }
 
-		throw new IllegalStateException("Attempt to deserialize field marked with @UnsignedJson which is not of type Long | long[]: " + type.getSimpleName());
-	}
+        throw new IllegalStateException("Attempt to deserialize field marked with @UnsignedJson which is not of type" +
+                " Long | long[]: " + type.getSimpleName());
+    }
 }

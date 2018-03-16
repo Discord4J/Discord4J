@@ -33,105 +33,105 @@ import java.util.Set;
  */
 public class DiscordRequest<T> {
 
-	private final Route<T> route;
-	private final String completeUri;
+    private final Route<T> route;
+    private final String completeUri;
 
-	@Nullable
-	private Object body;
+    @Nullable
+    private Object body;
 
-	@Nullable
-	private Map<String, Object> queryParams;
+    @Nullable
+    private Map<String, Object> queryParams;
 
-	@Nullable
-	private Map<String, Set<String>> headers;
+    @Nullable
+    private Map<String, Set<String>> headers;
 
-	public DiscordRequest(Route<T> route, String completeUri) {
-		this.route = route;
-		this.completeUri = completeUri;
-	}
+    public DiscordRequest(Route<T> route, String completeUri) {
+        this.route = route;
+        this.completeUri = completeUri;
+    }
 
-	Route<T> getRoute() {
-		return route;
-	}
+    Route<T> getRoute() {
+        return route;
+    }
 
-	String getCompleteUri() {
-		return completeUri;
-	}
+    String getCompleteUri() {
+        return completeUri;
+    }
 
-	@Nullable
-	public Object getBody() {
-		return body;
-	}
+    @Nullable
+    public Object getBody() {
+        return body;
+    }
 
-	@Nullable
-	public Map<String, Object> getQueryParams() {
-		return queryParams;
-	}
+    @Nullable
+    public Map<String, Object> getQueryParams() {
+        return queryParams;
+    }
 
-	@Nullable
-	public Map<String, Set<String>> getHeaders() {
-		return headers;
-	}
+    @Nullable
+    public Map<String, Set<String>> getHeaders() {
+        return headers;
+    }
 
-	/**
-	 * Set the given synchronous {@link java.lang.Object} as the body for the request.
-	 *
-	 * @param body the object to set as request body
-	 * @return this request
-	 */
-	public DiscordRequest<T> body(Object body) {
-		this.body = body;
-		return this;
-	}
+    /**
+     * Set the given synchronous {@link java.lang.Object} as the body for the request.
+     *
+     * @param body the object to set as request body
+     * @return this request
+     */
+    public DiscordRequest<T> body(Object body) {
+        this.body = body;
+        return this;
+    }
 
-	/**
-	 * Add the given name and value as a request query parameter.
-	 *
-	 * @param key the query parameter name
-	 * @param value the query parameter value
-	 * @return this request
-	 */
-	public DiscordRequest<T> query(String key, Object value) {
-		if (queryParams == null) {
-			queryParams = new LinkedHashMap<>();
-		}
-		queryParams.put(key, value);
-		return this;
-	}
+    /**
+     * Add the given name and value as a request query parameter.
+     *
+     * @param key the query parameter name
+     * @param value the query parameter value
+     * @return this request
+     */
+    public DiscordRequest<T> query(String key, Object value) {
+        if (queryParams == null) {
+            queryParams = new LinkedHashMap<>();
+        }
+        queryParams.put(key, value);
+        return this;
+    }
 
-	/**
-	 * Adds the given names and values as request query parameters.
-	 *
-	 * @param params a map of query parameter names to values
-	 * @return this request
-	 */
-	public DiscordRequest<T> query(Map<String, Object> params) {
-		params.forEach(this::query);
-		return this;
-	}
+    /**
+     * Adds the given names and values as request query parameters.
+     *
+     * @param params a map of query parameter names to values
+     * @return this request
+     */
+    public DiscordRequest<T> query(Map<String, Object> params) {
+        params.forEach(this::query);
+        return this;
+    }
 
-	/**
-	 * Adds the given key and value to the headers of this request.
-	 *
-	 * @param key the header key
-	 * @param value the header value
-	 * @return this request
-	 */
-	public DiscordRequest<T> header(String key, String value) {
-		if (headers == null) {
-			headers = new LinkedHashMap<>();
-		}
-		headers.computeIfAbsent(key.toLowerCase(), k -> new LinkedHashSet<>()).add(value);
-		return this;
-	}
+    /**
+     * Adds the given key and value to the headers of this request.
+     *
+     * @param key the header key
+     * @param value the header value
+     * @return this request
+     */
+    public DiscordRequest<T> header(String key, String value) {
+        if (headers == null) {
+            headers = new LinkedHashMap<>();
+        }
+        headers.computeIfAbsent(key.toLowerCase(), k -> new LinkedHashSet<>()).add(value);
+        return this;
+    }
 
-	/**
-	 * Exchange this request through the given {@link discord4j.rest.request.Router}.
-	 *
-	 * @param router a router that performs this request
-	 * @return the result of this request
-	 */
-	public Mono<T> exchange(Router router) {
-		return router.exchange(this);
-	}
+    /**
+     * Exchange this request through the given {@link discord4j.rest.request.Router}.
+     *
+     * @param router a router that performs this request
+     * @return the result of this request
+     */
+    public Mono<T> exchange(Router router) {
+        return router.exchange(this);
+    }
 }

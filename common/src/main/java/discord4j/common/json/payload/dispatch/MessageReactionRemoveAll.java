@@ -21,26 +21,26 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class MessageReactionRemoveAll implements Dispatch {
 
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
-	@JsonProperty("message_id")
-	@UnsignedJson
-	private long messageId;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
+    @JsonProperty("message_id")
+    @UnsignedJson
+    private long messageId;
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	public long getMessageId() {
-		return messageId;
-	}
+    public long getMessageId() {
+        return messageId;
+    }
 
-	@Override
-	public String toString() {
-		return "MessageReactionRemoveAll[" +
-				"channelId=" + channelId +
-				", messageId=" + messageId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "MessageReactionRemoveAll[" +
+                "channelId=" + channelId +
+                ", messageId=" + messageId +
+                ']';
+    }
 }

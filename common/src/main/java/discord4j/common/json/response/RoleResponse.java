@@ -20,59 +20,59 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class RoleResponse {
 
-	@UnsignedJson
-	private long id;
-	private String name;
-	private int color;
-	private boolean hoist;
-	private int position;
-	private int permissions;
-	private boolean managed;
-	private boolean mentionable;
+    @UnsignedJson
+    private long id;
+    private String name;
+    private int color;
+    private boolean hoist;
+    private int position;
+    private int permissions;
+    private boolean managed;
+    private boolean mentionable;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public int getColor() {
-		return color;
-	}
+    public int getColor() {
+        return color;
+    }
 
-	public boolean isHoist() {
-		return hoist;
-	}
+    public boolean isHoist() {
+        return hoist;
+    }
 
-	public int getPosition() {
-		return position;
-	}
+    public int getPosition() {
+        return position;
+    }
 
-	public int getPermissions() {
-		return permissions;
-	}
+    public int getPermissions() {
+        return permissions;
+    }
 
-	public boolean isManaged() {
-		return managed;
-	}
+    public boolean isManaged() {
+        return managed;
+    }
 
-	public boolean isMentionable() {
-		return mentionable;
-	}
+    public boolean isMentionable() {
+        return mentionable;
+    }
 
-	@Override
-	public String toString() {
-		return "RoleResponse[" +
-				"id=" + id +
-				", name=" + name +
-				", color=" + color +
-				", hoist=" + hoist +
-				", position=" + position +
-				", permissions=" + permissions +
-				", managed=" + managed +
-				", mentionable=" + mentionable +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "RoleResponse[" +
+                "id=" + id +
+                ", name=" + name +
+                ", color=" + color +
+                ", hoist=" + hoist +
+                ", position=" + position +
+                ", permissions=" + permissions +
+                ", managed=" + managed +
+                ", mentionable=" + mentionable +
+                ']';
+    }
 }

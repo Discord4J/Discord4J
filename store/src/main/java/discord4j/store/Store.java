@@ -28,10 +28,9 @@ import java.io.Serializable;
  * This provides an active data connection to a store's data source.
  *
  * @param <K> The key type which provides a 1:1 mapping to the value type. This type is also expected to be
- *           {@link Comparable} in order to allow for range operations.
+ * {@link Comparable} in order to allow for range operations.
  * @param <V> The value type, these follow
- *           <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
- *
+ * <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
  * @see LongObjStore
  * @see discord4j.store.util.AbsentValue
  */

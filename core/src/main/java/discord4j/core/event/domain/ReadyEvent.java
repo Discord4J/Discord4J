@@ -21,20 +21,20 @@ import discord4j.common.json.payload.dispatch.Ready;
 
 public class ReadyEvent implements Event {
 
-	private final Ready ready;
+    private final Ready ready;
 
-	public ReadyEvent(Ready ready) {
-		this.ready = ready;
-	}
+    public ReadyEvent(Ready ready) {
+        this.ready = ready;
+    }
 
-	public Ready getReady() {
-		return ready;
-	}
+    public Ready getReady() {
+        return ready;
+    }
 
-	@Override
-	public String toString() {
-		return "ReadyEvent[" +
-				"ready=" + ready +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ReadyEvent[" +
+                "ready=" + ready +
+                ']';
+    }
 }

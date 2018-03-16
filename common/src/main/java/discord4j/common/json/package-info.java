@@ -20,11 +20,11 @@
  * The following rules should be followed when creating a new POJO:
  * <h1>Placement</h1>
  * <ul>
- *     <li>Objects which are to be <b>serialized and sent</b> to Discord should be placed in
- *     {@link discord4j.common.json.request}.
- *     <li>Objects which are to be <b>received and deserialized</b> from Discord should be placed in
- *     {@link discord4j.common.json.response}.
- *     <li>Objects whose receiving and sending models are identical should be placed in {@link discord4j.common.json}.
+ * <li>Objects which are to be <b>serialized and sent</b> to Discord should be placed in
+ * {@link discord4j.common.json.request}.
+ * <li>Objects which are to be <b>received and deserialized</b> from Discord should be placed in
+ * {@link discord4j.common.json.response}.
+ * <li>Objects whose receiving and sending models are identical should be placed in {@link discord4j.common.json}.
  * </ul>
  * <h1>Field Types</h1>
  * <p>
@@ -36,19 +36,19 @@
  * Snowflake IDs are <b>not</b> represented as {@code String}s. Instead, they are {@code long}s and are annotated with
  * {@link discord4j.common.jackson.UnsignedJson}.
  * <ul>
- *     <li>Request POJOs:
- *     <ul>
- *         <li>"Optional" Fields are represented with the {@link discord4j.common.jackson.Possible Possible} type.
- *         <li>"Nullable" Fields are represented with literal {@code null}. The field should be annotated as Nullable.
- *         <li>"Optional and Nullable" Fields are both annotated with Nullable and are of type Possible.
- *     </ul>
- *     <li>Response POJOs:
- *     <ul>
- *         <li>"Optional" Fields are represented with literal {@code null}. The field should be annotated as Nullable.
- *         <li>"Nullable" Fields are represented with literal {@code null}. The field should be annotated as Nullable.
- *         <li>"Optional and Nullable" Fields are represented with literal {@code null}. The field should be annotated
- *         as Nullable.
- *     </ul>
+ * <li>Request POJOs:
+ * <ul>
+ * <li>"Optional" Fields are represented with the {@link discord4j.common.jackson.Possible Possible} type.
+ * <li>"Nullable" Fields are represented with literal {@code null}. The field should be annotated as Nullable.
+ * <li>"Optional and Nullable" Fields are both annotated with Nullable and are of type Possible.
+ * </ul>
+ * <li>Response POJOs:
+ * <ul>
+ * <li>"Optional" Fields are represented with literal {@code null}. The field should be annotated as Nullable.
+ * <li>"Nullable" Fields are represented with literal {@code null}. The field should be annotated as Nullable.
+ * <li>"Optional and Nullable" Fields are represented with literal {@code null}. The field should be annotated
+ * as Nullable.
+ * </ul>
  * </ul>
  * <h1>Anatomy and Naming</h1>
  * A Request POJO should contain only {@code final} fields set in its single constructor. It should not contain getters

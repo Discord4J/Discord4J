@@ -20,7 +20,8 @@ import org.junit.Test;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class LongObjTuple2Test {
 

@@ -23,127 +23,127 @@ package discord4j.core.object;
  */
 public enum Permission {
 
-	/** Allows creation of instant invites. */
-	CREATE_INSTANT_INVITE(0x00000001, false),
+    /** Allows creation of instant invites. */
+    CREATE_INSTANT_INVITE(0x00000001, false),
 
-	/** Allows kicking members. */
-	KICK_MEMBERS(0x00000002, true),
+    /** Allows kicking members. */
+    KICK_MEMBERS(0x00000002, true),
 
-	/** Allows banning members. */
-	BAN_MEMBERS(0x00000004, true),
+    /** Allows banning members. */
+    BAN_MEMBERS(0x00000004, true),
 
-	/** Allows all permissions and bypasses channel permission overwrites. */
-	ADMINISTRATOR(0x00000008, true),
+    /** Allows all permissions and bypasses channel permission overwrites. */
+    ADMINISTRATOR(0x00000008, true),
 
-	/** Allows management and editing of channels. */
-	MANAGE_CHANNELS(0x00000010, true),
+    /** Allows management and editing of channels. */
+    MANAGE_CHANNELS(0x00000010, true),
 
-	/** Allows management and editing of the guild. */
-	MANAGE_GUILD(0x00000020, true),
+    /** Allows management and editing of the guild. */
+    MANAGE_GUILD(0x00000020, true),
 
-	/** Allows for the addition of reactions to messages. */
-	ADD_REACTIONS(0x00000040, false),
+    /** Allows for the addition of reactions to messages. */
+    ADD_REACTIONS(0x00000040, false),
 
-	/** Allows for viewing of audit logs. */
-	VIEW_AUDIT_LOG(0x00000080, false),
+    /** Allows for viewing of audit logs. */
+    VIEW_AUDIT_LOG(0x00000080, false),
 
-	/** Allows guild members to view a channel, which includes reading messages in text channels. */
-	VIEW_CHANNEL(0x00000400, false),
+    /** Allows guild members to view a channel, which includes reading messages in text channels. */
+    VIEW_CHANNEL(0x00000400, false),
 
-	/** Allows for sending messages in a channel. */
-	SEND_MESSAGES(0x00000800, false),
+    /** Allows for sending messages in a channel. */
+    SEND_MESSAGES(0x00000800, false),
 
-	/** Allows for sending of /tts messages. */
-	SEND_TTS_MESSAGES(0x00001000, false),
+    /** Allows for sending of /tts messages. */
+    SEND_TTS_MESSAGES(0x00001000, false),
 
-	/** Allows for deletion of other users messages. */
-	MANAGED_MESSAGES(0x00002000, true),
+    /** Allows for deletion of other users messages. */
+    MANAGED_MESSAGES(0x00002000, true),
 
-	/** Links sent by users with this permission will be auto-embedded. */
-	EMBED_LINKS(0x00004000, false),
+    /** Links sent by users with this permission will be auto-embedded. */
+    EMBED_LINKS(0x00004000, false),
 
-	/** Allows for uploading images and files. */
-	ATTACH_FILES(0x00008000, false),
+    /** Allows for uploading images and files. */
+    ATTACH_FILES(0x00008000, false),
 
-	/** Allows for reading of message history. */
-	READ_MESSAGE_HISTORY(0x00010000, false),
+    /** Allows for reading of message history. */
+    READ_MESSAGE_HISTORY(0x00010000, false),
 
-	/**
-	 * Allows for using the @everyone tag to notify all users in a channel, and the @here tag to notify all online users
-	 * in a channel.
-	 */
-	MENTION_EVERYONE(0x00020000, false),
+    /**
+     * Allows for using the @everyone tag to notify all users in a channel, and the @here tag to notify all online users
+     * in a channel.
+     */
+    MENTION_EVERYONE(0x00020000, false),
 
-	/** Allows the usage of custom emojis from other servers. */
-	USE_EXTERNAL_EMOJIS(0x00040000, false),
+    /** Allows the usage of custom emojis from other servers. */
+    USE_EXTERNAL_EMOJIS(0x00040000, false),
 
-	/** Allows for joining of a voice channel. */
-	CONNECT(0x00100000, false),
+    /** Allows for joining of a voice channel. */
+    CONNECT(0x00100000, false),
 
-	/** Allows for speaking in a voice channel. */
-	SPEAK(0x00200000, false),
+    /** Allows for speaking in a voice channel. */
+    SPEAK(0x00200000, false),
 
-	/** Allows for muting members in a voice channel. */
-	MUTE_MEMBERS(0x00400000, false),
+    /** Allows for muting members in a voice channel. */
+    MUTE_MEMBERS(0x00400000, false),
 
-	/** Allows for deafening of members in a voice channel. */
-	DEAFEN_MEMBERS(0x00800000, false),
+    /** Allows for deafening of members in a voice channel. */
+    DEAFEN_MEMBERS(0x00800000, false),
 
-	/** Allows for moving of members between voice channels. */
-	MOVE_MEMBERS(0x01000000, false),
+    /** Allows for moving of members between voice channels. */
+    MOVE_MEMBERS(0x01000000, false),
 
-	/** Allows for using voice-activity-detection in a voice channel. */
-	USE_VAD(0x02000000, false),
+    /** Allows for using voice-activity-detection in a voice channel. */
+    USE_VAD(0x02000000, false),
 
-	/** Allows for modification of own nickname. */
-	CHANGE_NICKNAME(0x04000000, false),
+    /** Allows for modification of own nickname. */
+    CHANGE_NICKNAME(0x04000000, false),
 
-	/** Allows for modification of other users nicknames. */
-	MANAGE_NICKNAMES(0x08000000, false),
+    /** Allows for modification of other users nicknames. */
+    MANAGE_NICKNAMES(0x08000000, false),
 
-	/** Allows management and editing of roles. */
-	MANAGE_ROLES(0x10000000, true),
+    /** Allows management and editing of roles. */
+    MANAGE_ROLES(0x10000000, true),
 
-	/** Allows management and editing of webhooks. */
-	MANAGE_WEBHOOKS(0x20000000, true),
+    /** Allows management and editing of webhooks. */
+    MANAGE_WEBHOOKS(0x20000000, true),
 
-	/** Allows management and editing of emojis. */
-	MANAGE_EMOJIS(0x40000000, true);
+    /** Allows management and editing of emojis. */
+    MANAGE_EMOJIS(0x40000000, true);
 
-	/** Whether MFA is required. */
-	private final boolean mfa;
+    /** Whether MFA is required. */
+    private final boolean mfa;
 
-	/** The permission value. */
-	private final int value;
+    /** The permission value. */
+    private final int value;
 
-	/**
-	 * Constructs a {@code Permission}.
-	 *
-	 * @param value The permission value.
-	 * @param mfa Whether MFA is required.
-	 */
-	Permission(final int value, final boolean mfa) {
-		this.value = value;
-		this.mfa = mfa;
-	}
+    /**
+     * Constructs a {@code Permission}.
+     *
+     * @param value The permission value.
+     * @param mfa Whether MFA is required.
+     */
+    Permission(final int value, final boolean mfa) {
+        this.value = value;
+        this.mfa = mfa;
+    }
 
-	/**
-	 * Gets whether the permission requires the owner account to use multi-factor authentication when used on a guild
-	 * that has server-side MFA enabled.
-	 *
-	 * @return {@code true} when the permission requires the owner account to use multi-factor authentication when used
-	 * on a guild that has server-side MFA enabled, {@code false} otherwise.
-	 */
-	public boolean requiresMfa() {
-		return mfa;
-	}
+    /**
+     * Gets whether the permission requires the owner account to use multi-factor authentication when used on a guild
+     * that has server-side MFA enabled.
+     *
+     * @return {@code true} when the permission requires the owner account to use multi-factor authentication when used
+     * on a guild that has server-side MFA enabled, {@code false} otherwise.
+     */
+    public boolean requiresMfa() {
+        return mfa;
+    }
 
-	/**
-	 * Gets the permission's value.
-	 *
-	 * @return The permission's value.
-	 */
-	public int getValue() {
-		return value;
-	}
+    /**
+     * Gets the permission's value.
+     *
+     * @return The permission's value.
+     */
+    public int getValue() {
+        return value;
+    }
 }

@@ -20,17 +20,17 @@ import javax.annotation.Nullable;
 
 public class NicknameModifyRequest {
 
-	@Nullable
-	private final String nick;
+    @Nullable
+    private final String nick;
 
-	public NicknameModifyRequest(@Nullable String nick) {
-		this.nick = nick;
-	}
+    public NicknameModifyRequest(@Nullable String nick) {
+        this.nick = nick;
+    }
 
-	@Override
-	public String toString() {
-		return "NicknameModifyRequest[" +
-				"nick=" + nick +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "NicknameModifyRequest[" +
+                "nick=" + nick +
+                ']';
+    }
 }

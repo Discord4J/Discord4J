@@ -20,41 +20,41 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class UserGuildResponse {
 
-	@UnsignedJson
-	private long id;
-	private String name;
-	private String icon;
-	private boolean owner;
-	private int permissions;
+    @UnsignedJson
+    private long id;
+    private String name;
+    private String icon;
+    private boolean owner;
+    private int permissions;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getIcon() {
-		return icon;
-	}
+    public String getIcon() {
+        return icon;
+    }
 
-	public boolean isOwner() {
-		return owner;
-	}
+    public boolean isOwner() {
+        return owner;
+    }
 
-	public int getPermissions() {
-		return permissions;
-	}
+    public int getPermissions() {
+        return permissions;
+    }
 
-	@Override
-	public String toString() {
-		return "UserGuildResponse[" +
-				"id=" + id +
-				", name=" + name +
-				", icon=" + icon +
-				", owner=" + owner +
-				", permissions=" + permissions +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "UserGuildResponse[" +
+                "id=" + id +
+                ", name=" + name +
+                ", icon=" + icon +
+                ", owner=" + owner +
+                ", permissions=" + permissions +
+                ']';
+    }
 }

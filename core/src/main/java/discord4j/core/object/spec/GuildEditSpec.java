@@ -27,54 +27,54 @@ import javax.annotation.Nullable;
 
 public class GuildEditSpec implements Spec<GuildModifyRequest> {
 
-	private final GuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
+    private final GuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
 
-	public void setName(String name) {
-		requestBuilder.name(name);
-	}
+    public void setName(String name) {
+        requestBuilder.name(name);
+    }
 
-	public void setRegion(Region region) {
-		requestBuilder.region(region.getId());
-	}
+    public void setRegion(Region region) {
+        requestBuilder.region(region.getId());
+    }
 
-	public void setVerificationLevel(Guild.VerificationLevel verificationLevel) {
-		requestBuilder.verificationLevel(verificationLevel.getValue());
-	}
+    public void setVerificationLevel(Guild.VerificationLevel verificationLevel) {
+        requestBuilder.verificationLevel(verificationLevel.getValue());
+    }
 
-	public void setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
-		requestBuilder.defaultMessageNoficiations(notificationsLevel.getValue());
-	}
+    public void setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
+        requestBuilder.defaultMessageNoficiations(notificationsLevel.getValue());
+    }
 
-	public void setAfkChannelId(@Nullable Snowflake afkChannelId) {
-		requestBuilder.afkChannelId(afkChannelId == null ? null : afkChannelId.asLong());
-	}
+    public void setAfkChannelId(@Nullable Snowflake afkChannelId) {
+        requestBuilder.afkChannelId(afkChannelId == null ? null : afkChannelId.asLong());
+    }
 
-	public void setAfkChannel(@Nullable VoiceChannel afkChannel) {
-		setAfkChannelId(afkChannel == null ? null : afkChannel.getId());
-	}
+    public void setAfkChannel(@Nullable VoiceChannel afkChannel) {
+        setAfkChannelId(afkChannel == null ? null : afkChannel.getId());
+    }
 
-	public void setAfkTimeout(int afkTimeout) {
-		requestBuilder.afkTimeout(afkTimeout);
-	}
+    public void setAfkTimeout(int afkTimeout) {
+        requestBuilder.afkTimeout(afkTimeout);
+    }
 
-	public void setIcon(@Nullable String icon) { // TODO Icon class
-		requestBuilder.icon(icon);
-	}
+    public void setIcon(@Nullable String icon) { // TODO Icon class
+        requestBuilder.icon(icon);
+    }
 
-	public void setOwnerId(Snowflake ownerId) {
-		requestBuilder.ownerId(ownerId.asLong());
-	}
+    public void setOwnerId(Snowflake ownerId) {
+        requestBuilder.ownerId(ownerId.asLong());
+    }
 
-	public void setOwner(Member member) {
-		setOwnerId(member.getId());
-	}
+    public void setOwner(Member member) {
+        setOwnerId(member.getId());
+    }
 
-	public void setSplash(@Nullable String splash) {
-		requestBuilder.splash(splash);
-	}
+    public void setSplash(@Nullable String splash) {
+        requestBuilder.splash(splash);
+    }
 
-	@Override
-	public GuildModifyRequest asRequest() {
-		return requestBuilder.build();
-	}
+    @Override
+    public GuildModifyRequest asRequest() {
+        return requestBuilder.build();
+    }
 }

@@ -23,24 +23,24 @@ import java.util.Arrays;
 
 public class Hello implements PayloadData {
 
-	@JsonProperty("heartbeat_interval")
-	private int heartbeatInterval;
-	@JsonProperty("_trace")
-	private String[] trace;
+    @JsonProperty("heartbeat_interval")
+    private int heartbeatInterval;
+    @JsonProperty("_trace")
+    private String[] trace;
 
-	public int getHeartbeatInterval() {
-		return heartbeatInterval;
-	}
+    public int getHeartbeatInterval() {
+        return heartbeatInterval;
+    }
 
-	public String[] getTrace() {
-		return trace;
-	}
+    public String[] getTrace() {
+        return trace;
+    }
 
-	@Override
-	public String toString() {
-		return "Hello[" +
-				"heartbeatInterval=" + heartbeatInterval +
-				", trace=" + Arrays.toString(trace) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "Hello[" +
+                "heartbeatInterval=" + heartbeatInterval +
+                ", trace=" + Arrays.toString(trace) +
+                ']';
+    }
 }

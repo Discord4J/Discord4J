@@ -22,19 +22,19 @@ import discord4j.common.jackson.PossibleJson;
 @PossibleJson
 public class UserModifyRequest {
 
-	private final Possible<String> username;
-	private final Possible<String> avatar;
+    private final Possible<String> username;
+    private final Possible<String> avatar;
 
-	public UserModifyRequest(Possible<String> username, Possible<String> avatar) {
-		this.username = username;
-		this.avatar = avatar;
-	}
+    public UserModifyRequest(Possible<String> username, Possible<String> avatar) {
+        this.username = username;
+        this.avatar = avatar;
+    }
 
-	@Override
-	public String toString() {
-		return "UserModifyRequest[" +
-				"username=" + username +
-				", avatar=" + avatar +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "UserModifyRequest[" +
+                "username=" + username +
+                ", avatar=" + avatar +
+                ']';
+    }
 }

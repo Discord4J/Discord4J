@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalLong;
 
 /**
  * A Discord message reaction.
@@ -35,105 +34,105 @@ import java.util.OptionalLong;
  */
 public final class Reaction implements DiscordObject {
 
-	/** The Client associated to this object. */
-	private final Client client;
+    /** The Client associated to this object. */
+    private final Client client;
 
-	/** The raw data as represented by Discord. */
-	private final ReactionResponse reaction;
+    /** The raw data as represented by Discord. */
+    private final ReactionResponse reaction;
 
-	/** The ID of the message this reaction is associated to. */
-	private final long messageId;
+    /** The ID of the message this reaction is associated to. */
+    private final long messageId;
 
-	/**
-	 * Constructs a {@code Reaction} with an associated client and Discord data.
-	 *
-	 * @param client The Client associated to this object, must be non-null.
-	 * @param reaction The raw data as represented by Discord, must be non-null.
-	 * @param messageId The ID of the message this reaction is associated to.
-	 */
-	public Reaction(final Client client, final ReactionResponse reaction, final long messageId) {
-		this.client = Objects.requireNonNull(client);
-		this.reaction = Objects.requireNonNull(reaction);
-		this.messageId = messageId;
-	}
+    /**
+     * Constructs a {@code Reaction} with an associated client and Discord data.
+     *
+     * @param client The Client associated to this object, must be non-null.
+     * @param reaction The raw data as represented by Discord, must be non-null.
+     * @param messageId The ID of the message this reaction is associated to.
+     */
+    public Reaction(final Client client, final ReactionResponse reaction, final long messageId) {
+        this.client = Objects.requireNonNull(client);
+        this.reaction = Objects.requireNonNull(reaction);
+        this.messageId = messageId;
+    }
 
-	@Override
-	public Client getClient() {
-		return client;
-	}
+    @Override
+    public Client getClient() {
+        return client;
+    }
 
-	/**
-	 * Gets the number times this emoji has been used to react.
-	 *
-	 * @return The number of times this emoji has been used to react.
-	 */
-	public int getCount() {
-		return reaction.getCount();
-	}
+    /**
+     * Gets the number times this emoji has been used to react.
+     *
+     * @return The number of times this emoji has been used to react.
+     */
+    public int getCount() {
+        return reaction.getCount();
+    }
 
-	/**
-	 * Gets whether the current user reacted using this emoji.
-	 *
-	 * @return {@code true} if the current user reacted using this emoji, {@code false} otherwise.
-	 */
-	public boolean hasReacted() {
-		return reaction.isMe();
-	}
+    /**
+     * Gets whether the current user reacted using this emoji.
+     *
+     * @return {@code true} if the current user reacted using this emoji, {@code false} otherwise.
+     */
+    public boolean hasReacted() {
+        return reaction.isMe();
+    }
 
-	/**
-	 * Gets the ID of the emoji for this reaction, if present.
-	 *
-	 * @return The ID of the emoji for this reaction, if present.
-	 */
-	public Optional<Snowflake> getEmojiId() {
-		return Optional.ofNullable(reaction.getEmoji().getId()).map(Snowflake::of);
-	}
+    /**
+     * Gets the ID of the emoji for this reaction, if present.
+     *
+     * @return The ID of the emoji for this reaction, if present.
+     */
+    public Optional<Snowflake> getEmojiId() {
+        return Optional.ofNullable(reaction.getEmoji().getId()).map(Snowflake::of);
+    }
 
-	/**
-	 * Requests to retrieve the emoji for this reaction, if present.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji emoji} for this reaction,
-	 * if present. If an error is received, it is emitted through the {@code Mono}.
-	 */
-	public Mono<GuildEmoji> getGuildEmoji() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the emoji for this reaction, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji emoji} for this reaction,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildEmoji> getGuildEmoji() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	/**
-	 * Gets the name of the emoji for this reaction.
-	 *
-	 * @return The name of the emoji for this reaction.
-	 */
-	public String getEmojiName() {
-		return reaction.getEmoji().getName();
-	}
+    /**
+     * Gets the name of the emoji for this reaction.
+     *
+     * @return The name of the emoji for this reaction.
+     */
+    public String getEmojiName() {
+        return reaction.getEmoji().getName();
+    }
 
-	/**
-	 * Gets the ID of the message this reaction is associated to.
-	 *
-	 * @return The ID of the message this reaction is associated to.
-	 */
-	public Snowflake getMessageId() {
-		return Snowflake.of(messageId);
-	}
+    /**
+     * Gets the ID of the message this reaction is associated to.
+     *
+     * @return The ID of the message this reaction is associated to.
+     */
+    public Snowflake getMessageId() {
+        return Snowflake.of(messageId);
+    }
 
-	/**
-	 * Requests to retrieve the message this reaction is associated to.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the {@link Message message} this reaction is
-	 * associated to. If an error is received it is emitted through the {@code Mono}.
-	 */
-	public Mono<Message> getMessage() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the message this reaction is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Message message} this reaction is
+     * associated to. If an error is received it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> getMessage() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 
-	/**
-	 * Requests to retrieve the users that reacted with this emoji.
-	 *
-	 * @return A {@link Flux} that continually emits the {@link User users} that reacted with this emoji. If an error is
-	 * received, it is emitted through the {@code Flux}.
-	 */
-	public Flux<User> getReactors() {
-		throw new UnsupportedOperationException("Not yet implemented...");
-	}
+    /**
+     * Requests to retrieve the users that reacted with this emoji.
+     *
+     * @return A {@link Flux} that continually emits the {@link User users} that reacted with this emoji. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<User> getReactors() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
 }

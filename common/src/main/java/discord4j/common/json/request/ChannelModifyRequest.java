@@ -28,109 +28,109 @@ import javax.annotation.Nullable;
 @PossibleJson
 public class ChannelModifyRequest {
 
-	private final Possible<String> name;
-	private final Possible<Integer> position;
-	@Nullable
-	private final Possible<String> topic;
-	private final Possible<Boolean> nsfw;
-	private final Possible<Integer> bitrate;
-	@JsonProperty("user_limit")
-	private final Possible<Integer> userLimit;
-	@JsonProperty("permission_overwrites")
-	private final Possible<OverwriteEntity[]> permissionOverwrites;
-	@JsonProperty("parent_id")
-	@Nullable
-	@UnsignedJson
-	private final PossibleLong parentId;
+    private final Possible<String> name;
+    private final Possible<Integer> position;
+    @Nullable
+    private final Possible<String> topic;
+    private final Possible<Boolean> nsfw;
+    private final Possible<Integer> bitrate;
+    @JsonProperty("user_limit")
+    private final Possible<Integer> userLimit;
+    @JsonProperty("permission_overwrites")
+    private final Possible<OverwriteEntity[]> permissionOverwrites;
+    @JsonProperty("parent_id")
+    @Nullable
+    @UnsignedJson
+    private final PossibleLong parentId;
 
-	public ChannelModifyRequest(Possible<String> name, Possible<Integer> position,
-	                            @Nullable Possible<String> topic, Possible<Boolean> nsfw, Possible<Integer> bitrate,
-	                            Possible<Integer> userLimit, Possible<OverwriteEntity[]> permissionOverwrites,
-	                            @Nullable PossibleLong parentId) {
-		this.name = name;
-		this.position = position;
-		this.topic = topic;
-		this.nsfw = nsfw;
-		this.bitrate = bitrate;
-		this.userLimit = userLimit;
-		this.permissionOverwrites = permissionOverwrites;
-		this.parentId = parentId;
-	}
+    public ChannelModifyRequest(Possible<String> name, Possible<Integer> position,
+                                @Nullable Possible<String> topic, Possible<Boolean> nsfw, Possible<Integer> bitrate,
+                                Possible<Integer> userLimit, Possible<OverwriteEntity[]> permissionOverwrites,
+                                @Nullable PossibleLong parentId) {
+        this.name = name;
+        this.position = position;
+        this.topic = topic;
+        this.nsfw = nsfw;
+        this.bitrate = bitrate;
+        this.userLimit = userLimit;
+        this.permissionOverwrites = permissionOverwrites;
+        this.parentId = parentId;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private Possible<String> name = Possible.absent();
-		private Possible<Integer> position = Possible.absent();
-		@Nullable
-		private Possible<String> topic = Possible.absent();
-		private Possible<Boolean> nsfw = Possible.absent();
-		private Possible<Integer> bitrate = Possible.absent();
-		private Possible<Integer> userLimit = Possible.absent();
-		private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
-		@Nullable
-		private PossibleLong parentId = PossibleLong.absent();
+        private Possible<String> name = Possible.absent();
+        private Possible<Integer> position = Possible.absent();
+        @Nullable
+        private Possible<String> topic = Possible.absent();
+        private Possible<Boolean> nsfw = Possible.absent();
+        private Possible<Integer> bitrate = Possible.absent();
+        private Possible<Integer> userLimit = Possible.absent();
+        private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
+        @Nullable
+        private PossibleLong parentId = PossibleLong.absent();
 
-		public Builder name(String name) {
-			this.name = Possible.of(name);
-			return this;
-		}
+        public Builder name(String name) {
+            this.name = Possible.of(name);
+            return this;
+        }
 
-		public Builder position(int position) {
-			this.position = Possible.of(position);
-			return this;
-		}
+        public Builder position(int position) {
+            this.position = Possible.of(position);
+            return this;
+        }
 
-		public Builder topic(@Nullable String topic) {
-			this.topic = topic == null ? null : Possible.of(topic);
-			return this;
-		}
+        public Builder topic(@Nullable String topic) {
+            this.topic = topic == null ? null : Possible.of(topic);
+            return this;
+        }
 
-		public Builder nsfw(boolean nsfw) {
-			this.nsfw = Possible.of(nsfw);
-			return this;
-		}
+        public Builder nsfw(boolean nsfw) {
+            this.nsfw = Possible.of(nsfw);
+            return this;
+        }
 
-		public Builder bitrate(int bitrate) {
-			this.bitrate = Possible.of(bitrate);
-			return this;
-		}
+        public Builder bitrate(int bitrate) {
+            this.bitrate = Possible.of(bitrate);
+            return this;
+        }
 
-		public Builder userLimit(int userLimit) {
-			this.userLimit = Possible.of(userLimit);
-			return this;
-		}
+        public Builder userLimit(int userLimit) {
+            this.userLimit = Possible.of(userLimit);
+            return this;
+        }
 
-		public Builder permissionOverwrites(OverwriteEntity[] permissionOverwrites) {
-			this.permissionOverwrites = Possible.of(permissionOverwrites);
-			return this;
-		}
+        public Builder permissionOverwrites(OverwriteEntity[] permissionOverwrites) {
+            this.permissionOverwrites = Possible.of(permissionOverwrites);
+            return this;
+        }
 
-		public Builder parentId(@Nullable Long parentId) {
-			this.parentId = parentId == null ? null : PossibleLong.of(parentId);
-			return this;
-		}
+        public Builder parentId(@Nullable Long parentId) {
+            this.parentId = parentId == null ? null : PossibleLong.of(parentId);
+            return this;
+        }
 
-		public ChannelModifyRequest build() {
-			return new ChannelModifyRequest(name, position, topic, nsfw, bitrate, userLimit, permissionOverwrites, parentId);
-		}
+        public ChannelModifyRequest build() {
+            return new ChannelModifyRequest(name, position, topic, nsfw, bitrate, userLimit, permissionOverwrites, parentId);
+        }
 
-	}
+    }
 
-	@Override
-	public String toString() {
-		return "ChannelModifyRequest[" +
-				"name=" + name +
-				", position=" + position +
-				", topic=" + topic +
-				", nsfw=" + nsfw +
-				", bitrate=" + bitrate +
-				", userLimit=" + userLimit +
-				", permissionOverwrites=" + permissionOverwrites +
-				", parentId=" + parentId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ChannelModifyRequest[" +
+                "name=" + name +
+                ", position=" + position +
+                ", topic=" + topic +
+                ", nsfw=" + nsfw +
+                ", bitrate=" + bitrate +
+                ", userLimit=" + userLimit +
+                ", permissionOverwrites=" + permissionOverwrites +
+                ", parentId=" + parentId +
+                ']';
+    }
 }

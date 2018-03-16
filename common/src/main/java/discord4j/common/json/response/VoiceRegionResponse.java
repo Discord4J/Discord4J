@@ -20,60 +20,60 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class VoiceRegionResponse {
 
-	private String id;
-	private String name;
-	@JsonProperty("sample_hostname")
-	private String sampleHostname;
-	@JsonProperty("sample_port")
-	private int samplePort;
-	private boolean vip;
-	private boolean optimal;
-	private boolean deprecated;
-	private boolean custom;
+    private String id;
+    private String name;
+    @JsonProperty("sample_hostname")
+    private String sampleHostname;
+    @JsonProperty("sample_port")
+    private int samplePort;
+    private boolean vip;
+    private boolean optimal;
+    private boolean deprecated;
+    private boolean custom;
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getSampleHostname() {
-		return sampleHostname;
-	}
+    public String getSampleHostname() {
+        return sampleHostname;
+    }
 
-	public int getSamplePort() {
-		return samplePort;
-	}
+    public int getSamplePort() {
+        return samplePort;
+    }
 
-	public boolean isVip() {
-		return vip;
-	}
+    public boolean isVip() {
+        return vip;
+    }
 
-	public boolean isOptimal() {
-		return optimal;
-	}
+    public boolean isOptimal() {
+        return optimal;
+    }
 
-	public boolean isDeprecated() {
-		return deprecated;
-	}
+    public boolean isDeprecated() {
+        return deprecated;
+    }
 
-	public boolean isCustom() {
-		return custom;
-	}
+    public boolean isCustom() {
+        return custom;
+    }
 
-	@Override
-	public String toString() {
-		return "VoiceRegionResponse[" +
-				"id=" + id +
-				", name=" + name +
-				", sampleHostname=" + sampleHostname +
-				", samplePort=" + samplePort +
-				", vip=" + vip +
-				", optimal=" + optimal +
-				", deprecated=" + deprecated +
-				", custom=" + custom +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "VoiceRegionResponse[" +
+                "id=" + id +
+                ", name=" + name +
+                ", sampleHostname=" + sampleHostname +
+                ", samplePort=" + samplePort +
+                ", vip=" + vip +
+                ", optimal=" + optimal +
+                ", deprecated=" + deprecated +
+                ", custom=" + custom +
+                ']';
+    }
 }

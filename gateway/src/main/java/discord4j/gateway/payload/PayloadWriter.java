@@ -25,11 +25,11 @@ import io.netty.buffer.ByteBuf;
  */
 public interface PayloadWriter {
 
-	/**
-	 * Write a given payload to the output buffer.
-	 *
-	 * @param payload the output payload
-	 * @return the outbound {@code ByteBuf}
-	 */
-	ByteBuf write(GatewayPayload<?> payload);
+    /**
+     * Write a given payload to the output buffer.
+     *
+     * @param payload the output payload
+     * @return the outbound {@code ByteBuf}
+     */
+    ByteBuf write(GatewayPayload<?> payload);
 }

@@ -23,33 +23,33 @@ import discord4j.common.jackson.PossibleJson;
 @PossibleJson
 public class Identify implements PayloadData {
 
-	private final String token;
-	private final IdentifyProperties properties;
-	private final boolean compress;
-	@JsonProperty("large_threshold")
-	private final int largeThreshold;
-	private final Possible<int[]> shard;
-	private final Possible<StatusUpdate> presence;
+    private final String token;
+    private final IdentifyProperties properties;
+    private final boolean compress;
+    @JsonProperty("large_threshold")
+    private final int largeThreshold;
+    private final Possible<int[]> shard;
+    private final Possible<StatusUpdate> presence;
 
-	public Identify(String token, IdentifyProperties properties, boolean compress, int largeThreshold,
-	                Possible<int[]> shard, Possible<StatusUpdate> presence) {
-		this.token = token;
-		this.properties = properties;
-		this.compress = compress;
-		this.largeThreshold = largeThreshold;
-		this.shard = shard;
-		this.presence = presence;
-	}
+    public Identify(String token, IdentifyProperties properties, boolean compress, int largeThreshold,
+                    Possible<int[]> shard, Possible<StatusUpdate> presence) {
+        this.token = token;
+        this.properties = properties;
+        this.compress = compress;
+        this.largeThreshold = largeThreshold;
+        this.shard = shard;
+        this.presence = presence;
+    }
 
-	@Override
-	public String toString() {
-		return "Identify[" +
-				"token=hunter2" +
-				", properties=" + properties +
-				", compress=" + compress +
-				", largeThreshold=" + largeThreshold +
-				", shard=" + shard +
-				", presence=" + presence +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "Identify[" +
+                "token=hunter2" +
+                ", properties=" + properties +
+                ", compress=" + compress +
+                ", largeThreshold=" + largeThreshold +
+                ", shard=" + shard +
+                ", presence=" + presence +
+                ']';
+    }
 }

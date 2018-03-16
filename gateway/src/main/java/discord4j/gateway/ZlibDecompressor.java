@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.function.Predicate;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
@@ -31,24 +32,27 @@ import java.util.zip.InflaterOutputStream;
  */
 public class ZlibDecompressor {
 
-	private static final int ZLIB_SUFFIX = 0x0000FFFF;
-	private final Inflater context = new Inflater();
+    private static final int ZLIB_SUFFIX = 0x0000FFFF;
+    private static final Predicate<ByteBuf> windowPredicate = payload ->
+            payload.readableBytes() >= 4 && payload.getInt(payload.readableBytes() - 4) == ZLIB_SUFFIX;
 
-	public Flux<ByteBuf> completeMessages(Flux<ByteBuf> payloads) {
-		return payloads.windowUntil(payload -> payload.readableBytes() >= 4 && payload.getInt(payload.readableBytes() - 4) == ZLIB_SUFFIX)
-				.flatMap(Flux::collectList)
-				.map(list -> {
-					ByteBuf buf = Unpooled.wrappedBuffer(list.toArray(new ByteBuf[list.size()]));
-					byte[] bytes = new byte[buf.readableBytes()];
-					buf.readBytes(bytes);
+    private final Inflater context = new Inflater();
 
-					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					try (InflaterOutputStream inflater = new InflaterOutputStream(out, context)) {
-						inflater.write(bytes);
-						return Unpooled.wrappedBuffer(out.toByteArray());
-					} catch (IOException e) {
-						throw Exceptions.propagate(e);
-					}
-				});
-	}
+    public Flux<ByteBuf> completeMessages(Flux<ByteBuf> payloads) {
+        return payloads.windowUntil(windowPredicate)
+                .flatMap(Flux::collectList)
+                .map(list -> {
+                    ByteBuf buf = Unpooled.wrappedBuffer(list.toArray(new ByteBuf[list.size()]));
+                    byte[] bytes = new byte[buf.readableBytes()];
+                    buf.readBytes(bytes);
+
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    try (InflaterOutputStream inflater = new InflaterOutputStream(out, context)) {
+                        inflater.write(bytes);
+                        return Unpooled.wrappedBuffer(out.toByteArray());
+                    } catch (IOException e) {
+                        throw Exceptions.propagate(e);
+                    }
+                });
+    }
 }

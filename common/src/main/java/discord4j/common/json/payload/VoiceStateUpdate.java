@@ -21,31 +21,31 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class VoiceStateUpdate implements PayloadData {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private final long guildId;
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private final long channelId; // TODO nullable?
-	@JsonProperty("self_mute")
-	private final boolean selfMute;
-	@JsonProperty("self_deaf")
-	private final boolean selfDeaf;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private final long guildId;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private final long channelId; // TODO nullable?
+    @JsonProperty("self_mute")
+    private final boolean selfMute;
+    @JsonProperty("self_deaf")
+    private final boolean selfDeaf;
 
-	public VoiceStateUpdate(long guildId, long channelId, boolean selfMute, boolean selfDeaf) {
-		this.guildId = guildId;
-		this.channelId = channelId;
-		this.selfMute = selfMute;
-		this.selfDeaf = selfDeaf;
-	}
+    public VoiceStateUpdate(long guildId, long channelId, boolean selfMute, boolean selfDeaf) {
+        this.guildId = guildId;
+        this.channelId = channelId;
+        this.selfMute = selfMute;
+        this.selfDeaf = selfDeaf;
+    }
 
-	@Override
-	public String toString() {
-		return "VoiceStateUpdate[" +
-				"guildId=" + guildId +
-				", channelId=" + channelId +
-				", selfMute=" + selfMute +
-				", selfDeaf=" + selfDeaf +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "VoiceStateUpdate[" +
+                "guildId=" + guildId +
+                ", channelId=" + channelId +
+                ", selfMute=" + selfMute +
+                ", selfDeaf=" + selfDeaf +
+                ']';
+    }
 }

@@ -24,24 +24,24 @@ import java.util.Arrays;
 
 public class GuildMembersChunk implements Dispatch {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	private GuildMemberResponse[] members;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    private GuildMemberResponse[] members;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public GuildMemberResponse[] getMembers() {
-		return members;
-	}
+    public GuildMemberResponse[] getMembers() {
+        return members;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildMembersChunk[" +
-				"guildId=" + guildId +
-				", members=" + Arrays.toString(members) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildMembersChunk[" +
+                "guildId=" + guildId +
+                ", members=" + Arrays.toString(members) +
+                ']';
+    }
 }

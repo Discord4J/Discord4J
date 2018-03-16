@@ -22,40 +22,40 @@ import discord4j.common.json.response.EmojiResponse;
 
 public class MessageReactionAdd implements Dispatch {
 
-	@JsonProperty("user_id")
-	@UnsignedJson
-	private long userId;
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
-	@JsonProperty("message_id")
-	@UnsignedJson
-	private long messageId;
-	private EmojiResponse emoji;
+    @JsonProperty("user_id")
+    @UnsignedJson
+    private long userId;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
+    @JsonProperty("message_id")
+    @UnsignedJson
+    private long messageId;
+    private EmojiResponse emoji;
 
-	public long getUserId() {
-		return userId;
-	}
+    public long getUserId() {
+        return userId;
+    }
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	public long getMessageId() {
-		return messageId;
-	}
+    public long getMessageId() {
+        return messageId;
+    }
 
-	public EmojiResponse getEmoji() {
-		return emoji;
-	}
+    public EmojiResponse getEmoji() {
+        return emoji;
+    }
 
-	@Override
-	public String toString() {
-		return "MessageReactionAdd[" +
-				"userId=" + userId +
-				", channelId=" + channelId +
-				", messageId=" + messageId +
-				", emoji=" + emoji +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "MessageReactionAdd[" +
+                "userId=" + userId +
+                ", channelId=" + channelId +
+                ", messageId=" + messageId +
+                ", emoji=" + emoji +
+                ']';
+    }
 }

@@ -23,25 +23,25 @@ import discord4j.common.json.response.GuildMemberResponse;
 
 public class GuildMemberAdd implements Dispatch {
 
-	@JsonUnwrapped
-	private GuildMemberResponse member;
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
+    @JsonUnwrapped
+    private GuildMemberResponse member;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
 
-	public GuildMemberResponse getMember() {
-		return member;
-	}
+    public GuildMemberResponse getMember() {
+        return member;
+    }
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildMemberAdd[" +
-				"member=" + member +
-				", guildId=" + guildId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildMemberAdd[" +
+                "member=" + member +
+                ", guildId=" + guildId +
+                ']';
+    }
 }

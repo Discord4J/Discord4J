@@ -19,8 +19,8 @@ package discord4j.core.event.domain;
 
 public class ReconnectedEvent implements Event {
 
-	@Override
-	public String toString() {
-		return "Gateway successfully reconnected";
-	}
+    @Override
+    public String toString() {
+        return "Gateway successfully reconnected";
+    }
 }

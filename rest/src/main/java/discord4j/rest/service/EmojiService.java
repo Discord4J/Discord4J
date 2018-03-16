@@ -25,34 +25,34 @@ import reactor.core.publisher.Mono;
 
 public class EmojiService extends RestService {
 
-	public EmojiService(Router router) {
-		super(router);
-	}
+    public EmojiService(Router router) {
+        super(router);
+    }
 
-	public Mono<EmojiResponse[]> getGuildEmojis(long guildId) {
-		return Routes.GUILD_EMOJIS_GET.newRequest(guildId)
-				.exchange(getRouter());
-	}
+    public Mono<EmojiResponse[]> getGuildEmojis(long guildId) {
+        return Routes.GUILD_EMOJIS_GET.newRequest(guildId)
+                .exchange(getRouter());
+    }
 
-	public Mono<EmojiResponse> getGuildEmoji(long guildId, long emojiID) {
-		return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiID)
-				.exchange(getRouter());
-	}
+    public Mono<EmojiResponse> getGuildEmoji(long guildId, long emojiID) {
+        return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiID)
+                .exchange(getRouter());
+    }
 
-	public Mono<EmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request) {
-		return Routes.GUILD_EMOJI_CREATE.newRequest(guildId)
-				.body(request)
-				.exchange(getRouter());
-	}
+    public Mono<EmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request) {
+        return Routes.GUILD_EMOJI_CREATE.newRequest(guildId)
+                .body(request)
+                .exchange(getRouter());
+    }
 
-	public Mono<EmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request) {
-		return Routes.GUILD_EMOJI_MODIFY.newRequest(guildId, emojiId)
-				.body(request)
-				.exchange(getRouter());
-	}
+    public Mono<EmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request) {
+        return Routes.GUILD_EMOJI_MODIFY.newRequest(guildId, emojiId)
+                .body(request)
+                .exchange(getRouter());
+    }
 
-	public Mono<Void> deleteGuildEmoji(long guildId, long emojiId) {
-		return Routes.GUILD_EMOJI_DELETE.newRequest(guildId, emojiId)
-				.exchange(getRouter());
-	}
+    public Mono<Void> deleteGuildEmoji(long guildId, long emojiId) {
+        return Routes.GUILD_EMOJI_DELETE.newRequest(guildId, emojiId)
+                .exchange(getRouter());
+    }
 }

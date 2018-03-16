@@ -18,16 +18,16 @@ package discord4j.common.json.request;
 
 public class EmbedThumbnailRequest {
 
-	private final String url;
+    private final String url;
 
-	public EmbedThumbnailRequest(String url) {
-		this.url = url;
-	}
+    public EmbedThumbnailRequest(String url) {
+        this.url = url;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedThumbnailRequest[" +
-				"url=" + url +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedThumbnailRequest[" +
+                "url=" + url +
+                ']';
+    }
 }

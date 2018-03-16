@@ -23,25 +23,25 @@ import java.util.Arrays;
 
 public class MessageDeleteBulk implements Dispatch {
 
-	@UnsignedJson
-	private long[] ids;
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
+    @UnsignedJson
+    private long[] ids;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
 
-	public long[] getIds() {
-		return ids;
-	}
+    public long[] getIds() {
+        return ids;
+    }
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	@Override
-	public String toString() {
-		return "MessageDeleteBulk[" +
-				"ids=" + Arrays.toString(ids) +
-				", channelId=" + channelId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "MessageDeleteBulk[" +
+                "ids=" + Arrays.toString(ids) +
+                ", channelId=" + channelId +
+                ']';
+    }
 }

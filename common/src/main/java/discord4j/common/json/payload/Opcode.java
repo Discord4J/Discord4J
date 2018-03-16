@@ -21,59 +21,59 @@ import discord4j.common.json.payload.dispatch.Dispatch;
 
 public final class Opcode<T extends PayloadData> {
 
-	public static final Opcode<Dispatch> DISPATCH = newOp(0, Dispatch.class);
-	public static final Opcode<Heartbeat> HEARTBEAT = newOp(1, Heartbeat.class);
-	public static final Opcode<Identify> IDENTIFY = newOp(2, Identify.class);
-	public static final Opcode<StatusUpdate> STATUS_UPDATE = newOp(3, StatusUpdate.class);
-	public static final Opcode<VoiceStateUpdate> VOICE_STATE_UPDATE = newOp(4, VoiceStateUpdate.class);
-	public static final Opcode<?> VOICE_SERVER_PING = newOp(5, null);
-	public static final Opcode<Resume> RESUME = newOp(6, Resume.class);
-	public static final Opcode<?> RECONNECT = newOp(7, null);
-	public static final Opcode<RequestGuildMembers> REQUEST_GUILD_MEMBERS = newOp(8, RequestGuildMembers.class);
-	public static final Opcode<InvalidSession> INVALID_SESSION = newOp(9, InvalidSession.class);
-	public static final Opcode<Hello> HELLO = newOp(10, Hello.class);
-	public static final Opcode<?> HEARTBEAT_ACK = newOp(11, null);
+    public static final Opcode<Dispatch> DISPATCH = newOp(0, Dispatch.class);
+    public static final Opcode<Heartbeat> HEARTBEAT = newOp(1, Heartbeat.class);
+    public static final Opcode<Identify> IDENTIFY = newOp(2, Identify.class);
+    public static final Opcode<StatusUpdate> STATUS_UPDATE = newOp(3, StatusUpdate.class);
+    public static final Opcode<VoiceStateUpdate> VOICE_STATE_UPDATE = newOp(4, VoiceStateUpdate.class);
+    public static final Opcode<?> VOICE_SERVER_PING = newOp(5, null);
+    public static final Opcode<Resume> RESUME = newOp(6, Resume.class);
+    public static final Opcode<?> RECONNECT = newOp(7, null);
+    public static final Opcode<RequestGuildMembers> REQUEST_GUILD_MEMBERS = newOp(8, RequestGuildMembers.class);
+    public static final Opcode<InvalidSession> INVALID_SESSION = newOp(9, InvalidSession.class);
+    public static final Opcode<Hello> HELLO = newOp(10, Hello.class);
+    public static final Opcode<?> HEARTBEAT_ACK = newOp(11, null);
 
-	private final int rawOp;
-	private final Class<T> payloadType;
+    private final int rawOp;
+    private final Class<T> payloadType;
 
-	private Opcode(int rawOp, Class<T> payloadType) {
-		this.rawOp = rawOp;
-		this.payloadType = payloadType;
-	}
+    private Opcode(int rawOp, Class<T> payloadType) {
+        this.rawOp = rawOp;
+        this.payloadType = payloadType;
+    }
 
-	public static Opcode<?> forRaw(int rawOp) {
-		switch (rawOp) {
-			case 0: return DISPATCH;
-			case 1: return HEARTBEAT;
-			case 2: return IDENTIFY;
-			case 3: return STATUS_UPDATE;
-			case 4: return VOICE_STATE_UPDATE;
-			case 5: return VOICE_SERVER_PING;
-			case 6: return RESUME;
-			case 7: return RECONNECT;
-			case 8: return REQUEST_GUILD_MEMBERS;
-			case 9: return INVALID_SESSION;
-			case 10: return HELLO;
-			case 11: return HEARTBEAT_ACK;
-			default: return null;
-		}
-	}
+    public static Opcode<?> forRaw(int rawOp) {
+        switch (rawOp) {
+            case 0: return DISPATCH;
+            case 1: return HEARTBEAT;
+            case 2: return IDENTIFY;
+            case 3: return STATUS_UPDATE;
+            case 4: return VOICE_STATE_UPDATE;
+            case 5: return VOICE_SERVER_PING;
+            case 6: return RESUME;
+            case 7: return RECONNECT;
+            case 8: return REQUEST_GUILD_MEMBERS;
+            case 9: return INVALID_SESSION;
+            case 10: return HELLO;
+            case 11: return HEARTBEAT_ACK;
+            default: return null;
+        }
+    }
 
-	private static <T extends PayloadData> Opcode<T> newOp(int rawOp, Class<T> payloadType) {
-		return new Opcode<>(rawOp, payloadType);
-	}
+    private static <T extends PayloadData> Opcode<T> newOp(int rawOp, Class<T> payloadType) {
+        return new Opcode<>(rawOp, payloadType);
+    }
 
-	public int getRawOp() {
-		return rawOp;
-	}
+    public int getRawOp() {
+        return rawOp;
+    }
 
-	public Class<T> getPayloadType() {
-		return payloadType;
-	}
+    public Class<T> getPayloadType() {
+        return payloadType;
+    }
 
-	@Override
-	public String toString() {
-		return Integer.toString(getRawOp());
-	}
+    @Override
+    public String toString() {
+        return Integer.toString(getRawOp());
+    }
 }

@@ -27,43 +27,43 @@ import static org.junit.Assert.assertEquals;
 
 public class PossibleTest {
 
-	@Test
-	public void testPresent() throws Exception {
-		ObjectMapper mapper = getMapper();
-		String expected = "{\"string\":\"Hello world\",\"llong\":123}";
+    @Test
+    public void testPresent() throws Exception {
+        ObjectMapper mapper = getMapper();
+        String expected = "{\"string\":\"Hello world\",\"llong\":123}";
 
-		PossiblePojo pojo = new PossiblePojo(Possible.of("Hello world"), PossibleLong.of(123L));
-		String result = mapper.writeValueAsString(pojo);
+        PossiblePojo pojo = new PossiblePojo(Possible.of("Hello world"), PossibleLong.of(123L));
+        String result = mapper.writeValueAsString(pojo);
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testAbsent() throws Exception {
-		ObjectMapper mapper = getMapper();
-		String expected = "{}";
+    @Test
+    public void testAbsent() throws Exception {
+        ObjectMapper mapper = getMapper();
+        String expected = "{}";
 
-		PossiblePojo pojo = new PossiblePojo(Possible.absent(), PossibleLong.absent());
-		String result = mapper.writeValueAsString(pojo);
+        PossiblePojo pojo = new PossiblePojo(Possible.absent(), PossibleLong.absent());
+        String result = mapper.writeValueAsString(pojo);
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testNull() throws Exception {
-		ObjectMapper mapper = getMapper();
-		String expected = "{\"string\":null,\"llong\":null}";
+    @Test
+    public void testNull() throws Exception {
+        ObjectMapper mapper = getMapper();
+        String expected = "{\"string\":null,\"llong\":null}";
 
-		PossiblePojo pojo = new PossiblePojo(null, null);
-		String result = mapper.writeValueAsString(pojo);
+        PossiblePojo pojo = new PossiblePojo(null, null);
+        String result = mapper.writeValueAsString(pojo);
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 }

@@ -20,56 +20,56 @@ import java.util.NoSuchElementException;
 
 public class PossibleLong {
 
-	private static final PossibleLong ABSENT = new PossibleLong();
+    private static final PossibleLong ABSENT = new PossibleLong();
 
-	private final boolean isAbsent;
-	private final long value;
+    private final boolean isAbsent;
+    private final long value;
 
-	private PossibleLong() {
-		this.isAbsent = true;
-		this.value = 0;
-	}
+    private PossibleLong() {
+        this.isAbsent = true;
+        this.value = 0;
+    }
 
-	private PossibleLong(long value) {
-		this.isAbsent = false;
-		this.value = value;
-	}
+    private PossibleLong(long value) {
+        this.isAbsent = false;
+        this.value = value;
+    }
 
-	public static PossibleLong of(long value) {
-		return new PossibleLong(value);
-	}
+    public static PossibleLong of(long value) {
+        return new PossibleLong(value);
+    }
 
-	public static PossibleLong absent() {
-		return ABSENT;
-	}
+    public static PossibleLong absent() {
+        return ABSENT;
+    }
 
-	public long get() {
-		if (isAbsent()) {
-			throw new NoSuchElementException();
-		}
-		return value;
-	}
+    public long get() {
+        if (isAbsent()) {
+            throw new NoSuchElementException();
+        }
+        return value;
+    }
 
-	public boolean isAbsent() {
-		return isAbsent;
-	}
+    public boolean isAbsent() {
+        return isAbsent;
+    }
 
-	@Override
-	public int hashCode() {
-		return isAbsent ? 0 : Long.hashCode(value);
-	}
+    @Override
+    public int hashCode() {
+        return isAbsent ? 0 : Long.hashCode(value);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-		PossibleLong possible = (PossibleLong) o;
+        PossibleLong possible = (PossibleLong) o;
 
-		return isAbsent && possible.isAbsent || value == possible.value;
-	}
+        return isAbsent && possible.isAbsent || value == possible.value;
+    }
 }

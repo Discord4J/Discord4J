@@ -22,34 +22,34 @@ import javax.annotation.Nullable;
 
 public class AuditLogChangeResponse {
 
-	@JsonProperty("new_value")
-	@Nullable
-	private Object newValue;
-	@JsonProperty("old_value")
-	@Nullable
-	private Object oldValue;
-	private String key;
+    @JsonProperty("new_value")
+    @Nullable
+    private Object newValue;
+    @JsonProperty("old_value")
+    @Nullable
+    private Object oldValue;
+    private String key;
 
-	@Nullable
-	public Object getNewValue() {
-		return newValue;
-	}
+    @Nullable
+    public Object getNewValue() {
+        return newValue;
+    }
 
-	@Nullable
-	public Object getOldValue() {
-		return oldValue;
-	}
+    @Nullable
+    public Object getOldValue() {
+        return oldValue;
+    }
 
-	public String getKey() {
-		return key;
-	}
+    public String getKey() {
+        return key;
+    }
 
-	@Override
-	public String toString() {
-		return "AuditLogChangeResponse[" +
-				"newValue=" + newValue +
-				", oldValue=" + oldValue +
-				", key=" + key +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "AuditLogChangeResponse[" +
+                "newValue=" + newValue +
+                ", oldValue=" + oldValue +
+                ", key=" + key +
+                ']';
+    }
 }

@@ -27,44 +27,44 @@ import java.util.Set;
 
 public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
 
-	private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
+    private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
 
-	public TextChannelEditSpec setName(String name) {
-		requestBuilder.name(name);
-		return this;
-	}
+    public TextChannelEditSpec setName(String name) {
+        requestBuilder.name(name);
+        return this;
+    }
 
-	public TextChannelEditSpec setPosition(int position) {
-		requestBuilder.position(position);
-		return this;
-	}
+    public TextChannelEditSpec setPosition(int position) {
+        requestBuilder.position(position);
+        return this;
+    }
 
-	public TextChannelEditSpec setNsfw(boolean nsfw) {
-		requestBuilder.nsfw(nsfw);
-		return this;
-	}
+    public TextChannelEditSpec setNsfw(boolean nsfw) {
+        requestBuilder.nsfw(nsfw);
+        return this;
+    }
 
-	public TextChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
-		OverwriteEntity[] raw = permissionOverwrites.stream()
-				.map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
-						o.getDenied().getRawValue()))
-				.toArray(OverwriteEntity[]::new);
+    public TextChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+        OverwriteEntity[] raw = permissionOverwrites.stream()
+                .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
+                        o.getDenied().getRawValue()))
+                .toArray(OverwriteEntity[]::new);
 
-		requestBuilder.permissionOverwrites(raw);
-		return this;
-	}
+        requestBuilder.permissionOverwrites(raw);
+        return this;
+    }
 
-	public TextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
-		requestBuilder.parentId(parentId == null ? null : parentId.asLong());
-		return this;
-	}
+    public TextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
+        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
+        return this;
+    }
 
-	public TextChannelEditSpec setParent(@Nullable Category parent) {
-		return setParentId(parent == null ? null : parent.getId());
-	}
+    public TextChannelEditSpec setParent(@Nullable Category parent) {
+        return setParentId(parent == null ? null : parent.getId());
+    }
 
-	@Override
-	public ChannelModifyRequest asRequest() {
-		return requestBuilder.build();
-	}
+    @Override
+    public ChannelModifyRequest asRequest() {
+        return requestBuilder.build();
+    }
 }

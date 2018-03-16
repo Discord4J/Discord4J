@@ -21,26 +21,26 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class GuildRoleDelete implements Dispatch {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	@JsonProperty("role_id")
-	@UnsignedJson
-	private long roleId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    @JsonProperty("role_id")
+    @UnsignedJson
+    private long roleId;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public long getRoleId() {
-		return roleId;
-	}
+    public long getRoleId() {
+        return roleId;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildRoleDelete[" +
-				"guildId=" + guildId +
-				", roleId=" + roleId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildRoleDelete[" +
+                "guildId=" + guildId +
+                ", roleId=" + roleId +
+                ']';
+    }
 }

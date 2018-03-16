@@ -23,20 +23,20 @@ import java.util.Map;
 
 public class GroupDMCreateRequest {
 
-	@JsonProperty("access_tokens")
-	private final String[] accessTokens;
-	private final Map<String, String> nicks;
+    @JsonProperty("access_tokens")
+    private final String[] accessTokens;
+    private final Map<String, String> nicks;
 
-	public GroupDMCreateRequest(String[] accessTokens, Map<String, String> nicks) {
-		this.accessTokens = accessTokens;
-		this.nicks = nicks;
-	}
+    public GroupDMCreateRequest(String[] accessTokens, Map<String, String> nicks) {
+        this.accessTokens = accessTokens;
+        this.nicks = nicks;
+    }
 
-	@Override
-	public String toString() {
-		return "GroupDMCreateRequest[" +
-				"accessTokens=" + Arrays.toString(accessTokens) +
-				", nicks=" + nicks +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GroupDMCreateRequest[" +
+                "accessTokens=" + Arrays.toString(accessTokens) +
+                ", nicks=" + nicks +
+                ']';
+    }
 }

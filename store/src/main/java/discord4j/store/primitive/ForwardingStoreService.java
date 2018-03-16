@@ -18,7 +18,6 @@ package discord4j.store.primitive;
 
 import discord4j.store.Store;
 import discord4j.store.service.StoreService;
-import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 
@@ -55,7 +54,8 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
+                                                                                             Class<V> valueClass) {
         return getOriginal().provideGenericStore(keyClass, valueClass);
     }
 

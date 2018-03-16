@@ -24,21 +24,21 @@ import java.time.Duration;
 
 public class ResettableInterval {
 
-	private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
-	private Disposable task;
+    private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
+    private Disposable task;
 
-	public void start(Duration duration) {
-		task = Flux.interval(duration).subscribe(backing::onNext);
-	}
+    public void start(Duration duration) {
+        task = Flux.interval(duration).subscribe(backing::onNext);
+    }
 
-	public void stop() {
-		if (task == null) {
-			throw new IllegalStateException("Emitter has not started!");
-		}
-		task.dispose();
-	}
+    public void stop() {
+        if (task == null) {
+            throw new IllegalStateException("Emitter has not started!");
+        }
+        task.dispose();
+    }
 
-	public Flux<Long> ticks() {
-		return backing;
-	}
+    public Flux<Long> ticks() {
+        return backing;
+    }
 }

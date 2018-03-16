@@ -21,17 +21,17 @@ import discord4j.common.json.response.ChannelResponse;
 
 public class ChannelDelete implements Dispatch {
 
-	@JsonUnwrapped
-	private ChannelResponse channel;
+    @JsonUnwrapped
+    private ChannelResponse channel;
 
-	public ChannelResponse getChannel() {
-		return channel;
-	}
+    public ChannelResponse getChannel() {
+        return channel;
+    }
 
-	@Override
-	public String toString() {
-		return "ChannelDelete[" +
-				"channel=" + channel +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ChannelDelete[" +
+                "channel=" + channel +
+                ']';
+    }
 }

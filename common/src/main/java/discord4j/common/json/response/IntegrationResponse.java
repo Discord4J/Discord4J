@@ -21,82 +21,82 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class IntegrationResponse {
 
-	@UnsignedJson
-	private long id;
-	private String name;
-	private String type;
-	private boolean enabled;
-	private boolean syncing;
-	@JsonProperty("role_id")
-	@UnsignedJson
-	private long roleId;
-	@JsonProperty("expire_behavior")
-	private int expireBehavior;
-	@JsonProperty("expire_grace_period")
-	private int expireGracePeriod;
-	private UserResponse user;
-	private IntegrationAccountResponse account;
-	@JsonProperty("synced_at")
-	private String syncedAt;
+    @UnsignedJson
+    private long id;
+    private String name;
+    private String type;
+    private boolean enabled;
+    private boolean syncing;
+    @JsonProperty("role_id")
+    @UnsignedJson
+    private long roleId;
+    @JsonProperty("expire_behavior")
+    private int expireBehavior;
+    @JsonProperty("expire_grace_period")
+    private int expireGracePeriod;
+    private UserResponse user;
+    private IntegrationAccountResponse account;
+    @JsonProperty("synced_at")
+    private String syncedAt;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-	public boolean isSyncing() {
-		return syncing;
-	}
+    public boolean isSyncing() {
+        return syncing;
+    }
 
-	public long getRoleId() {
-		return roleId;
-	}
+    public long getRoleId() {
+        return roleId;
+    }
 
-	public int getExpireBehavior() {
-		return expireBehavior;
-	}
+    public int getExpireBehavior() {
+        return expireBehavior;
+    }
 
-	public int getExpireGracePeriod() {
-		return expireGracePeriod;
-	}
+    public int getExpireGracePeriod() {
+        return expireGracePeriod;
+    }
 
-	public UserResponse getUser() {
-		return user;
-	}
+    public UserResponse getUser() {
+        return user;
+    }
 
-	public IntegrationAccountResponse getAccount() {
-		return account;
-	}
+    public IntegrationAccountResponse getAccount() {
+        return account;
+    }
 
-	public String getSyncedAt() {
-		return syncedAt;
-	}
+    public String getSyncedAt() {
+        return syncedAt;
+    }
 
-	@Override
-	public String toString() {
-		return "IntegrationResponse[" +
-				"id=" + id +
-				", name=" + name +
-				", type=" + type +
-				", enabled=" + enabled +
-				", syncing=" + syncing +
-				", roleId=" + roleId +
-				", expireBehavior=" + expireBehavior +
-				", expireGracePeriod=" + expireGracePeriod +
-				", user=" + user +
-				", account=" + account +
-				", syncedAt=" + syncedAt +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "IntegrationResponse[" +
+                "id=" + id +
+                ", name=" + name +
+                ", type=" + type +
+                ", enabled=" + enabled +
+                ", syncing=" + syncing +
+                ", roleId=" + roleId +
+                ", expireBehavior=" + expireBehavior +
+                ", expireGracePeriod=" + expireGracePeriod +
+                ", user=" + user +
+                ", account=" + account +
+                ", syncedAt=" + syncedAt +
+                ']';
+    }
 }

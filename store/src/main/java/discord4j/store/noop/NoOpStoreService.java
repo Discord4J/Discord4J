@@ -20,7 +20,6 @@ import discord4j.store.Store;
 import discord4j.store.noop.primitive.NoOpLongObjStore;
 import discord4j.store.primitive.LongObjStore;
 import discord4j.store.service.StoreService;
-import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 
@@ -38,7 +37,8 @@ public class NoOpStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
+                                                                                             Class<V> valueClass) {
         return new NoOpStore<>();
     }
 

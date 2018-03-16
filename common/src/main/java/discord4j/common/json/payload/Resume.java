@@ -20,23 +20,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Resume implements PayloadData {
 
-	private final String token;
-	@JsonProperty("session_id")
-	private final String sessionId;
-	private final int seq;
+    private final String token;
+    @JsonProperty("session_id")
+    private final String sessionId;
+    private final int seq;
 
-	public Resume(String token, String sessionId, int seq) {
-		this.token = token;
-		this.sessionId = sessionId;
-		this.seq = seq;
-	}
+    public Resume(String token, String sessionId, int seq) {
+        this.token = token;
+        this.sessionId = sessionId;
+        this.seq = seq;
+    }
 
-	@Override
-	public String toString() {
-		return "Resume[" +
-				"token=hunter2" +
-				", sessionId=" + sessionId +
-				", seq=" + seq +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "Resume[" +
+                "token=hunter2" +
+                ", sessionId=" + sessionId +
+                ", seq=" + seq +
+                ']';
+    }
 }

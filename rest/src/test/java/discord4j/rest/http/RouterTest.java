@@ -36,165 +36,165 @@ import java.util.concurrent.TimeUnit;
 
 public class RouterTest {
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void test() throws Exception {
-		String token = System.getenv("token");
-		String channelId = System.getenv("channel");
+    @Test
+    public void test() throws Exception {
+        String token = System.getenv("token");
+        String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = getMapper();
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl("https://discordapp.com/api/v6")
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl("https://discordapp.com/api/v6")
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		MessageCreateRequest body = new MessageCreateRequest("hello at" + Instant.now(), null, false, null);
+        MessageCreateRequest body = new MessageCreateRequest("hello at" + Instant.now(), null, false, null);
 
-		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(body)
-				.exchange(router)
-				.subscribe(response -> System.out.println("complete response"));
+        Routes.MESSAGE_CREATE.newRequest(channelId)
+                .body(body)
+                .exchange(router)
+                .subscribe(response -> System.out.println("complete response"));
 
 
-		TimeUnit.SECONDS.sleep(1);
-	}
+        TimeUnit.SECONDS.sleep(1);
+    }
 
-	@Test
-	public void orderingTest() throws Exception {
-		String token = System.getenv("token");
-		String channelId = System.getenv("channel");
+    @Test
+    public void orderingTest() throws Exception {
+        String token = System.getenv("token");
+        String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = getMapper();
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl("https://discordapp.com/api/v6")
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl("https://discordapp.com/api/v6")
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		for (int i = 0; i < 10; i++) {
-			final int a = i;
+        for (int i = 0; i < 10; i++) {
+            final int a = i;
 
-			MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
+            MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
 
-			Routes.MESSAGE_CREATE.newRequest(channelId)
-					.body(body)
-					.exchange(router)
-					.subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
-		}
+            Routes.MESSAGE_CREATE.newRequest(channelId)
+                    .body(body)
+                    .exchange(router)
+                    .subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
+        }
 
-		TimeUnit.SECONDS.sleep(10);
-	}
+        TimeUnit.SECONDS.sleep(10);
+    }
 
-	@Test
-	public void testMultiSub() throws Exception {
-		String token = System.getenv("token");
-		String channelId = System.getenv("channel");
+    @Test
+    public void testMultiSub() throws Exception {
+        String token = System.getenv("token");
+        String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = getMapper();
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl("https://discordapp.com/api/v6")
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl("https://discordapp.com/api/v6")
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		MessageCreateRequest body = new MessageCreateRequest("hi", null, false, null);
+        MessageCreateRequest body = new MessageCreateRequest("hi", null, false, null);
 
-		Mono<MessageResponse> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(body)
-				.exchange(router);
+        Mono<MessageResponse> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
+                .body(body)
+                .exchange(router);
 
-		mono.subscribe();
-		mono.subscribe();
+        mono.subscribe();
+        mono.subscribe();
 
-		TimeUnit.SECONDS.sleep(2);
-	}
+        TimeUnit.SECONDS.sleep(2);
+    }
 
-	@Test
-	public void testCustomThreadingModel() throws Exception {
-		String token = System.getenv("token");
-		String channelId = System.getenv("channel");
+    @Test
+    public void testCustomThreadingModel() throws Exception {
+        String token = System.getenv("token");
+        String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = getMapper();
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl("https://discordapp.com/api/v6")
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl("https://discordapp.com/api/v6")
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .build();
 
-		Router router = new Router(httpClient);
-		Scheduler thread = Schedulers.single();
+        Router router = new Router(httpClient);
+        Scheduler thread = Schedulers.single();
 
-		for (int i = 0; i < 6; i++) {
-			final int a = i;
+        for (int i = 0; i < 6; i++) {
+            final int a = i;
 
-			MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
+            MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
 
-			Routes.MESSAGE_CREATE.newRequest(channelId)
-					.body(body)
-					.exchange(router)
-					.publishOn(thread)
-					.cancelOn(thread)
-					.subscribeOn(thread)
-					.subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
-		}
+            Routes.MESSAGE_CREATE.newRequest(channelId)
+                    .body(body)
+                    .exchange(router)
+                    .publishOn(thread)
+                    .cancelOn(thread)
+                    .subscribeOn(thread)
+                    .subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
+        }
 
-		TimeUnit.SECONDS.sleep(10);
-	}
+        TimeUnit.SECONDS.sleep(10);
+    }
 
-	@Test
-	public void testBlocking() throws Exception {
-		String token = System.getenv("token");
-		String channelId = System.getenv("channel");
+    @Test
+    public void testBlocking() throws Exception {
+        String token = System.getenv("token");
+        String channelId = System.getenv("channel");
 
-		ObjectMapper mapper = getMapper();
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl("https://discordapp.com/api/v6")
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl("https://discordapp.com/api/v6")
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		MessageCreateRequest body0 = new MessageCreateRequest("hi 0 at" + Instant.now(), null, false, null);
+        MessageCreateRequest body0 = new MessageCreateRequest("hi 0 at" + Instant.now(), null, false, null);
 
-		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(body0)
-				.exchange(router)
-				.block();
+        Routes.MESSAGE_CREATE.newRequest(channelId)
+                .body(body0)
+                .exchange(router)
+                .block();
 
-		MessageCreateRequest body1 = new MessageCreateRequest("hi 1 at" + Instant.now(), null, false, null);
+        MessageCreateRequest body1 = new MessageCreateRequest("hi 1 at" + Instant.now(), null, false, null);
 
-		Routes.MESSAGE_CREATE.newRequest(channelId)
-				.body(body1)
-				.exchange(router)
-				.block();
-	}
+        Routes.MESSAGE_CREATE.newRequest(channelId)
+                .body(body1)
+                .exchange(router)
+                .block();
+    }
 }

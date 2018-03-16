@@ -23,35 +23,35 @@ import java.awt.Color;
 
 public class RoleEditSpec implements Spec<RoleModifyRequest> {
 
-	private final RoleModifyRequest.Builder requestBuilder = RoleModifyRequest.builder();
+    private final RoleModifyRequest.Builder requestBuilder = RoleModifyRequest.builder();
 
-	public RoleEditSpec setName(String name) {
-		requestBuilder.name(name);
-		return this;
-	}
+    public RoleEditSpec setName(String name) {
+        requestBuilder.name(name);
+        return this;
+    }
 
-	public RoleEditSpec setPermissions(PermissionSet permissions) {
-		requestBuilder.permissions(permissions.getRawValue());
-		return this;
-	}
+    public RoleEditSpec setPermissions(PermissionSet permissions) {
+        requestBuilder.permissions(permissions.getRawValue());
+        return this;
+    }
 
-	public RoleEditSpec setColor(Color color) {
-		requestBuilder.color(color.getRed());
-		return this;
-	}
+    public RoleEditSpec setColor(Color color) {
+        requestBuilder.color(color.getRed());
+        return this;
+    }
 
-	public RoleEditSpec setHoist(boolean hoist) {
-		requestBuilder.hoist(hoist);
-		return this;
-	}
+    public RoleEditSpec setHoist(boolean hoist) {
+        requestBuilder.hoist(hoist);
+        return this;
+    }
 
-	public RoleEditSpec setMentionable(boolean mentionable) {
-		requestBuilder.mentionable(mentionable);
-		return this;
-	}
+    public RoleEditSpec setMentionable(boolean mentionable) {
+        requestBuilder.mentionable(mentionable);
+        return this;
+    }
 
-	@Override
-	public RoleModifyRequest asRequest() {
-		return requestBuilder.build();
-	}
+    @Override
+    public RoleModifyRequest asRequest() {
+        return requestBuilder.build();
+    }
 }

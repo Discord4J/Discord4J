@@ -20,20 +20,20 @@ import javax.annotation.Nullable;
 
 public class WebhookCreateRequest {
 
-	private final String name;
-	@Nullable
-	private final String avatar;
+    private final String name;
+    @Nullable
+    private final String avatar;
 
-	public WebhookCreateRequest(String name, @Nullable String avatar) {
-		this.name = name;
-		this.avatar = avatar;
-	}
+    public WebhookCreateRequest(String name, @Nullable String avatar) {
+        this.name = name;
+        this.avatar = avatar;
+    }
 
-	@Override
-	public String toString() {
-		return "WebhookCreateRequest[" +
-				"name=" + name +
-				", avatar=" + avatar +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "WebhookCreateRequest[" +
+                "name=" + name +
+                ", avatar=" + avatar +
+                ']';
+    }
 }

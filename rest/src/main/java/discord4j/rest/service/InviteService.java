@@ -23,17 +23,17 @@ import reactor.core.publisher.Mono;
 
 public class InviteService extends RestService {
 
-	public InviteService(Router router) {
-		super(router);
-	}
+    public InviteService(Router router) {
+        super(router);
+    }
 
-	public Mono<InviteResponse> getInvite(String inviteCode) {
-		return Routes.INVITE_GET.newRequest(inviteCode)
-				.exchange(getRouter());
-	}
+    public Mono<InviteResponse> getInvite(String inviteCode) {
+        return Routes.INVITE_GET.newRequest(inviteCode)
+                .exchange(getRouter());
+    }
 
-	public Mono<InviteResponse> deleteInvite(String inviteCode) {
-		return Routes.INVITE_DELETE.newRequest(inviteCode)
-				.exchange(getRouter());
-	}
+    public Mono<InviteResponse> deleteInvite(String inviteCode) {
+        return Routes.INVITE_DELETE.newRequest(inviteCode)
+                .exchange(getRouter());
+    }
 }

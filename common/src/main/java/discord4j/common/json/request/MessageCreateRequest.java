@@ -20,28 +20,29 @@ import javax.annotation.Nullable;
 
 public class MessageCreateRequest {
 
-	@Nullable
-	private final String content;
-	@Nullable
-	private final String nonce;
-	private final boolean tts;
-	@Nullable
-	private final EmbedRequest embed;
+    @Nullable
+    private final String content;
+    @Nullable
+    private final String nonce;
+    private final boolean tts;
+    @Nullable
+    private final EmbedRequest embed;
 
-	public MessageCreateRequest(@Nullable String content, @Nullable String nonce, boolean tts, @Nullable EmbedRequest embed) {
-		this.content = content;
-		this.nonce = nonce;
-		this.tts = tts;
-		this.embed = embed;
-	}
+    public MessageCreateRequest(@Nullable String content, @Nullable String nonce, boolean tts,
+                                @Nullable EmbedRequest embed) {
+        this.content = content;
+        this.nonce = nonce;
+        this.tts = tts;
+        this.embed = embed;
+    }
 
-	@Override
-	public String toString() {
-		return "MessageCreateRequest[" +
-				"content=" + content +
-				", nonce=" + nonce +
-				", tts=" + tts +
-				", embed=" + embed +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "MessageCreateRequest[" +
+                "content=" + content +
+                ", nonce=" + nonce +
+                ", tts=" + tts +
+                ", embed=" + embed +
+                ']';
+    }
 }

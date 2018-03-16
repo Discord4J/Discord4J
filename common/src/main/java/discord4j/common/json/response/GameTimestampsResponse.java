@@ -20,26 +20,26 @@ import javax.annotation.Nullable;
 
 public class GameTimestampsResponse {
 
-	@Nullable
-	private Integer start;
-	@Nullable
-	private Integer end;
+    @Nullable
+    private Integer start;
+    @Nullable
+    private Integer end;
 
-	@Nullable
-	public Integer getStart() {
-		return start;
-	}
+    @Nullable
+    public Integer getStart() {
+        return start;
+    }
 
-	@Nullable
-	public Integer getEnd() {
-		return end;
-	}
+    @Nullable
+    public Integer getEnd() {
+        return end;
+    }
 
-	@Override
-	public String toString() {
-		return "GameTimestampsResponse[" +
-				"start=" + start +
-				", end=" + end +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GameTimestampsResponse[" +
+                "start=" + start +
+                ", end=" + end +
+                ']';
+    }
 }

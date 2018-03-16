@@ -25,41 +25,41 @@ import java.io.InputStream;
 
 public class MessageCreateSpec implements Spec<MultipartRequest> {
 
-	@Nullable
-	private String content;
-	@Nullable
-	private String nonce;
-	private boolean tts;
-	private EmbedRequest embed;
-	private String fileName;
-	private InputStream file;
+    @Nullable
+    private String content;
+    @Nullable
+    private String nonce;
+    private boolean tts;
+    private EmbedRequest embed;
+    private String fileName;
+    private InputStream file;
 
-	public MessageCreateSpec setContent(String content) {
-		this.content = content;
-		return this;
-	}
+    public MessageCreateSpec setContent(String content) {
+        this.content = content;
+        return this;
+    }
 
-	public MessageCreateSpec setNonce(String nonce) {
-		this.nonce = nonce;
-		return this;
-	}
+    public MessageCreateSpec setNonce(String nonce) {
+        this.nonce = nonce;
+        return this;
+    }
 
-	public MessageCreateSpec setEmbed(EmbedSpec embed) {
-		this.embed = embed.asRequest();
-		return this;
-	}
+    public MessageCreateSpec setEmbed(EmbedSpec embed) {
+        this.embed = embed.asRequest();
+        return this;
+    }
 
-	public MessageCreateSpec setFile(String fileName, InputStream file) {
-		this.fileName = fileName;
-		this.file = file;
-		return this;
-	}
+    public MessageCreateSpec setFile(String fileName, InputStream file) {
+        this.fileName = fileName;
+        this.file = file;
+        return this;
+    }
 
-	@Override
-	public MultipartRequest asRequest() {
-		MessageCreateRequest json = new MessageCreateRequest(content, nonce, tts, embed);
+    @Override
+    public MultipartRequest asRequest() {
+        MessageCreateRequest json = new MessageCreateRequest(content, nonce, tts, embed);
 
-		return new MultipartRequest(json, file == null ? null : form ->
-				form.multipart(true).file("file", fileName, file, "application/octet-stream"));
-	}
+        return new MultipartRequest(json, file == null ? null : form ->
+                form.multipart(true).file("file", fileName, file, "application/octet-stream"));
+    }
 }

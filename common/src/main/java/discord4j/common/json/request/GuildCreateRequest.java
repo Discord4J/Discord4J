@@ -23,39 +23,39 @@ import java.util.Arrays;
 
 public class GuildCreateRequest {
 
-	private final String name;
-	private final String region;
-	@Nullable
-	private final String icon;
-	@JsonProperty("verification_level")
-	private final int verificationLevel;
-	@JsonProperty("default_message_notifications")
-	private final int defaultMessageNotifications;
-	private final RoleCreateRequest[] roles;
-	private final PartialChannelRequest[] channels;
+    private final String name;
+    private final String region;
+    @Nullable
+    private final String icon;
+    @JsonProperty("verification_level")
+    private final int verificationLevel;
+    @JsonProperty("default_message_notifications")
+    private final int defaultMessageNotifications;
+    private final RoleCreateRequest[] roles;
+    private final PartialChannelRequest[] channels;
 
-	public GuildCreateRequest(String name, String region, @Nullable String icon, int verificationLevel,
-	                          int defaultMessageNotifications, RoleCreateRequest[] roles,
-	                          PartialChannelRequest[] channels) {
-		this.name = name;
-		this.region = region;
-		this.icon = icon;
-		this.verificationLevel = verificationLevel;
-		this.defaultMessageNotifications = defaultMessageNotifications;
-		this.roles = roles;
-		this.channels = channels;
-	}
+    public GuildCreateRequest(String name, String region, @Nullable String icon, int verificationLevel,
+                              int defaultMessageNotifications, RoleCreateRequest[] roles,
+                              PartialChannelRequest[] channels) {
+        this.name = name;
+        this.region = region;
+        this.icon = icon;
+        this.verificationLevel = verificationLevel;
+        this.defaultMessageNotifications = defaultMessageNotifications;
+        this.roles = roles;
+        this.channels = channels;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildCreateRequest[" +
-				"name=" + name +
-				", region=" + region +
-				", icon=" + icon +
-				", verificationLevel=" + verificationLevel +
-				", defaultMessageNotifications=" + defaultMessageNotifications +
-				", roles=" + Arrays.toString(roles) +
-				", channels=" + Arrays.toString(channels) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildCreateRequest[" +
+                "name=" + name +
+                ", region=" + region +
+                ", icon=" + icon +
+                ", verificationLevel=" + verificationLevel +
+                ", defaultMessageNotifications=" + defaultMessageNotifications +
+                ", roles=" + Arrays.toString(roles) +
+                ", channels=" + Arrays.toString(channels) +
+                ']';
+    }
 }

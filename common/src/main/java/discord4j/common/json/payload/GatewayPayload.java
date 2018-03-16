@@ -29,92 +29,92 @@ import java.util.Objects;
 @JsonDeserialize(using = PayloadDeserializer.class)
 public class GatewayPayload<T extends PayloadData> {
 
-	@JsonSerialize(converter = OpcodeConverter.class)
-	private Opcode<T> op;
-	@JsonProperty("d")
-	@Nullable
-	private T data;
-	@JsonProperty("s")
-	@Nullable
-	private Integer sequence;
-	@JsonProperty("t")
-	@Nullable
-	private String type;
+    @JsonSerialize(converter = OpcodeConverter.class)
+    private Opcode<T> op;
+    @JsonProperty("d")
+    @Nullable
+    private T data;
+    @JsonProperty("s")
+    @Nullable
+    private Integer sequence;
+    @JsonProperty("t")
+    @Nullable
+    private String type;
 
-	public GatewayPayload(Opcode<T> op, @Nullable T data, @Nullable Integer sequence, @Nullable String type) {
-		this.op = op;
-		this.data = data;
-		this.sequence = sequence;
-		this.type = type;
-	}
+    public GatewayPayload(Opcode<T> op, @Nullable T data, @Nullable Integer sequence, @Nullable String type) {
+        this.op = op;
+        this.data = data;
+        this.sequence = sequence;
+        this.type = type;
+    }
 
-	public GatewayPayload() {
-	}
+    public GatewayPayload() {
+    }
 
-	public static GatewayPayload<Heartbeat> heartbeat(Heartbeat data) {
-		return new GatewayPayload<>(Opcode.HEARTBEAT, data, null, null);
-	}
+    public static GatewayPayload<Heartbeat> heartbeat(Heartbeat data) {
+        return new GatewayPayload<>(Opcode.HEARTBEAT, data, null, null);
+    }
 
-	public static GatewayPayload<Identify> identify(Identify data) {
-		return new GatewayPayload<>(Opcode.IDENTIFY, data, null, null);
-	}
+    public static GatewayPayload<Identify> identify(Identify data) {
+        return new GatewayPayload<>(Opcode.IDENTIFY, data, null, null);
+    }
 
-	public static GatewayPayload<StatusUpdate> statusUpdate(StatusUpdate data) {
-		return new GatewayPayload<>(Opcode.STATUS_UPDATE, data, null, null);
-	}
+    public static GatewayPayload<StatusUpdate> statusUpdate(StatusUpdate data) {
+        return new GatewayPayload<>(Opcode.STATUS_UPDATE, data, null, null);
+    }
 
-	public static GatewayPayload<VoiceStateUpdate> voiceStateUpdate(VoiceStateUpdate data) {
-		return new GatewayPayload<>(Opcode.VOICE_STATE_UPDATE, data, null, null);
-	}
+    public static GatewayPayload<VoiceStateUpdate> voiceStateUpdate(VoiceStateUpdate data) {
+        return new GatewayPayload<>(Opcode.VOICE_STATE_UPDATE, data, null, null);
+    }
 
-	public static GatewayPayload<Resume> resume(Resume data) {
-		return new GatewayPayload<>(Opcode.RESUME, data, null, null);
-	}
+    public static GatewayPayload<Resume> resume(Resume data) {
+        return new GatewayPayload<>(Opcode.RESUME, data, null, null);
+    }
 
-	public static GatewayPayload<RequestGuildMembers> requestGuildMembers(RequestGuildMembers data) {
-		return new GatewayPayload<>(Opcode.REQUEST_GUILD_MEMBERS, data, null, null);
-	}
+    public static GatewayPayload<RequestGuildMembers> requestGuildMembers(RequestGuildMembers data) {
+        return new GatewayPayload<>(Opcode.REQUEST_GUILD_MEMBERS, data, null, null);
+    }
 
-	public Opcode<T> getOp() {
-		return op;
-	}
+    public Opcode<T> getOp() {
+        return op;
+    }
 
-	@Nullable
-	public T getData() {
-		return data;
-	}
+    @Nullable
+    public T getData() {
+        return data;
+    }
 
-	@Nullable
-	public Integer getSequence() {
-		return sequence;
-	}
+    @Nullable
+    public Integer getSequence() {
+        return sequence;
+    }
 
-	@Nullable
-	public String getType() {
-		return type;
-	}
+    @Nullable
+    public String getType() {
+        return type;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(op, data, sequence, type);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(op, data, sequence, type);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || obj.getClass() != GatewayPayload.class) {
-			return false;
-		}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || obj.getClass() != GatewayPayload.class) {
+            return false;
+        }
 
-		GatewayPayload<?> other = (GatewayPayload<?>) obj;
+        GatewayPayload<?> other = (GatewayPayload<?>) obj;
 
-		return this.op == other.op
-				&& Objects.equals(this.data, other.data)
-				&& Objects.equals(this.sequence, other.sequence)
-				&& Objects.equals(this.type, other.type);
-	}
+        return this.op == other.op
+                && Objects.equals(this.data, other.data)
+                && Objects.equals(this.sequence, other.sequence)
+                && Objects.equals(this.type, other.type);
+    }
 
-	@Override
-	public String toString() {
-		return "GatewayPayload[op=" + op + ", data=" + data + ", sequence=" + sequence + ", type=" + type + "]";
-	}
+    @Override
+    public String toString() {
+        return "GatewayPayload[op=" + op + ", data=" + data + ", sequence=" + sequence + ", type=" + type + "]";
+    }
 }

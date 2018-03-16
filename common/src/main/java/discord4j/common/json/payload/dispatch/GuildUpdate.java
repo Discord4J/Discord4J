@@ -21,17 +21,17 @@ import discord4j.common.json.response.GuildResponse;
 
 public class GuildUpdate implements Dispatch {
 
-	@JsonUnwrapped
-	private GuildResponse guild;
+    @JsonUnwrapped
+    private GuildResponse guild;
 
-	public GuildResponse getGuild() {
-		return guild;
-	}
+    public GuildResponse getGuild() {
+        return guild;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildUpdate[" +
-				"guild=" + guild +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildUpdate[" +
+                "guild=" + guild +
+                ']';
+    }
 }

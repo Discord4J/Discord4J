@@ -28,98 +28,98 @@ import javax.annotation.Nullable;
 @PossibleJson
 public class ChannelCreateRequest {
 
-	private final String name;
-	private final Possible<Integer> type;
-	private final Possible<Integer> bitrate;
-	@JsonProperty("user_limit")
-	private final Possible<Integer> userLimit;
-	@JsonProperty("permission_overwrites")
-	private final Possible<OverwriteEntity[]> permissionOverwrites;
-	@JsonProperty("parent_id")
-	@Nullable
-	@UnsignedJson
-	private final PossibleLong parentId;
-	private final Possible<Boolean> nsfw;
+    private final String name;
+    private final Possible<Integer> type;
+    private final Possible<Integer> bitrate;
+    @JsonProperty("user_limit")
+    private final Possible<Integer> userLimit;
+    @JsonProperty("permission_overwrites")
+    private final Possible<OverwriteEntity[]> permissionOverwrites;
+    @JsonProperty("parent_id")
+    @Nullable
+    @UnsignedJson
+    private final PossibleLong parentId;
+    private final Possible<Boolean> nsfw;
 
-	public ChannelCreateRequest(String name, Possible<Integer> type,
-	                            Possible<Integer> bitrate, Possible<Integer> userLimit,
-	                            Possible<OverwriteEntity[]> permissionOverwrites,
-	                            @Nullable PossibleLong parentId,
-	                            Possible<Boolean> nsfw) {
-		this.name = name;
-		this.type = type;
-		this.bitrate = bitrate;
-		this.userLimit = userLimit;
-		this.permissionOverwrites = permissionOverwrites;
-		this.parentId = parentId;
-		this.nsfw = nsfw;
-	}
+    public ChannelCreateRequest(String name, Possible<Integer> type,
+                                Possible<Integer> bitrate, Possible<Integer> userLimit,
+                                Possible<OverwriteEntity[]> permissionOverwrites,
+                                @Nullable PossibleLong parentId,
+                                Possible<Boolean> nsfw) {
+        this.name = name;
+        this.type = type;
+        this.bitrate = bitrate;
+        this.userLimit = userLimit;
+        this.permissionOverwrites = permissionOverwrites;
+        this.parentId = parentId;
+        this.nsfw = nsfw;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private String name;
-		private Possible<Integer> type = Possible.absent();
-		private Possible<Integer> bitrate = Possible.absent();
-		private Possible<Integer> userLimit = Possible.absent();
-		private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
-		private PossibleLong parentId = PossibleLong.absent();
-		@Nullable
-		private Possible<Boolean> nsfw = Possible.absent();
+        private String name;
+        private Possible<Integer> type = Possible.absent();
+        private Possible<Integer> bitrate = Possible.absent();
+        private Possible<Integer> userLimit = Possible.absent();
+        private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
+        private PossibleLong parentId = PossibleLong.absent();
+        @Nullable
+        private Possible<Boolean> nsfw = Possible.absent();
 
-		public Builder name(String name) {
-			this.name = name;
-			return this;
-		}
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
 
-		public Builder type(int type) {
-			this.type = Possible.of(type);
-			return this;
-		}
+        public Builder type(int type) {
+            this.type = Possible.of(type);
+            return this;
+        }
 
-		public Builder bitrate(int bitrate) {
-			this.bitrate = Possible.of(bitrate);
-			return this;
-		}
+        public Builder bitrate(int bitrate) {
+            this.bitrate = Possible.of(bitrate);
+            return this;
+        }
 
-		public Builder userLimit(int userLimit) {
-			this.userLimit = Possible.of(userLimit);
-			return this;
-		}
+        public Builder userLimit(int userLimit) {
+            this.userLimit = Possible.of(userLimit);
+            return this;
+        }
 
-		public Builder permissionOverwrites(OverwriteEntity[] permissionOverwrites) {
-			this.permissionOverwrites = Possible.of(permissionOverwrites);
-			return this;
-		}
+        public Builder permissionOverwrites(OverwriteEntity[] permissionOverwrites) {
+            this.permissionOverwrites = Possible.of(permissionOverwrites);
+            return this;
+        }
 
-		public Builder parentId(@Nullable Long parentId) {
-			this.parentId = parentId == null ? null : PossibleLong.of(parentId);
-			return this;
-		}
+        public Builder parentId(@Nullable Long parentId) {
+            this.parentId = parentId == null ? null : PossibleLong.of(parentId);
+            return this;
+        }
 
-		public Builder nsfw(boolean nsfw) {
-			this.nsfw = Possible.of(nsfw);
-			return this;
-		}
+        public Builder nsfw(boolean nsfw) {
+            this.nsfw = Possible.of(nsfw);
+            return this;
+        }
 
-		public ChannelCreateRequest build() {
-			return new ChannelCreateRequest(name, type, bitrate, userLimit, permissionOverwrites, parentId, nsfw);
-		}
-	}
+        public ChannelCreateRequest build() {
+            return new ChannelCreateRequest(name, type, bitrate, userLimit, permissionOverwrites, parentId, nsfw);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "ChannelCreateRequest[" +
-				"name=" + name +
-				", type=" + type +
-				", bitrate=" + bitrate +
-				", userLimit=" + userLimit +
-				", permissionOverwrites=" + permissionOverwrites +
-				", parentId=" + parentId +
-				", nsfw=" + nsfw +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ChannelCreateRequest[" +
+                "name=" + name +
+                ", type=" + type +
+                ", bitrate=" + bitrate +
+                ", userLimit=" + userLimit +
+                ", permissionOverwrites=" + permissionOverwrites +
+                ", parentId=" + parentId +
+                ", nsfw=" + nsfw +
+                ']';
+    }
 }

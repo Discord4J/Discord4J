@@ -28,20 +28,20 @@ import javax.annotation.Nullable;
 
 public class PossibleSerializers extends Serializers.Base {
 
-	@Nullable
-	@Override
-	public JsonSerializer<?> findReferenceSerializer(SerializationConfig config, ReferenceType type,
-	                                                 BeanDescription beanDesc, TypeSerializer contentTypeSerializer,
-	                                                 JsonSerializer<Object> contentValueSerializer) {
-		Class<?> raw = type.getRawClass();
-		boolean staticTyping = config.isEnabled(MapperFeature.USE_STATIC_TYPING);
+    @Nullable
+    @Override
+    public JsonSerializer<?> findReferenceSerializer(SerializationConfig config, ReferenceType type,
+                                                     BeanDescription beanDesc, TypeSerializer contentTypeSerializer,
+                                                     JsonSerializer<Object> contentValueSerializer) {
+        Class<?> raw = type.getRawClass();
+        boolean staticTyping = config.isEnabled(MapperFeature.USE_STATIC_TYPING);
 
-		if (Possible.class.isAssignableFrom(raw)) {
-			return new PossibleSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
-		} else if (PossibleLong.class.isAssignableFrom(raw)) {
-			return new PossibleLongSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
-		}
+        if (Possible.class.isAssignableFrom(raw)) {
+            return new PossibleSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
+        } else if (PossibleLong.class.isAssignableFrom(raw)) {
+            return new PossibleLongSerializer(type, staticTyping, contentTypeSerializer, contentValueSerializer);
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

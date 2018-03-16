@@ -21,17 +21,17 @@ import discord4j.common.json.response.ChannelResponse;
 
 public class ChannelCreate implements Dispatch {
 
-	@JsonUnwrapped
-	private ChannelResponse channel;
+    @JsonUnwrapped
+    private ChannelResponse channel;
 
-	public ChannelResponse getChannel() {
-		return channel;
-	}
+    public ChannelResponse getChannel() {
+        return channel;
+    }
 
-	@Override
-	public String toString() {
-		return "ChannelCreate[" +
-				"channel=" + channel +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ChannelCreate[" +
+                "channel=" + channel +
+                ']';
+    }
 }

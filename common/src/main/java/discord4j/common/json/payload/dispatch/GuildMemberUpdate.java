@@ -24,37 +24,37 @@ import java.util.Arrays;
 
 public class GuildMemberUpdate implements Dispatch {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	@UnsignedJson
-	private long[] roles;
-	private UserResponse user;
-	private String nick;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    @UnsignedJson
+    private long[] roles;
+    private UserResponse user;
+    private String nick;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public long[] getRoles() {
-		return roles;
-	}
+    public long[] getRoles() {
+        return roles;
+    }
 
-	public UserResponse getUser() {
-		return user;
-	}
+    public UserResponse getUser() {
+        return user;
+    }
 
-	public String getNick() {
-		return nick;
-	}
+    public String getNick() {
+        return nick;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildMemberUpdate[" +
-				"guildId=" + guildId +
-				", roles=" + Arrays.toString(roles) +
-				", user=" + user +
-				", nick=" + nick +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildMemberUpdate[" +
+                "guildId=" + guildId +
+                ", roles=" + Arrays.toString(roles) +
+                ", user=" + user +
+                ", nick=" + nick +
+                ']';
+    }
 }

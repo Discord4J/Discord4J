@@ -25,32 +25,33 @@ import java.util.function.Consumer;
 
 public class MultipartRequest {
 
-	private final MessageCreateRequest createRequest;
-	private final Consumer<HttpClientRequest.Form> formConsumer;
+    private final MessageCreateRequest createRequest;
+    private final Consumer<HttpClientRequest.Form> formConsumer;
 
-	public MultipartRequest(MessageCreateRequest createRequest) {
-		this(createRequest, null);
-	}
+    public MultipartRequest(MessageCreateRequest createRequest) {
+        this(createRequest, null);
+    }
 
-	public MultipartRequest(@Nullable MessageCreateRequest createRequest, @Nullable Consumer<HttpClientRequest.Form> formConsumer) {
-		if (createRequest == null && formConsumer == null) {
-			throw new IllegalArgumentException("At least one of the parameters must be non-null");
-		}
-		this.createRequest = createRequest;
-		this.formConsumer = formConsumer;
-	}
+    public MultipartRequest(@Nullable MessageCreateRequest createRequest,
+                            @Nullable Consumer<HttpClientRequest.Form> formConsumer) {
+        if (createRequest == null && formConsumer == null) {
+            throw new IllegalArgumentException("At least one of the parameters must be non-null");
+        }
+        this.createRequest = createRequest;
+        this.formConsumer = formConsumer;
+    }
 
-	@Nullable
-	public MessageCreateRequest getCreateRequest() {
-		return createRequest;
-	}
+    @Nullable
+    public MessageCreateRequest getCreateRequest() {
+        return createRequest;
+    }
 
-	@Nullable
-	public Consumer<HttpClientRequest.Form> getFormConsumer() {
-		return formConsumer;
-	}
+    @Nullable
+    public Consumer<HttpClientRequest.Form> getFormConsumer() {
+        return formConsumer;
+    }
 
-	public boolean hasFormConsumer() {
-		return formConsumer != null;
-	}
+    public boolean hasFormConsumer() {
+        return formConsumer != null;
+    }
 }

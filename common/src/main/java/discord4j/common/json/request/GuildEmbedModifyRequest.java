@@ -25,21 +25,21 @@ import discord4j.common.jackson.UnsignedJson;
 @PossibleJson
 public class GuildEmbedModifyRequest {
 
-	private final Possible<Boolean> enabled;
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private final PossibleLong channelId;
+    private final Possible<Boolean> enabled;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private final PossibleLong channelId;
 
-	public GuildEmbedModifyRequest(Possible<Boolean> enabled, PossibleLong channelId) {
-		this.enabled = enabled;
-		this.channelId = channelId;
-	}
+    public GuildEmbedModifyRequest(Possible<Boolean> enabled, PossibleLong channelId) {
+        this.enabled = enabled;
+        this.channelId = channelId;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildEmbedModifyRequest[" +
-				"enabled=" + enabled +
-				", channelId=" + channelId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildEmbedModifyRequest[" +
+                "enabled=" + enabled +
+                ", channelId=" + channelId +
+                ']';
+    }
 }

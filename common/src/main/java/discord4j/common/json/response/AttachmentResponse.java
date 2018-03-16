@@ -23,59 +23,59 @@ import javax.annotation.Nullable;
 
 public class AttachmentResponse {
 
-	@UnsignedJson
-	private long id;
-	@JsonProperty("filename")
-	private String fileName;
-	private int size;
-	private String url;
-	@JsonProperty("proxy_url")
-	private String proxyUrl;
-	@Nullable
-	private Integer height;
-	@Nullable
-	private Integer width;
+    @UnsignedJson
+    private long id;
+    @JsonProperty("filename")
+    private String fileName;
+    private int size;
+    private String url;
+    @JsonProperty("proxy_url")
+    private String proxyUrl;
+    @Nullable
+    private Integer height;
+    @Nullable
+    private Integer width;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getFileName() {
-		return fileName;
-	}
+    public String getFileName() {
+        return fileName;
+    }
 
-	public int getSize() {
-		return size;
-	}
+    public int getSize() {
+        return size;
+    }
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public String getProxyUrl() {
-		return proxyUrl;
-	}
+    public String getProxyUrl() {
+        return proxyUrl;
+    }
 
-	@Nullable
-	public Integer getHeight() {
-		return height;
-	}
+    @Nullable
+    public Integer getHeight() {
+        return height;
+    }
 
-	@Nullable
-	public Integer getWidth() {
-		return width;
-	}
+    @Nullable
+    public Integer getWidth() {
+        return width;
+    }
 
-	@Override
-	public String toString() {
-		return "AttachmentResponse[" +
-				"id=" + id +
-				", fileName=" + fileName +
-				", size=" + size +
-				", url=" + url +
-				", proxyUrl=" + proxyUrl +
-				", height=" + height +
-				", width=" + width +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "AttachmentResponse[" +
+                "id=" + id +
+                ", fileName=" + fileName +
+                ", size=" + size +
+                ", url=" + url +
+                ", proxyUrl=" + proxyUrl +
+                ", height=" + height +
+                ", width=" + width +
+                ']';
+    }
 }

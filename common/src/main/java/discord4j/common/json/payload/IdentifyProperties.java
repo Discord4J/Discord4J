@@ -20,25 +20,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IdentifyProperties {
 
-	@JsonProperty("$os")
-	private final String os;
-	@JsonProperty("$browser")
-	private final String browser;
-	@JsonProperty("$device")
-	private final String device;
+    @JsonProperty("$os")
+    private final String os;
+    @JsonProperty("$browser")
+    private final String browser;
+    @JsonProperty("$device")
+    private final String device;
 
-	public IdentifyProperties(String os, String browser, String device) {
-		this.os = os;
-		this.browser = browser;
-		this.device = device;
-	}
+    public IdentifyProperties(String os, String browser, String device) {
+        this.os = os;
+        this.browser = browser;
+        this.device = device;
+    }
 
-	@Override
-	public String toString() {
-		return "IdentifyProperties[" +
-				"os=" + os +
-				", browser=" + browser +
-				", device=" + device +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "IdentifyProperties[" +
+                "os=" + os +
+                ", browser=" + browser +
+                ", device=" + device +
+                ']';
+    }
 }

@@ -28,14 +28,14 @@ import java.util.Objects;
  */
 public class FallbackReaderStrategy implements ReaderStrategy<String> {
 
-	@Override
-	public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
-		return true;
-	}
+    @Override
+    public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
+        return true;
+    }
 
-	@Override
-	public Mono<String> read(HttpClientResponse response, Class<String> responseType) {
-		Objects.requireNonNull(response);
-		return response.receive().aggregate().asString();
-	}
+    @Override
+    public Mono<String> read(HttpClientResponse response, Class<String> responseType) {
+        Objects.requireNonNull(response);
+        return response.receive().aggregate().asString();
+    }
 }

@@ -16,40 +16,42 @@ import org.junit.Test;
 
 public class ApplicationServiceTest {
 
-	private ApplicationService applicationService = null;
+    private ApplicationService applicationService = null;
 
-	private ApplicationService getApplicationService() {
+    private ApplicationService getApplicationService() {
 
-		if (applicationService != null) return applicationService;
+        if (applicationService != null) {
+            return applicationService;
+        }
 
-		String token = System.getenv("token");
-		ObjectMapper mapper = getMapper();
+        String token = System.getenv("token");
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl(Routes.BASE_URL)
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .writerStrategy(new EmptyWriterStrategy())
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		return applicationService = new ApplicationService(router);
-	}
+        return applicationService = new ApplicationService(router);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testGetCurrentApplicationInfo() {
-		getApplicationService().getCurrentApplicationInfo().block();
-	}
+    @Test
+    public void testGetCurrentApplicationInfo() {
+        getApplicationService().getCurrentApplicationInfo().block();
+    }
 
 }

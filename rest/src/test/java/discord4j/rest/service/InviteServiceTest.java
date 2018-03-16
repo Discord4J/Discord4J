@@ -32,47 +32,49 @@ import org.junit.Test;
 
 public class InviteServiceTest {
 
-	private static final String inviteCode = System.getenv("inviteCode");
+    private static final String inviteCode = System.getenv("inviteCode");
 
-	private InviteService inviteService = null;
+    private InviteService inviteService = null;
 
-	private InviteService getInviteService() {
+    private InviteService getInviteService() {
 
-		if (inviteService != null) return inviteService;
+        if (inviteService != null) {
+            return inviteService;
+        }
 
-		String token = System.getenv("token");
-		ObjectMapper mapper = getMapper();
+        String token = System.getenv("token");
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl(Routes.BASE_URL)
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .writerStrategy(new EmptyWriterStrategy())
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		return inviteService = new InviteService(router);
-	}
+        return inviteService = new InviteService(router);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testGetInvite() {
-		getInviteService().getInvite(inviteCode).block();
-	}
+    @Test
+    public void testGetInvite() {
+        getInviteService().getInvite(inviteCode).block();
+    }
 
-	@Test
-	public void testDeleteInvite() {
-		// TODO
-	}
+    @Test
+    public void testDeleteInvite() {
+        // TODO
+    }
 
 }

@@ -24,24 +24,24 @@ import java.util.Arrays;
 
 public class GuildEmojisUpdate implements Dispatch {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	private EmojiResponse[] emojis;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    private EmojiResponse[] emojis;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public EmojiResponse[] getEmojis() {
-		return emojis;
-	}
+    public EmojiResponse[] getEmojis() {
+        return emojis;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildEmojisUpdate[" +
-				"guildId=" + guildId +
-				", emojis=" + Arrays.toString(emojis) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildEmojisUpdate[" +
+                "guildId=" + guildId +
+                ", emojis=" + Arrays.toString(emojis) +
+                ']';
+    }
 }

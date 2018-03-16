@@ -20,35 +20,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EmbedVideoResponse {
 
-	private String url;
-	private int height;
-	private int width;
-	@JsonProperty("proxy_url")
-	private String proxyUrl;
+    private String url;
+    private int height;
+    private int width;
+    @JsonProperty("proxy_url")
+    private String proxyUrl;
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public int getHeight() {
-		return height;
-	}
+    public int getHeight() {
+        return height;
+    }
 
-	public int getWidth() {
-		return width;
-	}
+    public int getWidth() {
+        return width;
+    }
 
-	public String getProxyUrl() {
-		return proxyUrl;
-	}
+    public String getProxyUrl() {
+        return proxyUrl;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedVideoResponse[" +
-				"url=" + url +
-				", height=" + height +
-				", width=" + width +
-				", proxy_url=" + proxyUrl +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedVideoResponse[" +
+                "url=" + url +
+                ", height=" + height +
+                ", width=" + width +
+                ", proxy_url=" + proxyUrl +
+                ']';
+    }
 }

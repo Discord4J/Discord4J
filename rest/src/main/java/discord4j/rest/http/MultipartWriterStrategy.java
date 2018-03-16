@@ -35,32 +35,32 @@ import java.util.function.Consumer;
  */
 public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest> {
 
-	private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-	public MultipartWriterStrategy(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
+    public MultipartWriterStrategy(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
-	@Override
-	public boolean canWrite(@Nullable Class<?> type, @Nullable String contentType) {
-		return contentType != null && contentType.equals("multipart/form-data");
-	}
+    @Override
+    public boolean canWrite(@Nullable Class<?> type, @Nullable String contentType) {
+        return contentType != null && contentType.equals("multipart/form-data");
+    }
 
-	@Override
-	public Mono<Void> write(HttpClientRequest request, @Nullable MultipartRequest body) {
-		if (body == null) {
-			return Mono.empty(); // or .error() ?
-		}
-		Consumer<HttpClientRequest.Form> formConsumer = body.getFormConsumer();
-		MessageCreateRequest createRequest = body.getCreateRequest();
-		if (createRequest != null) {
-			try {
-				String payload = objectMapper.writeValueAsString(createRequest);
-				formConsumer = formConsumer.andThen(form -> form.attr("payload_json", payload));
-			} catch (JsonProcessingException e) {
-				throw Exceptions.propagate(e);
-			}
-		}
-		return request.chunkedTransfer(false).sendForm(formConsumer).then();
-	}
+    @Override
+    public Mono<Void> write(HttpClientRequest request, @Nullable MultipartRequest body) {
+        if (body == null) {
+            return Mono.empty(); // or .error() ?
+        }
+        Consumer<HttpClientRequest.Form> formConsumer = body.getFormConsumer();
+        MessageCreateRequest createRequest = body.getCreateRequest();
+        if (createRequest != null) {
+            try {
+                String payload = objectMapper.writeValueAsString(createRequest);
+                formConsumer = formConsumer.andThen(form -> form.attr("payload_json", payload));
+            } catch (JsonProcessingException e) {
+                throw Exceptions.propagate(e);
+            }
+        }
+        return request.chunkedTransfer(false).sendForm(formConsumer).then();
+    }
 }

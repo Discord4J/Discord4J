@@ -20,13 +20,13 @@ import discord4j.rest.request.Router;
 
 public abstract class RestService {
 
-	private final Router router;
+    private final Router router;
 
-	protected RestService(Router router) {
-		this.router = router;
-	}
+    protected RestService(Router router) {
+        this.router = router;
+    }
 
-	protected Router getRouter() {
-		return router;
-	}
+    protected Router getRouter() {
+        return router;
+    }
 }

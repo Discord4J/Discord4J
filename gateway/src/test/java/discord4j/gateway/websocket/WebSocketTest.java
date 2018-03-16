@@ -29,31 +29,31 @@ import static org.junit.Assert.assertEquals;
 
 public class WebSocketTest {
 
-	private static final Logger log = Loggers.getLogger(WebSocketTest.class);
+    private static final Logger log = Loggers.getLogger(WebSocketTest.class);
 
-	@Test
-	public void connectTest() throws URISyntaxException, InterruptedException {
-		int count = 10;
-		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
-		ReplayProcessor<Object> output = ReplayProcessor.create(count);
+    @Test
+    public void connectTest() throws URISyntaxException, InterruptedException {
+        int count = 10;
+        Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
+        ReplayProcessor<Object> output = ReplayProcessor.create(count);
 
-		WebSocketClient client = new WebSocketClient();
+        WebSocketClient client = new WebSocketClient();
 
-		client.execute("wss://echo.websocket.org/",
-				session -> {
-					log.debug("Starting to send messages");
-					return session
-							.send(input.doOnNext(s -> log.debug("outbound " + s)).map(WebSocketMessage::fromText))
-							.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
-							.subscribeWith(output)
-							.doOnNext(s -> log.debug("inbound " + s))
-							.then()
-							.doOnSuccessOrError((aVoid, ex) ->
-									log.debug("Done with " + (ex != null ? ex.getMessage() : "success")));
-				})
-				.block(Duration.ofMillis(5000));
+        client.execute("wss://echo.websocket.org/",
+                session -> {
+                    log.debug("Starting to send messages");
+                    return session
+                            .send(input.doOnNext(s -> log.debug("outbound " + s)).map(WebSocketMessage::fromText))
+                            .thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
+                            .subscribeWith(output)
+                            .doOnNext(s -> log.debug("inbound " + s))
+                            .then()
+                            .doOnSuccessOrError((aVoid, ex) ->
+                                    log.debug("Done with " + (ex != null ? ex.getMessage() : "success")));
+                })
+                .block(Duration.ofMillis(5000));
 
-		assertEquals(input.collectList().block(Duration.ofMillis(5000)),
-				output.collectList().block(Duration.ofMillis(5000)));
-	}
+        assertEquals(input.collectList().block(Duration.ofMillis(5000)),
+                output.collectList().block(Duration.ofMillis(5000)));
+    }
 }

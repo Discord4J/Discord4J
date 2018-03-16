@@ -22,41 +22,41 @@ import java.util.Arrays;
 
 public class ConnectionResponse {
 
-	@UnsignedJson
-	private long id;
-	private String name;
-	private String type;
-	private boolean revoked;
-	private IntegrationResponse[] integrations;
+    @UnsignedJson
+    private long id;
+    private String name;
+    private String type;
+    private boolean revoked;
+    private IntegrationResponse[] integrations;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public boolean isRevoked() {
-		return revoked;
-	}
+    public boolean isRevoked() {
+        return revoked;
+    }
 
-	public IntegrationResponse[] getIntegrations() {
-		return integrations;
-	}
+    public IntegrationResponse[] getIntegrations() {
+        return integrations;
+    }
 
-	@Override
-	public String toString() {
-		return "ConnectionResponse[" +
-				"id=" + id +
-				", name=" + name +
-				", type=" + type +
-				", revoked=" + revoked +
-				", integrations=" + Arrays.toString(integrations) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ConnectionResponse[" +
+                "id=" + id +
+                ", name=" + name +
+                ", type=" + type +
+                ", revoked=" + revoked +
+                ", integrations=" + Arrays.toString(integrations) +
+                ']';
+    }
 }

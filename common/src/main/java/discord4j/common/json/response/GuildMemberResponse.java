@@ -24,50 +24,50 @@ import java.util.Arrays;
 
 public class GuildMemberResponse {
 
-	private UserResponse user;
-	@Nullable
-	private String nick;
-	@UnsignedJson
-	private long[] roles;
-	@JsonProperty("joined_at")
-	private String joinedAt;
-	private boolean deaf;
-	private boolean mute;
+    private UserResponse user;
+    @Nullable
+    private String nick;
+    @UnsignedJson
+    private long[] roles;
+    @JsonProperty("joined_at")
+    private String joinedAt;
+    private boolean deaf;
+    private boolean mute;
 
-	public UserResponse getUser() {
-		return user;
-	}
+    public UserResponse getUser() {
+        return user;
+    }
 
-	@Nullable
-	public String getNick() {
-		return nick;
-	}
+    @Nullable
+    public String getNick() {
+        return nick;
+    }
 
-	public long[] getRoles() {
-		return roles;
-	}
+    public long[] getRoles() {
+        return roles;
+    }
 
-	public String getJoinedAt() {
-		return joinedAt;
-	}
+    public String getJoinedAt() {
+        return joinedAt;
+    }
 
-	public boolean isDeaf() {
-		return deaf;
-	}
+    public boolean isDeaf() {
+        return deaf;
+    }
 
-	public boolean isMute() {
-		return mute;
-	}
+    public boolean isMute() {
+        return mute;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildMemberResponse[" +
-				"user=" + user +
-				", nick=" + nick +
-				", roles=" + Arrays.toString(roles) +
-				", joinedAt=" + joinedAt +
-				", deaf=" + deaf +
-				", mute=" + mute +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildMemberResponse[" +
+                "user=" + user +
+                ", nick=" + nick +
+                ", roles=" + Arrays.toString(roles) +
+                ", joinedAt=" + joinedAt +
+                ", deaf=" + deaf +
+                ", mute=" + mute +
+                ']';
+    }
 }

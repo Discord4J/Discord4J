@@ -24,59 +24,59 @@ import java.time.Duration;
 
 public class GatewayStateChange implements Dispatch {
 
-	public enum State {
-		CONNECTED, DISCONNECTED, RETRY_STARTED, RETRY_SUCCEEDED, RETRY_FAILED
-	}
+    public enum State {
+        CONNECTED, DISCONNECTED, RETRY_STARTED, RETRY_SUCCEEDED, RETRY_FAILED
+    }
 
-	public static GatewayStateChange connected() {
-		return new GatewayStateChange(State.CONNECTED, 0, null);
-	}
+    public static GatewayStateChange connected() {
+        return new GatewayStateChange(State.CONNECTED, 0, null);
+    }
 
-	public static GatewayStateChange disconnected() {
-		return new GatewayStateChange(State.DISCONNECTED, 0, null);
-	}
+    public static GatewayStateChange disconnected() {
+        return new GatewayStateChange(State.DISCONNECTED, 0, null);
+    }
 
-	public static GatewayStateChange retryStarted(Duration nextAttemptBackoff) {
-		return new GatewayStateChange(State.RETRY_STARTED, 1, nextAttemptBackoff);
-	}
+    public static GatewayStateChange retryStarted(Duration nextAttemptBackoff) {
+        return new GatewayStateChange(State.RETRY_STARTED, 1, nextAttemptBackoff);
+    }
 
-	public static GatewayStateChange retrySucceeded(int currentAttempt) {
-		return new GatewayStateChange(State.RETRY_SUCCEEDED, currentAttempt, null);
-	}
+    public static GatewayStateChange retrySucceeded(int currentAttempt) {
+        return new GatewayStateChange(State.RETRY_SUCCEEDED, currentAttempt, null);
+    }
 
-	public static GatewayStateChange retryFailed(int currentAttempt, Duration nextAttemptBackoff) {
-		return new GatewayStateChange(State.RETRY_FAILED, currentAttempt, nextAttemptBackoff);
-	}
+    public static GatewayStateChange retryFailed(int currentAttempt, Duration nextAttemptBackoff) {
+        return new GatewayStateChange(State.RETRY_FAILED, currentAttempt, nextAttemptBackoff);
+    }
 
-	private final State state;
-	private final int currentAttempt;
-	private final Duration backoff;
+    private final State state;
+    private final int currentAttempt;
+    private final Duration backoff;
 
-	private GatewayStateChange(State state, int currentAttempt, Duration backoff) {
-		this.state = state;
-		this.currentAttempt = currentAttempt;
-		this.backoff = backoff;
-	}
+    private GatewayStateChange(State state, int currentAttempt, Duration backoff) {
+        this.state = state;
+        this.currentAttempt = currentAttempt;
+        this.backoff = backoff;
+    }
 
-	public State getState() {
-		return state;
-	}
+    public State getState() {
+        return state;
+    }
 
-	public int getCurrentAttempt() {
-		return currentAttempt;
-	}
+    public int getCurrentAttempt() {
+        return currentAttempt;
+    }
 
-	@Nullable
-	public Duration getBackoff() {
-		return backoff;
-	}
+    @Nullable
+    public Duration getBackoff() {
+        return backoff;
+    }
 
-	@Override
-	public String toString() {
-		return "GatewayStateChanged[" +
-				"state=" + state +
-				", currentAttempt=" + currentAttempt +
-				", backoff=" + backoff +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GatewayStateChanged[" +
+                "state=" + state +
+                ", currentAttempt=" + currentAttempt +
+                ", backoff=" + backoff +
+                ']';
+    }
 }

@@ -28,17 +28,17 @@ import java.util.*;
  * Copy of Reactor's Tuple2 but accepting a long as the first object.
  *
  * @param <T> The second object type.
- *
  * @see LongObjTuple2#of(long, Object)
  * @see Tuple2
  */
-public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Comparable<LongObjTuple2<T>> { //Methods copied from reactor.util.function.Tuple2, it would be extended instead but it has a private constructor
+public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Comparable<LongObjTuple2<T>> { //Methods
+    // copied from reactor.util.function.Tuple2, it would be extended instead but it has a private constructor
 
     /**
      * Create a {@link LongObjTuple2} with the given objects.
      *
-     * @param t1   The first value in the tuple. Not null.
-     * @param t2   The second value in the tuple. Not null.
+     * @param t1 The first value in the tuple. Not null.
+     * @param t2 The second value in the tuple. Not null.
      * @param <T> The type of the second value.
      * @return The new {@link LongObjTuple2}.
      */
@@ -71,7 +71,8 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
     private static final long serialVersionUID = 6977984978741213834L;
 
     final long t1;
-    @NonNull final T t2;
+    @NonNull
+    final T t2;
 
 
     LongObjTuple2(long t1, T t2) {
@@ -179,6 +180,7 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
     /**
      * A Tuple String representation is the comma separated list of values, enclosed
      * in square brackets.
+     *
      * @return the Tuple String representation
      */
     @Override
@@ -195,7 +197,6 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
      * @param values the values of the tuple to represent
      * @return a {@link StringBuilder} initialized with the string representation of the
      * values in the Tuple.
-     *
      * @see Tuples#tupleStringRepresentation(Object...)
      */
     static StringBuilder tupleStringRepresentation(Object... values) {
@@ -214,8 +215,9 @@ public class LongObjTuple2<T> implements Iterable<Object>, Serializable, Compara
 
     @Override
     public int compareTo(LongObjTuple2<T> o) { //Considers first object to have priority
-        if (o.t1 != t1)
+        if (o.t1 != t1) {
             return t1 < o.t1 ? -1 : 1;
+        }
 
         if (t2 instanceof Comparable) {
             return ((Comparable) t2).compareTo(o.t2);

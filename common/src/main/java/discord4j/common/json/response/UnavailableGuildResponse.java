@@ -20,23 +20,23 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class UnavailableGuildResponse {
 
-	@UnsignedJson
-	private long id;
-	private boolean unavailable;
+    @UnsignedJson
+    private long id;
+    private boolean unavailable;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public boolean isUnavailable() {
-		return unavailable;
-	}
+    public boolean isUnavailable() {
+        return unavailable;
+    }
 
-	@Override
-	public String toString() {
-		return "UnavailableGuildResponse[" +
-				"id=" + id +
-				", unavailable=" + unavailable +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "UnavailableGuildResponse[" +
+                "id=" + id +
+                ", unavailable=" + unavailable +
+                ']';
+    }
 }

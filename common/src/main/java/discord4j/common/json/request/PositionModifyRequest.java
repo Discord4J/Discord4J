@@ -20,20 +20,20 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class PositionModifyRequest {
 
-	@UnsignedJson
-	private final long id;
-	private final int position;
+    @UnsignedJson
+    private final long id;
+    private final int position;
 
-	public PositionModifyRequest(long id, int position) {
-		this.id = id;
-		this.position = position;
-	}
+    public PositionModifyRequest(long id, int position) {
+        this.id = id;
+        this.position = position;
+    }
 
-	@Override
-	public String toString() {
-		return "PositionModifyRequest[" +
-				"id=" + id +
-				", position=" + position +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "PositionModifyRequest[" +
+                "id=" + id +
+                ", position=" + position +
+                ']';
+    }
 }

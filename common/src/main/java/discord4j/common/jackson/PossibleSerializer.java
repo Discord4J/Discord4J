@@ -30,42 +30,42 @@ import javax.annotation.Nullable;
  */
 public class PossibleSerializer extends ReferenceTypeSerializer<Possible<?>> {
 
-	PossibleSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts, JsonSerializer<Object> ser) {
-		super(fullType, staticTyping, vts, ser);
-	}
+    PossibleSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts, JsonSerializer<Object> ser) {
+        super(fullType, staticTyping, vts, ser);
+    }
 
-	private PossibleSerializer(PossibleSerializer base, BeanProperty property, TypeSerializer vts,
-	                           JsonSerializer<?> valueSer, NameTransformer unwrapper, Object suppressableValue,
-	                           boolean suppressNulls) {
-		super(base, property, vts, valueSer, unwrapper, suppressableValue, suppressNulls);
-	}
+    private PossibleSerializer(PossibleSerializer base, BeanProperty property, TypeSerializer vts,
+                               JsonSerializer<?> valueSer, NameTransformer unwrapper, Object suppressableValue,
+                               boolean suppressNulls) {
+        super(base, property, vts, valueSer, unwrapper, suppressableValue, suppressNulls);
+    }
 
-	@Override
-	protected ReferenceTypeSerializer<Possible<?>> withResolved(BeanProperty prop, TypeSerializer vts,
-	                                                            JsonSerializer<?> value, NameTransformer unwrapper) {
-		return new PossibleSerializer(this, prop, vts, value, unwrapper, _suppressableValue, _suppressNulls);
-	}
+    @Override
+    protected ReferenceTypeSerializer<Possible<?>> withResolved(BeanProperty prop, TypeSerializer vts,
+                                                                JsonSerializer<?> value, NameTransformer unwrapper) {
+        return new PossibleSerializer(this, prop, vts, value, unwrapper, _suppressableValue, _suppressNulls);
+    }
 
-	@Override
-	public ReferenceTypeSerializer<Possible<?>> withContentInclusion(Object suppressableValue, boolean suppressNulls) {
-		return new PossibleSerializer(this, _property, _valueTypeSerializer, _valueSerializer, _unwrapper,
-				suppressableValue, suppressNulls);
-	}
+    @Override
+    public ReferenceTypeSerializer<Possible<?>> withContentInclusion(Object suppressableValue, boolean suppressNulls) {
+        return new PossibleSerializer(this, _property, _valueTypeSerializer, _valueSerializer, _unwrapper,
+                suppressableValue, suppressNulls);
+    }
 
-	@Override
-	protected boolean _isValuePresent(Possible<?> value) {
-		return !value.isAbsent();
-	}
+    @Override
+    protected boolean _isValuePresent(Possible<?> value) {
+        return !value.isAbsent();
+    }
 
-	@Nullable
-	@Override
-	protected Object _getReferenced(Possible<?> value) {
-		return value.get();
-	}
+    @Nullable
+    @Override
+    protected Object _getReferenced(Possible<?> value) {
+        return value.get();
+    }
 
-	@Nullable
-	@Override
-	protected Object _getReferencedIfPresent(Possible<?> value) {
-		return value.isAbsent() ? null : value.get();
-	}
+    @Nullable
+    @Override
+    protected Object _getReferencedIfPresent(Possible<?> value) {
+        return value.isAbsent() ? null : value.get();
+    }
 }

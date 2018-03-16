@@ -30,43 +30,43 @@ import java.util.concurrent.CountDownLatch;
 
 public class TokenBucketTest {
 
-	private static final Logger log = Loggers.getLogger(TokenBucketTest.class);
+    private static final Logger log = Loggers.getLogger(TokenBucketTest.class);
 
-	@Test
-	public void testReactiveBucket() throws InterruptedException {
-		CountDownLatch latch = new CountDownLatch(1);
-		TokenBucket limiter = new TokenBucket(120, Duration.ofSeconds(60));
+    @Test
+    public void testReactiveBucket() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        TokenBucket limiter = new TokenBucket(120, Duration.ofSeconds(60));
 
-		EmitterProcessor<Long> outbound = EmitterProcessor.create();
-		FluxSink<Long> sender = outbound.sink();
+        EmitterProcessor<Long> outbound = EmitterProcessor.create();
+        FluxSink<Long> sender = outbound.sink();
 
-		int requests = 150;
+        int requests = 150;
 
-		outbound.log().concatMap(t -> {
-			boolean success = limiter.tryConsume(1);
-			if (success) {
-				return Mono.just(t);
-			} else {
-				return Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
-						.map(x -> limiter.tryConsume(1))
-						.publishOn(Schedulers.elastic())
-						.map(consumed -> t);
-			}
-		}).subscribe(t -> {
-			log.info("Got {}", t);
-			if (t == requests) {
-				latch.countDown();
-			}
-		});
-		Mono.fromCallable(() -> {
-			long i = 1;
-			while (i <= requests) {
-				sender.next(i++);
-			}
-			sender.complete();
-			return "OK";
-		}).subscribeOn(Schedulers.elastic()).subscribe();
-		latch.await();
-	}
+        outbound.log().concatMap(t -> {
+            boolean success = limiter.tryConsume(1);
+            if (success) {
+                return Mono.just(t);
+            } else {
+                return Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
+                        .map(x -> limiter.tryConsume(1))
+                        .publishOn(Schedulers.elastic())
+                        .map(consumed -> t);
+            }
+        }).subscribe(t -> {
+            log.info("Got {}", t);
+            if (t == requests) {
+                latch.countDown();
+            }
+        });
+        Mono.fromCallable(() -> {
+            long i = 1;
+            while (i <= requests) {
+                sender.next(i++);
+            }
+            sender.complete();
+            return "OK";
+        }).subscribeOn(Schedulers.elastic()).subscribe();
+        latch.await();
+    }
 
 }

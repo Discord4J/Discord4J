@@ -22,72 +22,72 @@ import discord4j.common.jackson.PossibleJson;
 @PossibleJson
 public class RoleModifyRequest {
 
-	private final Possible<String> name;
-	private final Possible<Integer> permissions;
-	private final Possible<Integer> color;
-	private final Possible<Boolean> hoist;
-	private final Possible<Boolean> mentionable;
+    private final Possible<String> name;
+    private final Possible<Integer> permissions;
+    private final Possible<Integer> color;
+    private final Possible<Boolean> hoist;
+    private final Possible<Boolean> mentionable;
 
-	public RoleModifyRequest(Possible<String> name, Possible<Integer> permissions,
-	                         Possible<Integer> color, Possible<Boolean> hoist,
-	                         Possible<Boolean> mentionable) {
-		this.name = name;
-		this.permissions = permissions;
-		this.color = color;
-		this.hoist = hoist;
-		this.mentionable = mentionable;
-	}
+    public RoleModifyRequest(Possible<String> name, Possible<Integer> permissions,
+                             Possible<Integer> color, Possible<Boolean> hoist,
+                             Possible<Boolean> mentionable) {
+        this.name = name;
+        this.permissions = permissions;
+        this.color = color;
+        this.hoist = hoist;
+        this.mentionable = mentionable;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private Possible<String> name = Possible.absent();
-		private Possible<Integer> permissions = Possible.absent();
-		private Possible<Integer> color = Possible.absent();
-		private Possible<Boolean> hoist = Possible.absent();
-		private Possible<Boolean> mentionable = Possible.absent();
+        private Possible<String> name = Possible.absent();
+        private Possible<Integer> permissions = Possible.absent();
+        private Possible<Integer> color = Possible.absent();
+        private Possible<Boolean> hoist = Possible.absent();
+        private Possible<Boolean> mentionable = Possible.absent();
 
-		public Builder name(String name) {
-			this.name = Possible.of(name);
-			return this;
-		}
+        public Builder name(String name) {
+            this.name = Possible.of(name);
+            return this;
+        }
 
-		public Builder permissions(int permissions) {
-			this.permissions = Possible.of(permissions);
-			return this;
-		}
+        public Builder permissions(int permissions) {
+            this.permissions = Possible.of(permissions);
+            return this;
+        }
 
-		public Builder color(int color) {
-			this.color = Possible.of(color);
-			return this;
-		}
+        public Builder color(int color) {
+            this.color = Possible.of(color);
+            return this;
+        }
 
-		public Builder hoist(boolean hoist) {
-			this.hoist = Possible.of(hoist);
-			return this;
-		}
+        public Builder hoist(boolean hoist) {
+            this.hoist = Possible.of(hoist);
+            return this;
+        }
 
-		public Builder mentionable(boolean mentionable) {
-			this.mentionable = Possible.of(mentionable);
-			return this;
-		}
+        public Builder mentionable(boolean mentionable) {
+            this.mentionable = Possible.of(mentionable);
+            return this;
+        }
 
-		public RoleModifyRequest build() {
-			return new RoleModifyRequest(name, permissions, color, hoist, mentionable);
-		}
-	}
+        public RoleModifyRequest build() {
+            return new RoleModifyRequest(name, permissions, color, hoist, mentionable);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "RoleModifyRequest[" +
-				"name=" + name +
-				", permissions=" + permissions +
-				", color=" + color +
-				", hoist=" + hoist +
-				", mentionable=" + mentionable +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "RoleModifyRequest[" +
+                "name=" + name +
+                ", permissions=" + permissions +
+                ", color=" + color +
+                ", hoist=" + hoist +
+                ", mentionable=" + mentionable +
+                ']';
+    }
 }

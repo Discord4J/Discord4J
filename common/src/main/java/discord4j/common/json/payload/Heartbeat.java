@@ -23,20 +23,20 @@ import discord4j.common.jackson.HeartbeatConverter;
 @JsonSerialize(converter = HeartbeatConverter.class)
 public class Heartbeat implements PayloadData {
 
-	private int seq;
+    private int seq;
 
-	public Heartbeat(int seq) {
-		this.seq = seq;
-	}
+    public Heartbeat(int seq) {
+        this.seq = seq;
+    }
 
-	public int getSeq() {
-		return seq;
-	}
+    public int getSeq() {
+        return seq;
+    }
 
-	@Override
-	public String toString() {
-		return "Heartbeat[" +
-				"seq=" + seq +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "Heartbeat[" +
+                "seq=" + seq +
+                ']';
+    }
 }

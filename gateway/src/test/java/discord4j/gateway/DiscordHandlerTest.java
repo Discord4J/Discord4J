@@ -41,56 +41,56 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DiscordHandlerTest {
 
-	public static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
-	private static final Logger log = Loggers.getLogger(DiscordHandlerTest.class);
+    public static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
+    private static final Logger log = Loggers.getLogger(DiscordHandlerTest.class);
 
-	private String token;
+    private String token;
 
-	@Test
-	public void testGatewayConnect() throws Exception {
-		WebSocketClient ws = new WebSocketClient();
+    @Test
+    public void testGatewayConnect() throws Exception {
+        WebSocketClient ws = new WebSocketClient();
 
-		ObjectMapper mapper = getMapper();
-		PayloadReader reader = new JacksonPayloadReader(mapper);
-		PayloadWriter writer = new JacksonPayloadWriter(mapper);
+        ObjectMapper mapper = getMapper();
+        PayloadReader reader = new JacksonPayloadReader(mapper);
+        PayloadWriter writer = new JacksonPayloadWriter(mapper);
 
-		DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer);
+        DiscordWebSocketHandler handler = new DiscordWebSocketHandler(reader, writer);
 
-		EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create();
-		AtomicInteger seq = new AtomicInteger(0);
+        EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create();
+        AtomicInteger seq = new AtomicInteger(0);
 
-		handler.inbound().subscribe(payload -> {
-			if (payload.getData() instanceof Hello) {
-				IdentifyProperties properties = new IdentifyProperties("linux", "disco", "disco");
-				GatewayPayload<Identify> identify = GatewayPayload.identify(new Identify(token, properties, true, 250,
-						Possible.absent(), Possible.absent()));
+        handler.inbound().subscribe(payload -> {
+            if (payload.getData() instanceof Hello) {
+                IdentifyProperties properties = new IdentifyProperties("linux", "disco", "disco");
+                GatewayPayload<Identify> identify = GatewayPayload.identify(new Identify(token, properties, true, 250,
+                        Possible.absent(), Possible.absent()));
 
-				handler.outbound().onNext(identify);
-			} else if (payload.getData() instanceof Dispatch) {
-				seq.set(payload.getSequence());
-				dispatch.onNext((Dispatch) payload.getData());
-			}
-		}, error -> {
-			log.warn("Gateway connection terminated: {}", error.toString());
-		});
+                handler.outbound().onNext(identify);
+            } else if (payload.getData() instanceof Dispatch) {
+                seq.set(payload.getSequence());
+                dispatch.onNext((Dispatch) payload.getData());
+            }
+        }, error -> {
+            log.warn("Gateway connection terminated: {}", error.toString());
+        });
 
-		Flux.interval(Duration.ofMillis(45250))
-				.map(l -> new Heartbeat(seq.get()))
-				.map(GatewayPayload::heartbeat)
-				.subscribe(handler.outbound()::onNext);
+        Flux.interval(Duration.ofMillis(45250))
+                .map(l -> new Heartbeat(seq.get()))
+                .map(GatewayPayload::heartbeat)
+                .subscribe(handler.outbound()::onNext);
 
-		dispatch.ofType(Ready.class).subscribe(ready -> {
-			log.info("Gateway received READY!");
-		});
+        dispatch.ofType(Ready.class).subscribe(ready -> {
+            log.info("Gateway received READY!");
+        });
 
-		ws.execute(gatewayUrl, handler).block();
-	}
+        ws.execute(gatewayUrl, handler).block();
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
 }

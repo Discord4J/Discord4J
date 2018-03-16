@@ -22,6 +22,6 @@ import java.util.OptionalLong;
 
 public class UnsignedOptionalLongPojo {
 
-	@UnsignedJson
-	public OptionalLong unsignedLong;
+    @UnsignedJson
+    public OptionalLong unsignedLong;
 }

@@ -21,18 +21,18 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class GuildIntegrationsUpdate implements Dispatch {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildIntegrationsUpdate[" +
-				"guildId=" + guildId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildIntegrationsUpdate[" +
+                "guildId=" + guildId +
+                ']';
+    }
 }

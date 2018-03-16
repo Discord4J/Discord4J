@@ -19,22 +19,22 @@ package discord4j.common.json.response;
 
 public class ErrorResponse {
 
-	private long code;
-	private String message;
+    private long code;
+    private String message;
 
-	public long getCode() {
-		return code;
-	}
+    public long getCode() {
+        return code;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	@Override
-	public String toString() {
-		return "ErrorResponse[" +
-				"code=" + code +
-				", message=" + message +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ErrorResponse[" +
+                "code=" + code +
+                ", message=" + message +
+                ']';
+    }
 }

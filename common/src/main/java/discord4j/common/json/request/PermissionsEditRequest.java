@@ -18,22 +18,22 @@ package discord4j.common.json.request;
 
 public class PermissionsEditRequest {
 
-	private final int allow;
-	private final int deny;
-	private final String type;
+    private final int allow;
+    private final int deny;
+    private final String type;
 
-	public PermissionsEditRequest(int allow, int deny, String type) {
-		this.allow = allow;
-		this.deny = deny;
-		this.type = type;
-	}
+    public PermissionsEditRequest(int allow, int deny, String type) {
+        this.allow = allow;
+        this.deny = deny;
+        this.type = type;
+    }
 
-	@Override
-	public String toString() {
-		return "PermissionsEditRequest[" +
-				"allow=" + allow +
-				", deny=" + deny +
-				", type=" + type +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "PermissionsEditRequest[" +
+                "allow=" + allow +
+                ", deny=" + deny +
+                ", type=" + type +
+                ']';
+    }
 }

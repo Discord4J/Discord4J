@@ -31,148 +31,150 @@ import static org.junit.Assert.assertEquals;
 
 public class LongTest {
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModules(new PossibleModule(), new Jdk8Module());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModules(new PossibleModule(), new Jdk8Module());
+    }
 
-	@Test
-	public void testSerializeUnsignedLongToString() throws Exception {
-		class Pojo {
+    @Test
+    public void testSerializeUnsignedLongToString() throws Exception {
+        class Pojo {
 
-			@UnsignedJson
-			long unsignedLong = Long.parseUnsignedLong("9223372036854775808"); // 2^63
-		}
+            @UnsignedJson
+            long unsignedLong = Long.parseUnsignedLong("9223372036854775808"); // 2^63
+        }
 
-		String expected = "{\"unsignedLong\":\"9223372036854775808\"}";
-		String result = getMapper().writeValueAsString(new Pojo());
+        String expected = "{\"unsignedLong\":\"9223372036854775808\"}";
+        String result = getMapper().writeValueAsString(new Pojo());
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testSerializeSignedLongToNumber() throws Exception {
-		class Pojo {
+    @Test
+    public void testSerializeSignedLongToNumber() throws Exception {
+        class Pojo {
 
-			long signedLong = 1234L;
-		}
+            long signedLong = 1234L;
+        }
 
-		String expected = "{\"signedLong\":1234}";
-		String result = getMapper().writeValueAsString(new Pojo());
+        String expected = "{\"signedLong\":1234}";
+        String result = getMapper().writeValueAsString(new Pojo());
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testSerializeUnsignedPossibleLongToString() throws Exception {
-		@PossibleJson
-		class Pojo {
+    @Test
+    public void testSerializeUnsignedPossibleLongToString() throws Exception {
+        @PossibleJson
+        class Pojo {
 
-			@UnsignedJson
-			PossibleLong unsignedLong = PossibleLong.of(Long.parseUnsignedLong("9223372036854775808")); // 2^63
-		}
+            @UnsignedJson
+            PossibleLong unsignedLong = PossibleLong.of(Long.parseUnsignedLong("9223372036854775808")); // 2^63
+        }
 
-		String expected = "{\"unsignedLong\":\"9223372036854775808\"}";
-		String result = getMapper().writeValueAsString(new Pojo());
+        String expected = "{\"unsignedLong\":\"9223372036854775808\"}";
+        String result = getMapper().writeValueAsString(new Pojo());
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testSerializeSignedPossibleLongToNumber() throws Exception {
-		@PossibleJson
-		class Pojo {
+    @Test
+    public void testSerializeSignedPossibleLongToNumber() throws Exception {
+        @PossibleJson
+        class Pojo {
 
-			PossibleLong signedLong = PossibleLong.of(123L);
-		}
+            PossibleLong signedLong = PossibleLong.of(123L);
+        }
 
-		String expected = "{\"signedLong\":123}";
-		String result = getMapper().writeValueAsString(new Pojo());
+        String expected = "{\"signedLong\":123}";
+        String result = getMapper().writeValueAsString(new Pojo());
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testSerializeUnsignedAbsentPossibleLong() throws Exception {
-		@PossibleJson
-		class Pojo {
+    @Test
+    public void testSerializeUnsignedAbsentPossibleLong() throws Exception {
+        @PossibleJson
+        class Pojo {
 
-			@UnsignedJson
-			PossibleLong unsignedLong = PossibleLong.absent();
-		}
+            @UnsignedJson
+            PossibleLong unsignedLong = PossibleLong.absent();
+        }
 
-		String expected = "{}";
-		String result = getMapper().writeValueAsString(new Pojo());
+        String expected = "{}";
+        String result = getMapper().writeValueAsString(new Pojo());
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testSerializeUnsignedNullPossibleLong() throws Exception {
-		@PossibleJson
-		class Pojo {
+    @Test
+    public void testSerializeUnsignedNullPossibleLong() throws Exception {
+        @PossibleJson
+        class Pojo {
 
-			@UnsignedJson
-			PossibleLong unsignedLong = null;
-		}
+            @UnsignedJson
+            PossibleLong unsignedLong = null;
+        }
 
-		String expected = "{\"unsignedLong\":null}";
-		String result = getMapper().writeValueAsString(new Pojo());
+        String expected = "{\"unsignedLong\":null}";
+        String result = getMapper().writeValueAsString(new Pojo());
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testSerializeArrayOfUnsignedLongsToArrayOfStrings() throws Exception {
-		class Pojo {
+    @Test
+    public void testSerializeArrayOfUnsignedLongsToArrayOfStrings() throws Exception {
+        class Pojo {
 
-			@UnsignedJson
-			long[] ary = {
-					Long.parseUnsignedLong("9223372036854775808"),
-					Long.parseUnsignedLong("9223372036854775809"),
-					Long.parseUnsignedLong("9223372036854775810")
-			};
-		}
+            @UnsignedJson
+            long[] ary = {
+                    Long.parseUnsignedLong("9223372036854775808"),
+                    Long.parseUnsignedLong("9223372036854775809"),
+                    Long.parseUnsignedLong("9223372036854775810")
+            };
+        }
 
-		String expected = "{\"ary\":[\"9223372036854775808\",\"9223372036854775809\",\"9223372036854775810\"]}";
-		String result = getMapper().writeValueAsString(new Pojo());
+        String expected = "{\"ary\":[\"9223372036854775808\",\"9223372036854775809\",\"9223372036854775810\"]}";
+        String result = getMapper().writeValueAsString(new Pojo());
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testDeserializeNumberToSignedLong() throws Exception {
-		long expected = 123L;
-		long result = getMapper().readValue("{\"someLong\":123}", LongPojo.class).someLong;
+    @Test
+    public void testDeserializeNumberToSignedLong() throws Exception {
+        long expected = 123L;
+        long result = getMapper().readValue("{\"someLong\":123}", LongPojo.class).someLong;
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testDeserializeStringToUnsignedLong() throws Exception {
-		long expected = Long.parseUnsignedLong("9223372036854775808"); // 2^63
-		long result = getMapper().readValue("{\"unsignedLong\":\"9223372036854775808\"}", UnsignedLongPojo.class).unsignedLong;
+    @Test
+    public void testDeserializeStringToUnsignedLong() throws Exception {
+        long expected = Long.parseUnsignedLong("9223372036854775808"); // 2^63
+        long result = getMapper().readValue("{\"unsignedLong\":\"9223372036854775808\"}",
+                UnsignedLongPojo.class).unsignedLong;
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testDeserializeStringToSignedOptionalLong() throws Exception {
-		long expected = 123L;
-		long result = getMapper().readValue("{\"someLong\":\"123\"}", OptionalLongPojo.class).someLong.getAsLong();
+    @Test
+    public void testDeserializeStringToSignedOptionalLong() throws Exception {
+        long expected = 123L;
+        long result = getMapper().readValue("{\"someLong\":\"123\"}", OptionalLongPojo.class).someLong.getAsLong();
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
-	@Test
-	public void testDeserializeStringToUnsignedOptionalLong() throws Exception {
-		long expected = Long.parseUnsignedLong("9223372036854775808"); // 2^63
-		long result = getMapper().readValue("{\"unsignedLong\":\"9223372036854775808\"}", UnsignedOptionalLongPojo.class).unsignedLong.getAsLong();
+    @Test
+    public void testDeserializeStringToUnsignedOptionalLong() throws Exception {
+        long expected = Long.parseUnsignedLong("9223372036854775808"); // 2^63
+        long result = getMapper().readValue("{\"unsignedLong\":\"9223372036854775808\"}",
+                UnsignedOptionalLongPojo.class).unsignedLong.getAsLong();
 
-		assertEquals(expected, result);
-	}
+        assertEquals(expected, result);
+    }
 
 
 }

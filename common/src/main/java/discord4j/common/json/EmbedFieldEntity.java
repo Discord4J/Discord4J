@@ -18,49 +18,49 @@ package discord4j.common.json;
 
 public class EmbedFieldEntity {
 
-	private String name;
-	private String value;
-	private boolean inline;
+    private String name;
+    private String value;
+    private boolean inline;
 
-	public EmbedFieldEntity(String name, String value, boolean inline) {
-		this.name = name;
-		this.value = value;
-		this.inline = inline;
-	}
+    public EmbedFieldEntity(String name, String value, boolean inline) {
+        this.name = name;
+        this.value = value;
+        this.inline = inline;
+    }
 
-	public EmbedFieldEntity() {
-	}
+    public EmbedFieldEntity() {
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-	public boolean isInline() {
-		return inline;
-	}
+    public boolean isInline() {
+        return inline;
+    }
 
-	public void setInline(boolean inline) {
-		this.inline = inline;
-	}
+    public void setInline(boolean inline) {
+        this.inline = inline;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedFieldEntity[" +
-				"name=" + name +
-				", value=" + value +
-				", inline=" + inline +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedFieldEntity[" +
+                "name=" + name +
+                ", value=" + value +
+                ", inline=" + inline +
+                ']';
+    }
 }

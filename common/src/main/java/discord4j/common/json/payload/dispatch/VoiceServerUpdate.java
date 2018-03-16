@@ -21,30 +21,30 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class VoiceServerUpdate implements Dispatch {
 
-	private String token;
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	private String endpoint;
+    private String token;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    private String endpoint;
 
-	public String getToken() {
-		return token;
-	}
+    public String getToken() {
+        return token;
+    }
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public String getEndpoint() {
-		return endpoint;
-	}
+    public String getEndpoint() {
+        return endpoint;
+    }
 
-	@Override
-	public String toString() {
-		return "VoiceServerUpdate[" +
-				"token=" + token +
-				", guildId=" + guildId +
-				", endpoint=" + endpoint +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "VoiceServerUpdate[" +
+                "token=" + token +
+                ", guildId=" + guildId +
+                ", endpoint=" + endpoint +
+                ']';
+    }
 }

@@ -21,8 +21,8 @@ import discord4j.common.json.payload.Heartbeat;
 
 public class HeartbeatConverter extends StdConverter<Heartbeat, Integer> {
 
-	@Override
-	public Integer convert(Heartbeat value) {
-		return value.getSeq();
-	}
+    @Override
+    public Integer convert(Heartbeat value) {
+        return value.getSeq();
+    }
 }

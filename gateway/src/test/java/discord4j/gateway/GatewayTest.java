@@ -36,101 +36,101 @@ import java.util.zip.InflaterOutputStream;
 
 public class GatewayTest {
 
-	public static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
-	private static final Logger log = Loggers.getLogger(GatewayTest.class);
+    public static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
+    private static final Logger log = Loggers.getLogger(GatewayTest.class);
 
-	private String token;
-	private Inflater zlibContext;
+    private String token;
+    private Inflater zlibContext;
 
-	@Before
-	public void initialize() {
-		zlibContext = new Inflater();
-		token = System.getenv("token");
-	}
+    @Before
+    public void initialize() {
+        zlibContext = new Inflater();
+        token = System.getenv("token");
+    }
 
-	@Test
-	public void testGatewayConnect() throws URISyntaxException, InterruptedException {
-		EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
-		EmitterProcessor<String> inboundExchange = EmitterProcessor.create();
+    @Test
+    public void testGatewayConnect() throws URISyntaxException, InterruptedException {
+        EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
+        EmitterProcessor<String> inboundExchange = EmitterProcessor.create();
 
-		WebSocketClient client = new WebSocketClient();
+        WebSocketClient client = new WebSocketClient();
 
-		client.execute(gatewayUrl, session -> {
-			WebSocketMessageSubscriber subscriber = new WebSocketMessageSubscriber(inboundExchange, outboundExchange,
-					token);
-			session.closeFuture().subscribe(subscriber::onClose);
+        client.execute(gatewayUrl, session -> {
+            WebSocketMessageSubscriber subscriber = new WebSocketMessageSubscriber(inboundExchange, outboundExchange,
+                    token);
+            session.closeFuture().subscribe(subscriber::onClose);
 
-			session.receive()
-					.map(message -> {
-						if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-							ByteBuf payload = message.getPayload();
-							byte[] bytes = new byte[payload.readableBytes()];
-							payload.readBytes(bytes);
+            session.receive()
+                    .map(message -> {
+                        if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
+                            ByteBuf payload = message.getPayload();
+                            byte[] bytes = new byte[payload.readableBytes()];
+                            payload.readBytes(bytes);
 
-							ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length * 2);
-							try (InflaterOutputStream inflater = new InflaterOutputStream(out, zlibContext)) {
-								inflater.write(bytes);
-								return out.toString("UTF-8");
-							} catch (IOException e) {
-								throw Exceptions.propagate(e);
-							}
-						} else {
-							return message.getPayloadAsText();
-						}
-					})
-					.log("session-inbound")
-					.subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
+                            ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length * 2);
+                            try (InflaterOutputStream inflater = new InflaterOutputStream(out, zlibContext)) {
+                                inflater.write(bytes);
+                                return out.toString("UTF-8");
+                            } catch (IOException e) {
+                                throw Exceptions.propagate(e);
+                            }
+                        } else {
+                            return message.getPayloadAsText();
+                        }
+                    })
+                    .log("session-inbound")
+                    .subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
 
-			return session.send(outboundExchange
-					.log("session-outbound")
-					.doOnError(t -> log.info("outbound error", t))
-					.map(WebSocketMessage::fromText));
-		}).block();
-	}
+            return session.send(outboundExchange
+                    .log("session-outbound")
+                    .doOnError(t -> log.info("outbound error", t))
+                    .map(WebSocketMessage::fromText));
+        }).block();
+    }
 
-	private static class WebSocketMessageSubscriber {
+    private static class WebSocketMessageSubscriber {
 
-		private final EmitterProcessor<String> inboundExchange; // towards our users (eventDispatcher)
-		private final EmitterProcessor<String> outboundExchange; // towards discord (wire)
-		private final String token;
+        private final EmitterProcessor<String> inboundExchange; // towards our users (eventDispatcher)
+        private final EmitterProcessor<String> outboundExchange; // towards discord (wire)
+        private final String token;
 
-		public WebSocketMessageSubscriber(EmitterProcessor<String> inboundExchange,
-		                                  EmitterProcessor<String> outboundExchange, String token) {
-			this.inboundExchange = inboundExchange;
-			this.outboundExchange = outboundExchange;
-			this.token = token;
-		}
+        public WebSocketMessageSubscriber(EmitterProcessor<String> inboundExchange,
+                                          EmitterProcessor<String> outboundExchange, String token) {
+            this.inboundExchange = inboundExchange;
+            this.outboundExchange = outboundExchange;
+            this.token = token;
+        }
 
-		public void onNext(String message) {
-			if (message.contains("\"op\":10") || message.contains("\"op\":9")) {
-				outboundExchange.onNext("{\n" +
-						"  \"op\": 2,\n" +
-						"  \"d\": {\n" +
-						"    \"token\": \"" + token + "\",\n" +
-						"    \"properties\": {\n" +
-						"      \"$os\": \"linux\",\n" +
-						"      \"$browser\": \"disco\",\n" +
-						"      \"$device\": \"disco\"\n" +
-						"    },\n" +
-						"    \"large_threshold\": 250\n" +
-						"  }\n" +
-						"}");
-			} else {
-				inboundExchange.onNext(message);
-			}
-		}
+        public void onNext(String message) {
+            if (message.contains("\"op\":10") || message.contains("\"op\":9")) {
+                outboundExchange.onNext("{\n" +
+                        "  \"op\": 2,\n" +
+                        "  \"d\": {\n" +
+                        "    \"token\": \"" + token + "\",\n" +
+                        "    \"properties\": {\n" +
+                        "      \"$os\": \"linux\",\n" +
+                        "      \"$browser\": \"disco\",\n" +
+                        "      \"$device\": \"disco\"\n" +
+                        "    },\n" +
+                        "    \"large_threshold\": 250\n" +
+                        "  }\n" +
+                        "}");
+            } else {
+                inboundExchange.onNext(message);
+            }
+        }
 
-		public void onError(Throwable error) {
-			log.error("Error", error);
-		}
+        public void onError(Throwable error) {
+            log.error("Error", error);
+        }
 
-		public void onComplete() {
-			inboundExchange.onComplete();
-			outboundExchange.onComplete();
-		}
+        public void onComplete() {
+            inboundExchange.onComplete();
+            outboundExchange.onComplete();
+        }
 
-		public void onClose(CloseStatus closeStatus) {
-			log.info("Connection was CLOSED with status code {}", closeStatus.getCode());
-		}
-	}
+        public void onClose(CloseStatus closeStatus) {
+            log.info("Connection was CLOSED with status code {}", closeStatus.getCode());
+        }
+    }
 }

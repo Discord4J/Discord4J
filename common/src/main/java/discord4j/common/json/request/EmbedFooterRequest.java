@@ -20,20 +20,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EmbedFooterRequest {
 
-	private final String text;
-	@JsonProperty("icon_url")
-	private final String iconUrl;
+    private final String text;
+    @JsonProperty("icon_url")
+    private final String iconUrl;
 
-	public EmbedFooterRequest(String text, String iconUrl) {
-		this.text = text;
-		this.iconUrl = iconUrl;
-	}
+    public EmbedFooterRequest(String text, String iconUrl) {
+        this.text = text;
+        this.iconUrl = iconUrl;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedFooterRequest[" +
-				"text=" + text +
-				", iconUrl=" + iconUrl +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedFooterRequest[" +
+                "text=" + text +
+                ", iconUrl=" + iconUrl +
+                ']';
+    }
 }

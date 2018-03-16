@@ -18,5 +18,5 @@ package discord4j.core.object.spec;
 
 public interface Spec<T> {
 
-	T asRequest();
+    T asRequest();
 }

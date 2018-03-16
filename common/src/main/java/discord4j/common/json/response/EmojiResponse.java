@@ -24,67 +24,67 @@ import java.util.Arrays;
 
 public class EmojiResponse {
 
-	@Nullable
-	@UnsignedJson
-	private Long id;
-	private String name;
-	@Nullable
-	@UnsignedJson
-	private long[] roles;
-	@Nullable
-	private UserResponse user;
-	@Nullable
-	@JsonProperty("require_colons")
-	private Boolean requireColons;
-	@Nullable
-	private Boolean managed;
-	@Nullable
-	private Boolean animated;
+    @Nullable
+    @UnsignedJson
+    private Long id;
+    private String name;
+    @Nullable
+    @UnsignedJson
+    private long[] roles;
+    @Nullable
+    private UserResponse user;
+    @Nullable
+    @JsonProperty("require_colons")
+    private Boolean requireColons;
+    @Nullable
+    private Boolean managed;
+    @Nullable
+    private Boolean animated;
 
-	@Nullable
-	public Long getId() {
-		return id;
-	}
+    @Nullable
+    public Long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	@Nullable
-	public long[] getRoles() {
-		return roles;
-	}
+    @Nullable
+    public long[] getRoles() {
+        return roles;
+    }
 
-	@Nullable
-	public UserResponse getUser() {
-		return user;
-	}
+    @Nullable
+    public UserResponse getUser() {
+        return user;
+    }
 
-	@Nullable
-	public Boolean isRequireColons() {
-		return requireColons;
-	}
+    @Nullable
+    public Boolean isRequireColons() {
+        return requireColons;
+    }
 
-	@Nullable
-	public Boolean isManaged() {
-		return managed;
-	}
+    @Nullable
+    public Boolean isManaged() {
+        return managed;
+    }
 
-	@Nullable
-	public Boolean isAnimated() {
-		return animated;
-	}
+    @Nullable
+    public Boolean isAnimated() {
+        return animated;
+    }
 
-	@Override
-	public String toString() {
-		return "EmojiResponse[" +
-				"id=" + id +
-				", name=" + name +
-				", roles=" + Arrays.toString(roles) +
-				", user=" + user +
-				", requireColons=" + requireColons +
-				", managed=" + managed +
-				", animated=" + animated +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmojiResponse[" +
+                "id=" + id +
+                ", name=" + name +
+                ", roles=" + Arrays.toString(roles) +
+                ", user=" + user +
+                ", requireColons=" + requireColons +
+                ", managed=" + managed +
+                ", animated=" + animated +
+                ']';
+    }
 }

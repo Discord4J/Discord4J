@@ -20,23 +20,23 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class IntegrationAccountResponse {
 
-	@UnsignedJson
-	private long id;
-	private String name;
+    @UnsignedJson
+    private long id;
+    private String name;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public String toString() {
-		return "IntegrationAccountResponse[" +
-				"id=" + id +
-				", name=" + name +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "IntegrationAccountResponse[" +
+                "id=" + id +
+                ", name=" + name +
+                ']';
+    }
 }

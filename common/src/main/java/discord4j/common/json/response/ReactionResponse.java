@@ -18,28 +18,28 @@ package discord4j.common.json.response;
 
 public class ReactionResponse {
 
-	private int count;
-	private boolean me;
-	private EmojiResponse emoji;
+    private int count;
+    private boolean me;
+    private EmojiResponse emoji;
 
-	public int getCount() {
-		return count;
-	}
+    public int getCount() {
+        return count;
+    }
 
-	public boolean isMe() {
-		return me;
-	}
+    public boolean isMe() {
+        return me;
+    }
 
-	public EmojiResponse getEmoji() {
-		return emoji;
-	}
+    public EmojiResponse getEmoji() {
+        return emoji;
+    }
 
-	@Override
-	public String toString() {
-		return "ReactionResponse[" +
-				"count=" + count +
-				", me=" + me +
-				", emoji=" + emoji +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ReactionResponse[" +
+                "count=" + count +
+                ", me=" + me +
+                ", emoji=" + emoji +
+                ']';
+    }
 }

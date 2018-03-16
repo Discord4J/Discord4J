@@ -27,86 +27,86 @@ import java.util.Objects;
  */
 public class Possible<T> {
 
-	private static final Possible<?> ABSENT = new Possible<>(null);
+    private static final Possible<?> ABSENT = new Possible<>(null);
 
-	@Nullable
-	private final T value;
+    @Nullable
+    private final T value;
 
-	private Possible(@Nullable T value) {
-		this.value = value;
-	}
+    private Possible(@Nullable T value) {
+        this.value = value;
+    }
 
-	/**
-	 * Returns a {@code Possible} with a non-null, present value.
-	 *
-	 * @param value A non-null value for a new {@code Possible} to represent.
-	 * @param <T> JSON Property Type
-	 * @return An instance of {@code Possible} whose value is always present and never null.
-	 * @throws NullPointerException If {@code value} is null.
-	 */
-	public static <T> Possible<T> of(T value) {
-		Objects.requireNonNull(value);
-		return new Possible<>(value);
-	}
+    /**
+     * Returns a {@code Possible} with a non-null, present value.
+     *
+     * @param value A non-null value for a new {@code Possible} to represent.
+     * @param <T> JSON Property Type
+     * @return An instance of {@code Possible} whose value is always present and never null.
+     * @throws NullPointerException If {@code value} is null.
+     */
+    public static <T> Possible<T> of(T value) {
+        Objects.requireNonNull(value);
+        return new Possible<>(value);
+    }
 
-	/**
-	 * Returns a {@code Possible} with an absent value.
-	 *
-	 * @param <T> JSON Property Type
-	 * @return An instance of {@code Possible} whose value is absent, but not necessarily null.
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> Possible<T> absent() {
-		return (Possible<T>) ABSENT;
-	}
+    /**
+     * Returns a {@code Possible} with an absent value.
+     *
+     * @param <T> JSON Property Type
+     * @return An instance of {@code Possible} whose value is absent, but not necessarily null.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Possible<T> absent() {
+        return (Possible<T>) ABSENT;
+    }
 
-	/**
-	 * Returns an instance of {@code T} if this instance of {@code Possible} represents a non-absent value.
-	 *
-	 * @return An instance of {@code T}, if it is present. Guaranteed to never be null.
-	 * @throws NoSuchElementException If the value is {@link #isAbsent() absent}.
-	 */
-	@Nullable
-	public T get() {
-		if (isAbsent()) {
-			throw new NoSuchElementException();
-		}
-		return value;
-	}
+    /**
+     * Returns an instance of {@code T} if this instance of {@code Possible} represents a non-absent value.
+     *
+     * @return An instance of {@code T}, if it is present. Guaranteed to never be null.
+     * @throws NoSuchElementException If the value is {@link #isAbsent() absent}.
+     */
+    @Nullable
+    public T get() {
+        if (isAbsent()) {
+            throw new NoSuchElementException();
+        }
+        return value;
+    }
 
-	/**
-	 * Checks whether the instance of this {@code Possible} represents an absent value.
-	 *
-	 * @return True is the value is absent, false otherwise.
-	 */
-	public boolean isAbsent() {
-		return value == null;
-	}
+    /**
+     * Checks whether the instance of this {@code Possible} represents an absent value.
+     *
+     * @return True is the value is absent, false otherwise.
+     */
+    public boolean isAbsent() {
+        return value == null;
+    }
 
-	@Override
-	public int hashCode() {
-		return value != null ? value.hashCode() : 0;
-	}
+    @Override
+    public int hashCode() {
+        return value != null ? value.hashCode() : 0;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-		Possible<?> possible = (Possible<?>) o;
+        Possible<?> possible = (Possible<?>) o;
 
-		return value != null ? value.equals(possible.value) : possible.value == null;
-	}
+        return value != null ? value.equals(possible.value) : possible.value == null;
+    }
 
-	@Override
-	public String toString() {
-		if (isAbsent()) {
-			return "Possible.absent";
-		}
-		return "Possible[" + value + "]";
-	}
+    @Override
+    public String toString() {
+        if (isAbsent()) {
+            return "Possible.absent";
+        }
+        return "Possible[" + value + "]";
+    }
 }

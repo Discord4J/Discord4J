@@ -20,7 +20,6 @@ import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
 import discord4j.store.primitive.LongObjStore;
-import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -95,11 +94,12 @@ public class StoreServiceLoader {
      * @param keyClass The class of the keys.
      * @param valueClass The class of the values.
      * @param <K> The key type which provides a 1:1 mapping to the value type. This type is also expected to be
-     *           {@link Comparable} in order to allow for range operations.
+     * {@link Comparable} in order to allow for range operations.
      * @param <V> The value type.
      * @return A mono which provides a store instance.
      */
-    public <K extends Comparable<K>, V extends Serializable> Store<K, V> newGenericStore(Class<K> keyClass, Class<V> valueClass) {
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> newGenericStore(Class<K> keyClass,
+                                                                                         Class<V> valueClass) {
         return getStoreService().provideGenericStore(keyClass, valueClass);
     }
 
@@ -129,7 +129,8 @@ public class StoreServiceLoader {
         }
 
         @Override
-        public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
+        public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
+                                                                                                 Class<V> valueClass) {
             return genericService.provideGenericStore(keyClass, valueClass);
         }
 

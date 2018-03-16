@@ -39,131 +39,131 @@ import reactor.util.Loggers;
  */
 public class WebSocketSession {
 
-	private static final Logger log = Loggers.getLogger(WebSocketSession.class);
+    private static final Logger log = Loggers.getLogger(WebSocketSession.class);
 
-	private final WebSocketConnection delegate;
-	private final String id;
+    private final WebSocketConnection delegate;
+    private final String id;
 
-	public WebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound) {
-		this.delegate = new WebSocketConnection(inbound, outbound);
-		this.id = Integer.toHexString(System.identityHashCode(delegate));
-	}
+    public WebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound) {
+        this.delegate = new WebSocketConnection(inbound, outbound);
+        this.id = Integer.toHexString(System.identityHashCode(delegate));
+    }
 
-	/**
-	 * Get the flux of incoming messages, aggregated from frames.
-	 *
-	 * @return a {@code Flux<WebSocketMessage>} inbound from the connection.
-	 */
-	public Flux<WebSocketMessage> receive() {
-		return getDelegate().getInbound()
-				.aggregateFrames()
-				.receiveFrames()
-				.map(WebSocketMessage::fromFrame);
-	}
+    /**
+     * Get the flux of incoming messages, aggregated from frames.
+     *
+     * @return a {@code Flux<WebSocketMessage>} inbound from the connection.
+     */
+    public Flux<WebSocketMessage> receive() {
+        return getDelegate().getInbound()
+                .aggregateFrames()
+                .receiveFrames()
+                .map(WebSocketMessage::fromFrame);
+    }
 
-	/**
-	 * Write the given messages to the WebSocket connection.
-	 *
-	 * @param messages the messages to write
-	 * @return a Mono signaling completion
-	 */
-	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
-		Flux<WebSocketFrame> frames = Flux.from(messages).map(WebSocketMessage::toFrame);
-		return getDelegate().getOutbound()
-				.options(NettyPipeline.SendOptions::flushOnEach)
-				.sendObject(frames)
-				.then();
-	}
+    /**
+     * Write the given messages to the WebSocket connection.
+     *
+     * @param messages the messages to write
+     * @return a Mono signaling completion
+     */
+    public Mono<Void> send(Publisher<WebSocketMessage> messages) {
+        Flux<WebSocketFrame> frames = Flux.from(messages).map(WebSocketMessage::toFrame);
+        return getDelegate().getOutbound()
+                .options(NettyPipeline.SendOptions::flushOnEach)
+                .sendObject(frames)
+                .then();
+    }
 
-	/**
-	 * Replace internal reactor-netty logging handler for HttpClients with a custom one that provides more concise
-	 * information.
-	 */
-	public void replaceLoggingHandler() {
-		getDelegate().getInbound().context()
-				.replaceHandler("reactor.left.loggingHandler",
-						new SimpleLoggingHandler(HttpClient.class, LogLevel.DEBUG));
-	}
+    /**
+     * Replace internal reactor-netty logging handler for HttpClients with a custom one that provides more concise
+     * information.
+     */
+    public void replaceLoggingHandler() {
+        getDelegate().getInbound().context()
+                .replaceHandler("reactor.left.loggingHandler",
+                        new SimpleLoggingHandler(HttpClient.class, LogLevel.DEBUG));
+    }
 
-	/**
-	 * Get a future notifying the closing of the session.
-	 *
-	 * @return a Mono signaling completion, including the code and reason for the event.
-	 */
-	public Mono<CloseStatus> closeFuture() {
-		MonoProcessor<CloseStatus> reason = MonoProcessor.create();
-		// listen to netty event loop to retrieve close reason
-		getDelegate().getInbound().context().addHandlerLast("d4j.last.closeHandler",
-				new ChannelInboundHandlerAdapter() {
-					@Override
-					public void channelRead(ChannelHandlerContext ctx, Object msg) {
-						if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
-							CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
-							log.debug("Close status detected: {} {}", close.statusCode(), close.reasonText());
-							// then push it to our MonoProcessor for the reason
-							reason.onNext(new CloseStatus(close.statusCode(), close.reasonText()));
-						}
-						ctx.fireChannelRead(msg);
-					}
+    /**
+     * Get a future notifying the closing of the session.
+     *
+     * @return a Mono signaling completion, including the code and reason for the event.
+     */
+    public Mono<CloseStatus> closeFuture() {
+        MonoProcessor<CloseStatus> reason = MonoProcessor.create();
+        // listen to netty event loop to retrieve close reason
+        getDelegate().getInbound().context().addHandlerLast("d4j.last.closeHandler",
+                new ChannelInboundHandlerAdapter() {
+                    @Override
+                    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                        if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
+                            CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
+                            log.debug("Close status detected: {} {}", close.statusCode(), close.reasonText());
+                            // then push it to our MonoProcessor for the reason
+                            reason.onNext(new CloseStatus(close.statusCode(), close.reasonText()));
+                        }
+                        ctx.fireChannelRead(msg);
+                    }
 
-					@Override
-					public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-						if (evt instanceof SslCloseCompletionEvent) {
-							SslCloseCompletionEvent closeEvent = (SslCloseCompletionEvent) evt;
-							if (!closeEvent.isSuccess()) {
-								log.debug("Abnormal close status detected: {}", closeEvent.cause().toString());
-								// then push it to our MonoProcessor for the reason
-								if (!reason.isTerminated()) {
-									reason.onError(closeEvent.cause());
-								}
-							}
-						}
-						ctx.fireUserEventTriggered(evt);
-					}
-				});
+                    @Override
+                    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+                        if (evt instanceof SslCloseCompletionEvent) {
+                            SslCloseCompletionEvent closeEvent = (SslCloseCompletionEvent) evt;
+                            if (!closeEvent.isSuccess()) {
+                                log.debug("Abnormal close status detected: {}", closeEvent.cause().toString());
+                                // then push it to our MonoProcessor for the reason
+                                if (!reason.isTerminated()) {
+                                    reason.onError(closeEvent.cause());
+                                }
+                            }
+                        }
+                        ctx.fireUserEventTriggered(evt);
+                    }
+                });
 
-		return reason;
-	}
+        return reason;
+    }
 
-	private WebSocketConnection getDelegate() {
-		return this.delegate;
-	}
+    private WebSocketConnection getDelegate() {
+        return this.delegate;
+    }
 
-	/**
-	 * Return the id of the session.
-	 *
-	 * @return a {@code String} representing an hexadecimal number.
-	 */
-	public String getId() {
-		return this.id;
-	}
+    /**
+     * Return the id of the session.
+     *
+     * @return a {@code String} representing an hexadecimal number.
+     */
+    public String getId() {
+        return this.id;
+    }
 
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "[id=" + getId() + "]";
-	}
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[id=" + getId() + "]";
+    }
 
-	/**
-	 * Simple container for {@link reactor.ipc.netty.http.websocket.WebsocketInbound WebSocketInbound} and {@link
-	 * reactor.ipc.netty.http.websocket.WebsocketOutbound WebSocketOutbound}.
-	 */
-	private static class WebSocketConnection {
+    /**
+     * Simple container for {@link reactor.ipc.netty.http.websocket.WebsocketInbound WebSocketInbound} and {@link
+     * reactor.ipc.netty.http.websocket.WebsocketOutbound WebSocketOutbound}.
+     */
+    private static class WebSocketConnection {
 
-		private final WebsocketInbound inbound;
-		private final WebsocketOutbound outbound;
+        private final WebsocketInbound inbound;
+        private final WebsocketOutbound outbound;
 
-		private WebSocketConnection(WebsocketInbound inbound, WebsocketOutbound outbound) {
-			this.inbound = inbound;
-			this.outbound = outbound;
-		}
+        private WebSocketConnection(WebsocketInbound inbound, WebsocketOutbound outbound) {
+            this.inbound = inbound;
+            this.outbound = outbound;
+        }
 
-		public WebsocketInbound getInbound() {
-			return this.inbound;
-		}
+        public WebsocketInbound getInbound() {
+            return this.inbound;
+        }
 
-		public WebsocketOutbound getOutbound() {
-			return this.outbound;
-		}
-	}
+        public WebsocketOutbound getOutbound() {
+            return this.outbound;
+        }
+    }
 
 }

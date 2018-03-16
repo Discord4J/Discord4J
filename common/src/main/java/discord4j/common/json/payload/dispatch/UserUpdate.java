@@ -21,17 +21,17 @@ import discord4j.common.json.response.UserResponse;
 
 public class UserUpdate implements Dispatch {
 
-	@JsonUnwrapped
-	private UserResponse user;
+    @JsonUnwrapped
+    private UserResponse user;
 
-	public UserResponse getUser() {
-		return user;
-	}
+    public UserResponse getUser() {
+        return user;
+    }
 
-	@Override
-	public String toString() {
-		return "UserUpdate[" +
-				"user=" + user +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "UserUpdate[" +
+                "user=" + user +
+                ']';
+    }
 }

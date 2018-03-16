@@ -35,136 +35,136 @@ import static org.junit.Assert.*;
 
 public class PayloadDeserializationTest {
 
-	private ObjectMapper mapper;
+    private ObjectMapper mapper;
 
-	@Before
-	public void init() {
-		mapper = new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false) // required
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    @Before
+    public void init() {
+        mapper = new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false) // required
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testDispatchReady() throws IOException {
-		String input = "{\n" +
-				"  \"t\": \"READY\",\n" +
-				"  \"s\": 1,\n" +
-				"  \"op\": 0,\n" +
-				"  \"d\": {\n" +
-				"    \"v\": 6,\n" +
-				"    \"user_settings\": {},\n" +
-				"    \"user\": {\n" +
-				"      \"verified\": true,\n" +
-				"      \"username\": \"Reacton\",\n" +
-				"      \"mfa_enabled\": true,\n" +
-				"      \"id\": \"344487830824943618\",\n" +
-				"      \"email\": null,\n" +
-				"      \"discriminator\": \"6221\",\n" +
-				"      \"bot\": true,\n" +
-				"      \"avatar\": \"bb1ac764222d6b3242d6a4f78214c9c9\"\n" +
-				"    },\n" +
-				"    \"session_id\": \"070e00aac4f437d4219501063559164c\",\n" +
-				"    \"relationships\": [],\n" +
-				"    \"private_channels\": [],\n" +
-				"    \"presences\": [],\n" +
-				"    \"guilds\": [\n" +
-				"      {\n" +
-				"        \"unavailable\": true,\n" +
-				"        \"id\": \"135197118292819968\"\n" +
-				"      },\n" +
-				"      {\n" +
-				"        \"unavailable\": true,\n" +
-				"        \"id\": \"346719828784185375\"\n" +
-				"      }\n" +
-				"    ],\n" +
-				"    \"_trace\": [\n" +
-				"      \"gateway-prd-main-qgwq\",\n" +
-				"      \"discord-sessions-prd-1-12\"\n" +
-				"    ]\n" +
-				"  }\n" +
-				"}";
-		GatewayPayload<Ready> payload = mapper.readValue(input, GatewayPayload.class);
+    @Test
+    public void testDispatchReady() throws IOException {
+        String input = "{\n" +
+                "  \"t\": \"READY\",\n" +
+                "  \"s\": 1,\n" +
+                "  \"op\": 0,\n" +
+                "  \"d\": {\n" +
+                "    \"v\": 6,\n" +
+                "    \"user_settings\": {},\n" +
+                "    \"user\": {\n" +
+                "      \"verified\": true,\n" +
+                "      \"username\": \"Reacton\",\n" +
+                "      \"mfa_enabled\": true,\n" +
+                "      \"id\": \"344487830824943618\",\n" +
+                "      \"email\": null,\n" +
+                "      \"discriminator\": \"6221\",\n" +
+                "      \"bot\": true,\n" +
+                "      \"avatar\": \"bb1ac764222d6b3242d6a4f78214c9c9\"\n" +
+                "    },\n" +
+                "    \"session_id\": \"070e00aac4f437d4219501063559164c\",\n" +
+                "    \"relationships\": [],\n" +
+                "    \"private_channels\": [],\n" +
+                "    \"presences\": [],\n" +
+                "    \"guilds\": [\n" +
+                "      {\n" +
+                "        \"unavailable\": true,\n" +
+                "        \"id\": \"135197118292819968\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"unavailable\": true,\n" +
+                "        \"id\": \"346719828784185375\"\n" +
+                "      }\n" +
+                "    ],\n" +
+                "    \"_trace\": [\n" +
+                "      \"gateway-prd-main-qgwq\",\n" +
+                "      \"discord-sessions-prd-1-12\"\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
+        GatewayPayload<Ready> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(0, payload.getOp().getRawOp());
-		assertNotNull(payload.getData());
-		assertEquals(6, payload.getData().getVersion());
-	}
+        assertEquals(0, payload.getOp().getRawOp());
+        assertNotNull(payload.getData());
+        assertEquals(6, payload.getData().getVersion());
+    }
 
-	@Test
-	public void testHeartbeat() throws IOException {
-		String input = "{\n" +
-				"    \"op\": 1,\n" +
-				"    \"d\": 251,\n" +
-				"    \"s\": null,\n" +
-				"    \"t\": null\n" +
-				"}";
-		GatewayPayload<Heartbeat> payload = mapper.readValue(input, GatewayPayload.class);
+    @Test
+    public void testHeartbeat() throws IOException {
+        String input = "{\n" +
+                "    \"op\": 1,\n" +
+                "    \"d\": 251,\n" +
+                "    \"s\": null,\n" +
+                "    \"t\": null\n" +
+                "}";
+        GatewayPayload<Heartbeat> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(1, payload.getOp().getRawOp());
-		assertNotNull(payload.getData());
-		assertEquals(251, payload.getData().getSeq());
-	}
+        assertEquals(1, payload.getOp().getRawOp());
+        assertNotNull(payload.getData());
+        assertEquals(251, payload.getData().getSeq());
+    }
 
-	@Test
-	public void testReconnect() throws IOException {
-		String input = "{\n" +
-				"    \"op\": 7,\n" +
-				"    \"d\": null,\n" +
-				"    \"s\": null,\n" +
-				"    \"t\": null\n" +
-				"}";
-		GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
+    @Test
+    public void testReconnect() throws IOException {
+        String input = "{\n" +
+                "    \"op\": 7,\n" +
+                "    \"d\": null,\n" +
+                "    \"s\": null,\n" +
+                "    \"t\": null\n" +
+                "}";
+        GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(7, payload.getOp().getRawOp());
-		assertNull(payload.getData());
-	}
+        assertEquals(7, payload.getOp().getRawOp());
+        assertNull(payload.getData());
+    }
 
-	@Test
-	public void testInvalidSession() throws IOException {
-		String input = "{\n" +
-				"    \"op\": 9,\n" +
-				"    \"d\": false,\n" +
-				"    \"s\": null,\n" +
-				"    \"t\": null\n" +
-				"}";
-		GatewayPayload<InvalidSession> payload = mapper.readValue(input, GatewayPayload.class);
+    @Test
+    public void testInvalidSession() throws IOException {
+        String input = "{\n" +
+                "    \"op\": 9,\n" +
+                "    \"d\": false,\n" +
+                "    \"s\": null,\n" +
+                "    \"t\": null\n" +
+                "}";
+        GatewayPayload<InvalidSession> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(9, payload.getOp().getRawOp());
-		assertNotNull(payload.getData());
-		assertEquals(false, payload.getData().isResumable());
-	}
+        assertEquals(9, payload.getOp().getRawOp());
+        assertNotNull(payload.getData());
+        assertEquals(false, payload.getData().isResumable());
+    }
 
-	@Test
-	public void testHello() throws IOException {
-		String input = "{\n" +
-				"    \"op\": 10,\n" +
-				"    \"d\": {\n" +
-				"        \"heartbeat_interval\": 45000,\n" +
-				"        \"_trace\": [\"discord-gateway-prd-1-99\"]\n" +
-				"    },\n" +
-				"    \"s\": null,\n" +
-				"    \"t\": null\n" +
-				"}";
-		GatewayPayload<Hello> payload = mapper.readValue(input, GatewayPayload.class);
+    @Test
+    public void testHello() throws IOException {
+        String input = "{\n" +
+                "    \"op\": 10,\n" +
+                "    \"d\": {\n" +
+                "        \"heartbeat_interval\": 45000,\n" +
+                "        \"_trace\": [\"discord-gateway-prd-1-99\"]\n" +
+                "    },\n" +
+                "    \"s\": null,\n" +
+                "    \"t\": null\n" +
+                "}";
+        GatewayPayload<Hello> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(10, payload.getOp().getRawOp());
-		assertNotNull(payload.getData());
-		assertEquals(45000, payload.getData().getHeartbeatInterval());
-	}
+        assertEquals(10, payload.getOp().getRawOp());
+        assertNotNull(payload.getData());
+        assertEquals(45000, payload.getData().getHeartbeatInterval());
+    }
 
-	@Test
-	public void testHeartbeatAck() throws IOException {
-		String input = "{\n" +
-				"    \"op\": 11,\n" +
-				"    \"d\": null,\n" +
-				"    \"s\": null,\n" +
-				"    \"t\": null\n" +
-				"}";
-		GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
+    @Test
+    public void testHeartbeatAck() throws IOException {
+        String input = "{\n" +
+                "    \"op\": 11,\n" +
+                "    \"d\": null,\n" +
+                "    \"s\": null,\n" +
+                "    \"t\": null\n" +
+                "}";
+        GatewayPayload<?> payload = mapper.readValue(input, GatewayPayload.class);
 
-		assertEquals(11, payload.getOp().getRawOp());
-		assertNull(payload.getData());
-	}
+        assertEquals(11, payload.getOp().getRawOp());
+        assertNull(payload.getData());
+    }
 }

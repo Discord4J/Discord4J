@@ -24,68 +24,68 @@ import java.util.Arrays;
 
 public class ApplicationInfoResponse {
 
-	@UnsignedJson
-	private long id;
-	private String name;
-	@Nullable
-	private String icon;
-	@Nullable
-	private String description;
-	@JsonProperty("rpc_origins")
-	@Nullable
-	private String[] rpcOrigins;
-	@JsonProperty("bot_public")
-	private boolean botPublic;
-	@JsonProperty("bot_require_code_grant")
-	private boolean botRequireCodeGrant;
-	private UserResponse owner;
+    @UnsignedJson
+    private long id;
+    private String name;
+    @Nullable
+    private String icon;
+    @Nullable
+    private String description;
+    @JsonProperty("rpc_origins")
+    @Nullable
+    private String[] rpcOrigins;
+    @JsonProperty("bot_public")
+    private boolean botPublic;
+    @JsonProperty("bot_require_code_grant")
+    private boolean botRequireCodeGrant;
+    private UserResponse owner;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	@Nullable
-	public String getIcon() {
-		return icon;
-	}
+    @Nullable
+    public String getIcon() {
+        return icon;
+    }
 
-	@Nullable
-	public String getDescription() {
-		return description;
-	}
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
 
-	@Nullable
-	public String[] getRpcOrigins() {
-		return rpcOrigins;
-	}
+    @Nullable
+    public String[] getRpcOrigins() {
+        return rpcOrigins;
+    }
 
-	public boolean isBotPublic() {
-		return botPublic;
-	}
+    public boolean isBotPublic() {
+        return botPublic;
+    }
 
-	public boolean isBotRequireCodeGrant() {
-		return botRequireCodeGrant;
-	}
+    public boolean isBotRequireCodeGrant() {
+        return botRequireCodeGrant;
+    }
 
-	public UserResponse getOwner() {
-		return owner;
-	}
+    public UserResponse getOwner() {
+        return owner;
+    }
 
-	@Override
-	public String toString() {
-		return "ApplicationInfoResponse{" +
-				"id=" + id +
-				", name='" + name + '\'' +
-				", icon='" + icon + '\'' +
-				", description='" + description + '\'' +
-				", rpcOrigins=" + Arrays.toString(rpcOrigins) +
-				", botPublic=" + botPublic +
-				", botRequireCodeGrant=" + botRequireCodeGrant +
-				", owner=" + owner +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "ApplicationInfoResponse{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
+                ", description='" + description + '\'' +
+                ", rpcOrigins=" + Arrays.toString(rpcOrigins) +
+                ", botPublic=" + botPublic +
+                ", botRequireCodeGrant=" + botRequireCodeGrant +
+                ", owner=" + owner +
+                '}';
+    }
 }

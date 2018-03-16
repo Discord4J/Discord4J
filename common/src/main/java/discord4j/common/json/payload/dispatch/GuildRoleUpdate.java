@@ -22,24 +22,24 @@ import discord4j.common.json.response.RoleResponse;
 
 public class GuildRoleUpdate implements Dispatch {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	private RoleResponse role;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    private RoleResponse role;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public RoleResponse getRole() {
-		return role;
-	}
+    public RoleResponse getRole() {
+        return role;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildRoleUpdate[" +
-				"guildId=" + guildId +
-				", role=" + role +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildRoleUpdate[" +
+                "guildId=" + guildId +
+                ", role=" + role +
+                ']';
+    }
 }

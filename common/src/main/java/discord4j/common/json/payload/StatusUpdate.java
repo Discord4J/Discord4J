@@ -22,27 +22,27 @@ import javax.annotation.Nullable;
 
 public class StatusUpdate implements PayloadData {
 
-	@Nullable
-	private final Long since;
-	@Nullable
-	private final GameRequest game;
-	private final String status;
-	private final boolean afk;
+    @Nullable
+    private final Long since;
+    @Nullable
+    private final GameRequest game;
+    private final String status;
+    private final boolean afk;
 
-	public StatusUpdate(@Nullable Long since, @Nullable GameRequest game, String status, boolean afk) {
-		this.since = since;
-		this.game = game;
-		this.status = status;
-		this.afk = afk;
-	}
+    public StatusUpdate(@Nullable Long since, @Nullable GameRequest game, String status, boolean afk) {
+        this.since = since;
+        this.game = game;
+        this.status = status;
+        this.afk = afk;
+    }
 
-	@Override
-	public String toString() {
-		return "StatusUpdate[" +
-				"since=" + since +
-				", game=" + game +
-				", status=" + status +
-				", afk=" + afk +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "StatusUpdate[" +
+                "since=" + since +
+                ", game=" + game +
+                ", status=" + status +
+                ", afk=" + afk +
+                ']';
+    }
 }

@@ -26,75 +26,75 @@ import javax.annotation.Nullable;
 @PossibleJson
 public class GuildMemberAddRequest {
 
-	@JsonProperty("accessToken")
-	private final String accessToken;
-	@Nullable
-	private final Possible<String> nick;
-	@UnsignedJson
-	private final Possible<long[]> roles;
-	private final Possible<Boolean> mute;
-	private final Possible<Boolean> deaf;
+    @JsonProperty("accessToken")
+    private final String accessToken;
+    @Nullable
+    private final Possible<String> nick;
+    @UnsignedJson
+    private final Possible<long[]> roles;
+    private final Possible<Boolean> mute;
+    private final Possible<Boolean> deaf;
 
-	public GuildMemberAddRequest(String accessToken, @Nullable Possible<String> nick,
-	                             Possible<long[]> roles, Possible<Boolean> mute,
-	                             Possible<Boolean> deaf) {
-		this.accessToken = accessToken;
-		this.nick = nick;
-		this.roles = roles;
-		this.mute = mute;
-		this.deaf = deaf;
-	}
+    public GuildMemberAddRequest(String accessToken, @Nullable Possible<String> nick,
+                                 Possible<long[]> roles, Possible<Boolean> mute,
+                                 Possible<Boolean> deaf) {
+        this.accessToken = accessToken;
+        this.nick = nick;
+        this.roles = roles;
+        this.mute = mute;
+        this.deaf = deaf;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private String accessToken;
-		private Possible<String> nick = Possible.absent();
-		private Possible<long[]> roles = Possible.absent();
-		private Possible<Boolean> mute = Possible.absent();
-		private Possible<Boolean> deaf = Possible.absent();
+        private String accessToken;
+        private Possible<String> nick = Possible.absent();
+        private Possible<long[]> roles = Possible.absent();
+        private Possible<Boolean> mute = Possible.absent();
+        private Possible<Boolean> deaf = Possible.absent();
 
-		public Builder accessToken(String accessToken) {
-			this.accessToken = accessToken;
-			return this;
-		}
+        public Builder accessToken(String accessToken) {
+            this.accessToken = accessToken;
+            return this;
+        }
 
-		public Builder nick(String nick) {
-			this.nick = Possible.of(nick);
-			return this;
-		}
+        public Builder nick(String nick) {
+            this.nick = Possible.of(nick);
+            return this;
+        }
 
-		public Builder roles(long[] roles) {
-			this.roles = Possible.of(roles);
-			return this;
-		}
+        public Builder roles(long[] roles) {
+            this.roles = Possible.of(roles);
+            return this;
+        }
 
-		public Builder mute(boolean mute) {
-			this.mute = Possible.of(mute);
-			return this;
-		}
+        public Builder mute(boolean mute) {
+            this.mute = Possible.of(mute);
+            return this;
+        }
 
-		public Builder deaf(boolean deaf) {
-			this.deaf = Possible.of(deaf);
-			return this;
-		}
+        public Builder deaf(boolean deaf) {
+            this.deaf = Possible.of(deaf);
+            return this;
+        }
 
-		public GuildMemberAddRequest build() {
-			return new GuildMemberAddRequest(accessToken, nick, roles, mute, deaf);
-		}
-	}
+        public GuildMemberAddRequest build() {
+            return new GuildMemberAddRequest(accessToken, nick, roles, mute, deaf);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "GuildMemberAddRequest[" +
-				"accessToken=" + accessToken +
-				", nick=" + nick +
-				", roles=" + roles +
-				", mute=" + mute +
-				", deaf=" + deaf +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildMemberAddRequest[" +
+                "accessToken=" + accessToken +
+                ", nick=" + nick +
+                ", roles=" + roles +
+                ", mute=" + mute +
+                ", deaf=" + deaf +
+                ']';
+    }
 }

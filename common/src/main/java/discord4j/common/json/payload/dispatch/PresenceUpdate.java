@@ -28,52 +28,52 @@ import java.util.Arrays;
 @PossibleJson
 public class PresenceUpdate implements Dispatch {
 
-	@Nullable
-	private UserResponse user;
-	@Nullable
-	@UnsignedJson
-	private long[] roles;
-	@Nullable
-	private GameResponse game;
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId; // TODO: nullable?
-	private String status;
-	@Nullable
-	private String nick;
+    @Nullable
+    private UserResponse user;
+    @Nullable
+    @UnsignedJson
+    private long[] roles;
+    @Nullable
+    private GameResponse game;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId; // TODO: nullable?
+    private String status;
+    @Nullable
+    private String nick;
 
-	@Nullable
-	public UserResponse getUser() {
-		return user;
-	}
+    @Nullable
+    public UserResponse getUser() {
+        return user;
+    }
 
-	@Nullable
-	public long[] getRoles() {
-		return roles;
-	}
+    @Nullable
+    public long[] getRoles() {
+        return roles;
+    }
 
-	@Nullable
-	public GameResponse getGame() {
-		return game;
-	}
+    @Nullable
+    public GameResponse getGame() {
+        return game;
+    }
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	@Override
-	public String toString() {
-		return "PresenceUpdate[" +
-				"user=" + user +
-				", roles=" + Arrays.toString(roles) +
-				", game=" + game +
-				", guildId=" + guildId +
-				", status=" + status +
-				", nick=" + nick +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "PresenceUpdate[" +
+                "user=" + user +
+                ", roles=" + Arrays.toString(roles) +
+                ", game=" + game +
+                ", guildId=" + guildId +
+                ", status=" + status +
+                ", nick=" + nick +
+                ']';
+    }
 }

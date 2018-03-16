@@ -21,17 +21,17 @@ import discord4j.common.json.response.UnavailableGuildResponse;
 
 public class GuildDelete implements Dispatch {
 
-	@JsonUnwrapped
-	private UnavailableGuildResponse guild;
+    @JsonUnwrapped
+    private UnavailableGuildResponse guild;
 
-	public UnavailableGuildResponse getGuild() {
-		return guild;
-	}
+    public UnavailableGuildResponse getGuild() {
+        return guild;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildDelete[" +
-				"guild=" + guild +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildDelete[" +
+                "guild=" + guild +
+                ']';
+    }
 }

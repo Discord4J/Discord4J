@@ -47,7 +47,8 @@ public class StoreTests {
     @Test
     public void testGenericFallback() {
         assertEquals(ForwardingStoreService.class, provider.getLongObjStoreProvider().getClass());
-        assertEquals(TestService.class, ((ForwardingStoreService) provider.getLongObjStoreProvider()).getOriginal().getClass());
+        assertEquals(TestService.class,
+                ((ForwardingStoreService) provider.getLongObjStoreProvider()).getOriginal().getClass());
     }
 
     @Test
@@ -64,9 +65,11 @@ public class StoreTests {
             this.connection = connection;
         }
 
-        <T> boolean lenientListEquals(List<T> l1, List<T> l2) { //We don't really care about order, lists were only used in this test because of laziness
-            if (l1.size() != l2.size())
+        // We don't really care about order, lists were only used in this test because of laziness
+        <T> boolean lenientListEquals(List<T> l1, List<T> l2) {
+            if (l1.size() != l2.size()) {
                 return false;
+            }
 
             boolean equals = true;
             for (T x : l1) {
@@ -94,17 +97,22 @@ public class StoreTests {
         void testPut() {
             connection.store("hello", "world").block();
             connection.store(Mono.defer(() -> Mono.just(Tuples.of("hello1", "world1")))).block();
-            connection.store(Flux.fromArray(new Tuple2[]{Tuples.of("hello2", "world2"), Tuples.of("hello3", "world3")})).block();
+            connection.store(Flux.fromArray(new Tuple2[]{Tuples.of("hello2", "world2"), Tuples.of("hello3", "world3")}))
+                    .block();
             connection.store(Arrays.asList(Tuples.of("hello4", "world4"), Tuples.of("hello5", "world5"))).block();
         }
 
         void testFind() {
             assertEquals("world", connection.find("hello").block());
             assertEquals("world1", connection.findAll(Mono.just("hello1")).blockFirst());
-            assertTrue(lenientListEquals(Arrays.asList("world2", "world3"), connection.findAll(Flux.fromArray(new String[]{"hello2", "hello3"})).collectList().block()));
-            assertTrue(lenientListEquals(Arrays.asList("world4", "world5"), connection.findAll(Arrays.asList("hello4", "hello5")).collectList().block()));
-            assertTrue(lenientListEquals(Arrays.asList("world", "world1", "world2", "world3", "world4", "world5"), connection.findAll().collectList().block()));
-            assertTrue(lenientListEquals(Arrays.asList("world1", "world2"), connection.findInRange("hello1", "hello3").collectList().block()));
+            assertTrue(lenientListEquals(Arrays.asList("world2", "world3"),
+                    connection.findAll(Flux.fromArray(new String[]{"hello2", "hello3"})).collectList().block()));
+            assertTrue(lenientListEquals(Arrays.asList("world4", "world5"),
+                    connection.findAll(Arrays.asList("hello4", "hello5")).collectList().block()));
+            assertTrue(lenientListEquals(Arrays.asList("world", "world1", "world2", "world3", "world4", "world5"),
+                    connection.findAll().collectList().block()));
+            assertTrue(lenientListEquals(Arrays.asList("world1", "world2"),
+                    connection.findInRange("hello1", "hello3").collectList().block()));
         }
 
         void testExists() {
@@ -125,7 +133,8 @@ public class StoreTests {
             connection.deleteAll(Arrays.asList(Tuples.of("hello4", "world4"), Tuples.of("hello5", "world5"))).block();
             assertEquals(0L, (long) connection.count().block());
             testPut();
-            connection.deleteAll(Flux.fromIterable(Arrays.asList(Tuples.of("hello", "world"), Tuples.of("hello1", "world1")))).block();
+            connection.deleteAll(Flux.fromIterable(Arrays.asList(Tuples.of("hello", "world"), Tuples.of("hello1",
+                    "world1")))).block();
             assertEquals(4L, (long) connection.count().block());
             connection.deleteInRange("hello2", "hello4").block();
             assertEquals(2L, (long) connection.count().block());

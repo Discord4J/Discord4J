@@ -28,53 +28,53 @@ import java.time.Duration;
  */
 public class RetryOptions {
 
-	private final RetryContext retryContext;
+    private final RetryContext retryContext;
 
-	/**
-	 * Create a retry configuration object.
-	 *
-	 * @param firstBackoff the Duration to backoff on first attempts
-	 * @param maxBackoffInterval the max Duration to backoff
-	 */
-	public RetryOptions(Duration firstBackoff, Duration maxBackoffInterval) {
-		this.retryContext = new RetryContext(firstBackoff, maxBackoffInterval);
-	}
+    /**
+     * Create a retry configuration object.
+     *
+     * @param firstBackoff the Duration to backoff on first attempts
+     * @param maxBackoffInterval the max Duration to backoff
+     */
+    public RetryOptions(Duration firstBackoff, Duration maxBackoffInterval) {
+        this.retryContext = new RetryContext(firstBackoff, maxBackoffInterval);
+    }
 
-	/**
-	 * Retrieve a stateful context object to hold current attempt count and backoff delay on each retry.
-	 *
-	 * @return the RetryContext associated with this configuration object
-	 */
-	public RetryContext getRetryContext() {
-		return retryContext;
-	}
+    /**
+     * Retrieve a stateful context object to hold current attempt count and backoff delay on each retry.
+     *
+     * @return the RetryContext associated with this configuration object
+     */
+    public RetryContext getRetryContext() {
+        return retryContext;
+    }
 
-	/**
-	 * Retrieve the backoff function used for retrying. It uses a RetryContext object to calculate the correct backoff
-	 * delay.
-	 *
-	 * @return a Backoff function
-	 */
-	public Backoff getBackoff() {
-		return context -> {
-			RetryContext appContext = (RetryContext) context.applicationContext();
-			Duration nextBackoff;
-			try {
-				long factor = (long) Math.pow(2, (appContext.getAttempts() - 1));
-				nextBackoff = appContext.getFirstBackoff().multipliedBy(factor);
-			} catch (ArithmeticException e) {
-				nextBackoff = appContext.getMaxBackoffInterval();
-			}
-			return new BackoffDelay(appContext.getFirstBackoff(), appContext.getMaxBackoffInterval(), nextBackoff);
-		};
-	}
+    /**
+     * Retrieve the backoff function used for retrying. It uses a RetryContext object to calculate the correct backoff
+     * delay.
+     *
+     * @return a Backoff function
+     */
+    public Backoff getBackoff() {
+        return context -> {
+            RetryContext appContext = (RetryContext) context.applicationContext();
+            Duration nextBackoff;
+            try {
+                long factor = (long) Math.pow(2, (appContext.getAttempts() - 1));
+                nextBackoff = appContext.getFirstBackoff().multipliedBy(factor);
+            } catch (ArithmeticException e) {
+                nextBackoff = appContext.getMaxBackoffInterval();
+            }
+            return new BackoffDelay(appContext.getFirstBackoff(), appContext.getMaxBackoffInterval(), nextBackoff);
+        };
+    }
 
-	/**
-	 * Retrieve the jitter to be applied on each backoff delay.
-	 *
-	 * @return a Jitter function
-	 */
-	public Jitter getJitter() {
-		return Jitter.random();
-	}
+    /**
+     * Retrieve the jitter to be applied on each backoff delay.
+     *
+     * @return a Jitter function
+     */
+    public Jitter getJitter() {
+        return Jitter.random();
+    }
 }

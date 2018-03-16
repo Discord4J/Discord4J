@@ -40,7 +40,7 @@ public final class Stores {
     private final LongObjStore<TextChannelBean> textChannelStore;
     private final LongObjStore<UserBean> userStore;
     private final LongObjStore<VoiceChannelBean> voiceChannelStore;
-//    private final LongObjStore<WebhookBean> webhookStore;
+    //    private final LongObjStore<WebhookBean> webhookStore;
 
     public Stores(StoreService service) {
         attachmentStore = service.provideLongObjStore(AttachmentBean.class);

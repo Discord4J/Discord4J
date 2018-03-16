@@ -28,35 +28,35 @@ import java.nio.charset.Charset;
 
 public class JacksonPayloadReader implements PayloadReader {
 
-	private static final Logger log = Loggers.getLogger(JacksonPayloadReader.class);
+    private static final Logger log = Loggers.getLogger(JacksonPayloadReader.class);
 
-	private final ObjectMapper mapper;
-	private final boolean lenient;
+    private final ObjectMapper mapper;
+    private final boolean lenient;
 
-	public JacksonPayloadReader(ObjectMapper mapper) {
-		this(mapper, true);
-	}
+    public JacksonPayloadReader(ObjectMapper mapper) {
+        this(mapper, true);
+    }
 
-	public JacksonPayloadReader(ObjectMapper mapper, boolean lenient) {
-		this.mapper = mapper;
-		this.lenient = lenient;
-	}
+    public JacksonPayloadReader(ObjectMapper mapper, boolean lenient) {
+        this.mapper = mapper;
+        this.lenient = lenient;
+    }
 
-	@Override
-	public GatewayPayload<?> read(ByteBuf payload) {
-		try {
-			return mapper.readValue(payload.array(), GatewayPayload.class);
-		} catch (IOException e) {
-			if (lenient) {
-				// if eof input - just ignore
-				if (payload.readableBytes() > 0) {
-					log.warn("Error while decoding JSON ({} bytes): {}", payload.readableBytes(),
-							payload.toString(Charset.forName("UTF-8")), e);
-				}
-				return new GatewayPayload<>();
-			} else {
-				throw Exceptions.propagate(e);
-			}
-		}
-	}
+    @Override
+    public GatewayPayload<?> read(ByteBuf payload) {
+        try {
+            return mapper.readValue(payload.array(), GatewayPayload.class);
+        } catch (IOException e) {
+            if (lenient) {
+                // if eof input - just ignore
+                if (payload.readableBytes() > 0) {
+                    log.warn("Error while decoding JSON ({} bytes): {}", payload.readableBytes(),
+                            payload.toString(Charset.forName("UTF-8")), e);
+                }
+                return new GatewayPayload<>();
+            } else {
+                throw Exceptions.propagate(e);
+            }
+        }
+    }
 }

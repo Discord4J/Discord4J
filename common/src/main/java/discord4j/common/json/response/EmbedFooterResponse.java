@@ -20,30 +20,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EmbedFooterResponse {
 
-	private String text;
-	@JsonProperty("icon_url")
-	private String iconUrl;
-	@JsonProperty("proxy_icon_url")
-	private String proxyIconUrl;
+    private String text;
+    @JsonProperty("icon_url")
+    private String iconUrl;
+    @JsonProperty("proxy_icon_url")
+    private String proxyIconUrl;
 
-	public String getText() {
-		return text;
-	}
+    public String getText() {
+        return text;
+    }
 
-	public String getIconUrl() {
-		return iconUrl;
-	}
+    public String getIconUrl() {
+        return iconUrl;
+    }
 
-	public String getProxyIconUrl() {
-		return proxyIconUrl;
-	}
+    public String getProxyIconUrl() {
+        return proxyIconUrl;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedFooterResponse[" +
-				"text=" + text +
-				", iconUrl=" + iconUrl +
-				", proxyIconUrl=" + proxyIconUrl +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedFooterResponse[" +
+                "text=" + text +
+                ", iconUrl=" + iconUrl +
+                ", proxyIconUrl=" + proxyIconUrl +
+                ']';
+    }
 }

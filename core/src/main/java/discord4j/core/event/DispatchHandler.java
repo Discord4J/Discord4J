@@ -29,14 +29,14 @@ import discord4j.core.event.domain.Event;
 @FunctionalInterface
 public interface DispatchHandler<D extends Dispatch, E extends Event> {
 
-	/**
-	 * Operates and transforms a Dispatch event with its context, from gateway to a user-friendly Event, so it may be
-	 * further routed to an event dispatcher downstream.
-	 * <p>
-	 * The context allows access to underlying client resources for operations like caching.
-	 *
-	 * @param context the dispatch context
-	 * @return at most one Event that is derived from the given dispatch context
-	 */
-	E handle(DispatchContext<D> context);
+    /**
+     * Operates and transforms a Dispatch event with its context, from gateway to a user-friendly Event, so it may be
+     * further routed to an event dispatcher downstream.
+     * <p>
+     * The context allows access to underlying client resources for operations like caching.
+     *
+     * @param context the dispatch context
+     * @return at most one Event that is derived from the given dispatch context
+     */
+    E handle(DispatchContext<D> context);
 }

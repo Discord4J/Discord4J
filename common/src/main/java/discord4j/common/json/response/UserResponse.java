@@ -23,78 +23,78 @@ import javax.annotation.Nullable;
 
 public class UserResponse {
 
-	@UnsignedJson
-	private long id;
-	private String username;
-	private String discriminator;
-	@Nullable
-	private String avatar;
-	@Nullable
-	private Boolean bot;
-	@JsonProperty("mfa_enabled")
-	@Nullable
-	private Boolean mfaEnabled;
-	@Nullable
-	private Boolean verified;
-	@Nullable
-	private String email;
-	@Nullable
-	private String token;
+    @UnsignedJson
+    private long id;
+    private String username;
+    private String discriminator;
+    @Nullable
+    private String avatar;
+    @Nullable
+    private Boolean bot;
+    @JsonProperty("mfa_enabled")
+    @Nullable
+    private Boolean mfaEnabled;
+    @Nullable
+    private Boolean verified;
+    @Nullable
+    private String email;
+    @Nullable
+    private String token;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public String getDiscriminator() {
-		return discriminator;
-	}
+    public String getDiscriminator() {
+        return discriminator;
+    }
 
-	@Nullable
-	public String getAvatar() {
-		return avatar;
-	}
+    @Nullable
+    public String getAvatar() {
+        return avatar;
+    }
 
-	@Nullable
-	public Boolean isBot() {
-		return bot;
-	}
+    @Nullable
+    public Boolean isBot() {
+        return bot;
+    }
 
-	@Nullable
-	public Boolean isMfaEnabled() {
-		return mfaEnabled;
-	}
+    @Nullable
+    public Boolean isMfaEnabled() {
+        return mfaEnabled;
+    }
 
-	@Nullable
-	public Boolean getVerified() {
-		return verified;
-	}
+    @Nullable
+    public Boolean getVerified() {
+        return verified;
+    }
 
-	@Nullable
-	public String getEmail() {
-		return email;
-	}
+    @Nullable
+    public String getEmail() {
+        return email;
+    }
 
-	@Nullable
-	public String getToken() {
-		return token;
-	}
+    @Nullable
+    public String getToken() {
+        return token;
+    }
 
-	@Override
-	public String toString() {
-		return "UserResponse[" +
-				"id=" + id +
-				", username=" + username +
-				", discriminator=" + discriminator +
-				", avatar=" + avatar +
-				", bot=" + bot +
-				", mfaEnabled=" + mfaEnabled +
-				", verified=" + verified +
-				", email=" + email +
-				", token=" + token +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "UserResponse[" +
+                "id=" + id +
+                ", username=" + username +
+                ", discriminator=" + discriminator +
+                ", avatar=" + avatar +
+                ", bot=" + bot +
+                ", mfaEnabled=" + mfaEnabled +
+                ", verified=" + verified +
+                ", email=" + email +
+                ", token=" + token +
+                ']';
+    }
 }

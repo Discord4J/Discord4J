@@ -23,82 +23,82 @@ import javax.annotation.Nullable;
 
 public class VoiceStateResponse {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	@JsonProperty("channel_id")
-	@Nullable
-	@UnsignedJson
-	private Long channelId;
-	@JsonProperty("user_id")
-	@UnsignedJson
-	private long userId;
-	@JsonProperty("session_id")
-	private String sessionId;
-	private boolean deaf;
-	private boolean mute;
-	@JsonProperty("self_deaf")
-	private boolean selfDeaf;
-	@JsonProperty("self_video")
-	private boolean selfVideo;
-	@JsonProperty("self_mute")
-	private boolean selfMute;
-	private boolean suppress;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    @JsonProperty("channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long channelId;
+    @JsonProperty("user_id")
+    @UnsignedJson
+    private long userId;
+    @JsonProperty("session_id")
+    private String sessionId;
+    private boolean deaf;
+    private boolean mute;
+    @JsonProperty("self_deaf")
+    private boolean selfDeaf;
+    @JsonProperty("self_video")
+    private boolean selfVideo;
+    @JsonProperty("self_mute")
+    private boolean selfMute;
+    private boolean suppress;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	@Nullable
-	public Long getChannelId() {
-		return channelId;
-	}
+    @Nullable
+    public Long getChannelId() {
+        return channelId;
+    }
 
-	public long getUserId() {
-		return userId;
-	}
+    public long getUserId() {
+        return userId;
+    }
 
-	public String getSessionId() {
-		return sessionId;
-	}
+    public String getSessionId() {
+        return sessionId;
+    }
 
-	public boolean isDeaf() {
-		return deaf;
-	}
+    public boolean isDeaf() {
+        return deaf;
+    }
 
-	public boolean isMute() {
-		return mute;
-	}
+    public boolean isMute() {
+        return mute;
+    }
 
-	public boolean isSelfDeaf() {
-		return selfDeaf;
-	}
+    public boolean isSelfDeaf() {
+        return selfDeaf;
+    }
 
-	public boolean isSelfVideo() {
-		return selfVideo;
-	}
+    public boolean isSelfVideo() {
+        return selfVideo;
+    }
 
-	public boolean isSelfMute() {
-		return selfMute;
-	}
+    public boolean isSelfMute() {
+        return selfMute;
+    }
 
-	public boolean isSuppress() {
-		return suppress;
-	}
+    public boolean isSuppress() {
+        return suppress;
+    }
 
-	@Override
-	public String toString() {
-		return "VoiceStateResponse[" +
-				"guildId=" + guildId +
-				", channelId=" + channelId +
-				", userId=" + userId +
-				", sessionId=" + sessionId +
-				", deaf=" + deaf +
-				", mute=" + mute +
-				", selfDeaf=" + selfDeaf +
-				", selfVideo=" + selfVideo +
-				", selfMute=" + selfMute +
-				", suppress=" + suppress +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "VoiceStateResponse[" +
+                "guildId=" + guildId +
+                ", channelId=" + channelId +
+                ", userId=" + userId +
+                ", sessionId=" + sessionId +
+                ", deaf=" + deaf +
+                ", mute=" + mute +
+                ", selfDeaf=" + selfDeaf +
+                ", selfVideo=" + selfVideo +
+                ", selfMute=" + selfMute +
+                ", suppress=" + suppress +
+                ']';
+    }
 }

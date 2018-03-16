@@ -18,5 +18,5 @@ package discord4j.common.json;
 
 public class LongPojo {
 
-	public long someLong;
+    public long someLong;
 }

@@ -23,18 +23,18 @@ import java.time.Duration;
 
 public class GlobalRateLimiterTest {
 
-	@Test
-	public void testGlobalRateLimiter() {
-		GlobalRateLimiter rateLimiter = new GlobalRateLimiter();
+    @Test
+    public void testGlobalRateLimiter() {
+        GlobalRateLimiter rateLimiter = new GlobalRateLimiter();
 
-		rateLimiter.rateLimitFor(Duration.ofSeconds(2));
+        rateLimiter.rateLimitFor(Duration.ofSeconds(2));
 
-		Mono.when(rateLimiter).block();
-		System.out.println("1");
+        Mono.when(rateLimiter).block();
+        System.out.println("1");
 
-		rateLimiter.rateLimitFor(Duration.ofSeconds(2));
+        rateLimiter.rateLimitFor(Duration.ofSeconds(2));
 
-		Mono.when(rateLimiter).block();
-		System.out.println("2");
-	}
+        Mono.when(rateLimiter).block();
+        System.out.println("2");
+    }
 }

@@ -32,40 +32,42 @@ import org.junit.Test;
 
 public class VoiceServiceTest {
 
-	private VoiceService voiceService = null;
+    private VoiceService voiceService = null;
 
-	private VoiceService getVoiceService() {
+    private VoiceService getVoiceService() {
 
-		if (voiceService != null) return voiceService;
+        if (voiceService != null) {
+            return voiceService;
+        }
 
-		String token = System.getenv("token");
-		ObjectMapper mapper = getMapper();
+        String token = System.getenv("token");
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl(Routes.BASE_URL)
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .writerStrategy(new EmptyWriterStrategy())
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		return voiceService = new VoiceService(router);
-	}
+        return voiceService = new VoiceService(router);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testGetVoiceRegions() {
-		getVoiceService().getVoiceRegions().block();
-	}
+    @Test
+    public void testGetVoiceRegions() {
+        getVoiceService().getVoiceRegions().block();
+    }
 
 }

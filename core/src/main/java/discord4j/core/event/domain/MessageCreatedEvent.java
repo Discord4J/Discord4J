@@ -21,20 +21,20 @@ import discord4j.common.json.payload.dispatch.MessageCreate;
 
 public class MessageCreatedEvent implements Event {
 
-	private final MessageCreate messageCreate;
+    private final MessageCreate messageCreate;
 
-	public MessageCreatedEvent(MessageCreate messageCreate) {
-		this.messageCreate = messageCreate;
-	}
+    public MessageCreatedEvent(MessageCreate messageCreate) {
+        this.messageCreate = messageCreate;
+    }
 
-	public MessageCreate getMessageCreate() {
-		return messageCreate;
-	}
+    public MessageCreate getMessageCreate() {
+        return messageCreate;
+    }
 
-	@Override
-	public String toString() {
-		return "MessageCreatedEvent[" +
-				"messageCreate=" + messageCreate +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "MessageCreatedEvent[" +
+                "messageCreate=" + messageCreate +
+                ']';
+    }
 }

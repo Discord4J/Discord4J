@@ -11,52 +11,52 @@ import java.time.Duration;
  */
 public class RetryContext {
 
-	private final Duration firstBackoff;
-	private final Duration maxBackoffInterval;
+    private final Duration firstBackoff;
+    private final Duration maxBackoffInterval;
 
-	private boolean connected = false;
-	private int attempts = 1;
-	private int resetCount = 0;
+    private boolean connected = false;
+    private int attempts = 1;
+    private int resetCount = 0;
 
-	public RetryContext(Duration firstBackoff, Duration maxBackoffInterval) {
-		this.firstBackoff = firstBackoff;
-		this.maxBackoffInterval = maxBackoffInterval;
-	}
+    public RetryContext(Duration firstBackoff, Duration maxBackoffInterval) {
+        this.firstBackoff = firstBackoff;
+        this.maxBackoffInterval = maxBackoffInterval;
+    }
 
-	/**
-	 * Signal that the next retry attempt should be underway.
-	 */
-	public void next() {
-		connected = false;
-		attempts++;
-	}
+    /**
+     * Signal that the next retry attempt should be underway.
+     */
+    public void next() {
+        connected = false;
+        attempts++;
+    }
 
-	/**
-	 * Reset the attempt count, treating further calls to {@link #next()} as new retry sequences.
-	 */
-	public void reset() {
-		connected = true;
-		attempts = 1;
-		resetCount++;
-	}
+    /**
+     * Reset the attempt count, treating further calls to {@link #next()} as new retry sequences.
+     */
+    public void reset() {
+        connected = true;
+        attempts = 1;
+        resetCount++;
+    }
 
-	public Duration getFirstBackoff() {
-		return firstBackoff;
-	}
+    public Duration getFirstBackoff() {
+        return firstBackoff;
+    }
 
-	public Duration getMaxBackoffInterval() {
-		return maxBackoffInterval;
-	}
+    public Duration getMaxBackoffInterval() {
+        return maxBackoffInterval;
+    }
 
-	public boolean isConnected() {
-		return connected;
-	}
+    public boolean isConnected() {
+        return connected;
+    }
 
-	public int getAttempts() {
-		return attempts;
-	}
+    public int getAttempts() {
+        return attempts;
+    }
 
-	public int getResetCount() {
-		return resetCount;
-	}
+    public int getResetCount() {
+        return resetCount;
+    }
 }

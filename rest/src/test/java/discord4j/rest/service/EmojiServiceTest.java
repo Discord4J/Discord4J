@@ -32,62 +32,64 @@ import org.junit.Test;
 
 public class EmojiServiceTest {
 
-	private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
-	private static final long permanentEmoji = Long.parseUnsignedLong(System.getenv("permanentEmoji"));
+    private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
+    private static final long permanentEmoji = Long.parseUnsignedLong(System.getenv("permanentEmoji"));
 
-	private EmojiService emojiService = null;
+    private EmojiService emojiService = null;
 
-	private EmojiService getEmojiService() {
+    private EmojiService getEmojiService() {
 
-		if (emojiService != null) return emojiService;
+        if (emojiService != null) {
+            return emojiService;
+        }
 
-		String token = System.getenv("token");
-		ObjectMapper mapper = getMapper();
+        String token = System.getenv("token");
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl(Routes.BASE_URL)
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .writerStrategy(new EmptyWriterStrategy())
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		return emojiService = new EmojiService(router);
-	}
+        return emojiService = new EmojiService(router);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testGetGuildEmojis() {
-		getEmojiService().getGuildEmojis(guild).block();
-	}
+    @Test
+    public void testGetGuildEmojis() {
+        getEmojiService().getGuildEmojis(guild).block();
+    }
 
-	@Test
-	public void testGetGuildEmoji() {
-		getEmojiService().getGuildEmoji(guild, permanentEmoji).block();
-	}
+    @Test
+    public void testGetGuildEmoji() {
+        getEmojiService().getGuildEmoji(guild, permanentEmoji).block();
+    }
 
-	@Test
-	public void testCreateGuildEmoji() {
-		// TODO
-	}
+    @Test
+    public void testCreateGuildEmoji() {
+        // TODO
+    }
 
-	@Test
-	public void testModifyGuildEmoji() {
-		// TODO
-	}
+    @Test
+    public void testModifyGuildEmoji() {
+        // TODO
+    }
 
-	@Test
-	public void testDeleteGuildEmoji() {
-		// TODO
-	}
+    @Test
+    public void testDeleteGuildEmoji() {
+        // TODO
+    }
 }

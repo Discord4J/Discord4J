@@ -21,17 +21,17 @@ import discord4j.common.json.response.VoiceStateResponse;
 
 public class VoiceStateUpdateDispatch implements Dispatch {
 
-	@JsonUnwrapped
-	private VoiceStateResponse voiceState;
+    @JsonUnwrapped
+    private VoiceStateResponse voiceState;
 
-	public VoiceStateResponse getVoiceState() {
-		return voiceState;
-	}
+    public VoiceStateResponse getVoiceState() {
+        return voiceState;
+    }
 
-	@Override
-	public String toString() {
-		return "VoiceStateUpdateDispatch[" +
-				"voiceState=" + voiceState +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "VoiceStateUpdateDispatch[" +
+                "voiceState=" + voiceState +
+                ']';
+    }
 }

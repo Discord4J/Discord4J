@@ -20,20 +20,20 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class IntegrationCreateRequest {
 
-	private final String type;
-	@UnsignedJson
-	private final long id;
+    private final String type;
+    @UnsignedJson
+    private final long id;
 
-	public IntegrationCreateRequest(String type, long id) {
-		this.type = type;
-		this.id = id;
-	}
+    public IntegrationCreateRequest(String type, long id) {
+        this.type = type;
+        this.id = id;
+    }
 
-	@Override
-	public String toString() {
-		return "IntegrationCreateRequest[" +
-				"type=" + type +
-				", id=" + id +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "IntegrationCreateRequest[" +
+                "type=" + type +
+                ", id=" + id +
+                ']';
+    }
 }

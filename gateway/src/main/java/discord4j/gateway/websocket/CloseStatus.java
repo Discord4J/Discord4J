@@ -25,32 +25,32 @@ import javax.annotation.Nullable;
  */
 public class CloseStatus {
 
-	private final int code;
-	@Nullable
-	private final String reason;
+    private final int code;
+    @Nullable
+    private final String reason;
 
-	/**
-	 * Create a new {@link CloseStatus} instance.
-	 *
-	 * @param code the status code
-	 * @param reason the reason
-	 */
-	public CloseStatus(int code, @Nullable String reason) {
-		this.code = code;
-		this.reason = reason;
-	}
+    /**
+     * Create a new {@link CloseStatus} instance.
+     *
+     * @param code the status code
+     * @param reason the reason
+     */
+    public CloseStatus(int code, @Nullable String reason) {
+        this.code = code;
+        this.reason = reason;
+    }
 
-	public int getCode() {
-		return code;
-	}
+    public int getCode() {
+        return code;
+    }
 
-	@Nullable
-	public String getReason() {
-		return reason;
-	}
+    @Nullable
+    public String getReason() {
+        return reason;
+    }
 
-	@Override
-	public String toString() {
-		return code + (reason == null || reason.isEmpty() ? "" : " " + reason);
-	}
+    @Override
+    public String toString() {
+        return code + (reason == null || reason.isEmpty() ? "" : " " + reason);
+    }
 }

@@ -34,36 +34,36 @@ import java.util.Objects;
  */
 public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
-	private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-	public JacksonReaderStrategy(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
+    public JacksonReaderStrategy(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
-	@Override
-	public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
-		if (type == null || contentType == null || !contentType.startsWith("application/json")) {
-			return false;
-		}
+    @Override
+    public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
+        if (type == null || contentType == null || !contentType.startsWith("application/json")) {
+            return false;
+        }
 
-		// A Route<String> should be read by the FallbackReader
-		return !CharSequence.class.isAssignableFrom(type) && objectMapper.canDeserialize(getJavaType(type));
-	}
+        // A Route<String> should be read by the FallbackReader
+        return !CharSequence.class.isAssignableFrom(type) && objectMapper.canDeserialize(getJavaType(type));
+    }
 
-	@Override
-	public Mono<Res> read(HttpClientResponse response, Class<Res> responseType) {
-		Objects.requireNonNull(response);
-		Objects.requireNonNull(responseType);
-		return response.receive().aggregate().asByteArray().map(bytes -> {
-			try {
-				return objectMapper.readValue(bytes, responseType);
-			} catch (IOException e) {
-				throw Exceptions.propagate(e);
-			}
-		});
-	}
+    @Override
+    public Mono<Res> read(HttpClientResponse response, Class<Res> responseType) {
+        Objects.requireNonNull(response);
+        Objects.requireNonNull(responseType);
+        return response.receive().aggregate().asByteArray().map(bytes -> {
+            try {
+                return objectMapper.readValue(bytes, responseType);
+            } catch (IOException e) {
+                throw Exceptions.propagate(e);
+            }
+        });
+    }
 
-	private JavaType getJavaType(Type type) {
-		return objectMapper.getTypeFactory().constructType(type);
-	}
+    private JavaType getJavaType(Type type) {
+        return objectMapper.getTypeFactory().constructType(type);
+    }
 }

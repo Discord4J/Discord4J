@@ -28,51 +28,51 @@ import java.util.Set;
 
 public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
 
-	private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
-			.type(Channel.Type.GUILD_VOICE.getValue());
+    private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
+            .type(Channel.Type.GUILD_VOICE.getValue());
 
-	public VoiceChannelCreateSpec setName(String name) {
-		requestBuilder.name(name);
-		return this;
-	}
+    public VoiceChannelCreateSpec setName(String name) {
+        requestBuilder.name(name);
+        return this;
+    }
 
-	public VoiceChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
-		OverwriteEntity[] raw = permissionOverwrites.stream()
-				.map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
-						o.getDenied().getRawValue()))
-				.toArray(OverwriteEntity[]::new);
+    public VoiceChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+        OverwriteEntity[] raw = permissionOverwrites.stream()
+                .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
+                        o.getDenied().getRawValue()))
+                .toArray(OverwriteEntity[]::new);
 
-		requestBuilder.permissionOverwrites(raw);
-		return this;
-	}
+        requestBuilder.permissionOverwrites(raw);
+        return this;
+    }
 
-	public VoiceChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
-		requestBuilder.parentId(parentId == null ? null : parentId.asLong());
-		return this;
-	}
+    public VoiceChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
+        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
+        return this;
+    }
 
-	public VoiceChannelCreateSpec setParent(@Nullable Category parent) {
-		setParentId(parent == null ? null : parent.getId());
-		return this;
-	}
+    public VoiceChannelCreateSpec setParent(@Nullable Category parent) {
+        setParentId(parent == null ? null : parent.getId());
+        return this;
+    }
 
-	public VoiceChannelCreateSpec setNsfw(boolean nsfw) {
-		requestBuilder.nsfw(nsfw);
-		return this;
-	}
+    public VoiceChannelCreateSpec setNsfw(boolean nsfw) {
+        requestBuilder.nsfw(nsfw);
+        return this;
+    }
 
-	public VoiceChannelCreateSpec setBitrate(int bitrate) {
-		requestBuilder.bitrate(bitrate);
-		return this;
-	}
+    public VoiceChannelCreateSpec setBitrate(int bitrate) {
+        requestBuilder.bitrate(bitrate);
+        return this;
+    }
 
-	public VoiceChannelCreateSpec setUserLimit(int userLimit) {
-		requestBuilder.userLimit(userLimit);
-		return this;
-	}
+    public VoiceChannelCreateSpec setUserLimit(int userLimit) {
+        requestBuilder.userLimit(userLimit);
+        return this;
+    }
 
-	@Override
-	public ChannelCreateRequest asRequest() {
-		return requestBuilder.build();
-	}
+    @Override
+    public ChannelCreateRequest asRequest() {
+        return requestBuilder.build();
+    }
 }

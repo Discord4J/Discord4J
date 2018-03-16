@@ -28,23 +28,23 @@ import discord4j.core.Client;
  */
 public class DispatchContext<D extends Dispatch> {
 
-	private final D dispatch;
-	private final Client client;
+    private final D dispatch;
+    private final Client client;
 
-	public static <D extends Dispatch> DispatchContext<D> of(D dispatch, Client client) {
-		return new DispatchContext<>(dispatch, client);
-	}
+    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, Client client) {
+        return new DispatchContext<>(dispatch, client);
+    }
 
-	private DispatchContext(D dispatch, Client client) {
-		this.dispatch = dispatch;
-		this.client = client;
-	}
+    private DispatchContext(D dispatch, Client client) {
+        this.dispatch = dispatch;
+        this.client = client;
+    }
 
-	public D getDispatch() {
-		return dispatch;
-	}
+    public D getDispatch() {
+        return dispatch;
+    }
 
-	public Client getClient() {
-		return client;
-	}
+    public Client getClient() {
+        return client;
+    }
 }

@@ -18,17 +18,17 @@ package discord4j.common.jackson;
 
 public class PossibleFilter {
 
-	@Override
-	public boolean equals(Object obj) {
-		// Nulls should be included. Only exclude values which are Possible.absent
-		if (obj == null) {
-			return false;
-		} else if (Possible.class.isAssignableFrom(obj.getClass())) {
-			return ((Possible) obj).isAbsent();
-		} else if (PossibleLong.class.isAssignableFrom(obj.getClass())) {
-			return ((PossibleLong) obj).isAbsent();
-		}
+    @Override
+    public boolean equals(Object obj) {
+        // Nulls should be included. Only exclude values which are Possible.absent
+        if (obj == null) {
+            return false;
+        } else if (Possible.class.isAssignableFrom(obj.getClass())) {
+            return ((Possible) obj).isAbsent();
+        } else if (PossibleLong.class.isAssignableFrom(obj.getClass())) {
+            return ((PossibleLong) obj).isAbsent();
+        }
 
-		return false;
-	}
+        return false;
+    }
 }

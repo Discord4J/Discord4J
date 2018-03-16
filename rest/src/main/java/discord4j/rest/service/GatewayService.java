@@ -23,18 +23,18 @@ import reactor.core.publisher.Mono;
 
 public class GatewayService extends RestService {
 
-	public GatewayService(Router router) {
-		super(router);
-	}
+    public GatewayService(Router router) {
+        super(router);
+    }
 
-	public Mono<GatewayResponse> getGateway() {
-		return Routes.GATEWAY_GET.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<GatewayResponse> getGateway() {
+        return Routes.GATEWAY_GET.newRequest()
+                .exchange(getRouter());
+    }
 
-	public Mono<GatewayResponse> getGatewayBot() {
-		return Routes.GATEWAY_BOT_GET.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<GatewayResponse> getGatewayBot() {
+        return Routes.GATEWAY_BOT_GET.newRequest()
+                .exchange(getRouter());
+    }
 
 }

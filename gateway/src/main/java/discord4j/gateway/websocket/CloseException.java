@@ -25,31 +25,31 @@ package discord4j.gateway.websocket;
  */
 public class CloseException extends RuntimeException {
 
-	private final CloseStatus closeStatus;
+    private final CloseStatus closeStatus;
 
-	public CloseException(CloseStatus closeStatus) {
-		this(closeStatus, null);
-	}
+    public CloseException(CloseStatus closeStatus) {
+        this(closeStatus, null);
+    }
 
-	public CloseException(CloseStatus closeStatus, Throwable cause) {
-		super(cause);
-		this.closeStatus = closeStatus;
-	}
+    public CloseException(CloseStatus closeStatus, Throwable cause) {
+        super(cause);
+        this.closeStatus = closeStatus;
+    }
 
-	public CloseStatus getCloseStatus() {
-		return closeStatus;
-	}
+    public CloseStatus getCloseStatus() {
+        return closeStatus;
+    }
 
-	public int getCode() {
-		return closeStatus.getCode();
-	}
+    public int getCode() {
+        return closeStatus.getCode();
+    }
 
-	public String getReason() {
-		return closeStatus.getReason();
-	}
+    public String getReason() {
+        return closeStatus.getReason();
+    }
 
-	@Override
-	public String getMessage() {
-		return "WebSocket closed: " + closeStatus.toString();
-	}
+    @Override
+    public String getMessage() {
+        return "WebSocket closed: " + closeStatus.toString();
+    }
 }

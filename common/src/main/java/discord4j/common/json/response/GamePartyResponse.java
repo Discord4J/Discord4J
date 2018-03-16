@@ -21,26 +21,26 @@ import java.util.Arrays;
 
 public class GamePartyResponse {
 
-	@Nullable
-	private String id;
-	@Nullable
-	private int[] size;
+    @Nullable
+    private String id;
+    @Nullable
+    private int[] size;
 
-	@Nullable
-	public String getId() {
-		return id;
-	}
+    @Nullable
+    public String getId() {
+        return id;
+    }
 
-	@Nullable
-	public int[] getSize() {
-		return size;
-	}
+    @Nullable
+    public int[] getSize() {
+        return size;
+    }
 
-	@Override
-	public String toString() {
-		return "GamePartyResponse[" +
-				"id=" + id +
-				", size=" + Arrays.toString(size) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GamePartyResponse[" +
+                "id=" + id +
+                ", size=" + Arrays.toString(size) +
+                ']';
+    }
 }

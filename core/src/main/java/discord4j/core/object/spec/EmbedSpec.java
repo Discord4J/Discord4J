@@ -19,7 +19,6 @@ package discord4j.core.object.spec;
 import discord4j.common.json.EmbedFieldEntity;
 import discord4j.common.json.request.*;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,57 +26,57 @@ import java.util.List;
 
 public class EmbedSpec implements Spec<EmbedRequest> {
 
-	private final EmbedRequest.Builder requestBuilder = EmbedRequest.builder();
-	private final List<EmbedFieldEntity> fields = new ArrayList<>();
+    private final EmbedRequest.Builder requestBuilder = EmbedRequest.builder();
+    private final List<EmbedFieldEntity> fields = new ArrayList<>();
 
-	public EmbedSpec setTitle(String title) {
-		requestBuilder.title(title);
-		return this;
-	}
+    public EmbedSpec setTitle(String title) {
+        requestBuilder.title(title);
+        return this;
+    }
 
-	public EmbedSpec setDescription(String description) {
-		requestBuilder.description(description);
-		return this;
-	}
+    public EmbedSpec setDescription(String description) {
+        requestBuilder.description(description);
+        return this;
+    }
 
-	public EmbedSpec setUrl(String url) {
-		requestBuilder.url(url);
-		return this;
-	}
+    public EmbedSpec setUrl(String url) {
+        requestBuilder.url(url);
+        return this;
+    }
 
-	public EmbedSpec setTimestamp(Instant timestamp) {
-		requestBuilder.timestamp(DateTimeFormatter.ISO_INSTANT.format(timestamp));
-		return this;
-	}
+    public EmbedSpec setTimestamp(Instant timestamp) {
+        requestBuilder.timestamp(DateTimeFormatter.ISO_INSTANT.format(timestamp));
+        return this;
+    }
 
-	public EmbedSpec setFooter(String text, String iconUrl) {
-		requestBuilder.footer(new EmbedFooterRequest(text, iconUrl));
-		return this;
-	}
+    public EmbedSpec setFooter(String text, String iconUrl) {
+        requestBuilder.footer(new EmbedFooterRequest(text, iconUrl));
+        return this;
+    }
 
-	public EmbedSpec setImage(String url) {
-		requestBuilder.image(new EmbedImageRequest(url));
-		return this;
-	}
+    public EmbedSpec setImage(String url) {
+        requestBuilder.image(new EmbedImageRequest(url));
+        return this;
+    }
 
-	public EmbedSpec setThumbnail(String url) {
-		requestBuilder.thumbnail(new EmbedThumbnailRequest(url));
-		return this;
-	}
+    public EmbedSpec setThumbnail(String url) {
+        requestBuilder.thumbnail(new EmbedThumbnailRequest(url));
+        return this;
+    }
 
-	public EmbedSpec setAuthor(String name, String url, String iconUrl) {
-		requestBuilder.author(new EmbedAuthorRequest(name, url, iconUrl));
-		return this;
-	}
+    public EmbedSpec setAuthor(String name, String url, String iconUrl) {
+        requestBuilder.author(new EmbedAuthorRequest(name, url, iconUrl));
+        return this;
+    }
 
-	public EmbedSpec addField(String name, String value, boolean inline) {
-		this.fields.add(new EmbedFieldEntity(name, value, inline));
-		return this;
-	}
+    public EmbedSpec addField(String name, String value, boolean inline) {
+        this.fields.add(new EmbedFieldEntity(name, value, inline));
+        return this;
+    }
 
-	@Override
-	public EmbedRequest asRequest() {
-		requestBuilder.fields(this.fields.toArray(new EmbedFieldEntity[this.fields.size()]));
-		return requestBuilder.build();
-	}
+    @Override
+    public EmbedRequest asRequest() {
+        requestBuilder.fields(this.fields.toArray(new EmbedFieldEntity[this.fields.size()]));
+        return requestBuilder.build();
+    }
 }

@@ -50,120 +50,120 @@ import java.util.function.Predicate;
  */
 class RequestStream<T> {
 
-	private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing =
-			EmitterProcessor.create(false);
-	private final SimpleHttpClient httpClient;
-	private final GlobalRateLimiter globalRateLimiter;
-	/**
-	 * The retry function used for reading and completing HTTP requests. The back off is determined by the ratelimit
-	 * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the back off is
-	 * applied to the global rate limiter. Otherwise, it is applied only to this stream.
-	 */
-	private final Retry<AtomicLong> RETRY = Retry.onlyIf(new Predicate<RetryContext<AtomicLong>>() {
-		@Override
-		public boolean test(RetryContext<AtomicLong> ctx) {
-			Throwable exception = ctx.exception();
-			if (exception instanceof ClientException) {
-				ClientException clientException = (ClientException) exception;
-				if (clientException.getStatus().code() == 429) { // TODO: retry on other status codes?
-					boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
-					long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
+    private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing =
+            EmitterProcessor.create(false);
+    private final SimpleHttpClient httpClient;
+    private final GlobalRateLimiter globalRateLimiter;
+    /**
+     * The retry function used for reading and completing HTTP requests. The back off is determined by the ratelimit
+     * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the back off is
+     * applied to the global rate limiter. Otherwise, it is applied only to this stream.
+     */
+    private final Retry<AtomicLong> RETRY = Retry.onlyIf(new Predicate<RetryContext<AtomicLong>>() {
+        @Override
+        public boolean test(RetryContext<AtomicLong> ctx) {
+            Throwable exception = ctx.exception();
+            if (exception instanceof ClientException) {
+                ClientException clientException = (ClientException) exception;
+                if (clientException.getStatus().code() == 429) { // TODO: retry on other status codes?
+                    boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
+                    long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
 
-					if (global) {
-						globalRateLimiter.rateLimitFor(Duration.ofMillis(retryAfter));
-					} else {
-						ctx.applicationContext().set(retryAfter);
-					}
-					return true;
-				}
-			}
-			return false;
-		}
-	}).backoff(context -> {
-		if (context.applicationContext() == null) {
-			return new BackoffDelay(Duration.ZERO);
-		}
+                    if (global) {
+                        globalRateLimiter.rateLimitFor(Duration.ofMillis(retryAfter));
+                    } else {
+                        ctx.applicationContext().set(retryAfter);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+    }).backoff(context -> {
+        if (context.applicationContext() == null) {
+            return new BackoffDelay(Duration.ZERO);
+        }
 
-		long delay = ((AtomicLong) context.applicationContext()).get();
-		((AtomicLong) context.applicationContext()).set(0L);
-		return new BackoffDelay(Duration.ofMillis(delay));
-	});
+        long delay = ((AtomicLong) context.applicationContext()).get();
+        ((AtomicLong) context.applicationContext()).set(0L);
+        return new BackoffDelay(Duration.ofMillis(delay));
+    });
 
-	RequestStream(SimpleHttpClient httpClient, GlobalRateLimiter globalRateLimiter) {
-		this.httpClient = httpClient;
-		this.globalRateLimiter = globalRateLimiter;
-	}
+    RequestStream(SimpleHttpClient httpClient, GlobalRateLimiter globalRateLimiter) {
+        this.httpClient = httpClient;
+        this.globalRateLimiter = globalRateLimiter;
+    }
 
-	void push(Tuple2<MonoProcessor<T>, DiscordRequest<T>> request) {
-		backing.onNext(request);
-	}
+    void push(Tuple2<MonoProcessor<T>, DiscordRequest<T>> request) {
+        backing.onNext(request);
+    }
 
-	void start() {
-		read().subscribe(new Reader());
-	}
+    void start() {
+        read().subscribe(new Reader());
+    }
 
-	private Mono<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> read() {
-		return backing.next();
-	}
+    private Mono<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> read() {
+        return backing.next();
+    }
 
-	/**
-	 * Reads and completes one request from the stream at a time. If a request fails, it is retried according to the
-	 * {@link #RETRY retry function}. The reader may wait in between each request if preemptive ratelimiting is
-	 * necessary according to the response headers.
-	 *
-	 * @see #sleepTime
-	 * @see #rateLimitHandler
-	 */
-	private class Reader implements Consumer<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> {
+    /**
+     * Reads and completes one request from the stream at a time. If a request fails, it is retried according to the
+     * {@link #RETRY retry function}. The reader may wait in between each request if preemptive ratelimiting is
+     * necessary according to the response headers.
+     *
+     * @see #sleepTime
+     * @see #rateLimitHandler
+     */
+    private class Reader implements Consumer<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> {
 
-		private volatile Duration sleepTime = Duration.ZERO;
-		private final Consumer<HttpClientResponse> rateLimitHandler = response -> {
-			HttpHeaders headers = response.responseHeaders();
+        private volatile Duration sleepTime = Duration.ZERO;
+        private final Consumer<HttpClientResponse> rateLimitHandler = response -> {
+            HttpHeaders headers = response.responseHeaders();
 
-			int remaining = headers.getInt("X-RateLimit-Remaining", -1);
-			if (remaining == 0) {
-				long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
-				long discordTime = headers.getTimeMillis("Date") / 1000;
+            int remaining = headers.getInt("X-RateLimit-Remaining", -1);
+            if (remaining == 0) {
+                long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
+                long discordTime = headers.getTimeMillis("Date") / 1000;
 
-				sleepTime = Duration.ofSeconds(resetAt - discordTime);
-			}
-		};
+                sleepTime = Duration.ofSeconds(resetAt - discordTime);
+            }
+        };
 
-		@SuppressWarnings("ConstantConditions")
-		@Override
-		public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
-			MonoProcessor<T> callback = tuple.getT1();
-			DiscordRequest<T> req = tuple.getT2();
-			ExchangeFilter exchangeFilter = ExchangeFilter.builder()
-					.requestFilter(request -> Optional.ofNullable(req.getHeaders())
-							.ifPresent(headers -> headers.forEach(
-									(key, values) -> values.forEach(value -> request.header(key, value)))))
-					.responseFilter(rateLimitHandler)
-					.build();
+        @SuppressWarnings("ConstantConditions")
+        @Override
+        public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
+            MonoProcessor<T> callback = tuple.getT1();
+            DiscordRequest<T> req = tuple.getT2();
+            ExchangeFilter exchangeFilter = ExchangeFilter.builder()
+                    .requestFilter(request -> Optional.ofNullable(req.getHeaders())
+                            .ifPresent(headers -> headers.forEach(
+                                    (key, values) -> values.forEach(value -> request.header(key, value)))))
+                    .responseFilter(rateLimitHandler)
+                    .build();
 
-			Mono.when(globalRateLimiter)
-					.materialize()
-					.flatMap(e -> httpClient.exchange(req.getRoute().getMethod(),
-							RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()), req.getBody(),
-							req.getRoute().getResponseType(), exchangeFilter))
-					.retryWhen(RETRY)
-					.materialize()
-					.subscribe(signal -> {
-						if (signal.isOnSubscribe()) {
-							callback.onSubscribe(signal.getSubscription());
-						} else if (signal.isOnNext()) {
-							callback.onNext(signal.get());
-						} else if (signal.isOnError()) {
-							callback.onError(signal.getThrowable());
-						} else if (signal.isOnComplete()) {
-							callback.onComplete();
-						}
+            Mono.when(globalRateLimiter)
+                    .materialize()
+                    .flatMap(e -> httpClient.exchange(req.getRoute().getMethod(),
+                            RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()), req.getBody(),
+                            req.getRoute().getResponseType(), exchangeFilter))
+                    .retryWhen(RETRY)
+                    .materialize()
+                    .subscribe(signal -> {
+                        if (signal.isOnSubscribe()) {
+                            callback.onSubscribe(signal.getSubscription());
+                        } else if (signal.isOnNext()) {
+                            callback.onNext(signal.get());
+                        } else if (signal.isOnError()) {
+                            callback.onError(signal.getThrowable());
+                        } else if (signal.isOnComplete()) {
+                            callback.onComplete();
+                        }
 
-						Mono.delay(sleepTime).subscribe(l -> {
-							sleepTime = Duration.ZERO;
-							read().subscribe(this);
-						});
-					});
-		}
-	}
+                        Mono.delay(sleepTime).subscribe(l -> {
+                            sleepTime = Duration.ZERO;
+                            read().subscribe(this);
+                        });
+                    });
+        }
+    }
 }

@@ -21,10 +21,10 @@ import discord4j.core.Client;
 /** An object characterized by the Discord platform. */
 public interface DiscordObject {
 
-	/**
-	 * Gets the Client associated to this object.
-	 *
-	 * @return The Client associated to this object.
-	 */
-	Client getClient();
+    /**
+     * Gets the Client associated to this object.
+     *
+     * @return The Client associated to this object.
+     */
+    Client getClient();
 }

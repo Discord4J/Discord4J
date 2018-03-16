@@ -21,24 +21,24 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class RequestGuildMembers implements PayloadData {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private final long guildId;
-	private final String query;
-	private final int limit;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private final long guildId;
+    private final String query;
+    private final int limit;
 
-	public RequestGuildMembers(long guildId, String query, int limit) {
-		this.guildId = guildId;
-		this.query = query;
-		this.limit = limit;
-	}
+    public RequestGuildMembers(long guildId, String query, int limit) {
+        this.guildId = guildId;
+        this.query = query;
+        this.limit = limit;
+    }
 
-	@Override
-	public String toString() {
-		return "RequestGuildMembers[" +
-				"guildId=" + guildId +
-				", query=" + query +
-				", limit=" + limit +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "RequestGuildMembers[" +
+                "guildId=" + guildId +
+                ", query=" + query +
+                ", limit=" + limit +
+                ']';
+    }
 }

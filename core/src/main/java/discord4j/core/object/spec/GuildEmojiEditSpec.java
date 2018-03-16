@@ -24,21 +24,21 @@ import java.util.Set;
 
 public class GuildEmojiEditSpec implements Spec<GuildEmojiModifyRequest> {
 
-	private Possible<String> name = Possible.absent();
-	private Possible<long[]> roles = Possible.absent();
+    private Possible<String> name = Possible.absent();
+    private Possible<long[]> roles = Possible.absent();
 
-	public GuildEmojiEditSpec setName(String name) {
-		this.name = Possible.of(name);
-		return this;
-	}
+    public GuildEmojiEditSpec setName(String name) {
+        this.name = Possible.of(name);
+        return this;
+    }
 
-	public GuildEmojiEditSpec setRoles(Set<Snowflake> roles) {
-		this.roles = Possible.of(roles.stream().mapToLong(Snowflake::asLong).toArray());
-		return this;
-	}
+    public GuildEmojiEditSpec setRoles(Set<Snowflake> roles) {
+        this.roles = Possible.of(roles.stream().mapToLong(Snowflake::asLong).toArray());
+        return this;
+    }
 
-	@Override
-	public GuildEmojiModifyRequest asRequest() {
-		return null;
-	}
+    @Override
+    public GuildEmojiModifyRequest asRequest() {
+        return null;
+    }
 }

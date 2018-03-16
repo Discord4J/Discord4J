@@ -26,18 +26,18 @@ import java.lang.reflect.Type;
 
 public class PossibleTypeModifier extends TypeModifier {
 
-	@Override
-	public JavaType modifyType(JavaType type, Type jdkType, TypeBindings context, TypeFactory typeFactory) {
-		if (type.isReferenceType() || type.isContainerType()) {
-			return type;
-		}
+    @Override
+    public JavaType modifyType(JavaType type, Type jdkType, TypeBindings context, TypeFactory typeFactory) {
+        if (type.isReferenceType() || type.isContainerType()) {
+            return type;
+        }
 
-		Class<?> raw = type.getRawClass();
+        Class<?> raw = type.getRawClass();
 
-		if (raw == Possible.class || raw == PossibleLong.class) {
-			return ReferenceType.upgradeFrom(type, type.containedTypeOrUnknown(0));
-		}
+        if (raw == Possible.class || raw == PossibleLong.class) {
+            return ReferenceType.upgradeFrom(type, type.containedTypeOrUnknown(0));
+        }
 
-		return type;
-	}
+        return type;
+    }
 }

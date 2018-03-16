@@ -23,25 +23,25 @@ import discord4j.common.json.response.UserResponse;
 
 public class GuildBanRemove implements Dispatch {
 
-	@JsonUnwrapped
-	private UserResponse user;
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
+    @JsonUnwrapped
+    private UserResponse user;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
 
-	public UserResponse getUser() {
-		return user;
-	}
+    public UserResponse getUser() {
+        return user;
+    }
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildBanRemove[" +
-				"user=" + user +
-				", guildId=" + guildId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildBanRemove[" +
+                "user=" + user +
+                ", guildId=" + guildId +
+                ']';
+    }
 }

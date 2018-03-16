@@ -21,25 +21,25 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class MessageDelete implements Dispatch {
 
-	@UnsignedJson
-	private long id;
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
+    @UnsignedJson
+    private long id;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	@Override
-	public String toString() {
-		return "MessageDelete[" +
-				"id=" + id +
-				", channelId=" + channelId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "MessageDelete[" +
+                "id=" + id +
+                ", channelId=" + channelId +
+                ']';
+    }
 }

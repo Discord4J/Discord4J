@@ -22,22 +22,22 @@ import discord4j.common.jackson.PossibleJson;
 @PossibleJson
 public class GameRequest {
 
-	private final String name;
-	private final int type;
-	private final Possible<String> url;
+    private final String name;
+    private final int type;
+    private final Possible<String> url;
 
-	public GameRequest(String name, int type, Possible<String> url) {
-		this.name = name;
-		this.type = type;
-		this.url = url;
-	}
+    public GameRequest(String name, int type, Possible<String> url) {
+        this.name = name;
+        this.type = type;
+        this.url = url;
+    }
 
-	@Override
-	public String toString() {
-		return "GameRequest[" +
-				"name=" + name +
-				", type=" + type +
-				", url=" + url +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GameRequest[" +
+                "name=" + name +
+                ", type=" + type +
+                ", url=" + url +
+                ']';
+    }
 }

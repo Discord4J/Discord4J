@@ -24,20 +24,20 @@ import javax.annotation.Nullable;
 @PossibleJson
 public class WebhookModifyRequest {
 
-	private final Possible<String> name;
-	@Nullable
-	private final Possible<String> avatar;
+    private final Possible<String> name;
+    @Nullable
+    private final Possible<String> avatar;
 
-	public WebhookModifyRequest(Possible<String> name, @Nullable Possible<String> avatar) {
-		this.name = name;
-		this.avatar = avatar;
-	}
+    public WebhookModifyRequest(Possible<String> name, @Nullable Possible<String> avatar) {
+        this.name = name;
+        this.avatar = avatar;
+    }
 
-	@Override
-	public String toString() {
-		return "WebhookModifyRequest[" +
-				"name=" + name +
-				", avatar=" + avatar +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "WebhookModifyRequest[" +
+                "name=" + name +
+                ", avatar=" + avatar +
+                ']';
+    }
 }

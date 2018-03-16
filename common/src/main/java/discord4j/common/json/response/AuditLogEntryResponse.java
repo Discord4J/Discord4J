@@ -24,66 +24,66 @@ import java.util.Arrays;
 
 public class AuditLogEntryResponse {
 
-	@JsonProperty("target_id")
-	@Nullable
-	@UnsignedJson
-	private Long targetId;
-	@Nullable
-	private AuditLogChangeResponse[] changes;
-	@JsonProperty("user_id")
-	@UnsignedJson
-	private long userId;
-	@UnsignedJson
-	private long id;
-	@JsonProperty("action_type")
-	private int actionType;
-	@Nullable
-	private AuditLogEntryOptionsResponse options;
-	@Nullable
-	private String reason;
+    @JsonProperty("target_id")
+    @Nullable
+    @UnsignedJson
+    private Long targetId;
+    @Nullable
+    private AuditLogChangeResponse[] changes;
+    @JsonProperty("user_id")
+    @UnsignedJson
+    private long userId;
+    @UnsignedJson
+    private long id;
+    @JsonProperty("action_type")
+    private int actionType;
+    @Nullable
+    private AuditLogEntryOptionsResponse options;
+    @Nullable
+    private String reason;
 
-	@Nullable
-	public Long getTargetId() {
-		return targetId;
-	}
+    @Nullable
+    public Long getTargetId() {
+        return targetId;
+    }
 
-	@Nullable
-	public AuditLogChangeResponse[] getChanges() {
-		return changes;
-	}
+    @Nullable
+    public AuditLogChangeResponse[] getChanges() {
+        return changes;
+    }
 
-	public long getUserId() {
-		return userId;
-	}
+    public long getUserId() {
+        return userId;
+    }
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public int getActionType() {
-		return actionType;
-	}
+    public int getActionType() {
+        return actionType;
+    }
 
-	@Nullable
-	public AuditLogEntryOptionsResponse getOptions() {
-		return options;
-	}
+    @Nullable
+    public AuditLogEntryOptionsResponse getOptions() {
+        return options;
+    }
 
-	@Nullable
-	public String getReason() {
-		return reason;
-	}
+    @Nullable
+    public String getReason() {
+        return reason;
+    }
 
-	@Override
-	public String toString() {
-		return "AuditLogEntryResponse[" +
-				"targetId=" + targetId +
-				", changes=" + Arrays.toString(changes) +
-				", userId=" + userId +
-				", id=" + id +
-				", actionType=" + actionType +
-				", options=" + options +
-				", reason=" + reason +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "AuditLogEntryResponse[" +
+                "targetId=" + targetId +
+                ", changes=" + Arrays.toString(changes) +
+                ", userId=" + userId +
+                ", id=" + id +
+                ", actionType=" + actionType +
+                ", options=" + options +
+                ", reason=" + reason +
+                ']';
+    }
 }

@@ -23,20 +23,20 @@ import discord4j.common.jackson.UnsignedJson;
 @PossibleJson
 public class GuildEmojiModifyRequest {
 
-	private final Possible<String> name;
-	@UnsignedJson
-	private final Possible<long[]> roles;
+    private final Possible<String> name;
+    @UnsignedJson
+    private final Possible<long[]> roles;
 
-	public GuildEmojiModifyRequest(Possible<String> name, Possible<long[]> roles) {
-		this.name = name;
-		this.roles = roles;
-	}
+    public GuildEmojiModifyRequest(Possible<String> name, Possible<long[]> roles) {
+        this.name = name;
+        this.roles = roles;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildEmojiModifyRequest[" +
-				"name=" + name +
-				", roles=" + roles +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildEmojiModifyRequest[" +
+                "name=" + name +
+                ", roles=" + roles +
+                ']';
+    }
 }

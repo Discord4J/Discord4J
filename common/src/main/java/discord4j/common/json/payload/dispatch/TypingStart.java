@@ -21,32 +21,32 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class TypingStart implements Dispatch {
 
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
-	@JsonProperty("user_id")
-	@UnsignedJson
-	private long userId;
-	private int timestamp;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
+    @JsonProperty("user_id")
+    @UnsignedJson
+    private long userId;
+    private int timestamp;
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	public long getUserId() {
-		return userId;
-	}
+    public long getUserId() {
+        return userId;
+    }
 
-	public int getTimestamp() {
-		return timestamp;
-	}
+    public int getTimestamp() {
+        return timestamp;
+    }
 
-	@Override
-	public String toString() {
-		return "TypingStart[" +
-				"channelId=" + channelId +
-				", userId=" + userId +
-				", timestamp=" + timestamp +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "TypingStart[" +
+                "channelId=" + channelId +
+                ", userId=" + userId +
+                ", timestamp=" + timestamp +
+                ']';
+    }
 }

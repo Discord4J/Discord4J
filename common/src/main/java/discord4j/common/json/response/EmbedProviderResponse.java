@@ -18,22 +18,22 @@ package discord4j.common.json.response;
 
 public class EmbedProviderResponse {
 
-	private String name;
-	private String url;
+    private String name;
+    private String url;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedProviderResponse[" +
-				"name=" + name +
-				", url=" + url +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedProviderResponse[" +
+                "name=" + name +
+                ", url=" + url +
+                ']';
+    }
 }

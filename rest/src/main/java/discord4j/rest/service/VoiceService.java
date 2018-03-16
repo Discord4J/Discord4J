@@ -23,12 +23,12 @@ import reactor.core.publisher.Mono;
 
 public class VoiceService extends RestService {
 
-	public VoiceService(Router router) {
-		super(router);
-	}
+    public VoiceService(Router router) {
+        super(router);
+    }
 
-	public Mono<VoiceRegionResponse[]> getVoiceRegions() {
-		return Routes.VOICE_REGION_LIST.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<VoiceRegionResponse[]> getVoiceRegions() {
+        return Routes.VOICE_REGION_LIST.newRequest()
+                .exchange(getRouter());
+    }
 }

@@ -23,112 +23,112 @@ import java.util.Arrays;
 
 public class EmbedResponse {
 
-	@Nullable
-	private String title;
-	private String type;
-	@Nullable
-	private String description;
-	@Nullable
-	private String url;
-	@Nullable
-	private String timestamp;
-	@Nullable
-	private Integer color;
-	@Nullable
-	private EmbedFooterResponse footer;
-	@Nullable
-	private EmbedImageResponse image;
-	@Nullable
-	private EmbedThumbnailResponse thumbnail;
-	@Nullable
-	private EmbedVideoResponse video;
-	@Nullable
-	private EmbedProviderResponse provider;
-	@Nullable
-	private EmbedAuthorResponse author;
-	@Nullable
-	private EmbedFieldEntity[] fields;
+    @Nullable
+    private String title;
+    private String type;
+    @Nullable
+    private String description;
+    @Nullable
+    private String url;
+    @Nullable
+    private String timestamp;
+    @Nullable
+    private Integer color;
+    @Nullable
+    private EmbedFooterResponse footer;
+    @Nullable
+    private EmbedImageResponse image;
+    @Nullable
+    private EmbedThumbnailResponse thumbnail;
+    @Nullable
+    private EmbedVideoResponse video;
+    @Nullable
+    private EmbedProviderResponse provider;
+    @Nullable
+    private EmbedAuthorResponse author;
+    @Nullable
+    private EmbedFieldEntity[] fields;
 
-	@Nullable
-	public String getTitle() {
-		return title;
-	}
+    @Nullable
+    public String getTitle() {
+        return title;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	@Nullable
-	public String getDescription() {
-		return description;
-	}
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
 
-	@Nullable
-	public String getUrl() {
-		return url;
-	}
+    @Nullable
+    public String getUrl() {
+        return url;
+    }
 
-	@Nullable
-	public String getTimestamp() {
-		return timestamp;
-	}
+    @Nullable
+    public String getTimestamp() {
+        return timestamp;
+    }
 
-	@Nullable
-	public Integer getColor() {
-		return color;
-	}
+    @Nullable
+    public Integer getColor() {
+        return color;
+    }
 
-	@Nullable
-	public EmbedFooterResponse getFooter() {
-		return footer;
-	}
+    @Nullable
+    public EmbedFooterResponse getFooter() {
+        return footer;
+    }
 
-	@Nullable
-	public EmbedImageResponse getImage() {
-		return image;
-	}
+    @Nullable
+    public EmbedImageResponse getImage() {
+        return image;
+    }
 
-	@Nullable
-	public EmbedThumbnailResponse getThumbnail() {
-		return thumbnail;
-	}
+    @Nullable
+    public EmbedThumbnailResponse getThumbnail() {
+        return thumbnail;
+    }
 
-	@Nullable
-	public EmbedVideoResponse getVideo() {
-		return video;
-	}
+    @Nullable
+    public EmbedVideoResponse getVideo() {
+        return video;
+    }
 
-	@Nullable
-	public EmbedProviderResponse getProvider() {
-		return provider;
-	}
+    @Nullable
+    public EmbedProviderResponse getProvider() {
+        return provider;
+    }
 
-	@Nullable
-	public EmbedAuthorResponse getAuthor() {
-		return author;
-	}
+    @Nullable
+    public EmbedAuthorResponse getAuthor() {
+        return author;
+    }
 
-	@Nullable
-	public EmbedFieldEntity[] getFields() {
-		return fields;
-	}
+    @Nullable
+    public EmbedFieldEntity[] getFields() {
+        return fields;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedResponse[" +
-				"title=" + title +
-				", type=" + type +
-				", description=" + description +
-				", url=" + url +
-				", timestamp=" + timestamp +
-				", color=" + color +
-				", footer=" + footer +
-				", image=" + image +
-				", thumbnail=" + thumbnail +
-				", video=" + video +
-				", provider=" + provider +
-				", author=" + author +
-				", fields=" + Arrays.toString(fields) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedResponse[" +
+                "title=" + title +
+                ", type=" + type +
+                ", description=" + description +
+                ", url=" + url +
+                ", timestamp=" + timestamp +
+                ", color=" + color +
+                ", footer=" + footer +
+                ", image=" + image +
+                ", thumbnail=" + thumbnail +
+                ", video=" + video +
+                ", provider=" + provider +
+                ", author=" + author +
+                ", fields=" + Arrays.toString(fields) +
+                ']';
+    }
 }

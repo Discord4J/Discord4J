@@ -29,55 +29,55 @@ import reactor.core.publisher.Mono;
 
 public class UserService extends RestService {
 
-	public UserService(Router router) {
-		super(router);
-	}
+    public UserService(Router router) {
+        super(router);
+    }
 
-	public Mono<UserResponse> getCurrentUser() {
-		return Routes.CURRENT_USER_GET.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<UserResponse> getCurrentUser() {
+        return Routes.CURRENT_USER_GET.newRequest()
+                .exchange(getRouter());
+    }
 
-	public Mono<UserResponse> getUser(long userId) {
-		return Routes.USER_GET.newRequest(userId)
-				.exchange(getRouter());
-	}
+    public Mono<UserResponse> getUser(long userId) {
+        return Routes.USER_GET.newRequest(userId)
+                .exchange(getRouter());
+    }
 
-	public Mono<UserResponse> modifyCurrentUser(UserModifyRequest request) {
-		return Routes.CURRENT_USER_MODIFY.newRequest()
-				.body(request)
-				.exchange(getRouter());
-	}
+    public Mono<UserResponse> modifyCurrentUser(UserModifyRequest request) {
+        return Routes.CURRENT_USER_MODIFY.newRequest()
+                .body(request)
+                .exchange(getRouter());
+    }
 
-	public Mono<UserGuildResponse[]> getCurrentUserGuilds() {
-		return Routes.CURRENT_USER_GUILDS_GET.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<UserGuildResponse[]> getCurrentUserGuilds() {
+        return Routes.CURRENT_USER_GUILDS_GET.newRequest()
+                .exchange(getRouter());
+    }
 
-	public Mono<Void> leaveGuild(long guildId) {
-		return Routes.GUILD_LEAVE.newRequest(guildId)
-				.exchange(getRouter());
-	}
+    public Mono<Void> leaveGuild(long guildId) {
+        return Routes.GUILD_LEAVE.newRequest(guildId)
+                .exchange(getRouter());
+    }
 
-	public Mono<ChannelResponse[]> getUserDMs() {
-		return Routes.USER_DMS_GET.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<ChannelResponse[]> getUserDMs() {
+        return Routes.USER_DMS_GET.newRequest()
+                .exchange(getRouter());
+    }
 
-	public Mono<ChannelResponse> createDM(DMCreateRequest request) {
-		return Routes.USER_DM_CREATE.newRequest()
-				.body(request)
-				.exchange(getRouter());
-	}
+    public Mono<ChannelResponse> createDM(DMCreateRequest request) {
+        return Routes.USER_DM_CREATE.newRequest()
+                .body(request)
+                .exchange(getRouter());
+    }
 
-	public Mono<ChannelResponse> createGroupDM(GroupDMCreateRequest request) {
-		return Routes.GROUP_DM_CREATE.newRequest()
-				.body(request)
-				.exchange(getRouter());
-	}
+    public Mono<ChannelResponse> createGroupDM(GroupDMCreateRequest request) {
+        return Routes.GROUP_DM_CREATE.newRequest()
+                .body(request)
+                .exchange(getRouter());
+    }
 
-	public Mono<ConnectionResponse[]> getUserConnections() {
-		return Routes.USER_CONNECTIONS_GET.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<ConnectionResponse[]> getUserConnections() {
+        return Routes.USER_CONNECTIONS_GET.newRequest()
+                .exchange(getRouter());
+    }
 }

@@ -42,41 +42,41 @@ import java.util.logging.Level;
  */
 public class EventDispatcher {
 
-	private final FluxProcessor<Event, Event> processor;
-	private final Scheduler scheduler;
+    private final FluxProcessor<Event, Event> processor;
+    private final Scheduler scheduler;
 
-	/**
-	 * Creates a new event dispatcher using the given processor and maintaining its thread affinity.
-	 *
-	 * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
-	 */
-	public EventDispatcher(FluxProcessor<Event, Event> processor) {
-		this(processor, Schedulers.immediate());
-	}
+    /**
+     * Creates a new event dispatcher using the given processor and maintaining its thread affinity.
+     *
+     * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
+     */
+    public EventDispatcher(FluxProcessor<Event, Event> processor) {
+        this(processor, Schedulers.immediate());
+    }
 
-	/**
-	 * Creates a new event dispatcher using the given processor and thread model.
-	 *
-	 * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
-	 * @param scheduler a Scheduler to ensure a certain thread model on each published signal
-	 */
-	public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler) {
-		this.processor = processor;
-		this.scheduler = scheduler;
-	}
+    /**
+     * Creates a new event dispatcher using the given processor and thread model.
+     *
+     * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
+     * @param scheduler a Scheduler to ensure a certain thread model on each published signal
+     */
+    public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler) {
+        this.processor = processor;
+        this.scheduler = scheduler;
+    }
 
-	/**
-	 * Retrieves a {@link reactor.core.publisher.Flux} with elements of the given
-	 * {@link discord4j.core.event.domain.Event} type.
-	 *
-	 * @param eventClass the event class to obtain events from
-	 * @param <T> the type of the event class
-	 * @return a new {@link reactor.core.publisher.Flux} with the requested events
-	 */
-	public <T extends Event> Flux<T> on(Class<T> eventClass) {
-		return processor.publishOn(scheduler)
-				.ofType(eventClass)
-				.log("discord4j.dispatch." + eventClass.getSimpleName(), Level.FINE,
-						SignalType.ON_NEXT, SignalType.ON_SUBSCRIBE, SignalType.ON_ERROR, SignalType.CANCEL);
-	}
+    /**
+     * Retrieves a {@link reactor.core.publisher.Flux} with elements of the given
+     * {@link discord4j.core.event.domain.Event} type.
+     *
+     * @param eventClass the event class to obtain events from
+     * @param <T> the type of the event class
+     * @return a new {@link reactor.core.publisher.Flux} with the requested events
+     */
+    public <T extends Event> Flux<T> on(Class<T> eventClass) {
+        return processor.publishOn(scheduler)
+                .ofType(eventClass)
+                .log("discord4j.dispatch." + eventClass.getSimpleName(), Level.FINE,
+                        SignalType.ON_NEXT, SignalType.ON_SUBSCRIBE, SignalType.ON_ERROR, SignalType.CANCEL);
+    }
 }

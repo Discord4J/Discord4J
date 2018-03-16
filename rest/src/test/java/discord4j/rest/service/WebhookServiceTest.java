@@ -34,69 +34,71 @@ import org.junit.Test;
 
 public class WebhookServiceTest {
 
-	private static final long permanentChannel = Long.parseUnsignedLong(System.getenv("permanentChannel"));
-	private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
-	private static final long permanentWebhook = Long.parseUnsignedLong(System.getenv("permanentWebhook"));
+    private static final long permanentChannel = Long.parseUnsignedLong(System.getenv("permanentChannel"));
+    private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
+    private static final long permanentWebhook = Long.parseUnsignedLong(System.getenv("permanentWebhook"));
 
-	private WebhookService webhookService = null;
+    private WebhookService webhookService = null;
 
-	private WebhookService getWebhookService() {
+    private WebhookService getWebhookService() {
 
-		if (webhookService != null) return webhookService;
+        if (webhookService != null) {
+            return webhookService;
+        }
 
-		String token = System.getenv("token");
-		ObjectMapper mapper = getMapper();
+        String token = System.getenv("token");
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl(Routes.BASE_URL)
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .writerStrategy(new EmptyWriterStrategy())
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		return webhookService = new WebhookService(router);
-	}
+        return webhookService = new WebhookService(router);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testCreateWebhook() {
-		// TODO
-	}
+    @Test
+    public void testCreateWebhook() {
+        // TODO
+    }
 
-	@Test
-	public void testGetChannelWebhooks() {
-		getWebhookService().getChannelWebhooks(permanentChannel).block();
-	}
+    @Test
+    public void testGetChannelWebhooks() {
+        getWebhookService().getChannelWebhooks(permanentChannel).block();
+    }
 
-	@Test
-	public void testGetGuildWebhooks() {
-		getWebhookService().getGuildWebhooks(guild).block();
-	}
+    @Test
+    public void testGetGuildWebhooks() {
+        getWebhookService().getGuildWebhooks(guild).block();
+    }
 
-	@Test
-	public void testGetWebhook() {
-		getWebhookService().getWebhook(permanentWebhook).block();
-	}
+    @Test
+    public void testGetWebhook() {
+        getWebhookService().getWebhook(permanentWebhook).block();
+    }
 
-	@Test
-	public void testModifyWebhook() {
-		WebhookModifyRequest req = new WebhookModifyRequest(Possible.of("Permanent Webhook"), Possible.absent());
-		getWebhookService().modifyWebhook(permanentWebhook, req).block();
-	}
+    @Test
+    public void testModifyWebhook() {
+        WebhookModifyRequest req = new WebhookModifyRequest(Possible.of("Permanent Webhook"), Possible.absent());
+        getWebhookService().modifyWebhook(permanentWebhook, req).block();
+    }
 
-	@Test
-	public void testDeleteWebhook() {
-		// TODO
-	}
+    @Test
+    public void testDeleteWebhook() {
+        // TODO
+    }
 }

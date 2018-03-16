@@ -23,25 +23,25 @@ import java.util.concurrent.TimeUnit;
 
 public class ResettableIntervalTest {
 
-	@Test
-	public void test() throws InterruptedException {
+    @Test
+    public void test() throws InterruptedException {
 
-		ResettableInterval interval = new ResettableInterval();
-		interval.ticks().subscribe(System.out::println);
+        ResettableInterval interval = new ResettableInterval();
+        interval.ticks().subscribe(System.out::println);
 
-		interval.start(Duration.ofSeconds(1));
+        interval.start(Duration.ofSeconds(1));
 
-		TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(5);
 
-		interval.stop();
+        interval.stop();
 
-		TimeUnit.SECONDS.sleep(2);
+        TimeUnit.SECONDS.sleep(2);
 
-		interval.start(Duration.ofSeconds(1));
+        interval.start(Duration.ofSeconds(1));
 
-		TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(5);
 
-		interval.stop();
-	}
+        interval.stop();
+    }
 
 }

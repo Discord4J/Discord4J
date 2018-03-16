@@ -37,50 +37,50 @@ import java.time.Duration;
 
 public class GatewayClientTest {
 
-	private static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
+    private static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
 
-	private String token;
+    private String token;
 
-	@Before
-	public void initialize() {
-		token = System.getenv("token");
-	}
+    @Before
+    public void initialize() {
+        token = System.getenv("token");
+    }
 
-	@Test
-	public void test() {
-		ObjectMapper mapper = getMapper();
-		PayloadReader reader = new JacksonPayloadReader(mapper);
-		PayloadWriter writer = new JacksonPayloadWriter(mapper);
-		RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120));
-		GatewayClient gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
+    @Test
+    public void test() {
+        ObjectMapper mapper = getMapper();
+        PayloadReader reader = new JacksonPayloadReader(mapper);
+        PayloadWriter writer = new JacksonPayloadWriter(mapper);
+        RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120));
+        GatewayClient gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
 
-		gatewayClient.dispatch().subscribe(dispatch -> {
-			if (dispatch instanceof Ready) {
-				System.out.println("Test received READY!");
-			}
-		});
+        gatewayClient.dispatch().subscribe(dispatch -> {
+            if (dispatch instanceof Ready) {
+                System.out.println("Test received READY!");
+            }
+        });
 
-		FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
+        FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
 
-		gatewayClient.dispatch().ofType(MessageCreate.class)
-				.subscribe(message -> {
-					String content = message.getMessage().getContent();
-					if ("!close".equals(content)) {
-						gatewayClient.close(false);
-					} else if ("!retry".equals(content)) {
-						gatewayClient.close(true);
-					} else if ("!fail".equals(content)) {
-						outboundSink.next(new GatewayPayload<>());
-					}
-				});
+        gatewayClient.dispatch().ofType(MessageCreate.class)
+                .subscribe(message -> {
+                    String content = message.getMessage().getContent();
+                    if ("!close".equals(content)) {
+                        gatewayClient.close(false);
+                    } else if ("!retry".equals(content)) {
+                        gatewayClient.close(true);
+                    } else if ("!fail".equals(content)) {
+                        outboundSink.next(new GatewayPayload<>());
+                    }
+                });
 
-		gatewayClient.execute(gatewayUrl).block();
-	}
+        gatewayClient.execute(gatewayUrl).block();
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 }

@@ -25,31 +25,31 @@ import javax.annotation.Nullable;
 @PossibleJson
 public class PossiblePojo {
 
-	@Nullable
-	private Possible<String> string;
-	@Nullable
-	private PossibleLong llong;
+    @Nullable
+    private Possible<String> string;
+    @Nullable
+    private PossibleLong llong;
 
-	public PossiblePojo(@Nullable Possible<String> string, @Nullable PossibleLong llong) {
-		this.string = string;
-		this.llong = llong;
-	}
+    public PossiblePojo(@Nullable Possible<String> string, @Nullable PossibleLong llong) {
+        this.string = string;
+        this.llong = llong;
+    }
 
-	@Nullable
-	public Possible<String> getString() {
-		return string;
-	}
+    @Nullable
+    public Possible<String> getString() {
+        return string;
+    }
 
-	public void setString(@Nullable Possible<String> string) {
-		this.string = string;
-	}
+    public void setString(@Nullable Possible<String> string) {
+        this.string = string;
+    }
 
-	@Nullable
-	public PossibleLong getLlong() {
-		return llong;
-	}
+    @Nullable
+    public PossibleLong getLlong() {
+        return llong;
+    }
 
-	public void setLlong(@Nullable PossibleLong llong) {
-		this.llong = llong;
-	}
+    public void setLlong(@Nullable PossibleLong llong) {
+        this.llong = llong;
+    }
 }

@@ -23,12 +23,12 @@ import reactor.core.publisher.Mono;
 
 public class ApplicationService extends RestService {
 
-	public ApplicationService(Router router) {
-		super(router);
-	}
+    public ApplicationService(Router router) {
+        super(router);
+    }
 
-	public Mono<ApplicationInfoResponse> getCurrentApplicationInfo() {
-		return Routes.APPLICATION_INFO_GET.newRequest()
-				.exchange(getRouter());
-	}
+    public Mono<ApplicationInfoResponse> getCurrentApplicationInfo() {
+        return Routes.APPLICATION_INFO_GET.newRequest()
+                .exchange(getRouter());
+    }
 }

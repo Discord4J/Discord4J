@@ -21,8 +21,8 @@ import discord4j.common.json.payload.Opcode;
 
 public class OpcodeConverter extends StdConverter<Opcode<?>, Integer> {
 
-	@Override
-	public Integer convert(Opcode<?> value) {
-		return value.getRawOp();
-	}
+    @Override
+    public Integer convert(Opcode<?> value) {
+        return value.getRawOp();
+    }
 }

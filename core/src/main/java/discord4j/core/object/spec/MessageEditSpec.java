@@ -24,23 +24,23 @@ import javax.annotation.Nullable;
 
 public class MessageEditSpec implements Spec<MessageEditRequest> {
 
-	@Nullable
-	private Possible<String> content = Possible.absent();
-	@Nullable
-	private Possible<EmbedRequest> embed = Possible.absent();
+    @Nullable
+    private Possible<String> content = Possible.absent();
+    @Nullable
+    private Possible<EmbedRequest> embed = Possible.absent();
 
-	public MessageEditSpec setContent(@Nullable String content) {
-		this.content = content == null ? null : Possible.of(content);
-		return this;
-	}
+    public MessageEditSpec setContent(@Nullable String content) {
+        this.content = content == null ? null : Possible.of(content);
+        return this;
+    }
 
-	public MessageEditSpec setEmbed(@Nullable EmbedSpec embed) {
-		this.embed = embed == null ? null : Possible.of(embed.asRequest());
-		return this;
-	}
+    public MessageEditSpec setEmbed(@Nullable EmbedSpec embed) {
+        this.embed = embed == null ? null : Possible.of(embed.asRequest());
+        return this;
+    }
 
-	@Override
-	public MessageEditRequest asRequest() {
-		return new MessageEditRequest(content, embed);
-	}
+    @Override
+    public MessageEditRequest asRequest() {
+        return new MessageEditRequest(content, embed);
+    }
 }

@@ -24,43 +24,44 @@ import java.io.IOException;
 
 public class UnsignedLongSerializer extends StdSerializer<Object> { // <Long | PossibleLong | long[] | Possible<long[]>>
 
-	public UnsignedLongSerializer() {
-		super(Object.class);
-	}
+    public UnsignedLongSerializer() {
+        super(Object.class);
+    }
 
-	@Override
-	public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-		if (value instanceof Long) {
-			gen.writeString(Long.toUnsignedString((Long) value));
-		} else if (value instanceof PossibleLong) {
-			PossibleLong pl = (PossibleLong) value;
-			if (pl.isAbsent()) {
-				provider.defaultSerializeNull(gen);
-			} else {
-				gen.writeString(Long.toUnsignedString(pl.get()));
-			}
-		} else if (value instanceof long[]) {
-			writeArray((long[]) value, gen);
-		} else if (value instanceof Possible) {
-			Possible<?> p = (Possible<?>) value;
-			if (p.isAbsent()) {
-				provider.defaultSerializeNull(gen);
-			} else {
-				Object o = p.get();
-				if (o instanceof long[]) {
-					writeArray((long[]) o, gen);
-				}
-			}
-		} else {
-			throw new IllegalStateException("Attempt to serialize field marked with @UnsignedJson which is not of type Long | PossibleLong | long[] | Possible<long[]>");
-		}
-	}
+    @Override
+    public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        if (value instanceof Long) {
+            gen.writeString(Long.toUnsignedString((Long) value));
+        } else if (value instanceof PossibleLong) {
+            PossibleLong pl = (PossibleLong) value;
+            if (pl.isAbsent()) {
+                provider.defaultSerializeNull(gen);
+            } else {
+                gen.writeString(Long.toUnsignedString(pl.get()));
+            }
+        } else if (value instanceof long[]) {
+            writeArray((long[]) value, gen);
+        } else if (value instanceof Possible) {
+            Possible<?> p = (Possible<?>) value;
+            if (p.isAbsent()) {
+                provider.defaultSerializeNull(gen);
+            } else {
+                Object o = p.get();
+                if (o instanceof long[]) {
+                    writeArray((long[]) o, gen);
+                }
+            }
+        } else {
+            throw new IllegalStateException("Attempt to serialize field marked with @UnsignedJson which is not of " +
+                    "type Long | PossibleLong | long[] | Possible<long[]>");
+        }
+    }
 
-	private static void writeArray(long[] ary, JsonGenerator gen) throws IOException {
-		gen.writeStartArray();
-		for (long l : ary) {
-			gen.writeString(Long.toUnsignedString(l));
-		}
-		gen.writeEndArray();
-	}
+    private static void writeArray(long[] ary, JsonGenerator gen) throws IOException {
+        gen.writeStartArray();
+        for (long l : ary) {
+            gen.writeString(Long.toUnsignedString(l));
+        }
+        gen.writeEndArray();
+    }
 }

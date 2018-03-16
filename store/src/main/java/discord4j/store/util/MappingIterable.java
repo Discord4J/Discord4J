@@ -18,14 +18,14 @@ package discord4j.store.util;
 
 import java.util.Iterator;
 import java.util.Spliterator;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This class is an iterable which lazily maps an input type to an output type from a provided iterable.
  *
  * @param <I> The type to map.
  * @param <O> The type to map to.
- *
  * @see java.lang.Iterable
  */
 public class MappingIterable<I, O> implements Iterable<O> {
@@ -143,9 +143,9 @@ public class MappingIterable<I, O> implements Iterable<O> {
             return original.hasCharacteristics(characteristics);
         }
 
-//        @Override FIXME: No way to reverse mapper function, removing the ability for this delegation
-//        public Comparator<? super O> getComparator() {
-//            return new MappingComparator(original.getComparator());
-//        }
+        //        @Override FIXME: No way to reverse mapper function, removing the ability for this delegation
+        //        public Comparator<? super O> getComparator() {
+        //            return new MappingComparator(original.getComparator());
+        //        }
     }
 }

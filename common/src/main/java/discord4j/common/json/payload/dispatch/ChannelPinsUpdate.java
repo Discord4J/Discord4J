@@ -23,27 +23,27 @@ import javax.annotation.Nullable;
 
 public class ChannelPinsUpdate implements Dispatch {
 
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
-	@JsonProperty("last_pin_timestamp")
-	@Nullable
-	private String lastPinTimestamp;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
+    @JsonProperty("last_pin_timestamp")
+    @Nullable
+    private String lastPinTimestamp;
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	@Nullable
-	public String getLastPinTimestamp() {
-		return lastPinTimestamp;
-	}
+    @Nullable
+    public String getLastPinTimestamp() {
+        return lastPinTimestamp;
+    }
 
-	@Override
-	public String toString() {
-		return "ChannelPinsUpdate[" +
-				"channelId=" + channelId +
-				", lastPinTimestamp=" + lastPinTimestamp +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ChannelPinsUpdate[" +
+                "channelId=" + channelId +
+                ", lastPinTimestamp=" + lastPinTimestamp +
+                ']';
+    }
 }

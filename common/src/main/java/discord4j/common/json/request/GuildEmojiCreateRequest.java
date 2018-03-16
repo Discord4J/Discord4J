@@ -22,23 +22,23 @@ import java.util.Arrays;
 
 public class GuildEmojiCreateRequest {
 
-	private final String name;
-	private final String image;
-	@UnsignedJson
-	private final long[] roles;
+    private final String name;
+    private final String image;
+    @UnsignedJson
+    private final long[] roles;
 
-	public GuildEmojiCreateRequest(String name, String image, long[] roles) {
-		this.name = name;
-		this.image = image;
-		this.roles = roles;
-	}
+    public GuildEmojiCreateRequest(String name, String image, long[] roles) {
+        this.name = name;
+        this.image = image;
+        this.roles = roles;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildEmojiCreateRequest[" +
-				"name=" + name +
-				", image=" + image +
-				", roles=" + Arrays.toString(roles) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildEmojiCreateRequest[" +
+                "name=" + name +
+                ", image=" + image +
+                ", roles=" + Arrays.toString(roles) +
+                ']';
+    }
 }

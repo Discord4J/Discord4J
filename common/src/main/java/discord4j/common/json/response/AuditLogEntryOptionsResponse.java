@@ -23,72 +23,72 @@ import javax.annotation.Nullable;
 
 public class AuditLogEntryOptionsResponse {
 
-	@JsonProperty("delete_member_days")
-	@Nullable
-	private String deleteMemberDays;
-	@JsonProperty("members_removed")
-	@Nullable
-	private String membersRemoved;
-	@JsonProperty("channel_id")
-	@Nullable
-	@UnsignedJson
-	private Long channelId;
-	@Nullable
-	private String count;
-	@Nullable
-	@UnsignedJson
-	private Long id;
-	@Nullable
-	private String type;
-	@JsonProperty("role_name")
-	@Nullable
-	private String roleName;
+    @JsonProperty("delete_member_days")
+    @Nullable
+    private String deleteMemberDays;
+    @JsonProperty("members_removed")
+    @Nullable
+    private String membersRemoved;
+    @JsonProperty("channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long channelId;
+    @Nullable
+    private String count;
+    @Nullable
+    @UnsignedJson
+    private Long id;
+    @Nullable
+    private String type;
+    @JsonProperty("role_name")
+    @Nullable
+    private String roleName;
 
-	@Nullable
-	public String getDeleteMemberDays() {
-		return deleteMemberDays;
-	}
+    @Nullable
+    public String getDeleteMemberDays() {
+        return deleteMemberDays;
+    }
 
-	@Nullable
-	public String getMembersRemoved() {
-		return membersRemoved;
-	}
+    @Nullable
+    public String getMembersRemoved() {
+        return membersRemoved;
+    }
 
-	@Nullable
-	public Long getChannelId() {
-		return channelId;
-	}
+    @Nullable
+    public Long getChannelId() {
+        return channelId;
+    }
 
-	@Nullable
-	public String getCount() {
-		return count;
-	}
+    @Nullable
+    public String getCount() {
+        return count;
+    }
 
-	@Nullable
-	public Long getId() {
-		return id;
-	}
+    @Nullable
+    public Long getId() {
+        return id;
+    }
 
-	@Nullable
-	public String getType() {
-		return type;
-	}
+    @Nullable
+    public String getType() {
+        return type;
+    }
 
-	@Nullable
-	public String getRoleName() {
-		return roleName;
-	}
+    @Nullable
+    public String getRoleName() {
+        return roleName;
+    }
 
-	@Override
-	public String toString() {
-		return "AuditLogEntryOptionsResponse[" +
-				"deleteMemberDays=" + deleteMemberDays +
-				", membersRemoved=" + membersRemoved +
-				", channelId=" + channelId +
-				", count=" + count +
-				", id=" + id +
-				", type=" + type +
-				", roleName=" + roleName +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "AuditLogEntryOptionsResponse[" +
+                "deleteMemberDays=" + deleteMemberDays +
+                ", membersRemoved=" + membersRemoved +
+                ", channelId=" + channelId +
+                ", count=" + count +
+                ", id=" + id +
+                ", type=" + type +
+                ", roleName=" + roleName +
+                ']';
+    }
 }

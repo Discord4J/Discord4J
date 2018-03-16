@@ -20,27 +20,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InviteCreateRequest {
 
-	@JsonProperty("max_age")
-	private final int maxAge;
-	@JsonProperty("max_uses")
-	private final int maxUses;
-	private final boolean temporary;
-	private final boolean unique;
+    @JsonProperty("max_age")
+    private final int maxAge;
+    @JsonProperty("max_uses")
+    private final int maxUses;
+    private final boolean temporary;
+    private final boolean unique;
 
-	public InviteCreateRequest(int maxAge, int maxUses, boolean temporary, boolean unique) {
-		this.maxAge = maxAge;
-		this.maxUses = maxUses;
-		this.temporary = temporary;
-		this.unique = unique;
-	}
+    public InviteCreateRequest(int maxAge, int maxUses, boolean temporary, boolean unique) {
+        this.maxAge = maxAge;
+        this.maxUses = maxUses;
+        this.temporary = temporary;
+        this.unique = unique;
+    }
 
-	@Override
-	public String toString() {
-		return "InviteCreateRequest[" +
-				"maxAge=" + maxAge +
-				", maxUses=" + maxUses +
-				", temporary=" + temporary +
-				", unique=" + unique +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "InviteCreateRequest[" +
+                "maxAge=" + maxAge +
+                ", maxUses=" + maxUses +
+                ", temporary=" + temporary +
+                ", unique=" + unique +
+                ']';
+    }
 }

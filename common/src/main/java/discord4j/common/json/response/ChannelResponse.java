@@ -25,156 +25,156 @@ import java.util.Arrays;
 
 public class ChannelResponse {
 
-	@UnsignedJson
-	private long id;
-	private int type;
-	@JsonProperty("guild_id")
-	@Nullable
-	@UnsignedJson
-	private Long guildId;
-	@Nullable
-	private Integer position;
-	@JsonProperty("permission_overwrites")
-	@Nullable
-	private OverwriteEntity[] permissionOverwrites;
-	@Nullable
-	private String name;
-	@Nullable
-	private String topic;
-	@Nullable
-	private Boolean nsfw;
-	@JsonProperty("last_message_id")
-	@Nullable
-	@UnsignedJson
-	private Long lastMessageId;
-	@Nullable
-	private Integer bitrate;
-	@JsonProperty("user_limit")
-	@Nullable
-	private Integer userLimit;
-	@Nullable
-	private UserResponse[] recipients;
-	@Nullable
-	private String icon;
-	@JsonProperty("owner_id")
-	@Nullable
-	@UnsignedJson
-	private Long ownerId;
-	@JsonProperty("application_id")
-	@Nullable
-	@UnsignedJson
-	private Long applicationId;
-	@JsonProperty("parent_id")
-	@Nullable
-	@UnsignedJson
-	private Long parentId;
-	@JsonProperty("last_pin_timestamp")
-	@Nullable
-	private String lastPinTimestamp;
+    @UnsignedJson
+    private long id;
+    private int type;
+    @JsonProperty("guild_id")
+    @Nullable
+    @UnsignedJson
+    private Long guildId;
+    @Nullable
+    private Integer position;
+    @JsonProperty("permission_overwrites")
+    @Nullable
+    private OverwriteEntity[] permissionOverwrites;
+    @Nullable
+    private String name;
+    @Nullable
+    private String topic;
+    @Nullable
+    private Boolean nsfw;
+    @JsonProperty("last_message_id")
+    @Nullable
+    @UnsignedJson
+    private Long lastMessageId;
+    @Nullable
+    private Integer bitrate;
+    @JsonProperty("user_limit")
+    @Nullable
+    private Integer userLimit;
+    @Nullable
+    private UserResponse[] recipients;
+    @Nullable
+    private String icon;
+    @JsonProperty("owner_id")
+    @Nullable
+    @UnsignedJson
+    private Long ownerId;
+    @JsonProperty("application_id")
+    @Nullable
+    @UnsignedJson
+    private Long applicationId;
+    @JsonProperty("parent_id")
+    @Nullable
+    @UnsignedJson
+    private Long parentId;
+    @JsonProperty("last_pin_timestamp")
+    @Nullable
+    private String lastPinTimestamp;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public int getType() {
-		return type;
-	}
+    public int getType() {
+        return type;
+    }
 
-	@Nullable
-	public Long getGuildId() {
-		return guildId;
-	}
+    @Nullable
+    public Long getGuildId() {
+        return guildId;
+    }
 
-	@Nullable
-	public Integer getPosition() {
-		return position;
-	}
+    @Nullable
+    public Integer getPosition() {
+        return position;
+    }
 
-	@Nullable
-	public OverwriteEntity[] getPermissionOverwrites() {
-		return permissionOverwrites;
-	}
+    @Nullable
+    public OverwriteEntity[] getPermissionOverwrites() {
+        return permissionOverwrites;
+    }
 
-	@Nullable
-	public String getName() {
-		return name;
-	}
+    @Nullable
+    public String getName() {
+        return name;
+    }
 
-	@Nullable
-	public String getTopic() {
-		return topic;
-	}
+    @Nullable
+    public String getTopic() {
+        return topic;
+    }
 
-	@Nullable
-	public Boolean getNsfw() {
-		return nsfw;
-	}
+    @Nullable
+    public Boolean getNsfw() {
+        return nsfw;
+    }
 
-	@Nullable
-	public Long getLastMessageId() {
-		return lastMessageId;
-	}
+    @Nullable
+    public Long getLastMessageId() {
+        return lastMessageId;
+    }
 
-	@Nullable
-	public Integer getBitrate() {
-		return bitrate;
-	}
+    @Nullable
+    public Integer getBitrate() {
+        return bitrate;
+    }
 
-	@Nullable
-	public Integer getUserLimit() {
-		return userLimit;
-	}
+    @Nullable
+    public Integer getUserLimit() {
+        return userLimit;
+    }
 
-	@Nullable
-	public UserResponse[] getRecipients() {
-		return recipients;
-	}
+    @Nullable
+    public UserResponse[] getRecipients() {
+        return recipients;
+    }
 
-	@Nullable
-	public String getIcon() {
-		return icon;
-	}
+    @Nullable
+    public String getIcon() {
+        return icon;
+    }
 
-	@Nullable
-	public Long getOwnerId() {
-		return ownerId;
-	}
+    @Nullable
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	@Nullable
-	public Long getApplicationId() {
-		return applicationId;
-	}
+    @Nullable
+    public Long getApplicationId() {
+        return applicationId;
+    }
 
-	@Nullable
-	public Long getParentId() {
-		return parentId;
-	}
+    @Nullable
+    public Long getParentId() {
+        return parentId;
+    }
 
-	@Nullable
-	public String getLastPinTimestamp() {
-		return lastPinTimestamp;
-	}
+    @Nullable
+    public String getLastPinTimestamp() {
+        return lastPinTimestamp;
+    }
 
-	@Override
-	public String toString() {
-		return "ChannelResponse[" +
-				"id=" + id +
-				", type=" + type +
-				", guildId=" + guildId +
-				", position=" + position +
-				", permissionOverwrites=" + Arrays.toString(permissionOverwrites) +
-				", name=" + name +
-				", topic=" + topic +
-				", nsfw=" + nsfw +
-				", lastMessageId=" + lastMessageId +
-				", bitrate=" + bitrate +
-				", userLimit=" + userLimit +
-				", recipients=" + Arrays.toString(recipients) +
-				", icon=" + icon +
-				", ownerId=" + ownerId +
-				", applicationId=" + applicationId +
-				", parentId=" + parentId +
-				", lastPinTimestamp=" + lastPinTimestamp +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "ChannelResponse[" +
+                "id=" + id +
+                ", type=" + type +
+                ", guildId=" + guildId +
+                ", position=" + position +
+                ", permissionOverwrites=" + Arrays.toString(permissionOverwrites) +
+                ", name=" + name +
+                ", topic=" + topic +
+                ", nsfw=" + nsfw +
+                ", lastMessageId=" + lastMessageId +
+                ", bitrate=" + bitrate +
+                ", userLimit=" + userLimit +
+                ", recipients=" + Arrays.toString(recipients) +
+                ", icon=" + icon +
+                ", ownerId=" + ownerId +
+                ", applicationId=" + applicationId +
+                ", parentId=" + parentId +
+                ", lastPinTimestamp=" + lastPinTimestamp +
+                ']';
+    }
 }

@@ -20,6 +20,6 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class UnsignedLongPojo {
 
-	@UnsignedJson
-	public long unsignedLong;
+    @UnsignedJson
+    public long unsignedLong;
 }

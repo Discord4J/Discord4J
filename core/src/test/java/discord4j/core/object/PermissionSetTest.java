@@ -23,24 +23,24 @@ import static org.junit.Assert.assertTrue;
 
 public class PermissionSetTest {
 
-	@Test
-	public void testNone() {
-		PermissionSet permSet = PermissionSet.none();
-		assertEquals(0, permSet.size());
-	}
+    @Test
+    public void testNone() {
+        PermissionSet permSet = PermissionSet.none();
+        assertEquals(0, permSet.size());
+    }
 
-	@Test
-	public void testAll() {
-		PermissionSet permSet = PermissionSet.all();
-		assertEquals(Permission.values().length, permSet.size());
-	}
+    @Test
+    public void testAll() {
+        PermissionSet permSet = PermissionSet.all();
+        assertEquals(Permission.values().length, permSet.size());
+    }
 
-	@Test
-	public void testCustom() {
-		PermissionSet permSet = PermissionSet.of(Permission.ADD_REACTIONS, Permission.MANAGE_ROLES);
-		assertEquals(2, permSet.size());
-		assertTrue(permSet.contains(Permission.ADD_REACTIONS));
-		assertTrue(permSet.contains(Permission.MANAGE_ROLES));
-	}
+    @Test
+    public void testCustom() {
+        PermissionSet permSet = PermissionSet.of(Permission.ADD_REACTIONS, Permission.MANAGE_ROLES);
+        assertEquals(2, permSet.size());
+        assertTrue(permSet.contains(Permission.ADD_REACTIONS));
+        assertTrue(permSet.contains(Permission.MANAGE_ROLES));
+    }
 
 }

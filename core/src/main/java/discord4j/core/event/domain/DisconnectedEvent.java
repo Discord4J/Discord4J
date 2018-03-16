@@ -19,8 +19,8 @@ package discord4j.core.event.domain;
 
 public class DisconnectedEvent implements Event {
 
-	@Override
-	public String toString() {
-		return "Gateway connection terminated";
-	}
+    @Override
+    public String toString() {
+        return "Gateway connection terminated";
+    }
 }

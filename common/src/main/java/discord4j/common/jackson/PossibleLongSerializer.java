@@ -27,42 +27,43 @@ import javax.annotation.Nullable;
 
 public class PossibleLongSerializer extends ReferenceTypeSerializer<PossibleLong> {
 
-	PossibleLongSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts, JsonSerializer<Object> ser) {
-		super(fullType, staticTyping, vts, ser);
-	}
+    PossibleLongSerializer(ReferenceType fullType, boolean staticTyping, TypeSerializer vts,
+                           JsonSerializer<Object> ser) {
+        super(fullType, staticTyping, vts, ser);
+    }
 
-	private PossibleLongSerializer(PossibleLongSerializer base, BeanProperty property, TypeSerializer vts,
-	                           JsonSerializer<?> valueSer, NameTransformer unwrapper, Object suppressableValue,
-	                           boolean suppressNulls) {
-		super(base, property, vts, valueSer, unwrapper, suppressableValue, suppressNulls);
+    private PossibleLongSerializer(PossibleLongSerializer base, BeanProperty property, TypeSerializer vts,
+                                   JsonSerializer<?> valueSer, NameTransformer unwrapper, Object suppressableValue,
+                                   boolean suppressNulls) {
+        super(base, property, vts, valueSer, unwrapper, suppressableValue, suppressNulls);
 
-	}
+    }
 
-	@Override
-	protected ReferenceTypeSerializer<PossibleLong> withResolved(BeanProperty prop, TypeSerializer vts,
-	                                                            JsonSerializer<?> value, NameTransformer unwrapper) {
-		return new PossibleLongSerializer(this, prop, vts, value, unwrapper, _suppressableValue, _suppressNulls);
-	}
+    @Override
+    protected ReferenceTypeSerializer<PossibleLong> withResolved(BeanProperty prop, TypeSerializer vts,
+                                                                 JsonSerializer<?> value, NameTransformer unwrapper) {
+        return new PossibleLongSerializer(this, prop, vts, value, unwrapper, _suppressableValue, _suppressNulls);
+    }
 
-	@Override
-	public ReferenceTypeSerializer<PossibleLong> withContentInclusion(Object suppressableValue, boolean suppressNulls) {
-		return new PossibleLongSerializer(this, _property, _valueTypeSerializer, _valueSerializer, _unwrapper,
-				suppressableValue, suppressNulls);
-	}
+    @Override
+    public ReferenceTypeSerializer<PossibleLong> withContentInclusion(Object suppressableValue, boolean suppressNulls) {
+        return new PossibleLongSerializer(this, _property, _valueTypeSerializer, _valueSerializer, _unwrapper,
+                suppressableValue, suppressNulls);
+    }
 
-	@Override
-	protected boolean _isValuePresent(PossibleLong value) {
-		return !value.isAbsent();
-	}
+    @Override
+    protected boolean _isValuePresent(PossibleLong value) {
+        return !value.isAbsent();
+    }
 
-	@Override
-	protected Object _getReferenced(PossibleLong value) {
-		return value.get();
-	}
+    @Override
+    protected Object _getReferenced(PossibleLong value) {
+        return value.get();
+    }
 
-	@Nullable
-	@Override
-	protected Object _getReferencedIfPresent(PossibleLong value) {
-		return value.isAbsent() ? null : value.get();
-	}
+    @Nullable
+    @Override
+    protected Object _getReferencedIfPresent(PossibleLong value) {
+        return value.isAbsent() ? null : value.get();
+    }
 }

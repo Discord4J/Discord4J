@@ -25,58 +25,58 @@ import java.util.Arrays;
 
 public class Ready implements Dispatch {
 
-	@JsonProperty("v")
-	private int version;
-	private UserResponse user;
-	@JsonProperty("private_channels")
-	private ChannelResponse[] privateChannels;
-	private UnavailableGuildResponse[] guilds;
-	@JsonProperty("session_id")
-	private String sessionId;
-	@JsonProperty("_trace")
-	private String[] trace;
+    @JsonProperty("v")
+    private int version;
+    private UserResponse user;
+    @JsonProperty("private_channels")
+    private ChannelResponse[] privateChannels;
+    private UnavailableGuildResponse[] guilds;
+    @JsonProperty("session_id")
+    private String sessionId;
+    @JsonProperty("_trace")
+    private String[] trace;
 
-	// FIXME
-	private Object user_settings;
-	private Object[] relationships;
-	private Object[] presences;
+    // FIXME
+    private Object user_settings;
+    private Object[] relationships;
+    private Object[] presences;
 
-	public int getVersion() {
-		return version;
-	}
+    public int getVersion() {
+        return version;
+    }
 
-	public UserResponse getUser() {
-		return user;
-	}
+    public UserResponse getUser() {
+        return user;
+    }
 
-	public ChannelResponse[] getPrivateChannels() {
-		return privateChannels;
-	}
+    public ChannelResponse[] getPrivateChannels() {
+        return privateChannels;
+    }
 
-	public UnavailableGuildResponse[] getGuilds() {
-		return guilds;
-	}
+    public UnavailableGuildResponse[] getGuilds() {
+        return guilds;
+    }
 
-	public String getSessionId() {
-		return sessionId;
-	}
+    public String getSessionId() {
+        return sessionId;
+    }
 
-	public String[] getTrace() {
-		return trace;
-	}
+    public String[] getTrace() {
+        return trace;
+    }
 
-	@Override
-	public String toString() {
-		return "Ready[" +
-				"version=" + version +
-				", user=" + user +
-				", privateChannels=" + Arrays.toString(privateChannels) +
-				", guilds=" + Arrays.toString(guilds) +
-				", sessionId=" + sessionId +
-				", trace=" + Arrays.toString(trace) +
-				", user_settings=" + user_settings +
-				", relationships=" + Arrays.toString(relationships) +
-				", presences=" + Arrays.toString(presences) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "Ready[" +
+                "version=" + version +
+                ", user=" + user +
+                ", privateChannels=" + Arrays.toString(privateChannels) +
+                ", guilds=" + Arrays.toString(guilds) +
+                ", sessionId=" + sessionId +
+                ", trace=" + Arrays.toString(trace) +
+                ", user_settings=" + user_settings +
+                ", relationships=" + Arrays.toString(relationships) +
+                ", presences=" + Arrays.toString(presences) +
+                ']';
+    }
 }

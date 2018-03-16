@@ -20,24 +20,24 @@ import javax.annotation.Nullable;
 
 public class GatewayResponse {
 
-	private String url;
-	@Nullable
-	private Integer shards;
+    private String url;
+    @Nullable
+    private Integer shards;
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	@Nullable
-	public Integer getShards() {
-		return shards;
-	}
+    @Nullable
+    public Integer getShards() {
+        return shards;
+    }
 
-	@Override
-	public String toString() {
-		return "GatewayResponse[" +
-				"url=" + url +
-				", shards=" + shards +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GatewayResponse[" +
+                "url=" + url +
+                ", shards=" + shards +
+                ']';
+    }
 }

@@ -26,10 +26,10 @@ import discord4j.common.json.payload.PayloadData;
 @FunctionalInterface
 public interface PayloadHandler<T extends PayloadData> {
 
-	/**
-	 * Perform an action on a payload together with its context, which allows access to various gateway resources.
-	 *
-	 * @param context the payload's gateway context
-	 */
-	void handle(PayloadContext<T> context);
+    /**
+     * Perform an action on a payload together with its context, which allows access to various gateway resources.
+     *
+     * @param context the payload's gateway context
+     */
+    void handle(PayloadContext<T> context);
 }

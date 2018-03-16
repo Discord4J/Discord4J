@@ -24,22 +24,22 @@ import javax.annotation.Nullable;
 @PossibleJson
 public class MessageEditRequest {
 
-	@Nullable
-	private final Possible<String> content;
-	@Nullable
-	private final Possible<EmbedRequest> embed;
+    @Nullable
+    private final Possible<String> content;
+    @Nullable
+    private final Possible<EmbedRequest> embed;
 
-	public MessageEditRequest(@Nullable Possible<String> content,
-	                          @Nullable Possible<EmbedRequest> embed) {
-		this.content = content;
-		this.embed = embed;
-	}
+    public MessageEditRequest(@Nullable Possible<String> content,
+                              @Nullable Possible<EmbedRequest> embed) {
+        this.content = content;
+        this.embed = embed;
+    }
 
-	@Override
-	public String toString() {
-		return "MessageEditRequest[" +
-				"content=" + content +
-				", embed=" + embed +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "MessageEditRequest[" +
+                "content=" + content +
+                ", embed=" + embed +
+                ']';
+    }
 }

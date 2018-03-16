@@ -23,63 +23,63 @@ import javax.annotation.Nullable;
 
 public class WebhookResponse {
 
-	@UnsignedJson
-	private long id;
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
-	@Nullable
-	private UserResponse user;
-	@Nullable
-	private String name;
-	@Nullable
-	private String avatar;
-	private String token;
+    @UnsignedJson
+    private long id;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
+    @Nullable
+    private UserResponse user;
+    @Nullable
+    private String name;
+    @Nullable
+    private String avatar;
+    private String token;
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	@Nullable
-	public UserResponse getUser() {
-		return user;
-	}
+    @Nullable
+    public UserResponse getUser() {
+        return user;
+    }
 
-	@Nullable
-	public String getName() {
-		return name;
-	}
+    @Nullable
+    public String getName() {
+        return name;
+    }
 
-	@Nullable
-	public String getAvatar() {
-		return avatar;
-	}
+    @Nullable
+    public String getAvatar() {
+        return avatar;
+    }
 
-	public String getToken() {
-		return token;
-	}
+    public String getToken() {
+        return token;
+    }
 
-	@Override
-	public String toString() {
-		return "WebhookResponse[" +
-				"id=" + id +
-				", guildId=" + guildId +
-				", channelId=" + channelId +
-				", user=" + user +
-				", name=" + name +
-				", avatar=" + avatar +
-				", token=" + token +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "WebhookResponse[" +
+                "id=" + id +
+                ", guildId=" + guildId +
+                ", channelId=" + channelId +
+                ", user=" + user +
+                ", name=" + name +
+                ", avatar=" + avatar +
+                ", token=" + token +
+                ']';
+    }
 }

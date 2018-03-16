@@ -22,29 +22,29 @@ import java.util.Arrays;
 
 public class AuditLogResponse {
 
-	private WebhookResponse[] webhooks;
-	private UserResponse[] users;
-	@JsonProperty("audit_log_entries")
-	private AuditLogEntryResponse[] auditLogEntries;
+    private WebhookResponse[] webhooks;
+    private UserResponse[] users;
+    @JsonProperty("audit_log_entries")
+    private AuditLogEntryResponse[] auditLogEntries;
 
-	public WebhookResponse[] getWebhooks() {
-		return webhooks;
-	}
+    public WebhookResponse[] getWebhooks() {
+        return webhooks;
+    }
 
-	public UserResponse[] getUsers() {
-		return users;
-	}
+    public UserResponse[] getUsers() {
+        return users;
+    }
 
-	public AuditLogEntryResponse[] getAuditLogEntries() {
-		return auditLogEntries;
-	}
+    public AuditLogEntryResponse[] getAuditLogEntries() {
+        return auditLogEntries;
+    }
 
-	@Override
-	public String toString() {
-		return "AuditLogResponse[" +
-				"webhooks=" + Arrays.toString(webhooks) +
-				", users=" + Arrays.toString(users) +
-				", auditLogEntries=" + Arrays.toString(auditLogEntries) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "AuditLogResponse[" +
+                "webhooks=" + Arrays.toString(webhooks) +
+                ", users=" + Arrays.toString(users) +
+                ", auditLogEntries=" + Arrays.toString(auditLogEntries) +
+                ']';
+    }
 }

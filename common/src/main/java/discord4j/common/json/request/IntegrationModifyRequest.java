@@ -23,57 +23,57 @@ import discord4j.common.jackson.PossibleJson;
 @PossibleJson
 public class IntegrationModifyRequest {
 
-	@JsonProperty("expire_behavior")
-	private final Possible<Integer> expireBehavior;
-	@JsonProperty("expire_grace_period")
-	private final Possible<Integer> expireGracePeriod;
-	@JsonProperty("enable_emoticons")
-	private final Possible<Boolean> enableEmoticons;
+    @JsonProperty("expire_behavior")
+    private final Possible<Integer> expireBehavior;
+    @JsonProperty("expire_grace_period")
+    private final Possible<Integer> expireGracePeriod;
+    @JsonProperty("enable_emoticons")
+    private final Possible<Boolean> enableEmoticons;
 
-	public IntegrationModifyRequest(Possible<Integer> expireBehavior,
-	                                Possible<Integer> expireGracePeriod,
-	                                Possible<Boolean> enableEmoticons) {
-		this.expireBehavior = expireBehavior;
-		this.expireGracePeriod = expireGracePeriod;
-		this.enableEmoticons = enableEmoticons;
-	}
+    public IntegrationModifyRequest(Possible<Integer> expireBehavior,
+                                    Possible<Integer> expireGracePeriod,
+                                    Possible<Boolean> enableEmoticons) {
+        this.expireBehavior = expireBehavior;
+        this.expireGracePeriod = expireGracePeriod;
+        this.enableEmoticons = enableEmoticons;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private Possible<Integer> expireBehvaior = Possible.absent();
-		private Possible<Integer> expireGracePeriod = Possible.absent();
-		private Possible<Boolean> enableEmoticons = Possible.absent();
+        private Possible<Integer> expireBehvaior = Possible.absent();
+        private Possible<Integer> expireGracePeriod = Possible.absent();
+        private Possible<Boolean> enableEmoticons = Possible.absent();
 
-		public Builder expireBehavior(int expireBehavior) {
-			this.expireBehvaior = Possible.of(expireBehavior);
-			return this;
-		}
+        public Builder expireBehavior(int expireBehavior) {
+            this.expireBehvaior = Possible.of(expireBehavior);
+            return this;
+        }
 
-		public Builder expireGracePeriod(int expireGracePeriod) {
-			this.expireGracePeriod = Possible.of(expireGracePeriod);
-			return this;
-		}
+        public Builder expireGracePeriod(int expireGracePeriod) {
+            this.expireGracePeriod = Possible.of(expireGracePeriod);
+            return this;
+        }
 
-		public Builder enableEmoticons(boolean enableEmoticons) {
-			this.enableEmoticons = Possible.of(enableEmoticons);
-			return this;
-		}
+        public Builder enableEmoticons(boolean enableEmoticons) {
+            this.enableEmoticons = Possible.of(enableEmoticons);
+            return this;
+        }
 
-		public IntegrationModifyRequest build() {
-			return new IntegrationModifyRequest(expireBehvaior, expireGracePeriod, enableEmoticons);
-		}
-	}
+        public IntegrationModifyRequest build() {
+            return new IntegrationModifyRequest(expireBehvaior, expireGracePeriod, enableEmoticons);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "IntegrationModifyRequest[" +
-				"expireBehavior=" + expireBehavior +
-				", expireGracePeriod=" + expireGracePeriod +
-				", enableEmoticons=" + enableEmoticons +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "IntegrationModifyRequest[" +
+                "expireBehavior=" + expireBehavior +
+                ", expireGracePeriod=" + expireGracePeriod +
+                ", enableEmoticons=" + enableEmoticons +
+                ']';
+    }
 }

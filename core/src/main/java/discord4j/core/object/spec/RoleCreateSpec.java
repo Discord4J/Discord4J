@@ -23,39 +23,39 @@ import java.awt.Color;
 
 public class RoleCreateSpec implements Spec<RoleCreateRequest> {
 
-	private String name;
-	private int permissions;
-	private int color;
-	private boolean hoist;
-	private boolean mentionable;
+    private String name;
+    private int permissions;
+    private int color;
+    private boolean hoist;
+    private boolean mentionable;
 
-	public RoleCreateSpec setName(String name) {
-		this.name = name;
-		return this;
-	}
+    public RoleCreateSpec setName(String name) {
+        this.name = name;
+        return this;
+    }
 
-	public RoleCreateSpec setPermissions(PermissionSet permissions) {
-		this.permissions = permissions.getRawValue();
-		return this;
-	}
+    public RoleCreateSpec setPermissions(PermissionSet permissions) {
+        this.permissions = permissions.getRawValue();
+        return this;
+    }
 
-	public RoleCreateSpec setColor(Color color) {
-		this.color = color.getRed();
-		return this;
-	}
+    public RoleCreateSpec setColor(Color color) {
+        this.color = color.getRed();
+        return this;
+    }
 
-	public RoleCreateSpec setHoist(boolean hoist) {
-		this.hoist = hoist;
-		return this;
-	}
+    public RoleCreateSpec setHoist(boolean hoist) {
+        this.hoist = hoist;
+        return this;
+    }
 
-	public RoleCreateSpec setMentionable(boolean mentionable) {
-		this.mentionable = mentionable;
-		return this;
-	}
+    public RoleCreateSpec setMentionable(boolean mentionable) {
+        this.mentionable = mentionable;
+        return this;
+    }
 
-	@Override
-	public RoleCreateRequest asRequest() {
-		return new RoleCreateRequest(name, permissions, color, hoist, mentionable);
-	}
+    @Override
+    public RoleCreateRequest asRequest() {
+        return new RoleCreateRequest(name, permissions, color, hoist, mentionable);
+    }
 }

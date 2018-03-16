@@ -19,20 +19,20 @@ package discord4j.common.json.payload;
 
 public class InvalidSession implements PayloadData {
 
-	private boolean resumable;
+    private boolean resumable;
 
-	public InvalidSession(boolean resumable) { // constructor needed for Jackson, but should not be used manually
-		this.resumable = resumable;
-	}
+    public InvalidSession(boolean resumable) { // constructor needed for Jackson, but should not be used manually
+        this.resumable = resumable;
+    }
 
-	public boolean isResumable() {
-		return resumable;
-	}
+    public boolean isResumable() {
+        return resumable;
+    }
 
-	@Override
-	public String toString() {
-		return "InvalidSession[" +
-				"resumable=" + resumable +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "InvalidSession[" +
+                "resumable=" + resumable +
+                ']';
+    }
 }

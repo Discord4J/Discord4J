@@ -22,46 +22,46 @@ import javax.annotation.Nullable;
 
 public class GameAssetsResponse {
 
-	@JsonProperty("large_image")
-	@Nullable
-	private String largeImage;
-	@JsonProperty("large_text")
-	@Nullable
-	private String largeText;
-	@JsonProperty("small_image")
-	@Nullable
-	private String smallImage;
-	@JsonProperty("small_text")
-	@Nullable
-	private String smallText;
+    @JsonProperty("large_image")
+    @Nullable
+    private String largeImage;
+    @JsonProperty("large_text")
+    @Nullable
+    private String largeText;
+    @JsonProperty("small_image")
+    @Nullable
+    private String smallImage;
+    @JsonProperty("small_text")
+    @Nullable
+    private String smallText;
 
-	@Nullable
-	public String getLargeImage() {
-		return largeImage;
-	}
+    @Nullable
+    public String getLargeImage() {
+        return largeImage;
+    }
 
-	@Nullable
-	public String getLargeText() {
-		return largeText;
-	}
+    @Nullable
+    public String getLargeText() {
+        return largeText;
+    }
 
-	@Nullable
-	public String getSmallImage() {
-		return smallImage;
-	}
+    @Nullable
+    public String getSmallImage() {
+        return smallImage;
+    }
 
-	@Nullable
-	public String getSmallText() {
-		return smallText;
-	}
+    @Nullable
+    public String getSmallText() {
+        return smallText;
+    }
 
-	@Override
-	public String toString() {
-		return "GameAssetsResponse[" +
-				"largeImage=" + largeImage +
-				", largeText=" + largeText +
-				", smallImage=" + smallImage +
-				", smallText=" + smallText +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GameAssetsResponse[" +
+                "largeImage=" + largeImage +
+                ", largeText=" + largeText +
+                ", smallImage=" + smallImage +
+                ", smallText=" + smallText +
+                ']';
+    }
 }

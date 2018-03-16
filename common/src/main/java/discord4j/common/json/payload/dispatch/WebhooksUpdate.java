@@ -21,26 +21,26 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class WebhooksUpdate implements Dispatch {
 
-	@JsonProperty("guild_id")
-	@UnsignedJson
-	private long guildId;
-	@JsonProperty("channel_id")
-	@UnsignedJson
-	private long channelId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
 
-	public long getGuildId() {
-		return guildId;
-	}
+    public long getGuildId() {
+        return guildId;
+    }
 
-	public long getChannelId() {
-		return channelId;
-	}
+    public long getChannelId() {
+        return channelId;
+    }
 
-	@Override
-	public String toString() {
-		return "WebhooksUpdate[" +
-				"guildId=" + guildId +
-				", channelId=" + channelId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "WebhooksUpdate[" +
+                "guildId=" + guildId +
+                ", channelId=" + channelId +
+                ']';
+    }
 }

@@ -36,98 +36,98 @@ import org.junit.Test;
 
 public class UserServiceTest {
 
-	private static final long user = Long.parseUnsignedLong(System.getenv("member"));
+    private static final long user = Long.parseUnsignedLong(System.getenv("member"));
 
-	private UserService userService = null;
+    private UserService userService = null;
 
-	private UserService getUserService() {
+    private UserService getUserService() {
 
-		if (userService != null) {
-			return userService;
-		}
+        if (userService != null) {
+            return userService;
+        }
 
-		String token = System.getenv("token");
-		ObjectMapper mapper = getMapper();
+        String token = System.getenv("token");
+        ObjectMapper mapper = getMapper();
 
-		SimpleHttpClient httpClient = SimpleHttpClient.builder()
-				.baseUrl(Routes.BASE_URL)
-				.defaultHeader("Authorization", "Bot " + token)
-				.defaultHeader("Content-Type", "application/json")
-				.readerStrategy(new JacksonReaderStrategy<>(mapper))
-				.readerStrategy(new EmptyReaderStrategy())
-				.writerStrategy(new JacksonWriterStrategy(mapper))
-				.writerStrategy(new EmptyWriterStrategy())
-				.build();
+        SimpleHttpClient httpClient = SimpleHttpClient.builder()
+                .baseUrl(Routes.BASE_URL)
+                .defaultHeader("Authorization", "Bot " + token)
+                .defaultHeader("Content-Type", "application/json")
+                .readerStrategy(new JacksonReaderStrategy<>(mapper))
+                .readerStrategy(new EmptyReaderStrategy())
+                .writerStrategy(new JacksonWriterStrategy(mapper))
+                .writerStrategy(new EmptyWriterStrategy())
+                .build();
 
-		Router router = new Router(httpClient);
+        Router router = new Router(httpClient);
 
-		return userService = new UserService(router);
-	}
+        return userService = new UserService(router);
+    }
 
-	private ObjectMapper getMapper() {
-		return new ObjectMapper()
-				.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-				.registerModule(new PossibleModule());
-	}
+    private ObjectMapper getMapper() {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .registerModule(new PossibleModule());
+    }
 
-	@Test
-	public void testGetCurrentUser() {
-		getUserService().getCurrentUser().block();
-	}
+    @Test
+    public void testGetCurrentUser() {
+        getUserService().getCurrentUser().block();
+    }
 
-	@Test
-	public void testGetUser() {
-		getUserService().getUser(user).block();
-	}
+    @Test
+    public void testGetUser() {
+        getUserService().getUser(user).block();
+    }
 
-	@Test
-	public void testGetInvalidUser() {
-		try {
-			getUserService().getUser(1111222).block(); // should throw ClientException
-		} catch (ClientException e) {
-			e.getErrorResponse().blockOptional().ifPresent(response -> {
-				System.out.println("Error code: " + response.getCode());
-				System.out.println("Error message: " + response.getMessage());
-			});
-		}
-	}
+    @Test
+    public void testGetInvalidUser() {
+        try {
+            getUserService().getUser(1111222).block(); // should throw ClientException
+        } catch (ClientException e) {
+            e.getErrorResponse().blockOptional().ifPresent(response -> {
+                System.out.println("Error code: " + response.getCode());
+                System.out.println("Error message: " + response.getMessage());
+            });
+        }
+    }
 
-	@Test
-	public void testModifyCurrentUser() {
-		UserModifyRequest req = new UserModifyRequest(Possible.of("Discord4J 3 Test Bot"), Possible.absent());
-		getUserService().modifyCurrentUser(req).block();
-	}
+    @Test
+    public void testModifyCurrentUser() {
+        UserModifyRequest req = new UserModifyRequest(Possible.of("Discord4J 3 Test Bot"), Possible.absent());
+        getUserService().modifyCurrentUser(req).block();
+    }
 
-	@Test
-	public void testGetCurrentUserGuilds() {
-		getUserService().getCurrentUserGuilds().block();
-	}
+    @Test
+    public void testGetCurrentUserGuilds() {
+        getUserService().getCurrentUserGuilds().block();
+    }
 
-	@Test
-	public void testLeaveGuild() {
-		// TODO
-	}
+    @Test
+    public void testLeaveGuild() {
+        // TODO
+    }
 
-	@Test
-	public void testGetUserDMs() {
-		getUserService().getUserDMs().block();
-	}
+    @Test
+    public void testGetUserDMs() {
+        getUserService().getUserDMs().block();
+    }
 
-	@Test
-	public void testCreateDM() {
-		DMCreateRequest req = new DMCreateRequest(user);
-		getUserService().createDM(req).block();
-	}
+    @Test
+    public void testCreateDM() {
+        DMCreateRequest req = new DMCreateRequest(user);
+        getUserService().createDM(req).block();
+    }
 
-	@Test
-	public void testCreateGroupDM() {
-		// TODO
-	}
+    @Test
+    public void testCreateGroupDM() {
+        // TODO
+    }
 
-	@Test
-	public void testGetUserConnections() {
-		// TODO
-	}
+    @Test
+    public void testGetUserConnections() {
+        // TODO
+    }
 
 }

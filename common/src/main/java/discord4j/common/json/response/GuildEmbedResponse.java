@@ -23,26 +23,26 @@ import javax.annotation.Nullable;
 
 public class GuildEmbedResponse {
 
-	private boolean enabled;
-	@JsonProperty("channel_id")
-	@Nullable
-	@UnsignedJson
-	private Long channelId;
+    private boolean enabled;
+    @JsonProperty("channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long channelId;
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-	@Nullable
-	public Long getChannelId() {
-		return channelId;
-	}
+    @Nullable
+    public Long getChannelId() {
+        return channelId;
+    }
 
-	@Override
-	public String toString() {
-		return "GuildEmbedResponse[" +
-				"enabled=" + enabled +
-				", channelId=" + channelId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "GuildEmbedResponse[" +
+                "enabled=" + enabled +
+                ", channelId=" + channelId +
+                ']';
+    }
 }

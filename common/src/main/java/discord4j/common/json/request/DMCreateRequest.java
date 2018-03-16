@@ -21,18 +21,18 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class DMCreateRequest {
 
-	@JsonProperty("recipient_id")
-	@UnsignedJson
-	private final long recipientId;
+    @JsonProperty("recipient_id")
+    @UnsignedJson
+    private final long recipientId;
 
-	public DMCreateRequest(long recipientId) {
-		this.recipientId = recipientId;
-	}
+    public DMCreateRequest(long recipientId) {
+        this.recipientId = recipientId;
+    }
 
-	@Override
-	public String toString() {
-		return "DMCreateRequest[" +
-				"recipientId=" + recipientId +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "DMCreateRequest[" +
+                "recipientId=" + recipientId +
+                ']';
+    }
 }

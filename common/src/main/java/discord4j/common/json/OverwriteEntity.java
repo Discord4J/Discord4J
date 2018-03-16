@@ -20,61 +20,61 @@ import discord4j.common.jackson.UnsignedJson;
 
 public class OverwriteEntity {
 
-	@UnsignedJson
-	private long id;
-	private String type;
-	private int allow;
-	private int deny;
+    @UnsignedJson
+    private long id;
+    private String type;
+    private int allow;
+    private int deny;
 
-	public OverwriteEntity(long id, String type, int allow, int deny) {
-		this.id = id;
-		this.type = type;
-		this.allow = allow;
-		this.deny = deny;
-	}
+    public OverwriteEntity(long id, String type, int allow, int deny) {
+        this.id = id;
+        this.type = type;
+        this.allow = allow;
+        this.deny = deny;
+    }
 
-	public OverwriteEntity() {
-	}
+    public OverwriteEntity() {
+    }
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public void setId(long id) {
+        this.id = id;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public int getAllow() {
-		return allow;
-	}
+    public int getAllow() {
+        return allow;
+    }
 
-	public void setAllow(int allow) {
-		this.allow = allow;
-	}
+    public void setAllow(int allow) {
+        this.allow = allow;
+    }
 
-	public int getDeny() {
-		return deny;
-	}
+    public int getDeny() {
+        return deny;
+    }
 
-	public void setDeny(int deny) {
-		this.deny = deny;
-	}
+    public void setDeny(int deny) {
+        this.deny = deny;
+    }
 
-	@Override
-	public String toString() {
-		return "OverwriteEntity[" +
-				"id=" + id +
-				", type=" + type +
-				", allow=" + allow +
-				", deny=" + deny +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "OverwriteEntity[" +
+                "id=" + id +
+                ", type=" + type +
+                ", allow=" + allow +
+                ", deny=" + deny +
+                ']';
+    }
 }

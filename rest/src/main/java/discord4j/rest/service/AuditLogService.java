@@ -25,13 +25,13 @@ import java.util.Map;
 
 public class AuditLogService extends RestService {
 
-	public AuditLogService(Router router) {
-		super(router);
-	}
+    public AuditLogService(Router router) {
+        super(router);
+    }
 
-	public Mono<AuditLogResponse> getAuditLog(long guildId, Map<String, Object> queryParams) {
-		return Routes.AUDIT_LOG_GET.newRequest(guildId)
-				.query(queryParams)
-				.exchange(getRouter());
-	}
+    public Mono<AuditLogResponse> getAuditLog(long guildId, Map<String, Object> queryParams) {
+        return Routes.AUDIT_LOG_GET.newRequest(guildId)
+                .query(queryParams)
+                .exchange(getRouter());
+    }
 }

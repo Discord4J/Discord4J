@@ -24,51 +24,51 @@ import java.util.Arrays;
 
 public class PresenceResponse {
 
-	private UserResponse user;
-	@UnsignedJson
-	@Nullable
-	private long[] roles;
-	@Nullable
-	private GameResponse game;
-	@JsonProperty("guild_id")
-	@Nullable
-	@UnsignedJson
-	private Long guildId;
-	@Nullable
-	private String status;
+    private UserResponse user;
+    @UnsignedJson
+    @Nullable
+    private long[] roles;
+    @Nullable
+    private GameResponse game;
+    @JsonProperty("guild_id")
+    @Nullable
+    @UnsignedJson
+    private Long guildId;
+    @Nullable
+    private String status;
 
-	public UserResponse getUser() {
-		return user;
-	}
+    public UserResponse getUser() {
+        return user;
+    }
 
-	@Nullable
-	public long[] getRoles() {
-		return roles;
-	}
+    @Nullable
+    public long[] getRoles() {
+        return roles;
+    }
 
-	@Nullable
-	public GameResponse getGame() {
-		return game;
-	}
+    @Nullable
+    public GameResponse getGame() {
+        return game;
+    }
 
-	@Nullable
-	public Long getGuildId() {
-		return guildId;
-	}
+    @Nullable
+    public Long getGuildId() {
+        return guildId;
+    }
 
-	@Nullable
-	public String getStatus() {
-		return status;
-	}
+    @Nullable
+    public String getStatus() {
+        return status;
+    }
 
-	@Override
-	public String toString() {
-		return "PresenceResponse[" +
-				"user=" + user +
-				", roles=" + Arrays.toString(roles) +
-				", game=" + game +
-				", guildId=" + guildId +
-				", status=" + status +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "PresenceResponse[" +
+                "user=" + user +
+                ", roles=" + Arrays.toString(roles) +
+                ", game=" + game +
+                ", guildId=" + guildId +
+                ", status=" + status +
+                ']';
+    }
 }

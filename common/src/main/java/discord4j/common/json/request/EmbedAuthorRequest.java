@@ -20,23 +20,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EmbedAuthorRequest {
 
-	private final String name;
-	private final String url;
-	@JsonProperty("icon_url")
-	private final String iconUrl;
+    private final String name;
+    private final String url;
+    @JsonProperty("icon_url")
+    private final String iconUrl;
 
-	public EmbedAuthorRequest(String name, String url, String iconUrl) {
-		this.name = name;
-		this.url = url;
-		this.iconUrl = iconUrl;
-	}
+    public EmbedAuthorRequest(String name, String url, String iconUrl) {
+        this.name = name;
+        this.url = url;
+        this.iconUrl = iconUrl;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedAuthorRequest[" +
-				"name=" + name +
-				", url=" + url +
-				", iconUrl=" + iconUrl +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedAuthorRequest[" +
+                "name=" + name +
+                ", url=" + url +
+                ", iconUrl=" + iconUrl +
+                ']';
+    }
 }

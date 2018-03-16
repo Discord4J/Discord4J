@@ -22,87 +22,87 @@ import javax.annotation.Nullable;
 
 public class InviteResponse {
 
-	private String code;
-	private GuildResponse guild;
-	private ChannelResponse channel;
-	@Nullable
-	private UserResponse inviter;
-	@Nullable
-	private Integer uses;
-	@JsonProperty("max_uses")
-	@Nullable
-	private Integer maxUses;
-	@JsonProperty("max_age")
-	@Nullable
-	private Integer maxAge;
-	@Nullable
-	private Boolean temporary;
-	@JsonProperty("created_at")
-	@Nullable
-	private String createdAt;
-	@Nullable
-	private Boolean revoked;
+    private String code;
+    private GuildResponse guild;
+    private ChannelResponse channel;
+    @Nullable
+    private UserResponse inviter;
+    @Nullable
+    private Integer uses;
+    @JsonProperty("max_uses")
+    @Nullable
+    private Integer maxUses;
+    @JsonProperty("max_age")
+    @Nullable
+    private Integer maxAge;
+    @Nullable
+    private Boolean temporary;
+    @JsonProperty("created_at")
+    @Nullable
+    private String createdAt;
+    @Nullable
+    private Boolean revoked;
 
-	public String getCode() {
-		return code;
-	}
+    public String getCode() {
+        return code;
+    }
 
-	public GuildResponse getGuild() {
-		return guild;
-	}
+    public GuildResponse getGuild() {
+        return guild;
+    }
 
-	public ChannelResponse getChannel() {
-		return channel;
-	}
+    public ChannelResponse getChannel() {
+        return channel;
+    }
 
-	@Nullable
-	public UserResponse getInviter() {
-		return inviter;
-	}
+    @Nullable
+    public UserResponse getInviter() {
+        return inviter;
+    }
 
-	@Nullable
-	public Integer getUses() {
-		return uses;
-	}
+    @Nullable
+    public Integer getUses() {
+        return uses;
+    }
 
-	@Nullable
-	public Integer getMaxUses() {
-		return maxUses;
-	}
+    @Nullable
+    public Integer getMaxUses() {
+        return maxUses;
+    }
 
-	@Nullable
-	public Integer getMaxAge() {
-		return maxAge;
-	}
+    @Nullable
+    public Integer getMaxAge() {
+        return maxAge;
+    }
 
-	@Nullable
-	public Boolean getTemporary() {
-		return temporary;
-	}
+    @Nullable
+    public Boolean getTemporary() {
+        return temporary;
+    }
 
-	@Nullable
-	public String getCreatedAt() {
-		return createdAt;
-	}
+    @Nullable
+    public String getCreatedAt() {
+        return createdAt;
+    }
 
-	@Nullable
-	public Boolean getRevoked() {
-		return revoked;
-	}
+    @Nullable
+    public Boolean getRevoked() {
+        return revoked;
+    }
 
-	@Override
-	public String toString() {
-		return "InviteResponse[" +
-				"code=" + code +
-				", guild=" + guild +
-				", channel=" + channel +
-				", inviter=" + inviter +
-				", uses=" + uses +
-				", maxUses=" + maxUses +
-				", maxAge=" + maxAge +
-				", temporary=" + temporary +
-				", createdAt=" + createdAt +
-				", revoked=" + revoked +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "InviteResponse[" +
+                "code=" + code +
+                ", guild=" + guild +
+                ", channel=" + channel +
+                ", inviter=" + inviter +
+                ", uses=" + uses +
+                ", maxUses=" + maxUses +
+                ", maxAge=" + maxAge +
+                ", temporary=" + temporary +
+                ", createdAt=" + createdAt +
+                ", revoked=" + revoked +
+                ']';
+    }
 }

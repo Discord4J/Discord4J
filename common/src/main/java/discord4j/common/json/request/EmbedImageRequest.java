@@ -18,16 +18,16 @@ package discord4j.common.json.request;
 
 public class EmbedImageRequest {
 
-	private final String url;
+    private final String url;
 
-	public EmbedImageRequest(String url) {
-		this.url = url;
-	}
+    public EmbedImageRequest(String url) {
+        this.url = url;
+    }
 
-	@Override
-	public String toString() {
-		return "EmbedImageRequest[" +
-				"url=" + url +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "EmbedImageRequest[" +
+                "url=" + url +
+                ']';
+    }
 }

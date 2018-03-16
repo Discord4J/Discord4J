@@ -21,11 +21,11 @@ import reactor.core.publisher.Mono;
 /** A Discord object that has some relative position in respect to another object. */
 public interface Positionable {
 
-	/**
-	 * Requests to retrieve the position of this object.
-	 *
-	 * @return A {@link Mono} where, upon successful completion, emits the position of this object. If an error is
-	 * received, it is emitted through the {@code Mono}.
-	 */
-	Mono<Integer> getPosition();
+    /**
+     * Requests to retrieve the position of this object.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the position of this object. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    Mono<Integer> getPosition();
 }

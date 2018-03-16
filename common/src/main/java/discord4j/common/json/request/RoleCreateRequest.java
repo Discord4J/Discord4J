@@ -18,28 +18,28 @@ package discord4j.common.json.request;
 
 public class RoleCreateRequest {
 
-	private final String name;
-	private final int permissions;
-	private final int color;
-	private final boolean hoist;
-	private final boolean mentionable;
+    private final String name;
+    private final int permissions;
+    private final int color;
+    private final boolean hoist;
+    private final boolean mentionable;
 
-	public RoleCreateRequest(String name, int permissions, int color, boolean hoist, boolean mentionable) {
-		this.name = name;
-		this.permissions = permissions;
-		this.color = color;
-		this.hoist = hoist;
-		this.mentionable = mentionable;
-	}
+    public RoleCreateRequest(String name, int permissions, int color, boolean hoist, boolean mentionable) {
+        this.name = name;
+        this.permissions = permissions;
+        this.color = color;
+        this.hoist = hoist;
+        this.mentionable = mentionable;
+    }
 
-	@Override
-	public String toString() {
-		return "RoleCreateRequest[" +
-				"name=" + name +
-				", permissions=" + permissions +
-				", color=" + color +
-				", hoist=" + hoist +
-				", mentionable=" + mentionable +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "RoleCreateRequest[" +
+                "name=" + name +
+                ", permissions=" + permissions +
+                ", color=" + color +
+                ", hoist=" + hoist +
+                ", mentionable=" + mentionable +
+                ']';
+    }
 }

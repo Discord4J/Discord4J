@@ -22,17 +22,17 @@ import java.util.Arrays;
 
 public class Resumed implements Dispatch {
 
-	@JsonProperty("_trace")
-	private String[] trace;
+    @JsonProperty("_trace")
+    private String[] trace;
 
-	public String[] getTrace() {
-		return trace;
-	}
+    public String[] getTrace() {
+        return trace;
+    }
 
-	@Override
-	public String toString() {
-		return "Resumed[" +
-				"trace=" + Arrays.toString(trace) +
-				']';
-	}
+    @Override
+    public String toString() {
+        return "Resumed[" +
+                "trace=" + Arrays.toString(trace) +
+                ']';
+    }
 }

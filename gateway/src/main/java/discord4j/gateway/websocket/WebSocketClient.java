@@ -24,29 +24,29 @@ import reactor.ipc.netty.http.client.HttpClient;
  */
 public class WebSocketClient {
 
-	private final HttpClient httpClient;
+    private final HttpClient httpClient;
 
-	public WebSocketClient() {
-		this(HttpClient.create());
-	}
+    public WebSocketClient() {
+        this(HttpClient.create());
+    }
 
-	public WebSocketClient(HttpClient httpClient) {
-		this.httpClient = httpClient;
-	}
+    public WebSocketClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
 
-	/**
-	 * Execute a handshake request to the given url and handle the resulting WebSocket session with the given handler.
-	 *
-	 * @param url the handshake url
-	 * @param handler the handler of the WebSocket session
-	 * @return completion {@code Mono<Void>} to indicate the outcome of the WebSocket session handling.
-	 */
-	public Mono<Void> execute(String url, WebSocketHandler handler) {
-		return this.httpClient
-				.ws(url, headers -> {}, null)
-				.flatMap(response ->
-						response.receiveWebsocket((in, out) ->
-								handler.handle(new WebSocketSession(in, out))));
-	}
+    /**
+     * Execute a handshake request to the given url and handle the resulting WebSocket session with the given handler.
+     *
+     * @param url the handshake url
+     * @param handler the handler of the WebSocket session
+     * @return completion {@code Mono<Void>} to indicate the outcome of the WebSocket session handling.
+     */
+    public Mono<Void> execute(String url, WebSocketHandler handler) {
+        return this.httpClient
+                .ws(url, headers -> {}, null)
+                .flatMap(response ->
+                        response.receiveWebsocket((in, out) ->
+                                handler.handle(new WebSocketSession(in, out))));
+    }
 
 }

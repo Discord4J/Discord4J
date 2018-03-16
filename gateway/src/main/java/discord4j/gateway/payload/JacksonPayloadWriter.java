@@ -25,18 +25,18 @@ import reactor.core.Exceptions;
 
 public class JacksonPayloadWriter implements PayloadWriter {
 
-	private final ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
-	public JacksonPayloadWriter(ObjectMapper mapper) {
-		this.mapper = mapper;
-	}
+    public JacksonPayloadWriter(ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
 
-	@Override
-	public ByteBuf write(GatewayPayload<?> payload) {
-		try {
-			return Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload));
-		} catch (JsonProcessingException e) {
-			throw Exceptions.propagate(e);
-		}
-	}
+    @Override
+    public ByteBuf write(GatewayPayload<?> payload) {
+        try {
+            return Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload));
+        } catch (JsonProcessingException e) {
+            throw Exceptions.propagate(e);
+        }
+    }
 }
