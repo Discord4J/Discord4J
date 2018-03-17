@@ -20,6 +20,7 @@ package discord4j.core.event;
 import discord4j.common.json.payload.dispatch.*;
 import discord4j.core.event.domain.*;
 import discord4j.gateway.retry.GatewayStateChange;
+import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,189 +85,189 @@ public abstract class DispatchHandlers {
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
     @SuppressWarnings("unchecked")
-    public static <D extends Dispatch, E extends Event> E handle(DispatchContext<D> context) {
+    public static <D extends Dispatch, E extends Event> Flux<E> handle(DispatchContext<D> context) {
         DispatchHandler<D, E> entry = (DispatchHandler<D, E>) handlerMap.get(context.getDispatch().getClass());
         if (entry == null) {
-            return null;
+            return Flux.empty();
         }
         return entry.handle(context);
     }
 
-    private static Event channelDelete(DispatchContext<ChannelDelete> context) {
+    private static Flux<Event> channelDelete(DispatchContext<ChannelDelete> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event channelPinsUpdate(DispatchContext<ChannelPinsUpdate> context) {
+    private static Flux<Event> channelPinsUpdate(DispatchContext<ChannelPinsUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event channelUpdate(DispatchContext<ChannelUpdate> context) {
+    private static Flux<Event> channelUpdate(DispatchContext<ChannelUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildBanAdd(DispatchContext<GuildBanAdd> context) {
+    private static Flux<Event> guildBanAdd(DispatchContext<GuildBanAdd> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildBanRemove(DispatchContext<GuildBanRemove> context) {
+    private static Flux<Event> guildBanRemove(DispatchContext<GuildBanRemove> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildCreate(DispatchContext<GuildCreate> context) {
+    private static Flux<Event> guildCreate(DispatchContext<GuildCreate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildDelete(DispatchContext<GuildDelete> context) {
+    private static Flux<Event> guildDelete(DispatchContext<GuildDelete> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
+    private static Flux<Event> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
+    private static Flux<Event> guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildMemberAdd(DispatchContext<GuildMemberAdd> context) {
+    private static Flux<Event> guildMemberAdd(DispatchContext<GuildMemberAdd> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
+    private static Flux<Event> guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
+    private static Flux<Event> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {
+    private static Flux<Event> guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
+    private static Flux<Event> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildRoleDelete(DispatchContext<GuildRoleDelete> context) {
+    private static Flux<Event> guildRoleDelete(DispatchContext<GuildRoleDelete> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {
+    private static Flux<Event> guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event guildUpdate(DispatchContext<GuildUpdate> context) {
+    private static Flux<Event> guildUpdate(DispatchContext<GuildUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static MessageCreatedEvent messageCreate(DispatchContext<MessageCreate> context) {
+    private static Flux<MessageCreatedEvent> messageCreate(DispatchContext<MessageCreate> context) {
         // TODO
-        return new MessageCreatedEvent(context.getDispatch());
+        return Flux.just(new MessageCreatedEvent(context.getDispatch()));
     }
 
-    private static Event messageDelete(DispatchContext<MessageDelete> context) {
+    private static Flux<Event> messageDelete(DispatchContext<MessageDelete> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
+    private static Flux<Event> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
+    private static Flux<Event> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
+    private static Flux<Event> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
+    private static Flux<Event> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event messageUpdate(DispatchContext<MessageUpdate> context) {
+    private static Flux<Event> messageUpdate(DispatchContext<MessageUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event presenceUpdate(DispatchContext<PresenceUpdate> context) {
+    private static Flux<Event> presenceUpdate(DispatchContext<PresenceUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static ReadyEvent ready(DispatchContext<Ready> context) {
+    private static Flux<ReadyEvent> ready(DispatchContext<Ready> context) {
         // TODO
-        return new ReadyEvent(context.getDispatch());
+        return Flux.just(new ReadyEvent(context.getDispatch()));
     }
 
-    private static Event resumed(DispatchContext<Resumed> context) {
+    private static Flux<Event> resumed(DispatchContext<Resumed> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event typingStart(DispatchContext<TypingStart> context) {
+    private static Flux<Event> typingStart(DispatchContext<TypingStart> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event userUpdate(DispatchContext<UserUpdate> context) {
+    private static Flux<Event> userUpdate(DispatchContext<UserUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
+    private static Flux<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
+    private static Flux<Event> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
+    private static Flux<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
         // TODO
-        return null;
+        return Flux.empty();
     }
 
-    private static Event gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
+    private static Flux<Event> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
-                return new ConnectedEvent();
+                return Flux.just(new ConnectedEvent());
             case RETRY_STARTED:
-                return new ReconnectStartedEvent();
+                return Flux.just(new ReconnectStartedEvent());
             case RETRY_FAILED:
-                return new ReconnectFailedEvent();
+                return Flux.just(new ReconnectFailedEvent());
             case RETRY_SUCCEEDED:
-                return new ReconnectedEvent();
+                return Flux.just(new ReconnectedEvent());
             case DISCONNECTED:
-                return new DisconnectedEvent();
+                return Flux.just(new DisconnectedEvent());
         }
-        return null;
+        return Flux.empty();
     }
 
 }

@@ -66,7 +66,7 @@ public class RetryBotTest {
 
         client.gatewayClient.dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, client.impl))
-                .flatMap(context -> Mono.justOrEmpty(DispatchHandlers.<Dispatch, Event>handle(context)))
+                .flatMap(DispatchHandlers::<Dispatch, Event>handle)
                 .subscribeWith(client.eventProcessor);
 
         CommandListener commandListener = new CommandListener(client);

@@ -19,6 +19,7 @@ package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.core.event.domain.Event;
+import reactor.core.publisher.Flux;
 
 /**
  * Handler for the gateway Dispatch events.
@@ -30,13 +31,13 @@ import discord4j.core.event.domain.Event;
 public interface DispatchHandler<D extends Dispatch, E extends Event> {
 
     /**
-     * Operates and transforms a Dispatch event with its context, from gateway to a user-friendly Event, so it may be
+     * Operates and transforms a Dispatch event with its context, from gateway to user-friendly Events, so it may be
      * further routed to an event dispatcher downstream.
      * <p>
      * The context allows access to underlying client resources for operations like caching.
      *
      * @param context the dispatch context
-     * @return at most one Event that is derived from the given dispatch context
+     * @return a Flux of Events that are derived from the given dispatch context
      */
-    E handle(DispatchContext<D> context);
+    Flux<E> handle(DispatchContext<D> context);
 }
