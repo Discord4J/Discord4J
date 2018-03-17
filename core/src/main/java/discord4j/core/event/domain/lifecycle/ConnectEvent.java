@@ -15,26 +15,12 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.event.domain;
+package discord4j.core.event.domain.lifecycle;
 
-import discord4j.common.json.payload.dispatch.MessageCreate;
-
-public class MessageCreatedEvent implements Event {
-
-    private final MessageCreate messageCreate;
-
-    public MessageCreatedEvent(MessageCreate messageCreate) {
-        this.messageCreate = messageCreate;
-    }
-
-    public MessageCreate getMessageCreate() {
-        return messageCreate;
-    }
+public class ConnectEvent implements GatewayLifecycleEvent {
 
     @Override
     public String toString() {
-        return "MessageCreatedEvent[" +
-                "messageCreate=" + messageCreate +
-                ']';
+        return "Gateway connection established";
     }
 }

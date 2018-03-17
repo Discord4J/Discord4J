@@ -8,33 +8,91 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.event.domain;
 
-import discord4j.common.json.payload.dispatch.Ready;
+import discord4j.core.object.Snowflake;
+import discord4j.core.object.entity.User;
+
+import java.util.Objects;
+import java.util.Set;
 
 public class ReadyEvent implements Event {
 
-    private final Ready ready;
+    private final int gatewayVersion;
+    private final User self;
+    private final Set<Guild> guilds;
+    private final String sessionId;
+    private final String[] trace;
 
-    public ReadyEvent(Ready ready) {
-        this.ready = ready;
+    public ReadyEvent(int gatewayVersion, User self, Set<Guild> guilds, String sessionId, String[] trace) {
+        this.gatewayVersion = gatewayVersion;
+        this.self = self;
+        this.guilds = guilds;
+        this.sessionId = sessionId;
+        this.trace = trace;
     }
 
-    public Ready getReady() {
-        return ready;
+    public int getGatewayVersion() {
+        return gatewayVersion;
     }
 
-    @Override
-    public String toString() {
-        return "ReadyEvent[" +
-                "ready=" + ready +
-                ']';
+    public User getSelf() {
+        return self;
     }
+
+    public Set<Guild> getGuilds() {
+        return guilds;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public String[] getTrace() {
+        return trace;
+    }
+
+    public static class Guild {
+
+        private final long id;
+        private final boolean available;
+
+        public Guild(long id, boolean available) {
+            this.id = id;
+            this.available = available;
+        }
+
+        public Snowflake getId() {
+            return Snowflake.of(id);
+        }
+
+        public boolean isAvailable() {
+            return available;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Guild guild = (Guild) o;
+            return id == guild.id &&
+                    available == guild.available;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, available);
+        }
+    }
+
 }

@@ -30,6 +30,9 @@ import discord4j.core.event.DispatchContext;
 import discord4j.core.event.DispatchHandlers;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.lifecycle.*;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -153,20 +156,22 @@ public class RetryBotTest {
                     .map(res -> res.getOwner().getId())
                     .subscribe(ownerId::set);
 
-            client.dispatcher.on(MessageCreatedEvent.class)
-                    .subscribe(wrappedEvent -> {
-                        MessageCreate event = wrappedEvent.getMessageCreate();
-                        MessageResponse message = event.getMessage();
-                        if (ownerId.get() == message.getAuthor().getId()) {
-                            String content = message.getContent();
-                            if ("!close".equals(content)) {
-                                client.gatewayClient.close(false);
-                            } else if ("!retry".equals(content)) {
-                                client.gatewayClient.close(true);
-                            } else if ("!fail".equals(content)) {
-                                outboundSink.next(new GatewayPayload<>());
-                            }
-                        }
+            client.dispatcher.on(MessageCreateEvent.class)
+                    .subscribe(event -> {
+                        Message message = event.getMessage();
+
+                        message.getAuthorId()
+                                .filter(id -> ownerId.get() == id.asLong())
+                                .flatMap(id -> message.getContent())
+                                .ifPresent(content -> {
+                                    if ("!close".equals(content)) {
+                                        client.gatewayClient.close(false);
+                                    } else if ("!retry".equals(content)) {
+                                        client.gatewayClient.close(true);
+                                    } else if ("!fail".equals(content)) {
+                                        outboundSink.next(new GatewayPayload<>());
+                                    }
+                                });
                     });
         }
     }
@@ -180,11 +185,11 @@ public class RetryBotTest {
         }
 
         void configure() {
-            client.dispatcher.on(ConnectedEvent.class).subscribe();
-            client.dispatcher.on(DisconnectedEvent.class).subscribe();
-            client.dispatcher.on(ReconnectStartedEvent.class).subscribe();
-            client.dispatcher.on(ReconnectedEvent.class).subscribe();
-            client.dispatcher.on(ReconnectFailedEvent.class).subscribe();
+            client.dispatcher.on(ConnectEvent.class).subscribe();
+            client.dispatcher.on(DisconnectEvent.class).subscribe();
+            client.dispatcher.on(ReconnectStartEvent.class).subscribe();
+            client.dispatcher.on(ReconnectEvent.class).subscribe();
+            client.dispatcher.on(ReconnectFailEvent.class).subscribe();
         }
 
     }
