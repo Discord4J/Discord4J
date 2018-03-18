@@ -16,18 +16,19 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
 
-public class UnbanEvent implements Event {
+public class UnbanEvent extends GuildEvent {
 
     private final User user;
     private final long guildId;
 
-    public UnbanEvent(User user, long guildId) {
+    public UnbanEvent(Client client, User user, long guildId) {
+        super(client);
         this.user = user;
         this.guildId = guildId;
     }

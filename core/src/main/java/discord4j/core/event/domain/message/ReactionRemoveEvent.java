@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Message;
@@ -24,14 +24,15 @@ import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
 
-public class ReactionRemoveEvent implements Event {
+public class ReactionRemoveEvent extends MessageEvent {
 
     private final long userId;
     private final long channelId;
     private final long messageId;
     private final GuildEmoji emoji; // TODO need GuildEmoji | Unicode type
 
-    public ReactionRemoveEvent(long userId, long channelId, long messageId, GuildEmoji emoji) {
+    public ReactionRemoveEvent(Client client, long userId, long channelId, long messageId, GuildEmoji emoji) {
+        super(client);
         this.userId = userId;
         this.channelId = channelId;
         this.messageId = messageId;

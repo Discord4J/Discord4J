@@ -17,5 +17,17 @@
 
 package discord4j.core.event.domain;
 
-public interface Event {
+import discord4j.core.Client;
+
+public abstract class Event {
+
+    private final Client client;
+
+    public Event(Client client) {
+        this.client = client;
+    }
+
+    public Client getClient() {
+        return client;
+    }
 }

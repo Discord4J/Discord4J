@@ -25,25 +25,26 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.Client;
 
-public class ReconnectStartEvent extends GatewayLifecycleEvent {
+public class ResumeEvent extends GatewayLifecycleEvent {
 
-    public ReconnectStartEvent(Client client) {
+    private final String[] trace;
+
+    public ResumeEvent(Client client, String[] trace) {
         super(client);
+        this.trace = trace;
     }
 
-    @Override
-    public String toString() {
-        return "Gateway reconnect attempt started";
+    public String[] getTrace() {
+        return trace;
     }
 }

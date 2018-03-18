@@ -14,17 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain;
+package discord4j.core.event.domain.channel;
 
-public class ResumeEvent implements Event {
+import discord4j.core.Client;
+import discord4j.core.event.domain.Event;
 
-    private final String[] trace;
+public abstract class ChannelEvent extends Event {
 
-    public ResumeEvent(String[] trace) {
-        this.trace = trace;
-    }
-
-    public String[] getTrace() {
-        return trace;
+    public ChannelEvent(Client client) {
+        super(client);
     }
 }

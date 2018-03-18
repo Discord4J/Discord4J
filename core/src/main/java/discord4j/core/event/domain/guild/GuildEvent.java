@@ -16,29 +16,12 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.object.Snowflake;
-import discord4j.core.object.entity.Guild;
-import reactor.core.publisher.Mono;
+import discord4j.core.Client;
+import discord4j.core.event.domain.Event;
 
-public class RoleDeleteEvent {
+public abstract class GuildEvent extends Event {
 
-    private final long guildId;
-    private final long roleId;
-
-    public RoleDeleteEvent(long guildId, long roleId) {
-        this.guildId = guildId;
-        this.roleId = roleId;
-    }
-
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
-    }
-
-    public Snowflake getRoleId() {
-        return Snowflake.of(roleId);
+    public GuildEvent(Client client) {
+        super(client);
     }
 }

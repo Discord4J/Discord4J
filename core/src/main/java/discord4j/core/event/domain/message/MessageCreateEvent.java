@@ -16,14 +16,15 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.entity.Message;
 
-public class MessageCreateEvent implements Event {
+public class MessageCreateEvent extends MessageEvent {
 
     private final Message message;
 
-    public MessageCreateEvent(Message message) {
+    public MessageCreateEvent(Client client, Message message) {
+        super(client);
         this.message = message;
     }
 

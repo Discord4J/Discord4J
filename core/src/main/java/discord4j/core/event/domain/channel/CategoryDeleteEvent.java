@@ -16,14 +16,15 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.entity.Category;
 
-public class CategoryDeleteEvent implements Event {
+public class CategoryDeleteEvent extends ChannelEvent {
 
     private final Category category;
 
-    public CategoryDeleteEvent(Category category) {
+    public CategoryDeleteEvent(Client client, Category category) {
+        super(client);
         this.category = category;
     }
 

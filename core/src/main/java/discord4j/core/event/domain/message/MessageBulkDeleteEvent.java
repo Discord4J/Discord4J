@@ -16,19 +16,20 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MessageBulkDeleteEvent implements Event {
+public class MessageBulkDeleteEvent extends MessageEvent {
 
     private final long[] messageIds;
     private final long channelId;
 
-    public MessageBulkDeleteEvent(long[] messageIds, long channelId) {
+    public MessageBulkDeleteEvent(Client client, long[] messageIds, long channelId) {
+        super(client);
         this.messageIds = messageIds;
         this.channelId = channelId;
     }

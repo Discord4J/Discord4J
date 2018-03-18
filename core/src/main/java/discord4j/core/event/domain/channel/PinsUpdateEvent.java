@@ -16,19 +16,20 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.MessageChannel;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 
-public class PinsUpdateEvent implements Event {
+public class PinsUpdateEvent extends ChannelEvent {
 
     private final long channelId;
     private final Instant lastPinTimestamp;
 
-    public PinsUpdateEvent(long channelId, Instant lastPinTimestamp) {
+    public PinsUpdateEvent(Client client, long channelId, Instant lastPinTimestamp) {
+        super(client);
         this.channelId = channelId;
         this.lastPinTimestamp = lastPinTimestamp;
     }

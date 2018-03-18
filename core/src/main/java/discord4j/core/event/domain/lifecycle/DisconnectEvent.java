@@ -17,7 +17,13 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-public class DisconnectEvent implements GatewayLifecycleEvent {
+import discord4j.core.Client;
+
+public class DisconnectEvent extends GatewayLifecycleEvent {
+
+    public DisconnectEvent(Client client) {
+        super(client);
+    }
 
     @Override
     public String toString() {

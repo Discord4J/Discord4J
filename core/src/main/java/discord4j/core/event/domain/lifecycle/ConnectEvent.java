@@ -17,7 +17,13 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-public class ConnectEvent implements GatewayLifecycleEvent {
+import discord4j.core.Client;
+
+public class ConnectEvent extends GatewayLifecycleEvent {
+
+    public ConnectEvent(Client client) {
+        super(client);
+    }
 
     @Override
     public String toString() {

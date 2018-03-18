@@ -16,16 +16,17 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.User;
 
-public class MemberLeaveEvent implements Event {
+public class MemberLeaveEvent extends GuildEvent {
 
     private final User user;
     private final long guildId;
 
-    public MemberLeaveEvent(User user, long guildId) {
+    public MemberLeaveEvent(Client client, User user, long guildId) {
+        super(client);
         this.user = user;
         this.guildId = guildId;
     }

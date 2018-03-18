@@ -14,28 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.message;
+package discord4j.core.event.domain.role;
 
 import discord4j.core.Client;
-import discord4j.core.object.Snowflake;
+import discord4j.core.event.domain.Event;
 
-public class MessageDeleteEvent extends MessageEvent {
+public abstract class RoleEvent extends Event {
 
-    private final long messageId;
-    private final long channelId;
-
-    public MessageDeleteEvent(Client client, long messageId, long channelId) {
+    public RoleEvent(Client client) {
         super(client);
-        this.messageId = messageId;
-        this.channelId = channelId;
-    }
-
-    public Snowflake getMessageId() {
-        return Snowflake.of(messageId);
-    }
-
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
     }
 }
-

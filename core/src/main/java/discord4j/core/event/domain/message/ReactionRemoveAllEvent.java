@@ -16,18 +16,19 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import reactor.core.publisher.Mono;
 
-public class ReactionRemoveAllEvent implements Event {
+public class ReactionRemoveAllEvent extends MessageEvent {
 
     private final long channelId;
     private final long messageId;
 
-    public ReactionRemoveAllEvent(long channelId, long messageId) {
+    public ReactionRemoveAllEvent(Client client, long channelId, long messageId) {
+        super(client);
         this.channelId = channelId;
         this.messageId = messageId;
     }

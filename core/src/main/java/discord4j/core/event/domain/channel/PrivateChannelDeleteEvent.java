@@ -16,14 +16,15 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.entity.PrivateChannel;
 
-public class PrivateChannelDeleteEvent implements Event {
+public class PrivateChannelDeleteEvent extends ChannelEvent {
 
     private final PrivateChannel channel;
 
-    public PrivateChannelDeleteEvent(PrivateChannel channel) {
+    public PrivateChannelDeleteEvent(Client client, PrivateChannel channel) {
+        super(client);
         this.channel = channel;
     }
 

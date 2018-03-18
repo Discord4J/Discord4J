@@ -16,14 +16,15 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.entity.Guild;
 
-public class GuildCreateEvent implements Event {
+public class GuildCreateEvent extends GuildEvent {
 
     private final Guild guild;
 
-    public GuildCreateEvent(Guild guild) {
+    public GuildCreateEvent(Client client, Guild guild) {
+        super(client);
         this.guild = guild;
     }
 

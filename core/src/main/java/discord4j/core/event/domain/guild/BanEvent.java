@@ -16,18 +16,19 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.Client;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
 
-public class BanEvent implements Event {
+public class BanEvent extends GuildEvent {
 
     private final User user;
     private final long guildId;
 
-    public BanEvent(User user, long guildId) {
+    public BanEvent(Client client, User user, long guildId) {
+        super(client);
         this.user = user;
         this.guildId = guildId;
     }

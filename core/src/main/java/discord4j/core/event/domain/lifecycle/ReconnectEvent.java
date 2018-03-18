@@ -17,11 +17,14 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-public class ReconnectEvent implements GatewayLifecycleEvent {
+import discord4j.core.Client;
+
+public class ReconnectEvent extends GatewayLifecycleEvent {
 
     private final int currentAttempt;
 
-    public ReconnectEvent(int currentAttempt) {
+    public ReconnectEvent(Client client, int currentAttempt) {
+        super(client);
         this.currentAttempt = currentAttempt;
     }
 
