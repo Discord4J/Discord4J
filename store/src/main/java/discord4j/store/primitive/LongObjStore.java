@@ -37,8 +37,8 @@ import java.io.Serializable;
 public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
 
     @Override
-    default Mono<Void> store(Long key, V value) {
-        return storeWithLong(key, value);
+    default Mono<Void> save(Long key, V value) {
+        return saveWithLong(key, value);
     }
 
     /**
@@ -48,11 +48,11 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
      * @param value The value.
      * @return A mono which signals the completion of the storage of the pair.
      */
-    Mono<Void> storeWithLong(long key, V value);
+    Mono<Void> saveWithLong(long key, V value);
 
     @Override
-    default Mono<Void> store(Iterable<Tuple2<Long, V>> entries) {
-        return storeWithLong(new MappingIterable<>(LongObjTuple2::from, entries));
+    default Mono<Void> save(Iterable<Tuple2<Long, V>> entries) {
+        return saveWithLong(new MappingIterable<>(LongObjTuple2::from, entries));
     }
 
     /**
@@ -61,11 +61,11 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
      * @param entries A mono providing the key value pairs.
      * @return A mono which signals the completion of the storage of the pairs.
      */
-    Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries);
+    Mono<Void> saveWithLong(Iterable<LongObjTuple2<V>> entries);
 
     @Override
-    default Mono<Void> store(Publisher<Tuple2<Long, V>> entryStream) {
-        return storeWithLong(Flux.from(entryStream).map(LongObjTuple2::from));
+    default Mono<Void> save(Publisher<Tuple2<Long, V>> entryStream) {
+        return saveWithLong(Flux.from(entryStream).map(LongObjTuple2::from));
     }
 
     /**
@@ -74,7 +74,7 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
      * @param entryStream A flux providing the key value pairs.
      * @return A mono which signals the completion of the storage of the pairs.
      */
-    Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream);
+    Mono<Void> saveWithLong(Publisher<LongObjTuple2<V>> entryStream);
 
     @Override
     default Mono<V> find(Long id) {

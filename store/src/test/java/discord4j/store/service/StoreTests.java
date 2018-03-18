@@ -95,11 +95,11 @@ public class StoreTests {
         }
 
         void testPut() {
-            connection.store("hello", "world").block();
-            connection.store(Mono.defer(() -> Mono.just(Tuples.of("hello1", "world1")))).block();
-            connection.store(Flux.fromArray(new Tuple2[]{Tuples.of("hello2", "world2"), Tuples.of("hello3", "world3")}))
+            connection.save("hello", "world").block();
+            connection.save(Mono.defer(() -> Mono.just(Tuples.of("hello1", "world1")))).block();
+            connection.save(Flux.fromArray(new Tuple2[]{Tuples.of("hello2", "world2"), Tuples.of("hello3", "world3")}))
                     .block();
-            connection.store(Arrays.asList(Tuples.of("hello4", "world4"), Tuples.of("hello5", "world5"))).block();
+            connection.save(Arrays.asList(Tuples.of("hello4", "world4"), Tuples.of("hello5", "world5"))).block();
         }
 
         void testFind() {

@@ -24,7 +24,7 @@ import discord4j.store.service.StoreService;
 import java.io.Serializable;
 
 /**
- * Service which provides stores that do nothing. This is automatically used if no valid store services are found.
+ * Service which provides stores that do nothing. This is automatically used if no valid save services are found.
  *
  * @see NoOpStore
  * @see NoOpLongObjStore

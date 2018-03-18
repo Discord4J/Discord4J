@@ -49,7 +49,7 @@ public interface StoreService {
      * {@link Comparable} in order to allow for range operations.
      * @param <V> The value type, these follow
      * <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
-     * @return A mono which provides a store instance.
+     * @return A mono which provides a save instance.
      */
     <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V>
             valueClass);
@@ -68,7 +68,7 @@ public interface StoreService {
      * @param valueClass The class of the values.
      * @param <V> The value type, these follow
      * <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
-     * @return A mono which provides a store instance.
+     * @return A mono which provides a save instance.
      */
     <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass);
 }

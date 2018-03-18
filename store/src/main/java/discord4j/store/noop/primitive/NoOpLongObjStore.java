@@ -34,17 +34,17 @@ import java.io.Serializable;
 public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V> {
 
     @Override
-    public Mono<Void> storeWithLong(long key, V value) {
+    public Mono<Void> saveWithLong(long key, V value) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
+    public Mono<Void> saveWithLong(Iterable<LongObjTuple2<V>> entries) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream) {
+    public Mono<Void> saveWithLong(Publisher<LongObjTuple2<V>> entryStream) {
         return Mono.empty();
     }
 

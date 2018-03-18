@@ -32,7 +32,7 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     private final Map<K, V> map = new ConcurrentHashMap<>();
 
     @Override
-    public Mono<Void> store(K key, V value) {
+    public Mono<Void> save(K key, V value) {
         return Mono.defer(() -> {
             map.put(key, value);
             return Mono.empty();
@@ -40,13 +40,13 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     }
 
     @Override
-    public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
-        return Flux.fromIterable(entries).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
+    public Mono<Void> save(Iterable<Tuple2<K, V>> entries) {
+        return Flux.fromIterable(entries).flatMap(tuple -> save(tuple.getT1(), tuple.getT2())).then();
     }
 
     @Override
-    public Mono<Void> store(Publisher<Tuple2<K, V>> entryStream) {
-        return Flux.from(entryStream).flatMap(tuple -> store(tuple.getT1(), tuple.getT2())).then();
+    public Mono<Void> save(Publisher<Tuple2<K, V>> entryStream) {
+        return Flux.from(entryStream).flatMap(tuple -> save(tuple.getT1(), tuple.getT2())).then();
     }
 
     @Override

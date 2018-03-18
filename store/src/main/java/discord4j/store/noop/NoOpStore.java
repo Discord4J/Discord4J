@@ -34,17 +34,17 @@ import java.io.Serializable;
 public class NoOpStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
 
     @Override
-    public Mono<Void> store(K key, V value) {
+    public Mono<Void> save(K key, V value) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> store(Iterable<Tuple2<K, V>> entries) {
+    public Mono<Void> save(Iterable<Tuple2<K, V>> entries) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> store(Publisher<Tuple2<K, V>> entryStream) {
+    public Mono<Void> save(Publisher<Tuple2<K, V>> entryStream) {
         return Mono.empty();
     }
 

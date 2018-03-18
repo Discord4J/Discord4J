@@ -43,7 +43,7 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
      * @param value The value.
      * @return A mono which signals the completion of the storage of the pair.
      */
-    Mono<Void> store(K key, V value);
+    Mono<Void> save(K key, V value);
 
     /**
      * Stores key value pairs.
@@ -51,7 +51,7 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
      * @param entries A mono providing the key value pairs.
      * @return A mono which signals the completion of the storage of the pairs.
      */
-    Mono<Void> store(Iterable<Tuple2<K, V>> entries);
+    Mono<Void> save(Iterable<Tuple2<K, V>> entries);
 
     /**
      * Stores key value pairs.
@@ -59,7 +59,7 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
      * @param entryStream A flux providing the key value pairs.
      * @return A mono which signals the completion of the storage of the pairs.
      */
-    Mono<Void> store(Publisher<Tuple2<K, V>> entryStream);
+    Mono<Void> save(Publisher<Tuple2<K, V>> entryStream);
 
     /**
      * Attempts to find the value associated with the provided id.

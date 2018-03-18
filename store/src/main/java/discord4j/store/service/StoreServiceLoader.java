@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 /**
- * A factory-esque object which provides store objects from {@link StoreService}s.
+ * A factory-esque object which provides save objects from {@link StoreService}s.
  *
  * @see StoreService
  */
@@ -53,7 +53,7 @@ public class StoreServiceLoader {
     }
 
     /**
-     * Gets the store definitive {@link StoreService} implementation to use.
+     * Gets the {@link StoreService} implementation to use.
      *
      * @return The best {@link StoreService} implementation.
      */

@@ -20,7 +20,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * This represents a magic exception for signalling that a store contains no value for a query and that the store
+ * This represents a magic exception for signalling that a save contains no value for a query and that the store
  * can be trusted (stores which are unreliable/missing values should just return empty streams instead of throwing
  * this).
  *

@@ -55,33 +55,33 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     }
 
     @Override
-    public Mono<Void> store(Long key, V value) {
-        return toForward.store(key, value);
+    public Mono<Void> save(Long key, V value) {
+        return toForward.save(key, value);
     }
 
     @Override
-    public Mono<Void> storeWithLong(long key, V value) {
-        return this.store(key, value);
+    public Mono<Void> saveWithLong(long key, V value) {
+        return this.save(key, value);
     }
 
     @Override
-    public Mono<Void> store(Iterable<Tuple2<Long, V>> entries) {
-        return toForward.store(entries);
+    public Mono<Void> save(Iterable<Tuple2<Long, V>> entries) {
+        return toForward.save(entries);
     }
 
     @Override
-    public Mono<Void> storeWithLong(Iterable<LongObjTuple2<V>> entries) {
-        return this.store(new MappingIterable<>(LongObjTuple2::convert, entries));
+    public Mono<Void> saveWithLong(Iterable<LongObjTuple2<V>> entries) {
+        return this.save(new MappingIterable<>(LongObjTuple2::convert, entries));
     }
 
     @Override
-    public Mono<Void> store(Publisher<Tuple2<Long, V>> entryStream) {
-        return toForward.store(entryStream);
+    public Mono<Void> save(Publisher<Tuple2<Long, V>> entryStream) {
+        return toForward.save(entryStream);
     }
 
     @Override
-    public Mono<Void> storeWithLong(Publisher<LongObjTuple2<V>> entryStream) {
-        return this.store(Flux.from(entryStream).map(LongObjTuple2::convert));
+    public Mono<Void> saveWithLong(Publisher<LongObjTuple2<V>> entryStream) {
+        return this.save(Flux.from(entryStream).map(LongObjTuple2::convert));
     }
 
     @Override
