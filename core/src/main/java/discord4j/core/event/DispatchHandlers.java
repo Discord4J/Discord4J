@@ -18,7 +18,7 @@
 package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.*;
-import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
@@ -196,7 +196,7 @@ public abstract class DispatchHandlers {
     private static Flux<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         // TODO
         Message message = new Message(context.getClient(), new MessageBean(context.getDispatch().getMessage()));
-        return Flux.just(new MessageCreateEvent(message));
+        return Flux.just(new MessageCreateEvent(context.getClient(), message));
     }
 
     private static Flux<Event> messageDelete(DispatchContext<MessageDelete> context) {
@@ -242,8 +242,8 @@ public abstract class DispatchHandlers {
                 .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
                 .collect(Collectors.toSet());
 
-        return Flux.just(new ReadyEvent(dispatch.getVersion(), self, guilds, dispatch.getSessionId(),
-                dispatch.getTrace()));
+        return Flux.just(new ReadyEvent(context.getClient(), dispatch.getVersion(), self, guilds,
+                dispatch.getSessionId(), dispatch.getTrace()));
     }
 
     private static Flux<Event> resumed(DispatchContext<Resumed> context) {
@@ -280,15 +280,15 @@ public abstract class DispatchHandlers {
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
-                return Flux.just(new ConnectEvent());
+                return Flux.just(new ConnectEvent(context.getClient()));
             case RETRY_STARTED:
-                return Flux.just(new ReconnectStartEvent());
+                return Flux.just(new ReconnectStartEvent(context.getClient()));
             case RETRY_FAILED:
-                return Flux.just(new ReconnectFailEvent(dispatch.getCurrentAttempt()));
+                return Flux.just(new ReconnectFailEvent(context.getClient(), dispatch.getCurrentAttempt()));
             case RETRY_SUCCEEDED:
-                return Flux.just(new ReconnectEvent(dispatch.getCurrentAttempt()));
+                return Flux.just(new ReconnectEvent(context.getClient(), dispatch.getCurrentAttempt()));
             case DISCONNECTED:
-                return Flux.just(new DisconnectEvent());
+                return Flux.just(new DisconnectEvent(context.getClient()));
         }
         return Flux.empty();
     }
