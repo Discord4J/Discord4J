@@ -15,26 +15,25 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.event.domain;
+package discord4j.core.event.domain.lifecycle;
 
-import discord4j.common.json.payload.dispatch.MessageCreate;
+import discord4j.core.Client;
 
-public class MessageCreatedEvent implements Event {
+public class ReconnectEvent extends GatewayLifecycleEvent {
 
-    private final MessageCreate messageCreate;
+    private final int currentAttempt;
 
-    public MessageCreatedEvent(MessageCreate messageCreate) {
-        this.messageCreate = messageCreate;
+    public ReconnectEvent(Client client, int currentAttempt) {
+        super(client);
+        this.currentAttempt = currentAttempt;
     }
 
-    public MessageCreate getMessageCreate() {
-        return messageCreate;
+    public int getCurrentAttempt() {
+        return currentAttempt;
     }
 
     @Override
     public String toString() {
-        return "MessageCreatedEvent[" +
-                "messageCreate=" + messageCreate +
-                ']';
+        return "Gateway successfully reconnected";
     }
 }

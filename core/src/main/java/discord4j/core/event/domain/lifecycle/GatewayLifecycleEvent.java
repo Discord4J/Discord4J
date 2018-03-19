@@ -8,26 +8,20 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package discord4j.core.event.domain;
+package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.Client;
+import discord4j.core.event.domain.Event;
 
-public abstract class Event {
+public abstract class GatewayLifecycleEvent extends Event {
 
-    private final Client client;
-
-    public Event(Client client) {
-        this.client = client;
-    }
-
-    public Client getClient() {
-        return client;
+    public GatewayLifecycleEvent(Client client) {
+        super(client);
     }
 }

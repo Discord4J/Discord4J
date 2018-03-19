@@ -18,12 +18,21 @@
 package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.*;
-import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.lifecycle.*;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.bean.MessageBean;
+import discord4j.core.object.entity.bean.UserBean;
 import discord4j.gateway.retry.GatewayStateChange;
 import reactor.core.publisher.Flux;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Registry for {@link discord4j.common.json.payload.dispatch.Dispatch} to {@link discord4j.core.event.domain.Event}
@@ -34,6 +43,7 @@ public abstract class DispatchHandlers {
     private static final Map<Class<?>, DispatchHandler<?, ?>> handlerMap = new HashMap<>();
 
     static {
+        addHandler(ChannelCreate.class, DispatchHandlers::channelCreate);
         addHandler(ChannelDelete.class, DispatchHandlers::channelDelete);
         addHandler(ChannelPinsUpdate.class, DispatchHandlers::channelPinsUpdate);
         addHandler(ChannelUpdate.class, DispatchHandlers::channelUpdate);
@@ -91,6 +101,11 @@ public abstract class DispatchHandlers {
             return Flux.empty();
         }
         return entry.handle(context);
+    }
+
+    private static Flux<Event> channelCreate(DispatchContext<ChannelCreate> context) {
+        // TODO
+        return Flux.empty();
     }
 
     private static Flux<Event> channelDelete(DispatchContext<ChannelDelete> context) {
@@ -178,9 +193,10 @@ public abstract class DispatchHandlers {
         return Flux.empty();
     }
 
-    private static Flux<MessageCreatedEvent> messageCreate(DispatchContext<MessageCreate> context) {
+    private static Flux<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         // TODO
-        return Flux.just(new MessageCreatedEvent(context.getDispatch()));
+        Message message = new Message(context.getClient(), new MessageBean(context.getDispatch().getMessage()));
+        return Flux.just(new MessageCreateEvent(context.getClient(), message));
     }
 
     private static Flux<Event> messageDelete(DispatchContext<MessageDelete> context) {
@@ -220,7 +236,14 @@ public abstract class DispatchHandlers {
 
     private static Flux<ReadyEvent> ready(DispatchContext<Ready> context) {
         // TODO
-        return Flux.just(new ReadyEvent(context.getDispatch()));
+        Ready dispatch = context.getDispatch();
+        User self = new User(context.getClient(), new UserBean(dispatch.getUser()));
+        Set<ReadyEvent.Guild> guilds = Arrays.stream(dispatch.getGuilds())
+                .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
+                .collect(Collectors.toSet());
+
+        return Flux.just(new ReadyEvent(context.getClient(), dispatch.getVersion(), self, guilds,
+                dispatch.getSessionId(), dispatch.getTrace()));
     }
 
     private static Flux<Event> resumed(DispatchContext<Resumed> context) {
@@ -257,15 +280,15 @@ public abstract class DispatchHandlers {
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
-                return Flux.just(new ConnectedEvent());
+                return Flux.just(new ConnectEvent(context.getClient()));
             case RETRY_STARTED:
-                return Flux.just(new ReconnectStartedEvent());
+                return Flux.just(new ReconnectStartEvent(context.getClient()));
             case RETRY_FAILED:
-                return Flux.just(new ReconnectFailedEvent());
+                return Flux.just(new ReconnectFailEvent(context.getClient(), dispatch.getCurrentAttempt()));
             case RETRY_SUCCEEDED:
-                return Flux.just(new ReconnectedEvent());
+                return Flux.just(new ReconnectEvent(context.getClient(), dispatch.getCurrentAttempt()));
             case DISCONNECTED:
-                return Flux.just(new DisconnectedEvent());
+                return Flux.just(new DisconnectEvent(context.getClient()));
         }
         return Flux.empty();
     }

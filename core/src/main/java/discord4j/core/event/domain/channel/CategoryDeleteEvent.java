@@ -8,33 +8,27 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
+package discord4j.core.event.domain.channel;
 
-package discord4j.core.event.domain;
+import discord4j.core.Client;
+import discord4j.core.object.entity.Category;
 
-import discord4j.common.json.payload.dispatch.Ready;
+public class CategoryDeleteEvent extends ChannelEvent {
 
-public class ReadyEvent implements Event {
+    private final Category category;
 
-    private final Ready ready;
-
-    public ReadyEvent(Ready ready) {
-        this.ready = ready;
+    public CategoryDeleteEvent(Client client, Category category) {
+        super(client);
+        this.category = category;
     }
 
-    public Ready getReady() {
-        return ready;
-    }
-
-    @Override
-    public String toString() {
-        return "ReadyEvent[" +
-                "ready=" + ready +
-                ']';
+    public Category getCategory() {
+        return category;
     }
 }

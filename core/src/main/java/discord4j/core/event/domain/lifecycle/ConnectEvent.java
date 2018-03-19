@@ -15,12 +15,18 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.event.domain;
+package discord4j.core.event.domain.lifecycle;
 
-public class DisconnectedEvent implements Event {
+import discord4j.core.Client;
+
+public class ConnectEvent extends GatewayLifecycleEvent {
+
+    public ConnectEvent(Client client) {
+        super(client);
+    }
 
     @Override
     public String toString() {
-        return "Gateway connection terminated";
+        return "Gateway connection established";
     }
 }

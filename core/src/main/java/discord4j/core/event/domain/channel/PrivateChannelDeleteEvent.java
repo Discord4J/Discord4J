@@ -8,26 +8,27 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package discord4j.core.event.domain;
+package discord4j.core.event.domain.channel;
 
 import discord4j.core.Client;
+import discord4j.core.object.entity.PrivateChannel;
 
-public abstract class Event {
+public class PrivateChannelDeleteEvent extends ChannelEvent {
 
-    private final Client client;
+    private final PrivateChannel channel;
 
-    public Event(Client client) {
-        this.client = client;
+    public PrivateChannelDeleteEvent(Client client, PrivateChannel channel) {
+        super(client);
+        this.channel = channel;
     }
 
-    public Client getClient() {
-        return client;
+    public PrivateChannel getChannel() {
+        return channel;
     }
 }
