@@ -21,17 +21,17 @@ import javax.annotation.Nullable;
 public class GameTimestampsResponse {
 
     @Nullable
-    private Integer start;
+    private Long start;
     @Nullable
-    private Integer end;
+    private Long end;
 
     @Nullable
-    public Integer getStart() {
+    public Long getStart() {
         return start;
     }
 
     @Nullable
-    public Integer getEnd() {
+    public Long getEnd() {
         return end;
     }
 
