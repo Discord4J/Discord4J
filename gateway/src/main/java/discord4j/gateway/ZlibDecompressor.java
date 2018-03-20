@@ -42,7 +42,7 @@ public class ZlibDecompressor {
         return payloads.windowUntil(windowPredicate)
                 .flatMap(Flux::collectList)
                 .map(list -> {
-                    ByteBuf buf = Unpooled.wrappedBuffer(list.toArray(new ByteBuf[list.size()]));
+                    ByteBuf buf = Unpooled.wrappedBuffer(list.toArray(new ByteBuf[0]));
                     byte[] bytes = new byte[buf.readableBytes()];
                     buf.readBytes(bytes);
 
