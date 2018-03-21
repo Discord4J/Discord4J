@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.common.json.response.InviteResponse;
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import reactor.core.publisher.Mono;
@@ -49,8 +50,8 @@ public class Invite implements DiscordObject {
     }
 
     @Override
-    public final Client getClient() {
-        return client;
+    public final Shard getShard() {
+        return client.getShard();
     }
 
     /**

@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.common.json.response.ReactionResponse;
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -57,8 +58,8 @@ public final class Reaction implements DiscordObject {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     /**

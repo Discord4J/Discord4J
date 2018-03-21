@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.common.json.response.VoiceRegionResponse;
 import discord4j.core.Client;
+import discord4j.core.Shard;
 
 import java.util.Objects;
 
@@ -46,8 +47,8 @@ public final class Region implements DiscordObject {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     /**

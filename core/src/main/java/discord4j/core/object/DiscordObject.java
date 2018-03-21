@@ -16,15 +16,15 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.Client;
+import discord4j.core.Shard;
 
 /** An object characterized by the Discord platform. */
 public interface DiscordObject {
 
     /**
-     * Gets the Client associated to this object.
+     * Gets the Shard associated to this object.
      *
-     * @return The Client associated to this object.
+     * @return The Shard associated to this object.
      */
-    Client getClient();
+    Shard getShard();
 }

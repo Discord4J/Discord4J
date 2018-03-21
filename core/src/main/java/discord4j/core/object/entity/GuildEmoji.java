@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.GuildEmojiBean;
 import reactor.core.publisher.Flux;
@@ -58,8 +59,8 @@ public final class GuildEmoji implements Entity {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     @Override

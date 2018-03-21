@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.ChannelBean;
 
@@ -44,8 +45,8 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final Client getClient() {
-        return client;
+    public final Shard getShard() {
+        return client.getShard();
     }
 
     @Override

@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.common.json.response.VoiceStateResponse;
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.VoiceChannel;
@@ -51,8 +52,8 @@ public final class VoiceState implements DiscordObject {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     /**

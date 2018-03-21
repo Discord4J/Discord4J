@@ -21,6 +21,7 @@ import discord4j.common.json.response.GamePartyResponse;
 import discord4j.common.json.response.GameResponse;
 import discord4j.common.json.response.GameTimestampsResponse;
 import discord4j.core.Client;
+import discord4j.core.Shard;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -53,8 +54,8 @@ public final class Activity implements DiscordObject {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     /**
@@ -206,7 +207,7 @@ public final class Activity implements DiscordObject {
     }
 
     /** The type of "action" for an activity. */
-    enum Type {
+    public enum Type {
 
         /** "Playing {name}" */
         PLAYING(0),

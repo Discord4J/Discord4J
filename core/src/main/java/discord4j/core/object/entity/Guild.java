@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.Snowflake;
@@ -54,8 +55,8 @@ public final class Guild implements Entity {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     @Override

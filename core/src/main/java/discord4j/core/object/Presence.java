@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.common.json.response.PresenceResponse;
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
@@ -51,8 +52,8 @@ public final class Presence implements DiscordObject {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     /**
@@ -114,7 +115,7 @@ public final class Presence implements DiscordObject {
     }
 
     /** The status of a presence, indicated by a tiny colored circle next to an user's profile picture. */
-    enum Status {
+    public enum Status {
 
         /** A status of Idle. */
         IDLE("idle"),

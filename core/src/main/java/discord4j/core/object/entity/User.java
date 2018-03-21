@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.UserBean;
 import reactor.core.publisher.Mono;
@@ -49,8 +50,8 @@ public class User implements Entity {
     }
 
     @Override
-    public final Client getClient() {
-        return client;
+    public final Shard getShard() {
+        return client.getShard();
     }
 
     /**

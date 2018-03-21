@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.Client;
+import discord4j.core.Shard;
 import discord4j.core.object.PermissionSet;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.RoleBean;
@@ -56,8 +57,8 @@ public final class Role implements Entity, Positionable {
     }
 
     @Override
-    public Client getClient() {
-        return client;
+    public Shard getShard() {
+        return client.getShard();
     }
 
     @Override
