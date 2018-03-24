@@ -195,8 +195,8 @@ public abstract class DispatchHandlers {
 
     private static Flux<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         // TODO
-        Message message = new Message(context.getClient(), new MessageBean(context.getDispatch().getMessage()));
-        return Flux.just(new MessageCreateEvent(context.getClient(), message));
+        Message message = new Message(context.getServiceMediator(), new MessageBean(context.getDispatch().getMessage()));
+        return Flux.just(new MessageCreateEvent(context.getServiceMediator().getClient(), message));
     }
 
     private static Flux<Event> messageDelete(DispatchContext<MessageDelete> context) {
@@ -237,12 +237,12 @@ public abstract class DispatchHandlers {
     private static Flux<ReadyEvent> ready(DispatchContext<Ready> context) {
         // TODO
         Ready dispatch = context.getDispatch();
-        User self = new User(context.getClient(), new UserBean(dispatch.getUser()));
+        User self = new User(context.getServiceMediator(), new UserBean(dispatch.getUser()));
         Set<ReadyEvent.Guild> guilds = Arrays.stream(dispatch.getGuilds())
                 .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
                 .collect(Collectors.toSet());
 
-        return Flux.just(new ReadyEvent(context.getClient(), dispatch.getVersion(), self, guilds,
+        return Flux.just(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self, guilds,
                 dispatch.getSessionId(), dispatch.getTrace()));
     }
 
@@ -280,15 +280,17 @@ public abstract class DispatchHandlers {
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
-                return Flux.just(new ConnectEvent(context.getClient()));
+                return Flux.just(new ConnectEvent(context.getServiceMediator().getClient()));
             case RETRY_STARTED:
-                return Flux.just(new ReconnectStartEvent(context.getClient()));
+                return Flux.just(new ReconnectStartEvent(context.getServiceMediator().getClient()));
             case RETRY_FAILED:
-                return Flux.just(new ReconnectFailEvent(context.getClient(), dispatch.getCurrentAttempt()));
+                return Flux.just(new ReconnectFailEvent(context.getServiceMediator().getClient(),
+                        dispatch.getCurrentAttempt()));
             case RETRY_SUCCEEDED:
-                return Flux.just(new ReconnectEvent(context.getClient(), dispatch.getCurrentAttempt()));
+                return Flux.just(new ReconnectEvent(context.getServiceMediator().getClient(),
+                        dispatch.getCurrentAttempt()));
             case DISCONNECTED:
-                return Flux.just(new DisconnectEvent(context.getClient()));
+                return Flux.just(new DisconnectEvent(context.getServiceMediator().getClient()));
         }
         return Flux.empty();
     }

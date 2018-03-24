@@ -34,13 +34,13 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 
 public class ReconnectFailEvent extends GatewayLifecycleEvent {
 
     private final int currentAttempt;
 
-    public ReconnectFailEvent(Client client, int currentAttempt) {
+    public ReconnectFailEvent(DiscordClient client, int currentAttempt) {
         super(client);
         this.currentAttempt = currentAttempt;
     }

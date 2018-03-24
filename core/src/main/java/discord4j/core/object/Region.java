@@ -17,8 +17,8 @@
 package discord4j.core.object;
 
 import discord4j.common.json.response.VoiceRegionResponse;
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.ServiceMediator;
+import discord4j.core.DiscordClient;
 
 import java.util.Objects;
 
@@ -29,26 +29,26 @@ import java.util.Objects;
  */
 public final class Region implements DiscordObject {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
     private final VoiceRegionResponse region;
 
     /**
-     * Constructs a {@code Region} with an associated client and Discord data.
+     * Constructs a {@code Region} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param region The raw data as represented by Discord, must be non-null.
      */
-    public Region(final Client client, final VoiceRegionResponse region) {
-        this.client = Objects.requireNonNull(client);
+    public Region(final ServiceMediator serviceMediator, final VoiceRegionResponse region) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.region = Objects.requireNonNull(region);
     }
 
     @Override
-    public Shard getShard() {
-        return client.getShard();
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     /**
@@ -97,9 +97,9 @@ public final class Region implements DiscordObject {
     }
 
     /**
-     * Gets if the region is closest to the current user's client.
+     * Gets if the region is closest to the current user's serviceMediator.
      *
-     * @return {@code true} if the region is closest to the current user's client, {@code false} otherwise.
+     * @return {@code true} if the region is closest to the current user's serviceMediator, {@code false} otherwise.
      */
     public boolean isOptimal() {
         return region.isOptimal();

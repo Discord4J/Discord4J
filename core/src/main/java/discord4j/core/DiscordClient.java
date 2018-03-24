@@ -16,31 +16,11 @@
  */
 package discord4j.core;
 
-import discord4j.gateway.GatewayClient;
-import discord4j.rest.RestClient;
+public final class DiscordClient {
 
-public final class Client {
+    private final ServiceMediator serviceMediator;
 
-    private final GatewayClient gatewayClient;
-    private final RestClient restClient;
-    // TODO Stores
-    private final Shard shard;
-
-    Client(final GatewayClient gatewayClient, final RestClient restClient) {
-        this.gatewayClient = gatewayClient;
-        this.restClient = restClient;
-        shard = new Shard(this);
-    }
-
-    public GatewayClient getGatewayClient() {
-        return gatewayClient;
-    }
-
-    public RestClient getRestClient() {
-        return restClient;
-    }
-
-    public Shard getShard() {
-        return shard;
+    DiscordClient(final ServiceMediator serviceMediator) {
+        this.serviceMediator = serviceMediator;
     }
 }

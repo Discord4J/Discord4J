@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.CategoryBean;
 import reactor.core.publisher.Flux;
 
@@ -24,13 +24,13 @@ import reactor.core.publisher.Flux;
 public final class Category extends BaseGuildChannel {
 
     /**
-     * Constructs an {@code Category} with an associated client and Discord data.
+     * Constructs an {@code Category} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Category(final Client client, final CategoryBean data) {
-        super(client, data);
+    public Category(final ServiceMediator serviceMediator, final CategoryBean data) {
+        super(serviceMediator, data);
     }
 
     /**

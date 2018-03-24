@@ -17,11 +17,11 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 
 public class ConnectEvent extends GatewayLifecycleEvent {
 
-    public ConnectEvent(Client client) {
+    public ConnectEvent(DiscordClient client) {
         super(client);
     }
 

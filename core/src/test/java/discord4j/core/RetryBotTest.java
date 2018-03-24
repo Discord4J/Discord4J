@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.dispatch.Dispatch;
-import discord4j.common.json.payload.dispatch.MessageCreate;
-import discord4j.common.json.response.MessageResponse;
 import discord4j.core.event.DispatchContext;
 import discord4j.core.event.DispatchHandlers;
 import discord4j.core.event.EventDispatcher;
@@ -89,7 +87,7 @@ public class RetryBotTest {
 
     static class FakeClient {
 
-        private final Client impl;
+        private final ServiceMediator impl;
 
         private final ObjectMapper mapper;
 
@@ -131,7 +129,7 @@ public class RetryBotTest {
             restClient = new RestClient(router);
             gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
 
-            impl = new Client(gatewayClient, restClient);
+            impl = new ServiceMediator(gatewayClient, restClient);
 
             eventProcessor = EmitterProcessor.create(false);
             dispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());

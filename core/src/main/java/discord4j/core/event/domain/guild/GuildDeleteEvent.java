@@ -16,14 +16,14 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 
 public class GuildDeleteEvent extends GuildEvent {
 
     private final long guildId;
 
-    public GuildDeleteEvent(Client client, long guildId) {
+    public GuildDeleteEvent(DiscordClient client, long guildId) {
         super(client);
         this.guildId = guildId;
     }

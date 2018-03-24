@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -29,7 +29,7 @@ public class MemberChunkEvent extends GuildEvent {
     private final long guildId;
     private final Set<Member> members;
 
-    public MemberChunkEvent(Client client, long guildId, Set<Member> members) {
+    public MemberChunkEvent(DiscordClient client, long guildId, Set<Member> members) {
         super(client);
         this.guildId = guildId;
         this.members = members;

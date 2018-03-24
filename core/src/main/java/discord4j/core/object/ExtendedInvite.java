@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.common.json.response.InviteResponse;
-import discord4j.core.Client;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
 
@@ -33,13 +33,13 @@ import java.util.Optional;
 public final class ExtendedInvite extends Invite {
 
     /**
-     * Constructs a {@code ExtendedInvite} with an associated client and Discord data.
+     * Constructs a {@code ExtendedInvite} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param invite The raw data as represented by Discord, must be non-null.
      */
-    public ExtendedInvite(final Client client, final InviteResponse invite) {
-        super(client, invite);
+    public ExtendedInvite(final ServiceMediator serviceMediator, final InviteResponse invite) {
+        super(serviceMediator, invite);
     }
 
     /**

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import reactor.core.publisher.Mono;
@@ -25,7 +25,7 @@ public class IntegrationsUpdateEvent extends GuildEvent {
 
     private final long guildId;
 
-    public IntegrationsUpdateEvent(Client client, long guildId) {
+    public IntegrationsUpdateEvent(DiscordClient client, long guildId) {
         super(client);
         this.guildId = guildId;
     }

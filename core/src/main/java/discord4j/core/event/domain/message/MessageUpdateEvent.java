@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.User;
@@ -34,7 +34,7 @@ public class MessageUpdateEvent extends MessageEvent {
     private final Update<Set<User>> userMentions;
     private final Update<Set<Snowflake>> roleMentions;
 
-    public MessageUpdateEvent(Client client, @Nullable Update<String> content, @Nullable Update<Boolean> pinned,
+    public MessageUpdateEvent(DiscordClient client, @Nullable Update<String> content, @Nullable Update<Boolean> pinned,
                               @Nullable Update<Boolean> mentionsEveryone, @Nullable Update<Set<User>> userMentions,
                               @Nullable Update<Set<Snowflake>> roleMentions) {
         super(client);

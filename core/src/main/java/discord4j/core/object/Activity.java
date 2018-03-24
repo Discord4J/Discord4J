@@ -20,8 +20,8 @@ import discord4j.common.json.response.GameAssetsResponse;
 import discord4j.common.json.response.GamePartyResponse;
 import discord4j.common.json.response.GameResponse;
 import discord4j.common.json.response.GameTimestampsResponse;
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.ServiceMediator;
+import discord4j.core.DiscordClient;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -36,26 +36,26 @@ import java.util.OptionalInt;
  */
 public final class Activity implements DiscordObject {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
     private final GameResponse activity;
 
     /**
-     * Constructs a {@code Activity} with an associated client and Discord data.
+     * Constructs a {@code Activity} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param activity The raw data as represented by Discord, must be non-null.
      */
-    public Activity(final Client client, final GameResponse activity) {
-        this.client = Objects.requireNonNull(client);
+    public Activity(final ServiceMediator serviceMediator, final GameResponse activity) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.activity = Objects.requireNonNull(activity);
     }
 
     @Override
-    public Shard getShard() {
-        return client.getShard();
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     /**

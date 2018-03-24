@@ -16,20 +16,20 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.VoiceChannelBean;
 
 /** A Discord voice channel. */
 public final class VoiceChannel extends BaseGuildChannel {
 
     /**
-     * Constructs an {@code VoiceChannel} with an associated client and Discord data.
+     * Constructs an {@code VoiceChannel} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param channel The raw data as represented by Discord, must be non-null.
      */
-    public VoiceChannel(final Client client, final VoiceChannelBean channel) {
-        super(client, channel);
+    public VoiceChannel(final ServiceMediator serviceMediator, final VoiceChannelBean channel) {
+        super(serviceMediator, channel);
     }
 
     /**

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
 import discord4j.core.object.PermissionSet;
 
@@ -33,7 +33,7 @@ public class RoleUpdateEvent extends RoleEvent {
     private final Update<PermissionSet> permissions;
     private final Update<Boolean> mentionable;
 
-    public RoleUpdateEvent(Client client, @Nullable Update<String> name, @Nullable Update<Color> color,
+    public RoleUpdateEvent(DiscordClient client, @Nullable Update<String> name, @Nullable Update<Color> color,
                            @Nullable Update<Boolean> hoist, @Nullable Update<Integer> position,
                            @Nullable Update<PermissionSet> permissions, @Nullable Update<Boolean> mentionable) {
         super(client);

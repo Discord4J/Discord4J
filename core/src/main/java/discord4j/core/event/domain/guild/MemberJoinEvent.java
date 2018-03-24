@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -27,7 +27,7 @@ public class MemberJoinEvent extends GuildEvent {
     private final Member member;
     private final long guildId;
 
-    public MemberJoinEvent(Client client, Member member, long guildId) {
+    public MemberJoinEvent(DiscordClient client, Member member, long guildId) {
         super(client);
         this.member = member;
         this.guildId = guildId;

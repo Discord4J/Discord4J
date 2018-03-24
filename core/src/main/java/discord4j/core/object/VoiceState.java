@@ -17,8 +17,8 @@
 package discord4j.core.object;
 
 import discord4j.common.json.response.VoiceStateResponse;
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.VoiceChannel;
@@ -34,26 +34,26 @@ import java.util.Optional;
  */
 public final class VoiceState implements DiscordObject {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
     private final VoiceStateResponse voiceState;
 
     /**
-     * Constructs a {@code VoiceState} with an associated client and Discord data.
+     * Constructs a {@code VoiceState} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param voiceState The raw data as represented by Discord, must be non-null.
      */
-    public VoiceState(final Client client, final VoiceStateResponse voiceState) {
-        this.client = Objects.requireNonNull(client);
+    public VoiceState(final ServiceMediator serviceMediator, final VoiceStateResponse voiceState) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.voiceState = Objects.requireNonNull(voiceState);
     }
 
     @Override
-    public Shard getShard() {
-        return client.getShard();
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     /**

@@ -17,17 +17,17 @@
 
 package discord4j.core.event.domain;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 
 public abstract class Event {
 
-    private final Client client;
+    private final DiscordClient client;
 
-    public Event(Client client) {
+    protected Event(DiscordClient client) {
         this.client = client;
     }
 
-    public Client getClient() {
+    public DiscordClient getClient() {
         return client;
     }
 }

@@ -16,14 +16,14 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.TextChannel;
 
 public class TextChannelCreateEvent extends ChannelEvent {
 
     private final TextChannel channel;
 
-    public TextChannelCreateEvent(Client client, TextChannel channel) {
+    public TextChannelCreateEvent(DiscordClient client, TextChannel channel) {
         super(client);
         this.channel = channel;
     }

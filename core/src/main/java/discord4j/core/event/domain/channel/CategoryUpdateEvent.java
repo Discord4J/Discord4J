@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
 import discord4j.core.object.entity.PermissionOverwrite;
 
@@ -30,7 +30,7 @@ public class CategoryUpdateEvent extends ChannelEvent {
     private final Update<Set<PermissionOverwrite>> overwrites;
     private final Update<Integer> position;
 
-    public CategoryUpdateEvent(Client client, @Nullable Update<String> name,
+    public CategoryUpdateEvent(DiscordClient client, @Nullable Update<String> name,
                                @Nullable Update<Set<PermissionOverwrite>> overwrites,
                                @Nullable Update<Integer> position) {
         super(client);

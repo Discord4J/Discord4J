@@ -33,13 +33,13 @@
  */
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 
 public class ResumeEvent extends GatewayLifecycleEvent {
 
     private final String[] trace;
 
-    public ResumeEvent(Client client, String[] trace) {
+    public ResumeEvent(DiscordClient client, String[] trace) {
         super(client);
         this.trace = trace;
     }

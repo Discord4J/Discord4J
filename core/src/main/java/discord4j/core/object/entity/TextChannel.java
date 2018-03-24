@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.TextChannelBean;
 import reactor.core.publisher.Mono;
@@ -35,15 +35,15 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     private final BaseMessageChannel messageChannel;
 
     /**
-     * Constructs an {@code TextChannel} with an associated client and Discord data.
+     * Constructs an {@code TextChannel} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param channel The raw data as represented by Discord, must be non-null.
      */
-    public TextChannel(final Client client, final TextChannelBean channel) {
-        super(client, channel);
-        guildChannel = new BaseGuildChannel(client, channel.getGuildChannel());
-        messageChannel = new BaseMessageChannel(client, channel.getMessageChannel());
+    public TextChannel(final ServiceMediator serviceMediator, final TextChannelBean channel) {
+        super(serviceMediator, channel);
+        guildChannel = new BaseGuildChannel(serviceMediator, channel.getGuildChannel());
+        messageChannel = new BaseMessageChannel(serviceMediator, channel.getMessageChannel());
     }
 
     @Override

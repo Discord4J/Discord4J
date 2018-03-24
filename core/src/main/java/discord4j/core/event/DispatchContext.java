@@ -18,7 +18,7 @@
 package discord4j.core.event;
 
 import discord4j.common.json.payload.dispatch.Dispatch;
-import discord4j.core.Client;
+import discord4j.core.ServiceMediator;
 
 /**
  * Represents gateway dispatch data enriched with context for processing through a
@@ -29,22 +29,22 @@ import discord4j.core.Client;
 public class DispatchContext<D extends Dispatch> {
 
     private final D dispatch;
-    private final Client client;
+    private final ServiceMediator serviceMediator;
 
-    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, Client client) {
-        return new DispatchContext<>(dispatch, client);
+    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, ServiceMediator serviceMediator) {
+        return new DispatchContext<>(dispatch, serviceMediator);
     }
 
-    private DispatchContext(D dispatch, Client client) {
+    private DispatchContext(D dispatch, ServiceMediator serviceMediator) {
         this.dispatch = dispatch;
-        this.client = client;
+        this.serviceMediator = serviceMediator;
     }
 
     public D getDispatch() {
         return dispatch;
     }
 
-    public Client getClient() {
-        return client;
+    public ServiceMediator getServiceMediator() {
+        return serviceMediator;
     }
 }

@@ -33,7 +33,7 @@
  */
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.User;
 
@@ -48,7 +48,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
     private final String sessionId;
     private final String[] trace;
 
-    public ReadyEvent(Client client, int gatewayVersion, User self, Set<Guild> guilds, String sessionId,
+    public ReadyEvent(DiscordClient client, int gatewayVersion, User self, Set<Guild> guilds, String sessionId,
                       String[] trace) {
         super(client);
         this.gatewayVersion = gatewayVersion;

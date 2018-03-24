@@ -34,11 +34,11 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 
 public class ReconnectStartEvent extends GatewayLifecycleEvent {
 
-    public ReconnectStartEvent(Client client) {
+    public ReconnectStartEvent(DiscordClient client) {
         super(client);
     }
 

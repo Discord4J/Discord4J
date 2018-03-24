@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.GuildChannelBean;
 import reactor.core.publisher.Mono;
@@ -28,13 +28,13 @@ import java.util.Set;
 class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     /**
-     * Constructs an {@code BaseGuildChannel} with an associated client and Discord data.
+     * Constructs an {@code BaseGuildChannel} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseGuildChannel(final Client client, final GuildChannelBean data) {
-        super(client, data);
+    BaseGuildChannel(final ServiceMediator serviceMediator, final GuildChannelBean data) {
+        super(serviceMediator, data);
     }
 
     @Override

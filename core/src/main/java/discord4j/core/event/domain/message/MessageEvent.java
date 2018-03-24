@@ -16,12 +16,12 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
 
 public abstract class MessageEvent extends Event {
 
-    public MessageEvent(Client client) {
+    public MessageEvent(DiscordClient client) {
         super(client);
     }
 }

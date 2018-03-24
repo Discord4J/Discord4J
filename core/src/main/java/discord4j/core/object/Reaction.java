@@ -17,8 +17,8 @@
 package discord4j.core.object;
 
 import discord4j.common.json.response.ReactionResponse;
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -35,8 +35,8 @@ import java.util.Optional;
  */
 public final class Reaction implements DiscordObject {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
     private final ReactionResponse reaction;
@@ -45,21 +45,21 @@ public final class Reaction implements DiscordObject {
     private final long messageId;
 
     /**
-     * Constructs a {@code Reaction} with an associated client and Discord data.
+     * Constructs a {@code Reaction} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param reaction The raw data as represented by Discord, must be non-null.
      * @param messageId The ID of the message this reaction is associated to.
      */
-    public Reaction(final Client client, final ReactionResponse reaction, final long messageId) {
-        this.client = Objects.requireNonNull(client);
+    public Reaction(final ServiceMediator serviceMediator, final ReactionResponse reaction, final long messageId) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.reaction = Objects.requireNonNull(reaction);
         this.messageId = messageId;
     }
 
     @Override
-    public Shard getShard() {
-        return client.getShard();
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     /**

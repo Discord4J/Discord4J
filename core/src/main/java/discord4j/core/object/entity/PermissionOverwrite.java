@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.ServiceMediator;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.PermissionSet;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.PermissionOverwriteBean;
@@ -32,26 +32,26 @@ import java.util.Objects;
  */
 public final class PermissionOverwrite implements Entity {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord, must be non-null. */
     private final PermissionOverwriteBean data;
 
     /**
-     * Constructs a {@code PermissionOverwrite} with an associated client and Discord data.
+     * Constructs a {@code PermissionOverwrite} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public PermissionOverwrite(final Client client, final PermissionOverwriteBean data) {
-        this.client = Objects.requireNonNull(client);
+    public PermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
-    public Shard getShard() {
-        return client.getShard();
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     @Override

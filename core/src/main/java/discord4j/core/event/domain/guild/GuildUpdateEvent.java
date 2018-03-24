@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
@@ -41,7 +41,8 @@ public class GuildUpdateEvent extends GuildEvent {
     private final Update<Snowflake> systemChannel;
     private final Update<Guild.VerificationLevel> verificationLevel;
 
-    public GuildUpdateEvent(Client client, @Nullable Update<Snowflake> afkChannel, @Nullable Update<Integer> afkTimeout,
+    public GuildUpdateEvent(DiscordClient client, @Nullable Update<Snowflake> afkChannel,
+                            @Nullable Update<Integer> afkTimeout,
                             @Nullable Update<Guild.ContentFilterLevel> contentFilterLevel,
                             @Nullable Update<Set<String>> features, @Nullable Update<String> iconHash,
                             @Nullable Update<Guild.MfaLevel> mfaLevel, Update<String> name,

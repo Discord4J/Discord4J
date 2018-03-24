@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.ServiceMediator;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.GuildEmojiBean;
 import reactor.core.publisher.Flux;
@@ -36,8 +36,8 @@ import java.util.stream.Collectors;
  */
 public final class GuildEmoji implements Entity {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
     private final GuildEmojiBean data;
@@ -46,21 +46,21 @@ public final class GuildEmoji implements Entity {
     private final long guildId;
 
     /**
-     * Constructs a {@code GuildEmoji} with an associated client and Discord data.
+     * Constructs a {@code GuildEmoji} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this emoji is associated to.
      */
-    public GuildEmoji(final Client client, final GuildEmojiBean data, final long guildId) {
-        this.client = Objects.requireNonNull(client);
+    public GuildEmoji(final ServiceMediator serviceMediator, final GuildEmojiBean data, final long guildId) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }
 
     @Override
-    public Shard getShard() {
-        return client.getShard();
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     @Override

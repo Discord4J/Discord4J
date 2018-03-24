@@ -16,12 +16,12 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
 
 public abstract class RoleEvent extends Event {
 
-    public RoleEvent(Client client) {
+    public RoleEvent(DiscordClient client) {
         super(client);
     }
 }

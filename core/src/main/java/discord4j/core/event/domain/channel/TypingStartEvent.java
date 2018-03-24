@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
@@ -30,7 +30,7 @@ public class TypingStartEvent extends ChannelEvent {
     private final long userId;
     private final Instant startTime;
 
-    public TypingStartEvent(Client client, long channelId, long userId, Instant startTime) {
+    public TypingStartEvent(DiscordClient client, long channelId, long userId, Instant startTime) {
         super(client);
         this.channelId = channelId;
         this.userId = userId;

@@ -16,14 +16,14 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.VoiceChannel;
 
 public class VoiceChannelCreateEvent extends ChannelEvent {
 
     private final VoiceChannel channel;
 
-    public VoiceChannelCreateEvent(Client client, VoiceChannel channel) {
+    public VoiceChannelCreateEvent(DiscordClient client, VoiceChannel channel) {
         super(client);
         this.channel = channel;
     }

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.PermissionOverwrite;
@@ -34,7 +34,7 @@ public class TextChannelUpdateEvent extends ChannelEvent {
     private final Update<Integer> position;
     private final Update<String> topic;
 
-    public TextChannelUpdateEvent(Client client, @Nullable Update<Boolean> nsfw, @Nullable Update<String> name,
+    public TextChannelUpdateEvent(DiscordClient client, @Nullable Update<Boolean> nsfw, @Nullable Update<String> name,
                                   @Nullable Update<Snowflake> category,
                                   @Nullable Update<Set<PermissionOverwrite>> overwrites,
                                   @Nullable Update<Integer> position, @Nullable Update<String> topic) {

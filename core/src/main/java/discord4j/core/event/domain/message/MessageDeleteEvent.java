@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 
 public class MessageDeleteEvent extends MessageEvent {
@@ -24,7 +24,7 @@ public class MessageDeleteEvent extends MessageEvent {
     private final long messageId;
     private final long channelId;
 
-    public MessageDeleteEvent(Client client, long messageId, long channelId) {
+    public MessageDeleteEvent(DiscordClient client, long messageId, long channelId) {
         super(client);
         this.messageId = messageId;
         this.channelId = channelId;

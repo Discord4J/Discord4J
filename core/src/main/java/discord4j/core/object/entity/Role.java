@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.ServiceMediator;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.PermissionSet;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.RoleBean;
@@ -34,8 +34,8 @@ import java.util.Objects;
  */
 public final class Role implements Entity, Positionable {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
     private final RoleBean data;
@@ -44,21 +44,21 @@ public final class Role implements Entity, Positionable {
     private final long guildId;
 
     /**
-     * Constructs a {@code Role} with an associated client and Discord data.
+     * Constructs a {@code Role} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this role is associated to.
      */
-    public Role(final Client client, final RoleBean data, final long guildId) {
-        this.client = Objects.requireNonNull(client);
+    public Role(final ServiceMediator serviceMediator, final RoleBean data, final long guildId) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }
 
     @Override
-    public Shard getShard() {
-        return client.getShard();
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     @Override

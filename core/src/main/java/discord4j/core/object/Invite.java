@@ -17,8 +17,8 @@
 package discord4j.core.object;
 
 import discord4j.common.json.response.InviteResponse;
-import discord4j.core.Client;
-import discord4j.core.Shard;
+import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import reactor.core.publisher.Mono;
@@ -32,26 +32,26 @@ import java.util.Objects;
  */
 public class Invite implements DiscordObject {
 
-    /** The Client associated to this object. */
-    private final Client client;
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
     private final InviteResponse invite;
 
     /**
-     * Constructs a {@code Invite} with an associated client and Discord data.
+     * Constructs a {@code Invite} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param invite The raw data as represented by Discord, must be non-null.
      */
-    public Invite(final Client client, final InviteResponse invite) {
-        this.client = Objects.requireNonNull(client);
+    public Invite(final ServiceMediator serviceMediator, final InviteResponse invite) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.invite = Objects.requireNonNull(invite);
     }
 
     @Override
-    public final Shard getShard() {
-        return client.getShard();
+    public final DiscordClient getClient() {
+        return serviceMediator.getClient();
     }
 
     /**

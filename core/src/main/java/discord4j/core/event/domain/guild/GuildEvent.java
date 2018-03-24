@@ -16,12 +16,12 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
 
 public abstract class GuildEvent extends Event {
 
-    public GuildEvent(Client client) {
+    public GuildEvent(DiscordClient client) {
         super(client);
     }
 }

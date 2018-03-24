@@ -33,7 +33,7 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import reactor.core.publisher.Mono;
@@ -43,7 +43,7 @@ public class RoleDeleteEvent extends RoleEvent {
     private final long guildId;
     private final long roleId;
 
-    public RoleDeleteEvent(Client client, long guildId, long roleId) {
+    public RoleDeleteEvent(DiscordClient client, long guildId, long roleId) {
         super(client);
         this.guildId = guildId;
         this.roleId = roleId;

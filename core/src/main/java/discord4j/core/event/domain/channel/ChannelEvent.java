@@ -16,12 +16,12 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
 
 public abstract class ChannelEvent extends Event {
 
-    public ChannelEvent(Client client) {
+    public ChannelEvent(DiscordClient client) {
         super(client);
     }
 }

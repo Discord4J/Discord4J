@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.Client;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.Presence;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
@@ -46,15 +46,15 @@ public final class Member extends User {
     private final long guildId;
 
     /**
-     * Constructs a {@code Member} with an associated client and Discord data.
+     * Constructs a {@code Member} with an associated serviceMediator and Discord data.
      *
-     * @param client The Client associated to this object, must be non-null.
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param userData The user data as represented by Discord, must be non-null
      * @param guildId The ID of the guild this user is associated to.
      */
-    public Member(final Client client, final MemberBean data, final UserBean userData, final long guildId) {
-        super(client, userData);
+    public Member(final ServiceMediator serviceMediator, final MemberBean data, final UserBean userData, final long guildId) {
+        super(serviceMediator, userData);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }

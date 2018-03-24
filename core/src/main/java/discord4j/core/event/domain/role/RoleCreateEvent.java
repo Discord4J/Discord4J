@@ -33,7 +33,7 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
@@ -44,7 +44,7 @@ public class RoleCreateEvent extends RoleEvent {
     private final long guildId;
     private final Role role;
 
-    public RoleCreateEvent(Client client, long guildId, Role role) {
+    public RoleCreateEvent(DiscordClient client, long guildId, Role role) {
         super(client);
         this.guildId = guildId;
         this.role = role;

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.PermissionOverwrite;
@@ -34,8 +34,8 @@ public class VoiceChannelUpdateEvent extends ChannelEvent {
     private final Update<Integer> position;
     private final Update<Integer> userLimit;
 
-    public VoiceChannelUpdateEvent(Client client, @Nullable Update<Integer> bitrate, @Nullable Update<String> name,
-                                   @Nullable Update<Snowflake> category,
+    public VoiceChannelUpdateEvent(DiscordClient client, @Nullable Update<Integer> bitrate,
+                                   @Nullable Update<String> name, @Nullable Update<Snowflake> category,
                                    @Nullable Update<Set<PermissionOverwrite>> overwrites,
                                    @Nullable Update<Integer> position, @Nullable Update<Integer> userLimit) {
         super(client);

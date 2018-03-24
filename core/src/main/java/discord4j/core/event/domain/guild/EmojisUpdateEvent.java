@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Client;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
@@ -29,7 +29,7 @@ public class EmojisUpdateEvent extends GuildEvent {
     private final long guildId;
     private final Set<GuildEmoji> emojis;
 
-    public EmojisUpdateEvent(Client client, long guildId, Set<GuildEmoji> emojis) {
+    public EmojisUpdateEvent(DiscordClient client, long guildId, Set<GuildEmoji> emojis) {
         super(client);
         this.guildId = guildId;
         this.emojis = emojis;
