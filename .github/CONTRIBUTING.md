@@ -28,13 +28,9 @@ requests)
 3. Merge to the right branch! Always merge to the `dev` branch. 
 
 ### Style Requirements
-* Make sure your IDE is respecting the [.editorconfig](https://github.com/austinv11/Discord4J/blob/master/.editorconfig)
+* Make sure your IDE is respecting the [.editorconfig](https://github.com/Discord4J/Discord4J/blob/master/.editorconfig)
 * This project uses [1tbs](https://en.wikipedia.org/wiki/Indent_style#Variant:_1TBS), with the exception that single 
 line if statements do not need brackets.
 * All instanced objects should have getters and setters (where reasonable)
 * All classes and methods should be documented with javadocs
 * All new files should have the same LGPL 3 boilerplate header found in existing files.
-
-## Credit
-I won't ever take complete credit for something I didn't do or something someone helped me with. I will always credit 
-you on a release changelog and you will be forever immortalized on the [contributors page](https://github.com/austinv11/Discord4J/blob/master/CONTRIBUTORS.md).
