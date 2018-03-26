@@ -1,6 +1,6 @@
 ![Discord4J Logo](/images/d4j_l.png?raw=true)
 
-# Discord4J [![Download](https://jitpack.io/v/austinv11/Discord4j.svg?style=flat-square)](https://jitpack.io/#austinv11/Discord4j)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY) [![Documentation Status](https://readthedocs.org/projects/discord4j/badge/?version=latest)](http://discord4j.readthedocs.io/en/latest/?badge=latest&style=flat-square)
+# Discord4J [![Download](https://jitpack.io/v/Discord4J/Discord4j.svg?style=flat-square)](https://jitpack.io/#Discord4J/Discord4j)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square)](https://discord.gg/NxGAeCY) [![Documentation Status](https://readthedocs.org/projects/discord4j/badge/?version=latest)](http://discord4j.readthedocs.io/en/latest/?badge=latest&style=flat-square)
 
 Java interface for the official [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
@@ -28,7 +28,7 @@ In your `pom.xml` add (without the ellipses):
 <dependencies>
   ...
   <dependency>
-    <groupId>com.github.austinv11</groupId>
+    <groupId>com.github.Discord4J</groupId>
     <artifactId>Discord4J</artifactId>
     <version>@VERSION@</version>
   </dependency>
@@ -49,7 +49,7 @@ repositories {
 ...
 dependencies {
   ...
-  compile "com.github.austinv11:Discord4J:@VERSION@"
+  compile "com.github.Discord4J:Discord4J:@VERSION@"
 }
 ...
 ```
@@ -58,14 +58,14 @@ In your `build.sbt` add (without the ellipses):
 ```sbt
 ...
 libraryDependencies ++= Seq(
-  "com.github.austinv11" % "Discord4J" % "@VERSION@"
+  "com.github.Discord4J" % "Discord4J" % "@VERSION@"
 )
 
 resolvers += "jcenter" at "http://jcenter.bintray.com"
 resolvers += "jitpack.io" at "https://jitpack.io"
 ```
 ### Manually with the shaded jar
-If you don't use Maven nor Gradle (which you really should, because it's a lot more flexible and allows you to update easily), you can always [grab the shaded jar file](http://austinv11.github.io/Discord4J/downloads.html) (which has all the D4J dependencies inside), and link it in your IntelliJ or Eclipse project.
+If you don't use Maven nor Gradle (which you really should, because it's a lot more flexible and allows you to update easily), you can always [grab the shaded jar file](https:///discord4j.com/downloads.html) (which has all the D4J dependencies inside), and link it in your IntelliJ or Eclipse project.
 #### IntelliJ
 Module Settings > Dependencies > click the + > JARs or directories > Select your JAR file
 #### Eclipse
@@ -76,7 +76,7 @@ Project Properties > Java Build Path > Add the jar file
 * A [quick overview of the AudioPlayer](https://github.com/oopsjpeg/d4j-audioplayer) by [@oopsjpeg](https://github.com/oopsjpeg)
 * A Discord Bot [quick start example](https://gist.github.com/quanticc/a32fa8f3a57f98aee9dc9e935f851e72) maintined by [@quantic](https://github.com/quanticc)
 * A simple [Discord4J module example](https://github.com/Martacus/Simplecommands/tree/master) by [@Martacus](https://github.com/Martacus)
-* The [Official Javadocs](http://austinv11.github.io/Discord4J/docs.html) (or the [Dash](https://kapeli.com/dash)/[Velocity](https://velocity.silverlakesoftware.com/)/[Zeal](https://zealdocs.org/) mirror maintained by [@jammehcow](https://github.com/jammehcow))
+* The [Official Javadocs](http://discord4j.com/docs.html) (or the [Dash](https://kapeli.com/dash)/[Velocity](https://velocity.silverlakesoftware.com/)/[Zeal](https://zealdocs.org/) mirror maintained by [@jammehcow](https://github.com/jammehcow))
 
 ### Starting with the API
 The very first thing you need to do is obtain an `IDiscordClient` object. This can be done by using the `ClientBuilder`.
@@ -149,7 +149,7 @@ public class Main {
 Discord4J has an API for creating modular Discord Bots! See [Martacus's sample repo](https://github.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
 
 ### More examples
-See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
+See the [examples directory](https://github.com/Discord4J/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
 
 ## Projects using Discord4J
 * Official Discord4J Addons: A collection of official addons and modules for Discord4J (https://github.com/Discord4J-Addons)
@@ -169,10 +169,10 @@ The Discord API is still in development. Functions may break at any time.
 In such an event, please contact me or submit a pull request.
 
 ## Pull requests
-No one is perfect at programming and I am no exception. If you see something that can be improved, please read the [contributing guildelines](https://github.com/austinv11/Discord4J/blob/master/.github/CONTRIBUTING.md) and feel free to submit a pull request! 
+No one is perfect at programming and I am no exception. If you see something that can be improved, please read the [contributing guildelines](https://github.com/Discord4J/Discord4J/blob/master/.github/CONTRIBUTING.md) and feel free to submit a pull request! 
 
 ## Other info
-More information can be found in the official [javadocs](http://austinv11.github.io/Discord4J/docs.html). 
+More information can be found in the official [javadocs](http://discord4j.com/docs.html). 
 Alternatively you can view the docs through [Dash](https://kapeli.com/dash), [Velocity](https://velocity.silverlakesoftware.com/), or [Zeal](https://zealdocs.org/) (maintained by [@jammehcow](https://github.com/jammehcow)) under the *User Contributed* tab.
 
 You can contact me on the [Official Discord4J Server (recommended)](https://discord.gg/NxGAeCY) or the [Discord API server](https://discord.gg/0SBTUU1wZTU7PCok) in the #java_discord4j channel.
