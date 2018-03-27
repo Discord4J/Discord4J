@@ -25,7 +25,7 @@ import discord4j.store.util.LongLongTuple2;
 /**
  * Holder for {@link Store} instances for use in caching.
  */
-public final class Stores {
+public final class StoreHolder {
 
     private final LongObjStore<AttachmentBean> attachmentStore;
     private final LongObjStore<CategoryBean> categoryStore;
@@ -42,7 +42,7 @@ public final class Stores {
     private final LongObjStore<VoiceChannelBean> voiceChannelStore;
     //    private final LongObjStore<WebhookBean> webhookStore;
 
-    public Stores(StoreService service) {
+    public StoreHolder(StoreService service) {
         attachmentStore = service.provideLongObjStore(AttachmentBean.class);
         categoryStore = service.provideLongObjStore(CategoryBean.class);
         guildStore = service.provideLongObjStore(GuildBean.class);

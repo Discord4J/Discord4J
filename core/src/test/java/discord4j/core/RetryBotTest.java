@@ -31,6 +31,7 @@ import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.store.StoreHolder;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -42,6 +43,7 @@ import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.store.noop.NoOpStoreService;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.*;
@@ -129,7 +131,7 @@ public class RetryBotTest {
             restClient = new RestClient(router);
             gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
 
-            impl = new ServiceMediator(gatewayClient, restClient);
+            impl = new ServiceMediator(gatewayClient, restClient, new StoreHolder(new NoOpStoreService()));
 
             eventProcessor = EmitterProcessor.create(false);
             dispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
