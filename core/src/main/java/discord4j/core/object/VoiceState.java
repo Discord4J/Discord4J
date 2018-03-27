@@ -16,9 +16,9 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.json.response.VoiceStateResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.bean.VoiceStateBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.VoiceChannel;
@@ -38,7 +38,7 @@ public final class VoiceState implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final VoiceStateResponse voiceState;
+    private final VoiceStateBean voiceState;
 
     /**
      * Constructs a {@code VoiceState} with an associated serviceMediator and Discord data.
@@ -46,7 +46,7 @@ public final class VoiceState implements DiscordObject {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param voiceState The raw data as represented by Discord, must be non-null.
      */
-    public VoiceState(final ServiceMediator serviceMediator, final VoiceStateResponse voiceState) {
+    public VoiceState(final ServiceMediator serviceMediator, final VoiceStateBean voiceState) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.voiceState = Objects.requireNonNull(voiceState);
     }

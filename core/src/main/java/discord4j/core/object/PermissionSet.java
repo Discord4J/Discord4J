@@ -18,9 +18,7 @@ package discord4j.core.object;
 
 import java.util.*;
 
-/**
- * An <i>immutable</i> specialized {@link Set} implementation for use with the {@link Permission} type.
- */
+/** An <i>immutable</i> specialized {@link Set} implementation for use with the {@link Permission} type. */
 public final class PermissionSet extends AbstractSet<Permission> {
 
     /** Common instance for {@code all()}. */

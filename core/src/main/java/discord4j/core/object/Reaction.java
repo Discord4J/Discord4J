@@ -19,6 +19,7 @@ package discord4j.core.object;
 import discord4j.common.json.response.ReactionResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.bean.ReactionBean;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -39,7 +40,7 @@ public final class Reaction implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final ReactionResponse reaction;
+    private final ReactionBean reaction;
 
     /** The ID of the message this reaction is associated to. */
     private final long messageId;
@@ -51,7 +52,7 @@ public final class Reaction implements DiscordObject {
      * @param reaction The raw data as represented by Discord, must be non-null.
      * @param messageId The ID of the message this reaction is associated to.
      */
-    public Reaction(final ServiceMediator serviceMediator, final ReactionResponse reaction, final long messageId) {
+    public Reaction(final ServiceMediator serviceMediator, final ReactionBean reaction, final long messageId) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.reaction = Objects.requireNonNull(reaction);
         this.messageId = messageId;
@@ -86,7 +87,7 @@ public final class Reaction implements DiscordObject {
      * @return The ID of the emoji for this reaction, if present.
      */
     public Optional<Snowflake> getEmojiId() {
-        return Optional.ofNullable(reaction.getEmoji().getId()).map(Snowflake::of);
+        return Optional.ofNullable(reaction.getEmojiId()).map(Snowflake::of);
     }
 
     /**
@@ -105,7 +106,7 @@ public final class Reaction implements DiscordObject {
      * @return The name of the emoji for this reaction.
      */
     public String getEmojiName() {
-        return reaction.getEmoji().getName();
+        return reaction.getEmojiName();
     }
 
     /**

@@ -18,10 +18,10 @@ package discord4j.core.object;
 
 import discord4j.common.json.response.GameAssetsResponse;
 import discord4j.common.json.response.GamePartyResponse;
-import discord4j.common.json.response.GameResponse;
 import discord4j.common.json.response.GameTimestampsResponse;
 import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.object.bean.ActivityBean;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public final class Activity implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final GameResponse activity;
+    private final ActivityBean activity;
 
     /**
      * Constructs a {@code Activity} with an associated serviceMediator and Discord data.
@@ -48,7 +48,7 @@ public final class Activity implements DiscordObject {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param activity The raw data as represented by Discord, must be non-null.
      */
-    public Activity(final ServiceMediator serviceMediator, final GameResponse activity) {
+    public Activity(final ServiceMediator serviceMediator, final ActivityBean activity) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.activity = Objects.requireNonNull(activity);
     }
@@ -94,9 +94,7 @@ public final class Activity implements DiscordObject {
      * @return The UNIX time (in milliseconds) of when the activity started, if present.
      */
     public Optional<Instant> getStart() {
-        return Optional.ofNullable(activity.getTimestamps())
-                .map(GameTimestampsResponse::getStart)
-                .map(Instant::ofEpochMilli);
+        return Optional.ofNullable(activity.getStart()).map(Instant::ofEpochMilli);
     }
 
     /**
@@ -105,9 +103,7 @@ public final class Activity implements DiscordObject {
      * @return The UNIX time (in milliseconds) of when the activity ends, if present.
      */
     public Optional<Instant> getEnd() {
-        return Optional.ofNullable(activity.getTimestamps())
-                .map(GameTimestampsResponse::getStart)
-                .map(Instant::ofEpochMilli);
+        return Optional.ofNullable(activity.getEnd()).map(Instant::ofEpochMilli);
     }
 
     /**
@@ -143,7 +139,7 @@ public final class Activity implements DiscordObject {
      * @return The ID of the party, if present.
      */
     public Optional<String> getPartyId() {
-        return Optional.ofNullable(activity.getParty()).map(GamePartyResponse::getId);
+        return Optional.ofNullable(activity.getPartyId());
     }
 
     /**
@@ -152,10 +148,8 @@ public final class Activity implements DiscordObject {
      * @return The party's current size, if present.
      */
     public OptionalInt getCurrentPartySize() {
-        return Optional.ofNullable(activity.getParty())
-                .map(GamePartyResponse::getSize)
-                .map(sizes -> OptionalInt.of(sizes[0]))
-                .orElse(OptionalInt.empty());
+        final Integer currentPartySize = activity.getCurrentPartySize();
+        return (currentPartySize == null) ? OptionalInt.empty() : OptionalInt.of(currentPartySize);
     }
 
     /**
@@ -164,10 +158,8 @@ public final class Activity implements DiscordObject {
      * @return The party's max size, if present.
      */
     public OptionalInt getMaxPartySize() {
-        return Optional.ofNullable(activity.getParty())
-                .map(GamePartyResponse::getSize)
-                .map(sizes -> OptionalInt.of(sizes[1]))
-                .orElse(OptionalInt.empty());
+        final Integer maxPartySize = activity.getMaxPartySize();
+        return (maxPartySize == null) ? OptionalInt.empty() : OptionalInt.of(maxPartySize);
     }
 
     /**
@@ -176,7 +168,7 @@ public final class Activity implements DiscordObject {
      * @return The ID for a large asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getLargeImageId() {
-        return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getLargeImage);
+        return Optional.ofNullable(activity.getLargeImage());
     }
 
     /**
@@ -185,7 +177,7 @@ public final class Activity implements DiscordObject {
      * @return The text displayed when hovering over the large image of the activity, if present.
      */
     public Optional<String> getLargeText() {
-        return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getLargeText);
+        return Optional.ofNullable(activity.getLargeText());
     }
 
     /**
@@ -194,7 +186,7 @@ public final class Activity implements DiscordObject {
      * @return The ID for a small asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getSmallImageId() {
-        return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getSmallImage);
+        return Optional.ofNullable(activity.getSmallImage());
     }
 
     /**
@@ -203,7 +195,7 @@ public final class Activity implements DiscordObject {
      * @return The text displayed when hovering over the small image of the activity, if present.
      */
     public Optional<String> getSmallText() {
-        return Optional.ofNullable(activity.getAssets()).map(GameAssetsResponse::getSmallText);
+        return Optional.ofNullable(activity.getSmallText());
     }
 
     /** The type of "action" for an activity. */

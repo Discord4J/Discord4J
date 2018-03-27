@@ -16,9 +16,9 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.json.response.PresenceResponse;
 import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.object.bean.PresenceBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
@@ -38,7 +38,7 @@ public final class Presence implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final PresenceResponse presence;
+    private final PresenceBean presence;
 
     /**
      * Constructs a {@code Presence} with an associated serviceMediator and Discord data.
@@ -46,7 +46,7 @@ public final class Presence implements DiscordObject {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param presence The raw data as represented by Discord, must be non-null.
      */
-    public Presence(final ServiceMediator serviceMediator, final PresenceResponse presence) {
+    public Presence(final ServiceMediator serviceMediator, final PresenceBean presence) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.presence = Objects.requireNonNull(presence);
     }
@@ -62,7 +62,7 @@ public final class Presence implements DiscordObject {
      * @return The ID of the user this presence is associated to.
      */
     public Snowflake getUserId() {
-        return Snowflake.of(presence.getUser().getId());
+        return Snowflake.of(presence.getUserId());
     }
 
     /**
@@ -81,7 +81,7 @@ public final class Presence implements DiscordObject {
      * @return The activity for the user this presence is associated to, if present.
      */
     public Optional<Activity> getActivity() {
-        return Optional.ofNullable(presence.getGame()).map(game -> new Activity(serviceMediator, game));
+        return Optional.ofNullable(presence.getActivity()).map(game -> new Activity(serviceMediator, game));
     }
 
     /**

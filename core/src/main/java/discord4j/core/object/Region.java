@@ -16,9 +16,9 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.json.response.VoiceRegionResponse;
 import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.object.bean.RegionBean;
 
 import java.util.Objects;
 
@@ -33,7 +33,7 @@ public final class Region implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final VoiceRegionResponse region;
+    private final RegionBean region;
 
     /**
      * Constructs a {@code Region} with an associated serviceMediator and Discord data.
@@ -41,7 +41,7 @@ public final class Region implements DiscordObject {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param region The raw data as represented by Discord, must be non-null.
      */
-    public Region(final ServiceMediator serviceMediator, final VoiceRegionResponse region) {
+    public Region(final ServiceMediator serviceMediator, final RegionBean region) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.region = Objects.requireNonNull(region);
     }
