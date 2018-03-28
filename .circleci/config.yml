@@ -1,52 +1,137 @@
-# Java Gradle CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
 version: 2
-      
-job_definition: &job_definition
-  working_directory: ~/Discord4J
 
-  environment:
-    # Customize the JVM maximum heap limit
-    JVM_OPTS: -Xmx3200m
-    TERM: dumb
+job_defintion: &job_defintion
+  working_directory: ~/Discord4J
 
   steps:
     - checkout
 
-    # Download and cache dependencies
+    - run:
+        name: Collecting dependency definitions for cache key
+        command: find -type f -name '*.gradle' -exec cat {} >>~/dependencies.gradle \;
+
+    # restore saved caches
     - restore_cache:
         keys:
-        - v1-dependencies-{{ checksum "build.gradle" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+          - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+          - gradle-wrapper
 
-    - run: gradle dependencies
+    - restore_cache:
+        keys:
+          - gradle-cache-{{ checksum "~/dependencies.gradle" }}
+          - gradle-cache
+
+    - restore_cache:
+        keys:
+          - gradle-build-caches-{{ .Revision }}
+          - gradle-build-caches
+
+    - run:
+        name: Restoring Gradle Build Caches
+        command: |
+          [ -d ~/gradle-build-caches ] &&
+            [ -n "$(ls -A ~/gradle-build-caches)" ] &&
+            rm -rf ~/.gradle/caches/build-cache-* &&
+            mv ~/gradle-build-caches/* ~/.gradle/caches/ || true
+
+    # download and cache dependencies and Gradle
+    - run:
+        name: Downloading Dependencies
+        command: ./gradlew --max-workers 2 downloadDependencies
 
     - save_cache:
         paths:
-          - ~/.gradle
-        key: v1-dependencies-{{ checksum "build.gradle" }}
+          - ~/.gradle/wrapper/
+        key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
-    # run tests!
-    - run: gradle test
+    - save_cache:
+        paths:
+          - ~/.gradle/caches/
+        key: gradle-cache-{{ checksum "~/dependencies.gradle" }}
+
+    # build everything needed for publication
+    - run:
+        name: Building Project
+        command: ./gradlew --max-workers 2 --continue build publishToMavenLocal
+
+    # cache gradle build caches
+    - run:
+        name: Collecting Gradle Build Caches
+        command: |
+          mkdir -p ~/gradle-build-caches
+          [ -d ~/.gradle/caches ] &&
+            [ -n "$(ls -Ad ~/.gradle/caches/build-cache-* 2>/dev/null)" ] &&
+            mv ~/.gradle/caches/build-cache-* ~/gradle-build-caches || true
+        when: always
+
+    - save_cache:
+        paths:
+          - ~/gradle-build-caches
+        key: gradle-build-caches-{{ .Revision }}
+        when: always
+
+    # store the test results
+    - run:
+        name: Collecting test results
+        command: |
+          mkdir ~/test-results
+          find -mindepth 1 -maxdepth 1 -type d -exec sh -c '
+            [ -d {}/build/test-results/test ] &&
+            [ -n "$(ls -A {}/build/test-results/test)" ] &&
+            mkdir ~/test-results/{} &&
+            cp -a {}/build/test-results/test/* ~/test-results/{} || true
+            ' \;
+        when: always
+
+    - store_test_results:
+        path: ~/test-results
+
+    # store the artifacts
+    - run:
+        name: Collecting artifacts
+        command: |
+          mkdir ~/artifacts
+          find -mindepth 1 -maxdepth 1 -type d -exec sh -c '
+            [ -d {}/build/libs ] &&
+            [ -n "$(ls -A {}/build/libs)" ] &&
+            mkdir ~/artifacts/{} &&
+            cp -a {}/build/libs/* ~/artifacts/{} || true
+            ' \;
+          find -mindepth 1 -maxdepth 1 -type d -exec sh -c '
+            [ -d {}/build/docs/javadoc ] &&
+            [ -n "$(ls -A {}/build/docs/javadoc)" ] &&
+            { [ ! -d ~/artifacts/{} ] && mkdir ~/artifacts/{} || true; } &&
+            mkdir ~/artifacts/{}/javadoc &&
+            cp -a {}/build/docs/javadoc/* ~/artifacts/{}/javadoc || true
+            ' \;
+          find -mindepth 1 -maxdepth 1 -type d -exec sh -c '
+            [ -d {}/build/reports/tests/test ] &&
+            [ -n "$(ls -A {}/build/reports/tests/test)" ] &&
+            { [ ! -d ~/artifacts/{} ] && mkdir ~/artifacts/{} || true; } &&
+            mkdir ~/artifacts/{}/test-report &&
+            cp -a {}/build/reports/tests/test/* ~/artifacts/{}/test-report || true
+            ' \;
+        when: always
+
+    - store_artifacts:
+        path: ~/artifacts/
+        destination: Discord4J
 
 jobs:
   jvm8:
     docker:
       - image: circleci/openjdk:8-jdk
-    <<: *job_definition
+    <<: *job_defintion
 
   jvm9:
     docker:
       - image: circleci/openjdk:9-jdk
-    <<: *job_definition
+    <<: *job_defintion
 
   jvm10:
     docker:
       - image: circleci/openjdk:10-jdk
-    <<: *job_definition
+    <<: *job_defintion
 
 workflows:
   version: 2

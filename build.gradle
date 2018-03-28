@@ -59,6 +59,13 @@ allprojects {
         maven { url 'https://jitpack.io' }
     }
 
+    task downloadDependencies() {
+        description 'Download all dependencies to the Gradle cache'
+        doLast {
+            configurations.findAll { it.canBeResolved }.files
+        }
+    }
+
     jar {
         baseName = 'Discord4J-' + baseName
     }
