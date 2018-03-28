@@ -30,6 +30,7 @@ import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.FluxSink;
 
@@ -47,6 +48,7 @@ public class GatewayClientTest {
     }
 
     @Test
+    @Ignore("Example code not under CI")
     public void test() {
         ObjectMapper mapper = getMapper();
         PayloadReader reader = new JacksonPayloadReader(mapper);

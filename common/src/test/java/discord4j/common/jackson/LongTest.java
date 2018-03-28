@@ -171,7 +171,7 @@ public class LongTest {
     public void testDeserializeStringToUnsignedOptionalLong() throws Exception {
         long expected = Long.parseUnsignedLong("9223372036854775808"); // 2^63
         long result = getMapper().readValue("{\"unsignedLong\":\"9223372036854775808\"}",
-                UnsignedOptionalLongPojo.class).unsignedLong.getAsLong();
+                UnsignedOptionalLongPojo.class).unsignedLong;
 
         assertEquals(expected, result);
     }

@@ -32,7 +32,7 @@ public class WebSocketTest {
     private static final Logger log = Loggers.getLogger(WebSocketTest.class);
 
     @Test
-    public void connectTest() throws URISyntaxException, InterruptedException {
+    public void connectTest() {
         int count = 10;
         Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
         ReplayProcessor<Object> output = ReplayProcessor.create(count);

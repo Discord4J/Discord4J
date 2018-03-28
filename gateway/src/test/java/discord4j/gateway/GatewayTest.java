@@ -22,6 +22,7 @@ import discord4j.gateway.websocket.WebSocketClient;
 import discord4j.gateway.websocket.WebSocketMessage;
 import io.netty.buffer.ByteBuf;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
@@ -49,6 +50,7 @@ public class GatewayTest {
     }
 
     @Test
+    @Ignore("Example code not under CI")
     public void testGatewayConnect() throws URISyntaxException, InterruptedException {
         EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
         EmitterProcessor<String> inboundExchange = EmitterProcessor.create();

@@ -45,6 +45,7 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.store.noop.NoOpStoreService;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Schedulers;
@@ -64,6 +65,7 @@ public class RetryBotTest {
     }
 
     @Test
+    @Ignore("Example code excluded from CI")
     public void test() {
         FakeClient client = new FakeClient(token);
 

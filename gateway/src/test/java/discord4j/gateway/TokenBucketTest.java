@@ -35,12 +35,12 @@ public class TokenBucketTest {
     @Test
     public void testReactiveBucket() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        TokenBucket limiter = new TokenBucket(120, Duration.ofSeconds(60));
+        TokenBucket limiter = new TokenBucket(60, Duration.ofSeconds(30));
 
         EmitterProcessor<Long> outbound = EmitterProcessor.create();
         FluxSink<Long> sender = outbound.sink();
 
-        int requests = 150;
+        int requests = 65;
 
         outbound.log().concatMap(t -> {
             boolean success = limiter.tryConsume(1);

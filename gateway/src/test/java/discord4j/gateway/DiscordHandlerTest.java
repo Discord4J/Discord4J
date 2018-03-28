@@ -30,6 +30,7 @@ import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.websocket.WebSocketClient;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
@@ -47,6 +48,7 @@ public class DiscordHandlerTest {
     private String token;
 
     @Test
+    @Ignore("Example code not under CI")
     public void testGatewayConnect() throws Exception {
         WebSocketClient ws = new WebSocketClient();
 
