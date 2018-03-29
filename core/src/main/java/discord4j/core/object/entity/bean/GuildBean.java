@@ -26,6 +26,8 @@ import java.util.Objects;
 
 public final class GuildBean extends BaseGuildBean {
 
+    private static final long serialVersionUID = 4350381811087818276L;
+
     private String joinedAt;
     private boolean large;
     private int memberCount;
