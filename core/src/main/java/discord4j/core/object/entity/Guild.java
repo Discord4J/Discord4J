@@ -22,6 +22,7 @@ import discord4j.core.object.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.bean.BaseGuildBean;
 import discord4j.core.object.entity.bean.GuildBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,7 +42,7 @@ public final class Guild implements Entity {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final GuildBean data;
+    private final BaseGuildBean data;
 
     /**
      * Constructs an {@code Guild} with an associated serviceMediator and Discord data.
@@ -49,7 +50,7 @@ public final class Guild implements Entity {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Guild(final ServiceMediator serviceMediator, final GuildBean data) {
+    public Guild(final ServiceMediator serviceMediator, final BaseGuildBean data) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
     }
@@ -62,6 +63,10 @@ public final class Guild implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.getId());
+    }
+
+    private Optional<GuildBean> getGatewayData() {
+        return data instanceof GuildBean ? Optional.of((GuildBean) data) : Optional.empty();
     }
 
     /**
@@ -328,7 +333,9 @@ public final class Guild implements Entity {
      * @return When this guild was joined at, if present.
      */
     public Optional<Instant> getJoinTime() {
-        return Optional.ofNullable(data.getJoinedAt()).map(Instant::parse);
+        return getGatewayData()
+                .map(GuildBean::getJoinedAt)
+                .map(Instant::parse);
     }
 
     /**
@@ -337,7 +344,8 @@ public final class Guild implements Entity {
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
      */
     public Optional<Boolean> isLarge() {
-        return Optional.ofNullable(data.getLarge());
+        return getGatewayData()
+                .map(GuildBean::getLarge);
     }
 
     /**
@@ -346,8 +354,10 @@ public final class Guild implements Entity {
      * @return The total number of members in the guild, if present.
      */
     public OptionalInt getMemberCount() {
-        final Integer count = data.getMemberCount();
-        return (count == null) ? OptionalInt.empty() : OptionalInt.of(count);
+        return getGatewayData()
+                .map(guildBean -> OptionalInt.of(guildBean.getMemberCount()))
+                .orElseGet(OptionalInt::empty);
+
     }
 
     /**
