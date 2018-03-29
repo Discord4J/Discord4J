@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.io.Serializable;
-import java.util.function.Predicate;
 
 /**
  * This provides an active data connection to a store's data source.
@@ -173,16 +172,6 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
      * @return A mono which signals the completion of the deletion of values.
      */
     Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries);
-
-    /**
-     * Deletes all entries which satisfy the given predicate.
-     *
-     * @param filter A predicate which returns {@code true} for elements to be removed.
-     * @return A mono which signals the completion of the deletion of values.
-     */
-    default Mono<Void> deleteAll(Predicate<V> filter) {
-        return delete(entries().filter(t -> filter.test(t.getT2())).map(Tuple2::getT1));
-    }
 
     /**
      * Deletes all entries in the data source.
