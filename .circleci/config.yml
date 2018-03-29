@@ -38,20 +38,8 @@ jobs:
       - image: circleci/openjdk:8-jdk
     <<: *job_definition
 
-  jvm9:
-    docker:
-      - image: circleci/openjdk:9-jdk
-    <<: *job_definition
-
-  jvm10:
-    docker:
-      - image: circleci/openjdk:10-jdk
-    <<: *job_definition
-
 workflows:
   version: 2
   all:
     jobs:
       - jvm8
-      - jvm9
-      - jvm10
