@@ -6,6 +6,7 @@ version: 2
       
 job_definition: &job_definition
   working_directory: ~/Discord4J
+  context: D3J
 
   environment:
     # Customize the JVM maximum heap limit
