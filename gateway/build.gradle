@@ -4,6 +4,7 @@ dependencies {
     compile "io.projectreactor.addons:reactor-extra"
 
     testCompile "junit:junit:$junit_version"
+    testCompile "ch.qos.logback:logback-classic:$logback_version"
 }
 
 publishing {
