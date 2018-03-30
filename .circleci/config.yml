@@ -32,6 +32,18 @@ job_definition: &job_definition
     # run tests!
     - run: gradle test
 
+    # reports
+    - run:
+        name: Save test results
+        command: |
+          mkdir -p ~/junit/
+          find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+        when: always
+    - store_test_results:
+        path: ~/junit
+    - store_artifacts:
+        path: ~/junit
+
 jobs:
   jvm8:
     docker:
