@@ -40,6 +40,8 @@ public class UserResponse {
     private String email;
     @Nullable
     private String token;
+    @Nullable
+    private Long flags;
 
     public long getId() {
         return id;
@@ -83,6 +85,11 @@ public class UserResponse {
         return token;
     }
 
+    @Nullable
+    public Long getFlags() {
+        return flags;
+    }
+
     @Override
     public String toString() {
         return "UserResponse[" +
@@ -95,6 +102,7 @@ public class UserResponse {
                 ", verified=" + verified +
                 ", email=" + email +
                 ", token=" + token +
+                ", flags=" + flags +
                 ']';
     }
 }
