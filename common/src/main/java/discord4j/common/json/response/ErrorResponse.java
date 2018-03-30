@@ -17,17 +17,36 @@
 
 package discord4j.common.json.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.annotation.Nullable;
+import java.util.Arrays;
+
 public class ErrorResponse {
 
-    private long code;
+    @Nullable
+    private Long code;
+
+    @Nullable
     private String message;
 
-    public long getCode() {
+    @Nullable
+    @JsonProperty("parent_id")
+    private String[] parentId;
+
+    @Nullable
+    public Long getCode() {
         return code;
     }
 
+    @Nullable
     public String getMessage() {
         return message;
+    }
+
+    @Nullable
+    public String[] getParentId() {
+        return parentId;
     }
 
     @Override
@@ -35,6 +54,7 @@ public class ErrorResponse {
         return "ErrorResponse[" +
                 "code=" + code +
                 ", message=" + message +
+                ", parentId=" + Arrays.toString(parentId) +
                 ']';
     }
 }
