@@ -45,4 +45,13 @@ public class ClientException extends RuntimeException {
     public Mono<ErrorResponse> getErrorResponse() {
         return errorResponse;
     }
+
+    @Override
+    public String toString() {
+        return "ClientException[" +
+                "status=" + status +
+                ", headers=" + headers +
+                ", errorResponse=" + errorResponse +
+                ']';
+    }
 }
