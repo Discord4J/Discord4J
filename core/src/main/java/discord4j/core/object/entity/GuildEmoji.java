@@ -83,10 +83,6 @@ public final class GuildEmoji implements Entity {
      * @return The IDs of the roles this emoji is whitelisted to.
      */
     public Set<Snowflake> getRoleIds() {
-        if (data.getRoles() == null) {
-            return Collections.emptySet();
-        }
-
         return Arrays.stream(data.getRoles())
                 .mapToObj(Snowflake::of)
                 .collect(Collectors.toSet());
@@ -100,15 +96,6 @@ public final class GuildEmoji implements Entity {
      */
     public Flux<Role> getRoles() {
         throw new UnsupportedOperationException("Not yet implemented...");
-    }
-
-    /**
-     * Gets the ID of the user that created this emoji.
-     *
-     * @return The ID of the user that created this emoji.
-     */
-    public Snowflake getUserId() {
-        return Snowflake.of(data.getUser());
     }
 
     /**

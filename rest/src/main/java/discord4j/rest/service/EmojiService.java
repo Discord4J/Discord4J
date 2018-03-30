@@ -18,7 +18,7 @@ package discord4j.rest.service;
 
 import discord4j.common.json.request.GuildEmojiCreateRequest;
 import discord4j.common.json.request.GuildEmojiModifyRequest;
-import discord4j.common.json.response.EmojiResponse;
+import discord4j.common.json.response.GuildEmojiResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
@@ -29,23 +29,23 @@ public class EmojiService extends RestService {
         super(router);
     }
 
-    public Mono<EmojiResponse[]> getGuildEmojis(long guildId) {
+    public Mono<GuildEmojiResponse[]> getGuildEmojis(long guildId) {
         return Routes.GUILD_EMOJIS_GET.newRequest(guildId)
                 .exchange(getRouter());
     }
 
-    public Mono<EmojiResponse> getGuildEmoji(long guildId, long emojiID) {
+    public Mono<GuildEmojiResponse> getGuildEmoji(long guildId, long emojiID) {
         return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiID)
                 .exchange(getRouter());
     }
 
-    public Mono<EmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request) {
+    public Mono<GuildEmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request) {
         return Routes.GUILD_EMOJI_CREATE.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter());
     }
 
-    public Mono<EmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request) {
+    public Mono<GuildEmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request) {
         return Routes.GUILD_EMOJI_MODIFY.newRequest(guildId, emojiId)
                 .body(request)
                 .exchange(getRouter());

@@ -351,8 +351,8 @@ public abstract class Routes {
      * @see <a href="https://discordapp.com/developers/docs/resources/emoji#list-guild-emojis">https://discordapp
      * .com/developers/docs/resources/emoji#list-guild-emojis</a>
      */
-    public static final Route<EmojiResponse[]> GUILD_EMOJIS_GET = Route.get("/guilds/{guild.id}/emojis",
-            EmojiResponse[].class);
+    public static final Route<GuildEmojiResponse[]> GUILD_EMOJIS_GET = Route.get("/guilds/{guild.id}/emojis",
+            GuildEmojiResponse[].class);
 
     /**
      * Returns an emoji object for the given guild and emoji IDs.
@@ -360,8 +360,8 @@ public abstract class Routes {
      * @see <a href="https://discordapp.com/developers/docs/resources/emoji#get-guild-emoji">https://discordapp
      * .com/developers/docs/resources/emoji#get-guild-emoji</a>
      */
-    public static final Route<EmojiResponse> GUILD_EMOJI_GET = Route.get("/guilds/{guild.id}/emojis/{emoji.id}",
-            EmojiResponse.class);
+    public static final Route<GuildEmojiResponse> GUILD_EMOJI_GET = Route.get("/guilds/{guild.id}/emojis/{emoji.id}",
+            GuildEmojiResponse.class);
 
     /**
      * Create a new emoji for the guild. Returns the new emoji object on success. Fires a Guild Emojis Update Gateway
@@ -370,8 +370,8 @@ public abstract class Routes {
      * @see <a href="https://discordapp.com/developers/docs/resources/emoji#create-guild-emoji">https://discordapp
      * .com/developers/docs/resources/emoji#create-guild-emoji</a>
      */
-    public static final Route<EmojiResponse> GUILD_EMOJI_CREATE = Route.post("/guilds/{guild.id}/emojis",
-            EmojiResponse.class);
+    public static final Route<GuildEmojiResponse> GUILD_EMOJI_CREATE = Route.post("/guilds/{guild.id}/emojis",
+            GuildEmojiResponse.class);
 
     /**
      * Modify the given emoji. Returns the updated emoji object on success. Fires a Guild Emojis Update Gateway event.
@@ -379,8 +379,8 @@ public abstract class Routes {
      * @see <a href="https://discordapp.com/developers/docs/resources/emoji#modify-guild-emoji">https://discordapp
      * .com/developers/docs/resources/emoji#modify-guild-emoji</a>
      */
-    public static final Route<EmojiResponse> GUILD_EMOJI_MODIFY = Route.patch("/guilds/{guild.id}/emojis/{emoji.id}",
-            EmojiResponse.class);
+    public static final Route<GuildEmojiResponse> GUILD_EMOJI_MODIFY = Route.patch("/guilds/{guild.id}/emojis/" +
+                    "{emoji.id}", GuildEmojiResponse.class);
 
     /**
      * Delete the given emoji. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.

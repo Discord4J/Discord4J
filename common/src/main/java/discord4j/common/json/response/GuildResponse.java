@@ -54,7 +54,7 @@ public class GuildResponse {
     @JsonProperty("explicit_content_filter")
     private int explciitContentFilter;
     private RoleResponse[] roles;
-    private EmojiResponse[] emojis;
+    private GuildEmojiResponse[] emojis;
     private String[] features;
     @JsonProperty("mfa_level")
     private int mfaLevel;
@@ -152,7 +152,7 @@ public class GuildResponse {
         return roles;
     }
 
-    public EmojiResponse[] getEmojis() {
+    public GuildEmojiResponse[] getEmojis() {
         return emojis;
     }
 
