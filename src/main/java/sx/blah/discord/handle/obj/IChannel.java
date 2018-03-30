@@ -220,6 +220,16 @@ public interface IChannel extends IDiscordObject<IChannel> {
 	List<IMessage> bulkDelete(List<IMessage> messages);
 
 	/**
+	 * Bulk deletes the given message ids.
+	 *
+	 * <p>A message can be at most 2 weeks old to be eligible for bulk deletion.
+	 *
+	 * @param messageIds The message ids to delete.
+	 * @return The deleted messages.
+	 */
+	List<Long> bulkDeleteByIds(List<Long> messageIds);
+
+	/**
 	 * Gets the maximum number of messages which can be cached in the channel.
 	 *
 	 * @return The maximum number of messages which can be cached in the channel.

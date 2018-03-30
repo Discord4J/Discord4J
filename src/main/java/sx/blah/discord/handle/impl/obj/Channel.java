@@ -43,6 +43,7 @@ import java.time.Instant;
 import java.time.Period;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -360,6 +361,41 @@ public class Channel implements IChannel {
 				new BulkDeleteRequest(toDelete));
 
 		return toDelete;
+	}
+
+	@Override
+	public List<Long> bulkDeleteByIds(List<Long> messageIds) {
+		PermissionUtils.requirePermissions(this, client.getOurUser(), Permissions.MANAGE_MESSAGES);
+
+		if (messageIds.size() == 1) { //Bulk delete is no longer valid, time for normal delete.
+			client.getMessageByID(messageIds.get(0)).delete();
+			return messageIds;
+		}
+
+		if (messageIds.size() > 100) {
+			// We can't tell how old the messages are here
+			AtomicInteger indexCounter = new AtomicInteger();
+			Collection<List<Long>> split = messageIds
+					.stream()
+					.collect(Collectors.groupingBy(index -> indexCounter.getAndIncrement() / 100)).values();
+
+			split.forEach((toDelete) -> {
+				if (toDelete.size() == 1) {
+					client.getMessageByID(toDelete.get(0)).delete();
+					return;
+				}
+
+				RequestBuffer.request(() -> client.REQUESTS.POST.makeRequest(
+						DiscordEndpoints.CHANNELS + id + "/messages/bulk-delete",
+						new BulkDeleteRequest(toDelete.stream().map(String::valueOf).toArray(String[]::new))));
+			});
+		} else {
+			client.REQUESTS.POST.makeRequest(
+					DiscordEndpoints.CHANNELS + id + "/messages/bulk-delete",
+					new BulkDeleteRequest(messageIds.stream().map(String::valueOf).toArray(String[]::new)));
+		}
+
+		return messageIds;
 	}
 
 	@Override
