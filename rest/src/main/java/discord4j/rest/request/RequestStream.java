@@ -43,7 +43,7 @@ import java.util.function.Predicate;
  * linearization ensures proper ratelimit handling.
  * <p>
  * The flow of a request through the stream is as follows:
- * <p>
+ *
  * <img src="{@docRoot}img/RequestStream_Flow.png">
  *
  * @param <T> The type of items in the stream.
@@ -59,7 +59,7 @@ class RequestStream<T> {
      * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the back off is
      * applied to the global rate limiter. Otherwise, it is applied only to this stream.
      */
-    private final Retry<AtomicLong> RETRY = Retry.onlyIf(new Predicate<RetryContext<AtomicLong>>() {
+    private final Retry<AtomicLong> retryFactory = Retry.onlyIf(new Predicate<RetryContext<AtomicLong>>() {
         @Override
         public boolean test(RetryContext<AtomicLong> ctx) {
             Throwable exception = ctx.exception();
@@ -87,7 +87,7 @@ class RequestStream<T> {
         long delay = ((AtomicLong) context.applicationContext()).get();
         ((AtomicLong) context.applicationContext()).set(0L);
         return new BackoffDelay(Duration.ofMillis(delay));
-    });
+    }).withApplicationContext(new AtomicLong());
 
     RequestStream(SimpleHttpClient httpClient, GlobalRateLimiter globalRateLimiter) {
         this.httpClient = httpClient;
@@ -108,7 +108,7 @@ class RequestStream<T> {
 
     /**
      * Reads and completes one request from the stream at a time. If a request fails, it is retried according to the
-     * {@link #RETRY retry function}. The reader may wait in between each request if preemptive ratelimiting is
+     * {@link #retryFactory retry function}. The reader may wait in between each request if preemptive ratelimiting is
      * necessary according to the response headers.
      *
      * @see #sleepTime
@@ -146,7 +146,7 @@ class RequestStream<T> {
                     .flatMap(e -> httpClient.exchange(req.getRoute().getMethod(),
                             RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()), req.getBody(),
                             req.getRoute().getResponseType(), exchangeFilter))
-                    .retryWhen(RETRY)
+                    .retryWhen(retryFactory)
                     .materialize()
                     .subscribe(signal -> {
                         if (signal.isOnSubscribe()) {
