@@ -16,6 +16,7 @@
  */
 package discord4j.rest.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.Exceptions;
@@ -57,6 +58,9 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
         return response.receive().aggregate().asByteArray().map(bytes -> {
             try {
                 return objectMapper.readValue(bytes, responseType);
+            } catch (JsonProcessingException e) {
+                throw Exceptions.propagate(new RuntimeException(e.toString()
+                        .replaceAll("(\"token\": \")([A-Za-z0-9.-]*)(\")", "$1hunter2$3")));
             } catch (IOException e) {
                 throw Exceptions.propagate(e);
             }
