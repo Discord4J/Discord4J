@@ -10,7 +10,7 @@ ext {
     // Project constants
     github_org = 'Discord4J'
     project_name = 'Discord4J'
-    artifact_group = 'com.github.austinv11'
+    artifact_group = 'com.github.discord4j'
     project_version = '3.0.0-SNAPSHOT'
     project_description = 'Java interface for the Discord API'
     project_jdk = '1.8'
