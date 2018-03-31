@@ -45,7 +45,7 @@ public final class Message implements Entity {
     private final MessageBean data;
 
     /**
-     * Constructs a {@code Message} with an associated serviceMediator and Discord data.
+     * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

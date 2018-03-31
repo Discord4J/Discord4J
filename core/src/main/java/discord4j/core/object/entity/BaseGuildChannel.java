@@ -28,7 +28,7 @@ import java.util.Set;
 class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     /**
-     * Constructs an {@code BaseGuildChannel} with an associated serviceMediator and Discord data.
+     * Constructs an {@code BaseGuildChannel} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

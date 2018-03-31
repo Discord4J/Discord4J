@@ -46,11 +46,11 @@ public final class Member extends User {
     private final long guildId;
 
     /**
-     * Constructs a {@code Member} with an associated serviceMediator and Discord data.
+     * Constructs a {@code Member} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
-     * @param userData The user data as represented by Discord, must be non-null
+     * @param userData The user data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this user is associated to.
      */
     public Member(final ServiceMediator serviceMediator, final MemberBean data, final UserBean userData, final long guildId) {

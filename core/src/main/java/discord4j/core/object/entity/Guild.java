@@ -45,7 +45,7 @@ public final class Guild implements Entity {
     private final BaseGuildBean data;
 
     /**
-     * Constructs an {@code Guild} with an associated serviceMediator and Discord data.
+     * Constructs an {@code Guild} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -66,7 +66,7 @@ public final class Guild implements Entity {
     }
 
     private Optional<GuildBean> getGatewayData() {
-        return data instanceof GuildBean ? Optional.of((GuildBean) data) : Optional.empty();
+        return (data instanceof GuildBean) ? Optional.of((GuildBean) data) : Optional.empty();
     }
 
     /**
@@ -344,8 +344,7 @@ public final class Guild implements Entity {
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
      */
     public Optional<Boolean> isLarge() {
-        return getGatewayData()
-                .map(GuildBean::getLarge);
+        return getGatewayData().map(GuildBean::getLarge);
     }
 
     /**
@@ -357,7 +356,6 @@ public final class Guild implements Entity {
         return getGatewayData()
                 .map(guildBean -> OptionalInt.of(guildBean.getMemberCount()))
                 .orElseGet(OptionalInt::empty);
-
     }
 
     /**

@@ -24,7 +24,7 @@ import reactor.core.publisher.Flux;
 public final class Category extends BaseGuildChannel {
 
     /**
-     * Constructs an {@code Category} with an associated serviceMediator and Discord data.
+     * Constructs an {@code Category} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

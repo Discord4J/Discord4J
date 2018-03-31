@@ -33,17 +33,17 @@ public final class Region implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final RegionBean region;
+    private final RegionBean data;
 
     /**
-     * Constructs a {@code Region} with an associated serviceMediator and Discord data.
+     * Constructs a {@code Region} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param region The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Region(final ServiceMediator serviceMediator, final RegionBean region) {
+    public Region(final ServiceMediator serviceMediator, final RegionBean data) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
-        this.region = Objects.requireNonNull(region);
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -57,7 +57,7 @@ public final class Region implements DiscordObject {
      * @return The unique ID for the region.
      */
     public String getId() {
-        return region.getId();
+        return data.getId();
     }
 
     /**
@@ -66,7 +66,7 @@ public final class Region implements DiscordObject {
      * @return The name of the region.
      */
     public String getName() {
-        return region.getName();
+        return data.getName();
     }
 
     /**
@@ -75,7 +75,7 @@ public final class Region implements DiscordObject {
      * @return An example hostname for the region.
      */
     public String getSampleHostname() {
-        return region.getSampleHostname();
+        return data.getSampleHostname();
     }
 
     /**
@@ -84,7 +84,7 @@ public final class Region implements DiscordObject {
      * @return An example port for the region.
      */
     public int getSamplePort() {
-        return region.getSamplePort();
+        return data.getSamplePort();
     }
 
     /**
@@ -93,7 +93,7 @@ public final class Region implements DiscordObject {
      * @return {@code true} if this is a VIP region, {@code false} otherwise.
      */
     public boolean isVip() {
-        return region.isVip();
+        return data.isVip();
     }
 
     /**
@@ -102,7 +102,7 @@ public final class Region implements DiscordObject {
      * @return {@code true} if the region is closest to the current user's serviceMediator, {@code false} otherwise.
      */
     public boolean isOptimal() {
-        return region.isOptimal();
+        return data.isOptimal();
     }
 
     /**
@@ -111,7 +111,7 @@ public final class Region implements DiscordObject {
      * @return {@code true} if this is a deprecated voice region, {@code false} otherwise.
      */
     public boolean isDeprecated() {
-        return region.isDeprecated();
+        return data.isDeprecated();
     }
 
     /**
@@ -120,6 +120,6 @@ public final class Region implements DiscordObject {
      * @return {@code true} if this is a custom voice region, {@code false} otherwise.
      */
     public boolean isCustom() {
-        return region.isCustom();
+        return data.isCustom();
     }
 }

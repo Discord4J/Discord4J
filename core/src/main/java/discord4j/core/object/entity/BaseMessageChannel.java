@@ -28,7 +28,7 @@ import java.util.Optional;
 class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     /**
-     * Constructs an {@code BaseMessageChannel} with an associated serviceMediator and Discord data.
+     * Constructs an {@code BaseMessageChannel} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

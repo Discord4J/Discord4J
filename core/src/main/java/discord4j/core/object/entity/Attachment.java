@@ -38,7 +38,7 @@ public final class Attachment implements Entity {
     private final AttachmentBean data;
 
     /**
-     * Constructs an {@code Attachment} with an associated serviceMediator and Discord data.
+     * Constructs an {@code Attachment} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -109,6 +109,6 @@ public final class Attachment implements Entity {
      * @return The width of the file, if present.
      */
     public OptionalInt getWidth() {
-        return (data.getHeight() == null) ? OptionalInt.empty() : OptionalInt.of(data.getHeight());
+        return (data.getWidth() == null) ? OptionalInt.empty() : OptionalInt.of(data.getWidth());
     }
 }

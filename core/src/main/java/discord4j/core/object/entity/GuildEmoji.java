@@ -16,15 +16,14 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.GuildEmojiBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,7 +45,7 @@ public final class GuildEmoji implements Entity {
     private final long guildId;
 
     /**
-     * Constructs a {@code GuildEmoji} with an associated serviceMediator and Discord data.
+     * Constructs a {@code GuildEmoji} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -132,7 +131,7 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji is animated, {@code false} otherwise.
      */
     public boolean isAnimated() {
-        return data.isManaged();
+        return data.isAnimated();
     }
 
     /**

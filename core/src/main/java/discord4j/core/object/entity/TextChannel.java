@@ -35,15 +35,15 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     private final BaseMessageChannel messageChannel;
 
     /**
-     * Constructs an {@code TextChannel} with an associated serviceMediator and Discord data.
+     * Constructs an {@code TextChannel} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param channel The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
-    public TextChannel(final ServiceMediator serviceMediator, final TextChannelBean channel) {
-        super(serviceMediator, channel);
-        guildChannel = new BaseGuildChannel(serviceMediator, channel.getGuildChannel());
-        messageChannel = new BaseMessageChannel(serviceMediator, channel.getMessageChannel());
+    public TextChannel(final ServiceMediator serviceMediator, final TextChannelBean data) {
+        super(serviceMediator, data);
+        guildChannel = new BaseGuildChannel(serviceMediator, data.getGuildChannel());
+        messageChannel = new BaseMessageChannel(serviceMediator, data.getMessageChannel());
     }
 
     @Override

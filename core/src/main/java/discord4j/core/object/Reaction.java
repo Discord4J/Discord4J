@@ -16,7 +16,6 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.json.response.ReactionResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ReactionBean;
@@ -40,21 +39,21 @@ public final class Reaction implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final ReactionBean reaction;
+    private final ReactionBean data;
 
     /** The ID of the message this reaction is associated to. */
     private final long messageId;
 
     /**
-     * Constructs a {@code Reaction} with an associated serviceMediator and Discord data.
+     * Constructs a {@code Reaction} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param reaction The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      * @param messageId The ID of the message this reaction is associated to.
      */
-    public Reaction(final ServiceMediator serviceMediator, final ReactionBean reaction, final long messageId) {
+    public Reaction(final ServiceMediator serviceMediator, final ReactionBean data, final long messageId) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
-        this.reaction = Objects.requireNonNull(reaction);
+        this.data = Objects.requireNonNull(data);
         this.messageId = messageId;
     }
 
@@ -69,7 +68,7 @@ public final class Reaction implements DiscordObject {
      * @return The number of times this emoji has been used to react.
      */
     public int getCount() {
-        return reaction.getCount();
+        return data.getCount();
     }
 
     /**
@@ -78,7 +77,7 @@ public final class Reaction implements DiscordObject {
      * @return {@code true} if the current user reacted using this emoji, {@code false} otherwise.
      */
     public boolean hasReacted() {
-        return reaction.isMe();
+        return data.isMe();
     }
 
     /**
@@ -87,7 +86,7 @@ public final class Reaction implements DiscordObject {
      * @return The ID of the emoji for this reaction, if present.
      */
     public Optional<Snowflake> getEmojiId() {
-        return Optional.ofNullable(reaction.getEmojiId()).map(Snowflake::of);
+        return Optional.ofNullable(data.getEmojiId()).map(Snowflake::of);
     }
 
     /**
@@ -106,7 +105,7 @@ public final class Reaction implements DiscordObject {
      * @return The name of the emoji for this reaction.
      */
     public String getEmojiName() {
-        return reaction.getEmojiName();
+        return data.getEmojiName();
     }
 
     /**

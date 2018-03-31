@@ -39,7 +39,7 @@ public final class PermissionOverwrite implements Entity {
     private final PermissionOverwriteBean data;
 
     /**
-     * Constructs a {@code PermissionOverwrite} with an associated serviceMediator and Discord data.
+     * Constructs a {@code PermissionOverwrite} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

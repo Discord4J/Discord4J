@@ -34,21 +34,21 @@ import java.util.Optional;
  */
 public final class Presence implements DiscordObject {
 
-    /** The serviceMediator associated to this object. */
+    /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final PresenceBean presence;
+    private final PresenceBean data;
 
     /**
-     * Constructs a {@code Presence} with an associated serviceMediator and Discord data.
+     * Constructs a {@code Presence} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param presence The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Presence(final ServiceMediator serviceMediator, final PresenceBean presence) {
+    public Presence(final ServiceMediator serviceMediator, final PresenceBean data) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
-        this.presence = Objects.requireNonNull(presence);
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -62,7 +62,7 @@ public final class Presence implements DiscordObject {
      * @return The ID of the user this presence is associated to.
      */
     public Snowflake getUserId() {
-        return Snowflake.of(presence.getUserId());
+        return Snowflake.of(data.getUserId());
     }
 
     /**
@@ -81,7 +81,7 @@ public final class Presence implements DiscordObject {
      * @return The activity for the user this presence is associated to, if present.
      */
     public Optional<Activity> getActivity() {
-        return Optional.ofNullable(presence.getActivity()).map(game -> new Activity(serviceMediator, game));
+        return Optional.ofNullable(data.getActivity()).map(game -> new Activity(serviceMediator, game));
     }
 
     /**
@@ -90,7 +90,7 @@ public final class Presence implements DiscordObject {
      * @return The ID for the guild this presence is associated to, if present.
      */
     public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(presence.getGuildId()).map(Snowflake::of);
+        return Optional.ofNullable(data.getGuildId()).map(Snowflake::of);
     }
 
     /**
@@ -110,7 +110,7 @@ public final class Presence implements DiscordObject {
      */
     public Optional<Status> getStatus() {
         return Arrays.stream(Status.values())
-                .filter(status -> status.value.equals(presence.getStatus()))
+                .filter(status -> status.value.equals(data.getStatus()))
                 .findFirst();
     }
 

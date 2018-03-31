@@ -33,13 +33,13 @@ import java.util.Optional;
 public final class ExtendedInvite extends Invite {
 
     /**
-     * Constructs a {@code ExtendedInvite} with an associated serviceMediator and Discord data.
+     * Constructs a {@code ExtendedInvite} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param invite The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ExtendedInvite(final ServiceMediator serviceMediator, final InviteResponse invite) {
-        super(serviceMediator, invite);
+    public ExtendedInvite(final ServiceMediator serviceMediator, final InviteResponse data) {
+        super(serviceMediator, data);
     }
 
     /**
@@ -48,7 +48,7 @@ public final class ExtendedInvite extends Invite {
      * @return The ID of the user who created the invite.
      */
     public Snowflake getInviterId() {
-        return Optional.ofNullable(getInvite().getInviter())
+        return Optional.ofNullable(getData().getInviter())
                 .map(inviter -> Snowflake.of(inviter.getId()))
                 .orElseThrow(IllegalStateException::new);
     }
@@ -69,7 +69,7 @@ public final class ExtendedInvite extends Invite {
      * @return The number of times this invite has been used.
      */
     public int getUses() {
-        return Optional.ofNullable(getInvite().getUses()).orElseThrow(IllegalStateException::new);
+        return Optional.ofNullable(getData().getUses()).orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -78,7 +78,7 @@ public final class ExtendedInvite extends Invite {
      * @return The max number of times this invite can be used.
      */
     public int getMaxUses() {
-        return Optional.ofNullable(getInvite().getMaxUses()).orElseThrow(IllegalStateException::new);
+        return Optional.ofNullable(getData().getMaxUses()).orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -87,9 +87,8 @@ public final class ExtendedInvite extends Invite {
      * @return The instant this invite expires, if possible.
      */
     public Optional<Instant> getExpiration() {
-        final boolean temporary = Optional.ofNullable(getInvite().getTemporary())
-                .orElseThrow(IllegalStateException::new);
-        final int maxAge = Optional.ofNullable(getInvite().getMaxAge()).orElseThrow(IllegalStateException::new);
+        final boolean temporary = Optional.ofNullable(getData().getTemporary()).orElseThrow(IllegalStateException::new);
+        final int maxAge = Optional.ofNullable(getData().getMaxAge()).orElseThrow(IllegalStateException::new);
 
         return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
     }
@@ -100,7 +99,7 @@ public final class ExtendedInvite extends Invite {
      * @return When this invite was created.
      */
     public Instant getCreation() {
-        return Optional.ofNullable(getInvite().getCreatedAt())
+        return Optional.ofNullable(getData().getCreatedAt())
                 .map(Instant::parse)
                 .orElseThrow(IllegalStateException::new);
     }
@@ -111,6 +110,6 @@ public final class ExtendedInvite extends Invite {
      * @return {@code true} if this invite was revoked, {@code false} otherwise.
      */
     public boolean isRevoked() {
-        return Optional.ofNullable(getInvite().getRevoked()).orElseThrow(IllegalStateException::new);
+        return Optional.ofNullable(getData().getRevoked()).orElseThrow(IllegalStateException::new);
     }
 }

@@ -16,11 +16,8 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.json.response.GameAssetsResponse;
-import discord4j.common.json.response.GamePartyResponse;
-import discord4j.common.json.response.GameTimestampsResponse;
-import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ActivityBean;
 
 import java.time.Instant;
@@ -40,17 +37,17 @@ public final class Activity implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final ActivityBean activity;
+    private final ActivityBean data;
 
     /**
-     * Constructs a {@code Activity} with an associated serviceMediator and Discord data.
+     * Constructs a {@code Activity} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param activity The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Activity(final ServiceMediator serviceMediator, final ActivityBean activity) {
+    public Activity(final ServiceMediator serviceMediator, final ActivityBean data) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
-        this.activity = Objects.requireNonNull(activity);
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -64,7 +61,7 @@ public final class Activity implements DiscordObject {
      * @return The activity's name.
      */
     public String getName() {
-        return activity.getName();
+        return data.getName();
     }
 
     /**
@@ -74,7 +71,7 @@ public final class Activity implements DiscordObject {
      */
     public Type getType() {
         return Arrays.stream(Type.values())
-                .filter(value -> value.value == activity.getType())
+                .filter(value -> value.value == data.getType())
                 .findFirst() // If this throws Discord added something
                 .orElseThrow(UnsupportedOperationException::new);
     }
@@ -85,7 +82,7 @@ public final class Activity implements DiscordObject {
      * @return The stream url, if present.
      */
     public Optional<String> getStreamingUrl() {
-        return Optional.ofNullable(activity.getUrl());
+        return Optional.ofNullable(data.getUrl());
     }
 
     /**
@@ -94,7 +91,7 @@ public final class Activity implements DiscordObject {
      * @return The UNIX time (in milliseconds) of when the activity started, if present.
      */
     public Optional<Instant> getStart() {
-        return Optional.ofNullable(activity.getStart()).map(Instant::ofEpochMilli);
+        return Optional.ofNullable(data.getStart()).map(Instant::ofEpochMilli);
     }
 
     /**
@@ -103,7 +100,7 @@ public final class Activity implements DiscordObject {
      * @return The UNIX time (in milliseconds) of when the activity ends, if present.
      */
     public Optional<Instant> getEnd() {
-        return Optional.ofNullable(activity.getEnd()).map(Instant::ofEpochMilli);
+        return Optional.ofNullable(data.getEnd()).map(Instant::ofEpochMilli);
     }
 
     /**
@@ -112,7 +109,7 @@ public final class Activity implements DiscordObject {
      * @return The application ID for the game, if present.
      */
     public Optional<Snowflake> getApplicationId() {
-        return Optional.ofNullable(activity.getApplicationId()).map(Snowflake::of);
+        return Optional.ofNullable(data.getApplicationId()).map(Snowflake::of);
     }
 
     /**
@@ -121,7 +118,7 @@ public final class Activity implements DiscordObject {
      * @return What the player is currently doing, if present.
      */
     public Optional<String> getDetails() {
-        return Optional.ofNullable(activity.getDetails());
+        return Optional.ofNullable(data.getDetails());
     }
 
     /**
@@ -130,7 +127,7 @@ public final class Activity implements DiscordObject {
      * @return The user's current party status, if present.
      */
     public Optional<String> getState() {
-        return Optional.ofNullable(activity.getState());
+        return Optional.ofNullable(data.getState());
     }
 
     /**
@@ -139,7 +136,7 @@ public final class Activity implements DiscordObject {
      * @return The ID of the party, if present.
      */
     public Optional<String> getPartyId() {
-        return Optional.ofNullable(activity.getPartyId());
+        return Optional.ofNullable(data.getPartyId());
     }
 
     /**
@@ -148,7 +145,7 @@ public final class Activity implements DiscordObject {
      * @return The party's current size, if present.
      */
     public OptionalInt getCurrentPartySize() {
-        final Integer currentPartySize = activity.getCurrentPartySize();
+        final Integer currentPartySize = data.getCurrentPartySize();
         return (currentPartySize == null) ? OptionalInt.empty() : OptionalInt.of(currentPartySize);
     }
 
@@ -158,7 +155,7 @@ public final class Activity implements DiscordObject {
      * @return The party's max size, if present.
      */
     public OptionalInt getMaxPartySize() {
-        final Integer maxPartySize = activity.getMaxPartySize();
+        final Integer maxPartySize = data.getMaxPartySize();
         return (maxPartySize == null) ? OptionalInt.empty() : OptionalInt.of(maxPartySize);
     }
 
@@ -168,7 +165,7 @@ public final class Activity implements DiscordObject {
      * @return The ID for a large asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getLargeImageId() {
-        return Optional.ofNullable(activity.getLargeImage());
+        return Optional.ofNullable(data.getLargeImage());
     }
 
     /**
@@ -177,7 +174,7 @@ public final class Activity implements DiscordObject {
      * @return The text displayed when hovering over the large image of the activity, if present.
      */
     public Optional<String> getLargeText() {
-        return Optional.ofNullable(activity.getLargeText());
+        return Optional.ofNullable(data.getLargeText());
     }
 
     /**
@@ -186,7 +183,7 @@ public final class Activity implements DiscordObject {
      * @return The ID for a small asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getSmallImageId() {
-        return Optional.ofNullable(activity.getSmallImage());
+        return Optional.ofNullable(data.getSmallImage());
     }
 
     /**
@@ -195,7 +192,7 @@ public final class Activity implements DiscordObject {
      * @return The text displayed when hovering over the small image of the activity, if present.
      */
     public Optional<String> getSmallText() {
-        return Optional.ofNullable(activity.getSmallText());
+        return Optional.ofNullable(data.getSmallText());
     }
 
     /** The type of "action" for an activity. */

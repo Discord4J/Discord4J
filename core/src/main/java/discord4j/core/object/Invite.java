@@ -36,17 +36,17 @@ public class Invite implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final InviteResponse invite;
+    private final InviteResponse data;
 
     /**
-     * Constructs a {@code Invite} with an associated serviceMediator and Discord data.
+     * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param invite The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Invite(final ServiceMediator serviceMediator, final InviteResponse invite) {
+    public Invite(final ServiceMediator serviceMediator, final InviteResponse data) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
-        this.invite = Objects.requireNonNull(invite);
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class Invite implements DiscordObject {
      * @return The invite code (unique ID).
      */
     public final String getCode() {
-        return invite.getCode();
+        return data.getCode();
     }
 
     /**
@@ -69,7 +69,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the guild this invite is associated to.
      */
     public final Snowflake getGuildId() {
-        return Snowflake.of(invite.getGuild().getId());
+        return Snowflake.of(data.getGuild().getId());
     }
 
     /**
@@ -88,7 +88,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the channel this invite is associated to.
      */
     public final Snowflake getChannelId() {
-        return Snowflake.of(invite.getChannel().getId());
+        return Snowflake.of(data.getChannel().getId());
     }
 
     /**
@@ -106,7 +106,7 @@ public class Invite implements DiscordObject {
      *
      * @return The raw data as represented by Discord.
      */
-    protected final InviteResponse getInvite() {
-        return invite;
+    protected final InviteResponse getData() {
+        return data;
     }
 }

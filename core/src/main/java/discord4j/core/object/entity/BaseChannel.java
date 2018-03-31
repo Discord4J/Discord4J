@@ -34,7 +34,7 @@ class BaseChannel implements Channel {
     private final ServiceMediator serviceMediator;
 
     /**
-     * Constructs a {@code BaseChannel} with an associated serviceMediator and Discord data.
+     * Constructs a {@code BaseChannel} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
