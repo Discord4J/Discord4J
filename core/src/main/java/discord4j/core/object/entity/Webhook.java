@@ -51,7 +51,7 @@ public final class Webhook implements Entity {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return serviceMediator.getDiscordClient();
     }
 
     @Override

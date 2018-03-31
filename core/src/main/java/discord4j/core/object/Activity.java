@@ -53,7 +53,7 @@ public final class Activity implements DiscordObject {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return serviceMediator.getDiscordClient();
     }
 
     /**

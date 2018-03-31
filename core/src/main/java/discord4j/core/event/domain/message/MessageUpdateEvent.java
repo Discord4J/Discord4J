@@ -18,8 +18,9 @@ package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
+import discord4j.core.object.Snowflake;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -27,41 +28,21 @@ import java.util.Set;
 
 public class MessageUpdateEvent extends MessageEvent {
 
-    private final Update<String> content;
-    // TODO private final Update<Embed> embed;
-    private final Update<Boolean> pinned;
-    private final Update<Boolean> mentionsEveryone;
-    private final Update<Set<User>> userMentions;
-    private final Update<Set<Snowflake>> roleMentions;
+    private final Message current;
+    private final Message old;
 
-    public MessageUpdateEvent(DiscordClient client, @Nullable Update<String> content, @Nullable Update<Boolean> pinned,
-                              @Nullable Update<Boolean> mentionsEveryone, @Nullable Update<Set<User>> userMentions,
-                              @Nullable Update<Set<Snowflake>> roleMentions) {
+    public MessageUpdateEvent(DiscordClient client, Message current, @Nullable Message old) {
         super(client);
-        this.content = content;
-        this.pinned = pinned;
-        this.mentionsEveryone = mentionsEveryone;
-        this.userMentions = userMentions;
-        this.roleMentions = roleMentions;
+
+        this.current = current;
+        this.old = old;
     }
 
-    public Optional<Update<String>> getContent() {
-        return Optional.ofNullable(content);
+    public Message getCurrent() {
+        return current;
     }
 
-    public Optional<Update<Boolean>> isPinned() {
-        return Optional.ofNullable(pinned);
-    }
-
-    public Optional<Update<Boolean>> mentionsEveryone() {
-        return Optional.ofNullable(mentionsEveryone);
-    }
-
-    public Optional<Update<Set<User>>> getUserMentions() {
-        return Optional.ofNullable(userMentions);
-    }
-
-    public Optional<Update<Set<Snowflake>>> getRoleMentions() {
-        return Optional.ofNullable(roleMentions);
+    public Optional<Message> getOld() {
+        return Optional.ofNullable(old);
     }
 }

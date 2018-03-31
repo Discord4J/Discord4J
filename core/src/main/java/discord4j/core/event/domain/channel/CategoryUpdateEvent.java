@@ -18,7 +18,8 @@ package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
-import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.Category;
+import discord4j.core.object.entity.PermissionOverwrite;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -26,28 +27,20 @@ import java.util.Set;
 
 public class CategoryUpdateEvent extends ChannelEvent {
 
-    private final Update<String> name;
-    private final Update<Set<PermissionOverwrite>> overwrites;
-    private final Update<Integer> position;
+    private final Category old;
+    private final Category current;
 
-    public CategoryUpdateEvent(DiscordClient client, @Nullable Update<String> name,
-                               @Nullable Update<Set<PermissionOverwrite>> overwrites,
-                               @Nullable Update<Integer> position) {
+    public CategoryUpdateEvent(DiscordClient client, Category old, @Nullable Category current) {
         super(client);
-        this.name = name;
-        this.overwrites = overwrites;
-        this.position = position;
+        this.old = old;
+        this.current = current;
     }
 
-    public Optional<Update<String>> getName() {
-        return Optional.ofNullable(name);
+    public Category getOld() {
+        return old;
     }
 
-    public Optional<Update<Set<PermissionOverwrite>>> getOverwrites() {
-        return Optional.ofNullable(overwrites);
-    }
-
-    public Optional<Update<Integer>> getPosition() {
-        return Optional.ofNullable(position);
+    public Optional<Category> getCurrent() {
+        return Optional.ofNullable(current);
     }
 }

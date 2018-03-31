@@ -50,6 +50,17 @@ public interface Channel extends Entity {
         /** Represents a {@link Category}. */
         GUILD_CATEGORY(4);
 
+        public static Type of(int type) {
+            switch (type) {
+                case 0: return GUILD_TEXT;
+                case 1: return DM;
+                case 2: return GUILD_VOICE;
+                case 3: return GROUP_DM;
+                case 4: return GUILD_CATEGORY;
+                default: throw new IllegalArgumentException("Unknown Channel.Type: " + type);
+            }
+        }
+
         /** The underlying value as represented by Discord. */
         private final int value;
 

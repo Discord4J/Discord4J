@@ -58,7 +58,7 @@ public final class Message implements Entity {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return serviceMediator.getDiscordClient();
     }
 
     @Override
