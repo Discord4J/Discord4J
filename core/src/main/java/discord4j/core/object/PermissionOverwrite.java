@@ -14,23 +14,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
-import discord4j.core.object.PermissionSet;
-import discord4j.core.object.Snowflake;
-import discord4j.core.object.entity.bean.PermissionOverwriteBean;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.bean.PermissionOverwriteBean;
+import discord4j.core.object.entity.User;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A Discord permission overwrite.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
  */
-public final class PermissionOverwrite implements Entity {
+public final class PermissionOverwrite implements DiscordObject {
 
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
@@ -54,9 +57,51 @@ public final class PermissionOverwrite implements Entity {
         return serviceMediator.getClient();
     }
 
-    @Override
+    /**
+     * Gets the ID of the role or user this overwrite is associated to.
+     *
+     * @return The ID of the role or user this overwrite is associated to.
+     */
     public Snowflake getId() {
         return Snowflake.of(data.getId());
+    }
+
+    /**
+     * Gets the ID of the role this overwrite is associated to, if present.
+     *
+     * @return The ID of the role this overwrite is associated to, if present.
+     */
+    public Optional<Snowflake> getRoleId() {
+        return Optional.of(getId()).filter(ignored -> getType() == Type.ROLE);
+    }
+
+    /**
+     * Requests to retrieve the role this overwrite is associated to, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} this overwrite is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getRole() {
+        throw new UnsupportedOperationException("Not yet implemented...");
+    }
+
+    /**
+     * Gets the ID of the user this overwrite is associated to, if present.
+     *
+     * @return The ID of the user this overwrite is associated to, if present.
+     */
+    public Optional<Snowflake> getUserId() {
+        return Optional.of(getId()).filter(ignored -> getType() == Type.MEMBER);
+    }
+
+    /**
+     * Requests to retrieve the user this overwrite is associated to, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} this overwrite is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getUser() {
+        throw new UnsupportedOperationException("Not yet implemented...");
     }
 
     /**

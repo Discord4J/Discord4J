@@ -21,7 +21,7 @@ import discord4j.common.json.request.ChannelCreateRequest;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Category;
 import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.PermissionOverwrite;
+import discord4j.core.object.PermissionOverwrite;
 
 import javax.annotation.Nullable;
 import java.util.Set;

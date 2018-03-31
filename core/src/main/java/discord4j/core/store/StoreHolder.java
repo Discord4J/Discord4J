@@ -34,13 +34,11 @@ public final class StoreHolder {
     private final LongObjStore<GuildEmojiBean> guildEmojiStore;
     private final Store<LongLongTuple2, MemberBean> memberStore;
     private final LongObjStore<MessageBean> messageStore;
-    private final LongObjStore<PermissionOverwriteBean> permissionOverwriteStore;
     private final LongObjStore<PrivateChannelBean> privateChannelStore;
     private final LongObjStore<RoleBean> roleStore;
     private final LongObjStore<TextChannelBean> textChannelStore;
     private final LongObjStore<UserBean> userStore;
     private final LongObjStore<VoiceChannelBean> voiceChannelStore;
-    //    private final LongObjStore<WebhookBean> webhookStore;
 
     public StoreHolder(StoreService service) {
         attachmentStore = service.provideLongObjStore(AttachmentBean.class);
@@ -50,7 +48,6 @@ public final class StoreHolder {
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
         messageStore = service.provideLongObjStore(MessageBean.class);
-        permissionOverwriteStore = service.provideLongObjStore(PermissionOverwriteBean.class);
         privateChannelStore = service.provideLongObjStore(PrivateChannelBean.class);
         roleStore = service.provideLongObjStore(RoleBean.class);
         textChannelStore = service.provideLongObjStore(TextChannelBean.class);
@@ -84,10 +81,6 @@ public final class StoreHolder {
 
     public LongObjStore<MessageBean> getMessageStore() {
         return messageStore;
-    }
-
-    public LongObjStore<PermissionOverwriteBean> getPermissionOverwriteStore() {
-        return permissionOverwriteStore;
     }
 
     public LongObjStore<PrivateChannelBean> getPrivateChannelStore() {
