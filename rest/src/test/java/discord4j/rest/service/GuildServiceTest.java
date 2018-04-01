@@ -23,14 +23,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.request.*;
+import discord4j.common.json.response.ChannelResponse;
 import discord4j.common.json.response.GuildResponse;
 import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class GuildServiceTest {
 
@@ -39,14 +43,11 @@ public class GuildServiceTest {
     private static final long permanentRole = Long.parseUnsignedLong(System.getenv("permanentRole"));
     private static final long trashCategory = Long.parseUnsignedLong(System.getenv("trashCategory"));
 
-    private GuildService guildService = null;
+    private GuildService guildService;
+    private ChannelService channelService;
 
-    private GuildService getGuildService() {
-
-        if (guildService != null) {
-            return guildService;
-        }
-
+    @Before
+    public void setup() {
         String token = System.getenv("token");
         ObjectMapper mapper = getMapper();
 
@@ -62,8 +63,8 @@ public class GuildServiceTest {
                 .build();
 
         Router router = new Router(httpClient);
-
-        return guildService = new GuildService(router);
+        guildService = new GuildService(router);
+        channelService = new ChannelService(router);
     }
 
     private ObjectMapper getMapper() {
@@ -71,6 +72,14 @@ public class GuildServiceTest {
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .registerModules(new PossibleModule(), new Jdk8Module());
+    }
+
+    private GuildService getGuildService() {
+        return guildService;
+    }
+
+    private ChannelService getChannelService() {
+        return channelService;
     }
 
     @Test
@@ -105,6 +114,18 @@ public class GuildServiceTest {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
         ChannelCreateRequest req = ChannelCreateRequest.builder().name(randomName).parentId(trashCategory).build();
         getGuildService().createGuildChannel(guild, req).block();
+    }
+
+    @Test
+    public void testDeleteGuildChannels() {
+        getGuildService().getGuildChannels(guild)
+                .flatMapIterable(response -> Arrays.stream(response)
+                        .filter(res -> res.getParentId() != null && trashCategory == res.getParentId())
+                        .map(ChannelResponse::getId)
+                        .collect(Collectors.toList()))
+                .flatMap(id -> getChannelService().deleteChannel(id))
+                .then()
+                .block();
     }
 
     @Test
