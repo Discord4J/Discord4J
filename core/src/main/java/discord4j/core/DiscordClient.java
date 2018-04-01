@@ -36,7 +36,7 @@ public final class DiscordClient {
     }
 
     public Mono<Category> getCategoryById(final Snowflake categoryId) {
-        return getChannelById(categoryId).cast(Category.class);
+        return getChannelById(categoryId).ofType(Category.class);
     }
 
     public Mono<Guild> getGuildById(final Snowflake guildId) {
@@ -50,7 +50,7 @@ public final class DiscordClient {
     }
 
     public Mono<GuildChannel> getGuildChannelById(final Snowflake guildChannelId) {
-        return getChannelById(guildChannelId).cast(GuildChannel.class);
+        return getChannelById(guildChannelId).ofType(GuildChannel.class);
     }
 
     public Mono<GuildEmoji> getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
@@ -89,7 +89,7 @@ public final class DiscordClient {
     }
 
     public Mono<MessageChannel> getMessageChannelById(final Snowflake messageChannelId) {
-        return getChannelById(messageChannelId).cast(MessageChannel.class);
+        return getChannelById(messageChannelId).ofType(MessageChannel.class);
     }
 
     public Mono<Role> getRoleById(final Snowflake guildId, final Snowflake roleId) {
@@ -105,7 +105,7 @@ public final class DiscordClient {
     }
 
     public Mono<TextChannel> getTextChannelById(final Snowflake textChannelId) {
-        return getChannelById(textChannelId).cast(TextChannel.class);
+        return getChannelById(textChannelId).ofType(TextChannel.class);
     }
 
     public Mono<User> getUserById(final Snowflake userId) {
@@ -118,7 +118,7 @@ public final class DiscordClient {
     }
 
     public Mono<VoiceChannel> getVoiceChannelById(final Snowflake voiceChannelId) {
-        return getChannelById(voiceChannelId).cast(VoiceChannel.class);
+        return getChannelById(voiceChannelId).ofType(VoiceChannel.class);
     }
 
     public Mono<Webhook> getWebhookById(final Snowflake webhookId) {
