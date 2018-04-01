@@ -136,7 +136,7 @@ public final class Role implements Entity, Positionable {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     /**

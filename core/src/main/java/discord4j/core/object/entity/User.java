@@ -115,7 +115,7 @@ public class User implements Entity {
      * is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> asMember(final Snowflake guildId) {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMemberById(guildId, getId());
     }
 
     /**

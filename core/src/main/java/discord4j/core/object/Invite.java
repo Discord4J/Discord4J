@@ -79,7 +79,7 @@ public class Invite implements DiscordObject {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     /**
@@ -98,7 +98,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<TextChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getTextChannelById(getChannelId());
     }
 
     /**

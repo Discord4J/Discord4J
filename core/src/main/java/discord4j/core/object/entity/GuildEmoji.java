@@ -94,7 +94,7 @@ public final class GuildEmoji implements Entity {
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id));
     }
 
     /**
@@ -150,6 +150,6 @@ public final class GuildEmoji implements Entity {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 }

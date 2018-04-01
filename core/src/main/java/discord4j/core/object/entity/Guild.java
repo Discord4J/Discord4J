@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.Snowflake;
@@ -112,7 +112,7 @@ public final class Guild implements Entity {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getOwner() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMemberById(getId(), getOwnerId());
     }
 
     /**
@@ -150,7 +150,7 @@ public final class Guild implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getAfkChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getAfkChannelId()).flatMap(getClient()::getVoiceChannelById);
     }
 
     /**
@@ -178,7 +178,7 @@ public final class Guild implements Entity {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getEmbedChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(getClient()::getGuildChannelById);
     }
 
     /**
@@ -235,7 +235,7 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getId(), id));
     }
 
     /**
@@ -256,7 +256,7 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<GuildEmoji> getEmojis() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Flux.fromIterable(getEmojiIds()).flatMap(id -> getClient().getGuildEmojiById(getId(), id));
     }
 
     /**
@@ -305,7 +305,7 @@ public final class Guild implements Entity {
      * widget, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getWidgetChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getWidgetChannelId()).flatMap(getClient()::getGuildChannelById);
     }
 
     /**
@@ -324,7 +324,7 @@ public final class Guild implements Entity {
      * messages are sent, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getSystemChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getSystemChannelId()).flatMap(getClient()::getTextChannelById);
     }
 
     /**

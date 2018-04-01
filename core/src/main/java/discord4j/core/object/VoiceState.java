@@ -72,7 +72,7 @@ public final class VoiceState implements DiscordObject {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     /**
@@ -91,7 +91,7 @@ public final class VoiceState implements DiscordObject {
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getChannelId()).flatMap(getClient()::getVoiceChannelById);
     }
 
     /**
@@ -110,7 +110,7 @@ public final class VoiceState implements DiscordObject {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getUserById(getUserId());
     }
 
     /**

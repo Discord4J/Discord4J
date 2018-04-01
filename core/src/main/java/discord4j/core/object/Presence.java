@@ -72,7 +72,7 @@ public final class Presence implements DiscordObject {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getUserById(getUserId());
     }
 
     /**
@@ -100,7 +100,7 @@ public final class Presence implements DiscordObject {
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**

@@ -44,7 +44,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public Mono<Message> getLastMessage() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getLastMessageId()).flatMap(id -> getClient().getMessageById(getId(), id));
     }
 
     @Override

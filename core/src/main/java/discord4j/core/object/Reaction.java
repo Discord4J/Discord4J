@@ -19,9 +19,7 @@ package discord4j.core.object;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ReactionBean;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -41,20 +39,31 @@ public final class Reaction implements DiscordObject {
     /** The raw data as represented by Discord. */
     private final ReactionBean data;
 
+    /** The ID of the channel this reaction is associated to. */
+    private final long channelId;
+
     /** The ID of the message this reaction is associated to. */
     private final long messageId;
+
+    /** The ID of the guild this reaction is associated to, if present. */
+    private final Long guildId;
 
     /**
      * Constructs a {@code Reaction} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
+     * @param channelId The ID of the channel this reaction is associated to.
      * @param messageId The ID of the message this reaction is associated to.
+     * @param guildId The ID of the guild this reaction is associated to, if present.
      */
-    public Reaction(final ServiceMediator serviceMediator, final ReactionBean data, final long messageId) {
+    public Reaction(final ServiceMediator serviceMediator, final ReactionBean data, final long channelId,
+                    final long messageId, final Long guildId) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
+        this.channelId = channelId;
         this.messageId = messageId;
+        this.guildId = guildId;
     }
 
     @Override
@@ -96,7 +105,8 @@ public final class Reaction implements DiscordObject {
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> getGuildEmoji() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getEmojiId())
+                .flatMap(id -> getClient().getGuildEmojiById(getEmojiId().orElseThrow(IllegalStateException::new), id));
     }
 
     /**
@@ -124,7 +134,45 @@ public final class Reaction implements DiscordObject {
      * associated to. If an error is received it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageById(getChannelId(), getMessageId());
+    }
+
+    /**
+     * Gets the ID of the channel this reaction is associated to.
+     *
+     * @return The ID of the channel this reaction is associated to.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
+    }
+
+    /**
+     * Requests to retrieve the channel this reaction is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel channel} this reaction
+     * is associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageChannel> getChannel() {
+        return getClient().getMessageChannelById(getChannelId());
+    }
+
+    /**
+     * Gets the ID of the guild this reaction is associated to, if present.
+     *
+     * @return The ID of the guild this reaction is associated to, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.of(guildId).map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the guild this reaction is associated to, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this reaction is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**

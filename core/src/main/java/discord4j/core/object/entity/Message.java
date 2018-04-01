@@ -81,7 +81,7 @@ public final class Message implements Entity {
      * was sent in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageChannelById(getChannelId());
     }
 
     /**
@@ -112,7 +112,7 @@ public final class Message implements Entity {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getAuthor() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getAuthorId()).flatMap(getClient()::getUserById);
     }
 
     /**
@@ -174,11 +174,11 @@ public final class Message implements Entity {
     /**
      * Requests to retrieve the users specifically mentioned in this message.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} specifically mentioned in
-     * this message. If an error is received, it is emitted through the {@link Mono}.
+     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
+     * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUserMentions() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Flux.fromIterable(getUserMentionIds()).flatMap(getClient()::getUserById);
     }
 
     /**
@@ -195,8 +195,8 @@ public final class Message implements Entity {
     /**
      * Requests to retrieve the roles specifically mentioned in this message.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Role roles} specifically mentioned in
-     * this message. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Flux} that continually emits {@link Role roles} specifically mentioned in this message. If an
+     * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<Role> getRoleMentions() {
         throw new UnsupportedOperationException("Not yet implemented...");
@@ -205,11 +205,23 @@ public final class Message implements Entity {
     // TODO: getEmbeds()
 
     /**
-     * Gets any attached files.
+     * Gets the IDs of any attached files.
      *
-     * @return Any attached files.
+     * @return The IDs of any attached files.
      */
-    public Set<Attachment> getAttachments() {
+    public Set<Snowflake> getAttachmentIds() {
+        return Arrays.stream(data.getAttachments())
+                .mapToObj(Snowflake::of)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Requests to retrieve any attached files.
+     *
+     * @return A {@link Flux} that continually emits any {@link Attachment attached} files. If an error is received, it
+     * is emitted through the {@code Flux}.
+     */
+    public Flux<Attachment> getAttachments() {
         throw new UnsupportedOperationException("Not yet implemented...");
     }
 
@@ -238,7 +250,7 @@ public final class Message implements Entity {
      * message, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> getWebhook() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getWebhookId()).flatMap(getClient()::getWebhookById);
     }
 
     /**

@@ -75,7 +75,7 @@ public final class Webhook implements Entity {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     /**
@@ -94,7 +94,7 @@ public final class Webhook implements Entity {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getTextChannelById(getChannelId());
     }
 
     /**
@@ -113,7 +113,7 @@ public final class Webhook implements Entity {
      * by, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getCreator() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getUserById(getCreatorId());
     }
 
     /**

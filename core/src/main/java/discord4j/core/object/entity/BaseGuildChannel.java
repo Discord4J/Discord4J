@@ -45,7 +45,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     @Override
@@ -65,7 +65,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Mono<Category> getCategory() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
     }
 
     @Override

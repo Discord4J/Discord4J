@@ -28,7 +28,6 @@ public final class StoreHolder {
     private final LongObjStore<AttachmentBean> attachmentStore;
     private final LongObjStore<CategoryBean> categoryStore;
     private final LongObjStore<GuildBean> guildStore;
-    private final LongObjStore<GuildChannelBean> guildChannelStore;
     private final LongObjStore<GuildEmojiBean> guildEmojiStore;
     private final Store<LongLongTuple2, MemberBean> memberStore;
     private final LongObjStore<MessageBean> messageStore;
@@ -42,7 +41,6 @@ public final class StoreHolder {
         attachmentStore = service.provideLongObjStore(AttachmentBean.class);
         categoryStore = service.provideLongObjStore(CategoryBean.class);
         guildStore = service.provideLongObjStore(GuildBean.class);
-        guildChannelStore = service.provideLongObjStore(GuildChannelBean.class);
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
         messageStore = service.provideLongObjStore(MessageBean.class);
@@ -63,10 +61,6 @@ public final class StoreHolder {
 
     public LongObjStore<GuildBean> getGuildStore() {
         return guildStore;
-    }
-
-    public LongObjStore<GuildChannelBean> getGuildChannelStore() {
-        return guildChannelStore;
     }
 
     public LongObjStore<GuildEmojiBean> getGuildEmojiStore() {

@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.bean.PermissionOverwriteBean;
@@ -41,15 +42,20 @@ public final class PermissionOverwrite implements DiscordObject {
     /** The raw data as represented by Discord, must be non-null. */
     private final PermissionOverwriteBean data;
 
+    /** The ID of the guild associated to this overwrite. */
+    private final long guildId;
+
     /**
      * Constructs a {@code PermissionOverwrite} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
+     * @param guildId The ID of the guild associated to this overwrite.
      */
-    public PermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data) {
+    public PermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data, final long guildId) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
+        this.guildId = guildId;
     }
 
     @Override
@@ -82,7 +88,7 @@ public final class PermissionOverwrite implements DiscordObject {
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> getRole() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getRoleId()).flatMap(id -> getClient().getRoleById(getGuildId(), id));
     }
 
     /**
@@ -101,7 +107,7 @@ public final class PermissionOverwrite implements DiscordObject {
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getUserId()).flatMap(getClient()::getUserById);
     }
 
     /**
@@ -132,6 +138,25 @@ public final class PermissionOverwrite implements DiscordObject {
      */
     public PermissionSet getDenied() {
         return PermissionSet.of(data.getDeny());
+    }
+
+    /**
+     * Gets the ID of the guild associated to this overwrite.
+     *
+     * @return The ID of the guild associated to this overwrite.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
+     * Requests to retrieve the guild associated to this overwrite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} associated to this overwrite.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 
     /** The type of entity a {@link PermissionOverwrite} is explicitly for. */

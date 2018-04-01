@@ -61,6 +61,6 @@ public final class PrivateChannel extends BaseMessageChannel {
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getRecipients() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Flux.fromIterable(getRecipientIds()).flatMap(getClient()::getUserById);
     }
 }
