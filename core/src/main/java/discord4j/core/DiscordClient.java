@@ -23,6 +23,8 @@ import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+
 public final class DiscordClient {
 
     private final ServiceMediator serviceMediator;
@@ -34,7 +36,7 @@ public final class DiscordClient {
     }
 
     public Mono<Category> getCategoryById(final Snowflake categoryId) {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getChannelById(categoryId).cast(Category.class);
     }
 
     public Mono<Guild> getGuildById(final Snowflake guildId) {
@@ -48,7 +50,7 @@ public final class DiscordClient {
     }
 
     public Mono<GuildChannel> getGuildChannelById(final Snowflake guildChannelId) {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getChannelById(guildChannelId).cast(GuildChannel.class);
     }
 
     public Mono<GuildEmoji> getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
@@ -87,7 +89,7 @@ public final class DiscordClient {
     }
 
     public Mono<MessageChannel> getMessageChannelById(final Snowflake messageChannelId) {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getChannelById(messageChannelId).cast(MessageChannel.class);
     }
 
     public Mono<Role> getRoleById(final Snowflake guildId, final Snowflake roleId) {
@@ -103,7 +105,7 @@ public final class DiscordClient {
     }
 
     public Mono<TextChannel> getTextChannelById(final Snowflake textChannelId) {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getChannelById(textChannelId).cast(TextChannel.class);
     }
 
     public Mono<User> getUserById(final Snowflake userId) {
@@ -116,7 +118,7 @@ public final class DiscordClient {
     }
 
     public Mono<VoiceChannel> getVoiceChannelById(final Snowflake voiceChannelId) {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getChannelById(voiceChannelId).cast(VoiceChannel.class);
     }
 
     public Mono<Webhook> getWebhookById(final Snowflake webhookId) {
@@ -124,5 +126,41 @@ public final class DiscordClient {
                 .getWebhook(webhookId.asLong())
                 .map(WebhookBean::new)
                 .map(bean -> new Webhook(serviceMediator, bean));
+    }
+
+    private Mono<Channel> getChannelById(final Snowflake channelId) {
+        final Mono<Category> category = storeHolder.getCategoryStore()
+                .find(channelId.asLong())
+                .map(categoryBean -> new Category(serviceMediator, categoryBean));
+
+        final Mono<TextChannel> textChannel = storeHolder.getTextChannelStore()
+                .find(channelId.asLong())
+                .map(textChannelBean -> new TextChannel(serviceMediator, textChannelBean));
+
+        final Mono<VoiceChannel> voiceChannel = storeHolder.getVoiceChannelStore()
+                .find(channelId.asLong())
+                .map(voiceChannelBean -> new VoiceChannel(serviceMediator, voiceChannelBean));
+
+        final Mono<Channel> rest = serviceMediator.getRestClient().getChannelService()
+                .getChannel(channelId.asLong())
+                .map(channelResponse -> {
+                    final Channel.Type channelType = Arrays.stream(Channel.Type.values())
+                            .filter(type -> type.getValue() == channelResponse.getType())
+                            .findFirst() // // If this throws Discord added something
+                            .orElseThrow(UnsupportedOperationException::new);
+
+                    switch (channelType) {
+                        case GUILD_TEXT: return new TextChannel(serviceMediator, new TextChannelBean(channelResponse));
+                        case DM: return new PrivateChannel(serviceMediator, new PrivateChannelBean(channelResponse));
+                        case GUILD_VOICE: return new VoiceChannel(serviceMediator, new VoiceChannelBean(channelResponse));
+                        case GUILD_CATEGORY: return new Category(serviceMediator, new CategoryBean(channelResponse));
+                        default: throw new UnsupportedOperationException("Cannot initialize channel for " + channelId);
+                    }
+                });
+
+        return category.cast(Channel.class)
+                .switchIfEmpty(textChannel)
+                .switchIfEmpty(voiceChannel)
+                .switchIfEmpty(rest);
     }
 }

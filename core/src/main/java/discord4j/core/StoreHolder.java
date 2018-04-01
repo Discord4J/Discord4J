@@ -31,7 +31,6 @@ public final class StoreHolder {
     private final LongObjStore<GuildEmojiBean> guildEmojiStore;
     private final Store<LongLongTuple2, MemberBean> memberStore;
     private final LongObjStore<MessageBean> messageStore;
-    private final LongObjStore<PrivateChannelBean> privateChannelStore;
     private final LongObjStore<RoleBean> roleStore;
     private final LongObjStore<TextChannelBean> textChannelStore;
     private final LongObjStore<UserBean> userStore;
@@ -44,7 +43,6 @@ public final class StoreHolder {
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
         messageStore = service.provideLongObjStore(MessageBean.class);
-        privateChannelStore = service.provideLongObjStore(PrivateChannelBean.class);
         roleStore = service.provideLongObjStore(RoleBean.class);
         textChannelStore = service.provideLongObjStore(TextChannelBean.class);
         userStore = service.provideLongObjStore(UserBean.class);
@@ -73,10 +71,6 @@ public final class StoreHolder {
 
     public LongObjStore<MessageBean> getMessageStore() {
         return messageStore;
-    }
-
-    public LongObjStore<PrivateChannelBean> getPrivateChannelStore() {
-        return privateChannelStore;
     }
 
     public LongObjStore<RoleBean> getRoleStore() {
