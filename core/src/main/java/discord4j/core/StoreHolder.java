@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.store;
+package discord4j.core;
 
 import discord4j.core.object.entity.bean.*;
 import discord4j.store.Store;
@@ -22,9 +22,7 @@ import discord4j.store.primitive.LongObjStore;
 import discord4j.store.service.StoreService;
 import discord4j.store.util.LongLongTuple2;
 
-/**
- * Holder for {@link Store} instances for use in caching.
- */
+/** Holder for {@link Store} instances for use in caching. */
 public final class StoreHolder {
 
     private final LongObjStore<AttachmentBean> attachmentStore;
@@ -40,7 +38,7 @@ public final class StoreHolder {
     private final LongObjStore<UserBean> userStore;
     private final LongObjStore<VoiceChannelBean> voiceChannelStore;
 
-    public StoreHolder(StoreService service) {
+    StoreHolder(final StoreService service) {
         attachmentStore = service.provideLongObjStore(AttachmentBean.class);
         categoryStore = service.provideLongObjStore(CategoryBean.class);
         guildStore = service.provideLongObjStore(GuildBean.class);

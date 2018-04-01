@@ -16,7 +16,6 @@
  */
 package discord4j.core;
 
-import discord4j.core.store.StoreHolder;
 import discord4j.gateway.GatewayClient;
 import discord4j.rest.RestClient;
 

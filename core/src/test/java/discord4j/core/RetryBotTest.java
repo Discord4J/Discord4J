@@ -31,7 +31,6 @@ import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.store.StoreHolder;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
