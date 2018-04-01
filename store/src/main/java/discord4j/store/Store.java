@@ -86,13 +86,6 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
     Mono<Boolean> exists(Publisher<K> ids);
 
     /**
-     * Retrieves all stored values from the data source.
-     *
-     * @return A stream of all data objects from the data source.
-     */
-    Flux<V> findAll();
-
-    /**
      * Retrieves all stored values from the data source which have a provided id.
      *
      * @param ids A set of ids to find values for.

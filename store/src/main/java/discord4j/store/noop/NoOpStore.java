@@ -64,11 +64,6 @@ public class NoOpStore<K extends Comparable<K>, V extends Serializable> implemen
     }
 
     @Override
-    public Flux<V> findAll() {
-        return Flux.empty();
-    }
-
-    @Override
     public Flux<V> findAll(Iterable<K> ids) {
         return Flux.empty();
     }

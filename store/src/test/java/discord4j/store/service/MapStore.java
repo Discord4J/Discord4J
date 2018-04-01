@@ -65,11 +65,6 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     }
 
     @Override
-    public Flux<V> findAll() {
-        return Flux.defer(() -> Flux.fromIterable(map.values()));
-    }
-
-    @Override
     public Flux<V> findAll(Iterable<K> ids) {
         return Flux.defer(() -> Flux.fromIterable(ids)).map(map::get);
     }

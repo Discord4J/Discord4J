@@ -110,7 +110,7 @@ public class StoreTests {
             assertTrue(lenientListEquals(Arrays.asList("world4", "world5"),
                     connection.findAll(Arrays.asList("hello4", "hello5")).collectList().block()));
             assertTrue(lenientListEquals(Arrays.asList("world", "world1", "world2", "world3", "world4", "world5"),
-                    connection.findAll().collectList().block()));
+                    connection.values().collectList().block()));
             assertTrue(lenientListEquals(Arrays.asList("world1", "world2"),
                     connection.findInRange("hello1", "hello3").collectList().block()));
         }

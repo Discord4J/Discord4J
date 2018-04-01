@@ -120,11 +120,6 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     }
 
     @Override
-    public Flux<V> findAll() {
-        return toForward.findAll();
-    }
-
-    @Override
     public Flux<V> findAll(Iterable<Long> ids) {
         return toForward.findAll(ids);
     }

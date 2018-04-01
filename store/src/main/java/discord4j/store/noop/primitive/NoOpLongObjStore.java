@@ -69,11 +69,6 @@ public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V>
     }
 
     @Override
-    public Flux<V> findAll() {
-        return Flux.empty();
-    }
-
-    @Override
     public Flux<V> findAll(Iterable<Long> ids) {
         return Flux.empty();
     }
