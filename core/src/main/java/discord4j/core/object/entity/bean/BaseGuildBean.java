@@ -16,7 +16,8 @@
  */
 package discord4j.core.object.entity.bean;
 
-import discord4j.common.json.response.*;
+import discord4j.common.json.response.GuildResponse;
+import discord4j.common.json.response.RoleResponse;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;

@@ -18,8 +18,8 @@ package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.Snowflake;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

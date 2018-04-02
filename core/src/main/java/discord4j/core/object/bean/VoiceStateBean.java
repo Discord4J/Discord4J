@@ -17,8 +17,9 @@
 package discord4j.core.object.bean;
 
 import discord4j.common.json.response.VoiceStateResponse;
-import java.io.Serializable;
+
 import javax.annotation.Nullable;
+import java.io.Serializable;
 
 public final class VoiceStateBean implements Serializable {
 

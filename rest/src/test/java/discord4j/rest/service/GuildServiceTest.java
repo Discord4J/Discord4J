@@ -32,9 +32,7 @@ import discord4j.rest.route.Routes;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 public class GuildServiceTest {
 

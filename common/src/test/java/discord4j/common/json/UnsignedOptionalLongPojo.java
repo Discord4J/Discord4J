@@ -18,8 +18,6 @@ package discord4j.common.json;
 
 import discord4j.common.jackson.UnsignedJson;
 
-import java.util.OptionalLong;
-
 public class UnsignedOptionalLongPojo {
 
     @UnsignedJson
