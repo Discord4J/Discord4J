@@ -67,7 +67,7 @@ public class VoiceServiceTest {
 
     @Test
     public void testGetVoiceRegions() {
-        getVoiceService().getVoiceRegions().block();
+        getVoiceService().getVoiceRegions().then().block();
     }
 
 }

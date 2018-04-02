@@ -102,7 +102,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testGetMessages() {
-        getChannelService().getMessages(permanentChannel, Collections.emptyMap()).block();
+        getChannelService().getMessages(permanentChannel, Collections.emptyMap()).then().block();
     }
 
     @Test
@@ -178,7 +178,7 @@ public class ChannelServiceTest {
     @Test
     public void testGetReactions() throws UnsupportedEncodingException {
         String reaction = URLEncoder.encode("❤", "UTF-8");
-        getChannelService().getReactions(permanentChannel, permanentMessage, reaction, Collections.emptyMap()).block();
+        getChannelService().getReactions(permanentChannel, permanentMessage, reaction, Collections.emptyMap()).then().block();
     }
 
     @Test
@@ -211,7 +211,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testGetChannelInvites() {
-        getChannelService().getChannelInvites(permanentChannel).block();
+        getChannelService().getChannelInvites(permanentChannel).then().block();
     }
 
     @Test
@@ -232,7 +232,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testGetPinnedMessages() {
-        getChannelService().getPinnedMessages(permanentChannel).block();
+        getChannelService().getPinnedMessages(permanentChannel).then().block();
     }
 
     @Test

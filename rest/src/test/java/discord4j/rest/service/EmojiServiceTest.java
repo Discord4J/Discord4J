@@ -70,7 +70,7 @@ public class EmojiServiceTest {
 
     @Test
     public void testGetGuildEmojis() {
-        getEmojiService().getGuildEmojis(guild).block();
+        getEmojiService().getGuildEmojis(guild).then().block();
     }
 
     @Test

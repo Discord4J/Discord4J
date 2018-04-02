@@ -101,7 +101,7 @@ public class UserServiceTest {
 
     @Test
     public void testGetCurrentUserGuilds() {
-        getUserService().getCurrentUserGuilds().block();
+        getUserService().getCurrentUserGuilds().then().block();
     }
 
     @Test
@@ -111,7 +111,7 @@ public class UserServiceTest {
 
     @Test
     public void testGetUserDMs() {
-        getUserService().getUserDMs().block();
+        getUserService().getUserDMs().then().block();
     }
 
     @Test

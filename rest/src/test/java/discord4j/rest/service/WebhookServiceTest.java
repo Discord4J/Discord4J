@@ -78,12 +78,12 @@ public class WebhookServiceTest {
 
     @Test
     public void testGetChannelWebhooks() {
-        getWebhookService().getChannelWebhooks(permanentChannel).block();
+        getWebhookService().getChannelWebhooks(permanentChannel).then().block();
     }
 
     @Test
     public void testGetGuildWebhooks() {
-        getWebhookService().getGuildWebhooks(guild).block();
+        getWebhookService().getGuildWebhooks(guild).then().block();
     }
 
     @Test

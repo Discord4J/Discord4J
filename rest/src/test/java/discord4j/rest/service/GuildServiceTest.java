@@ -106,7 +106,7 @@ public class GuildServiceTest {
 
     @Test
     public void testGetGuildChannels() {
-        getGuildService().getGuildChannels(guild).block();
+        getGuildService().getGuildChannels(guild).then().block();
     }
 
     @Test
@@ -119,10 +119,8 @@ public class GuildServiceTest {
     @Test
     public void testDeleteGuildChannels() {
         getGuildService().getGuildChannels(guild)
-                .flatMapIterable(response -> Arrays.stream(response)
-                        .filter(res -> res.getParentId() != null && trashCategory == res.getParentId())
-                        .map(ChannelResponse::getId)
-                        .collect(Collectors.toList()))
+                .filter(res -> res.getParentId() != null && trashCategory == res.getParentId())
+                .map(ChannelResponse::getId)
                 .flatMap(id -> getChannelService().deleteChannel(id))
                 .then()
                 .block();
@@ -140,7 +138,7 @@ public class GuildServiceTest {
 
     @Test
     public void testGetGuildMembers() {
-        getGuildService().getGuildMembers(guild, Collections.emptyMap()).block();
+        getGuildService().getGuildMembers(guild, Collections.emptyMap()).then().block();
     }
 
     @Test
@@ -177,7 +175,7 @@ public class GuildServiceTest {
 
     @Test
     public void testGetGuildBans() {
-        getGuildService().getGuildBans(guild).block();
+        getGuildService().getGuildBans(guild).then().block();
     }
 
     @Test
@@ -192,7 +190,7 @@ public class GuildServiceTest {
 
     @Test
     public void testGetGuildRoles() {
-        getGuildService().getGuildRoles(guild).block();
+        getGuildService().getGuildRoles(guild).then().block();
     }
 
     @Test
@@ -231,17 +229,17 @@ public class GuildServiceTest {
 
     @Test
     public void testGetGuildVoiceRegions() {
-        getGuildService().getGuildVoiceRegions(guild).block();
+        getGuildService().getGuildVoiceRegions(guild).then().block();
     }
 
     @Test
     public void testGetGuildInvites() {
-        getGuildService().getGuildInvites(guild).block();
+        getGuildService().getGuildInvites(guild).then().block();
     }
 
     @Test
     public void testGetGuildIntegrations() {
-        getGuildService().getGuildIntegrations(guild).block();
+        getGuildService().getGuildIntegrations(guild).then().block();
     }
 
     @Test
