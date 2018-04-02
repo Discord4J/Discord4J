@@ -24,6 +24,7 @@ import discord4j.common.json.response.UserResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.MultipartRequest;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -51,10 +52,11 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<MessageResponse[]> getMessages(long channelId, Map<String, Object> queryParams) {
+    public Flux<MessageResponse> getMessages(long channelId, Map<String, Object> queryParams) {
         return Routes.MESSAGES_GET.newRequest(channelId)
                 .query(queryParams)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<MessageResponse> getMessage(long channelId, long messageId) {
@@ -84,11 +86,12 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<UserResponse[]> getReactions(long channelId, long messageId, String emoji,
+    public Flux<UserResponse> getReactions(long channelId, long messageId, String emoji,
                                              Map<String, Object> queryParams) {
         return Routes.REACTIONS_GET.newRequest(channelId, messageId, emoji)
                 .query(queryParams)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> deleteAllReactions(long channelId, long messageId) {
@@ -119,9 +122,10 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<InviteResponse[]> getChannelInvites(long channelId) {
+    public Flux<InviteResponse> getChannelInvites(long channelId) {
         return Routes.CHANNEL_INVITES_GET.newRequest(channelId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<InviteResponse> createChannelInvite(long channelId, InviteCreateRequest request) {
@@ -140,9 +144,10 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<MessageResponse[]> getPinnedMessages(long channelId) {
+    public Flux<MessageResponse> getPinnedMessages(long channelId) {
         return Routes.MESSAGES_PINNED_GET.newRequest(channelId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> addPinnedMessage(long channelId, long messageId) {

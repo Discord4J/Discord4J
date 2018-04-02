@@ -19,6 +19,7 @@ package discord4j.rest.service;
 import discord4j.common.json.response.VoiceRegionResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class VoiceService extends RestService {
@@ -27,8 +28,9 @@ public class VoiceService extends RestService {
         super(router);
     }
 
-    public Mono<VoiceRegionResponse[]> getVoiceRegions() {
+    public Flux<VoiceRegionResponse> getVoiceRegions() {
         return Routes.VOICE_REGION_LIST.newRequest()
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 }

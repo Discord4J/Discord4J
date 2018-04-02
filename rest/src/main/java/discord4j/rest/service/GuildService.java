@@ -20,6 +20,7 @@ import discord4j.common.json.request.*;
 import discord4j.common.json.response.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -52,9 +53,10 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<ChannelResponse[]> getGuildChannels(long guildId) {
+    public Flux<ChannelResponse> getGuildChannels(long guildId) {
         return Routes.GUILD_CHANNELS_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<ChannelResponse> createGuildChannel(long guildId, ChannelCreateRequest request) {
@@ -74,10 +76,11 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<GuildMemberResponse[]> getGuildMembers(long guildId, Map<String, Object> queryParams) {
+    public Flux<GuildMemberResponse> getGuildMembers(long guildId, Map<String, Object> queryParams) {
         return Routes.GUILD_MEMBERS_LIST.newRequest(guildId)
                 .query(queryParams)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<GuildMemberResponse> addGuildMember(long guildId, long userId, GuildMemberAddRequest request) {
@@ -113,9 +116,10 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<UserResponse[]> getGuildBans(long guildId) {
+    public Flux<UserResponse> getGuildBans(long guildId) {
         return Routes.GUILD_BANS_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> createGuildBan(long guildId, long userId, Map<String, Object> queryParams) {
@@ -129,9 +133,10 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<RoleResponse[]> getGuildRoles(long guildId) {
+    public Flux<RoleResponse> getGuildRoles(long guildId) {
         return Routes.GUILD_ROLES_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<RoleResponse> createGuildRole(long guildId, RoleCreateRequest request) {
@@ -140,10 +145,11 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<RoleResponse[]> modifyGuildRolePositions(long guildId, PositionModifyRequest[] request) {
+    public Flux<RoleResponse> modifyGuildRolePositions(long guildId, PositionModifyRequest[] request) {
         return Routes.GUILD_ROLE_POSITIONS_MODIFY.newRequest(guildId)
                 .body(request)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<RoleResponse> modifyGuildRole(long guildId, long roleId, RoleModifyRequest request) {
@@ -169,19 +175,22 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<VoiceRegionResponse[]> getGuildVoiceRegions(long guildId) {
+    public Flux<VoiceRegionResponse> getGuildVoiceRegions(long guildId) {
         return Routes.GUILD_VOICE_REGIONS_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<InviteResponse[]> getGuildInvites(long guildId) {
+    public Flux<InviteResponse> getGuildInvites(long guildId) {
         return Routes.GUILD_INVITES_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<IntegrationResponse[]> getGuildIntegrations(long guildId) {
+    public Flux<IntegrationResponse> getGuildIntegrations(long guildId) {
         return Routes.GUILD_INTEGRATIONS_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> createGuildIntegration(long guildId, IntegrationCreateRequest request) {

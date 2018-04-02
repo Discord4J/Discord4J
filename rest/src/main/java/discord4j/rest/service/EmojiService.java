@@ -21,6 +21,7 @@ import discord4j.common.json.request.GuildEmojiModifyRequest;
 import discord4j.common.json.response.GuildEmojiResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class EmojiService extends RestService {
@@ -29,9 +30,10 @@ public class EmojiService extends RestService {
         super(router);
     }
 
-    public Mono<GuildEmojiResponse[]> getGuildEmojis(long guildId) {
+    public Flux<GuildEmojiResponse> getGuildEmojis(long guildId) {
         return Routes.GUILD_EMOJIS_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<GuildEmojiResponse> getGuildEmoji(long guildId, long emojiID) {

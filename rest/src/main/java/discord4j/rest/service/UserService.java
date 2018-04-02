@@ -25,6 +25,7 @@ import discord4j.common.json.response.UserGuildResponse;
 import discord4j.common.json.response.UserResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class UserService extends RestService {
@@ -49,9 +50,10 @@ public class UserService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<UserGuildResponse[]> getCurrentUserGuilds() {
+    public Flux<UserGuildResponse> getCurrentUserGuilds() {
         return Routes.CURRENT_USER_GUILDS_GET.newRequest()
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> leaveGuild(long guildId) {
@@ -59,9 +61,10 @@ public class UserService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<ChannelResponse[]> getUserDMs() {
+    public Flux<ChannelResponse> getUserDMs() {
         return Routes.USER_DMS_GET.newRequest()
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<ChannelResponse> createDM(DMCreateRequest request) {
@@ -76,8 +79,9 @@ public class UserService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<ConnectionResponse[]> getUserConnections() {
+    public Flux<ConnectionResponse> getUserConnections() {
         return Routes.USER_CONNECTIONS_GET.newRequest()
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 }

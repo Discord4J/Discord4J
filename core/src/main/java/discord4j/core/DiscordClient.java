@@ -97,7 +97,6 @@ public final class DiscordClient {
                 .find(roleId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
                         .getGuildRoles(guildId.asLong())
-                        .flatMapMany(Flux::fromArray)
                         .filter(response -> response.getId() == roleId.asLong())
                         .map(RoleBean::new)
                         .singleOrEmpty())

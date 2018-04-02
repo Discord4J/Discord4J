@@ -21,6 +21,7 @@ import discord4j.common.json.request.WebhookModifyRequest;
 import discord4j.common.json.response.WebhookResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class WebhookService extends RestService {
@@ -35,14 +36,16 @@ public class WebhookService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<WebhookResponse[]> getChannelWebhooks(long channelId) {
+    public Flux<WebhookResponse> getChannelWebhooks(long channelId) {
         return Routes.CHANNEL_WEBHOOKS_GET.newRequest(channelId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<WebhookResponse[]> getGuildWebhooks(long guildId) {
+    public Flux<WebhookResponse> getGuildWebhooks(long guildId) {
         return Routes.GUILD_WEBHOOKS_GET.newRequest(guildId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<WebhookResponse> getWebhook(long webhookId) {
