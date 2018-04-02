@@ -187,10 +187,7 @@ public final class Guild implements Entity {
      * @return The level of verification required for the guild.
      */
     public VerificationLevel getVerificationLevel() {
-        return Arrays.stream(VerificationLevel.values())
-                .filter(level -> level.value == data.getVerificationLevel())
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return VerificationLevel.of(data.getVerificationLevel());
     }
 
     /**
@@ -199,10 +196,7 @@ public final class Guild implements Entity {
      * @return The default message notification level.
      */
     public NotificationLevel getNotificationLevel() {
-        return Arrays.stream(NotificationLevel.values())
-                .filter(level -> level.value == data.getDefaultMessageNotifications())
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return NotificationLevel.of(data.getDefaultMessageNotifications());
     }
 
     /**
@@ -211,10 +205,7 @@ public final class Guild implements Entity {
      * @return The default explicit content filter level.
      */
     public ContentFilterLevel getContentFilterLevel() {
-        return Arrays.stream(ContentFilterLevel.values())
-                .filter(level -> level.value == data.getExplicitContentFilter())
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return ContentFilterLevel.of(data.getExplicitContentFilter());
     }
 
     /**
@@ -274,10 +265,7 @@ public final class Guild implements Entity {
      * @return The required MFA level for the guild.
      */
     public MfaLevel getMfaLevel() {
-        return Arrays.stream(MfaLevel.values())
-                .filter(level -> level.value == data.getMfaLevel())
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return MfaLevel.of(data.getMfaLevel());
     }
 
     /**
@@ -430,6 +418,22 @@ public final class Guild implements Entity {
         public int getValue() {
             return value;
         }
+
+        /**
+         * Gets the content filter level of the guild. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The content filter level of the guild.
+         */
+        public static ContentFilterLevel of(final int value) {
+            switch (value) {
+                case 0: return DISABLED;
+                case 1: return MEMBERS_WITHOUT_ROLES;
+                case 2: return ALL_MEMBERS;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
+        }
     }
 
     /**
@@ -464,6 +468,21 @@ public final class Guild implements Entity {
         public int getValue() {
             return value;
         }
+
+        /**
+         * Gets the multi-factor authentication level of the guild. It is guaranteed that invoking {@link #getValue()}
+         * from the returned enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The multi-factor authentication level of the guild.
+         */
+        public static MfaLevel of(final int value) {
+            switch (value) {
+                case 0: return NONE;
+                case 1: return ELEVATED;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
+        }
     }
 
     /**
@@ -497,6 +516,21 @@ public final class Guild implements Entity {
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Gets the notification level of the guild. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The notification level of the guild.
+         */
+        public static NotificationLevel of(final int value) {
+            switch (value) {
+                case 0: return ALL_MESSAGES;
+                case 1: return ONLY_MENTIONS;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
         }
     }
 
@@ -540,6 +574,24 @@ public final class Guild implements Entity {
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Gets the verification level of the guild. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The verification level of the guild.
+         */
+        public static VerificationLevel of(final int value) {
+            switch (value) {
+                case 0: return NONE;
+                case 1: return LOW;
+                case 2: return MEDIUM;
+                case 3: return HIGH;
+                case 4: return VERY_HIGH;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
         }
     }
 }

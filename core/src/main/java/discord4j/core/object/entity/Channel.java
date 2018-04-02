@@ -68,5 +68,23 @@ public interface Channel extends Entity {
         public int getValue() {
             return value;
         }
+
+        /**
+         * Gets the type of channel. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of channel.
+         */
+        public static Type of(final int value) {
+            switch (value) {
+                case 0: return GUILD_TEXT;
+                case 1: return DM;
+                case 2: return GUILD_VOICE;
+                case 3: return GROUP_DM;
+                case 4: return GUILD_CATEGORY;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
+        }
     }
 }

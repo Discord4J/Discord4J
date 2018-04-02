@@ -16,12 +16,11 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.ChannelBean;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /** An internal implementation of {@link Channel} designed to streamline inheritance. */
@@ -56,10 +55,7 @@ class BaseChannel implements Channel {
 
     @Override
     public final Type getType() {
-        return Arrays.stream(Type.values())
-                .filter(type -> type.getValue() == data.getType())
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return Type.of(data.getType());
     }
 
     /**

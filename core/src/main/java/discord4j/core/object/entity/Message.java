@@ -259,10 +259,7 @@ public final class Message implements Entity {
      * @return The type of message.
      */
     public Type getType() {
-        return Arrays.stream(Type.values())
-                .filter(value -> value.value == data.getType())
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return Type.of(data.getType());
     }
 
     /** Represents the various types of messages. */
@@ -311,6 +308,27 @@ public final class Message implements Entity {
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of message.
+         */
+        public static Type of(final int value) {
+            switch (value) {
+                case 0: return DEFAULT;
+                case 1: return RECIPIENT_ADD;
+                case 2: return RECIPIENT_REMOVE;
+                case 3: return CALL;
+                case 4: return CHANNEL_NAME_CHANGE;
+                case 5: return CHANNEL_ICON_CHANGE;
+                case 6: return CHANNEL_PINNED_MESSAGE;
+                case 7: return GUILD_MEMBER_JOIN;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
         }
     }
 }

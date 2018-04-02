@@ -16,16 +16,15 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.ServiceMediator;
 import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
+import discord4j.core.object.bean.PermissionOverwriteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.bean.PermissionOverwriteBean;
 import discord4j.core.object.entity.User;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -116,10 +115,7 @@ public final class PermissionOverwrite implements DiscordObject {
      * @return The type of entity this overwrite is for.
      */
     public Type getType() {
-        return Arrays.stream(Type.values())
-                .filter(type -> Objects.equals(data.getType(), type.value))
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return Type.of(data.getType());
     }
 
     /**
@@ -187,6 +183,21 @@ public final class PermissionOverwrite implements DiscordObject {
          */
         public String getValue() {
             return value;
+        }
+
+        /**
+         * Gets the type of permission overwrite. It is guaranteed that invoking {@link #getValue()} from the returned
+         * enum will equal ({@link #equals(Object)}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of permission overwrite.
+         */
+        public static Type of(final String value) {
+            switch (value) {
+                case "role": return ROLE;
+                case "member": return MEMBER;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
         }
     }
 }

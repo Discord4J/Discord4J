@@ -143,12 +143,7 @@ public final class DiscordClient {
         final Mono<Channel> rest = serviceMediator.getRestClient().getChannelService()
                 .getChannel(channelId.asLong())
                 .map(channelResponse -> {
-                    final Channel.Type channelType = Arrays.stream(Channel.Type.values())
-                            .filter(type -> type.getValue() == channelResponse.getType())
-                            .findFirst() // // If this throws Discord added something
-                            .orElseThrow(UnsupportedOperationException::new);
-
-                    switch (channelType) {
+                    switch (Channel.Type.of(channelResponse.getType())) {
                         case GUILD_TEXT: return new TextChannel(serviceMediator, new TextChannelBean(channelResponse));
                         case DM: return new PrivateChannel(serviceMediator, new PrivateChannelBean(channelResponse));
                         case GUILD_VOICE: return new VoiceChannel(serviceMediator, new VoiceChannelBean(channelResponse));

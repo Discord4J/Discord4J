@@ -21,7 +21,6 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ActivityBean;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -70,10 +69,7 @@ public final class Activity implements DiscordObject {
      * @return The specific "action" for this activity.
      */
     public Type getType() {
-        return Arrays.stream(Type.values())
-                .filter(value -> value.value == data.getType())
-                .findFirst() // If this throws Discord added something
-                .orElseThrow(UnsupportedOperationException::new);
+        return Type.of(data.getType());
     }
 
     /**
@@ -226,6 +222,22 @@ public final class Activity implements DiscordObject {
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Gets the type of activity. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of activity.
+         */
+        public static Type of(final int value) {
+            switch (value) {
+                case 0: return PLAYING;
+                case 1: return STREAMING;
+                case 2: return LISTENING;
+                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+            }
         }
     }
 }
