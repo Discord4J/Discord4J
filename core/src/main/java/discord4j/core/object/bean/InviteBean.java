@@ -17,133 +17,46 @@
 package discord4j.core.object.bean;
 
 import discord4j.common.json.response.InviteResponse;
-import discord4j.common.json.response.UserResponse;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
-public final class InviteBean implements Serializable {
+public class InviteBean implements Serializable {
 
-    private static final long serialVersionUID = -3682327346102202724L;
+    private static final long serialVersionUID = -92456339756174244L;
 
     private String code;
     private long guildId;
     private long channelId;
-    @Nullable
-    private Long inviterId;
-    @Nullable
-    private Integer uses;
-    @Nullable
-    private Integer maxUses;
-    @Nullable
-    private Integer maxAge;
-    @Nullable
-    private Boolean temporary;
-    @Nullable
-    private String createdAt;
-    @Nullable
-    private Boolean revoked;
 
     public InviteBean(final InviteResponse response) {
         code = response.getCode();
         guildId = response.getGuild().getId();
         channelId = response.getChannel().getId();
-        final UserResponse inviter = response.getInviter();
-        inviterId = (inviter == null) ? null : inviter.getId();
-        uses = response.getUses();
-        maxUses = response.getMaxUses();
-        maxAge = response.getMaxAge();
-        temporary = response.getTemporary();
-        createdAt = response.getCreatedAt();
-        revoked = response.getRevoked();
     }
 
     public InviteBean() {}
 
-    public String getCode() {
+    public final String getCode() {
         return code;
     }
 
-    public void setCode(final String code) {
+    public final void setCode(final String code) {
         this.code = code;
     }
 
-    public long getGuildId() {
+    public final long getGuildId() {
         return guildId;
     }
 
-    public void setGuildId(final long guildId) {
+    public final void setGuildId(final long guildId) {
         this.guildId = guildId;
     }
 
-    public long getChannelId() {
+    public final long getChannelId() {
         return channelId;
     }
 
-    public void setChannelId(final long channelId) {
+    public final void setChannelId(final long channelId) {
         this.channelId = channelId;
-    }
-
-    @Nullable
-    public Long getInviterId() {
-        return inviterId;
-    }
-
-    public void setInviterId(@Nullable final Long inviterId) {
-        this.inviterId = inviterId;
-    }
-
-    @Nullable
-    public Integer getUses() {
-        return uses;
-    }
-
-    public void setUses(@Nullable final Integer uses) {
-        this.uses = uses;
-    }
-
-    @Nullable
-    public Integer getMaxUses() {
-        return maxUses;
-    }
-
-    public void setMaxUses(@Nullable final Integer maxUses) {
-        this.maxUses = maxUses;
-    }
-
-    @Nullable
-    public Integer getMaxAge() {
-        return maxAge;
-    }
-
-    public void setMaxAge(@Nullable final Integer maxAge) {
-        this.maxAge = maxAge;
-    }
-
-    @Nullable
-    public Boolean getTemporary() {
-        return temporary;
-    }
-
-    public void setTemporary(@Nullable final Boolean temporary) {
-        this.temporary = temporary;
-    }
-
-    @Nullable
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(@Nullable final String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Nullable
-    public Boolean getRevoked() {
-        return revoked;
-    }
-
-    public void setRevoked(@Nullable final Boolean revoked) {
-        this.revoked = revoked;
     }
 }

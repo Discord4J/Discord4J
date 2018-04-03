@@ -16,9 +16,9 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.json.response.InviteResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.bean.InviteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import reactor.core.publisher.Mono;
@@ -36,7 +36,7 @@ public class Invite implements DiscordObject {
     private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final InviteResponse data;
+    private final InviteBean data;
 
     /**
      * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
@@ -44,7 +44,7 @@ public class Invite implements DiscordObject {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Invite(final ServiceMediator serviceMediator, final InviteResponse data) {
+    public Invite(final ServiceMediator serviceMediator, final InviteBean data) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
     }
@@ -69,7 +69,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the guild this invite is associated to.
      */
     public final Snowflake getGuildId() {
-        return Snowflake.of(data.getGuild().getId());
+        return Snowflake.of(data.getGuildId());
     }
 
     /**
@@ -88,7 +88,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the channel this invite is associated to.
      */
     public final Snowflake getChannelId() {
-        return Snowflake.of(data.getChannel().getId());
+        return Snowflake.of(data.getChannelId());
     }
 
     /**
@@ -106,7 +106,7 @@ public class Invite implements DiscordObject {
      *
      * @return The raw data as represented by Discord.
      */
-    protected final InviteResponse getData() {
+    protected InviteBean getData() {
         return data;
     }
 }
