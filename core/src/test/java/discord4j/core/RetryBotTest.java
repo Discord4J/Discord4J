@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.dispatch.Dispatch;
@@ -34,88 +35,80 @@ import discord4j.core.object.entity.Message;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
-import discord4j.gateway.payload.PayloadReader;
-import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.RouteUtils;
 import discord4j.store.noop.NoOpStoreService;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Schedulers;
-import reactor.util.Logger;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
 
 public class RetryBotTest {
 
-    private String token;
+    private static String token;
+    private static Integer shardId;
+    private static Integer shardCount;
 
-    @Before
-    public void initialize() {
+    @BeforeClass
+    public static void initialize() {
         token = System.getenv("token");
+        String shardIdValue = System.getenv("shardId");
+        String shardCountValue = System.getenv("shardCount");
+        if (shardIdValue != null && shardCountValue != null) {
+            shardId = Integer.valueOf(shardIdValue);
+            shardCount = Integer.valueOf(shardCountValue);
+        }
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void test() {
-        FakeClient client = new FakeClient(token);
+        Bootstrap bootstrap = new Bootstrap(token);
 
-        client.gatewayClient.dispatch()
-                .map(dispatch -> DispatchContext.of(dispatch, client.impl))
-                .flatMap(DispatchHandlers::<Dispatch, Event>handle)
-                .subscribeWith(client.eventProcessor);
-
-        CommandListener commandListener = new CommandListener(client);
+        CommandListener commandListener = new CommandListener(bootstrap.serviceMediator, bootstrap.eventDispatcher);
         commandListener.configure();
 
-        LifecycleListener lifecycleListener = new LifecycleListener(client);
+        LifecycleListener lifecycleListener = new LifecycleListener(bootstrap.eventDispatcher);
         lifecycleListener.configure();
 
-        client.impl.getRestClient().getGatewayService().getGateway()
-                .flatMap(res -> client.gatewayClient.execute(res.getUrl() + "?v=6&encoding=json&compress=zlib-stream"))
-                .block();
+        bootstrap.blockingLogin();
     }
 
-    private static <V> Flux<V> wiretap(Flux<V> flux, Logger logger) {
-        return flux.log(logger, Level.FINE, false, SignalType.ON_NEXT);
+    @Test
+    @Ignore("Example code excluded from CI")
+    public void testNoCommands() {
+        Bootstrap bootstrap = new Bootstrap(token);
+
+        LifecycleListener lifecycleListener = new LifecycleListener(bootstrap.eventDispatcher);
+        lifecycleListener.configure();
+
+        bootstrap.blockingLogin();
     }
 
-    static class FakeClient {
+    public static class Bootstrap {
 
-        private final ServiceMediator impl;
+        private final ServiceMediator serviceMediator;
+        private final EventDispatcher eventDispatcher;
 
-        private final ObjectMapper mapper;
-
-        private final SimpleHttpClient httpClient;
-        private final Router router;
-        private final RestClient restClient;
-
-        private final PayloadReader reader;
-        private final PayloadWriter writer;
-        private final RetryOptions retryOptions;
-        private final GatewayClient gatewayClient;
-
-        private final EmitterProcessor<Event> eventProcessor;
-        private final EventDispatcher dispatcher;
-
-        FakeClient(String token) {
-            mapper = new ObjectMapper()
+        Bootstrap(String token) {
+            ObjectMapper mapper = new ObjectMapper()
                     .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                    .registerModule(new PossibleModule());
+                    .registerModules(new PossibleModule(), new Jdk8Module());
 
-            httpClient = SimpleHttpClient.builder()
+            SimpleHttpClient httpClient = SimpleHttpClient.builder()
                     .baseUrl(Routes.BASE_URL)
                     .defaultHeader("authorization", "Bot " + token)
                     .defaultHeader("content-type", "application/json")
@@ -127,51 +120,67 @@ public class RetryBotTest {
                     .writerStrategy(new EmptyWriterStrategy())
                     .build();
 
-            router = new Router(httpClient);
-            reader = new JacksonPayloadReader(mapper);
-            writer = new JacksonPayloadWriter(mapper);
-            retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120));
+            RestClient restClient = new RestClient(new Router(httpClient));
 
-            restClient = new RestClient(router);
-            gatewayClient = new GatewayClient(reader, writer, retryOptions, token);
+            GatewayClient gatewayClient = new GatewayClient(
+                    new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
+                    new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token);
 
-            impl = new ServiceMediator(gatewayClient, restClient, new StoreHolder(new NoOpStoreService()));
+            serviceMediator = new ServiceMediator(gatewayClient, restClient, new StoreHolder(new NoOpStoreService()));
 
-            eventProcessor = EmitterProcessor.create(false);
-            dispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
+            EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
+            gatewayClient.dispatch()
+                    .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
+                    .flatMap(DispatchHandlers::<Dispatch, Event>handle)
+                    .subscribeWith(eventProcessor);
+            eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
+        }
+
+        void blockingLogin() {
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("v", 6);
+            queryParams.put("encoding", "json");
+            queryParams.put("compress", "zlib-stream");
+            serviceMediator.getRestClient().getGatewayService().getGateway()
+                    .flatMap(res -> serviceMediator.getGatewayClient()
+                            .execute(RouteUtils.expandQuery(res.getUrl(), queryParams),
+                                    shardId != null ? new int[]{shardId, shardCount} : null, null))
+                    .block();
         }
     }
 
-    static class CommandListener {
+    public static class CommandListener {
 
-        private final FakeClient client;
+        private final ServiceMediator services;
+        private final EventDispatcher dispatcher;
         private final AtomicLong ownerId = new AtomicLong();
 
-        CommandListener(FakeClient client) {
-            this.client = client;
+        CommandListener(ServiceMediator services, EventDispatcher dispatcher) {
+            this.services = services;
+            this.dispatcher = dispatcher;
         }
 
         void configure() {
-            FluxSink<GatewayPayload<?>> outboundSink = client.gatewayClient.sender();
+            FluxSink<GatewayPayload<?>> outboundSink = services.getGatewayClient().sender();
 
-            client.dispatcher.on(ReadyEvent.class)
+            dispatcher.on(ReadyEvent.class)
                     .next()
-                    .flatMap(ready -> client.impl.getRestClient().getApplicationService().getCurrentApplicationInfo())
+                    .flatMap(ready -> services.getRestClient().getApplicationService().getCurrentApplicationInfo())
                     .map(res -> res.getOwner().getId())
                     .subscribe(ownerId::set);
 
-            client.dispatcher.on(MessageCreateEvent.class)
+            dispatcher.on(MessageCreateEvent.class)
                     .subscribe(event -> {
                         Message message = event.getMessage();
 
                         message.getAuthorId()
-                                .filter(id -> ownerId.get() == id.asLong())
+                                .filter(id -> ownerId.get() == id.asLong()) // only accept bot owner messages
                                 .flatMap(id -> message.getContent())
                                 .ifPresent(content -> {
                                     if ("!close".equals(content)) {
-                                        client.gatewayClient.close(false);
+                                        services.getGatewayClient().close(false);
                                     } else if ("!retry".equals(content)) {
-                                        client.gatewayClient.close(true);
+                                        services.getGatewayClient().close(true);
                                     } else if ("!fail".equals(content)) {
                                         outboundSink.next(new GatewayPayload<>());
                                     }
@@ -180,23 +189,22 @@ public class RetryBotTest {
         }
     }
 
-    static class LifecycleListener {
+    public static class LifecycleListener {
 
-        private final FakeClient client;
+        private final EventDispatcher dispatcher;
 
-        LifecycleListener(FakeClient client) {
-            this.client = client;
+        LifecycleListener(EventDispatcher dispatcher) {
+            this.dispatcher = dispatcher;
         }
 
         void configure() {
-            client.dispatcher.on(ConnectEvent.class).subscribe();
-            client.dispatcher.on(DisconnectEvent.class).subscribe();
-            client.dispatcher.on(ReconnectStartEvent.class).subscribe();
-            client.dispatcher.on(ReconnectEvent.class).subscribe();
-            client.dispatcher.on(ReconnectFailEvent.class).subscribe();
+            dispatcher.on(ConnectEvent.class).subscribe();
+            dispatcher.on(DisconnectEvent.class).subscribe();
+            dispatcher.on(ReconnectStartEvent.class).subscribe();
+            dispatcher.on(ReconnectEvent.class).subscribe();
+            dispatcher.on(ReconnectFailEvent.class).subscribe();
         }
 
     }
-
 
 }

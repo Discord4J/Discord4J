@@ -26,6 +26,7 @@ import reactor.util.Loggers;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Registry for operating on gateway {@link discord4j.common.json.payload.PayloadData} objects, handling each lifecycle
@@ -95,8 +96,9 @@ public abstract class PayloadHandlers {
         context.getHeartbeat().start(interval);
 
         IdentifyProperties props = new IdentifyProperties(System.getProperty("os.name"), "Discord4J", "Discord4J");
-        Identify identify = new Identify(context.getToken(), props, false, 250, Possible.absent(), Possible
-                .absent());
+        Identify identify = new Identify(context.getToken(), props, false, 250,
+                Optional.ofNullable(context.getShard()).map(Possible::of).orElse(Possible.absent()),
+                Optional.ofNullable(context.getStatus()).map(Possible::of).orElse(Possible.absent()));
         GatewayPayload<Identify> response = GatewayPayload.identify(identify);
 
         context.getSender().next(response);

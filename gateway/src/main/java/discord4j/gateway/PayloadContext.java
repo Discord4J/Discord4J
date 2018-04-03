@@ -19,6 +19,7 @@ package discord4j.gateway;
 import discord4j.common.ResettableInterval;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.PayloadData;
+import discord4j.common.json.payload.StatusUpdate;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import reactor.core.publisher.FluxSink;
 
@@ -42,10 +43,12 @@ public class PayloadContext<T extends PayloadData> {
     private final ResettableInterval heartbeat;
     private final String token;
     private final DiscordWebSocketHandler handler;
+    private final int[] shard;
+    private final StatusUpdate status;
 
     private PayloadContext(GatewayPayload<T> payload, FluxSink<Dispatch> dispatch, FluxSink<GatewayPayload<?>> sender,
-                           AtomicInteger lastSequence, AtomicReference<String> sessionId,
-                           ResettableInterval heartbeat, String token, DiscordWebSocketHandler handler) {
+            AtomicInteger lastSequence, AtomicReference<String> sessionId, ResettableInterval heartbeat,
+            String token, DiscordWebSocketHandler handler, int[] shard, StatusUpdate status) {
         this.payload = payload;
         this.dispatch = dispatch;
         this.sender = sender;
@@ -54,6 +57,8 @@ public class PayloadContext<T extends PayloadData> {
         this.heartbeat = heartbeat;
         this.token = token;
         this.handler = handler;
+        this.shard = shard;
+        this.status = status;
     }
 
     public GatewayPayload<T> getPayload() {
@@ -93,6 +98,16 @@ public class PayloadContext<T extends PayloadData> {
         return handler;
     }
 
+    @Nullable
+    public int[] getShard() {
+        return shard;
+    }
+
+    @Nullable
+    public StatusUpdate getStatus() {
+        return status;
+    }
+
     public static class Builder {
 
         private GatewayPayload<?> payload;
@@ -103,6 +118,8 @@ public class PayloadContext<T extends PayloadData> {
         private ResettableInterval heartbeat;
         private String token;
         private DiscordWebSocketHandler handler;
+        private int[] shard;
+        private StatusUpdate status;
 
         public Builder setPayload(GatewayPayload<?> payload) {
             this.payload = payload;
@@ -144,8 +161,19 @@ public class PayloadContext<T extends PayloadData> {
             return this;
         }
 
+        public Builder setShard(@Nullable int[] shard) {
+            this.shard = shard;
+            return this;
+        }
+
+        public Builder setStatus(@Nullable StatusUpdate status) {
+            this.status = status;
+            return this;
+        }
+
         public PayloadContext build() {
-            return new PayloadContext<>(payload, dispatch, sender, lastSequence, sessionId, heartbeat, token, handler);
+            return new PayloadContext<>(payload, dispatch, sender, lastSequence, sessionId, heartbeat, token,
+                    handler, shard, status);
         }
     }
 }

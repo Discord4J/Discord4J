@@ -20,6 +20,7 @@ import discord4j.common.ResettableInterval;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.Heartbeat;
 import discord4j.common.json.payload.Opcode;
+import discord4j.common.json.payload.StatusUpdate;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.Ready;
 import discord4j.gateway.payload.PayloadReader;
@@ -38,6 +39,7 @@ import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -79,7 +81,7 @@ public class GatewayClient {
     private final FluxSink<GatewayPayload<?>> senderSink;
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
-                         RetryOptions retryOptions, String token) {
+            RetryOptions retryOptions, String token) {
         this.payloadReader = payloadReader;
         this.payloadWriter = payloadWriter;
         this.retryOptions = retryOptions;
@@ -96,9 +98,12 @@ public class GatewayClient {
      * Establish a reconnecting gateway connection to the given URL.
      *
      * @param gatewayUrl the URL used to establish a websocket connection
+     * @param shard an array containing two integer values, a zero-based value of the current shard and the total
+     *         number of shards, can be null for single-shard connections
+     * @param status the structure for initial presence information, can be null for no status
      * @return a Mono signaling completion
      */
-    public Mono<Void> execute(String gatewayUrl) {
+    public Mono<Void> execute(String gatewayUrl, @Nullable int[] shard, @Nullable StatusUpdate status) {
         return Mono.defer(() -> {
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
 
@@ -118,7 +123,7 @@ public class GatewayClient {
 
             // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
             Disposable receiverSub = receiver.map(this::updateSequence)
-                    .map(payload -> payloadContext(payload, handler))
+                    .map(payload -> payloadContext(payload, handler, shard, status))
                     .subscribe(PayloadHandlers::handle);
 
             // Subscribe the handler's outbound exchange with our outgoing signals
@@ -164,7 +169,8 @@ public class GatewayClient {
         return payload;
     }
 
-    private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler) {
+    private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler,
+            @Nullable int[] shard, @Nullable StatusUpdate status) {
         return new PayloadContext.Builder()
                 .setPayload(payload)
                 .setDispatch(dispatchSink)
@@ -174,6 +180,8 @@ public class GatewayClient {
                 .setHeartbeat(heartbeat)
                 .setToken(token)
                 .setHandler(handler)
+                .setShard(shard)
+                .setStatus(status)
                 .build();
     }
 

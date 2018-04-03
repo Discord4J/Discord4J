@@ -76,7 +76,7 @@ public class GatewayClientTest {
                     }
                 });
 
-        gatewayClient.execute(gatewayUrl).block();
+        gatewayClient.execute(gatewayUrl, null, null).block();
     }
 
     private ObjectMapper getMapper() {
