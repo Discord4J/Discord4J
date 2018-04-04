@@ -16,10 +16,10 @@
  */
 package discord4j.core;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
+import discord4j.core.util.EntityUtil;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 
@@ -107,45 +107,13 @@ public final class DiscordClient {
 
         final Mono<ChannelBean> rest = serviceMediator.getRestClient().getChannelService()
                 .getChannel(channelId.asLong())
-                .map(this::getChannelBean);
+                .map(EntityUtil::getChannelBean);
 
         return category.cast(ChannelBean.class)
                 .switchIfEmpty(textChannel)
                 .switchIfEmpty(voiceChannel)
                 .switchIfEmpty(rest)
-                .map(this::getChannel);
-    }
-
-    /**
-     * An utility that converts a {@code ChannelResponse} to some instance of {@code ChannelBean}.
-     *
-     * @param response The {@code ChannelResponse} to convert.
-     * @return The converted {@code ChannelBean}.
-     */
-    private ChannelBean getChannelBean(final ChannelResponse response) {
-        switch (Channel.Type.of(response.getType())) {
-            case GUILD_TEXT: return new TextChannelBean(response);
-            case DM: return new PrivateChannelBean(response);
-            case GUILD_VOICE: return new VoiceChannelBean(response);
-            case GUILD_CATEGORY: return new CategoryBean(response);
-            default: throw new UnsupportedOperationException("Unknown Response: " + response);
-        }
-    }
-
-    /**
-     * An utility that converts a {@code ChannelBean} to some instance of {@code Channel}.
-     *
-     * @param bean The {@code ChannelBean} to convert.
-     * @return The converted {@code Channel}.
-     */
-    private Channel getChannel(final ChannelBean bean) {
-        switch (Channel.Type.of(bean.getType())) {
-            case GUILD_TEXT: return new TextChannel(serviceMediator, (TextChannelBean) bean);
-            case DM: return new PrivateChannel(serviceMediator, (PrivateChannelBean) bean);
-            case GUILD_VOICE: return new VoiceChannel(serviceMediator, (VoiceChannelBean) bean);
-            case GUILD_CATEGORY: return new Category(serviceMediator, (CategoryBean) bean);
-            default: throw new UnsupportedOperationException("Unknown Bean: " + bean);
-        }
+                .map(channelBean -> EntityUtil.getChannel(serviceMediator, channelBean));
     }
 
     /**

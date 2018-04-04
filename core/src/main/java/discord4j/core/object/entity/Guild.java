@@ -24,6 +24,7 @@ import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.bean.BaseGuildBean;
 import discord4j.core.object.entity.bean.GuildBean;
+import discord4j.core.util.EntityUtil;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 /**
  * A Discord guild.
@@ -377,7 +379,18 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<GuildChannel> getChannels() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getGatewayData())
+                .map(GuildBean::getChannels)
+                .map(Arrays::stream)
+                .map(LongStream::boxed)
+                .flatMapMany(Flux::fromStream)
+                .map(Snowflake::of)
+                .flatMap(getClient()::getGuildChannelById)
+                .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
+                        .getGuildChannels(getId().asLong())
+                        .map(EntityUtil::getChannelBean)
+                        .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
+                        .cast(GuildChannel.class));
     }
 
     /**
