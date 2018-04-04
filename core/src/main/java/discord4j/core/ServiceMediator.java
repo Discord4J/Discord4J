@@ -23,14 +23,17 @@ public final class ServiceMediator {
 
     private final GatewayClient gatewayClient;
     private final RestClient restClient;
-    private final DiscordClient discordClient;
     private final StoreHolder storeHolder;
+    private final DiscordClient discordClient;
+    private final ClientConfig clientConfig;
 
-    ServiceMediator(final GatewayClient gatewayClient, final RestClient restClient, StoreHolder storeHolder) {
+    ServiceMediator(final GatewayClient gatewayClient, final RestClient restClient, final StoreHolder storeHolder,
+                    final ClientConfig clientConfig) {
         this.gatewayClient = gatewayClient;
         this.restClient = restClient;
         this.storeHolder = storeHolder;
         discordClient = new DiscordClient(this);
+        this.clientConfig = clientConfig;
     }
 
     public GatewayClient getGatewayClient() {
@@ -41,11 +44,15 @@ public final class ServiceMediator {
         return restClient;
     }
 
+    public StoreHolder getStoreHolder() {
+        return storeHolder;
+    }
+
     public DiscordClient getClient() {
         return discordClient;
     }
 
-    public StoreHolder getStoreHolder() {
-        return storeHolder;
+    public ClientConfig getClientConfig() {
+        return clientConfig;
     }
 }

@@ -16,12 +16,17 @@
  */
 package discord4j.core;
 
+import discord4j.common.json.payload.StatusUpdate;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
 import discord4j.core.util.EntityUtil;
+import discord4j.rest.util.RouteUtils;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /** A high-level abstraction of common Discord operations such as entity retrieval and Discord shard manipulation. */
 public final class DiscordClient {
@@ -228,6 +233,42 @@ public final class DiscordClient {
                 .getWebhook(webhookId.asLong())
                 .map(WebhookBean::new)
                 .map(webhookBean -> new Webhook(serviceMediator, webhookBean));
+    }
+
+    /**
+     * Logs in the client to the gateway.
+     *
+     * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
+     * gateway without a reconnect attempt. It is recommended to call this from {@code main} and as a final statement
+     * invoke {@link Mono#block()}.
+     */
+    public Mono<Void> login() {
+        // TODO Add configuration
+        final int[] shards = {0, 1};
+        final StatusUpdate statusUpdate = null;
+
+        final Map<String, Object> parameters = new HashMap<>(3);
+        parameters.put("compress", "zlib-stream");
+        parameters.put("encoding", "json");
+        parameters.put("v", 6);
+
+        return serviceMediator.getRestClient().getGatewayService().getGateway()
+                .flatMap(response -> serviceMediator.getGatewayClient()
+                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters),shards, statusUpdate));
+    }
+
+    /** Logs out the client from the gateway. */
+    public void logout() {
+        serviceMediator.getGatewayClient().close(false);
+    }
+
+    /**
+     * Gets the configuration for this client.
+     *
+     * @return The configuration for this client.
+     */
+    public ClientConfig getConfig() {
+        return serviceMediator.getClientConfig();
     }
 
     /**

@@ -120,13 +120,15 @@ public class RetryBotTest {
                     .writerStrategy(new EmptyWriterStrategy())
                     .build();
 
+            StoreHolder storeHolder = new StoreHolder(new NoOpStoreService());
             RestClient restClient = new RestClient(new Router(httpClient));
+            ClientConfig config = new ClientConfig(token);
 
             GatewayClient gatewayClient = new GatewayClient(
                     new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
                     new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token);
 
-            serviceMediator = new ServiceMediator(gatewayClient, restClient, new StoreHolder(new NoOpStoreService()));
+            serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, config);
 
             EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
             gatewayClient.dispatch()
