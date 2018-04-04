@@ -127,4 +127,13 @@ public class User implements Entity {
     public final Mono<PrivateChannel> getPrivateChannel() {
         throw new UnsupportedOperationException("Not yet implemented...");
     }
+
+    /**
+     * Gets the ServiceMediator associated to this object.
+     *
+     * @return The ServiceMediator associated to this object.
+     */
+    protected final ServiceMediator getServiceMediator() {
+        return serviceMediator;
+    }
 }

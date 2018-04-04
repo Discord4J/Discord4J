@@ -33,8 +33,6 @@ public final class GuildBean extends BaseGuildBean {
     private int memberCount;
     private long[] members;
     private long[] channels;
-    // TODO voice states
-    // TODO presences
 
     public GuildBean(final GuildResponse response) {
         super(response);

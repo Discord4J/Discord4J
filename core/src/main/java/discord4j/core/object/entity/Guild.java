@@ -24,6 +24,7 @@ import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.bean.BaseGuildBean;
 import discord4j.core.object.entity.bean.GuildBean;
+import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -353,7 +354,10 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return serviceMediator.getStoreHolder().getVoiceStateStore()
+                // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
+                .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
+                .map(bean -> new VoiceState(serviceMediator, bean));
     }
 
     /**
@@ -383,7 +387,10 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Presence> getPresences() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return serviceMediator.getStoreHolder().getPresenceStore()
+                // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
+                .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
+                .map(bean -> new Presence(serviceMediator, bean));
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

@@ -16,6 +16,8 @@
  */
 package discord4j.core;
 
+import discord4j.core.object.bean.PresenceBean;
+import discord4j.core.object.bean.VoiceStateBean;
 import discord4j.core.object.entity.bean.*;
 import discord4j.store.Store;
 import discord4j.store.primitive.LongObjStore;
@@ -31,10 +33,12 @@ public final class StoreHolder {
     private final LongObjStore<GuildEmojiBean> guildEmojiStore;
     private final Store<LongLongTuple2, MemberBean> memberStore;
     private final LongObjStore<MessageBean> messageStore;
+    private final Store<LongLongTuple2, PresenceBean> presenceStore;
     private final LongObjStore<RoleBean> roleStore;
     private final LongObjStore<TextChannelBean> textChannelStore;
     private final LongObjStore<UserBean> userStore;
     private final LongObjStore<VoiceChannelBean> voiceChannelStore;
+    private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
 
     StoreHolder(final StoreService service) {
         attachmentStore = service.provideLongObjStore(AttachmentBean.class);
@@ -43,10 +47,12 @@ public final class StoreHolder {
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
         messageStore = service.provideLongObjStore(MessageBean.class);
+        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceBean.class);
         roleStore = service.provideLongObjStore(RoleBean.class);
         textChannelStore = service.provideLongObjStore(TextChannelBean.class);
         userStore = service.provideLongObjStore(UserBean.class);
         voiceChannelStore = service.provideLongObjStore(VoiceChannelBean.class);
+        voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
     }
 
     public LongObjStore<AttachmentBean> getAttachmentStore() {
@@ -73,6 +79,10 @@ public final class StoreHolder {
         return messageStore;
     }
 
+    public Store<LongLongTuple2, PresenceBean> getPresenceStore() {
+        return presenceStore;
+    }
+
     public LongObjStore<RoleBean> getRoleStore() {
         return roleStore;
     }
@@ -87,5 +97,9 @@ public final class StoreHolder {
 
     public LongObjStore<VoiceChannelBean> getVoiceChannelStore() {
         return voiceChannelStore;
+    }
+
+    public Store<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
+        return voiceStateStore;
     }
 }

@@ -22,6 +22,7 @@ import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.bean.MemberBean;
 import discord4j.core.object.entity.bean.UserBean;
+import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -148,7 +149,9 @@ public final class Member extends User {
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceState> getVoiceState() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getServiceMediator().getStoreHolder().getVoiceStateStore()
+                .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
+                .map(bean -> new VoiceState(getServiceMediator(), bean));
     }
 
     /**
@@ -158,6 +161,8 @@ public final class Member extends User {
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Presence> getPresence() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getServiceMediator().getStoreHolder().getPresenceStore()
+                .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
+                .map(bean -> new Presence(getServiceMediator(), bean));
     }
 }
