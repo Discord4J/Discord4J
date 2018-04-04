@@ -35,6 +35,7 @@ public class Ready implements Dispatch {
     private String sessionId;
     @JsonProperty("_trace")
     private String[] trace;
+    private int[] shard;
 
     // FIXME
     private Object user_settings;
@@ -65,6 +66,10 @@ public class Ready implements Dispatch {
         return trace;
     }
 
+    public int[] getShard() {
+        return shard;
+    }
+
     @Override
     public String toString() {
         return "Ready[" +
@@ -74,6 +79,7 @@ public class Ready implements Dispatch {
                 ", guilds=" + Arrays.toString(guilds) +
                 ", sessionId=" + sessionId +
                 ", trace=" + Arrays.toString(trace) +
+                ", shard=" + Arrays.toString(shard) +
                 ", user_settings=" + user_settings +
                 ", relationships=" + Arrays.toString(relationships) +
                 ", presences=" + Arrays.toString(presences) +
