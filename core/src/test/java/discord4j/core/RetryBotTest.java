@@ -55,6 +55,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * An example bot showing gateway and rest operations without involving core module user-facing constructs.
+ */
 public class RetryBotTest {
 
     private static String token;
@@ -128,14 +131,15 @@ public class RetryBotTest {
                     new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
                     new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token);
 
-            serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, config);
-
             EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
+            eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
+
+            serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, eventDispatcher, config);
+
             gatewayClient.dispatch()
                     .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
                     .flatMap(DispatchHandlers::<Dispatch, Event>handle)
                     .subscribeWith(eventProcessor);
-            eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
         }
 
         void blockingLogin() {

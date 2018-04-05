@@ -16,6 +16,7 @@
  */
 package discord4j.core;
 
+import discord4j.core.event.EventDispatcher;
 import discord4j.gateway.GatewayClient;
 import discord4j.rest.RestClient;
 
@@ -24,14 +25,16 @@ public final class ServiceMediator {
     private final GatewayClient gatewayClient;
     private final RestClient restClient;
     private final StoreHolder storeHolder;
+    private final EventDispatcher eventDispatcher;
     private final DiscordClient discordClient;
     private final ClientConfig clientConfig;
 
     ServiceMediator(final GatewayClient gatewayClient, final RestClient restClient, final StoreHolder storeHolder,
-                    final ClientConfig clientConfig) {
+                    final EventDispatcher eventDispatcher, final ClientConfig clientConfig) {
         this.gatewayClient = gatewayClient;
         this.restClient = restClient;
         this.storeHolder = storeHolder;
+        this.eventDispatcher = eventDispatcher;
         discordClient = new DiscordClient(this);
         this.clientConfig = clientConfig;
     }
@@ -46,6 +49,10 @@ public final class ServiceMediator {
 
     public StoreHolder getStoreHolder() {
         return storeHolder;
+    }
+
+    public EventDispatcher getEventDispatcher() {
+        return eventDispatcher;
     }
 
     public DiscordClient getClient() {

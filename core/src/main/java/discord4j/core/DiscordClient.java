@@ -17,6 +17,7 @@
 package discord4j.core;
 
 import discord4j.common.json.payload.StatusUpdate;
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
@@ -257,7 +258,7 @@ public final class DiscordClient {
      * invoke {@link Mono#block()}.
      */
     public Mono<Void> login() {
-        // TODO Add configuration
+        // TODO Add configuration -- refactor GatewayClient#execute parameters into a config object
         final int[] shards = {0, 1};
         final StatusUpdate statusUpdate = null;
 
@@ -268,12 +269,21 @@ public final class DiscordClient {
 
         return serviceMediator.getRestClient().getGatewayService().getGateway()
                 .flatMap(response -> serviceMediator.getGatewayClient()
-                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters),shards, statusUpdate));
+                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters), shards, statusUpdate));
     }
 
     /** Logs out the client from the gateway. */
     public void logout() {
         serviceMediator.getGatewayClient().close(false);
+    }
+
+    /**
+     * Gets the event dispatcher, allowing reactive subscription of client events.
+     *
+     * @return an EventDispatcher associated with this client.
+     */
+    public EventDispatcher getEventDispatcher() {
+        return serviceMediator.getEventDispatcher();
     }
 
     /**

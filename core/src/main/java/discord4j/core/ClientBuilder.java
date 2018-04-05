@@ -22,6 +22,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
+import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.core.event.DispatchContext;
+import discord4j.core.event.DispatchHandlers;
+import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.Event;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -32,6 +37,8 @@ import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.store.noop.NoOpStoreService;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -72,14 +79,28 @@ public final class ClientBuilder {
                 .baseUrl(Routes.BASE_URL)
                 .build();
 
+        // TODO built-in store discovery or custom service override
         final StoreHolder storeHolder = new StoreHolder(new NoOpStoreService());
         final RestClient restClient = new RestClient(new Router(httpClient));
 
+        // TODO custom retry parameters
+        // TODO shard setup
+        // TODO initial status
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
                 new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token);
 
-        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, config);
+        // TODO custom processor and threading model
+        final EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
+        final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
+
+        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, eventDispatcher, config);
+
+        serviceMediator.getGatewayClient().dispatch()
+                .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
+                .flatMap(DispatchHandlers::<Dispatch, Event>handle)
+                .subscribeWith(eventProcessor);
+
         return new DiscordClient(serviceMediator);
     }
 }
