@@ -73,9 +73,14 @@ public class GatewayClient {
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
+
     private final AtomicInteger lastSequence = new AtomicInteger(0);
-    private final AtomicReference<String> sessionId = new AtomicReference<>("");
     private final ResettableInterval heartbeat = new ResettableInterval();
+    private final AtomicReference<String> sessionId = new AtomicReference<>("");
+
+    private final AtomicReference<int[]> shard = new AtomicReference<>();
+    private final AtomicReference<StatusUpdate> status = new AtomicReference<>();
+
     private final FluxSink<Dispatch> dispatchSink;
     private final FluxSink<GatewayPayload<?>> receiverSink;
     private final FluxSink<GatewayPayload<?>> senderSink;
@@ -106,6 +111,8 @@ public class GatewayClient {
     public Mono<Void> execute(String gatewayUrl, @Nullable int[] shard, @Nullable StatusUpdate status) {
         return Mono.defer(() -> {
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
+            this.shard.set(shard);
+            this.status.set(status);
 
             // Internally subscribe to Ready to signal completion of retry mechanism
             Disposable readySub = dispatch.ofType(Ready.class).subscribe(d -> {
@@ -123,7 +130,7 @@ public class GatewayClient {
 
             // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
             Disposable receiverSub = receiver.map(this::updateSequence)
-                    .map(payload -> payloadContext(payload, handler, shard, status))
+                    .map(payload -> payloadContext(payload, handler, this))
                     .subscribe(PayloadHandlers::handle);
 
             // Subscribe the handler's outbound exchange with our outgoing signals
@@ -170,19 +177,8 @@ public class GatewayClient {
     }
 
     private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler,
-            @Nullable int[] shard, @Nullable StatusUpdate status) {
-        return new PayloadContext.Builder()
-                .setPayload(payload)
-                .setDispatch(dispatchSink)
-                .setSender(senderSink)
-                .setLastSequence(lastSequence)
-                .setSessionId(sessionId)
-                .setHeartbeat(heartbeat)
-                .setToken(token)
-                .setHandler(handler)
-                .setShard(shard)
-                .setStatus(status)
-                .build();
+            GatewayClient client) {
+        return new PayloadContext<>(payload, handler, client);
     }
 
     /**
@@ -242,5 +238,71 @@ public class GatewayClient {
      */
     public String getSessionId() {
         return sessionId.get();
+    }
+
+    /**
+     * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
+     *
+     * @return a {@link reactor.core.publisher.FluxSink} for {@link discord4j.common.json.payload.dispatch.Dispatch}
+     *         objects
+     */
+    FluxSink<Dispatch> dispatchSink() {
+        return dispatchSink;
+    }
+
+    /**
+     * Gets the atomic reference for the current heartbeat sequence.
+     *
+     * @return an AtomicInteger representing the current gateway sequence
+     */
+    AtomicInteger lastSequence() {
+        return lastSequence;
+    }
+
+    /**
+     * Gets the atomic reference for the current session ID.
+     *
+     * @return an AtomicReference of the String representing the current session ID
+     */
+    AtomicReference<String> sessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Gets the heartbeat manager bound to this GatewayClient.
+     *
+     * @return a {@link discord4j.common.ResettableInterval} to manipulate heartbeat operations
+     */
+    ResettableInterval heartbeat() {
+        return heartbeat;
+    }
+
+    /**
+     * Gets the token used to connect to the gateway.
+     *
+     * @return a token String
+     */
+    String token() {
+        return token;
+    }
+
+    /**
+     * Gets the atomic reference for the shard login information.
+     *
+     * @return an AtomicReference containing an int array with shard settings. The object reference can
+     *         be <code>null</code> if the client is not part of a shard
+     */
+    AtomicReference<int[]> shard() {
+        return shard;
+    }
+
+    /**
+     * Gets the atomic reference for the initial presence setting.
+     *
+     * @return an AtomicReference containing a {@link discord4j.common.json.payload.StatusUpdate} object for initial
+     *         presence settings. The object reference can be null if the client is not setting a presence on IDENTIFY
+     */
+    AtomicReference<StatusUpdate> status() {
+        return status;
     }
 }
