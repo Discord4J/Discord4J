@@ -94,7 +94,7 @@ public final class ApplicationUser extends User {
      * @return {@code true} if the app's bot will only join upon completion of the full OAuth2 code grant flow,
      * {@code false} otherwise.
      */
-    public boolean requiresCode() {
+    public boolean requireCodeGrant() {
         return data.isBotRequireCodeGrant();
     }
 
@@ -113,7 +113,7 @@ public final class ApplicationUser extends User {
      * @return A {@link Mono} where, upon successful completion, emits the {@link User owner} of the application. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<User> getUser() {
+    public Mono<User> getOwner() {
         return getServiceMediator().getClient().getUserById(getOwnerId());
     }
 }

@@ -125,7 +125,7 @@ public class RetryBotTest {
 
             StoreHolder storeHolder = new StoreHolder(new NoOpStoreService());
             RestClient restClient = new RestClient(new Router(httpClient));
-            ClientConfig config = new ClientConfig(token);
+            ClientConfig config = new ClientConfig(token, shardId, shardCount);
 
             GatewayClient gatewayClient = new GatewayClient(
                     new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),

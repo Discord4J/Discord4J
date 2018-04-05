@@ -19,12 +19,24 @@ package discord4j.core;
 public final class ClientConfig {
 
     private final String token;
+    private final int shardIndex;
+    private final int shardCount;
 
-    ClientConfig(final String token) {
+    ClientConfig(final String token, final int shardIndex, final int shardCount) {
         this.token = token;
+        this.shardIndex = shardIndex;
+        this.shardCount = shardCount;
     }
 
     public String getToken() {
         return token;
+    }
+
+    public int getShardIndex() {
+        return shardIndex;
+    }
+
+    public int getShardCount() {
+        return shardCount;
     }
 }

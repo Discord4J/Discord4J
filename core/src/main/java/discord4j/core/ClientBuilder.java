@@ -46,6 +46,8 @@ import java.util.Objects;
 public final class ClientBuilder {
 
     private String token;
+    private int shardIndex;
+    private int shardCount;
 
     public ClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
@@ -59,8 +61,24 @@ public final class ClientBuilder {
         this.token = Objects.requireNonNull(token);
     }
 
+    public int getShardIndex() {
+        return shardIndex;
+    }
+
+    public void setShardIndex(final int shardIndex) {
+        this.shardIndex = shardIndex;
+    }
+
+    public int getShardCount() {
+        return shardCount;
+    }
+
+    public void setShardCount(final int shardCount) {
+        this.shardCount = shardCount;
+    }
+
     public DiscordClient build() {
-        final ClientConfig config = new ClientConfig(token);
+        final ClientConfig config = new ClientConfig(token, shardIndex, shardCount);
 
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)

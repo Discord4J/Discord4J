@@ -258,8 +258,8 @@ public final class DiscordClient {
      * invoke {@link Mono#block()}.
      */
     public Mono<Void> login() {
-        // TODO Add configuration -- refactor GatewayClient#execute parameters into a config object
-        final int[] shards = {0, 1};
+        final int[] shards = {getConfig().getShardIndex(), getConfig().getShardCount()};
+        // TODO Add initialStatusUpdate parameters in ClientConfig
         final StatusUpdate statusUpdate = null;
 
         final Map<String, Object> parameters = new HashMap<>(3);
@@ -275,6 +275,11 @@ public final class DiscordClient {
     /** Logs out the client from the gateway. */
     public void logout() {
         serviceMediator.getGatewayClient().close(false);
+    }
+
+    /** Reconnects the client to the gateway. */
+    public void reconnect() {
+        serviceMediator.getGatewayClient().close(true);
     }
 
     /**
