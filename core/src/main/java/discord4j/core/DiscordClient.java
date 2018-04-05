@@ -236,6 +236,20 @@ public final class DiscordClient {
     }
 
     /**
+     * Requests to retrieve the application user.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationUser application user}. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ApplicationUser> getApplicationUser() {
+        return serviceMediator.getRestClient().getApplicationService()
+                .getCurrentApplicationInfo()
+                .map(ApplicationBean::new)
+                .flatMap(applicationBean -> getUserBean(Snowflake.of(applicationBean.getId()))
+                        .map(userBean -> new ApplicationUser(serviceMediator, userBean, applicationBean)));
+    }
+
+    /**
      * Logs in the client to the gateway.
      *
      * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
