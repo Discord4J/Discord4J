@@ -23,6 +23,7 @@ import discord4j.core.object.entity.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -58,7 +59,7 @@ public final class Reaction implements DiscordObject {
      * @param guildId The ID of the guild this reaction is associated to, if present.
      */
     public Reaction(final ServiceMediator serviceMediator, final ReactionBean data, final long channelId,
-                    final long messageId, final Long guildId) {
+                    final long messageId, @Nullable final Long guildId) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
         this.channelId = channelId;

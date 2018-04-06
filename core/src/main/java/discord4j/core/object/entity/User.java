@@ -16,10 +16,12 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.request.DMCreateRequest;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -125,7 +127,11 @@ public class User implements Entity {
      * this user. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<PrivateChannel> getPrivateChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return serviceMediator.getRestClient().getUserService()
+                .createDM(new DMCreateRequest(getId().asLong()))
+                .map(EntityUtil::getChannelBean)
+                .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
+                .cast(PrivateChannel.class);
     }
 
     /**

@@ -451,7 +451,7 @@ public final class Guild implements Entity {
                 case 0: return DISABLED;
                 case 1: return MEMBERS_WITHOUT_ROLES;
                 case 2: return ALL_MEMBERS;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }
@@ -500,7 +500,7 @@ public final class Guild implements Entity {
             switch (value) {
                 case 0: return NONE;
                 case 1: return ELEVATED;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }
@@ -549,7 +549,7 @@ public final class Guild implements Entity {
             switch (value) {
                 case 0: return ALL_MESSAGES;
                 case 1: return ONLY_MENTIONS;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }
@@ -610,7 +610,7 @@ public final class Guild implements Entity {
                 case 2: return MEDIUM;
                 case 3: return HIGH;
                 case 4: return VERY_HIGH;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }

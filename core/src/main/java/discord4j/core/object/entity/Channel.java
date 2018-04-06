@@ -16,6 +16,8 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.util.EntityUtil;
+
 /**
  * A Discord channel.
  *
@@ -83,7 +85,7 @@ public interface Channel extends Entity {
                 case 2: return GUILD_VOICE;
                 case 3: return GROUP_DM;
                 case 4: return GUILD_CATEGORY;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }

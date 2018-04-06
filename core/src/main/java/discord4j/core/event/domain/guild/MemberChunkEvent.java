@@ -40,7 +40,7 @@ public class MemberChunkEvent extends GuildEvent {
     }
 
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     public Set<Member> getMembers() {

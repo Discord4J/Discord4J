@@ -42,7 +42,7 @@ public class UnbanEvent extends GuildEvent {
     }
 
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
 }

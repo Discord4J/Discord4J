@@ -37,7 +37,7 @@ public final class EntityUtil {
             case DM: return new PrivateChannelBean(response);
             case GUILD_VOICE: return new VoiceChannelBean(response);
             case GUILD_CATEGORY: return new CategoryBean(response);
-            default: throw new UnsupportedOperationException("Unknown Response: " + response);
+            default: return throwUnsupportedDiscordValue(response);
         }
     }
 
@@ -54,8 +54,18 @@ public final class EntityUtil {
             case DM: return new PrivateChannel(serviceMediator, (PrivateChannelBean) bean);
             case GUILD_VOICE: return new VoiceChannel(serviceMediator, (VoiceChannelBean) bean);
             case GUILD_CATEGORY: return new Category(serviceMediator, (CategoryBean) bean);
-            default: throw new UnsupportedOperationException("Unknown Bean: " + bean);
+            default: return throwUnsupportedDiscordValue(bean);
         }
+    }
+
+    /**
+     * Throws an {@link UnsupportedOperationException} for an unknown Discord value. This method is intended to be used
+     * in enum value constructs such as {@link Channel.Type#of(int)} when the value has not been properly supported.
+     *
+     * @param value The unknown Discord value.
+     */
+    public static <T> T throwUnsupportedDiscordValue(final Object value) {
+        throw new UnsupportedOperationException("Unknown Value: " + value);
     }
 
     private EntityUtil() {}

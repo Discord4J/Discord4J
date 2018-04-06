@@ -55,7 +55,7 @@ public class RoleCreateEvent extends RoleEvent {
     }
 
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     public Role getRole() {

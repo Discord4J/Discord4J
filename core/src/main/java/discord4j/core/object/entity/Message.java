@@ -21,6 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.Reaction;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.MessageBean;
+import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -327,7 +328,7 @@ public final class Message implements Entity {
                 case 5: return CHANNEL_ICON_CHANGE;
                 case 6: return CHANNEL_PINNED_MESSAGE;
                 case 7: return GUILD_MEMBER_JOIN;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }

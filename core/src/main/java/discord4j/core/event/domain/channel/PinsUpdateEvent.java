@@ -39,7 +39,7 @@ public class PinsUpdateEvent extends ChannelEvent {
     }
 
     public Mono<MessageChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageChannelById(getChannelId());
     }
 
     public Instant getLastPinTimestamp() {

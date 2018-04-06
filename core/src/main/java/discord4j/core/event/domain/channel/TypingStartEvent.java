@@ -42,7 +42,7 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     public Mono<MessageChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageChannelById(getChannelId());
     }
 
     public Snowflake getUserId() {
@@ -50,7 +50,7 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     public Mono<User> getUser() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getUserById(getUserId());
     }
 
     public Instant getStartTime() {

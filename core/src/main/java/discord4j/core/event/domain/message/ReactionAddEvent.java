@@ -44,7 +44,7 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     public Mono<User> getUser() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getUserById(getUserId());
     }
 
     public Snowflake getChannelId() {
@@ -52,7 +52,7 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     public Mono<MessageChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageChannelById(getChannelId());
     }
 
     public Snowflake getMessageId() {
@@ -60,7 +60,7 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     public Mono<Message> getMessage() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     public GuildEmoji getEmoji() {

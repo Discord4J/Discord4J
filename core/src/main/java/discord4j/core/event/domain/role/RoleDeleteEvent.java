@@ -54,7 +54,7 @@ public class RoleDeleteEvent extends RoleEvent {
     }
 
     public Mono<Guild> getGuild() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getGuildById(getGuildId());
     }
 
     public Snowflake getRoleId() {

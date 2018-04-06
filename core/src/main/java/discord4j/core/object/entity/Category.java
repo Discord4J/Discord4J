@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.CategoryBean;
 import reactor.core.publisher.Flux;
 
@@ -40,6 +41,8 @@ public final class Category extends BaseGuildChannel {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<GuildChannel> getChannels() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getGuild().flatMapMany(Guild::getChannels)
+                .filter(channel -> channel.getCategoryId().orElse(Snowflake.of(0)).equals(getId()));
+        // TODO Sort channels by position? How to accomplish this when getPosition is Mono<Integer>?
     }
 }

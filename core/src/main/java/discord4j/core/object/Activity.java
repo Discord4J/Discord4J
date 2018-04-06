@@ -19,6 +19,7 @@ package discord4j.core.object;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ActivityBean;
+import discord4j.core.util.EntityUtil;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -236,7 +237,7 @@ public final class Activity implements DiscordObject {
                 case 0: return PLAYING;
                 case 1: return STREAMING;
                 case 2: return LISTENING;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }

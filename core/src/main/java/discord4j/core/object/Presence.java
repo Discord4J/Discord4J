@@ -21,6 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.PresenceBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
+import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -160,7 +161,7 @@ public final class Presence implements DiscordObject {
                 case "dnd": return DND;
                 case "online": return ONLINE;
                 case "offline": return OFFLINE;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }

@@ -38,7 +38,7 @@ public class ReactionRemoveAllEvent extends MessageEvent {
     }
 
     public Mono<MessageChannel> getChannel() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageChannelById(getChannelId());
     }
 
     public Snowflake getMessageId() {
@@ -46,6 +46,6 @@ public class ReactionRemoveAllEvent extends MessageEvent {
     }
 
     public Mono<Message> getMessage() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getClient().getMessageById(getChannelId(), getMessageId());
     }
 }

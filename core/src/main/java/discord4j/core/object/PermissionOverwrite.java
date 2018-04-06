@@ -23,6 +23,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
+import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -196,7 +197,7 @@ public final class PermissionOverwrite implements DiscordObject {
             switch (value) {
                 case "role": return ROLE;
                 case "member": return MEMBER;
-                default: throw new UnsupportedOperationException("Unknown Value: " + value);
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
     }
