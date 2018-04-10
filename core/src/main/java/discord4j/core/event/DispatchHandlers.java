@@ -247,8 +247,8 @@ public abstract class DispatchHandlers {
     }
 
     private static Flux<Event> resumed(DispatchContext<Resumed> context) {
-        // TODO
-        return Flux.empty();
+        Resumed dispatch = context.getDispatch();
+        return Flux.just(new ResumeEvent(context.getServiceMediator().getClient(), dispatch.getTrace()));
     }
 
     private static Flux<Event> typingStart(DispatchContext<TypingStart> context) {

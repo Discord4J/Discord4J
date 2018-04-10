@@ -20,9 +20,9 @@ import discord4j.common.ResettableInterval;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.Heartbeat;
 import discord4j.common.json.payload.Opcode;
-import discord4j.common.json.payload.StatusUpdate;
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.common.json.payload.dispatch.Ready;
+import discord4j.common.json.payload.dispatch.Resumed;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
@@ -39,8 +39,8 @@ import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -68,28 +68,28 @@ public class GatewayClient {
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final RetryOptions retryOptions;
+    private final IdentifyOptions identifyOptions;
     private final String token;
 
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
 
+    private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger lastSequence = new AtomicInteger(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
-
-    private final AtomicReference<int[]> shard = new AtomicReference<>();
-    private final AtomicReference<StatusUpdate> status = new AtomicReference<>();
 
     private final FluxSink<Dispatch> dispatchSink;
     private final FluxSink<GatewayPayload<?>> receiverSink;
     private final FluxSink<GatewayPayload<?>> senderSink;
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
-            RetryOptions retryOptions, String token) {
+            RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
         this.payloadReader = payloadReader;
         this.payloadWriter = payloadWriter;
         this.retryOptions = retryOptions;
+        this.identifyOptions = identifyOptions;
         this.token = token;
 
         // initialize the sinks to safely produce values downstream
@@ -103,19 +103,21 @@ public class GatewayClient {
      * Establish a reconnecting gateway connection to the given URL.
      *
      * @param gatewayUrl the URL used to establish a websocket connection
-     * @param shard an array containing two integer values, a zero-based value of the current shard and the total
-     *         number of shards, can be null for single-shard connections
-     * @param status the structure for initial presence information, can be null for no status
      * @return a Mono signaling completion
      */
-    public Mono<Void> execute(String gatewayUrl, @Nullable int[] shard, @Nullable StatusUpdate status) {
+    public Mono<Void> execute(String gatewayUrl) {
         return Mono.defer(() -> {
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
-            this.shard.set(shard);
-            this.status.set(status);
+
+            if (identifyOptions.getResumeSequence() != null) {
+                this.lastSequence.set(identifyOptions.getResumeSequence());
+                this.sessionId.set(identifyOptions.getResumeSessionId());
+            } else {
+                resumable.set(false);
+            }
 
             // Internally subscribe to Ready to signal completion of retry mechanism
-            Disposable readySub = dispatch.ofType(Ready.class).subscribe(d -> {
+            Disposable readySub = dispatch.filter(GatewayClient::isReadyOrResume).subscribe(d -> {
                 RetryContext retryContext = retryOptions.getRetryContext();
                 if (retryContext.getResetCount() == 0) {
                     dispatchSink.next(GatewayStateChange.connected());
@@ -123,6 +125,8 @@ public class GatewayClient {
                     dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
                 }
                 retryContext.reset();
+                identifyOptions.setResumeSessionId(sessionId.get());
+                resumable.set(true);
             });
 
             // Subscribe each inbound GatewayPayload to the receiver sink
@@ -152,7 +156,29 @@ public class GatewayClient {
                         readySub.dispose();
                         heartbeat.stop();
                     });
-        }).retryWhen(Retry.<RetryContext>onlyIf(context -> ABNORMAL_ERROR.test(context.exception()))
+        }).retryWhen(retryFactory()).doOnTerminate(() -> dispatchSink.next(GatewayStateChange.disconnected()));
+    }
+
+    private static boolean isReadyOrResume(Dispatch d) {
+        return Ready.class.isAssignableFrom(d.getClass()) || Resumed.class.isAssignableFrom(d.getClass());
+    }
+
+    private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
+        if (payload.getSequence() != null) {
+            lastSequence.set(payload.getSequence());
+            identifyOptions.setResumeSequence(lastSequence.get());
+        }
+        return payload;
+    }
+
+    private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler,
+            GatewayClient client) {
+        return new PayloadContext<>(payload, handler, client);
+    }
+
+    private Retry<RetryContext> retryFactory() {
+        // TODO add retryMax + RetryOptions field
+        return Retry.<RetryContext>onlyIf(context -> ABNORMAL_ERROR.test(context.exception()))
                 .withApplicationContext(retryOptions.getRetryContext())
                 .backoff(retryOptions.getBackoff())
                 .jitter(retryOptions.getJitter())
@@ -163,22 +189,11 @@ public class GatewayClient {
                     if (attempt == 1) {
                         dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
                     } else {
-                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, Duration.ofMillis(backoff)));
+                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, Duration.ofMillis
+                                (backoff)));
                     }
                     context.applicationContext().next();
-                })).doOnTerminate(() -> dispatchSink.next(GatewayStateChange.disconnected()));
-    }
-
-    private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
-        if (payload.getSequence() != null) {
-            lastSequence.set(payload.getSequence());
-        }
-        return payload;
-    }
-
-    private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler,
-            GatewayClient client) {
-        return new PayloadContext<>(payload, handler, client);
+                });
     }
 
     /**
@@ -241,6 +256,19 @@ public class GatewayClient {
     }
 
     /**
+     * Gets the current heartbeat sequence.
+     *
+     * @return an integer representing the current gateway sequence
+     */
+    public int getLastSequence() {
+        return lastSequence.get();
+    }
+
+    ///////////////////////////////////////////
+    // Fields for PayloadHandler consumption //
+    ///////////////////////////////////////////
+
+    /**
      * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
      *
      * @return a {@link reactor.core.publisher.FluxSink} for {@link discord4j.common.json.payload.dispatch.Dispatch}
@@ -287,22 +315,29 @@ public class GatewayClient {
     }
 
     /**
-     * Gets the atomic reference for the shard login information.
+     * An boolean value indicating if this client will attempt to RESUME.
      *
-     * @return an AtomicReference containing an int array with shard settings. The object reference can
-     *         be <code>null</code> if the client is not part of a shard
+     * @return an AtomicBoolean representing resume capabilities
      */
-    AtomicReference<int[]> shard() {
-        return shard;
+    AtomicBoolean resumable() {
+        return resumable;
     }
 
     /**
-     * Gets the atomic reference for the initial presence setting.
+     * Gets the configuration object for gateway identifying procedure.
      *
-     * @return an AtomicReference containing a {@link discord4j.common.json.payload.StatusUpdate} object for initial
-     *         presence settings. The object reference can be null if the client is not setting a presence on IDENTIFY
+     * @return an IdentifyOptions configuration object
      */
-    AtomicReference<StatusUpdate> status() {
-        return status;
+    IdentifyOptions identifyOptions() {
+        return identifyOptions;
+    }
+
+    /**
+     * Gets the configuration object for gateway reconnection procedure.
+     *
+     * @return a RetryOptions configuration object
+     */
+    RetryOptions retryOptions() {
+        return retryOptions;
     }
 }

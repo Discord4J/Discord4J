@@ -33,6 +33,7 @@ import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
@@ -47,10 +48,19 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -59,6 +69,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * An example bot showing gateway and rest operations without involving core module user-facing constructs.
  */
 public class RetryBotTest {
+
+    private static final Logger log = Loggers.getLogger(RetryBotTest.class);
 
     private static String token;
     private static Integer shardId;
@@ -78,7 +90,20 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void test() {
-        Bootstrap bootstrap = new Bootstrap(token);
+        IdentifyOptions options = new IdentifyOptions();
+        options.setShard(shardId != null ? new int[]{shardId, shardCount} : null);
+
+        try {
+            for (String line : Files.readAllLines(Paths.get("resume.dat"))) {
+                String[] tokens = line.split(";", 2);
+                options.setResumeSessionId(tokens[0]);
+                options.setResumeSequence(Integer.valueOf(tokens[1]));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Bootstrap bootstrap = new Bootstrap(token, options);
 
         CommandListener commandListener = new CommandListener(bootstrap.serviceMediator, bootstrap.eventDispatcher);
         commandListener.configure();
@@ -86,18 +111,32 @@ public class RetryBotTest {
         LifecycleListener lifecycleListener = new LifecycleListener(bootstrap.eventDispatcher);
         lifecycleListener.configure();
 
-        bootstrap.blockingLogin();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            // Persist our identify options
+            try {
+                String sessionId = options.getResumeSessionId();
+                Integer sequence = options.getResumeSequence();
+                log.debug("Resuming data: {}, {}", sessionId, sequence);
+                Path saved = Files.write(Paths.get("resume.dat"),
+                        Collections.singletonList(sessionId + ";" + sequence));
+                log.info("File saved to {}", saved.toAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+
+        bootstrap.login().block();
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void testNoCommands() {
-        Bootstrap bootstrap = new Bootstrap(token);
+        Bootstrap bootstrap = new Bootstrap(token, new IdentifyOptions());
 
         LifecycleListener lifecycleListener = new LifecycleListener(bootstrap.eventDispatcher);
         lifecycleListener.configure();
 
-        bootstrap.blockingLogin();
+        bootstrap.login().block();
     }
 
     public static class Bootstrap {
@@ -105,7 +144,7 @@ public class RetryBotTest {
         private final ServiceMediator serviceMediator;
         private final EventDispatcher eventDispatcher;
 
-        Bootstrap(String token) {
+        Bootstrap(String token, IdentifyOptions options) {
             ObjectMapper mapper = new ObjectMapper()
                     .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
@@ -129,7 +168,7 @@ public class RetryBotTest {
 
             GatewayClient gatewayClient = new GatewayClient(
                     new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                    new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token);
+                    new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120)), token, options);
 
             EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
             eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
@@ -142,16 +181,14 @@ public class RetryBotTest {
                     .subscribeWith(eventProcessor);
         }
 
-        void blockingLogin() {
+        Mono<Void> login() {
             Map<String, Object> queryParams = new HashMap<>();
             queryParams.put("v", 6);
             queryParams.put("encoding", "json");
             queryParams.put("compress", "zlib-stream");
-            serviceMediator.getRestClient().getGatewayService().getGateway()
+            return serviceMediator.getRestClient().getGatewayService().getGateway()
                     .flatMap(res -> serviceMediator.getGatewayClient()
-                            .execute(RouteUtils.expandQuery(res.getUrl(), queryParams),
-                                    shardId != null ? new int[]{shardId, shardCount} : null, null))
-                    .block();
+                            .execute(RouteUtils.expandQuery(res.getUrl(), queryParams)));
         }
     }
 
@@ -169,9 +206,9 @@ public class RetryBotTest {
         void configure() {
             FluxSink<GatewayPayload<?>> outboundSink = services.getGatewayClient().sender();
 
-            dispatcher.on(ReadyEvent.class)
+            Flux.first(dispatcher.on(ReadyEvent.class), dispatcher.on(ResumeEvent.class))
                     .next()
-                    .flatMap(ready -> services.getRestClient().getApplicationService().getCurrentApplicationInfo())
+                    .flatMap(evt -> services.getRestClient().getApplicationService().getCurrentApplicationInfo())
                     .map(res -> res.getOwner().getId())
                     .subscribe(ownerId::set);
 

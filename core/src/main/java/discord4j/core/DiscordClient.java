@@ -269,7 +269,7 @@ public final class DiscordClient {
 
         return serviceMediator.getRestClient().getGatewayService().getGateway()
                 .flatMap(response -> serviceMediator.getGatewayClient()
-                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters), shards, statusUpdate));
+                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters)));
     }
 
     /** Logs out the client from the gateway. */

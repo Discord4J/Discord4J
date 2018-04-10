@@ -81,27 +81,33 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleInvalidSession(PayloadContext<InvalidSession> context) {
-        // TODO polish
+        GatewayClient client = context.getClient();
         if (context.getData().isResumable()) {
-            String token = context.getClient().token();
-            context.getClient().sender().next(GatewayPayload.resume(
-                    new Resume(token, context.getClient().getSessionId(), context.getClient().lastSequence().get())));
+            String token = client.token();
+            client.sender().next(GatewayPayload.resume(
+                    new Resume(token, client.getSessionId(), client.lastSequence().get())));
         } else {
+            client.resumable().compareAndSet(true, false);
             context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
         }
     }
 
     private static void handleHello(PayloadContext<Hello> context) {
         Duration interval = Duration.ofMillis(context.getData().getHeartbeatInterval());
-        context.getClient().heartbeat().start(interval);
+        GatewayClient client = context.getClient();
+        client.heartbeat().start(interval);
 
-        IdentifyProperties props = new IdentifyProperties(System.getProperty("os.name"), "Discord4J", "Discord4J");
-        Identify identify = new Identify(context.getClient().token(), props, false, 250,
-                Optional.ofNullable(context.getClient().shard().get()).map(Possible::of).orElse(Possible.absent()),
-                Optional.ofNullable(context.getClient().status().get()).map(Possible::of).orElse(Possible.absent()));
-        GatewayPayload<Identify> response = GatewayPayload.identify(identify);
-
-        context.getClient().sender().next(response);
+        if (client.resumable().get() && client.retryOptions().getRetryContext().getAttempts() == 1) {
+            log.debug("Attempting to RESUME from {}", client.lastSequence().get());
+            client.sender().next(GatewayPayload.resume(
+                    new Resume(client.token(), client.getSessionId(), client.lastSequence().get())));
+        } else {
+            IdentifyProperties props = new IdentifyProperties(System.getProperty("os.name"), "Discord4J", "Discord4J");
+            Identify identify = new Identify(client.token(), props, false, 250,
+                    Optional.ofNullable(client.identifyOptions().getShard()).map(Possible::of).orElse(Possible.absent()),
+                    Optional.ofNullable(client.identifyOptions().getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
+            client.sender().next(GatewayPayload.identify(identify));
+        }
     }
 
     private static void handleHeartbeatAck(PayloadContext<?> context) {

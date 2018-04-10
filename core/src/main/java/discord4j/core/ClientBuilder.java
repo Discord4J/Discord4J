@@ -28,6 +28,7 @@ import discord4j.core.event.DispatchHandlers;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
@@ -106,7 +107,7 @@ public final class ClientBuilder {
         // TODO initial status
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token);
+                new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token, new IdentifyOptions());
 
         // TODO custom processor and threading model
         final EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
