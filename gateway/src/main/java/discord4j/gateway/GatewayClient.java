@@ -189,8 +189,9 @@ public class GatewayClient {
                     if (attempt == 1) {
                         dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
                     } else {
-                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, Duration.ofMillis
-                                (backoff)));
+                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1,
+                                Duration.ofMillis(backoff)));
+                        resumable.set(false);
                     }
                     context.applicationContext().next();
                 });
