@@ -20,16 +20,14 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Reaction;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.bean.ReactionBean;
 import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -200,30 +198,23 @@ public final class Message implements Entity {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<Role> getRoleMentions() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Flux.fromIterable(getRoleMentionIds())
+                .flatMap(roleId -> getGuild()
+                        .map(Guild::getId)
+                        .flatMap(guildId -> getClient().getRoleById(guildId, roleId)));
     }
 
     // TODO: getEmbeds()
 
     /**
-     * Gets the IDs of any attached files.
+     * Gets any attached files.
      *
-     * @return The IDs of any attached files.
+     * @return Any attached files.
      */
-    public Set<Snowflake> getAttachmentIds() {
+    public Set<Attachment> getAttachments() {
         return Arrays.stream(data.getAttachments())
-                .mapToObj(Snowflake::of)
+                .map(bean -> new Attachment(serviceMediator, bean))
                 .collect(Collectors.toSet());
-    }
-
-    /**
-     * Requests to retrieve any attached files.
-     *
-     * @return A {@link Flux} that continually emits any {@link Attachment attached} files. If an error is received, it
-     * is emitted through the {@code Flux}.
-     */
-    public Flux<Attachment> getAttachments() {
-        throw new UnsupportedOperationException("Not yet implemented...");
     }
 
     /**
@@ -232,7 +223,10 @@ public final class Message implements Entity {
      * @return The reactions to this message.
      */
     public Set<Reaction> getReactions() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        final ReactionBean[] reactions = data.getReactions();
+        return (reactions == null) ? Collections.emptySet() : Arrays.stream(reactions)
+                .map(bean -> new Reaction(serviceMediator, bean, getChannelId().asLong(), getId().asLong()))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -252,6 +246,16 @@ public final class Message implements Entity {
      */
     public Mono<Webhook> getWebhook() {
         return Mono.justOrEmpty(getWebhookId()).flatMap(getClient()::getWebhookById);
+    }
+
+    /**
+     * Requests to retrieve the guild this message is associated to, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this message is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return getChannel().ofType(GuildChannel.class).flatMap(GuildChannel::getGuild);
     }
 
     /**

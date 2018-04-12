@@ -16,12 +16,14 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.response.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.bean.RegionBean;
 import discord4j.core.object.entity.bean.BaseGuildBean;
 import discord4j.core.object.entity.bean.GuildBean;
 import discord4j.core.util.EntityUtil;
@@ -31,6 +33,8 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -134,7 +138,12 @@ public final class Guild implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Region> getRegion() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildVoiceRegions(getId().asLong())
+                .filter(response -> response.getId().equals(getRegionId()))
+                .map(RegionBean::new)
+                .map(bean -> new Region(serviceMediator, bean))
+                .single();
     }
 
     /**
@@ -369,6 +378,18 @@ public final class Guild implements Entity {
      * it is emitted through the {@code Flux}.
      */
     public Flux<Member> getMembers() {
+        final LongFunction<Flux<GuildMemberResponse>> getNextPage = id -> {
+            final Map<String, Object> parameters = new HashMap<>(2);
+            parameters.put("limit", 1000);
+            parameters.put("after", id);
+
+            return serviceMediator.getRestClient().getGuildService()
+                    .getGuildMembers(getId().asLong(), parameters);
+        };
+
+        final AtomicLong previousId = new AtomicLong(0L);
+
+        // TODO Efficiently be able to grab members in chunks either from store or REST
         throw new UnsupportedOperationException("Not yet implemented...");
     }
 

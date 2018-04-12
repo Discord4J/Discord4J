@@ -66,4 +66,13 @@ class BaseChannel implements Channel {
     protected ChannelBean getData() {
         return data;
     }
+
+    /**
+     * Gets the ServiceMediator associated to this object.
+     *
+     * @return The ServiceMediator associated to this object.
+     */
+    protected ServiceMediator getServiceMediator() {
+        return serviceMediator;
+    }
 }

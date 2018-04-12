@@ -16,16 +16,21 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.json.response.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ReactionBean;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.bean.UserBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongFunction;
 
 /**
  * A Discord message reaction.
@@ -46,9 +51,6 @@ public final class Reaction implements DiscordObject {
     /** The ID of the message this reaction is associated to. */
     private final long messageId;
 
-    /** The ID of the guild this reaction is associated to, if present. */
-    private final Long guildId;
-
     /**
      * Constructs a {@code Reaction} with an associated ServiceMediator and Discord data.
      *
@@ -56,15 +58,13 @@ public final class Reaction implements DiscordObject {
      * @param data The raw data as represented by Discord, must be non-null.
      * @param channelId The ID of the channel this reaction is associated to.
      * @param messageId The ID of the message this reaction is associated to.
-     * @param guildId The ID of the guild this reaction is associated to, if present.
      */
     public Reaction(final ServiceMediator serviceMediator, final ReactionBean data, final long channelId,
-                    final long messageId, @Nullable final Long guildId) {
+                    final long messageId) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
         this.channelId = channelId;
         this.messageId = messageId;
-        this.guildId = guildId;
     }
 
     @Override
@@ -107,7 +107,9 @@ public final class Reaction implements DiscordObject {
      */
     public Mono<GuildEmoji> getGuildEmoji() {
         return Mono.justOrEmpty(getEmojiId())
-                .flatMap(id -> getClient().getGuildEmojiById(getEmojiId().orElseThrow(IllegalStateException::new), id));
+                .flatMap(emojiId -> getGuild()
+                        .map(Guild::getId)
+                        .flatMap(guildId -> getClient().getGuildEmojiById(guildId, emojiId)));
     }
 
     /**
@@ -158,22 +160,13 @@ public final class Reaction implements DiscordObject {
     }
 
     /**
-     * Gets the ID of the guild this reaction is associated to, if present.
-     *
-     * @return The ID of the guild this reaction is associated to, if present.
-     */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.of(guildId).map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the guild this reaction is associated to, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this reaction is associated to,
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+        return getChannel().ofType(GuildChannel.class).flatMap(GuildChannel::getGuild);
     }
 
     /**
@@ -183,6 +176,23 @@ public final class Reaction implements DiscordObject {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getReactors() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        final LongFunction<Flux<UserResponse>> getNextPage = id -> {
+            final Map<String, Object> parameters = new HashMap<>(2);
+            parameters.put("limit", 100);
+            parameters.put("after", id);
+
+            return serviceMediator.getRestClient().getChannelService()
+                    .getReactions(getChannelId().asLong(), messageId, getEmojiName(), parameters);
+        };
+
+        final AtomicLong previousId = new AtomicLong(0L);
+
+        return Flux.defer(() -> getNextPage.apply(previousId.get())
+                .collectList()
+                .doOnNext(users -> previousId.set(users.isEmpty() ? 0L : users.get(users.size() - 1).getId()))
+                .flatMapMany(Flux::fromIterable)
+                .map(UserBean::new)
+                .map(bean -> new User(serviceMediator, bean)))
+                .repeat(() -> previousId.get() != 0L);
     }
 }

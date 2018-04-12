@@ -16,9 +16,10 @@
  */
 package discord4j.core.object.entity.bean;
 
-import discord4j.common.json.response.AttachmentResponse;
 import discord4j.common.json.response.MessageResponse;
+import discord4j.common.json.response.ReactionResponse;
 import discord4j.common.json.response.UserResponse;
+import discord4j.core.object.bean.ReactionBean;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -40,8 +41,9 @@ public final class MessageBean implements Serializable {
     private boolean mentionEveryone;
     private long[] mentions;
     private long[] mentionRoles;
-    private long[] attachments;
-    // TODO Reactions
+    private AttachmentBean[] attachments;
+    @Nullable
+    private ReactionBean[] reactions;
     private boolean pinned;
     @Nullable
     private Long webhookId;
@@ -64,8 +66,13 @@ public final class MessageBean implements Serializable {
         mentionRoles = response.getMentionRoles();
 
         attachments = Arrays.stream(response.getAttachments())
-                .mapToLong(AttachmentResponse::getId)
-                .toArray();
+                .map(AttachmentBean::new)
+                .toArray(AttachmentBean[]::new);
+
+        final ReactionResponse[] reactions = response.getReactions();
+        this.reactions = reactions == null ? null : Arrays.stream(reactions)
+                .map(ReactionBean::new)
+                .toArray(ReactionBean[]::new);
 
         pinned = response.isPinned();
         webhookId = response.getWebhookId();
@@ -156,12 +163,21 @@ public final class MessageBean implements Serializable {
         this.mentionRoles = mentionRoles;
     }
 
-    public long[] getAttachments() {
+    public AttachmentBean[] getAttachments() {
         return attachments;
     }
 
-    public void setAttachments(final long[] attachments) {
+    public void setAttachments(final AttachmentBean[] attachments) {
         this.attachments = attachments;
+    }
+
+    @Nullable
+    public ReactionBean[] getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(@Nullable final ReactionBean[] reactions) {
+        this.reactions = reactions;
     }
 
     public boolean isPinned() {

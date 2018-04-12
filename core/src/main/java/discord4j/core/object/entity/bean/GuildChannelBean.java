@@ -18,6 +18,7 @@ package discord4j.core.object.entity.bean;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.common.json.response.ChannelResponse;
+import discord4j.core.object.bean.PermissionOverwriteBean;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class GuildChannelBean extends ChannelBean {
 
     private long guildId;
     @Nullable
-    private long[] permissionOverwrites;
+    private PermissionOverwriteBean[] permissionOverwrites;
     private String name;
     @Nullable
     private Long parentId;
@@ -41,8 +42,8 @@ public class GuildChannelBean extends ChannelBean {
 
         final OverwriteEntity[] overwrites = response.getPermissionOverwrites();
         permissionOverwrites = (overwrites == null) ? null : Arrays.stream(overwrites)
-                .mapToLong(OverwriteEntity::getId)
-                .toArray();
+                .map(PermissionOverwriteBean::new)
+                .toArray(PermissionOverwriteBean[]::new);
 
         name = Objects.requireNonNull(response.getName());
         parentId = response.getParentId();
@@ -60,11 +61,11 @@ public class GuildChannelBean extends ChannelBean {
     }
 
     @Nullable
-    public final long[] getPermissionOverwrites() {
+    public final PermissionOverwriteBean[] getPermissionOverwrites() {
         return permissionOverwrites;
     }
 
-    public final void setPermissionOverwrites(@Nullable final long[] permissionOverwrites) {
+    public final void setPermissionOverwrites(@Nullable final PermissionOverwriteBean[] permissionOverwrites) {
         this.permissionOverwrites = permissionOverwrites;
     }
 

@@ -19,11 +19,15 @@ package discord4j.core.object.entity;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.Snowflake;
+import discord4j.core.object.bean.PermissionOverwriteBean;
 import discord4j.core.object.entity.bean.GuildChannelBean;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** An internal implementation of {@link GuildChannel} designed to streamline inheritance. */
 class BaseGuildChannel extends BaseChannel implements GuildChannel {
@@ -50,7 +54,10 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Set<PermissionOverwrite> getPermissionOverwrites() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        final PermissionOverwriteBean[] permissionOverwrites = getData().getPermissionOverwrites();
+        return (permissionOverwrites == null) ? Collections.emptySet() : Arrays.stream(permissionOverwrites)
+                .map(bean -> new PermissionOverwrite(getServiceMediator(), bean, getGuildId().asLong()))
+                .collect(Collectors.toSet());
     }
 
     @Override
