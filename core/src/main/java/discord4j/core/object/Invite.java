@@ -21,6 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.InviteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;

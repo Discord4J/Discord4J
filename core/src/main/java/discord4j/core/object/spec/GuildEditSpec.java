@@ -18,10 +18,10 @@ package discord4j.core.object.spec;
 
 import discord4j.common.json.request.GuildModifyRequest;
 import discord4j.core.object.Region;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.util.Snowflake;
 
 import javax.annotation.Nullable;
 

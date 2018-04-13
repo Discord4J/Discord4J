@@ -17,7 +17,7 @@
 package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.Snowflake;
+import discord4j.core.object.util.Snowflake;
 
 public class GuildDeleteEvent extends GuildEvent {
 

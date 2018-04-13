@@ -18,9 +18,9 @@ package discord4j.core;
 
 import discord4j.common.json.payload.StatusUpdate;
 import discord4j.core.event.EventDispatcher;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
+import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.util.LongLongTuple2;

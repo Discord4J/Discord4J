@@ -19,6 +19,7 @@ package discord4j.core.object;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ActivityBean;
+import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 
 import java.time.Instant;

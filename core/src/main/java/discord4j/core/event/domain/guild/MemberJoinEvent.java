@@ -17,9 +17,9 @@
 package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 public class MemberJoinEvent extends GuildEvent {

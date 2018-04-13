@@ -22,6 +22,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ReactionBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

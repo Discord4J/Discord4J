@@ -19,8 +19,8 @@ package discord4j.core.object.entity;
 import discord4j.common.json.request.DMCreateRequest;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 

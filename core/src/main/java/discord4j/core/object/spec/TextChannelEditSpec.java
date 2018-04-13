@@ -19,8 +19,8 @@ package discord4j.core.object.spec;
 import discord4j.common.json.OverwriteEntity;
 import discord4j.common.json.request.ChannelModifyRequest;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Category;
+import discord4j.core.object.util.Snowflake;
 
 import javax.annotation.Nullable;
 import java.util.Set;

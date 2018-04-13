@@ -17,7 +17,7 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.Snowflake;
+import discord4j.core.object.util.Snowflake;
 
 import java.util.Arrays;
 import java.util.Set;

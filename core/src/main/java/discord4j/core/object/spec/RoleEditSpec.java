@@ -17,7 +17,7 @@
 package discord4j.core.object.spec;
 
 import discord4j.common.json.request.RoleModifyRequest;
-import discord4j.core.object.PermissionSet;
+import discord4j.core.object.util.PermissionSet;
 
 import java.awt.*;
 

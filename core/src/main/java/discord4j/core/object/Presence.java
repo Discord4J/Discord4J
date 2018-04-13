@@ -21,6 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.PresenceBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 

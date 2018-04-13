@@ -14,28 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+@NonNullApi
+package discord4j.core.object.util;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
-
-public class MemberLeaveEvent extends GuildEvent {
-
-    private final User user;
-    private final long guildId;
-
-    public MemberLeaveEvent(DiscordClient client, User user, long guildId) {
-        super(client);
-        this.user = user;
-        this.guildId = guildId;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-}
+import reactor.util.annotation.NonNullApi;

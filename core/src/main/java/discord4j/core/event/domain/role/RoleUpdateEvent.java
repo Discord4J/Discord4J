@@ -18,7 +18,7 @@ package discord4j.core.event.domain.role;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.Update;
-import discord4j.core.object.PermissionSet;
+import discord4j.core.object.util.PermissionSet;
 
 import javax.annotation.Nullable;
 import java.awt.*;

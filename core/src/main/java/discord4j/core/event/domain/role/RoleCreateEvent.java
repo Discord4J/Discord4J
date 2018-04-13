@@ -34,9 +34,9 @@
 package discord4j.core.event.domain.role;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
+import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 public class RoleCreateEvent extends RoleEvent {

@@ -18,10 +18,10 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Presence;
-import discord4j.core.object.Snowflake;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.bean.MemberBean;
 import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.object.util.Snowflake;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
