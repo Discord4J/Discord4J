@@ -16,6 +16,10 @@
  */
 package discord4j.core.object.util;
 
+import discord4j.core.util.EntityUtil;
+
+import java.time.Instant;
+
 /**
  * An <i>unsigned</i> 64-bit ID that is guaranteed to be unique across all of Discord, except in some unique scenarios
  * in which child objects share their parent's ID.
@@ -43,6 +47,17 @@ public final class Snowflake {
      */
     public static Snowflake of(final String id) {
         return new Snowflake(Long.parseUnsignedLong(id));
+    }
+
+    /**
+     * Constructs a {@code Snowflake} utilizing a timestamp. The constructed {@code Snowflake} is only guaranteed to
+     * contain accurate information about its {@link #getTimestamp() timestamp}; the other portions are undefined.
+     *
+     * @param timestamp The timestamp to construct a {@code Snowflake}. Must be non-null.
+     * @return A constructed {@code Snowflake} with the timestamp.
+     */
+    public static Snowflake of(final Instant timestamp) {
+        return of((timestamp.toEpochMilli() - EntityUtil.DISCORD_EPOCH) << 22);
     }
 
     /** The <i>unsigned</i> ID. */
@@ -73,6 +88,15 @@ public final class Snowflake {
      */
     public String asString() {
         return Long.toUnsignedString(id);
+    }
+
+    /**
+     * Gets the timestamp of this {@code Snowflake}.
+     *
+     * @return The timestamp of this {@code Snowflake}.
+     */
+    public Instant getTimestamp() {
+        return Instant.ofEpochMilli(EntityUtil.DISCORD_EPOCH + (id >>> 22));
     }
 
     /**

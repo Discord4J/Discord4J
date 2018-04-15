@@ -24,6 +24,9 @@ import discord4j.core.object.entity.bean.*;
 /** An utility class for entity processing. */
 public final class EntityUtil {
 
+    /** The UNIX time that represents Discord's epoch (January 1, 2015). */
+    public static final long DISCORD_EPOCH = 1420070400000L;
+
     /**
      * An utility that converts some instance of {@code ChannelResponse} to its associated {@code ChannelBean}
      * {@link Channel.Type type}. That is to say, {@code response.getType() == ChannelBean#getType()}.
