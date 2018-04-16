@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 class MessageDispatchHandlers {
 
     static Flux<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         MessageBean bean = new MessageBean(context.getDispatch().getMessage());
         Message message = new Message(context.getServiceMediator(), bean);
 
@@ -41,7 +41,7 @@ class MessageDispatchHandlers {
     }
 
     static Flux<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
 
@@ -54,7 +54,7 @@ class MessageDispatchHandlers {
     }
 
     static Flux<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
 
@@ -83,7 +83,7 @@ class MessageDispatchHandlers {
     }
 
     static Flux<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         MessageBean bean = new MessageBean(context.getDispatch().getMessage());
         Message current = new Message(context.getServiceMediator(), bean);
 

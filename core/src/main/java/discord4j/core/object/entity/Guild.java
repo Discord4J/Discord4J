@@ -68,7 +68,7 @@ public final class Guild implements Entity {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getDiscordClient();
+        return serviceMediator.getClient();
     }
 
     @Override

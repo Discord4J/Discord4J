@@ -17,14 +17,10 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.Update;
-import discord4j.core.object.Snowflake;
-import discord4j.core.object.entity.PermissionOverwrite;
 import discord4j.core.object.entity.VoiceChannel;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.Set;
 
 public class VoiceChannelUpdateEvent extends ChannelEvent {
 

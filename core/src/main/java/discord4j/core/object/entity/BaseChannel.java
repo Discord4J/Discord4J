@@ -45,7 +45,7 @@ class BaseChannel implements Channel {
 
     @Override
     public final DiscordClient getClient() {
-        return serviceMediator.getDiscordClient();
+        return serviceMediator.getClient();
     }
 
     @Override

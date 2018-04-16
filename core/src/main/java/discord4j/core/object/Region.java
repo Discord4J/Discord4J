@@ -48,7 +48,7 @@ public final class Region implements DiscordObject {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getDiscordClient();
+        return serviceMediator.getClient();
     }
 
     /**

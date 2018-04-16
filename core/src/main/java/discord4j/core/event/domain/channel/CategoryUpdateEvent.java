@@ -17,13 +17,10 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.Update;
 import discord4j.core.object.entity.Category;
-import discord4j.core.object.entity.PermissionOverwrite;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.Set;
 
 public class CategoryUpdateEvent extends ChannelEvent {
 

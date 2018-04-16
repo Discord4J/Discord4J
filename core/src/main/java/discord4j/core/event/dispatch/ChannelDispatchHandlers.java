@@ -20,11 +20,11 @@ import discord4j.common.json.payload.dispatch.*;
 import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.StoreHolder;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
-import discord4j.core.store.StoreHolder;
 import discord4j.core.util.ArrayUtil;
 import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Flux;
@@ -51,7 +51,7 @@ class ChannelDispatchHandlers {
 
     private static Flux<TextChannelCreateEvent> textChannelCreate(DispatchContext<ChannelCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getDiscordClient();
+        DiscordClient client = serviceMediator.getClient();
         TextChannelBean bean = new TextChannelBean(context.getDispatch().getChannel());
 
         Mono<TextChannelCreateEvent> saveChannel = serviceMediator.getStoreHolder().getTextChannelStore()
@@ -65,18 +65,15 @@ class ChannelDispatchHandlers {
 
     private static Flux<PrivateChannelCreateEvent> privateChannelCreate(DispatchContext<ChannelCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getDiscordClient();
+        DiscordClient client = serviceMediator.getClient();
         PrivateChannelBean bean = new PrivateChannelBean(context.getDispatch().getChannel());
 
-        return serviceMediator.getStoreHolder().getPrivateChannelStore()
-                .save(bean.getId(), bean)
-                .thenReturn(new PrivateChannelCreateEvent(client, new PrivateChannel(serviceMediator, bean)))
-                .flux();
+        return Flux.just(new PrivateChannelCreateEvent(client, new PrivateChannel(serviceMediator, bean)));
     }
 
     private static Flux<VoiceChannelCreateEvent> voiceChannelCreate(DispatchContext<ChannelCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getDiscordClient();
+        DiscordClient client = serviceMediator.getClient();
         VoiceChannelBean bean = new VoiceChannelBean(context.getDispatch().getChannel());
 
         Mono<VoiceChannelCreateEvent> saveChannel = serviceMediator.getStoreHolder().getVoiceChannelStore()
@@ -90,7 +87,7 @@ class ChannelDispatchHandlers {
 
     private static Flux<CategoryCreateEvent> categoryCreateEvent(DispatchContext<ChannelCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getDiscordClient();
+        DiscordClient client = serviceMediator.getClient();
         CategoryBean bean = new CategoryBean(context.getDispatch().getChannel());
 
         Mono<CategoryCreateEvent> saveChannel = serviceMediator.getStoreHolder().getCategoryStore()
@@ -128,7 +125,7 @@ class ChannelDispatchHandlers {
 
     private static Flux<TextChannelDeleteEvent> textChannelDelete(DispatchContext<ChannelDelete> context) {
         StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         TextChannelBean bean = new TextChannelBean(context.getDispatch().getChannel());
 
         Mono<TextChannelDeleteEvent> deleteChannel = storeHolder.getTextChannelStore()
@@ -142,18 +139,16 @@ class ChannelDispatchHandlers {
 
     private static Flux<PrivateChannelDeleteEvent> privateChannelDelete(DispatchContext<ChannelDelete> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         PrivateChannelBean bean = new PrivateChannelBean(context.getDispatch().getChannel());
 
-        return serviceMediator.getStoreHolder().getPrivateChannelStore()
-                .delete(bean.getId())
-                .thenReturn(new PrivateChannelDeleteEvent(client, new PrivateChannel(serviceMediator, bean)))
-                .flux();
+        return Flux.just(new PrivateChannelDeleteEvent(client, new PrivateChannel(serviceMediator, bean)));
+
     }
 
     private static Flux<VoiceChannelDeleteEvent> voiceChannelDelete(DispatchContext<ChannelDelete> context) {
         StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         VoiceChannelBean bean = new VoiceChannelBean(context.getDispatch().getChannel());
 
         Mono<VoiceChannelDeleteEvent> deleteChannel = storeHolder.getVoiceChannelStore()
@@ -167,7 +162,7 @@ class ChannelDispatchHandlers {
 
     private static Flux<CategoryDeleteEvent> categoryDeleteEvent(DispatchContext<ChannelDelete> context) {
         StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         CategoryBean bean = new CategoryBean(context.getDispatch().getChannel());
 
         Mono<CategoryDeleteEvent> deleteChannel = storeHolder.getCategoryStore()
@@ -191,7 +186,7 @@ class ChannelDispatchHandlers {
         Instant timestamp = context.getDispatch().getLastPinTimestamp() == null ? null :
                 Instant.parse(context.getDispatch().getLastPinTimestamp());
 
-        return Flux.just(new PinsUpdateEvent(context.getServiceMediator().getDiscordClient(), channelId, timestamp));
+        return Flux.just(new PinsUpdateEvent(context.getServiceMediator().getClient(), channelId, timestamp));
     }
 
     static Flux<? extends Event> channelUpdate(DispatchContext<ChannelUpdate> context) {
@@ -211,7 +206,7 @@ class ChannelDispatchHandlers {
 
     private static Flux<TextChannelUpdateEvent> textChannelUpdate(DispatchContext<ChannelUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getDiscordClient();
+        DiscordClient client = serviceMediator.getClient();
         TextChannelBean bean = new TextChannelBean(context.getDispatch().getChannel());
         TextChannel current = new TextChannel(context.getServiceMediator(), bean);
 
@@ -227,7 +222,7 @@ class ChannelDispatchHandlers {
 
     private static Flux<VoiceChannelUpdateEvent> voiceChannelUpdate(DispatchContext<ChannelUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getDiscordClient();
+        DiscordClient client = serviceMediator.getClient();
         VoiceChannelBean bean = new VoiceChannelBean(context.getDispatch().getChannel());
         VoiceChannel current = new VoiceChannel(context.getServiceMediator(), bean);
 
@@ -243,7 +238,7 @@ class ChannelDispatchHandlers {
 
     private static Flux<CategoryUpdateEvent> categoryUpdateEvent(DispatchContext<ChannelUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getDiscordClient();
+        DiscordClient client = serviceMediator.getClient();
         CategoryBean bean = new CategoryBean(context.getDispatch().getChannel());
         Category current = new Category(context.getServiceMediator(), bean);
 

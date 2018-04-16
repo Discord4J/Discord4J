@@ -102,7 +102,7 @@ public abstract class DispatchHandlers {
     }
 
     private static Flux<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
-        DiscordClient client = context.getServiceMediator().getDiscordClient();
+        DiscordClient client = context.getServiceMediator().getClient();
         long channelId = context.getDispatch().getChannelId();
         long userId = context.getDispatch().getUserId();
         Instant startTime = Instant.ofEpochMilli(context.getDispatch().getTimestamp());

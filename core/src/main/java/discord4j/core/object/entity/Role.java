@@ -59,7 +59,7 @@ public final class Role implements Entity {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getDiscordClient();
+        return serviceMediator.getClient();
     }
 
     public int getRawPosition() {

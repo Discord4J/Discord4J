@@ -61,7 +61,7 @@ public final class GuildEmoji implements Entity {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getDiscordClient();
+        return serviceMediator.getClient();
     }
 
     @Override

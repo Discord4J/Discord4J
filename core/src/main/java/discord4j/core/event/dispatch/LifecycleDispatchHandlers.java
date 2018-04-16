@@ -38,12 +38,12 @@ class LifecycleDispatchHandlers {
                 .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
                 .collect(Collectors.toSet());
 
-        return Flux.just(new ReadyEvent(context.getServiceMediator().getDiscordClient(), dispatch.getVersion(), self,
+        return Flux.just(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
                 guilds, dispatch.getSessionId(), dispatch.getTrace()));
     }
 
     static Flux<ResumeEvent> resumed(DispatchContext<Resumed> context) {
-        return Flux.just(new ResumeEvent(context.getServiceMediator().getDiscordClient(),
+        return Flux.just(new ResumeEvent(context.getServiceMediator().getClient(),
                 context.getDispatch().getTrace()));
     }
 
@@ -51,17 +51,17 @@ class LifecycleDispatchHandlers {
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
-                return Flux.just(new ConnectEvent(context.getServiceMediator().getDiscordClient()));
+                return Flux.just(new ConnectEvent(context.getServiceMediator().getClient()));
             case RETRY_STARTED:
-                return Flux.just(new ReconnectStartEvent(context.getServiceMediator().getDiscordClient()));
+                return Flux.just(new ReconnectStartEvent(context.getServiceMediator().getClient()));
             case RETRY_FAILED:
-                return Flux.just(new ReconnectFailEvent(context.getServiceMediator().getDiscordClient(),
+                return Flux.just(new ReconnectFailEvent(context.getServiceMediator().getClient(),
                         dispatch.getCurrentAttempt()));
             case RETRY_SUCCEEDED:
-                return Flux.just(new ReconnectEvent(context.getServiceMediator().getDiscordClient(),
+                return Flux.just(new ReconnectEvent(context.getServiceMediator().getClient(),
                         dispatch.getCurrentAttempt()));
             case DISCONNECTED:
-                return Flux.just(new DisconnectEvent(context.getServiceMediator().getDiscordClient()));
+                return Flux.just(new DisconnectEvent(context.getServiceMediator().getClient()));
         }
         return Flux.empty();
     }

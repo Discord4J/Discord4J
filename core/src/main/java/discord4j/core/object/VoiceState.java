@@ -54,7 +54,7 @@ public final class VoiceState implements DiscordObject {
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getDiscordClient();
+        return serviceMediator.getClient();
     }
 
     /**

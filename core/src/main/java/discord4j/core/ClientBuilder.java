@@ -23,9 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.payload.dispatch.Dispatch;
-import discord4j.core.event.DispatchContext;
-import discord4j.core.event.DispatchHandlers;
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.dispatch.DispatchContext;
+import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.IdentifyOptions;
@@ -113,7 +113,8 @@ public final class ClientBuilder {
         final EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
 
-        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, eventDispatcher, config);
+        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder,
+                eventDispatcher, config);
 
         serviceMediator.getGatewayClient().dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
