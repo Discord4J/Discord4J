@@ -22,12 +22,14 @@ import discord4j.core.object.Reaction;
 import discord4j.core.object.bean.ReactionBean;
 import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -265,6 +267,36 @@ public final class Message implements Entity {
      */
     public Type getType() {
         return Type.of(data.getType());
+    }
+
+    /**
+     * Requests to edit this message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #edit(MessageEditSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> edit(final Consumer<MessageEditSpec> spec) {
+        final MessageEditSpec mutatedSpec = new MessageEditSpec();
+        spec.accept(mutatedSpec);
+        return edit(mutatedSpec);
+    }
+
+    /**
+     * Requests to edit this message.
+     *
+     * @param spec A configured {@link MessageEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> edit(final MessageEditSpec spec) {
+        return serviceMediator.getRestClient().getChannelService()
+                .editMessage(getChannelId().asLong(), getId().asLong(), spec.asRequest())
+                .map(MessageBean::new)
+                .map(bean -> new Message(serviceMediator, bean));
     }
 
     /** Represents the various types of messages. */

@@ -25,7 +25,12 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.bean.RegionBean;
 import discord4j.core.object.entity.bean.BaseGuildBean;
 import discord4j.core.object.entity.bean.GuildBean;
+import discord4j.core.object.entity.bean.RoleBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.GuildEditSpec;
+import discord4j.core.spec.RoleCreateSpec;
+import discord4j.core.spec.TextChannelCreateSpec;
+import discord4j.core.spec.VoiceChannelCreateSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -34,6 +39,7 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -425,6 +431,128 @@ public final class Guild implements Entity {
                 // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
                 .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
                 .map(bean -> new Presence(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to edit this guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #edit(GuildEditSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> edit(final Consumer<GuildEditSpec> spec) {
+        final GuildEditSpec mutatedSpec = new GuildEditSpec();
+        spec.accept(mutatedSpec);
+        return edit(mutatedSpec);
+    }
+
+    /**
+     * Requests to edit this guild.
+     *
+     * @param spec A configured {@link GuildEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> edit(final GuildEditSpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .modifyGuild(getId().asLong(), spec.asRequest())
+                .map(BaseGuildBean::new)
+                .map(bean -> new Guild(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to create a role.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createRole(RoleCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> createRole(final Consumer<RoleCreateSpec> spec) {
+        final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
+        spec.accept(mutatedSpec);
+        return createRole(mutatedSpec);
+    }
+
+    /**
+     * Requests to create a role.
+     *
+     * @param spec A configured {@link RoleCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> createRole(final RoleCreateSpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .createGuildRole(getId().asLong(), spec.asRequest())
+                .map(RoleBean::new)
+                .map(bean -> new Role(serviceMediator, bean, getId().asLong()));
+    }
+
+    /**
+     * Requests to create a text channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createTextChannel(TextChannelCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> createTextChannel(final Consumer<TextChannelCreateSpec> spec) {
+        final TextChannelCreateSpec mutatedSpec = new TextChannelCreateSpec();
+        spec.accept(mutatedSpec);
+        return createTextChannel(mutatedSpec);
+    }
+
+    /**
+     * Requests to create a text channel.
+     *
+     * @param spec A configured {@link TextChannelCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> createTextChannel(final TextChannelCreateSpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .createGuildChannel(getId().asLong(), spec.asRequest())
+                .map(EntityUtil::getChannelBean)
+                .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
+                .cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to create a voice channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createVoiceChannel(VoiceChannelCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> createVoiceChannel(final Consumer<VoiceChannelCreateSpec> spec) {
+        final VoiceChannelCreateSpec mutatedSpec = new VoiceChannelCreateSpec();
+        spec.accept(mutatedSpec);
+        return createVoiceChannel(mutatedSpec);
+    }
+
+    /**
+     * Requests to create a voice channel.
+     *
+     * @param spec A configured {@link VoiceChannelCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> createVoiceChannel(final VoiceChannelCreateSpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .createGuildChannel(getId().asLong(), spec.asRequest())
+                .map(EntityUtil::getChannelBean)
+                .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
+                .cast(VoiceChannel.class);
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

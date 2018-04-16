@@ -18,13 +18,18 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.object.entity.bean.TextChannelBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.TextChannelEditSpec;
+import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /** A Discord text channel. */
 public final class TextChannel extends BaseChannel implements GuildChannel, MessageChannel {
@@ -128,5 +133,66 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
      */
     public String getMention() {
         return "<#" + getId().asString() + ">";
+    }
+
+    /**
+     * Requests to create a message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link MessageCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createMessage(MessageCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> createMessage(final Consumer<MessageCreateSpec> spec) {
+        final MessageCreateSpec mutatedSpec = new MessageCreateSpec();
+        spec.accept(mutatedSpec);
+        return createMessage(mutatedSpec);
+    }
+
+    /**
+     * Requests to create a message.
+     *
+     * @param spec A configured {@link MessageCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Message> createMessage(final MessageCreateSpec spec) {
+        return getServiceMediator().getRestClient().getChannelService()
+                .createMessage(getId().asLong(), spec.asRequest())
+                .map(MessageBean::new)
+                .map(bean -> new Message(getServiceMediator(), bean));
+    }
+
+    /**
+     * Requests to edit this text channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #edit(TextChannelEditSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> edit(final Consumer<TextChannelEditSpec> spec) {
+        final TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
+        spec.accept(mutatedSpec);
+        return edit(mutatedSpec);
+    }
+
+    /**
+     * Requests to edit this text channel.
+     *
+     * @param spec A configured {@link TextChannelEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> edit(final TextChannelEditSpec spec) {
+        return getServiceMediator().getRestClient().getChannelService()
+                .modifyChannel(getId().asLong(), spec.asRequest())
+                .map(EntityUtil::getChannelBean)
+                .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
+                .cast(TextChannel.class);
     }
 }

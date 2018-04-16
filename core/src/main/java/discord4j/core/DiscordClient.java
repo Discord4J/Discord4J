@@ -21,6 +21,7 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.util.LongLongTuple2;
@@ -28,6 +29,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /** A high-level abstraction of common Discord operations such as entity retrieval and Discord shard manipulation. */
 public final class DiscordClient {
@@ -280,6 +282,36 @@ public final class DiscordClient {
     /** Reconnects the client to the gateway. */
     public void reconnect() {
         serviceMediator.getGatewayClient().close(true);
+    }
+
+    /**
+     * Requests to create a guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createGuild(GuildCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> createGuild(final Consumer<GuildCreateSpec> spec) {
+        final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
+        spec.accept(mutatedSpec);
+        return createGuild(mutatedSpec);
+    }
+
+    /**
+     * Requests to create a guild.
+     *
+     * @param spec A configured {@link GuildCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> createGuild(final GuildCreateSpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .createGuild(spec.asRequest())
+                .map(BaseGuildBean::new)
+                .map(bean -> new Guild(serviceMediator, bean));
     }
 
     /**

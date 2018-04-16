@@ -20,12 +20,14 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.GuildEmojiBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.GuildEmojiEditSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -151,5 +153,35 @@ public final class GuildEmoji implements Entity {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Requests to edit this guild emoji.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiEditSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #edit(GuildEmojiEditSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildEmoji}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildEmoji> edit(final Consumer<GuildEmojiEditSpec> spec) {
+        final GuildEmojiEditSpec mutatedSpec = new GuildEmojiEditSpec();
+        spec.accept(mutatedSpec);
+        return edit(mutatedSpec);
+    }
+
+    /**
+     * Requests to edit this guild emoji.
+     *
+     * @param spec A configured {@link GuildEmojiEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildEmoji}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildEmoji> edit(final GuildEmojiEditSpec spec) {
+        return serviceMediator.getRestClient().getEmojiService()
+                .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), spec.asRequest())
+                .map(GuildEmojiBean::new)
+                .map(bean -> new GuildEmoji(serviceMediator, bean, getGuildId().asLong()));
     }
 }

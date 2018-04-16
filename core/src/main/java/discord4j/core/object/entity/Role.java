@@ -19,13 +19,15 @@ package discord4j.core.object.entity;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.RoleBean;
+import discord4j.core.object.trait.Positionable;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.object.trait.Positionable;
+import discord4j.core.spec.RoleEditSpec;
 import reactor.core.publisher.Mono;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * A Discord role.
@@ -152,5 +154,35 @@ public final class Role implements Entity, Positionable {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.getId());
+    }
+
+    /**
+     * Requests to edit this role.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link RoleEditSpec} to be operated on. If some properties
+     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
+     * the spec externally and call {@link #edit(RoleEditSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> edit(final Consumer<RoleEditSpec> spec) {
+        final RoleEditSpec mutatedSpec = new RoleEditSpec();
+        spec.accept(mutatedSpec);
+        return edit(mutatedSpec);
+    }
+
+    /**
+     * Requests to edit this role.
+     *
+     * @param spec A configured {@link RoleEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> edit(final RoleEditSpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .modifyGuildRole(getGuildId().asLong(), getId().asLong(), spec.asRequest())
+                .map(RoleBean::new)
+                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
     }
 }
