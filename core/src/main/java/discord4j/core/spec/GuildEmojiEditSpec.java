@@ -39,6 +39,6 @@ public class GuildEmojiEditSpec implements Spec<GuildEmojiModifyRequest> {
 
     @Override
     public GuildEmojiModifyRequest asRequest() {
-        return null;
+        return new GuildEmojiModifyRequest(name, roles);
     }
 }

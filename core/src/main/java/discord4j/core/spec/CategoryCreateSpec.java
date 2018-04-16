@@ -19,50 +19,27 @@ package discord4j.core.spec;
 import discord4j.common.json.OverwriteEntity;
 import discord4j.common.json.request.ChannelCreateRequest;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.Category;
 import discord4j.core.object.entity.Channel;
-import discord4j.core.object.util.Snowflake;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
-public class TextChannelCreateSpec implements Spec<ChannelCreateRequest> {
+public class CategoryCreateSpec implements Spec<ChannelCreateRequest> {
 
     private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_TEXT.getValue());
+            .type(Channel.Type.GUILD_CATEGORY.getValue());
 
-    public TextChannelCreateSpec setName(String name) {
+    public CategoryCreateSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
-    public TextChannelCreateSpec setTopic(@Nullable String topic) {
-        requestBuilder.topic(topic);
-        return this;
-    }
-
-    public TextChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public CategoryCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
                         o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
 
         requestBuilder.permissionOverwrites(raw);
-        return this;
-    }
-
-    public TextChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
-        return this;
-    }
-
-    public TextChannelCreateSpec setParent(@Nullable Category parent) {
-        setParentId(parent == null ? null : parent.getId());
-        return this;
-    }
-
-    public TextChannelCreateSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
         return this;
     }
 

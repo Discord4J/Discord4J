@@ -17,31 +17,26 @@
 package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
-import discord4j.common.json.request.ChannelCreateRequest;
+import discord4j.common.json.request.ChannelModifyRequest;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.Category;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.util.Snowflake;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
-public class TextChannelCreateSpec implements Spec<ChannelCreateRequest> {
+public class CategoryEditSpec implements Spec<ChannelModifyRequest> {
 
-    private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_TEXT.getValue());
+    private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
 
-    public TextChannelCreateSpec setName(String name) {
+    public CategoryEditSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
-    public TextChannelCreateSpec setTopic(@Nullable String topic) {
-        requestBuilder.topic(topic);
+    public CategoryEditSpec setPosition(int position) {
+        requestBuilder.position(position);
         return this;
     }
 
-    public TextChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public CategoryEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
                         o.getDenied().getRawValue()))
@@ -51,23 +46,8 @@ public class TextChannelCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
-    public TextChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
-        return this;
-    }
-
-    public TextChannelCreateSpec setParent(@Nullable Category parent) {
-        setParentId(parent == null ? null : parent.getId());
-        return this;
-    }
-
-    public TextChannelCreateSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
-        return this;
-    }
-
     @Override
-    public ChannelCreateRequest asRequest() {
+    public ChannelModifyRequest asRequest() {
         return requestBuilder.build();
     }
 }

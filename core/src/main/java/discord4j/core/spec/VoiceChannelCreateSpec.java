@@ -36,6 +36,16 @@ public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
+    public VoiceChannelCreateSpec setBitrate(int bitrate) {
+        requestBuilder.bitrate(bitrate);
+        return this;
+    }
+
+    public VoiceChannelCreateSpec setUserLimit(int userLimit) {
+        requestBuilder.userLimit(userLimit);
+        return this;
+    }
+
     public VoiceChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
@@ -53,21 +63,6 @@ public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
 
     public VoiceChannelCreateSpec setParent(@Nullable Category parent) {
         setParentId(parent == null ? null : parent.getId());
-        return this;
-    }
-
-    public VoiceChannelCreateSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
-        return this;
-    }
-
-    public VoiceChannelCreateSpec setBitrate(int bitrate) {
-        requestBuilder.bitrate(bitrate);
-        return this;
-    }
-
-    public VoiceChannelCreateSpec setUserLimit(int userLimit) {
-        requestBuilder.userLimit(userLimit);
         return this;
     }
 

@@ -30,6 +30,7 @@ public class ChannelCreateRequest {
 
     private final String name;
     private final Possible<Integer> type;
+    private final Possible<String> topic;
     private final Possible<Integer> bitrate;
     @JsonProperty("user_limit")
     private final Possible<Integer> userLimit;
@@ -41,13 +42,13 @@ public class ChannelCreateRequest {
     private final PossibleLong parentId;
     private final Possible<Boolean> nsfw;
 
-    public ChannelCreateRequest(String name, Possible<Integer> type,
+    public ChannelCreateRequest(String name, Possible<Integer> type, @Nullable Possible<String> topic,
                                 Possible<Integer> bitrate, Possible<Integer> userLimit,
-                                Possible<OverwriteEntity[]> permissionOverwrites,
-                                @Nullable PossibleLong parentId,
+                                Possible<OverwriteEntity[]> permissionOverwrites, @Nullable PossibleLong parentId,
                                 Possible<Boolean> nsfw) {
         this.name = name;
         this.type = type;
+        this.topic = topic;
         this.bitrate = bitrate;
         this.userLimit = userLimit;
         this.permissionOverwrites = permissionOverwrites;
@@ -63,11 +64,12 @@ public class ChannelCreateRequest {
 
         private String name;
         private Possible<Integer> type = Possible.absent();
+        @Nullable
+        private Possible<String> topic = Possible.absent();
         private Possible<Integer> bitrate = Possible.absent();
         private Possible<Integer> userLimit = Possible.absent();
         private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
         private PossibleLong parentId = PossibleLong.absent();
-        @Nullable
         private Possible<Boolean> nsfw = Possible.absent();
 
         public Builder name(String name) {
@@ -77,6 +79,11 @@ public class ChannelCreateRequest {
 
         public Builder type(int type) {
             this.type = Possible.of(type);
+            return this;
+        }
+
+        public Builder topic(@Nullable String topic) {
+            this.topic = topic == null ? null : Possible.of(topic);
             return this;
         }
 
@@ -106,20 +113,22 @@ public class ChannelCreateRequest {
         }
 
         public ChannelCreateRequest build() {
-            return new ChannelCreateRequest(name, type, bitrate, userLimit, permissionOverwrites, parentId, nsfw);
+            return new ChannelCreateRequest(name, type, topic, bitrate, userLimit, permissionOverwrites, parentId,
+                    nsfw);
         }
     }
 
     @Override
     public String toString() {
-        return "ChannelCreateRequest[" +
-                "name=" + name +
+        return "ChannelCreateRequest{" +
+                "name='" + name + '\'' +
                 ", type=" + type +
+                ", topic=" + topic +
                 ", bitrate=" + bitrate +
                 ", userLimit=" + userLimit +
                 ", permissionOverwrites=" + permissionOverwrites +
                 ", parentId=" + parentId +
                 ", nsfw=" + nsfw +
-                ']';
+                '}';
     }
 }

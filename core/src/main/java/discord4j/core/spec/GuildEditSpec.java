@@ -29,48 +29,57 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
 
     private final GuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
 
-    public void setName(String name) {
+    public GuildEditSpec setName(String name) {
         requestBuilder.name(name);
+        return this;
     }
 
-    public void setRegion(Region region) {
+    public GuildEditSpec setRegion(Region region) {
         requestBuilder.region(region.getId());
+        return this;
     }
 
-    public void setVerificationLevel(Guild.VerificationLevel verificationLevel) {
+    public GuildEditSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
         requestBuilder.verificationLevel(verificationLevel.getValue());
+        return this;
     }
 
-    public void setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
+    public GuildEditSpec setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
         requestBuilder.defaultMessageNoficiations(notificationsLevel.getValue());
+        return this;
     }
 
-    public void setAfkChannelId(@Nullable Snowflake afkChannelId) {
+    public GuildEditSpec setAfkChannelId(@Nullable Snowflake afkChannelId) {
         requestBuilder.afkChannelId(afkChannelId == null ? null : afkChannelId.asLong());
+        return this;
     }
 
-    public void setAfkChannel(@Nullable VoiceChannel afkChannel) {
-        setAfkChannelId(afkChannel == null ? null : afkChannel.getId());
+    public GuildEditSpec setAfkChannel(@Nullable VoiceChannel afkChannel) {
+        return setAfkChannelId(afkChannel == null ? null : afkChannel.getId());
     }
 
-    public void setAfkTimeout(int afkTimeout) {
+    public GuildEditSpec setAfkTimeout(int afkTimeout) {
         requestBuilder.afkTimeout(afkTimeout);
+        return this;
     }
 
-    public void setIcon(@Nullable String icon) { // TODO Icon class
+    public GuildEditSpec setIcon(@Nullable String icon) { // TODO Icon class
         requestBuilder.icon(icon);
+        return this;
     }
 
-    public void setOwnerId(Snowflake ownerId) {
+    public GuildEditSpec setOwnerId(Snowflake ownerId) {
         requestBuilder.ownerId(ownerId.asLong());
+        return this;
     }
 
-    public void setOwner(Member member) {
-        setOwnerId(member.getId());
+    public GuildEditSpec setOwner(Member member) {
+        return setOwnerId(member.getId());
     }
 
-    public void setSplash(@Nullable String splash) {
+    public GuildEditSpec setSplash(@Nullable String splash) {
         requestBuilder.splash(splash);
+        return this;
     }
 
     @Override

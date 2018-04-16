@@ -39,11 +39,6 @@ public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
-    public VoiceChannelEditSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
-        return this;
-    }
-
     public VoiceChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),

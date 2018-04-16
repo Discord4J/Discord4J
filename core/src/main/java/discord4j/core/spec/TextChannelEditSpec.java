@@ -39,6 +39,11 @@ public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
+    public TextChannelEditSpec setTopic(String topic) {
+        requestBuilder.topic(topic);
+        return this;
+    }
+
     public TextChannelEditSpec setNsfw(boolean nsfw) {
         requestBuilder.nsfw(nsfw);
         return this;
