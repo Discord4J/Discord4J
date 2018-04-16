@@ -14,33 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.spec;
+package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.json.request.EmbedRequest;
-import discord4j.common.json.request.MessageEditRequest;
+import discord4j.common.json.request.GuildEmojiModifyRequest;
+import discord4j.core.object.util.Snowflake;
 
-import javax.annotation.Nullable;
+import java.util.Set;
 
-public class MessageEditSpec implements Spec<MessageEditRequest> {
+public class GuildEmojiEditSpec implements Spec<GuildEmojiModifyRequest> {
 
-    @Nullable
-    private Possible<String> content = Possible.absent();
-    @Nullable
-    private Possible<EmbedRequest> embed = Possible.absent();
+    private Possible<String> name = Possible.absent();
+    private Possible<long[]> roles = Possible.absent();
 
-    public MessageEditSpec setContent(@Nullable String content) {
-        this.content = content == null ? null : Possible.of(content);
+    public GuildEmojiEditSpec setName(String name) {
+        this.name = Possible.of(name);
         return this;
     }
 
-    public MessageEditSpec setEmbed(@Nullable EmbedSpec embed) {
-        this.embed = embed == null ? null : Possible.of(embed.asRequest());
+    public GuildEmojiEditSpec setRoles(Set<Snowflake> roles) {
+        this.roles = Possible.of(roles.stream().mapToLong(Snowflake::asLong).toArray());
         return this;
     }
 
     @Override
-    public MessageEditRequest asRequest() {
-        return new MessageEditRequest(content, embed);
+    public GuildEmojiModifyRequest asRequest() {
+        return null;
     }
 }

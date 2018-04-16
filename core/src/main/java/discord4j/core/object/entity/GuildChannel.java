@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.trait.Positionable;
+import discord4j.core.object.trait.Positionable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.spec;
+package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.common.json.request.ChannelCreateRequest;

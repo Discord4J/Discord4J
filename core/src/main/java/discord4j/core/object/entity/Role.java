@@ -21,7 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.RoleBean;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.trait.Positionable;
+import discord4j.core.object.trait.Positionable;
 import reactor.core.publisher.Mono;
 
 import java.awt.*;

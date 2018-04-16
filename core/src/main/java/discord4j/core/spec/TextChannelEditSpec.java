@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.spec;
+package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.common.json.request.ChannelModifyRequest;
@@ -25,26 +25,26 @@ import discord4j.core.object.util.Snowflake;
 import javax.annotation.Nullable;
 import java.util.Set;
 
-public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
+public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
 
     private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
 
-    public VoiceChannelEditSpec setName(String name) {
+    public TextChannelEditSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
-    public VoiceChannelEditSpec setPosition(int position) {
+    public TextChannelEditSpec setPosition(int position) {
         requestBuilder.position(position);
         return this;
     }
 
-    public VoiceChannelEditSpec setNsfw(boolean nsfw) {
+    public TextChannelEditSpec setNsfw(boolean nsfw) {
         requestBuilder.nsfw(nsfw);
         return this;
     }
 
-    public VoiceChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public TextChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
                         o.getDenied().getRawValue()))
@@ -54,23 +54,13 @@ public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
-    public VoiceChannelEditSpec setParentId(@Nullable Snowflake parentId) {
+    public TextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
         requestBuilder.parentId(parentId == null ? null : parentId.asLong());
         return this;
     }
 
-    public VoiceChannelEditSpec setParent(@Nullable Category parent) {
+    public TextChannelEditSpec setParent(@Nullable Category parent) {
         return setParentId(parent == null ? null : parent.getId());
-    }
-
-    public VoiceChannelEditSpec setBitrate(int bitrate) {
-        requestBuilder.bitrate(bitrate);
-        return this;
-    }
-
-    public VoiceChannelEditSpec setUserLimit(int userLimit) {
-        requestBuilder.userLimit(userLimit);
-        return this;
     }
 
     @Override

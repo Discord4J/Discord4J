@@ -15,6 +15,6 @@
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 @NonNullApi
-package discord4j.core.object.spec;
+package discord4j.core.spec;
 
 import reactor.util.annotation.NonNullApi;

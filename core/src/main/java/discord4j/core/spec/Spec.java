@@ -14,7 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-@NonNullApi
-package discord4j.core.trait;
+package discord4j.core.spec;
 
-import reactor.util.annotation.NonNullApi;
+public interface Spec<T> {
+
+    T asRequest();
+}

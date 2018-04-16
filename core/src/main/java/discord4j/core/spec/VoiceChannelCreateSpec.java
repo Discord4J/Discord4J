@@ -14,37 +14,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.spec;
+package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
-import discord4j.common.json.request.ChannelModifyRequest;
+import discord4j.common.json.request.ChannelCreateRequest;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Category;
+import discord4j.core.object.entity.Channel;
 import discord4j.core.object.util.Snowflake;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
-public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
+public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
 
-    private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
+    private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
+            .type(Channel.Type.GUILD_VOICE.getValue());
 
-    public TextChannelEditSpec setName(String name) {
+    public VoiceChannelCreateSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
-    public TextChannelEditSpec setPosition(int position) {
-        requestBuilder.position(position);
-        return this;
-    }
-
-    public TextChannelEditSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
-        return this;
-    }
-
-    public TextChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public VoiceChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
                         o.getDenied().getRawValue()))
@@ -54,17 +46,33 @@ public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
-    public TextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
+    public VoiceChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
         requestBuilder.parentId(parentId == null ? null : parentId.asLong());
         return this;
     }
 
-    public TextChannelEditSpec setParent(@Nullable Category parent) {
-        return setParentId(parent == null ? null : parent.getId());
+    public VoiceChannelCreateSpec setParent(@Nullable Category parent) {
+        setParentId(parent == null ? null : parent.getId());
+        return this;
+    }
+
+    public VoiceChannelCreateSpec setNsfw(boolean nsfw) {
+        requestBuilder.nsfw(nsfw);
+        return this;
+    }
+
+    public VoiceChannelCreateSpec setBitrate(int bitrate) {
+        requestBuilder.bitrate(bitrate);
+        return this;
+    }
+
+    public VoiceChannelCreateSpec setUserLimit(int userLimit) {
+        requestBuilder.userLimit(userLimit);
+        return this;
     }
 
     @Override
-    public ChannelModifyRequest asRequest() {
+    public ChannelCreateRequest asRequest() {
         return requestBuilder.build();
     }
 }
