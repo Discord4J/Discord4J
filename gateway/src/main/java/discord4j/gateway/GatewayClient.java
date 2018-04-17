@@ -177,11 +177,11 @@ public class GatewayClient {
     }
 
     private Retry<RetryContext> retryFactory() {
-        // TODO add retryMax + RetryOptions field
         return Retry.<RetryContext>onlyIf(context -> ABNORMAL_ERROR.test(context.exception()))
                 .withApplicationContext(retryOptions.getRetryContext())
                 .backoff(retryOptions.getBackoff())
                 .jitter(retryOptions.getJitter())
+                .retryMax(retryOptions.getMaxRetries())
                 .doOnRetry(context -> {
                     int attempt = context.applicationContext().getAttempts();
                     long backoff = context.backoff().toMillis();

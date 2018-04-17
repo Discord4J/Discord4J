@@ -77,4 +77,13 @@ public class RetryOptions {
     public Jitter getJitter() {
         return Jitter.random();
     }
+
+    /**
+     * Returns the number of retries.
+     *
+     * @return number of retries
+     */
+    public int getMaxRetries() {
+        return Integer.MAX_VALUE;
+    }
 }
