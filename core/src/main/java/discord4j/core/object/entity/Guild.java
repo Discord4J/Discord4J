@@ -25,12 +25,10 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.bean.RegionBean;
 import discord4j.core.object.entity.bean.BaseGuildBean;
 import discord4j.core.object.entity.bean.GuildBean;
+import discord4j.core.object.entity.bean.GuildEmojiBean;
 import discord4j.core.object.entity.bean.RoleBean;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.spec.GuildEditSpec;
-import discord4j.core.spec.RoleCreateSpec;
-import discord4j.core.spec.TextChannelCreateSpec;
-import discord4j.core.spec.VoiceChannelCreateSpec;
+import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -464,6 +462,36 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create an emoji.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createEmoji(GuildEmojiCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildEmoji> createEmoji(final Consumer<GuildEmojiCreateSpec> spec) {
+        final GuildEmojiCreateSpec mutatedSpec = new GuildEmojiCreateSpec();
+        spec.accept(mutatedSpec);
+        return createEmoji(mutatedSpec);
+    }
+
+    /**
+     * Requests to create an emoji.
+     *
+     * @param spec A configured {@link GuildEmojiCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildEmoji> createEmoji(final GuildEmojiCreateSpec spec) {
+        return serviceMediator.getRestClient().getEmojiService()
+                .createGuildEmoji(getId().asLong(), spec.asRequest())
+                .map(GuildEmojiBean::new)
+                .map(bean -> new GuildEmoji(serviceMediator, bean, getId().asLong()));
+    }
+
+    /**
      * Requests to create a role.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on. If some
@@ -491,6 +519,37 @@ public final class Guild implements Entity {
                 .createGuildRole(getId().asLong(), spec.asRequest())
                 .map(RoleBean::new)
                 .map(bean -> new Role(serviceMediator, bean, getId().asLong()));
+    }
+
+    /**
+     * Requests to create a category.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createCategory(CategoryCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Category> createCategory(final Consumer<CategoryCreateSpec> spec) {
+        final CategoryCreateSpec mutatedSpec = new CategoryCreateSpec();
+        spec.accept(mutatedSpec);
+        return createCategory(mutatedSpec);
+    }
+
+    /**
+     * Requests to create a category.
+     *
+     * @param spec A configured {@link CategoryCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Category> createCategory(final CategoryCreateSpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .createGuildChannel(getId().asLong(), spec.asRequest())
+                .map(EntityUtil::getChannelBean)
+                .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
+                .cast(Category.class);
     }
 
     /**
