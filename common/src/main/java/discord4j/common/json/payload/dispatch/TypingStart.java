@@ -24,6 +24,9 @@ public class TypingStart implements Dispatch {
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
     @JsonProperty("user_id")
     @UnsignedJson
     private long userId;
@@ -31,6 +34,10 @@ public class TypingStart implements Dispatch {
 
     public long getChannelId() {
         return channelId;
+    }
+
+    public long getGuildId() {
+        return guildId;
     }
 
     public long getUserId() {
@@ -45,6 +52,7 @@ public class TypingStart implements Dispatch {
     public String toString() {
         return "TypingStart[" +
                 "channelId=" + channelId +
+                ", guildId=" + guildId +
                 ", userId=" + userId +
                 ", timestamp=" + timestamp +
                 ']';

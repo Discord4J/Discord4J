@@ -26,6 +26,9 @@ public class MessageDelete implements Dispatch {
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
 
     public long getId() {
         return id;
@@ -35,11 +38,16 @@ public class MessageDelete implements Dispatch {
         return channelId;
     }
 
+    public long getGuildId() {
+        return guildId;
+    }
+
     @Override
     public String toString() {
         return "MessageDelete[" +
                 "id=" + id +
                 ", channelId=" + channelId +
+                ", guildId=" + guildId +
                 ']';
     }
 }

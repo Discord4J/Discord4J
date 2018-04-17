@@ -28,6 +28,9 @@ public class MessageReactionAdd implements Dispatch {
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
     @JsonProperty("message_id")
     @UnsignedJson
     private long messageId;
@@ -39,6 +42,10 @@ public class MessageReactionAdd implements Dispatch {
 
     public long getChannelId() {
         return channelId;
+    }
+
+    public long getGuildId() {
+        return guildId;
     }
 
     public long getMessageId() {
@@ -54,6 +61,7 @@ public class MessageReactionAdd implements Dispatch {
         return "MessageReactionAdd[" +
                 "userId=" + userId +
                 ", channelId=" + channelId +
+                ", guildId=" + guildId +
                 ", messageId=" + messageId +
                 ", emoji=" + emoji +
                 ']';
