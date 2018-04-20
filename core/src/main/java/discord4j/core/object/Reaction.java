@@ -23,15 +23,14 @@ import discord4j.core.object.bean.ReactionBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.UserBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.LongFunction;
+import java.util.function.Function;
 
 /**
  * A Discord message reaction.
@@ -177,23 +176,12 @@ public final class Reaction implements DiscordObject {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getReactors() {
-        final LongFunction<Flux<UserResponse>> getNextPage = id -> {
-            final Map<String, Object> parameters = new HashMap<>(2);
-            parameters.put("limit", 100);
-            parameters.put("after", id);
+        Function<Map<String, Object>, Flux<UserResponse>> makeRequest = params ->
+                serviceMediator.getRestClient().getChannelService()
+                        .getReactions(getChannelId().asLong(), messageId, getEmojiName(), params);
 
-            return serviceMediator.getRestClient().getChannelService()
-                    .getReactions(getChannelId().asLong(), messageId, getEmojiName(), parameters);
-        };
-
-        final AtomicLong previousId = new AtomicLong(0L);
-
-        return Flux.defer(() -> getNextPage.apply(previousId.get())
-                .collectList()
-                .doOnNext(users -> previousId.set(users.isEmpty() ? 0L : users.get(users.size() - 1).getId()))
-                .flatMapMany(Flux::fromIterable)
+        return PaginationUtil.paginateAfter(makeRequest, UserResponse::getId, 0L, 100)
                 .map(UserBean::new)
-                .map(bean -> new User(serviceMediator, bean)))
-                .repeat(() -> previousId.get() != 0L);
+                .map(bean -> new User(serviceMediator, bean));
     }
 }
