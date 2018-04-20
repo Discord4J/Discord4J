@@ -30,12 +30,14 @@ public final class UserBean implements Serializable {
     private String discriminator;
     @Nullable
     private String avatar;
+    private boolean isBot;
 
     public UserBean(final UserResponse response) {
         id = response.getId();
         username = response.getUsername();
         discriminator = response.getDiscriminator();
         avatar = response.getAvatar();
+        isBot = response.isBot() != null && response.isBot();
     }
 
     public UserBean() {}
@@ -71,5 +73,13 @@ public final class UserBean implements Serializable {
 
     public void setAvatar(@Nullable final String avatar) {
         this.avatar = avatar;
+    }
+
+    public boolean isBot() {
+        return isBot;
+    }
+
+    public void setBot(boolean bot) {
+        isBot = bot;
     }
 }

@@ -84,6 +84,15 @@ public class User implements Entity {
     }
 
     /**
+     * Gets whether the user is a bot.
+     *
+     * @return {@code true} if this user is a bot, {@code false} otherwise.
+     */
+    public boolean isBot() {
+        return data.isBot();
+    }
+
+    /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another user (assuming the user
      * exists in context of the mention).
      *
