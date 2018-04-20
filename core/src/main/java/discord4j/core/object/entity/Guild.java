@@ -142,12 +142,20 @@ public final class Guild implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Region> getRegion() {
+        return getRegions().filter(response -> response.getId().equals(getRegionId())).single();
+    }
+
+    /**
+     * Requests to retrieve the voice regions for the guild.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link Region voice regions}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    public Flux<Region> getRegions() {
         return serviceMediator.getRestClient().getGuildService()
                 .getGuildVoiceRegions(getId().asLong())
-                .filter(response -> response.getId().equals(getRegionId()))
                 .map(RegionBean::new)
-                .map(bean -> new Region(serviceMediator, bean))
-                .single();
+                .map(bean -> new Region(serviceMediator, bean));
     }
 
     /**
@@ -615,6 +623,16 @@ public final class Guild implements Entity {
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(VoiceChannel.class);
+    }
+
+    /**
+     * Requests to delete this guild.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return serviceMediator.getRestClient().getGuildService().deleteGuild(getId().asLong());
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

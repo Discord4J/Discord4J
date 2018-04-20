@@ -299,6 +299,28 @@ public final class Message implements Entity {
                 .map(bean -> new Message(serviceMediator, bean));
     }
 
+    /**
+     * Requests to delete this message.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return serviceMediator.getRestClient().getChannelService()
+                .deleteMessage(getChannelId().asLong(), getId().asLong());
+    }
+
+    /**
+     * Requests to delete all the reactions on this message.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating all the reactions on this
+     * message has been deleted. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteAllReactions() {
+        return serviceMediator.getRestClient().getChannelService()
+                .deleteAllReactions(getChannelId().asLong(), getId().asLong());
+    }
+
     /** Represents the various types of messages. */
     public enum Type {
 

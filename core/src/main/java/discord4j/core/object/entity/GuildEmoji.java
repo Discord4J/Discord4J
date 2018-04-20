@@ -184,4 +184,15 @@ public final class GuildEmoji implements Entity {
                 .map(GuildEmojiBean::new)
                 .map(bean -> new GuildEmoji(serviceMediator, bean, getGuildId().asLong()));
     }
+
+    /**
+     * Requests to delete this emoji.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the emoji has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return serviceMediator.getRestClient().getEmojiService()
+                .deleteGuildEmoji(getGuildId().asLong(), getId().asLong());
+    }
 }

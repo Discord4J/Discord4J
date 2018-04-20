@@ -20,6 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.ChannelBean;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
@@ -56,6 +57,11 @@ class BaseChannel implements Channel {
     @Override
     public final Type getType() {
         return Type.of(data.getType());
+    }
+
+    @Override
+    public final Mono<Void> delete() {
+        return serviceMediator.getRestClient().getChannelService().deleteChannel(getId().asLong()).then();
     }
 
     /**

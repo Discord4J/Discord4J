@@ -19,10 +19,7 @@ package discord4j.core.object;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.PermissionOverwriteBean;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -47,17 +44,23 @@ public final class PermissionOverwrite implements DiscordObject {
     /** The ID of the guild associated to this overwrite. */
     private final long guildId;
 
+    /** The ID of the channel associated to this overwrite. */
+    private final long channelId;
+
     /**
      * Constructs a {@code PermissionOverwrite} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild associated to this overwrite.
+     * @param channelId The ID of the channel associated to this overwrite.
      */
-    public PermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data, final long guildId) {
+    public PermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data,
+                               final long guildId, final long channelId) {
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
+        this.channelId = channelId;
     }
 
     @Override
@@ -156,6 +159,35 @@ public final class PermissionOverwrite implements DiscordObject {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the ID of the channel associated to this overwrite.
+     *
+     * @return The ID of the channel associated to this overwrite.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
+    }
+
+    /**
+     * Requests to retrieve the channel associated to this overwrite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel} associated to this
+     * overwrite. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildChannel> getChannel() {
+        return getClient().getGuildChannelById(getChannelId());
+    }
+
+    /**
+     * Requests to delete this permission overwrite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the permission overwrite has
+     * been deleted. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return serviceMediator.getRestClient().getChannelService().deleteChannelPermission(channelId, getId().asLong());
     }
 
     /** The type of entity a {@link PermissionOverwrite} is explicitly for. */

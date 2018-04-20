@@ -187,4 +187,15 @@ public final class Role implements Entity {
                 .map(RoleBean::new)
                 .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
     }
+
+    /**
+     * Requests to delete this role.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role has been deleted. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return serviceMediator.getRestClient().getGuildService()
+                .deleteGuildRole(getGuildId().asLong(), getId().asLong());
+    }
 }

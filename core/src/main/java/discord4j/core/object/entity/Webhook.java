@@ -142,4 +142,14 @@ public final class Webhook implements Entity {
     public String getToken() {
         return data.getToken();
     }
+
+    /**
+     * Requests to delete this webhook.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return serviceMediator.getRestClient().getWebhookService().deleteWebhook(getId().asLong());
+    }
 }

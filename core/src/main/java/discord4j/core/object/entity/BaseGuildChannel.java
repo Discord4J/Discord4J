@@ -56,7 +56,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public final Set<PermissionOverwrite> getPermissionOverwrites() {
         final PermissionOverwriteBean[] permissionOverwrites = getData().getPermissionOverwrites();
         return (permissionOverwrites == null) ? Collections.emptySet() : Arrays.stream(permissionOverwrites)
-                .map(bean -> new PermissionOverwrite(getServiceMediator(), bean, getGuildId().asLong()))
+                .map(bean -> new PermissionOverwrite(getServiceMediator(), bean, getGuildId().asLong(), getId().asLong()))
                 .collect(Collectors.toSet());
     }
 

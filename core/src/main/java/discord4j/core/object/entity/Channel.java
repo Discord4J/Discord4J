@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.util.EntityUtil;
+import reactor.core.publisher.Mono;
 
 /**
  * A Discord channel.
@@ -31,6 +32,14 @@ public interface Channel extends Entity {
      * @return The type of channel.
      */
     Type getType();
+
+    /**
+     * Requests to delete this channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Void> delete();
 
     /** Represents the various types of channels. */
     enum Type {

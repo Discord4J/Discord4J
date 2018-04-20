@@ -196,4 +196,27 @@ public final class Reaction implements DiscordObject {
                 .map(bean -> new User(serviceMediator, bean)))
                 .repeat(() -> previousId.get() != 0L);
     }
+
+    /**
+     * Requests to delete the reaction by the specified user.
+     *
+     * @param userId The ID of the specified user to delete the reaction by.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction by the specified
+     * user has been deleted. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete(final Snowflake userId) {
+        return serviceMediator.getRestClient().getChannelService()
+                .deleteReaction(channelId, messageId, getEmojiName(), userId.asLong());
+    }
+
+    /**
+     * Requests to delete the reaction by the specified user.
+     *
+     * @param user The specified user to delete the reaction by.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction by the specified
+     * user has been deleted. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete(final User user) {
+        return delete(user.getId());
+    }
 }
