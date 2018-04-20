@@ -76,12 +76,17 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     }
 
     @Override
-    protected GuildChannelBean getData() {
-        return (GuildChannelBean) super.getData();
+    public int getRawPosition() {
+        return getData().getPosition();
     }
 
     @Override
     public final Mono<Integer> getPosition() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getGuild().flatMapMany(Guild::getChannels).collectList().map(list -> list.indexOf(this));
+    }
+
+    @Override
+    protected GuildChannelBean getData() {
+        return (GuildChannelBean) super.getData();
     }
 }

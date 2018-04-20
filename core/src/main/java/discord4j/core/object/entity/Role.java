@@ -19,7 +19,6 @@ package discord4j.core.object.entity;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.RoleBean;
-import discord4j.core.object.trait.Positionable;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
@@ -34,7 +33,7 @@ import java.util.function.Consumer;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
-public final class Role implements Entity, Positionable {
+public final class Role implements Entity {
 
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
@@ -63,9 +62,12 @@ public final class Role implements Entity, Positionable {
         return serviceMediator.getClient();
     }
 
-    @Override
+    public int getRawPosition() {
+        return data.getPosition();
+    }
+
     public Mono<Integer> getPosition() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return getGuild().flatMapMany(Guild::getRoles).collectList().map(list -> list.indexOf(this));
     }
 
     /**

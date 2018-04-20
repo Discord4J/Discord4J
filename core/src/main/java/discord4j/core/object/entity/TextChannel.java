@@ -83,6 +83,11 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     }
 
     @Override
+    public int getRawPosition() {
+        return guildChannel.getRawPosition();
+    }
+
+    @Override
     public Mono<Integer> getPosition() {
         return guildChannel.getPosition();
     }

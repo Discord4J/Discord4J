@@ -26,7 +26,7 @@ import java.time.Instant;
  *
  * @see <a href="https://discordapp.com/developers/docs/reference#snowflake-ids">Snowflake IDs</a>
  */
-public final class Snowflake {
+public final class Snowflake implements Comparable<Snowflake> {
 
     /**
      * Constructs a {@code Snowflake} utilizing an <i>unsigned</i> ID.
@@ -97,6 +97,19 @@ public final class Snowflake {
      */
     public Instant getTimestamp() {
         return Instant.ofEpochMilli(EntityUtil.DISCORD_EPOCH + (id >>> 22));
+    }
+
+    /**
+     * Compares this snowflake to the specified snowflake.
+     * <p>
+     * The comparison is based on the timestamp portion of the snowflakes.
+     *
+     * @param other The other snowflake to compare to.
+     * @return The comparator value.
+     */
+    @Override
+    public int compareTo(Snowflake other) {
+        return Long.signum((id >>> 22) - (other.id >>> 22));
     }
 
     /**

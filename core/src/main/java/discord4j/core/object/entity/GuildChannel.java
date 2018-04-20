@@ -17,7 +17,6 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.trait.Positionable;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
-public interface GuildChannel extends Channel, Positionable {
+public interface GuildChannel extends Channel {
 
     /**
      * Gets the ID of the guild this channel is associated to.
@@ -70,4 +69,20 @@ public interface GuildChannel extends Channel, Positionable {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Category> getCategory();
+
+    /**
+     * Gets the raw position of the channel as exposed by Discord. This may or may not be accurate with relativity to
+     * other channels in the guild.
+     *
+     * @return The raw position of the channel.
+     */
+    int getRawPosition();
+
+    /**
+     * Requests to retrieve the position of the channel relative to other channels in the guild.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the position of the channel. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    Mono<Integer> getPosition();
 }

@@ -242,7 +242,9 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getId(), id));
+        return Flux.fromIterable(getRoleIds())
+                .flatMap(id -> getClient().getRoleById(getId(), id))
+                .sort(Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
     }
 
     /**
@@ -415,7 +417,8 @@ public final class Guild implements Entity {
                         .getGuildChannels(getId().asLong())
                         .map(EntityUtil::getChannelBean)
                         .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                        .cast(GuildChannel.class));
+                        .cast(GuildChannel.class))
+                .sort(Comparator.comparing(GuildChannel::getRawPosition).thenComparing(GuildChannel::getId));
     }
 
     /**
