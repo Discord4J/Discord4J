@@ -24,52 +24,57 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmbedSpec implements Spec<EmbedRequest> {
+public class EmbedCreateSpec implements Spec<EmbedRequest> {
 
     private final EmbedRequest.Builder requestBuilder = EmbedRequest.builder();
     private final List<EmbedFieldEntity> fields = new ArrayList<>();
 
-    public EmbedSpec setTitle(String title) {
+    public EmbedCreateSpec setTitle(String title) {
         requestBuilder.title(title);
         return this;
     }
 
-    public EmbedSpec setDescription(String description) {
+    public EmbedCreateSpec setDescription(String description) {
         requestBuilder.description(description);
         return this;
     }
 
-    public EmbedSpec setUrl(String url) {
+    public EmbedCreateSpec setUrl(String url) {
         requestBuilder.url(url);
         return this;
     }
 
-    public EmbedSpec setTimestamp(Instant timestamp) {
+    public EmbedCreateSpec setTimestamp(Instant timestamp) {
         requestBuilder.timestamp(DateTimeFormatter.ISO_INSTANT.format(timestamp));
         return this;
     }
 
-    public EmbedSpec setFooter(String text, String iconUrl) {
+    public EmbedCreateSpec setColor(final int color) {
+        requestBuilder.color(color);
+        return this;
+    }
+
+    public EmbedCreateSpec setFooter(String text, String iconUrl) {
         requestBuilder.footer(new EmbedFooterRequest(text, iconUrl));
         return this;
     }
 
-    public EmbedSpec setImage(String url) {
+    public EmbedCreateSpec setImage(String url) {
         requestBuilder.image(new EmbedImageRequest(url));
         return this;
     }
 
-    public EmbedSpec setThumbnail(String url) {
+    public EmbedCreateSpec setThumbnail(String url) {
         requestBuilder.thumbnail(new EmbedThumbnailRequest(url));
         return this;
     }
 
-    public EmbedSpec setAuthor(String name, String url, String iconUrl) {
+    public EmbedCreateSpec setAuthor(String name, String url, String iconUrl) {
         requestBuilder.author(new EmbedAuthorRequest(name, url, iconUrl));
         return this;
     }
 
-    public EmbedSpec addField(String name, String value, boolean inline) {
+    public EmbedCreateSpec addField(String name, String value, boolean inline) {
         this.fields.add(new EmbedFieldEntity(name, value, inline));
         return this;
     }

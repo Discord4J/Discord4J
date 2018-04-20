@@ -38,17 +38,17 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public Optional<Snowflake> getLastMessageId() {
+    public final Optional<Snowflake> getLastMessageId() {
         return Optional.ofNullable(getData().getLastMessageId()).map(Snowflake::of);
     }
 
     @Override
-    public Mono<Message> getLastMessage() {
+    public final Mono<Message> getLastMessage() {
         return Mono.justOrEmpty(getLastMessageId()).flatMap(id -> getClient().getMessageById(getId(), id));
     }
 
     @Override
-    public Optional<Instant> getLastPinTimestamp() {
+    public final Optional<Instant> getLastPinTimestamp() {
         return Optional.ofNullable(getData().getLastPinTimestamp()).map(Instant::parse);
     }
 

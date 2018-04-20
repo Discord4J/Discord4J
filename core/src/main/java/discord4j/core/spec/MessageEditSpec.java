@@ -34,7 +34,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
         return this;
     }
 
-    public MessageEditSpec setEmbed(@Nullable EmbedSpec embed) {
+    public MessageEditSpec setEmbed(@Nullable EmbedCreateSpec embed) {
         this.embed = embed == null ? null : Possible.of(embed.asRequest());
         return this;
     }
