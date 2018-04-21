@@ -23,22 +23,20 @@ import discord4j.core.object.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.bean.RegionBean;
-import discord4j.core.object.entity.bean.BaseGuildBean;
-import discord4j.core.object.entity.bean.GuildBean;
-import discord4j.core.object.entity.bean.GuildEmojiBean;
-import discord4j.core.object.entity.bean.RoleBean;
+import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.PaginationUtil;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.function.LongFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -384,19 +382,22 @@ public final class Guild implements Entity {
      * it is emitted through the {@code Flux}.
      */
     public Flux<Member> getMembers() {
-        final LongFunction<Flux<GuildMemberResponse>> getNextPage = id -> {
-            final Map<String, Object> parameters = new HashMap<>(2);
-            parameters.put("limit", 1000);
-            parameters.put("after", id);
+        Function<Map<String, Object>, Flux<GuildMemberResponse>> doRequest = params ->
+                serviceMediator.getRestClient().getGuildService().getGuildMembers(getId().asLong(), params);
 
-            return serviceMediator.getRestClient().getGuildService()
-                    .getGuildMembers(getId().asLong(), parameters);
-        };
+        Flux<Member> requestMembers =
+                PaginationUtil.paginateAfter(doRequest, response -> response.getUser().getId(), 0, 100)
+                        .map(response -> Tuples.of(new MemberBean(response), new UserBean(response.getUser())))
+                        .map(tuple -> new Member(serviceMediator, tuple.getT1(), tuple.getT2(), getId().asLong()));
 
-        final AtomicLong previousId = new AtomicLong(0L);
-
-        // TODO Efficiently be able to grab members in chunks either from store or REST
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return Mono.justOrEmpty(getGatewayData())
+                .map(GuildBean::getMembers)
+                .map(Arrays::stream)
+                .map(LongStream::boxed)
+                .flatMapMany(Flux::fromStream)
+                .map(Snowflake::of)
+                .flatMap(memberId -> getClient().getMemberById(getId(), memberId))
+                .switchIfEmpty(requestMembers);
     }
 
     /**
