@@ -28,7 +28,6 @@ import java.util.Arrays;
 @PossibleJson
 public class PresenceUpdate implements Dispatch {
 
-    @Nullable
     private UserResponse user;
     @Nullable
     @UnsignedJson
@@ -42,7 +41,6 @@ public class PresenceUpdate implements Dispatch {
     @Nullable
     private String nick;
 
-    @Nullable
     public UserResponse getUser() {
         return user;
     }

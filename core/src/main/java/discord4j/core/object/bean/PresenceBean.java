@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.bean;
 
+import discord4j.common.json.payload.dispatch.PresenceUpdate;
 import discord4j.common.json.response.GameResponse;
 import discord4j.common.json.response.PresenceResponse;
 
@@ -40,6 +41,14 @@ public final class PresenceBean implements Serializable {
         activity = (game == null) ? null : new ActivityBean(game);
         guildId = response.getGuildId();
         status = response.getStatus();
+    }
+
+    public PresenceBean(final PresenceUpdate update) {
+        userId = update.getUser().getId();
+        final GameResponse game = update.getGame();
+        activity = (game == null) ? null : new ActivityBean(game);
+        guildId = update.getGuildId();
+        status = update.getStatus();
     }
 
     public PresenceBean() {}

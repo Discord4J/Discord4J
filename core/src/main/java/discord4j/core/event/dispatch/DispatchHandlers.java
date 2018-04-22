@@ -18,10 +18,19 @@ package discord4j.core.event.dispatch;
 
 import discord4j.common.json.payload.dispatch.*;
 import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.Event;
+import discord4j.core.ServiceMediator;
+import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
+import discord4j.core.object.Presence;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.bean.PresenceBean;
+import discord4j.core.object.bean.VoiceStateBean;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.bean.UserBean;
 import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -96,9 +105,24 @@ public abstract class DispatchHandlers {
         return entry.handle(context);
     }
 
-    private static Flux<Event> presenceUpdate(DispatchContext<PresenceUpdate> context) {
-        // TODO
-        return Flux.empty();
+    private static Flux<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
+        ServiceMediator serviceMediator = context.getServiceMediator();
+        DiscordClient client = serviceMediator.getClient();
+
+        long guildId = context.getDispatch().getGuildId();
+        long userId = context.getDispatch().getUser().getId();
+        LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
+        PresenceBean bean = new PresenceBean(context.getDispatch());
+        Presence current = new Presence(serviceMediator, bean);
+
+        Mono<Void> saveNew = serviceMediator.getStoreHolder().getPresenceStore().save(key, bean);
+
+        return serviceMediator.getStoreHolder().getPresenceStore()
+                .find(key)
+                .flatMap(saveNew::thenReturn)
+                .map(old -> new PresenceUpdateEvent(client, current, new Presence(serviceMediator, old)))
+                .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, current, null)))
+                .flux();
     }
 
     private static Flux<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
@@ -110,22 +134,57 @@ public abstract class DispatchHandlers {
         return Flux.just(new TypingStartEvent(client, channelId, userId, startTime));
     }
 
-    private static Flux<Event> userUpdate(DispatchContext<UserUpdate> context) {
-        // TODO
-        return Flux.empty();
+    private static Flux<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
+        ServiceMediator serviceMediator = context.getServiceMediator();
+        DiscordClient client = serviceMediator.getClient();
+
+        UserBean bean = new UserBean(context.getDispatch().getUser());
+        User current = new User(serviceMediator, bean);
+
+        Mono<Void> saveNew = serviceMediator.getStoreHolder().getUserStore().save(bean.getId(), bean);
+
+        return serviceMediator.getStoreHolder().getUserStore()
+                .find(context.getDispatch().getUser().getId())
+                .flatMap(saveNew::thenReturn)
+                .map(old -> new UserUpdateEvent(client, current, new User(serviceMediator, old)))
+                .switchIfEmpty(saveNew.thenReturn(new UserUpdateEvent(client, current, null)))
+                .flux();
     }
 
     private static Flux<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
-        // TODO
-        return Flux.empty();
+        DiscordClient client = context.getServiceMediator().getClient();
+        String token = context.getDispatch().getToken();
+        long guildId = context.getDispatch().getGuildId();
+        String endpoint = context.getDispatch().getEndpoint();
+
+        return Flux.just(new VoiceServerUpdateEvent(client, token, guildId, endpoint));
     }
 
-    private static Flux<Event> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
-        // TODO
-        return Flux.empty();
+    private static Flux<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
+        ServiceMediator serviceMediator = context.getServiceMediator();
+        DiscordClient client = serviceMediator.getClient();
+
+        long guildId = context.getDispatch().getVoiceState().getGuildId();
+        long userId = context.getDispatch().getVoiceState().getUserId();
+
+        LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
+        VoiceStateBean bean = new VoiceStateBean(context.getDispatch().getVoiceState());
+        VoiceState current = new VoiceState(serviceMediator, bean);
+
+        Mono<Void> saveNew = serviceMediator.getStoreHolder().getVoiceStateStore().save(key, bean);
+
+        return serviceMediator.getStoreHolder().getVoiceStateStore()
+                .find(key)
+                .flatMap(saveNew::thenReturn)
+                .map(old -> new VoiceStateUpdateEvent(client, current, new VoiceState(serviceMediator, old)))
+                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(client, current, null)))
+                .flux();
     }
 
     private static Flux<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
-        return Flux.empty();
+        long guildId = context.getDispatch().getGuildId();
+        long channelId = context.getDispatch().getChannelId();
+
+        return Flux.just(new WebhooksUpdateEvent(context.getServiceMediator().getClient(), guildId, channelId));
     }
 }
