@@ -17,10 +17,13 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.bean.ExtendedInviteBean;
 import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.object.entity.bean.TextChannelBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -199,5 +202,35 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to create an invite.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link InviteCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createInvite(InviteCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ExtendedInvite> createInvite(final Consumer<InviteCreateSpec> spec) {
+        final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
+        spec.accept(mutatedSpec);
+        return createInvite(mutatedSpec);
+    }
+
+    /**
+     * Requests to create an invite.
+     *
+     * @param spec A configured {@link InviteCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ExtendedInvite> createInvite(final InviteCreateSpec spec) {
+        return getServiceMediator().getRestClient().getChannelService()
+                .createChannelInvite(getId().asLong(), spec.asRequest())
+                .map(ExtendedInviteBean::new)
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
     }
 }
