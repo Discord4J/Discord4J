@@ -45,31 +45,30 @@ import java.util.stream.Stream;
 
 class GuildDispatchHandlers {
 
-    static Flux<BanEvent> guildBanAdd(DispatchContext<GuildBanAdd> context) {
+    static Mono<BanEvent> guildBanAdd(DispatchContext<GuildBanAdd> context) {
         User user = new User(context.getServiceMediator(), new UserBean(context.getDispatch().getUser()));
         long guildId = context.getDispatch().getGuildId();
 
-        return Flux.just(new BanEvent(context.getServiceMediator().getClient(), user, guildId));
+        return Mono.just(new BanEvent(context.getServiceMediator().getClient(), user, guildId));
     }
 
-    static Flux<UnbanEvent> guildBanRemove(DispatchContext<GuildBanRemove> context) {
+    static Mono<UnbanEvent> guildBanRemove(DispatchContext<GuildBanRemove> context) {
         User user = new User(context.getServiceMediator(), new UserBean(context.getDispatch().getUser()));
         long guildId = context.getDispatch().getGuildId();
 
-        return Flux.just(new UnbanEvent(context.getServiceMediator().getClient(), user, guildId));
+        return Mono.just(new UnbanEvent(context.getServiceMediator().getClient(), user, guildId));
     }
 
-    static Flux<GuildCreateEvent> guildCreate(DispatchContext<GuildCreate> context) {
+    static Mono<GuildCreateEvent> guildCreate(DispatchContext<GuildCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         GuildBean bean = new GuildBean(context.getDispatch().getGuild());
 
         return serviceMediator.getStoreHolder().getGuildStore()
                 .save(bean.getId(), bean)
-                .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, bean)))
-                .flux();
+                .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, bean)));
     }
 
-    static Flux<GuildDeleteEvent> guildDelete(DispatchContext<GuildDelete> context) {
+    static Mono<GuildDeleteEvent> guildDelete(DispatchContext<GuildDelete> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
 
@@ -107,11 +106,10 @@ class GuildDispatchHandlers {
                 })
                 .flatMap(deleteGuild::thenReturn)
                 .map(guild -> new GuildDeleteEvent(client, guildId, new Guild(context.getServiceMediator(), guild)))
-                .switchIfEmpty(deleteGuild.thenReturn(new GuildDeleteEvent(client, guildId, null)))
-                .flux();
+                .switchIfEmpty(deleteGuild.thenReturn(new GuildDeleteEvent(client, guildId, null)));
     }
 
-    static Flux<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
+    static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
 
         long[] emojiIds = Arrays.stream(context.getDispatch().getEmojis())
@@ -139,16 +137,15 @@ class GuildDispatchHandlers {
 
         return updateGuildBean
                 .then(saveEmojis)
-                .thenReturn(new EmojisUpdateEvent(client, guildId, emojis))
-                .flux();
+                .thenReturn(new EmojisUpdateEvent(client, guildId, emojis));
     }
 
-    static Flux<IntegrationsUpdateEvent> guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
-        return Flux.just(new IntegrationsUpdateEvent(context.getServiceMediator().getClient(),
+    static Mono<IntegrationsUpdateEvent> guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
+        return Mono.just(new IntegrationsUpdateEvent(context.getServiceMediator().getClient(),
                 context.getDispatch().getGuildId()));
     }
 
-    static Flux<MemberJoinEvent> guildMemberAdd(DispatchContext<GuildMemberAdd> context) {
+    static Mono<MemberJoinEvent> guildMemberAdd(DispatchContext<GuildMemberAdd> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         long guildId = context.getDispatch().getGuildId();
         GuildMemberResponse response = context.getDispatch().getMember();
@@ -166,11 +163,10 @@ class GuildDispatchHandlers {
 
         return addMemberId
                 .then(saveMember)
-                .thenReturn(new MemberJoinEvent(serviceMediator.getClient(), member, guildId))
-                .flux();
+                .thenReturn(new MemberJoinEvent(serviceMediator.getClient(), member, guildId));
     }
 
-    static Flux<MemberLeaveEvent> guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
+    static Mono<MemberLeaveEvent> guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         long guildId = context.getDispatch().getGuildId();
         UserResponse response = context.getDispatch().getUser();
@@ -187,11 +183,10 @@ class GuildDispatchHandlers {
 
         return removeMemberId
                 .then(deleteMember)
-                .thenReturn(new MemberLeaveEvent(serviceMediator.getClient(), user, guildId))
-                .flux();
+                .thenReturn(new MemberLeaveEvent(serviceMediator.getClient(), user, guildId));
     }
 
-    static Flux<MemberChunkEvent> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
+    static Mono<MemberChunkEvent> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         long guildId = context.getDispatch().getGuildId();
 
@@ -219,16 +214,15 @@ class GuildDispatchHandlers {
 
         return addMemberIds
                 .then(saveMembers)
-                .thenReturn(new MemberChunkEvent(serviceMediator.getClient(), guildId, members))
-                .flux();
+                .thenReturn(new MemberChunkEvent(serviceMediator.getClient(), guildId, members));
     }
 
-    static Flux<MemberUpdateEvent> guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {
+    static Mono<MemberUpdateEvent> guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {
         // TODO
-        return Flux.empty();
+        return Mono.empty();
     }
 
-    static Flux<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
+    static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
         long guildId = context.getDispatch().getGuildId();
@@ -245,11 +239,10 @@ class GuildDispatchHandlers {
 
         return addRoleId
                 .then(saveRole)
-                .thenReturn(new RoleCreateEvent(client, guildId, role))
-                .flux();
+                .thenReturn(new RoleCreateEvent(client, guildId, role));
     }
 
-    static Flux<RoleDeleteEvent> guildRoleDelete(DispatchContext<GuildRoleDelete> context) {
+    static Mono<RoleDeleteEvent> guildRoleDelete(DispatchContext<GuildRoleDelete> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         long guildId = context.getDispatch().getGuildId();
         long roleId = context.getDispatch().getRoleId();
@@ -266,11 +259,10 @@ class GuildDispatchHandlers {
 
         return removeRoleId
                 .then(deleteRole)
-                .thenReturn(new RoleDeleteEvent(context.getServiceMediator().getClient(), guildId, roleId))
-                .flux();
+                .thenReturn(new RoleDeleteEvent(context.getServiceMediator().getClient(), guildId, roleId));
     }
 
-    static Flux<RoleUpdateEvent> guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {
+    static Mono<RoleUpdateEvent> guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
         long guildId = context.getDispatch().getGuildId();
@@ -284,11 +276,10 @@ class GuildDispatchHandlers {
                 .find(context.getDispatch().getRole().getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new RoleUpdateEvent(client, current, new Role(serviceMediator, old, guildId)))
-                .switchIfEmpty(saveNew.thenReturn(new RoleUpdateEvent(client, current, null)))
-                .flux();
+                .switchIfEmpty(saveNew.thenReturn(new RoleUpdateEvent(client, current, null)));
     }
 
-    static Flux<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate> context) {
+    static Mono<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 
@@ -301,8 +292,7 @@ class GuildDispatchHandlers {
                 .find(context.getDispatch().getGuild().getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new GuildUpdateEvent(client, current, new Guild(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new GuildUpdateEvent(client, current, null)))
-                .flux();
+                .switchIfEmpty(saveNew.thenReturn(new GuildUpdateEvent(client, current, null)));
     }
 
 }

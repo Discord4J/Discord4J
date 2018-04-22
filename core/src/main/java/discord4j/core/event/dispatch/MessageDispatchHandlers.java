@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 
 class MessageDispatchHandlers {
 
-    static Flux<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
+    static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         MessageBean bean = new MessageBean(context.getDispatch().getMessage());
         Message message = new Message(context.getServiceMediator(), bean);
@@ -36,11 +36,10 @@ class MessageDispatchHandlers {
                 .save(bean.getId(), bean);
 
         return saveMessage
-                .thenReturn(new MessageCreateEvent(client, message))
-                .flux();
+                .thenReturn(new MessageCreateEvent(client, message));
     }
 
-    static Flux<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
+    static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
@@ -49,11 +48,10 @@ class MessageDispatchHandlers {
                 .delete(context.getDispatch().getId());
 
         return deleteMessage
-                .thenReturn(new MessageDeleteEvent(client, messageId, channelId))
-                .flux();
+                .thenReturn(new MessageDeleteEvent(client, messageId, channelId));
     }
 
-    static Flux<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
+    static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
@@ -62,27 +60,26 @@ class MessageDispatchHandlers {
                 .delete(Flux.fromArray(ArrayUtil.toObject(context.getDispatch().getIds())));
 
         return deleteMessages
-                .thenReturn(new MessageBulkDeleteEvent(client, messageIds, channelId))
-                .flux();
+                .thenReturn(new MessageBulkDeleteEvent(client, messageIds, channelId));
     }
 
-    static Flux<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
+    static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
         // TODO need MessageBean#reactions and GuildEmoji | Unicode type
-        return Flux.empty();
+        return Mono.empty();
     }
 
-    static Flux<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
+    static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
         // TODO need MessageBean#reactions and GuildEmoji | Unicode type
-        return Flux.empty();
+        return Mono.empty();
     }
 
-    static Flux<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll>
+    static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll>
                                                                          context) {
         // TODO need MessageBean#reactions and GuildEmoji | Unicode type
-        return Flux.empty();
+        return Mono.empty();
     }
 
-    static Flux<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
+    static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         MessageBean bean = new MessageBean(context.getDispatch().getMessage());
         Message current = new Message(context.getServiceMediator(), bean);
@@ -94,7 +91,6 @@ class MessageDispatchHandlers {
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new MessageUpdateEvent(client, current, new Message(context.getServiceMediator(), old)))
-                .switchIfEmpty(saveNew.thenReturn(new MessageUpdateEvent(client, current, null)))
-                .flux();
+                .switchIfEmpty(saveNew.thenReturn(new MessageUpdateEvent(client, current, null)));
     }
 }

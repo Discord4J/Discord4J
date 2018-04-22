@@ -97,15 +97,15 @@ public abstract class DispatchHandlers {
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
     @SuppressWarnings("unchecked")
-    public static <D extends Dispatch, E extends Event> Flux<E> handle(DispatchContext<D> context) {
+    public static <D extends Dispatch, E extends Event> Mono<E> handle(DispatchContext<D> context) {
         DispatchHandler<D, E> entry = (DispatchHandler<D, E>) handlerMap.get(context.getDispatch().getClass());
         if (entry == null) {
-            return Flux.empty();
+            return Mono.empty();
         }
         return entry.handle(context);
     }
 
-    private static Flux<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
+    private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 
@@ -121,20 +121,19 @@ public abstract class DispatchHandlers {
                 .find(key)
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new PresenceUpdateEvent(client, current, new Presence(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, current, null)))
-                .flux();
+                .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, current, null)));
     }
 
-    private static Flux<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
+    private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         long channelId = context.getDispatch().getChannelId();
         long userId = context.getDispatch().getUserId();
         Instant startTime = Instant.ofEpochMilli(context.getDispatch().getTimestamp());
 
-        return Flux.just(new TypingStartEvent(client, channelId, userId, startTime));
+        return Mono.just(new TypingStartEvent(client, channelId, userId, startTime));
     }
 
-    private static Flux<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
+    private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 
@@ -147,20 +146,19 @@ public abstract class DispatchHandlers {
                 .find(context.getDispatch().getUser().getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new UserUpdateEvent(client, current, new User(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new UserUpdateEvent(client, current, null)))
-                .flux();
+                .switchIfEmpty(saveNew.thenReturn(new UserUpdateEvent(client, current, null)));
     }
 
-    private static Flux<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
+    private static Mono<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         String token = context.getDispatch().getToken();
         long guildId = context.getDispatch().getGuildId();
         String endpoint = context.getDispatch().getEndpoint();
 
-        return Flux.just(new VoiceServerUpdateEvent(client, token, guildId, endpoint));
+        return Mono.just(new VoiceServerUpdateEvent(client, token, guildId, endpoint));
     }
 
-    private static Flux<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
+    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 
@@ -177,14 +175,13 @@ public abstract class DispatchHandlers {
                 .find(key)
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new VoiceStateUpdateEvent(client, current, new VoiceState(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(client, current, null)))
-                .flux();
+                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(client, current, null)));
     }
 
-    private static Flux<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
+    private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
         long guildId = context.getDispatch().getGuildId();
         long channelId = context.getDispatch().getChannelId();
 
-        return Flux.just(new WebhooksUpdateEvent(context.getServiceMediator().getClient(), guildId, channelId));
+        return Mono.just(new WebhooksUpdateEvent(context.getServiceMediator().getClient(), guildId, channelId));
     }
 }

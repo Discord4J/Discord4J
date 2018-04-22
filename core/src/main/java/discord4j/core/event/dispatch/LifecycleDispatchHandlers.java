@@ -24,6 +24,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.bean.UserBean;
 import discord4j.gateway.retry.GatewayStateChange;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -31,39 +32,39 @@ import java.util.stream.Collectors;
 
 class LifecycleDispatchHandlers {
 
-    static Flux<ReadyEvent> ready(DispatchContext<Ready> context) {
+    static Mono<ReadyEvent> ready(DispatchContext<Ready> context) {
         Ready dispatch = context.getDispatch();
         User self = new User(context.getServiceMediator(), new UserBean(dispatch.getUser()));
         Set<ReadyEvent.Guild> guilds = Arrays.stream(dispatch.getGuilds())
                 .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
                 .collect(Collectors.toSet());
 
-        return Flux.just(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
+        return Mono.just(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
                 guilds, dispatch.getSessionId(), dispatch.getTrace()));
     }
 
-    static Flux<ResumeEvent> resumed(DispatchContext<Resumed> context) {
-        return Flux.just(new ResumeEvent(context.getServiceMediator().getClient(),
+    static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {
+        return Mono.just(new ResumeEvent(context.getServiceMediator().getClient(),
                 context.getDispatch().getTrace()));
     }
 
-    static Flux<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
+    static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
-                return Flux.just(new ConnectEvent(context.getServiceMediator().getClient()));
+                return Mono.just(new ConnectEvent(context.getServiceMediator().getClient()));
             case RETRY_STARTED:
-                return Flux.just(new ReconnectStartEvent(context.getServiceMediator().getClient()));
+                return Mono.just(new ReconnectStartEvent(context.getServiceMediator().getClient()));
             case RETRY_FAILED:
-                return Flux.just(new ReconnectFailEvent(context.getServiceMediator().getClient(),
+                return Mono.just(new ReconnectFailEvent(context.getServiceMediator().getClient(),
                         dispatch.getCurrentAttempt()));
             case RETRY_SUCCEEDED:
-                return Flux.just(new ReconnectEvent(context.getServiceMediator().getClient(),
+                return Mono.just(new ReconnectEvent(context.getServiceMediator().getClient(),
                         dispatch.getCurrentAttempt()));
             case DISCONNECTED:
-                return Flux.just(new DisconnectEvent(context.getServiceMediator().getClient()));
+                return Mono.just(new DisconnectEvent(context.getServiceMediator().getClient()));
         }
-        return Flux.empty();
+        return Mono.empty();
     }
 
 }

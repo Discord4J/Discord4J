@@ -19,7 +19,7 @@ package discord4j.core.event.dispatch;
 
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.core.event.domain.Event;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Handler for the gateway Dispatch events.
@@ -39,5 +39,5 @@ public interface DispatchHandler<D extends Dispatch, E extends Event> {
      * @param context the dispatch context
      * @return a Flux of Events that are derived from the given dispatch context
      */
-    Flux<E> handle(DispatchContext<D> context);
+    Mono<E> handle(DispatchContext<D> context);
 }
