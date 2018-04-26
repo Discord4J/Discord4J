@@ -38,7 +38,10 @@ import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.store.noop.NoOpStoreService;
+import discord4j.store.service.StoreService;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.FluxProcessor;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
@@ -49,38 +52,74 @@ public final class ClientBuilder {
     private String token;
     private int shardIndex;
     private int shardCount;
+    private StoreService storeService;
+    private FluxProcessor<Event, Event> eventProcessor;
+    private Scheduler eventScheduler;
 
     public ClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
+        shardIndex = 0;
+        shardCount = 1;
+        storeService = new NoOpStoreService();
+        eventProcessor = EmitterProcessor.create(false);
+        eventScheduler = Schedulers.elastic();
     }
 
     public String getToken() {
         return token;
     }
 
-    public void setToken(final String token) {
+    public ClientBuilder setToken(final String token) {
         this.token = Objects.requireNonNull(token);
+        return this;
     }
 
     public int getShardIndex() {
         return shardIndex;
     }
 
-    public void setShardIndex(final int shardIndex) {
+    public ClientBuilder setShardIndex(final int shardIndex) {
         this.shardIndex = shardIndex;
+        return this;
     }
 
     public int getShardCount() {
         return shardCount;
     }
 
-    public void setShardCount(final int shardCount) {
+    public ClientBuilder setShardCount(final int shardCount) {
         this.shardCount = shardCount;
+        return this;
+    }
+
+    public StoreService getStoreService() {
+        return storeService;
+    }
+
+    public ClientBuilder setStoreService(final StoreService storeService) {
+        this.storeService = Objects.requireNonNull(storeService);
+        return this;
+    }
+
+    public FluxProcessor<Event, Event> getEventProcessor() {
+        return eventProcessor;
+    }
+
+    public ClientBuilder setEventProcessor(final FluxProcessor<Event, Event> eventProcessor) {
+        this.eventProcessor = Objects.requireNonNull(eventProcessor);
+        return this;
+    }
+
+    public Scheduler getEventScheduler() {
+        return eventScheduler;
+    }
+
+    public ClientBuilder setEventScheduler(final Scheduler eventScheduler) {
+        this.eventScheduler = Objects.requireNonNull(eventScheduler);
+        return this;
     }
 
     public DiscordClient build() {
-        final ClientConfig config = new ClientConfig(token, shardIndex, shardCount);
-
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
@@ -98,10 +137,6 @@ public final class ClientBuilder {
                 .baseUrl(Routes.BASE_URL)
                 .build();
 
-        // TODO built-in store discovery or custom service override
-        final StoreHolder storeHolder = new StoreHolder(new NoOpStoreService());
-        final RestClient restClient = new RestClient(new Router(httpClient));
-
         // TODO custom retry parameters
         // TODO shard setup
         // TODO initial status
@@ -109,9 +144,10 @@ public final class ClientBuilder {
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
                 new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token, new IdentifyOptions());
 
-        // TODO custom processor and threading model
-        final EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
-        final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
+        final StoreHolder storeHolder = new StoreHolder(storeService);
+        final RestClient restClient = new RestClient(new Router(httpClient));
+        final ClientConfig config = new ClientConfig(token, shardIndex, shardCount);
+        final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, eventScheduler);
 
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, eventDispatcher, config);
 
@@ -120,6 +156,6 @@ public final class ClientBuilder {
                 .flatMap(DispatchHandlers::<Dispatch, Event>handle)
                 .subscribeWith(eventProcessor);
 
-        return new DiscordClient(serviceMediator);
+        return serviceMediator.getClient();
     }
 }
