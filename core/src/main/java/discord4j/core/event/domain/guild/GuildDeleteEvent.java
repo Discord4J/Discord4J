@@ -17,18 +17,28 @@
 package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Snowflake;
+
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class GuildDeleteEvent extends GuildEvent {
 
     private final long guildId;
+    private final Guild guild;
 
-    public GuildDeleteEvent(DiscordClient client, long guildId) {
+    public GuildDeleteEvent(DiscordClient client, long guildId, @Nullable Guild guild) {
         super(client);
         this.guildId = guildId;
+        this.guild = guild;
     }
 
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
+    }
+
+    public Optional<Guild> getGuild() {
+        return Optional.ofNullable(guild);
     }
 }

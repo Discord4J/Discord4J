@@ -14,30 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.Guild;
+import discord4j.core.object.VoiceState;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class GuildUpdateEvent extends GuildEvent {
+public class VoiceStateUpdateEvent extends Event {
 
-    private final Guild current;
-    private final Guild old;
+    private final VoiceState current;
+    private final VoiceState old;
 
-    public GuildUpdateEvent(DiscordClient client, Guild current, @Nullable Guild old) {
+    public VoiceStateUpdateEvent(DiscordClient client, VoiceState current, @Nullable VoiceState old) {
         super(client);
         this.current = current;
         this.old = old;
     }
 
-    public Guild getCurrent() {
+    public VoiceState getCurrent() {
         return current;
     }
 
-    public Optional<Guild> getOld() {
+    public Optional<VoiceState> getOld() {
         return Optional.ofNullable(old);
     }
 }

@@ -17,57 +17,27 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.Update;
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.TextChannel;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.Set;
 
 public class TextChannelUpdateEvent extends ChannelEvent {
 
-    private final Update<Boolean> nsfw;
-    private final Update<String> name;
-    private final Update<Snowflake> category;
-    private final Update<Set<PermissionOverwrite>> overwrites;
-    private final Update<Integer> position;
-    private final Update<String> topic;
+    private final TextChannel current;
+    private final TextChannel old;
 
-    public TextChannelUpdateEvent(DiscordClient client, @Nullable Update<Boolean> nsfw, @Nullable Update<String> name,
-                                  @Nullable Update<Snowflake> category,
-                                  @Nullable Update<Set<PermissionOverwrite>> overwrites,
-                                  @Nullable Update<Integer> position, @Nullable Update<String> topic) {
+    public TextChannelUpdateEvent(DiscordClient client, TextChannel current, @Nullable TextChannel old) {
         super(client);
-        this.nsfw = nsfw;
-        this.name = name;
-        this.category = category;
-        this.overwrites = overwrites;
-        this.position = position;
-        this.topic = topic;
+        this.current = current;
+        this.old = old;
     }
 
-    public Optional<Update<Boolean>> isNsfw() {
-        return Optional.ofNullable(nsfw);
+    public TextChannel getCurrent() {
+        return current;
     }
 
-    public Optional<Update<String>> getName() {
-        return Optional.ofNullable(name);
-    }
-
-    public Optional<Update<Snowflake>> getCategory() {
-        return Optional.ofNullable(category);
-    }
-
-    public Optional<Update<Set<PermissionOverwrite>>> getOverwrites() {
-        return Optional.ofNullable(overwrites);
-    }
-
-    public Optional<Update<Integer>> getPosition() {
-        return Optional.ofNullable(position);
-    }
-
-    public Optional<Update<String>> getTopic() {
-        return Optional.ofNullable(topic);
+    public Optional<TextChannel> getOld() {
+        return Optional.ofNullable(old);
     }
 }

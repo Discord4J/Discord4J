@@ -14,30 +14,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Snowflake;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
+public class VoiceServerUpdateEvent extends Event {
 
-public class GuildUpdateEvent extends GuildEvent {
+    private final String token;
+    private final long guildId;
+    private final String endpoint;
 
-    private final Guild current;
-    private final Guild old;
-
-    public GuildUpdateEvent(DiscordClient client, Guild current, @Nullable Guild old) {
+    public VoiceServerUpdateEvent(DiscordClient client, String token, long guildId, String endpoint) {
         super(client);
-        this.current = current;
-        this.old = old;
+        this.token = token;
+        this.guildId = guildId;
+        this.endpoint = endpoint;
     }
 
-    public Guild getCurrent() {
-        return current;
+    public String getToken() {
+        return token;
     }
 
-    public Optional<Guild> getOld() {
-        return Optional.ofNullable(old);
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    public String getEndpoint() {
+        return endpoint;
     }
 }

@@ -17,57 +17,27 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.Update;
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.VoiceChannel;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.Set;
 
 public class VoiceChannelUpdateEvent extends ChannelEvent {
 
-    private final Update<Integer> bitrate;
-    private final Update<String> name;
-    private final Update<Snowflake> category;
-    private final Update<Set<PermissionOverwrite>> overwrites;
-    private final Update<Integer> position;
-    private final Update<Integer> userLimit;
+    private final VoiceChannel current;
+    private final VoiceChannel old;
 
-    public VoiceChannelUpdateEvent(DiscordClient client, @Nullable Update<Integer> bitrate,
-                                   @Nullable Update<String> name, @Nullable Update<Snowflake> category,
-                                   @Nullable Update<Set<PermissionOverwrite>> overwrites,
-                                   @Nullable Update<Integer> position, @Nullable Update<Integer> userLimit) {
+    public VoiceChannelUpdateEvent(DiscordClient client, VoiceChannel current, @Nullable VoiceChannel old) {
         super(client);
-        this.bitrate = bitrate;
-        this.name = name;
-        this.category = category;
-        this.overwrites = overwrites;
-        this.position = position;
-        this.userLimit = userLimit;
+        this.current = current;
+        this.old = old;
     }
 
-    public Optional<Update<Integer>> getBitrate() {
-        return Optional.ofNullable(bitrate);
+    public VoiceChannel getCurrent() {
+        return current;
     }
 
-    public Optional<Update<String>> getName() {
-        return Optional.ofNullable(name);
-    }
-
-    public Optional<Update<Snowflake>> getCategory() {
-        return Optional.ofNullable(category);
-    }
-
-    public Optional<Update<Set<PermissionOverwrite>>> getOverwrites() {
-        return Optional.ofNullable(overwrites);
-    }
-
-    public Optional<Update<Integer>> getPosition() {
-        return Optional.ofNullable(position);
-    }
-
-    public Optional<Update<Integer>> getUserLimit() {
-        return Optional.ofNullable(userLimit);
+    public Optional<VoiceChannel> getOld() {
+        return Optional.ofNullable(old);
     }
 }

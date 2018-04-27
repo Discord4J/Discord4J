@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.event;
+package discord4j.core.event.dispatch;
 
 import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.core.ServiceMediator;

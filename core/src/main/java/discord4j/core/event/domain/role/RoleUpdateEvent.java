@@ -17,55 +17,27 @@
 package discord4j.core.event.domain.role;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.Update;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.entity.Role;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.Optional;
 
 public class RoleUpdateEvent extends RoleEvent {
 
-    private final Update<String> name;
-    private final Update<Color> color;
-    private final Update<Boolean> hoist;
-    private final Update<Integer> position;
-    private final Update<PermissionSet> permissions;
-    private final Update<Boolean> mentionable;
+    private final Role current;
+    private final Role old;
 
-    public RoleUpdateEvent(DiscordClient client, @Nullable Update<String> name, @Nullable Update<Color> color,
-                           @Nullable Update<Boolean> hoist, @Nullable Update<Integer> position,
-                           @Nullable Update<PermissionSet> permissions, @Nullable Update<Boolean> mentionable) {
+    public RoleUpdateEvent(DiscordClient client, Role current, @Nullable Role old) {
         super(client);
-        this.name = name;
-        this.color = color;
-        this.hoist = hoist;
-        this.position = position;
-        this.permissions = permissions;
-        this.mentionable = mentionable;
+        this.current = current;
+        this.old = old;
     }
 
-    public Optional<Update<String>> getName() {
-        return Optional.ofNullable(name);
+    public Role getCurrent() {
+        return current;
     }
 
-    public Optional<Update<Color>> getColor() {
-        return Optional.ofNullable(color);
-    }
-
-    public Optional<Update<Boolean>> isHoisted() {
-        return Optional.ofNullable(hoist);
-    }
-
-    public Optional<Update<Integer>> getPosition() {
-        return Optional.ofNullable(position);
-    }
-
-    public Optional<Update<PermissionSet>> getPermissions() {
-        return Optional.ofNullable(permissions);
-    }
-
-    public Optional<Update<Boolean>> isMentionable() {
-        return Optional.ofNullable(mentionable);
+    public Optional<Role> getOld() {
+        return Optional.ofNullable(old);
     }
 }

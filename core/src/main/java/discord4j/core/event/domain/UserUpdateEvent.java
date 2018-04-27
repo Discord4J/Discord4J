@@ -14,49 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event;
+package discord4j.core.event.domain;
+
+import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.User;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.Optional;
 
-public final class Update<T> {
+public class UserUpdateEvent extends Event {
 
-    private final T current;
-    private final T old;
+    private final User current;
+    private final User old;
 
-    public static <T> Update<T> of(T current, @Nullable T old) {
-        return new Update<>(current, old);
-    }
-
-    private Update(T current, @Nullable T old) {
+    public UserUpdateEvent(DiscordClient client, User current, @Nullable User old) {
+        super(client);
         this.current = current;
         this.old = old;
     }
 
-    public T getCurrent() {
+    public User getCurrent() {
         return current;
     }
 
-    public Optional<T> getOld() {
+    public Optional<User> getOld() {
         return Optional.ofNullable(old);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Update<?> update = (Update<?>) o;
-        return Objects.equals(current, update.current) &&
-                Objects.equals(old, update.old);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(current, old);
     }
 }

@@ -14,30 +14,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
+public class WebhooksUpdateEvent extends Event {
 
-public class GuildUpdateEvent extends GuildEvent {
+    private final long guildId;
+    private final long channelId;
 
-    private final Guild current;
-    private final Guild old;
-
-    public GuildUpdateEvent(DiscordClient client, Guild current, @Nullable Guild old) {
+    public WebhooksUpdateEvent(DiscordClient client, long guildId, long channelId) {
         super(client);
-        this.current = current;
-        this.old = old;
+        this.guildId = guildId;
+        this.channelId = channelId;
     }
 
-    public Guild getCurrent() {
-        return current;
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
-    public Optional<Guild> getOld() {
-        return Optional.ofNullable(old);
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
+    }
+
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 }
