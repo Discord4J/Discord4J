@@ -12,6 +12,7 @@ dependencies {
 
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
+    testCompile "io.projectreactor:reactor-test:$reactortest_version"
 }
 
 publishing {
