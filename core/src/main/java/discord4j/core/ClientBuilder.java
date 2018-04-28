@@ -37,8 +37,8 @@ import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
-import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.service.StoreService;
+import discord4j.store.service.StoreServiceLoader;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.scheduler.Scheduler;
@@ -60,7 +60,7 @@ public final class ClientBuilder {
         this.token = Objects.requireNonNull(token);
         shardIndex = 0;
         shardCount = 1;
-        storeService = new NoOpStoreService();
+        storeService = new StoreServiceLoader().getStoreService();
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
     }
