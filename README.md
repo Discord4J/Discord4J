@@ -33,10 +33,6 @@ Given that `@VERSION@` = the version of Discord4J (this can either be a release 
 In your `pom.xml` add (without the ellipses):
 ```xml
 <repositories>
-  <repository> <!-- This repo fixes issues with transitive dependencies -->
-    <id>jcenter</id>
-    <url>http://jcenter.bintray.com</url>
-  </repository>
   <repository>
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
@@ -45,7 +41,7 @@ In your `pom.xml` add (without the ellipses):
 
 <dependencies>
   <dependency>
-    <groupId>com.github.Discord4J</groupId>
+    <groupId>com.github.Discord4J.Discord4J</groupId>
     <artifactId>Discord4J-core</artifactId>
     <version>@VERSION@</version>
   </dependency>
@@ -55,24 +51,22 @@ In your `pom.xml` add (without the ellipses):
 In your `build.gradle` add (without the ellipses): 
 ```groovy
 repositories {
-  jcenter() //This prevents issues with transitive dependencies
   maven {
     url  "https://jitpack.io"
   }
 }
 
 dependencies {
-  compile "com.github.Discord4J:Discord4J-core:@VERSION@"
+  compile "com.github.Discord4J.Discord4J:Discord4J-core:@VERSION@"
 }
 ```
 ### With SBT
 In your `build.sbt` add (without the ellipses):
 ```sbt
 libraryDependencies ++= Seq(
-  "com.github.Discord4J" % "Discord4J-core" % "@VERSION@"
+  "com.github.Discord4J.Discord4J" % "Discord4J-core" % "@VERSION@"
 )
 
-resolvers += "jcenter" at "http://jcenter.bintray.com"
 resolvers += "jitpack.io" at "https://jitpack.io"
 ```
 ### Manually with the shaded jar
