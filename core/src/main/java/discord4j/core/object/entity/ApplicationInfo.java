@@ -16,39 +16,42 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.entity.bean.ApplicationBean;
-import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.object.entity.bean.ApplicationInfoBean;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
 
-/** The current application represented as an {@link User}. */
-public final class ApplicationUser extends User {
+/** Represents the Current (typically) Application Information. */
+public final class ApplicationInfo implements Entity {
+
+    /** The ServiceMediator associated to this object. */
+    private final ServiceMediator serviceMediator;
 
     /** The raw data as represented by Discord. */
-    private final ApplicationBean data;
+    private final ApplicationInfoBean data;
 
     /**
-     * Constructs a {@code ApplicationUser} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code ApplicationInfo} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param userBean The user data as represented by Discord, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationUser(final ServiceMediator serviceMediator, final UserBean userBean, final ApplicationBean data) {
-        super(serviceMediator, userBean);
+    public ApplicationInfo(final ServiceMediator serviceMediator, final ApplicationInfoBean data) {
+        this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.data = Objects.requireNonNull(data);
     }
 
-    /**
-     * Gets the ID of the app.
-     *
-     * @return The ID of the app.
-     */
-    public Snowflake getApplicationId() {
+    @Override
+    public DiscordClient getClient() {
+        return serviceMediator.getClient();
+    }
+
+    @Override
+    public Snowflake getId() {
         return Snowflake.of(data.getId());
     }
 
@@ -114,6 +117,6 @@ public final class ApplicationUser extends User {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getOwner() {
-        return getServiceMediator().getClient().getUserById(getOwnerId());
+        return serviceMediator.getClient().getUserById(getOwnerId());
     }
 }

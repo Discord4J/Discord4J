@@ -239,17 +239,16 @@ public final class DiscordClient {
     }
 
     /**
-     * Requests to retrieve the application user.
+     * Requests to retrieve the application info.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationUser application user}. If
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationInfo application info}. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<ApplicationUser> getApplicationUser() {
+    public Mono<ApplicationInfo> getApplicationInfo() {
         return serviceMediator.getRestClient().getApplicationService()
                 .getCurrentApplicationInfo()
-                .map(ApplicationBean::new)
-                .flatMap(applicationBean -> getUserBean(Snowflake.of(applicationBean.getId()))
-                        .map(userBean -> new ApplicationUser(serviceMediator, userBean, applicationBean)));
+                .map(ApplicationInfoBean::new)
+                .map(applicationInfoBean -> new ApplicationInfo(serviceMediator, applicationInfoBean));
     }
 
     /**

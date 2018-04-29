@@ -20,7 +20,7 @@ package discord4j.core;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.ApplicationUser;
+import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
 import org.junit.BeforeClass;
@@ -98,8 +98,8 @@ public class ExampleBot {
         public void accept(ListenerContext context) {
             context.client.getEventDispatcher().on(ReadyEvent.class)
                     .next() // get only once and then unsubscribe
-                    .flatMap(ready -> context.client.getApplicationUser())
-                    .map(ApplicationUser::getOwnerId)
+                    .flatMap(ready -> context.client.getApplicationInfo())
+                    .map(ApplicationInfo::getOwnerId)
                     .subscribe(owner::set);
 
             context.client.getEventDispatcher().on(MessageCreateEvent.class)

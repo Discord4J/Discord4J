@@ -21,7 +21,7 @@ import discord4j.common.json.response.ApplicationInfoResponse;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 
-public final class ApplicationBean implements Serializable {
+public final class ApplicationInfoBean implements Serializable {
 
     private static final long serialVersionUID = 2418495859931703844L;
 
@@ -35,7 +35,7 @@ public final class ApplicationBean implements Serializable {
     private boolean botRequireCodeGrant;
     private long ownerId;
 
-    public ApplicationBean(final ApplicationInfoResponse response) {
+    public ApplicationInfoBean(final ApplicationInfoResponse response) {
         id = response.getId();
         name = response.getName();
         icon = response.getIcon();
@@ -45,7 +45,7 @@ public final class ApplicationBean implements Serializable {
         ownerId = response.getOwner().getId();
     }
 
-    public ApplicationBean() {}
+    public ApplicationInfoBean() {}
 
     public long getId() {
         return id;
