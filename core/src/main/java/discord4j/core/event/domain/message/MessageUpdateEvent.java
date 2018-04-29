@@ -24,21 +24,49 @@ import java.util.Optional;
 
 public class MessageUpdateEvent extends MessageEvent {
 
-    private final Message current;
+    private final long messageId;
+    private final long channelId;
+    private final long guildId;
+
+    @Nullable
     private final Message old;
 
-    public MessageUpdateEvent(DiscordClient client, Message current, @Nullable Message old) {
-        super(client);
+    private final boolean contentChanged;
+    @Nullable
+    private final String currentContent;
 
-        this.current = current;
+    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, long guildId, @Nullable Message
+            old, boolean contentChanged, @Nullable String currentContent) {
+        super(client);
+        this.messageId = messageId;
+        this.channelId = channelId;
+        this.guildId = guildId;
         this.old = old;
+        this.contentChanged = contentChanged;
+        this.currentContent = currentContent;
     }
 
-    public Message getCurrent() {
-        return current;
+    public long getMessageId() {
+        return messageId;
+    }
+
+    public long getChannelId() {
+        return channelId;
+    }
+
+    public long getGuildId() {
+        return guildId;
     }
 
     public Optional<Message> getOld() {
         return Optional.ofNullable(old);
+    }
+
+    public boolean isContentChanged() {
+        return contentChanged;
+    }
+
+    public Optional<String> getCurrentContent() {
+        return Optional.ofNullable(currentContent);
     }
 }

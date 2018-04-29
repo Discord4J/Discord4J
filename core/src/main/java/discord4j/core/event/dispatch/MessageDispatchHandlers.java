@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.jackson.Possible;
 import discord4j.common.json.payload.dispatch.*;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.*;
@@ -81,16 +82,33 @@ class MessageDispatchHandlers {
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
         DiscordClient client = context.getServiceMediator().getClient();
-        MessageBean bean = new MessageBean(context.getDispatch().getMessage());
-        Message current = new Message(context.getServiceMediator(), bean);
 
-        Mono<Void> saveNew = context.getServiceMediator().getStoreHolder().getMessageStore()
-                .save(bean.getId(), bean);
+        long messageId = context.getDispatch().getId();
+        long channelId = context.getDispatch().getChannelId();
+        long guildId = context.getDispatch().getGuildId();
 
-        return context.getServiceMediator().getStoreHolder().getMessageStore()
-                .find(bean.getId())
-                .flatMap(saveNew::thenReturn)
-                .map(old -> new MessageUpdateEvent(client, current, new Message(context.getServiceMediator(), old)))
-                .switchIfEmpty(saveNew.thenReturn(new MessageUpdateEvent(client, current, null)));
+        Possible<String> content = context.getDispatch().getContent();
+        boolean contentChanged = content == null || !content.isAbsent();
+        String currentContent = content == null || content.isAbsent() ? null : content.get();
+
+        Mono<MessageUpdateEvent> update = context.getServiceMediator().getStoreHolder().getMessageStore()
+                .find(messageId)
+                .flatMap(oldBean -> {
+                    // updating the content and embed of the bean in the store
+                    Message old = new Message(context.getServiceMediator(), oldBean);
+                    MessageBean newBean = new MessageBean(oldBean);
+                    newBean.setContent(currentContent);
+
+                    // TODO embed
+
+                    return context.getServiceMediator().getStoreHolder().getMessageStore()
+                            .save(newBean.getId(), newBean)
+                            .thenReturn(new MessageUpdateEvent(client, messageId, channelId, guildId, old,
+                                    contentChanged, newBean.getContent()));
+                });
+
+        return update
+                .defaultIfEmpty(new MessageUpdateEvent(client, messageId, channelId, guildId, null, contentChanged,
+                        currentContent));
     }
 }

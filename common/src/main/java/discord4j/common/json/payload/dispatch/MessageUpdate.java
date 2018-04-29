@@ -16,22 +16,60 @@
  */
 package discord4j.common.json.payload.dispatch;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import discord4j.common.json.response.MessageResponse;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.UnsignedJson;
+import discord4j.common.json.response.EmbedResponse;
 
+import javax.annotation.Nullable;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageUpdate implements Dispatch {
 
-    @JsonUnwrapped
-    private MessageResponse message;
+    @UnsignedJson
+    private long id;
+    @JsonProperty("channel_id")
+    @UnsignedJson
+    private long channelId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
+    @Nullable
+    private Possible<String> content = Possible.absent();
+    @Nullable
+    private Possible<EmbedResponse> embed = Possible.absent();
 
-    public MessageResponse getMessage() {
-        return message;
+    public long getId() {
+        return id;
+    }
+
+    public long getChannelId() {
+        return channelId;
+    }
+
+    public long getGuildId() {
+        return guildId;
+    }
+
+    @Nullable
+    public Possible<String> getContent() {
+        return content;
+    }
+
+    @Nullable
+    public Possible<EmbedResponse> getEmbed() {
+        return embed;
     }
 
     @Override
     public String toString() {
-        return "MessageUpdate[" +
-                "message=" + message +
-                ']';
+        return "MessageUpdate{" +
+                "id=" + id +
+                ", channelId=" + channelId +
+                ", guildId=" + guildId +
+                ", content=" + content +
+                ", embed=" + embed +
+                '}';
     }
 }

@@ -79,6 +79,24 @@ public final class MessageBean implements Serializable {
         type = response.getType();
     }
 
+    public MessageBean(MessageBean toCopy) {
+        id = toCopy.id;
+        channelId = toCopy.channelId;
+        author = toCopy.author;
+        content = toCopy.content;
+        timestamp = toCopy.timestamp;
+        editedTimestamp = toCopy.editedTimestamp;
+        tts = toCopy.tts;
+        mentionEveryone = toCopy.mentionEveryone;
+        mentions = toCopy.mentions;
+        mentionRoles = toCopy.mentionRoles;
+        attachments = toCopy.attachments;
+        reactions = toCopy.reactions;
+        pinned = toCopy.pinned;
+        webhookId = toCopy.webhookId;
+        type = toCopy.type;
+    }
+
     public MessageBean() {}
 
     public long getId() {

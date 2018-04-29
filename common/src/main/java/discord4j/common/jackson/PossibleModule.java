@@ -37,6 +37,7 @@ public class PossibleModule extends Module {
     @Override
     public void setupModule(SetupContext context) {
         context.addSerializers(new PossibleSerializers());
+        context.addDeserializers(new PossibleDeserializers());
         context.addTypeModifier(new PossibleTypeModifier());
     }
 }
