@@ -261,7 +261,7 @@ class GuildDispatchHandlers {
                 .flatMap(guild -> serviceMediator.getStoreHolder().getGuildStore().save(guildId, guild));
 
         Mono<Void> saveMembers = serviceMediator.getStoreHolder().getMemberStore().save(memberPairs);
-        
+
         Mono<Void> saveUsers = serviceMediator.getStoreHolder().getUserStore().save(userPairs);
 
         Set<Member> members = Arrays.stream(context.getDispatch().getMembers())
