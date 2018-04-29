@@ -28,13 +28,21 @@ ext {
 }
 
 allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
     group = artifact_group
     version = project_version
+
+    task downloadDependencies() {
+        description 'Download all dependencies to the Gradle cache'
+        doLast {
+            configurations.findAll { it.canBeResolved }.files
+        }
+    }
 }
 
 subprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven-publish'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'com.gorylenko.gradle-git-properties'
     apply plugin: 'com.jfrog.artifactory'
@@ -56,13 +64,6 @@ subprojects {
         maven { url "https://repo.spring.io/snapshot" }
         maven { url "https://repo.spring.io/milestone" }
         maven { url 'https://jitpack.io' }
-    }
-
-    task downloadDependencies() {
-        description 'Download all dependencies to the Gradle cache'
-        doLast {
-            configurations.findAll { it.canBeResolved }.files
-        }
     }
 
     javadoc {
