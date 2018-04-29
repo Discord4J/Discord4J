@@ -60,6 +60,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,10 +95,16 @@ public class RetryBotTest {
         options.setShard(shardId != null ? new int[]{shardId, shardCount} : null);
 
         try {
-            for (String line : Files.readAllLines(Paths.get("resume.dat"))) {
-                String[] tokens = line.split(";", 2);
-                options.setResumeSessionId(tokens[0]);
-                options.setResumeSequence(Integer.valueOf(tokens[1]));
+            Path path = Paths.get("resume.dat");
+            if (Files.isRegularFile(path)
+                    && Files.getLastModifiedTime(path).toInstant().plusSeconds(60).isAfter(Instant.now())) {
+                for (String line : Files.readAllLines(path)) {
+                    String[] tokens = line.split(";", 2);
+                    options.setResumeSessionId(tokens[0]);
+                    options.setResumeSequence(Integer.valueOf(tokens[1]));
+                }
+            } else {
+                log.debug("Not attempting to resume");
             }
         } catch (IOException e) {
             e.printStackTrace();
