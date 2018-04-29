@@ -27,9 +27,12 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.bean.VoiceStateBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
 import discord4j.core.util.ArrayUtil;
+import discord4j.core.util.EntityUtil;
 import discord4j.store.util.LongLongTuple2;
 import discord4j.store.util.LongObjTuple2;
 import reactor.core.publisher.Flux;
@@ -61,11 +64,52 @@ class GuildDispatchHandlers {
 
     static Mono<GuildCreateEvent> guildCreate(DispatchContext<GuildCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
-        GuildBean bean = new GuildBean(context.getDispatch().getGuild());
 
-        return serviceMediator.getStoreHolder().getGuildStore()
-                .save(bean.getId(), bean)
-                .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, bean)));
+        GuildBean guildBean = new GuildBean(context.getDispatch().getGuild());
+
+        Mono<Void> saveGuild = serviceMediator.getStoreHolder().getGuildStore().save(guildBean.getId(), guildBean);
+        // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
+        Mono<Void> saveChannels = Flux.just(context.getDispatch().getGuild().getChannels()).flatMap(channel -> {
+            switch (Channel.Type.of(channel.getType())) {
+                case GUILD_TEXT:
+                    return serviceMediator.getStoreHolder().getTextChannelStore().save(channel.getId(),
+                            new TextChannelBean(channel));
+                case GUILD_VOICE:
+                    return serviceMediator.getStoreHolder().getVoiceChannelStore().save(channel.getId(),
+                            new VoiceChannelBean(channel));
+                case GUILD_CATEGORY:
+                    return serviceMediator.getStoreHolder().getCategoryStore().save(channel.getId(),
+                            new CategoryBean(channel));
+                default:
+                    return EntityUtil.throwUnsupportedDiscordValue(channel.getType());
+            }
+        }).then();
+
+        Mono<Void> saveRoles = serviceMediator.getStoreHolder().getRoleStore()
+                .save(Flux.just(context.getDispatch().getGuild().getRoles())
+                        .map(role -> Tuples.of(role.getId(), new RoleBean(role))));
+
+        Mono<Void> saveEmojis = serviceMediator.getStoreHolder().getGuildEmojiStore()
+                .save(Flux.just(context.getDispatch().getGuild().getEmojis())
+                        .map(emoji -> Tuples.of(emoji.getId(), new GuildEmojiBean(emoji))));
+
+        Mono<Void> saveMembers = serviceMediator.getStoreHolder().getMemberStore()
+                .save(Flux.just(context.getDispatch().getGuild().getMembers())
+                        .map(member -> Tuples.of(LongLongTuple2.of(guildBean.getId(), member.getUser().getId()),
+                                new MemberBean(member))));
+
+        Mono<Void> saveVoiceStates = serviceMediator.getStoreHolder().getVoiceStateStore()
+                .save(Flux.just(context.getDispatch().getGuild().getVoiceStates())
+                        .map(voiceState -> Tuples.of(LongLongTuple2.of(guildBean.getId(), voiceState.getUserId()),
+                                new VoiceStateBean(voiceState))));
+
+        return saveGuild
+                .then(saveChannels)
+                .then(saveRoles)
+                .then(saveEmojis)
+                .then(saveMembers)
+                .then(saveVoiceStates)
+                .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, guildBean)));
     }
 
     static Mono<GuildDeleteEvent> guildDelete(DispatchContext<GuildDelete> context) {
