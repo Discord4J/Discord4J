@@ -196,6 +196,7 @@ class GuildDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         GuildMemberResponse response = context.getDispatch().getMember();
         MemberBean bean = new MemberBean(response);
+        UserBean userBean = new UserBean(response.getUser());
 
         Mono<Void> addMemberId = serviceMediator.getStoreHolder().getGuildStore()
                 .find(guildId)
@@ -205,10 +206,14 @@ class GuildDispatchHandlers {
         Mono<Void> saveMember = serviceMediator.getStoreHolder().getMemberStore()
                 .save(LongLongTuple2.of(guildId, response.getUser().getId()), bean);
 
-        Member member = new Member(serviceMediator, bean, new UserBean(response.getUser()), guildId);
+        Mono<Void> saveUser = serviceMediator.getStoreHolder().getUserStore()
+                .save(response.getUser().getId(), userBean);
+
+        Member member = new Member(serviceMediator, bean,userBean, guildId);
 
         return addMemberId
                 .then(saveMember)
+                .then(saveUser)
                 .thenReturn(new MemberJoinEvent(serviceMediator.getClient(), member, guildId));
     }
 
@@ -240,6 +245,10 @@ class GuildDispatchHandlers {
                 .map(response -> Tuples.of(response, new MemberBean(response)))
                 .map(tuple -> Tuples.of(LongLongTuple2.of(guildId, tuple.getT1().getUser().getId()), tuple.getT2()));
 
+        Flux<Tuple2<Long, UserBean>> userPairs = Flux.fromStream(Arrays.stream(context.getDispatch().getMembers()))
+                .map(response -> new UserBean(response.getUser()))
+                .map(bean -> Tuples.of(bean.getId(), bean));
+
         Mono<Void> addMemberIds = serviceMediator.getStoreHolder().getGuildStore()
                 .find(guildId)
                 .doOnNext(guild -> {
@@ -252,6 +261,8 @@ class GuildDispatchHandlers {
                 .flatMap(guild -> serviceMediator.getStoreHolder().getGuildStore().save(guildId, guild));
 
         Mono<Void> saveMembers = serviceMediator.getStoreHolder().getMemberStore().save(memberPairs);
+        
+        Mono<Void> saveUsers = serviceMediator.getStoreHolder().getUserStore().save(userPairs);
 
         Set<Member> members = Arrays.stream(context.getDispatch().getMembers())
                 .map(response -> Tuples.of(new MemberBean(response), new UserBean(response.getUser())))
@@ -260,6 +271,7 @@ class GuildDispatchHandlers {
 
         return addMemberIds
                 .then(saveMembers)
+                .then(saveUsers)
                 .thenReturn(new MemberChunkEvent(serviceMediator.getClient(), guildId, members));
     }
 
