@@ -17,12 +17,15 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.object.entity.bean.MessageChannelBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.MessageCreateSpec;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /** An internal implementation of {@link MessageChannel} designed to streamline inheritance. */
 class BaseMessageChannel extends BaseChannel implements MessageChannel {
@@ -50,6 +53,21 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Optional<Instant> getLastPinTimestamp() {
         return Optional.ofNullable(getData().getLastPinTimestamp()).map(Instant::parse);
+    }
+
+    @Override
+    public final Mono<Message> createMessage(final Consumer<MessageCreateSpec> spec) {
+        final MessageCreateSpec mutatedSpec = new MessageCreateSpec();
+        spec.accept(mutatedSpec);
+        return createMessage(mutatedSpec);
+    }
+
+    @Override
+    public final Mono<Message> createMessage(final MessageCreateSpec spec) {
+        return getServiceMediator().getRestClient().getChannelService()
+                .createMessage(getId().asLong(), spec.asRequest())
+                .map(MessageBean::new)
+                .map(bean -> new Message(getServiceMediator(), bean));
     }
 
     @Override

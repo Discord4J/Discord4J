@@ -17,10 +17,12 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.MessageCreateSpec;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /** A Discord channel that can utilizes messages. */
 public interface MessageChannel extends Channel {
@@ -46,4 +48,25 @@ public interface MessageChannel extends Channel {
      * @return When the last pinned message was pinned, if present.
      */
     Optional<Instant> getLastPinTimestamp();
+
+    /**
+     * Requests to create a message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link MessageCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createMessage(MessageCreateSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    Mono<Message> createMessage(Consumer<MessageCreateSpec> spec);
+
+    /**
+     * Requests to create a message.
+     *
+     * @param spec A configured {@link MessageCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    Mono<Message> createMessage(MessageCreateSpec spec);
 }

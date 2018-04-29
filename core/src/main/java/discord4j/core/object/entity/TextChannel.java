@@ -110,6 +110,16 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
         return messageChannel.getLastPinTimestamp();
     }
 
+    @Override
+    public Mono<Message> createMessage(final Consumer<MessageCreateSpec> spec) {
+        return messageChannel.createMessage(spec);
+    }
+
+    @Override
+    public Mono<Message> createMessage(final MessageCreateSpec spec) {
+        return messageChannel.createMessage(spec);
+    }
+
     /**
      * Gets the channel topic.
      *
@@ -141,36 +151,6 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
      */
     public String getMention() {
         return "<#" + getId().asString() + ">";
-    }
-
-    /**
-     * Requests to create a message.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link MessageCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createMessage(MessageCreateSpec)}.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Message> createMessage(final Consumer<MessageCreateSpec> spec) {
-        final MessageCreateSpec mutatedSpec = new MessageCreateSpec();
-        spec.accept(mutatedSpec);
-        return createMessage(mutatedSpec);
-    }
-
-    /**
-     * Requests to create a message.
-     *
-     * @param spec A configured {@link MessageCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Message> createMessage(final MessageCreateSpec spec) {
-        return getServiceMediator().getRestClient().getChannelService()
-                .createMessage(getId().asLong(), spec.asRequest())
-                .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean));
     }
 
     /**
