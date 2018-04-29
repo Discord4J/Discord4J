@@ -1,12 +1,9 @@
 plugins {
-    id 'java'
-    id 'maven'
-    id 'maven-publish'
-    id 'com.jfrog.bintray' version '1.8.0'
-    id 'com.jfrog.artifactory' version '4.5.2'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
     id 'io.spring.dependency-management' version '1.0.4.RELEASE'
     id 'com.github.ben-manes.versions' version '0.17.0'
     id 'com.gorylenko.gradle-git-properties' version '1.4.21'
+    id 'java'
 }
 
 ext {
@@ -25,29 +22,25 @@ ext {
     junit_version = '4.12'
     logback_version = '1.3.0-alpha4'
     autoservice_version = '1.0-rc4'
-}
 
-allprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven-publish'
-
-    group = artifact_group
-    version = project_version
-
-    task downloadDependencies() {
-        description 'Download all dependencies to the Gradle cache'
-        doLast {
-            configurations.findAll { it.canBeResolved }.files
+    defaultBlank = { closure ->
+        try {
+            closure()
+        } catch (MissingPropertyException e) {
+            ''
         }
     }
 }
 
-subprojects {
+allprojects {
+
+    group = artifact_group
+    version = project_version
+
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'com.gorylenko.gradle-git-properties'
-    apply plugin: 'com.jfrog.artifactory'
-
-    archivesBaseName = 'discord4j-' + project.name
 
     sourceCompatibility = project_jdk
     targetCompatibility = project_jdk
@@ -66,6 +59,17 @@ subprojects {
         maven { url 'https://jitpack.io' }
     }
 
+    task downloadDependencies() {
+        description 'Download all dependencies to the Gradle cache'
+        doLast {
+            configurations.findAll { it.canBeResolved }.files
+        }
+    }
+
+    jar {
+        baseName = 'Discord4J-' + baseName
+    }
+
     javadoc {
         options.encoding = 'UTF-8'
         options.tags = [
@@ -76,76 +80,25 @@ subprojects {
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
+        baseName = 'Discord4J-' + baseName
         classifier = 'javadoc'
         from 'build/docs/javadoc'
     }
 
     task sourcesJar(type: Jar) {
+        baseName = 'Discord4J-' + baseName
         classifier = 'sources'
         from sourceSets.main.allSource
     }
 
     artifacts {
+        archives jar
         archives javadocJar
         archives sourcesJar
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-                artifactId 'discord4j-' + project.name
-                artifact sourcesJar
-                artifact javadocJar
-            }
-        }
-    }
+    shadowJar.dependsOn(assemble)
 }
-
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    pkg {
-        licenses = ['LGPL-3.0']
-        vcsUrl = 'https://github.com/Discord4J/Discord4J.git'
-        name = project_name
-        version {
-            name = project.version
-        }
-    }
-}
-
-artifactory {
-    contextUrl = 'https://oss.jfrog.org'
-    resolve {
-        repository {
-            repoKey = 'jcenter'
-        }
-    }
-    publish {
-        repository {
-            if (project.version.endsWith("-SNAPSHOT")) {
-                repoKey = 'oss-snapshot-local'
-            } else {
-                repoKey = 'oss-release-local'
-            }
-
-            username = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-            password = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-        }
-        defaults {
-            publications('mavenJava')
-            publishArtifacts = true
-            properties = ['qa.level': 'basic', 'dev.team': 'core']
-            publishPom = true
-        }
-    }
-}
-
-artifactoryPublish.skip = true
-
-bintrayUpload.dependsOn build
-artifactoryPublish.dependsOn build
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.7'

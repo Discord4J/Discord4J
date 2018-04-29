@@ -6,3 +6,16 @@ dependencies {
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
 }
+
+publishing {
+    publications {
+        rest(MavenPublication) {
+            artifactId 'Discord4J-rest'
+
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}

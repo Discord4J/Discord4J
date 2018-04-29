@@ -1,3 +1,10 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+shadowJar {
+    baseName = 'Discord4J'
+    classifier = 'shaded'
+}
+
 dependencies {
     compile project(':rest')
     compile project(':gateway')
@@ -6,4 +13,17 @@ dependencies {
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
     testCompile "io.projectreactor:reactor-test"
+}
+
+publishing {
+    publications {
+        core(MavenPublication) {
+            artifactId 'Discord4J-core'
+
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
 }

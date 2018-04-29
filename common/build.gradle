@@ -6,3 +6,16 @@ dependencies {
 
     testCompile "junit:junit:$junit_version"
 }
+
+publishing {
+    publications {
+        common(MavenPublication) {
+            artifactId 'Discord4J-common'
+
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
