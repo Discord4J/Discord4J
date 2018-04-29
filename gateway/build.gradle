@@ -6,16 +6,3 @@ dependencies {
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
 }
-
-publishing {
-    publications {
-        gateway(MavenPublication) {
-            artifactId 'Discord4J-gateway'
-
-            from components.java
-
-            artifact sourcesJar
-            artifact javadocJar
-        }
-    }
-}
