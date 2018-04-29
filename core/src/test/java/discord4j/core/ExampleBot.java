@@ -17,20 +17,18 @@
 
 package discord4j.core;
 
-import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.ApplicationInfo;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class ExampleBot {
+
+    private static final Logger log = Loggers.getLogger(ExampleBot.class);
 
     private static String token;
 
@@ -41,80 +39,17 @@ public class ExampleBot {
 
     @Test
     @Ignore("Example code excluded from CI")
-    public void testLogoutBot() {
+    public void testLogBot() {
         DiscordClient client = new ClientBuilder(token).build();
-        Listeners listeners = new Listeners(client);
-        listeners.registerListener(new CoreCommandListener());
-        listeners.registerListener(context -> {
-            EventDispatcher dispatcher = context.client.getEventDispatcher();
-            dispatcher.on(ConnectEvent.class).subscribe();
-            dispatcher.on(DisconnectEvent.class).subscribe();
-            dispatcher.on(ReconnectStartEvent.class).subscribe();
-            dispatcher.on(ReconnectEvent.class).subscribe();
-            dispatcher.on(ReconnectFailEvent.class).subscribe();
-        });
-        // latch to avoid blocking main thread on .login()
-        //        CountDownLatch latch = new CountDownLatch(1);
-        //        client.login()
-        //                .doOnTerminate(latch::countDown)
-        //                .doOnCancel(latch::countDown)
-        //                .subscribe();
-        //        latch.await();
-        // or just block it
+        client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(new MessageCreateListener());
         client.login().block();
     }
 
-    public static class Listeners {
-
-        private final DiscordClient client;
-
-        Listeners(DiscordClient client) {
-            this.client = client;
-        }
-
-        private void registerListener(Consumer<ListenerContext> listener) {
-            listener.accept(new ListenerContext(client));
-        }
-    }
-
-    public static class ListenerContext {
-
-        private final DiscordClient client;
-
-        ListenerContext(DiscordClient client) {
-            this.client = client;
-        }
-
-        public DiscordClient getClient() {
-            return client;
-        }
-    }
-
-    private static class CoreCommandListener implements Consumer<ListenerContext> {
-
-        private final AtomicReference<Snowflake> owner = new AtomicReference<>();
+    private static class MessageCreateListener implements Consumer<MessageCreateEvent> {
 
         @Override
-        public void accept(ListenerContext context) {
-            context.client.getEventDispatcher().on(ReadyEvent.class)
-                    .next() // get only once and then unsubscribe
-                    .flatMap(ready -> context.client.getApplicationInfo())
-                    .map(ApplicationInfo::getOwnerId)
-                    .subscribe(owner::set);
-
-            context.client.getEventDispatcher().on(MessageCreateEvent.class)
-                    .subscribe(event -> {
-                        Message message = event.getMessage();
-
-                        message.getAuthorId()
-                                .filter(id -> id.equals(owner.get())) // only accept bot owner messages
-                                .flatMap(id -> message.getContent())
-                                .ifPresent(content -> {
-                                    if ("!logout".equals(content)) {
-                                        context.client.logout();
-                                    }
-                                });
-                    });
+        public void accept(MessageCreateEvent event) {
+            log.info(event.getMessage().getContent().orElse(""));
         }
     }
 }
