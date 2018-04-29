@@ -19,7 +19,6 @@ package discord4j.core.object.entity.bean;
 import discord4j.common.json.response.ChannelResponse;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public final class TextChannelBean extends ChannelBean {
 
@@ -36,7 +35,7 @@ public final class TextChannelBean extends ChannelBean {
         guildChannel = new GuildChannelBean(response);
         messageChannel = new MessageChannelBean(response);
         topic = response.getTopic();
-        nsfw = Objects.requireNonNull(response.getNsfw());
+        nsfw = response.isNsfw() != null && response.isNsfw();
     }
 
     public TextChannelBean() {}
@@ -47,6 +46,15 @@ public final class TextChannelBean extends ChannelBean {
 
     public void setGuildChannel(final GuildChannelBean guildChannel) {
         this.guildChannel = guildChannel;
+    }
+
+    @Nullable
+    public Long getGuildId() {
+        return this.guildChannel.getGuildId();
+    }
+
+    public void setGuildId(Long guildId) {
+        this.guildChannel.setGuildId(guildId);
     }
 
     public MessageChannelBean getMessageChannel() {

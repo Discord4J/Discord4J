@@ -106,7 +106,7 @@ public class ChannelResponse {
     }
 
     @Nullable
-    public Boolean getNsfw() {
+    public Boolean isNsfw() {
         return nsfw;
     }
 

@@ -27,7 +27,6 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
-import discord4j.core.object.VoiceState;
 import discord4j.core.object.bean.VoiceStateBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
@@ -72,14 +71,17 @@ class GuildDispatchHandlers {
         Mono<Void> saveChannels = Flux.just(context.getDispatch().getGuild().getChannels()).flatMap(channel -> {
             switch (Channel.Type.of(channel.getType())) {
                 case GUILD_TEXT:
-                    return serviceMediator.getStoreHolder().getTextChannelStore().save(channel.getId(),
-                            new TextChannelBean(channel));
+                    TextChannelBean textChannelBean = new TextChannelBean(channel);
+                    textChannelBean.setGuildId(guildBean.getId());
+                    return serviceMediator.getStoreHolder().getTextChannelStore().save(channel.getId(), textChannelBean);
                 case GUILD_VOICE:
-                    return serviceMediator.getStoreHolder().getVoiceChannelStore().save(channel.getId(),
-                            new VoiceChannelBean(channel));
+                    VoiceChannelBean voiceChannelBean = new VoiceChannelBean(channel);
+                    voiceChannelBean.setGuildId(guildBean.getId());
+                    return serviceMediator.getStoreHolder().getVoiceChannelStore().save(channel.getId(), voiceChannelBean);
                 case GUILD_CATEGORY:
-                    return serviceMediator.getStoreHolder().getCategoryStore().save(channel.getId(),
-                            new CategoryBean(channel));
+                    CategoryBean categoryBean = new CategoryBean(channel);
+                    categoryBean.setGuildId(guildBean.getId());
+                    return serviceMediator.getStoreHolder().getCategoryStore().save(channel.getId(), categoryBean);
                 default:
                     return EntityUtil.throwUnsupportedDiscordValue(channel.getType());
             }

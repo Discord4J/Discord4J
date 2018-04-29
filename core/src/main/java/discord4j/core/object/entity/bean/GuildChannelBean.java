@@ -28,7 +28,8 @@ public class GuildChannelBean extends ChannelBean {
 
     private static final long serialVersionUID = -3061996202860792100L;
 
-    private long guildId;
+    @Nullable
+    private Long guildId;
     @Nullable
     private PermissionOverwriteBean[] permissionOverwrites;
     private String name;
@@ -38,7 +39,7 @@ public class GuildChannelBean extends ChannelBean {
 
     public GuildChannelBean(final ChannelResponse response) {
         super(response);
-        guildId = Objects.requireNonNull(response.getGuildId());
+        guildId = response.getGuildId();
 
         final OverwriteEntity[] overwrites = response.getPermissionOverwrites();
         permissionOverwrites = (overwrites == null) ? null : Arrays.stream(overwrites)
@@ -52,11 +53,12 @@ public class GuildChannelBean extends ChannelBean {
 
     public GuildChannelBean() {}
 
-    public final long getGuildId() {
+    @Nullable
+    public final Long getGuildId() {
         return guildId;
     }
 
-    public final void setGuildId(final long guildId) {
+    public final void setGuildId(final Long guildId) {
         this.guildId = guildId;
     }
 
