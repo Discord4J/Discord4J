@@ -85,7 +85,6 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
     @Override
     public GatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode payload = p.getCodec().readTree(p);
-        System.out.println(payload);
 
         int op = payload.get(OP_FIELD).asInt();
         String t = payload.get(T_FIELD).asText();
