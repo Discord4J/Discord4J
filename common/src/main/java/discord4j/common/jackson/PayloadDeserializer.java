@@ -73,6 +73,9 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.VOICE_STATE_UPDATE, VoiceStateUpdateDispatch.class);
         dispatchTypes.put(EventNames.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
         dispatchTypes.put(EventNames.WEBHOOKS_UPDATE, WebhooksUpdate.class);
+
+        // Ignored
+        dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);
     }
 
     public PayloadDeserializer() {

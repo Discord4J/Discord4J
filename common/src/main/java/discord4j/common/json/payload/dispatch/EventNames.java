@@ -51,4 +51,7 @@ public abstract class EventNames {
     public static final String VOICE_STATE_UPDATE = "VOICE_STATE_UPDATE";
     public static final String VOICE_SERVER_UPDATE = "VOICE_SERVER_UPDATE";
     public static final String WEBHOOKS_UPDATE = "WEBHOOKS_UPDATE";
+
+    // Ignored
+    public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";
 }
