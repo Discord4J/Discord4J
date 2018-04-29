@@ -193,7 +193,7 @@ public class GuildServiceTest {
 
     @Test
     public void testCreateGuildRole() {
-        String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
+        String randomName = "test_" + Long.toHexString(Double.doubleToLongBits(Math.random()));
         RoleCreateRequest req = new RoleCreateRequest(randomName, 0, 0, false, false);
         getGuildService().createGuildRole(guild, req).block();
     }
@@ -211,7 +211,11 @@ public class GuildServiceTest {
 
     @Test
     public void testDeleteGuildRole() {
-        // TODO
+        getGuildService().getGuildRoles(guild)
+                .filter(role -> role.getName().startsWith("test_") || role.getName().startsWith("3f"))
+                .limitRequest(5)
+                .flatMap(role -> getGuildService().deleteGuildRole(guild, role.getId()))
+                .blockLast();
     }
 
     @Test
