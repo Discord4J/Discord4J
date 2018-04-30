@@ -16,6 +16,8 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.json.payload.GatewayPayload;
+import discord4j.common.json.payload.RequestGuildMembers;
 import discord4j.common.json.payload.dispatch.*;
 import discord4j.common.json.response.GuildEmojiResponse;
 import discord4j.common.json.response.GuildMemberResponse;
@@ -105,12 +107,18 @@ class GuildDispatchHandlers {
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildBean.getId(), voiceState.getUserId()),
                                 new VoiceStateBean(voiceState))));
 
+        Mono<Void> startMemberChunk = Mono.fromRunnable(() -> {
+            context.getServiceMediator().getGatewayClient().sender()
+                    .next(GatewayPayload.requestGuildMembers(new RequestGuildMembers(guildBean.getId(), "", 0)));
+        });
+
         return saveGuild
                 .then(saveChannels)
                 .then(saveRoles)
                 .then(saveEmojis)
                 .then(saveMembers)
                 .then(saveVoiceStates)
+                .then(startMemberChunk) // TODO make optional
                 .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, guildBean)));
     }
 

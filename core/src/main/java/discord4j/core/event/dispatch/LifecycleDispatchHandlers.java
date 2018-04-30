@@ -34,13 +34,19 @@ class LifecycleDispatchHandlers {
 
     static Mono<ReadyEvent> ready(DispatchContext<Ready> context) {
         Ready dispatch = context.getDispatch();
-        User self = new User(context.getServiceMediator(), new UserBean(dispatch.getUser()));
+        UserBean userBean = new UserBean(dispatch.getUser());
+
+        User self = new User(context.getServiceMediator(), userBean);
         Set<ReadyEvent.Guild> guilds = Arrays.stream(dispatch.getGuilds())
                 .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
                 .collect(Collectors.toSet());
 
-        return Mono.just(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
-                guilds, dispatch.getSessionId(), dispatch.getTrace()));
+        Mono<Void> saveUser = context.getServiceMediator().getStoreHolder().getUserStore()
+                .save(context.getDispatch().getUser().getId(), userBean);
+
+        return saveUser.thenReturn(
+                new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self, guilds,
+                        dispatch.getSessionId(), dispatch.getTrace()));
     }
 
     static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {
