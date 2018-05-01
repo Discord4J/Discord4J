@@ -16,6 +16,9 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.response.AuditLogChangeResponse;
+import discord4j.common.json.response.AuditLogEntryResponse;
+import discord4j.common.json.response.AuditLogResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
@@ -24,8 +27,12 @@ import discord4j.core.object.data.stored.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.audit.*;
+import discord4j.core.object.bean.RegionBean;
+import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
+import discord4j.core.util.AuditLogUtil;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.rest.json.response.PruneResponse;
@@ -38,6 +45,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -690,6 +698,34 @@ public final class Guild implements Entity {
      */
     public Mono<Void> leave() {
         return serviceMediator.getRestClient().getUserService().leaveGuild(getId().asLong());
+    }
+
+    public Flux<AuditLogEntry> getAuditLog(Snowflake responsibleUser, ActionType actionType) {
+        Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
+            params.put("user_id", responsibleUser.asString());
+            params.put("action_type", actionType.getValue());
+
+            return serviceMediator.getRestClient().getAuditLogService().getAuditLog(getId().asLong(), params).flux();
+        };
+
+        Function<AuditLogResponse, Long> getLastEntryId = response ->
+                response.getAuditLogEntries()[response.getAuditLogEntries().length - 1].getId();
+
+        return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
+                .flatMap(log -> Flux.fromArray(log.getAuditLogEntries()).map(entry -> {
+                    long targetId = entry.getTargetId() == null ? 0 : entry.getTargetId();
+
+                    Map<String, AuditLogChange<?>> changes = entry.getChanges() == null
+                            ? Collections.emptyMap()
+                            : Arrays.stream(entry.getChanges()).collect(AuditLogUtil.changeCollector());
+
+                    Map<String, ?> options = entry.getOptions() == null
+                            ? Collections.emptyMap()
+                            : AuditLogUtil.createOptionMap(entry.getOptions());
+
+                    return new AuditLogEntry(getClient(), entry.getId(), targetId, entry.getUserId(),
+                            entry.getReason(), ActionType.of(entry.getActionType()), changes, options);
+                }));
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */
