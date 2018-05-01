@@ -28,6 +28,8 @@ import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 public class UserService extends RestService {
 
     public UserService(Router router) {
@@ -50,8 +52,9 @@ public class UserService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Flux<UserGuildResponse> getCurrentUserGuilds() {
+    public Flux<UserGuildResponse> getCurrentUserGuilds(Map<String, Object> queryParams) {
         return Routes.CURRENT_USER_GUILDS_GET.newRequest()
+                .query(queryParams)
                 .exchange(getRouter())
                 .flatMapMany(Flux::fromArray);
     }

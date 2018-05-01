@@ -34,6 +34,8 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
 
+import java.util.Collections;
+
 public class UserServiceTest {
 
     private static final long user = Long.parseUnsignedLong(System.getenv("member"));
@@ -101,7 +103,7 @@ public class UserServiceTest {
 
     @Test
     public void testGetCurrentUserGuilds() {
-        getUserService().getCurrentUserGuilds().then().block();
+        getUserService().getCurrentUserGuilds(Collections.emptyMap()).then().block();
     }
 
     @Test

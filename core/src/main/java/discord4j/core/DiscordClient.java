@@ -17,19 +17,23 @@
 package discord4j.core;
 
 import discord4j.common.json.payload.StatusUpdate;
+import discord4j.common.json.response.UserGuildResponse;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.PaginationUtil;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.util.LongLongTuple2;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** A high-level abstraction of common Discord operations such as entity retrieval and Discord shard manipulation. */
 public final class DiscordClient {
@@ -249,6 +253,26 @@ public final class DiscordClient {
                 .getCurrentApplicationInfo()
                 .map(ApplicationInfoBean::new)
                 .map(applicationInfoBean -> new ApplicationInfo(serviceMediator, applicationInfoBean));
+    }
+
+    /**
+     * Requests to retrieve the guilds the current user is in.
+     *
+     * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current user is in. If an error
+     * is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Guild> getGuilds() {
+        final Function<Map<String, Object>, Flux<UserGuildResponse>> makeRequest = params ->
+                serviceMediator.getRestClient().getUserService().getCurrentUserGuilds(params);
+
+        return serviceMediator.getStoreHolder().getGuildStore()
+                .values()
+                .cast(BaseGuildBean.class)
+                .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
+                        .map(UserGuildResponse::getId)
+                        .flatMap(serviceMediator.getRestClient().getGuildService()::getGuild)
+                        .map(BaseGuildBean::new))
+                .map(bean -> new Guild(serviceMediator, bean));
     }
 
     /**
