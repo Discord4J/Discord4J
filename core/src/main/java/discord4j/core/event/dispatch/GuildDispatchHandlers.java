@@ -349,16 +349,24 @@ class GuildDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 
-        GuildBean bean = new GuildBean(context.getDispatch().getGuild());
-        Guild current = new Guild(serviceMediator, bean);
+        long guildId = context.getDispatch().getGuild().getId();
 
-        Mono<Void> saveNew = serviceMediator.getStoreHolder().getGuildStore().save(bean.getId(), bean);
+        Mono<GuildUpdateEvent> update = context.getServiceMediator().getStoreHolder().getGuildStore()
+                .find(guildId)
+                .flatMap(oldBean -> {
+                    GuildBean newBean = new GuildBean(oldBean, context.getDispatch().getGuild());
 
-        return serviceMediator.getStoreHolder().getGuildStore()
-                .find(context.getDispatch().getGuild().getId())
-                .flatMap(saveNew::thenReturn)
-                .map(old -> new GuildUpdateEvent(client, current, new Guild(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new GuildUpdateEvent(client, current, null)));
+                    Guild old = new Guild(context.getServiceMediator(), oldBean);
+                    Guild current = new Guild(context.getServiceMediator(), newBean);
+
+                    return context.getServiceMediator().getStoreHolder().getGuildStore()
+                            .save(newBean.getId(), newBean)
+                            .thenReturn(new GuildUpdateEvent(client, current, old));
+                });
+
+        Guild current = new Guild(serviceMediator, new BaseGuildBean(context.getDispatch().getGuild()));
+
+        return update.defaultIfEmpty(new GuildUpdateEvent(client, current, null));
     }
 
 }

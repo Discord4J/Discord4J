@@ -37,7 +37,7 @@ public final class GuildBean extends BaseGuildBean {
     public GuildBean(final GuildResponse response) {
         super(response);
 
-        // None of these fields can be null if the GuildResponse was received on the gateway. Enforce this.
+        // None of these fields can be null if the GuildResponse was received in a guild_create. Enforce this.
         this.joinedAt = Objects.requireNonNull(response.getJoinedAt());
         this.large = Objects.requireNonNull(response.getLarge());
         this.memberCount = Objects.requireNonNull(response.getMemberCount());
@@ -50,6 +50,16 @@ public final class GuildBean extends BaseGuildBean {
         channels = Arrays.stream(Objects.requireNonNull(response.getChannels()))
                 .mapToLong(ChannelResponse::getId)
                 .toArray();
+    }
+
+    public GuildBean(final GuildBean toCopy, final GuildResponse response) {
+        super(response);
+
+        this.joinedAt = toCopy.joinedAt;
+        this.large = toCopy.large;
+        this.memberCount = toCopy.memberCount;
+        this.members = toCopy.members;
+        this.channels = toCopy.channels;
     }
 
     public GuildBean() {}

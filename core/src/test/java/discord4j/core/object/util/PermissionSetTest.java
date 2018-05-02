@@ -18,8 +18,6 @@ package discord4j.core.object.util;
 
 import org.junit.Test;
 
-import java.security.Permissions;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
