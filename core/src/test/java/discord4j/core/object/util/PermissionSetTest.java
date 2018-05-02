@@ -18,6 +18,8 @@ package discord4j.core.object.util;
 
 import org.junit.Test;
 
+import java.security.Permissions;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -43,4 +45,23 @@ public class PermissionSetTest {
         assertTrue(permSet.contains(Permission.MANAGE_ROLES));
     }
 
+    @Test
+    public void testOr() {
+        PermissionSet set0 = PermissionSet.of(Permission.KICK_MEMBERS);
+        PermissionSet set1 = PermissionSet.of(Permission.BAN_MEMBERS);
+        PermissionSet result = set0.or(set1);
+
+        assertEquals(2, result.size());
+        assertEquals(PermissionSet.of(Permission.KICK_MEMBERS, Permission.BAN_MEMBERS), result);
+    }
+
+    @Test
+    public void testAnd() {
+        PermissionSet set0 = PermissionSet.of(Permission.KICK_MEMBERS, Permission.BAN_MEMBERS);
+        PermissionSet set1 = PermissionSet.of(Permission.KICK_MEMBERS);
+        PermissionSet result = set0.and(set1);
+
+        assertEquals(1, result.size());
+        assertEquals(PermissionSet.of(Permission.KICK_MEMBERS), result);
+    }
 }

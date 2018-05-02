@@ -81,6 +81,26 @@ public final class PermissionSet extends AbstractSet<Permission> {
     }
 
     /**
+     * Performs a logical AND of of this permission set with the other permission set.
+     *
+     * @param other The other permission set.
+     * @return A new permission set of this set AND the other set.
+     */
+    public PermissionSet and(PermissionSet other) {
+        return PermissionSet.of(this.rawValue & other.rawValue);
+    }
+
+    /**
+     * Performs a logical OR of this permission set with the other permission set.
+     *
+     * @param other The other permission set.
+     * @return A new permission set of this set OR the other set.
+     */
+    public PermissionSet or(PermissionSet other) {
+        return PermissionSet.of(this.rawValue | other.rawValue);
+    }
+
+    /**
      * Gets this {@code PermissionSet} as an {@link EnumSet}.
      *
      * @return This {@code PermissionSet} as an {@link EnumSet}.

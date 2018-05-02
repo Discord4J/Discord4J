@@ -57,7 +57,7 @@ public enum Permission {
     SEND_TTS_MESSAGES(0x00001000, false),
 
     /** Allows for deletion of other users messages. */
-    MANAGED_MESSAGES(0x00002000, true),
+    MANAGE_MESSAGES(0x00002000, true),
 
     /** Links sent by users with this permission will be auto-embedded. */
     EMBED_LINKS(0x00004000, false),
