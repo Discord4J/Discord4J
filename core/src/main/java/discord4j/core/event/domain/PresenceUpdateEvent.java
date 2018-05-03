@@ -17,20 +17,34 @@
 package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.Presence;
+import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.Snowflake;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class PresenceUpdateEvent extends Event {
 
+    private final long guildId;
+    private final long userId;
     private final Presence current;
     private final Presence old;
 
-    public PresenceUpdateEvent(DiscordClient client, Presence current, @Nullable Presence old) {
+    public PresenceUpdateEvent(DiscordClient client, long guildId, long userId, Presence current,
+                               @Nullable Presence old) {
         super(client);
+        this.guildId = guildId;
+        this.userId = userId;
         this.current = current;
         this.old = old;
+    }
+
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    public Snowflake getUserId() {
+        return Snowflake.of(userId);
     }
 
     public Presence getCurrent() {

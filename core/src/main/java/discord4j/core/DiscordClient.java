@@ -16,11 +16,13 @@
  */
 package discord4j.core;
 
+import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.payload.StatusUpdate;
 import discord4j.common.json.response.UserGuildResponse;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
+import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.util.EntityUtil;
@@ -335,6 +337,11 @@ public final class DiscordClient {
                 .createGuild(spec.asRequest())
                 .map(BaseGuildBean::new)
                 .map(bean -> new Guild(serviceMediator, bean));
+    }
+
+    public Mono<Void> updatePresence(final Presence presence) {
+        return Mono.fromRunnable(() -> serviceMediator.getGatewayClient().sender().next(
+                GatewayPayload.statusUpdate(presence.asStatusUpdate())));
     }
 
     /**

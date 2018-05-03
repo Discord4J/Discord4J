@@ -21,7 +21,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
-import discord4j.core.object.Presence;
+import discord4j.core.object.presence.Presence;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.bean.PresenceBean;
 import discord4j.core.object.bean.VoiceStateBean;
@@ -29,7 +29,6 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.bean.UserBean;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.store.util.LongLongTuple2;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -113,15 +112,15 @@ public abstract class DispatchHandlers {
         long userId = context.getDispatch().getUser().getId();
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         PresenceBean bean = new PresenceBean(context.getDispatch());
-        Presence current = new Presence(serviceMediator, bean);
+        Presence current = new Presence(bean);
 
         Mono<Void> saveNew = serviceMediator.getStoreHolder().getPresenceStore().save(key, bean);
 
         return serviceMediator.getStoreHolder().getPresenceStore()
                 .find(key)
                 .flatMap(saveNew::thenReturn)
-                .map(old -> new PresenceUpdateEvent(client, current, new Presence(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, current, null)));
+                .map(old -> new PresenceUpdateEvent(client, guildId, userId, current, new Presence(old)))
+                .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, guildId, userId, current, null)));
     }
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {

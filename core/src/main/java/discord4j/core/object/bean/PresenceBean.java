@@ -25,41 +25,44 @@ import java.io.Serializable;
 
 public final class PresenceBean implements Serializable {
 
-    private static final long serialVersionUID = -643257747475306026L;
+    private static final long serialVersionUID = -2046485730083712716L;
 
-    private long userId;
     @Nullable
     private ActivityBean activity;
-    @Nullable
-    private Long guildId;
     @Nullable
     private String status;
 
     public PresenceBean(final PresenceResponse response) {
-        userId = response.getUser().getId();
         final GameResponse game = response.getGame();
-        activity = (game == null) ? null : new ActivityBean(game);
-        guildId = response.getGuildId();
+
+        if (game == null) {
+            activity = null;
+        } else if (game.getTimestamps() != null || game.getSessionId() != null || game.getApplicationId() != null ||
+                game.getDetails() != null || game.getSyncId() != null || game.getState() != null ||
+                game.getParty() != null || game.getAssets() != null) {
+            activity = new RichActivityBean(game);
+        } else {
+            activity = new ActivityBean(game);
+        }
         status = response.getStatus();
     }
 
     public PresenceBean(final PresenceUpdate update) {
-        userId = update.getUser().getId();
         final GameResponse game = update.getGame();
-        activity = (game == null) ? null : new ActivityBean(game);
-        guildId = update.getGuildId();
+
+        if (game == null) {
+            activity = null;
+        } else if (game.getTimestamps() != null || game.getSessionId() != null || game.getApplicationId() != null ||
+                game.getDetails() != null || game.getSyncId() != null || game.getState() != null ||
+                game.getParty() != null || game.getAssets() != null) {
+            activity = new RichActivityBean(game);
+        } else {
+            activity = new ActivityBean(game);
+        }
         status = update.getStatus();
     }
 
     public PresenceBean() {}
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(final long userId) {
-        this.userId = userId;
-    }
 
     @Nullable
     public ActivityBean getActivity() {
@@ -68,15 +71,6 @@ public final class PresenceBean implements Serializable {
 
     public void setActivity(@Nullable final ActivityBean activity) {
         this.activity = activity;
-    }
-
-    @Nullable
-    public Long getGuildId() {
-        return guildId;
-    }
-
-    public void setGuildId(@Nullable final Long guildId) {
-        this.guildId = guildId;
     }
 
     @Nullable

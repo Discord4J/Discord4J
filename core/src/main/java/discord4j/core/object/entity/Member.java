@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.Presence;
+import discord4j.core.object.presence.Presence;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.bean.MemberBean;
 import discord4j.core.object.entity.bean.UserBean;
@@ -164,6 +164,6 @@ public final class Member extends User {
     public Mono<Presence> getPresence() {
         return getServiceMediator().getStoreHolder().getPresenceStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
-                .map(bean -> new Presence(getServiceMediator(), bean));
+                .map(Presence::new);
     }
 }

@@ -21,12 +21,16 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
+import discord4j.common.json.payload.StatusUpdate;
 import discord4j.common.json.payload.dispatch.Dispatch;
+import discord4j.common.json.request.GameRequest;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.presence.Presence;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -44,6 +48,7 @@ import reactor.core.publisher.FluxProcessor;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Objects;
 
@@ -55,6 +60,7 @@ public final class ClientBuilder {
     private StoreService storeService;
     private FluxProcessor<Event, Event> eventProcessor;
     private Scheduler eventScheduler;
+    private Presence initialPresence;
 
     public ClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
@@ -63,6 +69,7 @@ public final class ClientBuilder {
         storeService = new StoreServiceLoader().getStoreService();
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
+        initialPresence = null;
     }
 
     public String getToken() {
@@ -119,6 +126,15 @@ public final class ClientBuilder {
         return this;
     }
 
+    public Presence getInitialPresence() {
+        return initialPresence;
+    }
+
+    public ClientBuilder setInitialPresence(@Nullable Presence initialPresence) {
+        this.initialPresence = initialPresence;
+        return this;
+    }
+
     public DiscordClient build() {
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -139,10 +155,13 @@ public final class ClientBuilder {
 
         // TODO custom retry parameters
         // TODO shard setup
-        // TODO initial status
+
+        final IdentifyOptions identifyOptions = new IdentifyOptions();
+        identifyOptions.setInitialStatus(initialPresence.asStatusUpdate());
+
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token, new IdentifyOptions());
+                new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token, identifyOptions);
 
         final StoreHolder storeHolder = new StoreHolder(storeService);
         final RestClient restClient = new RestClient(new Router(httpClient));

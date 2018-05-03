@@ -36,6 +36,13 @@ public class StatusUpdate implements PayloadData {
         this.afk = afk;
     }
 
+    public StatusUpdate(@Nullable GameRequest game, String status) {
+        this.since = null;
+        this.game = game;
+        this.status = status;
+        this.afk = false;
+    }
+
     @Override
     public String toString() {
         return "StatusUpdate[" +

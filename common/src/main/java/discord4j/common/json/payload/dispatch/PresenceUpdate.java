@@ -36,7 +36,7 @@ public class PresenceUpdate implements Dispatch {
     private GameResponse game;
     @JsonProperty("guild_id")
     @UnsignedJson
-    private long guildId; // TODO: nullable?
+    private long guildId;
     private String status;
     @Nullable
     private String nick;

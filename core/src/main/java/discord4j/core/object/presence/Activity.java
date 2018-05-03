@@ -14,55 +14,49 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object;
+package discord4j.core.object.presence;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
 import discord4j.core.object.bean.ActivityBean;
+import discord4j.core.object.bean.RichActivityBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-/**
- * A Discord presence activity.
- *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#activity-object">Activity Object</a>
- */
-public final class Activity implements DiscordObject {
+public class Activity {
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
-
-    /** The raw data as represented by Discord. */
-    private final ActivityBean data;
-
-    /**
-     * Constructs a {@code Activity} with an associated ServiceMediator and Discord data.
-     *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
-     */
-    public Activity(final ServiceMediator serviceMediator, final ActivityBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
-        this.data = Objects.requireNonNull(data);
+    public static Activity playing(String name) {
+        return new Activity(Type.PLAYING.getValue(), name, null, null);
     }
 
-    @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public static Activity streaming(String name, String url) {
+        return new Activity(Type.STREAMING.getValue(), name, url, null);
     }
 
-    /**
-     * Gets the activity's name.
-     *
-     * @return The activity's name.
-     */
-    public String getName() {
-        return data.getName();
+    public static Activity listening(String name) {
+        return new Activity(Type.LISTENING.getValue(), name, null, null);
+    }
+
+    private final int type;
+    private final String name;
+    @Nullable
+    private final String streamingUrl;
+    @Nullable
+    private final RichActivityBean richData;
+
+    Activity(final ActivityBean bean) {
+        this(bean.getType(), bean.getName(), bean.getUrl(),
+                bean instanceof RichActivityBean ? (RichActivityBean) bean : null);
+    }
+
+    private Activity(int type, String name, @Nullable String streamingUrl, @Nullable RichActivityBean richData) {
+        this.type = type;
+        this.name = name;
+        this.streamingUrl = streamingUrl;
+        this.richData = richData;
     }
 
     /**
@@ -71,7 +65,16 @@ public final class Activity implements DiscordObject {
      * @return The specific "action" for this activity.
      */
     public Type getType() {
-        return Type.of(data.getType());
+        return Type.of(type);
+    }
+
+    /**
+     * Gets the activity's name.
+     *
+     * @return The activity's name.
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -80,7 +83,7 @@ public final class Activity implements DiscordObject {
      * @return The stream url, if present.
      */
     public Optional<String> getStreamingUrl() {
-        return Optional.ofNullable(data.getUrl());
+        return Optional.ofNullable(streamingUrl);
     }
 
     /**
@@ -89,7 +92,7 @@ public final class Activity implements DiscordObject {
      * @return The UNIX time (in milliseconds) of when the activity started, if present.
      */
     public Optional<Instant> getStart() {
-        return Optional.ofNullable(data.getStart()).map(Instant::ofEpochMilli);
+        return Optional.ofNullable(richData).map(RichActivityBean::getStart).map(Instant::ofEpochMilli);
     }
 
     /**
@@ -98,7 +101,7 @@ public final class Activity implements DiscordObject {
      * @return The UNIX time (in milliseconds) of when the activity ends, if present.
      */
     public Optional<Instant> getEnd() {
-        return Optional.ofNullable(data.getEnd()).map(Instant::ofEpochMilli);
+        return Optional.ofNullable(richData).map(RichActivityBean::getEnd).map(Instant::ofEpochMilli);
     }
 
     /**
@@ -107,7 +110,7 @@ public final class Activity implements DiscordObject {
      * @return The application ID for the game, if present.
      */
     public Optional<Snowflake> getApplicationId() {
-        return Optional.ofNullable(data.getApplicationId()).map(Snowflake::of);
+        return Optional.ofNullable(richData).map(RichActivityBean::getApplicationId).map(Snowflake::of);
     }
 
     /**
@@ -116,7 +119,7 @@ public final class Activity implements DiscordObject {
      * @return What the player is currently doing, if present.
      */
     public Optional<String> getDetails() {
-        return Optional.ofNullable(data.getDetails());
+        return Optional.ofNullable(richData).map(RichActivityBean::getDetails);
     }
 
     /**
@@ -125,7 +128,7 @@ public final class Activity implements DiscordObject {
      * @return The user's current party status, if present.
      */
     public Optional<String> getState() {
-        return Optional.ofNullable(data.getState());
+        return Optional.ofNullable(richData).map(RichActivityBean::getState);
     }
 
     /**
@@ -134,7 +137,7 @@ public final class Activity implements DiscordObject {
      * @return The ID of the party, if present.
      */
     public Optional<String> getPartyId() {
-        return Optional.ofNullable(data.getPartyId());
+        return Optional.ofNullable(richData).map(RichActivityBean::getPartyId);
     }
 
     /**
@@ -143,7 +146,9 @@ public final class Activity implements DiscordObject {
      * @return The party's current size, if present.
      */
     public OptionalInt getCurrentPartySize() {
-        final Integer currentPartySize = data.getCurrentPartySize();
+        if (richData == null) return OptionalInt.empty();
+
+        final Integer currentPartySize = richData.getCurrentPartySize();
         return (currentPartySize == null) ? OptionalInt.empty() : OptionalInt.of(currentPartySize);
     }
 
@@ -153,7 +158,9 @@ public final class Activity implements DiscordObject {
      * @return The party's max size, if present.
      */
     public OptionalInt getMaxPartySize() {
-        final Integer maxPartySize = data.getMaxPartySize();
+        if (richData == null) return OptionalInt.empty();
+
+        final Integer maxPartySize = richData.getMaxPartySize();
         return (maxPartySize == null) ? OptionalInt.empty() : OptionalInt.of(maxPartySize);
     }
 
@@ -163,7 +170,7 @@ public final class Activity implements DiscordObject {
      * @return The ID for a large asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getLargeImageId() {
-        return Optional.ofNullable(data.getLargeImage());
+        return Optional.ofNullable(richData).map(RichActivityBean::getLargeImage);
     }
 
     /**
@@ -172,7 +179,7 @@ public final class Activity implements DiscordObject {
      * @return The text displayed when hovering over the large image of the activity, if present.
      */
     public Optional<String> getLargeText() {
-        return Optional.ofNullable(data.getLargeText());
+        return Optional.ofNullable(richData).map(RichActivityBean::getLargeText);
     }
 
     /**
@@ -181,7 +188,7 @@ public final class Activity implements DiscordObject {
      * @return The ID for a small asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getSmallImageId() {
-        return Optional.ofNullable(data.getSmallImage());
+        return Optional.ofNullable(richData).map(RichActivityBean::getSmallImage);
     }
 
     /**
@@ -190,7 +197,7 @@ public final class Activity implements DiscordObject {
      * @return The text displayed when hovering over the small image of the activity, if present.
      */
     public Optional<String> getSmallText() {
-        return Optional.ofNullable(data.getSmallText());
+        return Optional.ofNullable(richData).map(RichActivityBean::getSmallText);
     }
 
     /** The type of "action" for an activity. */
@@ -202,14 +209,17 @@ public final class Activity implements DiscordObject {
         /** "Streaming {name}" */
         STREAMING(1),
 
-        /** Listening to {name} */
-        LISTENING(2);
+        /** "Listening to {name}" */
+        LISTENING(2),
+
+        /** "Watching {name}" */
+        WATCHING(3);
 
         /** The underlying value as represented by Discord. */
         private final int value;
 
         /**
-         * Constructs a {@code Activity.Type}.
+         * Constructs a {@code RichActivity.Type}.
          *
          * @param value The underlying value as represented by Discord.
          */
@@ -238,6 +248,7 @@ public final class Activity implements DiscordObject {
                 case 0: return PLAYING;
                 case 1: return STREAMING;
                 case 2: return LISTENING;
+                case 3: return WATCHING;
                 default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }

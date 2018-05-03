@@ -19,7 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.common.json.response.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.Presence;
+import discord4j.core.object.presence.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.bean.RegionBean;
@@ -440,7 +440,7 @@ public final class Guild implements Entity {
         return serviceMediator.getStoreHolder().getPresenceStore()
                 // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
                 .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
-                .map(bean -> new Presence(serviceMediator, bean));
+                .map(Presence::new);
     }
 
     /**
