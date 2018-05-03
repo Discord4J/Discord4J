@@ -117,6 +117,18 @@ public final class Message implements Entity {
     }
 
     /**
+     * Requests to retrieve the author of this message as a {@link Member member} of the guild in which it was sent.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the author of this message as a
+     * {@link Member member} of the guild in which it was sent, if present. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
+    public Mono<Member> getAuthorAsMember() {
+        return Mono.justOrEmpty(getAuthorId()).flatMap(authorId ->
+                getGuild().flatMap(guild -> getClient().getMemberById(guild.getId(), authorId)));
+    }
+
+    /**
      * Gets the contents of the message, if present.
      *
      * @return The contents of the message, if present.
