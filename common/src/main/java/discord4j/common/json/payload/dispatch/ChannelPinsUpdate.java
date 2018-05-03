@@ -26,12 +26,21 @@ public class ChannelPinsUpdate implements Dispatch {
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
+    @JsonProperty("guild_id")
+    @Nullable
+    @UnsignedJson
+    private Long guildId;
     @JsonProperty("last_pin_timestamp")
     @Nullable
     private String lastPinTimestamp;
 
     public long getChannelId() {
         return channelId;
+    }
+
+    @Nullable
+    public Long getGuildId() {
+        return guildId;
     }
 
     @Nullable
@@ -43,6 +52,7 @@ public class ChannelPinsUpdate implements Dispatch {
     public String toString() {
         return "ChannelPinsUpdate[" +
                 "channelId=" + channelId +
+                ", guildId=" + guildId +
                 ", lastPinTimestamp=" + lastPinTimestamp +
                 ']';
     }
