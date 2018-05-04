@@ -86,8 +86,8 @@ public interface MessageChannel extends Channel {
      * publisher emits.
      *
      * @param until The companion {@link Publisher} that signals when to stop triggering the typing indicator.
-     * @return A {@link Flux} which completes when the typing indicator in this channel will no longer be triggered. If
-     * an error is received, it is emitted through the {@code Flux}.
+     * @return A {@link Mono} which completes when the typing indicator in this channel will no longer be triggered. If
+     * an error is received, it is emitted through the {@code Mono}.
      */
-    Flux<Void> typeUntil(Publisher<Void> until);
+    Mono<Void> typeUntil(Publisher<Void> until);
 }
