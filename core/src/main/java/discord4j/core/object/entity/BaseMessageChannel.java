@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -86,6 +87,12 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                 .flatMap(l -> type().flux())
                 .takeUntilOther(until)
                 .then();
+    }
+
+    @Override
+    public final Flux<Message> getMessages(final int limit, @Nullable final Snowflake startId,
+                                           @Nullable final Snowflake endId) {
+        throw new UnsupportedOperationException("Not yet implemented...");
     }
 
     @Override

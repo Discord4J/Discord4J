@@ -20,7 +20,6 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.bean.ExtendedInviteBean;
-import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.object.entity.bean.TextChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
@@ -31,6 +30,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -130,6 +130,12 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     @Override
     public Mono<Void> typeUntil(Publisher<Void> until) {
         return messageChannel.typeUntil(until);
+    }
+
+    @Override
+    public Flux<Message> getMessages(final int limit, @Nullable final Snowflake startId,
+                                     @Nullable final Snowflake endId) {
+        return messageChannel.getMessages(limit, startId, endId);
     }
 
     /**

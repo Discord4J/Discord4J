@@ -22,6 +22,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -90,4 +91,22 @@ public interface MessageChannel extends Channel {
      * an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Void> typeUntil(Publisher<Void> until);
+
+    /**
+     * Requests to retrieve messages within the specified ID range, sorted by {@link Snowflake#compareTo(Snowflake)}.
+     *
+     * @param limit The maximum amount of items to emit through the returned {@code Flux}. Must be positive or 0.
+     *
+     * @param startId The ID of the <i>earliest</i> message to retrieve (inclusive). To get messages <i>after</i> a
+     * specified time (also inclusive) use {@link Snowflake#of(Instant)}. If {@code null}, the default value is
+     * equivalent to {@code Snowflake.of(id.getTimestamp())} where {@code id} is {@link #getId()} for this channel.
+     *
+     * @param endId The ID of the <i>latest</i> message to retrieve (exclusive). To get messages <i>before</i> a
+     * specified time (also exclusive) use {@link Snowflake#of(Instant)}. If {@code null}, the default value is
+     * equivalent to {@code Snowflake.of(Instant.now())}.
+     *
+     * @return A {@link Flux} that continually emits {@link Message messages} within the specified ID range, sorted by
+     * {@link Snowflake#compareTo(Snowflake)}. If an error is received, it is emitted through the {@code Flux}.
+     */
+    Flux<Message> getMessages(int limit, @Nullable Snowflake startId, @Nullable Snowflake endId);
 }
