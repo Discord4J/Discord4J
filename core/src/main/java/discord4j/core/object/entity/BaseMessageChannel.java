@@ -21,8 +21,11 @@ import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.object.entity.bean.MessageChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -68,6 +71,20 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                 .createMessage(getId().asLong(), spec.asRequest())
                 .map(MessageBean::new)
                 .map(bean -> new Message(getServiceMediator(), bean));
+    }
+
+    @Override
+    public final Mono<Void> type() {
+        return getServiceMediator().getRestClient().getChannelService()
+                .triggerTypingIndicator(getId().asLong())
+                .then();
+    }
+
+    @Override
+    public final Flux<Void> typeUntil(Publisher<Void> until) {
+        return Flux.interval(Duration.ZERO, Duration.ofSeconds(10))
+                .flatMap(l -> type().flux())
+                .takeUntilOther(until);
     }
 
     @Override

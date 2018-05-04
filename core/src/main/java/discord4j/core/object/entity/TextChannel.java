@@ -27,6 +27,8 @@ import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -118,6 +120,16 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     @Override
     public Mono<Message> createMessage(final MessageCreateSpec spec) {
         return messageChannel.createMessage(spec);
+    }
+
+    @Override
+    public Mono<Void> type() {
+        return messageChannel.type();
+    }
+
+    @Override
+    public Flux<Void> typeUntil(Publisher<Void> until) {
+        return messageChannel.typeUntil(until);
     }
 
     /**

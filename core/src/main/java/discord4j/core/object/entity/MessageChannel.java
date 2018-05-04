@@ -18,6 +18,8 @@ package discord4j.core.object.entity;
 
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -69,4 +71,23 @@ public interface MessageChannel extends Channel {
      * received, it is emitted through the {@code Mono}.
      */
     Mono<Message> createMessage(MessageCreateSpec spec);
+
+    /**
+     * Requests to trigger the typing indicator in this channel. A single invocation of this method will trigger the
+     * indicator for 10 seconds or until the bot sends a message in this channel.
+     *
+     * @return A {@link Mono} which completes upon successful triggering of the typing indicator in this channel. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Void> type();
+
+    /**
+     * Requests to trigger the typing indicator in this channel. It will be continuously triggered until the given
+     * publisher emits.
+     *
+     * @param until The companion {@link Publisher} that signals when to stop triggering the typing indicator.
+     * @return A {@link Flux} which completes when the typing indicator in this channel will no longer be triggered. If
+     * an error is received, it is emitted through the {@code Flux}.
+     */
+    Flux<Void> typeUntil(Publisher<Void> until);
 }
