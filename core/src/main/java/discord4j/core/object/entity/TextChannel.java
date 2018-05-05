@@ -133,9 +133,8 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     }
 
     @Override
-    public Flux<Message> getMessages(final int limit, @Nullable final Snowflake startId,
-                                     @Nullable final Snowflake endId) {
-        return messageChannel.getMessages(limit, startId, endId);
+    public Flux<Message> getMessages(@Nullable final Snowflake startId, @Nullable final Snowflake endId) {
+        return messageChannel.getMessages(startId, endId);
     }
 
     /**

@@ -95,8 +95,6 @@ public interface MessageChannel extends Channel {
     /**
      * Requests to retrieve messages within the specified ID range, sorted by {@link Snowflake#compareTo(Snowflake)}.
      *
-     * @param limit The maximum amount of items to emit through the returned {@code Flux}. Must be positive or 0.
-     *
      * @param startId The ID of the <i>earliest</i> message to retrieve (inclusive). To get messages <i>after</i> a
      * specified time (also inclusive) use {@link Snowflake#of(Instant)}. If {@code null}, the default value is
      * equivalent to {@code Snowflake.of(id.getTimestamp())} where {@code id} is {@link #getId()} for this channel.
@@ -108,5 +106,5 @@ public interface MessageChannel extends Channel {
      * @return A {@link Flux} that continually emits {@link Message messages} within the specified ID range, sorted by
      * {@link Snowflake#compareTo(Snowflake)}. If an error is received, it is emitted through the {@code Flux}.
      */
-    Flux<Message> getMessages(int limit, @Nullable Snowflake startId, @Nullable Snowflake endId);
+    Flux<Message> getMessages(@Nullable Snowflake startId, @Nullable Snowflake endId);
 }

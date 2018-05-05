@@ -90,8 +90,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public final Flux<Message> getMessages(final int limit, @Nullable final Snowflake startId,
-                                           @Nullable final Snowflake endId) {
+    public final Flux<Message> getMessages(@Nullable final Snowflake startId, @Nullable final Snowflake endId) {
         throw new UnsupportedOperationException("Not yet implemented...");
     }
 
