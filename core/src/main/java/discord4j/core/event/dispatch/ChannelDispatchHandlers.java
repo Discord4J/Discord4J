@@ -16,7 +16,10 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.common.json.payload.dispatch.*;
+import discord4j.common.json.payload.dispatch.ChannelCreate;
+import discord4j.common.json.payload.dispatch.ChannelDelete;
+import discord4j.common.json.payload.dispatch.ChannelPinsUpdate;
+import discord4j.common.json.payload.dispatch.ChannelUpdate;
 import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
@@ -27,10 +30,10 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
 import discord4j.core.util.ArrayUtil;
 import discord4j.store.primitive.LongObjStore;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 class ChannelDispatchHandlers {
@@ -178,7 +181,7 @@ class ChannelDispatchHandlers {
     static Mono<PinsUpdateEvent> channelPinsUpdate(DispatchContext<ChannelPinsUpdate> context) {
         long channelId = context.getDispatch().getChannelId();
         Instant timestamp = context.getDispatch().getLastPinTimestamp() == null ? null :
-                Instant.parse(context.getDispatch().getLastPinTimestamp());
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().getLastPinTimestamp(), Instant::from);
 
         return Mono.just(new PinsUpdateEvent(context.getServiceMediator().getClient(), channelId, timestamp));
     }

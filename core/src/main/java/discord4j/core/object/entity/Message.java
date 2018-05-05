@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -143,7 +144,7 @@ public final class Message implements Entity {
      * @return When this message was sent.
      */
     public Instant getTimestamp() {
-        return Instant.parse(data.getTimestamp());
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.getTimestamp(), Instant::from);
     }
 
     /**

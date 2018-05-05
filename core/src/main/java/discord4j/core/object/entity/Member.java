@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -92,7 +93,7 @@ public final class Member extends User {
      * @return When the user joined the guild.
      */
     public Instant getJoinTime() {
-        return Instant.parse(data.getJoinedAt());
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.getJoinedAt(), Instant::from);
     }
 
     /**

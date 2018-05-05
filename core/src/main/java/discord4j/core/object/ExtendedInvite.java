@@ -23,6 +23,7 @@ import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -98,7 +99,7 @@ public final class ExtendedInvite extends Invite {
      * @return When this invite was created.
      */
     public Instant getCreation() {
-        return Instant.parse(getData().getCreatedAt());
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(getData().getCreatedAt(), Instant::from);
     }
 
     /**
