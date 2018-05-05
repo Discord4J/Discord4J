@@ -5,16 +5,3 @@ dependencies {
     testCompile "junit:junit:$junit_version"
     testCompileOnly "com.google.auto.service:auto-service:$autoservice_version"
 }
-
-publishing {
-    publications {
-        store(MavenPublication) {
-            artifactId 'Discord4J-store'
-
-            from components.java
-
-            artifact sourcesJar
-            artifact javadocJar
-        }
-    }
-}
