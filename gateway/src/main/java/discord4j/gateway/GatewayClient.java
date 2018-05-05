@@ -148,6 +148,7 @@ public class GatewayClient {
                     .subscribe(handler.outbound()::onNext);
 
             return webSocketClient.execute(gatewayUrl, handler)
+                    .doOnCancel(() -> close(false))
                     .doOnTerminate(() -> {
                         inboundSub.dispose();
                         receiverSub.dispose();
@@ -156,7 +157,9 @@ public class GatewayClient {
                         readySub.dispose();
                         heartbeat.stop();
                     });
-        }).retryWhen(retryFactory()).doOnTerminate(() -> dispatchSink.next(GatewayStateChange.disconnected()));
+        }).retryWhen(retryFactory())
+                .doOnCancel(() -> dispatchSink.next(GatewayStateChange.disconnected()))
+                .doOnTerminate(() -> dispatchSink.next(GatewayStateChange.disconnected()));
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
