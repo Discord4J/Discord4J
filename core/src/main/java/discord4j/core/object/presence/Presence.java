@@ -22,7 +22,6 @@ import discord4j.common.json.request.GameRequest;
 import discord4j.core.object.bean.PresenceBean;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -37,7 +36,7 @@ public final class Presence {
     }
 
     public static Presence online(Activity activity) {
-        return new Presence(Status.ONLINE, Objects.requireNonNull(activity));
+        return new Presence(Status.ONLINE, activity);
     }
 
     public static Presence doNotDisturb() {
@@ -45,7 +44,7 @@ public final class Presence {
     }
 
     public static Presence doNotDisturb(Activity activity) {
-        return new Presence(Status.DO_NOT_DISTURB, Objects.requireNonNull(activity));
+        return new Presence(Status.DO_NOT_DISTURB, activity);
     }
 
     public static Presence idle() {
@@ -53,7 +52,7 @@ public final class Presence {
     }
 
     public static Presence idle(Activity activity) {
-        return new Presence(Status.IDLE, Objects.requireNonNull(activity));
+        return new Presence(Status.IDLE, activity);
     }
 
     public static Presence invisible() {
