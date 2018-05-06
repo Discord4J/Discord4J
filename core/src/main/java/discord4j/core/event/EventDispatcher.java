@@ -22,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.logging.Level;
 
@@ -44,15 +43,6 @@ public class EventDispatcher {
 
     private final FluxProcessor<Event, Event> processor;
     private final Scheduler scheduler;
-
-    /**
-     * Creates a new event dispatcher using the given processor and maintaining its thread affinity.
-     *
-     * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
-     */
-    public EventDispatcher(FluxProcessor<Event, Event> processor) {
-        this(processor, Schedulers.immediate());
-    }
 
     /**
      * Creates a new event dispatcher using the given processor and thread model.
