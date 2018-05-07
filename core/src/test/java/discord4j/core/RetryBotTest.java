@@ -17,41 +17,17 @@
 
 package discord4j.core;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.payload.GatewayPayload;
-import discord4j.common.json.payload.dispatch.Dispatch;
-import discord4j.core.event.dispatch.DispatchContext;
-import discord4j.core.event.dispatch.DispatchHandlers;
-import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
-import discord4j.gateway.GatewayClient;
+import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.IdentifyOptions;
-import discord4j.gateway.payload.JacksonPayloadReader;
-import discord4j.gateway.payload.JacksonPayloadWriter;
-import discord4j.gateway.retry.RetryOptions;
-import discord4j.rest.RestClient;
-import discord4j.rest.http.*;
-import discord4j.rest.http.client.SimpleHttpClient;
-import discord4j.rest.request.Router;
-import discord4j.rest.route.Routes;
-import discord4j.rest.util.RouteUtils;
-import discord4j.store.noop.NoOpStoreService;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -59,16 +35,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * An example bot showing gateway and rest operations without involving core module user-facing constructs.
- */
 public class RetryBotTest {
 
     private static final Logger log = Loggers.getLogger(RetryBotTest.class);
@@ -92,7 +62,8 @@ public class RetryBotTest {
     @Ignore("Example code excluded from CI")
     public void test() {
         IdentifyOptions options = new IdentifyOptions();
-        options.setShard(shardId != null ? new int[]{shardId, shardCount} : null);
+        options.setShardIndex(shardId);
+        options.setShardCount(shardCount);
 
         try {
             Path path = Paths.get("resume.dat");
@@ -110,14 +81,6 @@ public class RetryBotTest {
             e.printStackTrace();
         }
 
-        Bootstrap bootstrap = new Bootstrap(token, options);
-
-        CommandListener commandListener = new CommandListener(bootstrap.serviceMediator, bootstrap.eventDispatcher);
-        commandListener.configure();
-
-        LifecycleListener lifecycleListener = new LifecycleListener(bootstrap.eventDispatcher);
-        lifecycleListener.configure();
-
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Persist our identify options
             try {
@@ -132,95 +95,57 @@ public class RetryBotTest {
             }
         }));
 
-        bootstrap.login().block();
+        DiscordClient client = new ClientBuilder(token)
+                .setIdentifyOptions(options)
+                .setInitialPresence(Presence.doNotDisturb())
+                .build();
+
+        CommandListener commandListener = new CommandListener(client);
+        commandListener.configure();
+
+        LifecycleListener lifecycleListener = new LifecycleListener(client);
+        lifecycleListener.configure();
+
+        client.login().block();
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void testNoCommands() {
-        Bootstrap bootstrap = new Bootstrap(token, new IdentifyOptions());
+        IdentifyOptions options = new IdentifyOptions();
+        options.setShardIndex(shardId);
+        options.setShardCount(shardCount);
 
-        LifecycleListener lifecycleListener = new LifecycleListener(bootstrap.eventDispatcher);
+        DiscordClient client = new ClientBuilder(token)
+                .setIdentifyOptions(options)
+                .setInitialPresence(Presence.doNotDisturb())
+                .build();
+
+        LifecycleListener lifecycleListener = new LifecycleListener(client);
         lifecycleListener.configure();
 
-        bootstrap.login().block();
-    }
-
-    public static class Bootstrap {
-
-        private final ServiceMediator serviceMediator;
-        private final EventDispatcher eventDispatcher;
-
-        Bootstrap(String token, IdentifyOptions options) {
-            ObjectMapper mapper = new ObjectMapper()
-                    .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                    .registerModules(new PossibleModule(), new Jdk8Module());
-
-            SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                    .baseUrl(Routes.BASE_URL)
-                    .defaultHeader("authorization", "Bot " + token)
-                    .defaultHeader("content-type", "application/json")
-                    .defaultHeader("user-agent", "Discord4J")
-                    .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                    .readerStrategy(new EmptyReaderStrategy())
-                    .writerStrategy(new JacksonWriterStrategy(mapper))
-                    .writerStrategy(new MultipartWriterStrategy(mapper))
-                    .writerStrategy(new EmptyWriterStrategy())
-                    .build();
-
-            StoreHolder storeHolder = new StoreHolder(new NoOpStoreService());
-            RestClient restClient = new RestClient(new Router(httpClient));
-            ClientConfig config = new ClientConfig(token, shardId, shardCount);
-
-            GatewayClient gatewayClient = new GatewayClient(
-                    new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                    new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120)), token, options);
-
-            EmitterProcessor<Event> eventProcessor = EmitterProcessor.create(false);
-            eventDispatcher = new EventDispatcher(eventProcessor, Schedulers.elastic());
-
-            serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder, eventDispatcher, config);
-
-            gatewayClient.dispatch()
-                    .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
-                    .flatMap(DispatchHandlers::<Dispatch, Event>handle)
-                    .subscribeWith(eventProcessor);
-        }
-
-        Mono<Void> login() {
-            Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("v", 6);
-            queryParams.put("encoding", "json");
-            queryParams.put("compress", "zlib-stream");
-            return serviceMediator.getRestClient().getGatewayService().getGateway()
-                    .flatMap(res -> serviceMediator.getGatewayClient()
-                            .execute(RouteUtils.expandQuery(res.getUrl(), queryParams)));
-        }
+        client.login().block();
     }
 
     public static class CommandListener {
 
-        private final ServiceMediator services;
-        private final EventDispatcher dispatcher;
+        private final DiscordClient client;
         private final AtomicLong ownerId = new AtomicLong();
 
-        CommandListener(ServiceMediator services, EventDispatcher dispatcher) {
-            this.services = services;
-            this.dispatcher = dispatcher;
+        public CommandListener(DiscordClient client) {
+            this.client = client;
         }
 
         void configure() {
-            FluxSink<GatewayPayload<?>> outboundSink = services.getGatewayClient().sender();
-
-            Flux.first(dispatcher.on(ReadyEvent.class), dispatcher.on(ResumeEvent.class))
+            Flux.first(client.getEventDispatcher().on(ReadyEvent.class), client.getEventDispatcher().on(ResumeEvent.class))
                     .next()
-                    .flatMap(evt -> services.getRestClient().getApplicationService().getCurrentApplicationInfo())
-                    .map(res -> res.getOwner().getId())
+                    .flatMap(evt -> client.getApplicationInfo())
+                    .map(ApplicationInfo::getOwnerId)
+                    .map(Snowflake::asLong)
                     .subscribe(ownerId::set);
 
-            dispatcher.on(MessageCreateEvent.class)
-                    .subscribe(event -> {
+            client.getEventDispatcher().on(MessageCreateEvent.class)
+                    .doOnNext(event -> {
                         Message message = event.getMessage();
 
                         message.getAuthorId()
@@ -228,31 +153,39 @@ public class RetryBotTest {
                                 .flatMap(id -> message.getContent())
                                 .ifPresent(content -> {
                                     if ("!close".equals(content)) {
-                                        services.getGatewayClient().close(false);
+                                        client.logout();
                                     } else if ("!retry".equals(content)) {
-                                        services.getGatewayClient().close(true);
-                                    } else if ("!fail".equals(content)) {
-                                        outboundSink.next(new GatewayPayload<>());
+                                        client.reconnect();
+                                    } else if ("!online".equals(content)) {
+                                        client.updatePresence(Presence.online()).subscribe();
+                                    } else if ("!dnd".equals(content)) {
+                                        client.updatePresence(Presence.doNotDisturb()).subscribe();
+                                    } else if ("!raise".equals(content)) {
+                                        // exception if DM
+                                        Snowflake guildId = message.getGuild().block().getId();
+                                        log.info("Message came from guild: {}", guildId);
                                     }
                                 });
-                    });
+                    })
+                    .retry() // retry if above block throws
+                    .subscribe();
         }
     }
 
     public static class LifecycleListener {
 
-        private final EventDispatcher dispatcher;
+        private final DiscordClient client;
 
-        LifecycleListener(EventDispatcher dispatcher) {
-            this.dispatcher = dispatcher;
+        public LifecycleListener(DiscordClient client) {
+            this.client = client;
         }
 
         void configure() {
-            dispatcher.on(ConnectEvent.class).subscribe();
-            dispatcher.on(DisconnectEvent.class).subscribe();
-            dispatcher.on(ReconnectStartEvent.class).subscribe();
-            dispatcher.on(ReconnectEvent.class).subscribe();
-            dispatcher.on(ReconnectFailEvent.class).subscribe();
+            client.getEventDispatcher().on(ConnectEvent.class).subscribe();
+            client.getEventDispatcher().on(DisconnectEvent.class).subscribe();
+            client.getEventDispatcher().on(ReconnectStartEvent.class).subscribe();
+            client.getEventDispatcher().on(ReconnectEvent.class).subscribe();
+            client.getEventDispatcher().on(ReconnectFailEvent.class).subscribe();
         }
 
     }

@@ -21,11 +21,8 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.payload.StatusUpdate;
 import discord4j.common.json.payload.dispatch.Dispatch;
-import discord4j.common.json.request.GameRequest;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
@@ -55,21 +52,21 @@ import java.util.Objects;
 public final class ClientBuilder {
 
     private String token;
-    private int shardIndex;
-    private int shardCount;
+    private Integer shardIndex;
+    private Integer shardCount;
     private StoreService storeService;
     private FluxProcessor<Event, Event> eventProcessor;
     private Scheduler eventScheduler;
     private Presence initialPresence;
+    private IdentifyOptions identifyOptions;
 
     public ClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
-        shardIndex = 0;
-        shardCount = 1;
         storeService = new StoreServiceLoader().getStoreService();
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
         initialPresence = null;
+        identifyOptions = null;
     }
 
     public String getToken() {
@@ -81,20 +78,20 @@ public final class ClientBuilder {
         return this;
     }
 
-    public int getShardIndex() {
+    public Integer getShardIndex() {
         return shardIndex;
     }
 
-    public ClientBuilder setShardIndex(final int shardIndex) {
+    public ClientBuilder setShardIndex(final Integer shardIndex) {
         this.shardIndex = shardIndex;
         return this;
     }
 
-    public int getShardCount() {
+    public Integer getShardCount() {
         return shardCount;
     }
 
-    public ClientBuilder setShardCount(final int shardCount) {
+    public ClientBuilder setShardCount(final Integer shardCount) {
         this.shardCount = shardCount;
         return this;
     }
@@ -135,6 +132,15 @@ public final class ClientBuilder {
         return this;
     }
 
+    public IdentifyOptions getIdentifyOptions() {
+        return identifyOptions;
+    }
+
+    public ClientBuilder setIdentifyOptions(IdentifyOptions identifyOptions) {
+        this.identifyOptions = identifyOptions;
+        return this;
+    }
+
     public DiscordClient build() {
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -154,10 +160,21 @@ public final class ClientBuilder {
                 .build();
 
         // TODO custom retry parameters
-        // TODO shard setup
-
-        final IdentifyOptions identifyOptions = new IdentifyOptions();
-        identifyOptions.setInitialStatus(initialPresence.asStatusUpdate());
+        if (identifyOptions == null) {
+            identifyOptions = new IdentifyOptions();
+        }
+        if (shardIndex != null) {
+            identifyOptions.setShardIndex(shardIndex);
+        }
+        if (shardCount != null) {
+            identifyOptions.setShardCount(shardCount);
+        }
+        if (identifyOptions.getShardIndex() == null ^ identifyOptions.getShardCount() == null) {
+            throw new IllegalArgumentException("Must set shardIndex and shardCount together");
+        }
+        if (initialPresence != null) {
+            identifyOptions.setInitialStatus(initialPresence.asStatusUpdate());
+        }
 
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),

@@ -103,9 +103,14 @@ public abstract class PayloadHandlers {
                     new Resume(client.token(), client.getSessionId(), client.lastSequence().get())));
         } else {
             IdentifyProperties props = new IdentifyProperties(System.getProperty("os.name"), "Discord4J", "Discord4J");
+            IdentifyOptions options = client.identifyOptions();
+            int[] shard = null;
+            if (options.getShardIndex() != null && options.getShardCount() != null) {
+                shard = new int[]{options.getShardIndex(), options.getShardCount()};
+            }
             Identify identify = new Identify(client.token(), props, false, 250,
-                    Optional.ofNullable(client.identifyOptions().getShard()).map(Possible::of).orElse(Possible.absent()),
-                    Optional.ofNullable(client.identifyOptions().getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
+                    Optional.ofNullable(shard).map(Possible::of).orElse(Possible.absent()),
+                    Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
             client.sender().next(GatewayPayload.identify(identify));
         }
     }
