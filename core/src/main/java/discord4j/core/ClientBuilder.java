@@ -28,6 +28,7 @@ import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.util.VersionUtil;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -44,12 +45,17 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Properties;
 
 public final class ClientBuilder {
+
+    private static final Logger log = Loggers.getLogger(ClientBuilder.class);
 
     private String token;
     private Integer shardIndex;
@@ -155,10 +161,13 @@ public final class ClientBuilder {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .registerModules(new PossibleModule(), new Jdk8Module());
 
+        final Properties properties = VersionUtil.getProperties();
+        final String version = properties.getProperty(VersionUtil.GIT_COMMIT_ID_DESCRIBE);
+
         final SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .defaultHeader("Content-Type", "application/json")
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("User-Agent", "Discord4J")
+                .defaultHeader("content-type", "application/json")
+                .defaultHeader("authorization", "Bot " + token)
+                .defaultHeader("user-agent", "DiscordBot(http://discord4j.com, " + version + ")")
                 .readerStrategy(new JacksonReaderStrategy<>(mapper))
                 .readerStrategy(new EmptyReaderStrategy())
                 .writerStrategy(new MultipartWriterStrategy(mapper))
@@ -200,6 +209,7 @@ public final class ClientBuilder {
                 .flatMap(DispatchHandlers::<Dispatch, Event>handle)
                 .subscribeWith(eventProcessor);
 
+        log.info("Discord4J {}", version);
         return serviceMediator.getClient();
     }
 }
