@@ -1,6 +1,7 @@
 .idea
-*.iml
+*.jar
 out/
 .gradle
+!gradle-wrapper.jar
 build/
 logs/
