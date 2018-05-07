@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.0'
     id 'com.jfrog.artifactory' version '4.4.4'
-    id 'com.gorylenko.gradle-git-properties' version '1.4.21' apply false
+    id 'com.palantir.git-version' version '0.11.0'
     id 'io.spring.dependency-management' version '1.0.4.RELEASE' apply false
 }
 
@@ -32,6 +32,7 @@ allprojects {
 
     group = artifact_group
     version = project_version
+    description = project_description
 
     sourceCompatibility = project_jdk
     targetCompatibility = project_jdk
@@ -76,7 +77,7 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'com.gorylenko.gradle-git-properties'
+    apply plugin: 'com.palantir.git-version'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'com.jfrog.bintray'
     apply plugin: 'com.jfrog.artifactory'
@@ -93,6 +94,27 @@ subprojects {
             }
         }
     }
+
+    task writeGitProperties(type: WriteProperties) {
+        def details = versionDetails()
+        File gitPropertiesDir = new File(project.buildDir, 'resources/main')
+        File gitPropertiesFile = new File(gitPropertiesDir, 'git.properties')
+        outputFile gitPropertiesFile
+        inputs.dir project.files(new File(project.rootDir, '.git')).asFileTree
+        def describe = details.lastTag + '-' + details.commitDistance + '-g' + details.gitHash.substring(0, 7)
+        property 'application.name', 'Discord4J'
+        property 'application.version', project.version
+        property 'application.description', project.description
+        property 'application.url', 'https://github.com/Discord4J/Discord4J'
+        property 'git.branch', details.branchName ?: 'none'
+        property 'git.commit.id', details.gitHashFull
+        property 'git.commit.id.abbrev', details.gitHash
+        property 'git.closest.tag.name', details.lastTag ?: 'none'
+        property 'git.closest.tag.commit.count', details.commitDistance
+        property 'git.commit.id.describe', describe
+    }
+
+    project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn writeGitProperties
 }
 
 bintray {

@@ -162,12 +162,13 @@ public final class ClientBuilder {
                 .registerModules(new PossibleModule(), new Jdk8Module());
 
         final Properties properties = VersionUtil.getProperties();
-        final String version = properties.getProperty(VersionUtil.GIT_COMMIT_ID_DESCRIBE);
+        final String version = properties.getProperty(VersionUtil.APPLICATION_VERSION, "3");
+        final String url = properties.getProperty(VersionUtil.APPLICATION_URL, "http://discord4j.com");
 
         final SimpleHttpClient httpClient = SimpleHttpClient.builder()
                 .defaultHeader("content-type", "application/json")
                 .defaultHeader("authorization", "Bot " + token)
-                .defaultHeader("user-agent", "DiscordBot(http://discord4j.com, " + version + ")")
+                .defaultHeader("user-agent", "DiscordBot(" + url + ", " + version + ")")
                 .readerStrategy(new JacksonReaderStrategy<>(mapper))
                 .readerStrategy(new EmptyReaderStrategy())
                 .writerStrategy(new MultipartWriterStrategy(mapper))
@@ -209,7 +210,13 @@ public final class ClientBuilder {
                 .flatMap(DispatchHandlers::<Dispatch, Event>handle)
                 .subscribeWith(eventProcessor);
 
-        log.info("Discord4J {}", version);
+        final String name = properties.getProperty(VersionUtil.APPLICATION_NAME, "Discord4J");
+        final String gitDescribe = properties.getProperty(VersionUtil.GIT_COMMIT_ID_DESCRIBE, version);
+        final String description = properties.getProperty(VersionUtil.APPLICATION_DESCRIPTION);
+        log.info("{} {} ({})", name, gitDescribe, url);
+        if (description != null) {
+            log.info("{}", description);
+        }
         return serviceMediator.getClient();
     }
 }

@@ -23,11 +23,17 @@ import java.util.Properties;
 
 public final class VersionUtil {
 
+    public static final String APPLICATION_NAME = "application.name";
+    public static final String APPLICATION_VERSION = "application.version";
+    public static final String APPLICATION_DESCRIPTION = "application.description";
+    public static final String APPLICATION_URL = "application.url";
+    public static final String GIT_BRANCH = "git.branch";
+    public static final String GIT_COMMIT_ID = "git.commit.id";
+    public static final String GIT_COMMIT_ID_ABBREV = "git.commit.id.abbrev";
     public static final String GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe";
 
     public static Properties getProperties() {
         Properties properties = new Properties();
-        properties.setProperty(GIT_COMMIT_ID_DESCRIBE, "v3");
         try (InputStream inputStream = VersionUtil.class.getResourceAsStream("/git.properties")) {
             if (inputStream != null) {
                 properties.load(inputStream);
