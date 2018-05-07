@@ -23,8 +23,11 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientResponse;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -39,6 +42,8 @@ import java.util.logging.Level;
  * @since 3.0
  */
 public class SimpleHttpClient {
+
+    private static final Logger httpLogger = Loggers.getLogger("discord4j.rest.http.client");
 
     private final HttpClient httpClient;
     private final String baseUrl;
@@ -116,7 +121,7 @@ public class SimpleHttpClient {
                             .orElseGet(() -> Mono.error(new RuntimeException("No strategies to write this request: " +
                                     body + " - " + contentType)));
                 })
-                .log(SimpleHttpClient.class.getName(), Level.FINE)
+                .log(httpLogger, Level.FINE, false, SignalType.ON_NEXT, SignalType.ON_ERROR)
                 .flatMap(response -> {
                     exchangeFilter.getResponseFilter().accept(response);
 
