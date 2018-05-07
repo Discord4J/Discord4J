@@ -59,14 +59,14 @@ public final class ClientBuilder {
     private Scheduler eventScheduler;
     private Presence initialPresence;
     private IdentifyOptions identifyOptions;
+    private RetryOptions retryOptions;
 
     public ClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
         storeService = new StoreServiceLoader().getStoreService();
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
-        initialPresence = null;
-        identifyOptions = null;
+        retryOptions = new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE);
     }
 
     public String getToken() {
@@ -141,6 +141,14 @@ public final class ClientBuilder {
         return this;
     }
 
+    public RetryOptions getRetryOptions() {
+        return retryOptions;
+    }
+
+    public void setRetryOptions(RetryOptions retryOptions) {
+        this.retryOptions = retryOptions;
+    }
+
     public DiscordClient build() {
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -159,7 +167,6 @@ public final class ClientBuilder {
                 .baseUrl(Routes.BASE_URL)
                 .build();
 
-        // TODO custom retry parameters
         if (identifyOptions == null) {
             identifyOptions = new IdentifyOptions();
         }
@@ -178,11 +185,11 @@ public final class ClientBuilder {
 
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120)), token, identifyOptions);
+                retryOptions, token, identifyOptions);
 
         final StoreHolder storeHolder = new StoreHolder(storeService);
         final RestClient restClient = new RestClient(new Router(httpClient));
-        final ClientConfig config = new ClientConfig(token, shardIndex, shardCount);
+        final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(), identifyOptions.getShardCount());
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, eventScheduler);
 
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder,

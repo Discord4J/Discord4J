@@ -29,15 +29,27 @@ import java.time.Duration;
 public class RetryOptions {
 
     private final RetryContext retryContext;
+    private final int maxRetries;
 
     /**
      * Create a retry configuration object.
      *
      * @param firstBackoff the Duration to backoff on first attempts
-     * @param maxBackoffInterval the max Duration to backoff
+     * @param maxBackoffInterval the maximum backoff Duration
+     * @param maxRetries the maximum amount of retries to attempt a reconnect
      */
-    public RetryOptions(Duration firstBackoff, Duration maxBackoffInterval) {
+    public RetryOptions(Duration firstBackoff, Duration maxBackoffInterval, int maxRetries) {
+        if (firstBackoff.minus(Duration.ofSeconds(2)).isNegative()) {
+            throw new IllegalArgumentException("firstBackoff duration must be at least 2 seconds");
+        }
+        if (maxBackoffInterval.minus(firstBackoff).isNegative()) {
+            throw new IllegalArgumentException("maxBackoffInterval must be at least the same as firstBackoff");
+        }
+        if (maxRetries < 0) {
+            throw new IllegalArgumentException("maxRetries must be a positive integer");
+        }
         this.retryContext = new RetryContext(firstBackoff, maxBackoffInterval);
+        this.maxRetries = maxRetries;
     }
 
     /**
@@ -84,6 +96,6 @@ public class RetryOptions {
      * @return number of retries
      */
     public int getMaxRetries() {
-        return Integer.MAX_VALUE;
+        return maxRetries;
     }
 }
