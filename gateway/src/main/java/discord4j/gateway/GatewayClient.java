@@ -40,6 +40,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -86,11 +87,11 @@ public class GatewayClient {
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
-        this.payloadReader = payloadReader;
-        this.payloadWriter = payloadWriter;
-        this.retryOptions = retryOptions;
-        this.identifyOptions = identifyOptions;
-        this.token = token;
+        this.payloadReader = Objects.requireNonNull(payloadReader);
+        this.payloadWriter = Objects.requireNonNull(payloadWriter);
+        this.retryOptions = Objects.requireNonNull(retryOptions);
+        this.identifyOptions = Objects.requireNonNull(identifyOptions);
+        this.token = Objects.requireNonNull(token);
 
         // initialize the sinks to safely produce values downstream
         // we use LATEST backpressure handling to avoid overflow on no subscriber situations
